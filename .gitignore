@@ -117,6 +117,9 @@ instance/
 # Sphinx documentation
 docs/_build/
 
+# Personal tutorials and guides
+docs/git-workflow.md
+
 # PyBuilder
 target/
 
