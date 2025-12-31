@@ -1,6 +1,6 @@
 # Capcat - Archive and Share Articles with Confidence
 
-A dual-mode news archiving tool that captures articles from 17+ sources and converts them into **self-contained, shareable HTML files** with embedded CSS and JavaScript - no external dependencies required.
+A dual-mode news archiving tool that captures articles from 12 curated sources and converts them into **self-contained, shareable HTML files** with embedded CSS and JavaScript - no external dependencies required.
 
 ## Why Capcat?
 
@@ -21,7 +21,7 @@ A dual-mode news archiving tool that captures articles from 17+ sources and conv
 ```
 
 Choose from:
-- **Fetch by Source** - Browse 17 news sources (Hacker News, BBC, IEEE, Nature, etc.)
+- **Fetch by Source** - Browse 12 curated sources (Hacker News, BBC, IEEE, Nature, etc.)
 - **Fetch by Bundle** - Curated collections (Tech, AI, Science, News, Sports)
 - **Single Article** - Archive any URL instantly
 - **Source Management** - Add custom RSS/news sources
@@ -29,7 +29,7 @@ Choose from:
 ### Command Line Mode
 
 ```bash
-# Fetch curated tech bundle (HN + Lobsters + InfoQ + IEEE)
+# Fetch curated tech bundle (IEEE + Mashable)
 ./capcat bundle tech --count 10
 
 # Fetch specific sources with media
@@ -75,7 +75,7 @@ Every article is a **complete, portable HTML file**:
 
 ### Smart Content Extraction
 
-- **17+ News Sources** - HN, BBC, Guardian, Nature, IEEE, Scientific American, and more
+- **12 Curated Sources** - HN, BBC, Guardian, Nature, IEEE, Scientific American, MIT News, and more
 - **Intelligent Fallback** - Finds images even when primary extraction misses them
 - **Comment Preservation** - Captures discussions with privacy anonymization
 - **Media Handling** - Images always downloaded, video/audio/PDFs with `--media` flag
@@ -86,9 +86,9 @@ Pre-configured topic collections:
 
 | Bundle | Sources | Description |
 |--------|---------|-------------|
-| `tech` | HN, Lobsters, InfoQ | General tech news |
-| `techpro` | HN, Lobsters, InfoQ, IEEE, Gizmodo, Futurism | Extended tech coverage |
-| `ai` | LessWrong, Google AI, OpenAI, MIT News | AI research and developments |
+| `tech` | IEEE, Mashable | Consumer technology news |
+| `techpro` | HN, Lobsters, InfoQ | Professional developer news |
+| `ai` | MIT News, Google Research | AI research and developments |
 | `science` | Nature, Scientific American | Scientific publications |
 | `news` | BBC, Guardian | General news |
 | `sports` | BBC Sport | Sports coverage |
@@ -202,9 +202,9 @@ download_media: true
 
 ## Available Sources
 
-**Tech**: Hacker News, Lobsters, InfoQ, IEEE Spectrum, Gizmodo, Futurism
+**Tech**: Hacker News, Lobsters, InfoQ, IEEE Spectrum, Mashable
 
-**AI**: LessWrong, Google AI Blog, OpenAI Blog, MIT News
+**AI**: Google Research, MIT News
 
 **News**: BBC, The Guardian
 
@@ -243,12 +243,12 @@ Full documentation at [capcat.org](https://capcat.org):
 
 **Source failing?**
 - Check `test-diagnose-*.md` reports
-- Many sources use RSS to bypass anti-bot measures
+- Most sources use RSS/APIs for reliable, ethical access
 - Run `./capcat catch` and try individual sources
 
 ## Contributing
 
-Contributions welcome! See [CONTRIBUTING.md](https://github.com/stayukasabov/capcat/blob/main/.github/CONTRIBUTING.md)
+Contributions welcome! Open an issue or pull request on [GitHub](https://github.com/stayukasabov/capcat).
 
 ## License
 
