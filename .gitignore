@@ -61,9 +61,13 @@ api_keys.txt
 # Temporary Files
 *.tmp
 *.bak
+*.backup
 *_backup
+*_backup.*
 *_old
+*_old.*
 *_fixed
+*_fixed.*
 test-diagnose-*.md
 temp/
 tmp/
@@ -74,7 +78,11 @@ cc_*/
 
 # Documentation Backups
 docs_backup_*/
+docs/docs_backup_*/
+docs/hybrid_utility_refactor/
+website/
 website_backup_*/
+hybrid_utility_refactor/
 
 # Test Outputs
 test_output/
