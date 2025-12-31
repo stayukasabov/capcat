@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capcat Holographic Effect</title>
+    <link rel="stylesheet" href="../css/design-system.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        :root {
+            /* Full Capcat brand orange scale for dramatic holographic effect */
+            --holo-color1: var(--orange-200);  /* #FFD4B7 - Lightest */
+            --holo-color2: var(--orange-400);  /* #FF9463 - Light */
+            --holo-color3: var(--orange-500);  /* #F1540E - Primary */
+            --holo-color4: var(--orange-600);  /* #D44400 - Medium */
+            --holo-color5: var(--orange-700);  /* #B13700 - Dark */
+            --holo-color6: var(--orange-800);  /* #8E2C00 - Darker */
+            --holo-cream1: var(--accent-cream-light);  /* #faf2e7 */
+            --holo-cream2: var(--accent-cream-soft);   /* #faf5ee */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            background: var(--paper);
+            font-family: var(--font-family-sans-serif);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .holographic-container {
+            perspective: 1000px;
+            isolation: isolate;
+        }
+
+        .capcat-card {
+            width: 500px;
+            height: 500px;
+            position: relative;
+            cursor: pointer;
+            touch-action: none;
+            transform-origin: center;
+            transition: transform 0.3s ease, filter 0.3s ease;
+            filter: drop-shadow(-5px -5px 10px var(--color1))
+                    drop-shadow(5px 5px 10px var(--color2))
+                    drop-shadow(0 0 20px rgba(255,255,255,0.3));
+        }
+
+        .capcat-card:hover {
+            filter: drop-shadow(-10px -10px 20px var(--color1))
+                    drop-shadow(10px 10px 20px var(--color2))
+                    drop-shadow(0 0 30px rgba(255,255,255,0.5));
+        }
+
+        /* SVG container */
+        .svg-wrapper {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .svg-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            position: relative;
+            z-index: 0;
+        }
+
+        /* Primary holographic gradient overlay - Simple 2-color gradient */
+        .capcat-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                115deg,
+                transparent 0%,
+                var(--holo-color2) 25%,
+                transparent 47%,
+                transparent 53%,
+                var(--holo-color5) 75%,
+                transparent 100%
+            );
+            background-size: 300% 300%;
+            background-position: 50% 50%;
+            background-repeat: no-repeat;
+            opacity: 0.7;
+            mix-blend-mode: color-dodge;
+            filter: brightness(1) contrast(1.2);
+            transition: all 0.33s ease;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* Sparkle and full spectrum rainbow overlay */
+        .capcat-card::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                radial-gradient(circle at 20% 80%, rgba(255,255,255,0.8) 2px, transparent 2px),
+                radial-gradient(circle at 80% 20%, rgba(255,255,255,0.6) 2px, transparent 2px),
+                radial-gradient(circle at 40% 40%, rgba(255,255,255,0.4) 1px, transparent 1px),
+                radial-gradient(circle at 60% 70%, rgba(255,255,255,0.5) 1px, transparent 1px),
+                radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3) 1px, transparent 1px),
+                radial-gradient(circle at 70% 60%, rgba(255,255,255,0.4) 1px, transparent 1px),
+                linear-gradient(
+                    125deg,
+                    var(--holo-cream1) 5%,
+                    var(--holo-color1) 15%,
+                    var(--holo-color2) 25%,
+                    var(--holo-color3) 40%,
+                    var(--holo-color4) 55%,
+                    var(--holo-color5) 70%,
+                    var(--holo-color6) 85%,
+                    var(--holo-cream2) 95%
+                );
+            background-size: 200px 200px, 250px 250px, 180px 180px, 220px 220px, 160px 160px, 240px 240px, 160%;
+            background-position: 50% 50%;
+            background-repeat: no-repeat;
+            background-blend-mode: overlay;
+            mix-blend-mode: color-dodge;
+            opacity: 0.85;
+            filter: brightness(1.2) contrast(1.1);
+            transition: all 0.33s ease;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        /* Enhanced hover effects - Dramatic intensity increase */
+        .capcat-card:hover::before {
+            animation: none;
+            background: linear-gradient(
+                110deg,
+                transparent 25%,
+                var(--holo-color2) 48%,
+                var(--holo-color5) 52%,
+                transparent 75%
+            );
+            background-size: 250% 250%;
+            background-position: 50% 50%;
+            opacity: 0.88;
+            filter: brightness(0.66) contrast(1.33);
+            transition: none;
+        }
+
+        .capcat-card:hover::after {
+            animation: none;
+            opacity: 1;
+            filter: brightness(1.4) contrast(1.2);
+            transition: none;
+        }
+
+        /* Active state - same as hover */
+        .capcat-card.active::before,
+        .capcat-card.active::after {
+            animation: none;
+            transition: none;
+        }
+
+        .capcat-card.active::before {
+            background: linear-gradient(
+                110deg,
+                transparent 25%,
+                var(--holo-color2) 48%,
+                var(--holo-color5) 52%,
+                transparent 75%
+            );
+            background-size: 250% 250%;
+            opacity: 0.88;
+            filter: brightness(0.66) contrast(1.33);
+        }
+
+        .capcat-card.active::after {
+            opacity: 1;
+            filter: brightness(1.4) contrast(1.2);
+        }
+
+        /* Animation for automatic holographic effect */
+        .capcat-card.auto-animate {
+            animation: holoCardRotate 12s ease 0s 1;
+        }
+
+        .capcat-card.auto-animate::before {
+            animation: holoGradientMove 12s ease 0s 1;
+        }
+
+        .capcat-card.auto-animate::after {
+            animation: holoSparkleMove 12s ease 0s 1;
+        }
+
+        @keyframes holoCardRotate {
+            0%, 100% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
+            25% { transform: rotateX(8deg) rotateY(-15deg) rotateZ(2deg); }
+            50% { transform: rotateX(-6deg) rotateY(20deg) rotateZ(-1deg); }
+            75% { transform: rotateX(10deg) rotateY(10deg) rotateZ(3deg); }
+        }
+
+        @keyframes holoGradientMove {
+            0%, 100% {
+                background-position: 50% 50%;
+                opacity: 0.7;
+                filter: brightness(1) contrast(1.2);
+            }
+            5%, 9% {
+                background-position: 100% 100%;
+                opacity: 0.9;
+                filter: brightness(0.8) contrast(1.3);
+            }
+            13%, 17% {
+                background-position: 0% 0%;
+                opacity: 0.85;
+                filter: brightness(0.9) contrast(1.25);
+            }
+            35%, 39% {
+                background-position: 100% 100%;
+                opacity: 0.95;
+                filter: brightness(0.75) contrast(1.35);
+            }
+            55% {
+                background-position: 0% 0%;
+                opacity: 0.88;
+                filter: brightness(0.85) contrast(1.3);
+            }
+        }
+
+        @keyframes holoSparkleMove {
+            0%, 100% {
+                background-position: 50% 50%;
+                opacity: 0.85;
+                filter: brightness(1.2) contrast(1.1);
+            }
+            5%, 8% {
+                background-position: 40% 40%;
+                opacity: 1;
+                filter: brightness(1.4) contrast(1.2);
+            }
+            13%, 16% {
+                background-position: 50% 50%;
+                opacity: 0.75;
+                filter: brightness(1.3) contrast(1.15);
+            }
+            35%, 38% {
+                background-position: 60% 60%;
+                opacity: 0.95;
+                filter: brightness(1.35) contrast(1.18);
+            }
+            55% {
+                background-position: 45% 45%;
+                opacity: 0.8;
+                filter: brightness(1.25) contrast(1.12);
+            }
+        }
+
+        @keyframes sparkleShift {
+            0%, 100% { transform: translateX(0) translateY(0); }
+            25% { transform: translateX(2px) translateY(-2px); }
+            50% { transform: translateX(-1px) translateY(2px); }
+            75% { transform: translateX(1px) translateY(1px); }
+        }
+
+        /* Title styling */
+        .title {
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--imprint);
+            font-family: var(--font-family-heading);
+            font-size: var(--text-xxlarge);
+            font-weight: var(--weight-heading);
+            letter-spacing: -0.02em;
+            z-index: 10;
+        }
+
+        /* Interactive hint */
+        .hint {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--imprint-light);
+            font-family: var(--font-family-sans-serif);
+            font-size: var(--text-base);
+            font-weight: var(--weight-normal);
+            text-align: center;
+            z-index: 10;
+            animation: fadeInOut 3s ease-in-out infinite;
+        }
+
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        /* Style for dynamic updates */
+        .hover-style {
+            /* This will be populated by JavaScript */
+        }
+    </style>
+</head>
+<body>
+    <div class="title">Capcat Holographic</div>
+
+    <div class="holographic-container">
+        <div class="capcat-card auto-animate" id="capcatCard">
+            <div class="svg-wrapper">
+                <img src="Capcat-Cat-Color.svg" alt="Capcat Logo">
+            </div>
+        </div>
+    </div>
+
+    <div class="hint">Hover or touch the card to interact</div>
+
+    <style class="hover-style"></style>
+
+    <script>
+        $(document).ready(function() {
+            let interactionTimeout;
+            const $card = $('#capcatCard');
+            const $hoverStyle = $('.hover-style');
+
+            // Enhanced mouse/touch interaction
+            $card.on('mousemove touchmove', function(e) {
+                e.preventDefault();
+
+                // Remove auto-animation when interacting
+                $card.removeClass('auto-animate');
+
+                // Get position data
+                let pos = [e.offsetX || 0, e.offsetY || 0];
+                if (e.type === 'touchmove' && e.touches[0]) {
+                    const rect = this.getBoundingClientRect();
+                    pos = [
+                        e.touches[0].clientX - rect.left,
+                        e.touches[0].clientY - rect.top
+                    ];
+                }
+
+                // Calculate positions and rotations
+                const rect = this.getBoundingClientRect();
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+
+                const x = pos[0] - centerX;
+                const y = pos[1] - centerY;
+
+                // Enhanced rotation calculation
+                const rotateY = (x / centerX) * 25; // Max 25 degrees
+                const rotateX = -(y / centerY) * 25; // Max 25 degrees
+                const rotateZ = (x / centerX) * 5; // Slight Z rotation
+
+                // Calculate gradient and sparkle positions
+                const gradientX = 50 + (x / centerX) * 25;
+                const gradientY = 50 + (y / centerY) * 25;
+                const sparkleX = 50 + (x / centerX) * 15;
+                const sparkleY = 50 + (y / centerY) * 15;
+
+                // Calculate opacity based on distance from center
+                const distance = Math.sqrt(x*x + y*y);
+                const maxDistance = Math.sqrt(centerX*centerX + centerY*centerY);
+                const opacity = 0.7 + (distance / maxDistance) * 0.3;
+
+                // Apply transforms
+                const transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) rotateZ(${rotateZ}deg)`;
+                $card.css('transform', transform);
+
+                // Dynamic CSS for pseudo-elements - High visibility
+                const hoverCSS = `
+                    #capcatCard::before {
+                        background-position: ${gradientX}% ${gradientY}% !important;
+                        opacity: 0.88 !important;
+                        filter: brightness(0.66) contrast(1.33) !important;
+                    }
+                    #capcatCard::after {
+                        background-position: ${sparkleX}% ${sparkleY}% !important;
+                        opacity: 1 !important;
+                        filter: brightness(1.4) contrast(1.2) !important;
+                    }
+                `;
+
+                $hoverStyle.html(hoverCSS);
+
+                // Clear existing timeout
+                clearTimeout(interactionTimeout);
+            });
+
+            // Reset on mouse leave or touch end
+            $card.on('mouseleave touchend touchcancel', function() {
+                // Clear dynamic styles
+                $hoverStyle.html('');
+                $card.css('transform', '');
+
+                // Restart auto-animation after delay
+                interactionTimeout = setTimeout(function() {
+                    $card.addClass('auto-animate');
+                }, 2000);
+            });
+
+            // Enhanced click effect
+            $card.on('click', function() {
+                $card.removeClass('auto-animate');
+
+                // Pulse effect
+                $card.css('transform', 'scale(1.05) rotateX(5deg) rotateY(5deg)');
+
+                setTimeout(function() {
+                    $card.css('transform', '');
+                    setTimeout(function() {
+                        $card.addClass('auto-animate');
+                    }, 1000);
+                }, 200);
+            });
+
+            // Prevent context menu on long press (mobile)
+            $card.on('contextmenu', function(e) {
+                e.preventDefault();
+                return false;
+            });
+        });
+    </script>
+</body>
+</html>
