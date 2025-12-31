@@ -357,7 +357,18 @@ class HoverButton {
   attachEventsListener() {
     window.addEventListener('mousemove', e => this.onMouseMove(e));
     window.addEventListener('resize', e => this.calculatePosition(e));
-    window.addEventListener('scroll', e => this.calculatePosition(e));
+
+    // Use passive listener and requestAnimationFrame for scroll performance
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          this.calculatePosition();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    }, { passive: true });
   }
 
   calculatePosition() {
