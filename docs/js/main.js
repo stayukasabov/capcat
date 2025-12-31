@@ -469,7 +469,6 @@ function initElasticHover() {
 
     if (typeof gsap === 'undefined') {
       if (attempts < maxAttempts) {
-        console.log(`Attempt ${attempts}: GSAP not ready, retrying...`);
         requestAnimationFrame(tryInit);
       } else {
         console.error('GSAP library failed to load after maximum attempts');
@@ -480,7 +479,6 @@ function initElasticHover() {
     const svgWrapper = document.querySelector('.svg-wrapper');
     if (!svgWrapper) {
       if (attempts < maxAttempts) {
-        console.log(`Attempt ${attempts}: SVG wrapper not found, retrying...`);
         requestAnimationFrame(tryInit);
       } else {
         console.error('SVG wrapper not found after maximum attempts');
@@ -491,7 +489,6 @@ function initElasticHover() {
     const box = svgWrapper.getBoundingClientRect();
     if (box.width === 0 || box.height === 0) {
       if (attempts < maxAttempts) {
-        console.log(`Attempt ${attempts}: SVG has no dimensions (${box.width}x${box.height}), retrying...`);
         requestAnimationFrame(tryInit);
       } else {
         console.error('SVG wrapper has no dimensions after maximum attempts');
@@ -499,9 +496,8 @@ function initElasticHover() {
       return;
     }
 
-    // Success! Initialize the hover effect
+    // Initialize the hover effect
     new HoverButton(svgWrapper);
-    console.log(`✓ Elastic hover initialized successfully on attempt ${attempts}`);
   }
 
   // Start trying immediately
