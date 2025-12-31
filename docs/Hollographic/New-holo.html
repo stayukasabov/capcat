@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capcat Holographic Effect - New</title>
+    <link rel="stylesheet" href="../css/design-system.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            background: var(--paper);
+            font-family: var(--font-family-sans-serif);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .holographic-container {
+            perspective: 1000px;
+        }
+
+        .capcat-card {
+            width: 500px;
+            height: 500px;
+            position: relative;
+            cursor: pointer;
+            touch-action: none;
+            transform-origin: center;
+            transition: transform 0.1s ease-out;
+        }
+
+        .svg-wrapper {
+            width: 100%;
+            height: 100%;
+        }
+
+        .svg-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="holographic-container">
+        <div class="capcat-card" id="capcatCard">
+            <div class="svg-wrapper">
+                <img src="Capcat-Cat-Color.svg" alt="Capcat Logo">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            const $card = $('#capcatCard');
+
+            // 3D transform on mouse move
+            $card.on('mousemove touchmove', function(e) {
+                e.preventDefault();
+
+                // Get position data
+                let pos = [e.offsetX || 0, e.offsetY || 0];
+                if (e.type === 'touchmove' && e.touches[0]) {
+                    const rect = this.getBoundingClientRect();
+                    pos = [
+                        e.touches[0].clientX - rect.left,
+                        e.touches[0].clientY - rect.top
+                    ];
+                }
+
+                // Calculate rotation
+                const rect = this.getBoundingClientRect();
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+
+                const x = pos[0] - centerX;
+                const y = pos[1] - centerY;
+
+                const rotateY = (x / centerX) * 25;
+                const rotateX = -(y / centerY) * 25;
+                const rotateZ = (x / centerX) * 5;
+
+                // Apply transform
+                const transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) rotateZ(${rotateZ}deg)`;
+                $card.css('transform', transform);
+            });
+
+            // Reset on mouse leave
+            $card.on('mouseleave touchend touchcancel', function() {
+                $card.css('transform', '');
+            });
+
+            // Prevent context menu
+            $card.on('contextmenu', function(e) {
+                e.preventDefault();
+                return false;
+            });
+        });
+    </script>
+</body>
+</html>

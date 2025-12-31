@@ -1,289 +1,249 @@
-# Capcat - News Article Archiving System
+# Capcat Website
 
-A powerful, modular news article archiving system that fetches articles from 13+ sources, converts them to Markdown, and organizes them with media files.
+Modern, responsive website for the Capcat article archiving tool.
 
-##  Features
+## Design System
 
-- **Multi-Source Support**: 13+ news sources including Hacker News, BBC, Nature, IEEE
-- **Modular Architecture**: Easy to add new sources with config-driven or custom implementations
-- **Media Handling**: Automatic download and organization of images, videos, and documents
-- **Flexible Output**: Markdown files with optional HTML generation
-- **Parallel Processing**: Concurrent article processing for performance
-- **Privacy Compliant**: Usernames anonymized, no personal data stored
-- **Configurable**: Command-line arguments, environment variables, and config files
+### Color Palette
 
-##  Requirements
+Inspired by the UX Writing Skill design with warm, readable colors:
 
-- Python 3.8+
-- Internet connection for article fetching
-- ~100MB disk space for dependencies
+- **Cream Background:** `#FAF8EE` - Soft, paper-like reading surface
+- **Ink Text:** `#1a1614` - High contrast, readable dark text
+- **Ink Light:** `#4a4540` - Secondary text color
+- **Accent Orange:** `#EA5E34` - Capcat brand color for CTAs and highlights
 
-##  Installation
+### Typography
 
-### Quick Setup
+- **Font Family:** IBM Plex Serif for headings and body text
+- **Golden Ratio Scale:** 1.618 progression for harmonious hierarchy
+- **Base Size:** 18px (1.125rem) for optimal readability
+- **Line Height:** 1.6 for body text, 1.2 for headings
 
-```bash
-# Clone repository
-git clone <repository-url>
-cd capcat
+### Spacing System
 
-# Setup environment
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
+Multiples of 8px for consistent rhythm:
+- **xs:** 8px (0.5rem)
+- **sm:** 16px (1rem)
+- **md:** 24px (1.5rem)
+- **lg:** 32px (2rem)
+- **xl:** 48px (3rem)
+- **xxl:** 64px (4rem)
+- **xxxl:** 96px (6rem)
 
-# Verify installation
-./capcat list sources
+## File Structure
+
 ```
-
-### Docker (Alternative)
-
-```bash
-docker build -t capcat .
-docker run -v $(pwd)/output:/app/output capcat bundle tech --count 10
-```
-
-##  Quick Start
-
-```bash
-# Fetch 10 tech articles
-./capcat bundle tech --count 10
-
-# Fetch from specific sources
-./capcat fetch hn,bbc --count 15 --media
-
-# Single article processing
-./capcat single https://example.com/article
-
-# List available sources
-./capcat list sources
-
-# Show bundles
-./capcat list bundles
-```
-
-##  Usage
-
-### Command Line Interface
-
-```bash
-# Basic usage
-./capcat <command> [options]
-
-# Commands
-list sources           # Show all available sources
-list bundles          # Show predefined source bundles
-fetch <sources>       # Fetch from specific sources
-bundle <name>         # Fetch from predefined bundle
-single <url>          # Process single article
-
-# Options
---count N             # Number of articles (default: 30)
---media               # Download videos/audio/documents
---html                # Generate HTML output
---output-dir DIR      # Custom output directory
---config FILE         # Custom config file
---debug               # Enable debug logging
-```
-
-### Available Sources
-
-**Technology:**
-- `hn` - Hacker News
-- `lb` - Lobsters
-- `iq` - InfoQ
-- `ieee` - IEEE Spectrum
-- `mashable` - Mashable
-
-**News:**
-- `bbc` - BBC News
-- `guardian` - The Guardian
-
-**Science:**
-- `nature` - Nature News
-- `scientificamerican` - Scientific American
-
-**AI/ML:**
-- `mitnews` - MIT News
-
-**Sports:**
-- `bbcsport` - BBC Sport
-
-### Predefined Bundles
-
-```bash
-./capcat bundle tech          # ieee + mashable
-./capcat bundle techpro       # hn + lb + iq
-./capcat bundle news          # bbc + guardian
-./capcat bundle science       # nature + scientificamerican
-./capcat bundle ai            # mitnews
-./capcat bundle sports        # bbcsport
-```
-
-##  Output Structure
-
-### Batch Processing
-```
-../News/news_DD-MM-YYYY/
-├── Source_DD-MM-YYYY/
-│   └── NN_Article_Title/
-│       ├── article.md
-│       ├── images/
-│       ├── files/
-│       └── html/ (if --html)
-```
-
-### Single Articles
-```
-../Capcats/cc_DD-MM-YYYY-Title/
-├── article.md
+website/
+├── index.html              # Homepage
+├── css/
+│   ├── design-system.css   # Design tokens and variables
+│   └── main.css            # Component styles
+├── js/
+│   └── main.js             # Interactive behaviors
+├── fonts/
+│   └── IBMPlex/            # IBM Plex Serif font files
 ├── images/
-└── files/
+│   └── ...                 # Website assets
+└── README.md               # This file
 ```
 
-##  Configuration
+## Features
 
-### Command Line (Highest Priority)
-```bash
-./capcat fetch hn --count 20 --media
-```
+### Homepage Sections
 
-### Environment Variables
-```bash
-export CAPCAT_OUTPUT_DIR="/custom/path"
-export CAPCAT_DEFAULT_COUNT=50
-```
+1. **Hero Section**
+   - Main value proposition
+   - CTA buttons
+   - Interactive code demo
 
-### Config File (`capcat.yml`)
-```yaml
-output_dir: "/custom/path"
-default_count: 50
-media_download: true
-sources:
-  hn:
-    rate_limit: 5
-```
+2. **Problem Section**
+   - Information overload challenges
+   - Research-backed statistics
+   - User pain points
 
-##  Development
+3. **Features Section**
+   - Dual-mode architecture
+   - CLI and TUI comparison
+   - Key capabilities
 
-### Adding a New Source
+4. **How It Works**
+   - 5-step workflow visualization
+   - Progressive disclosure
 
-#### Config-Driven (15-30 minutes)
-```yaml
-# sources/active/config_driven/configs/newsource.yaml
-display_name: "New Source"
-base_url: "https://newsource.com/"
-category: tech
-article_selectors: [".headline a"]
-content_selectors: [".article-content"]
-```
+5. **Dual Mode Benefits**
+   - Side-by-side comparison
+   - Use case scenarios
+   - Learning progression path
 
-#### Custom Implementation (2-4 hours)
-```python
-# sources/active/custom/newsource/source.py
-from core.source_system.base_source import BaseSource
+6. **Tutorials Section**
+   - CLI commands
+   - Interactive menu guides
+   - Advanced topics
+   - Learning paths for different user types
 
-class NewSource(BaseSource):
-    def get_articles(self, count=30):
-        # Custom implementation
-        pass
-```
+7. **Sources & Capabilities**
+   - 17+ pre-configured sources
+   - Categories: Tech, News, Science, AI
+   - Custom RSS source addition guide
 
-### Verification
-```bash
-# Verify all sources work
-./capcat list sources
+8. **Get Started**
+   - Installation steps
+   - Quick start commands
+   - GitHub CTA
 
-# Verify specific source
-./capcat fetch newsource --count 5
+### Responsive Design
 
-# Verify bundle
-./capcat bundle tech --count 10
-```
+- **Desktop:** 1200px+ optimal width, horizontal navigation
+- **Tablet:** 768px - 1023px, 2-column grids, full-screen menu
+- **Mobile:** < 768px, single-column layout, full-screen overlay menu
+- **Small Mobile:** < 480px, optimized touch targets, compressed spacing
 
-##  Architecture
+#### Mobile Menu Features
+- Full-screen overlay with cream background
+- Smooth fade-in/fade-out animations (0.4s)
+- Staggered menu item animations
+- Animated hamburger icon (transforms to X)
+- Body scroll lock when menu is open
+- Close on: link click, overlay click, or Escape key
+- 44px minimum touch targets for accessibility
 
-```mermaid
-graph TB
-    CLI[CLI Interface] --> Main[Main App]
-    Main --> Factory[Source Factory]
-    Factory --> Sources[News Sources]
-    Sources --> Fetcher[Article Fetcher]
-    Fetcher --> Media[Media Processor]
-    Media --> Format[Content Formatter]
-    Format --> Output[File Output]
-```
+### Interactive Features
 
-**Key Components:**
-- **Source System**: Modular source management with auto-discovery
-- **Processing Pipeline**: Parallel article processing with error handling
-- **Media Handling**: Intelligent media download and organization
-- **Output Generation**: Markdown and HTML with structured directories
+- **Smooth scrolling** for anchor links with offset
+- **Intersection Observer** animations for scroll-triggered reveals
+- **Code snippet copy** buttons with success feedback
+- **Full-screen mobile menu** with fade overlay
+- **Animated hamburger** icon (3-line to X transformation)
+- **Scroll-aware header** with shadow on scroll
+- **Body scroll lock** prevents background scrolling when menu open
+- **Keyboard navigation** (Escape to close menu)
+- **Touch-optimized** 44px minimum hit areas
 
-##  Common Issues & Solutions
+## Typography Scale
 
-### Module Not Found
-```bash
-# Use wrapper (handles venv automatically)
-./capcat list sources
+Based on golden ratio (1.618):
 
-# Or activate manually
-source venv/bin/activate
-```
+| Level | Desktop | Mobile | Usage |
+|-------|---------|--------|-------|
+| h1 | 2.618rem (42px) | 1.618rem (26px) | Page titles |
+| h2 | 1.618rem (26px) | 1.25rem (20px) | Section headers |
+| h3 | 1.25rem (20px) | 1.125rem (18px) | Subsections |
+| body | 1.125rem (18px) | 1rem (16px) | Main text |
+| small | 0.875rem (14px) | 0.875rem (14px) | Captions |
 
-### Source Failures
-- 90% success rate is normal (anti-bot protection)
-- Some sources may have temporary issues
-- Check debug logs for details
+## Component Library
 
-### Performance Issues
-```bash
-# Reduce parallel workers
-export CAPCAT_MAX_WORKERS=4
+### Cards
 
-# Enable progress tracking
-./capcat fetch hn --count 10 --debug
-```
+- **Problem Card:** Pain point highlighting
+- **Feature Card:** Product capabilities
+- **Tutorial Card:** Learning resource links
+- **Path Card:** Guided learning sequences
+- **Source Category:** Available RSS sources by topic
 
-##  Documentation
+### Buttons
 
-- [API Reference](docs/api/README.md) - Complete API documentation
-- [Architecture Guide](docs/architecture/system.md) - System design details
-- [Developer Guide](docs/developer/guide.md) - Contributing and development
-- [Source Development](docs/developer/sources.md) - Adding new sources
+- **Primary:** Orange background, white text
+- **Secondary:** Transparent with border
+- **Large variant:** Increased padding for CTAs
 
-## 🤝 Contributing
+### Code Blocks
 
-1. Fork the repository
-2. Create feature branch: `git checkout -b feature/new-feature`
-3. Follow PEP 8 coding standards
-4. Update documentation
-5. Submit pull request
+- Cream tinted background
+- Monaco/SF Mono font stack
+- Copy-to-clipboard functionality
+- Syntax highlighting ready
+
+### Navigation
+
+- Sticky header with backdrop blur
+- Desktop horizontal menu
+- Mobile slide-down menu
+- Smooth scroll to sections
+
+## Browser Support
+
+- Chrome/Edge 90+
+- Firefox 88+
+- Safari 14+
+- Modern mobile browsers
+
+## Performance
+
+- CSS custom properties for theming
+- Minimal JavaScript (~5KB)
+- Web font optimization with font-display: swap
+- Lazy-loaded animations via Intersection Observer
+- No external dependencies
+- Hardware-accelerated transitions
+- Viewport height fix for mobile browsers
+- Optimized touch targets for mobile (44x44px minimum)
+
+## Accessibility
+
+- Semantic HTML5 structure
+- ARIA labels for interactive elements
+- Keyboard navigation support
+- Color contrast WCAG AA compliant
+- Focus indicators for all interactive elements
+- Responsive text sizing
+
+## External Links
+
+- **Case Study:** Links to Substack blog post in main navigation (update URL before launch)
+- **GitHub:** Repository link
+- **Designer Portfolio:** https://stayux.com
+
+## Future Enhancements
+
+- [ ] Dark mode toggle
+- [ ] Search functionality
+- [ ] Interactive source selector
+- [ ] User testimonials section
+- [ ] Video tutorials embed
+- [ ] Download analytics
+- [ ] Newsletter signup
+- [ ] Syntax highlighting for code blocks
+
+## Development
+
+### Local Testing
+
+1. Open `index.html` in a modern browser
+2. Use a local server for best experience:
+   ```bash
+   python -m http.server 8000
+   # Navigate to http://localhost:8000
+   ```
+
+### Font Files
+
+IBM Plex Serif font files should be placed in `fonts/IBMPlex/`:
+- IBMPlexSerif-Thin.woff2
+- IBMPlexSerif-Light.woff2
+- IBMPlexSerif-Regular.woff2
+- IBMPlexSerif-Medium.woff2
+- IBMPlexSerif-SemiBold.woff2
+- IBMPlexSerif-Bold.woff2
+
+Download from: https://github.com/IBM/plex/releases
+
+### Customization
+
+All design tokens are defined in `css/design-system.css`:
+- Colors: `:root` CSS custom properties
+- Spacing: `--space-*` variables
+- Typography: `--text-*` and `--font-*` variables
+- Layout widths: `--measure-*` variables
+
+## Credits
+
+- **Design & Development:** Stayu Kasabov
+- **Typography:** IBM Plex Serif by IBM
+- **Inspiration:** Source Serif 4 design palette
+- **Architecture:** Based on Capcat case study
 
 ## License
 
-MIT-Style Non-Commercial License - see [LICENSE.txt](../LICENSE.txt) file for details.
-
-**Copyright (c) 2025 Stayu Kasabov**
-
-- Non-commercial use only
-- Attribution required
-- Share-alike modifications
-- Contributions welcome
-
-## Acknowledgments
-
-- Built with Python 3.8+
-- Uses BeautifulSoup4 for HTML parsing
-- Requests library for HTTP handling
-- Threading for parallel processing
-
-##  Support
-
-- Create an issue on GitHub
-- Check existing documentation
-- Review troubleshooting guide
-
----
-
-**Note**: This tool is designed for personal archiving and research purposes. Please respect robots.txt and terms of service for all sources.
+See main Capcat repository for licensing information.

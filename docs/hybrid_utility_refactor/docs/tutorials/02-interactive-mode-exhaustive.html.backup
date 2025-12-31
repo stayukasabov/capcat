@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Mode Exhaustive Reference</title>
+    <link rel="stylesheet" href="../../css/design-system.css">
+    <link rel="stylesheet" href="../../css/main.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="site-header">
+        <div class="container">
+            <nav class="main-nav">
+                <div class="logo">
+                    <a href="../../index.html">
+                    <svg class="capcat-logo" width="100%" height="20" viewBox="0 0 120 36" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve">
+                        <g transform="matrix(1,0,0,1,-25136.8,-9036.29)">
+                                <g transform="matrix(0.101942,0,0,0.101942,24610.1,8883.85)">
+                                    <path d="M5599.61,1616.47L5599.66,1616.38C5600.74,1622.26 5601.26,1628.65 5601.26,1635.54L5601.26,1701.4C5601.26,1704.57 5601.56,1707.02 5602.09,1708.92L5601.99,1709.02C5606.21,1723.62 5624.36,1704.6 5624.36,1723.41C5624.36,1732.23 5605.56,1747.52 5583.16,1745.91C5582.93,1745.92 5582.7,1745.92 5582.45,1745.92C5578.93,1745.92 5575.11,1745.16 5571.38,1743.78L5571.37,1743.78C5562.39,1740.41 5553.95,1733.47 5551.49,1724.98C5536.46,1738.54 5514.52,1747.96 5493.82,1749L5493.73,1749.09C5492.48,1749.15 5491.23,1749.18 5489.99,1749.18C5466.27,1749.18 5447.99,1732.07 5447.99,1707.96C5447.99,1707.61 5447.99,1707.26 5448,1706.91L5448.23,1706.74C5448.87,1663.44 5484.29,1647.39 5521.6,1642.33L5521.63,1642.29C5532.57,1640.82 5543.67,1640.29 5554.1,1640.29L5554.1,1618.51C5554.1,1614.47 5553.49,1610.72 5552.38,1607.31L5552.54,1607.1C5547.59,1592.27 5533.06,1583.85 5517.44,1585.07C5508.88,1585.74 5494.66,1592.62 5505.38,1603.35C5516.1,1614.07 5494.65,1633.45 5472.47,1628.01L5472.43,1628C5466.37,1626.51 5462.02,1621.44 5462.02,1611.33C5462.02,1589.79 5483.29,1578.82 5504.14,1573.64C5516.57,1570.55 5528.85,1569.51 5536.38,1569.51C5552,1569.51 5564.61,1572.36 5574.41,1577.84L5574.36,1577.94C5588.16,1585.72 5596.37,1598.77 5599.61,1616.47C5598.61,1618.1 5597.66,1619.69 5596.93,1620.96C5596.39,1621.89 5595.88,1622.76 5595.39,1623.58C5595.9,1622.73 5596.43,1621.84 5596.98,1620.88C5597.7,1619.62 5598.63,1618.07 5599.61,1616.47ZM5554.15,1674.61L5554.09,1674.68C5553.99,1671.49 5553.36,1668.44 5551.52,1665.83L5551.5,1665.79L5551.41,1665.68L5551.39,1665.65C5547.85,1660.68 5541.66,1659.07 5535.57,1658.92C5519.57,1658.53 5497.94,1661.21 5492.01,1680.51C5489.72,1687.93 5489.87,1697.98 5495.19,1706.19L5495.18,1706.19L5495.24,1706.28L5495.31,1706.37L5495.31,1706.37C5501.3,1714.11 5510.73,1717.92 5518.49,1717.88C5519.81,1717.87 5521.1,1717.78 5522.36,1717.61L5522.43,1717.52C5542.01,1714.91 5552.76,1693.79 5553.66,1683.39C5553.9,1680.5 5554.24,1677.5 5554.15,1674.61ZM5655.48,1606.94C5650.11,1592.14 5633.8,1610.33 5633.8,1591.19C5633.8,1582.01 5651.19,1565.8 5674.8,1568.98C5683.29,1569.97 5689.56,1573.73 5694.16,1578.52C5699.61,1584.19 5702.74,1591.31 5704.51,1596.99C5706.26,1602.63 5706.67,1606.85 5706.67,1606.85L5707.45,1606.85C5712.89,1587.4 5739.72,1569.51 5765.78,1569.51C5773.42,1569.51 5780.44,1570.87 5786.81,1573.3C5802.54,1579.32 5814.35,1591.95 5821.87,1607.23C5828.22,1620.14 5831.5,1634.93 5831.5,1649.24C5831.5,1656.97 5830.87,1664.41 5829.67,1671.48C5821.72,1718.11 5788.62,1749.18 5744.39,1749.18C5742.93,1749.18 5741.48,1749.14 5740.03,1749.07C5729.11,1748.48 5718.34,1745.59 5706.67,1739.07L5706.67,1762.41L5706.76,1762.37L5706.76,1774.83C5706.76,1776.77 5706.82,1778.53 5706.95,1780.11C5709.18,1808.27 5730.12,1782.01 5730.12,1803.7C5730.12,1812.89 5712.73,1829.1 5689.13,1825.92C5681.05,1824.97 5674.98,1822.11 5670.43,1818.32C5658.92,1808.73 5657.17,1793.24 5657.26,1788.05C5657.29,1785.83 5657.08,1783.58 5657.17,1781.4L5657.17,1620.07C5657.17,1614.05 5656.53,1609.85 5655.48,1606.94ZM5758.32,1602.3C5755.39,1601.38 5752.14,1600.88 5748.55,1600.88C5721.72,1600.88 5707.31,1633 5707.31,1659.84C5707.31,1664.6 5706.87,1673.25 5707.53,1682.86C5708.48,1696.5 5711.63,1712.06 5721.4,1721.14C5726.51,1725.9 5733.44,1728.88 5742.81,1728.88C5769.07,1728.88 5780.31,1701.62 5783.58,1676.51C5784.33,1670.76 5784.66,1665.12 5784.66,1659.94C5784.66,1638.52 5779.89,1609.05 5758.32,1602.3ZM5171.08,1669.46C5168.37,1658.28 5166.95,1646.44 5166.95,1634.13C5166.95,1610.06 5173.76,1587.85 5185.36,1568.57C5198.79,1546.25 5218.65,1527.87 5241.83,1515.1C5264.78,1502.45 5290.97,1495.32 5317.38,1495.32C5320.18,1495.32 5322.96,1495.45 5325.7,1495.71C5350.04,1497.99 5371.48,1509.87 5385.67,1521.82L5385.72,1521.75C5389.09,1524.58 5392.04,1527.42 5394.53,1530.14L5394.61,1530.18C5397.25,1533.07 5399.36,1535.82 5400.87,1538.27C5410.14,1553.33 5404.98,1573.26 5389.77,1581.12L5389.69,1581.13L5389.48,1581.3C5387.16,1582.47 5384.61,1583.36 5381.85,1583.91C5369.75,1586.33 5346.41,1584.08 5334.21,1555.59C5334.06,1555.23 5333.89,1554.86 5333.73,1554.5L5333.69,1554.53C5327.07,1540.04 5312.68,1525.35 5294.57,1522.11C5292.17,1521.68 5289.7,1521.45 5287.18,1521.45C5256.97,1521.45 5239.23,1548.98 5232.32,1579.7C5230.07,1589.73 5228.97,1600.11 5228.97,1609.97C5228.97,1629.41 5233.9,1648.72 5243.09,1665.52C5247.81,1674.17 5253.66,1682.15 5260.54,1689.14C5268.87,1697.6 5278.7,1704.62 5289.89,1709.63C5301.95,1715.03 5315.59,1718.1 5330.59,1718.1C5348.77,1718.1 5363.58,1713.34 5375.61,1707.41C5395.47,1697.63 5407.71,1684.66 5414.95,1684.66C5419.02,1684.66 5423.66,1688.72 5423.66,1692.21C5423.66,1716.94 5372.76,1752.65 5317.11,1761.57C5308.74,1762.91 5300.26,1763.64 5291.82,1763.64C5274.23,1763.64 5258.01,1760.54 5243.5,1754.83C5230.57,1749.76 5218.99,1742.62 5208.99,1733.79C5201.49,1727.17 5194.88,1719.59 5189.25,1711.21C5180.96,1698.87 5174.8,1684.79 5171.08,1669.46ZM5858.25,1647.84C5865.42,1607.08 5902.02,1576.76 5942.55,1570.55C5944.9,1570.19 5947.26,1569.91 5949.63,1569.72C5952.35,1569.49 5955.08,1569.38 5957.81,1569.38C5969.02,1569.38 5979.5,1572.6 5988.38,1577.1C6000.77,1583.39 6010.03,1592.2 6013.77,1598.28C6020.97,1609.97 6015.2,1626.02 6001.03,1628.85C5992.93,1630.47 5977.28,1628.96 5969.1,1609.87C5968.52,1608.51 5967.84,1607.14 5967.06,1605.8C5961.37,1595.95 5950.58,1586.9 5937.57,1586.9C5934.03,1586.9 5930.78,1587.45 5927.8,1588.47C5921.91,1590.48 5917.06,1594.31 5913.16,1599.32C5904.02,1611.07 5900.09,1629.27 5900.09,1645.62C5900.09,1656.62 5902.44,1667.56 5906.88,1677.48C5915.56,1696.86 5932.19,1712.35 5954.73,1716.8C5959.01,1717.65 5963.51,1718.1 5968.2,1718.10C5978.28,1718.1 5986.67,1715.97 5993.68,1713.05C6009.13,1706.61 6017.86,1696.29 6023.21,1696.29C6025.94,1696.29 6029.05,1699.01 6029.05,1701.35C6029.05,1717.25 5997.66,1739.92 5962.18,1747.02C5955.11,1748.44 5947.87,1749.23 5940.68,1749.23C5935.15,1749.23 5929.81,1748.77 5924.7,1747.89C5903.07,1744.15 5885.48,1732.81 5873.66,1716.57C5862.97,1701.87 5856.98,1683.15 5856.98,1662.42C5856.98,1657.43 5857.42,1652.57 5858.25,1647.84ZM6056.72,1728.59C6053.31,1722.59 6051.38,1715.5 6051.38,1707.68C6051.38,1662.41 6088.81,1646.4 6127.44,1641.7C6137.59,1640.46 6147.83,1640.01 6157.49,1640.01L6157.49,1618.23C6157.49,1614.6 6157,1611.2 6156.1,1608.07C6151.57,1592.47 6136.66,1583.53 6120.61,1584.79C6119.73,1584.86 6118.79,1584.99 6117.83,1585.18C6109.39,1586.91 6098.92,1593.44 6108.55,1603.06C6108.78,1603.3 6109,1603.53 6109.2,1603.77C6117.94,1614.13 6099.11,1631.45 6078.47,1628.29C6077.52,1628.15 6076.56,1627.95 6075.6,1627.72C6069.53,1626.22 6065.18,1621.16 6065.18,1611.05C6065.18,1580.13 6108.99,1571.01 6132.49,1569.48C6135.13,1569.31 6137.51,1569.23 6139.55,1569.23C6154.49,1569.23 6166.67,1571.83 6176.28,1576.85C6195.68,1586.99 6204.61,1606.99 6204.61,1635.34L6204.61,1701.21C6204.61,1708.61 6206.24,1712.14 6208.63,1713.74C6215.28,1718.16 6227.84,1707.63 6227.84,1723.27C6227.84,1732.09 6209.04,1747.39 6186.65,1745.78C6186.42,1745.79 6186.18,1745.79 6185.94,1745.79C6185.46,1745.79 6184.98,1745.77 6184.49,1745.75C6172.67,1745.07 6158.19,1736.37 6154.83,1724.79C6141.14,1737.14 6121.72,1746.06 6102.71,1748.33C6099.58,1748.7 6096.46,1748.9 6093.38,1748.9C6077.36,1748.9 6063.82,1741.09 6056.72,1728.59ZM6112.7,1662.32C6104.86,1665.41 6098.28,1670.86 6095.4,1680.23C6094.72,1682.43 6094.26,1684.86 6094.08,1687.41C6093.66,1693.45 6094.84,1700.13 6098.58,1705.91L6098.57,1705.91L6098.64,1706L6098.7,1706.09L6098.71,1706.09C6104.69,1713.83 6114.12,1717.63 6121.88,1717.6C6143.92,1717.48 6156.04,1694.27 6157,1683.19C6157.52,1677.12 6158.42,1670.53 6154.91,1665.54L6154.89,1665.51L6154.81,1665.39L6154.78,1665.36C6151.25,1660.4 6145.06,1658.79 6138.96,1658.64C6130.73,1658.44 6121.01,1659.05 6112.7,1662.32ZM6250.38,1599.35C6243.72,1597.06 6238.98,1592.74 6238.2,1585.08C6237.66,1579.82 6242.45,1574.94 6246.41,1573.75C6251.11,1572.34 6255.97,1571.79 6260.13,1572.06L6260.13,1568.57L6260.11,1568.57L6260.11,1552.35C6260.11,1552.35 6260.15,1552.37 6260.15,1552.35C6260.15,1537.61 6277.65,1516.47 6298.7,1513.73C6301.46,1513.39 6304.23,1514.26 6306.3,1516.11C6308.37,1517.97 6309.54,1520.63 6309.49,1523.42C6309.51,1526.69 6309.53,1530.53 6309.55,1534.49C6309.63,1547.47 6309.74,1561.74 6309.74,1561.74C6309.68,1562.93 6309.65,1564.21 6309.65,1565.58L6309.65,1568.57L6309.67,1568.57L6309.67,1575.96L6309.73,1575.97C6315.92,1576.58 6321.89,1574.97 6328.25,1573.92C6331.38,1573.4 6334.6,1573.02 6337.98,1573.1C6340.95,1573.17 6343.91,1575.81 6343.61,1579.03C6343.03,1585.23 6330.83,1597.16 6311.42,1599.51C6310.77,1602.68 6310.23,1605.22 6309.67,1607.42L6309.67,1654.6L6309.63,1654.58L6309.72,1699.33C6309.72,1709.22 6311.62,1714.47 6314.54,1717.03C6324,1725.32 6344.1,1705.13 6344.1,1722.65C6344.1,1731.83 6329.58,1749.33 6298.14,1749.33C6292.86,1749.33 6288.3,1748.79 6284.38,1747.85C6260.96,1742.22 6260.05,1722.04 6260.04,1714.17C6260.04,1713.55 6260.05,1713.01 6260.05,1712.55L6260.08,1671.95L6260.13,1601.31C6256.62,1600.98 6253.32,1600.36 6250.38,1599.35ZM5389.77,1581.29L5389.58,1581.39L5389.69,1581.3L5389.77,1581.29Z" style="fill:rgb(234,94,52);"></path>
+                                </g>
+                            </g>
+                        </svg>
+                    </a>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="../../index.html#features" title="View Capcat features">Features</a></li>
+                    <li><a href="../../index.html#how-it-works" title="Learn how Capcat works">How It Works</a></li>
+                    <li><a href="../../index.html#tutorials" title="Browse Capcat tutorials">Tutorials</a></li>
+                    <li><a href="https://substack.com/@yourusername/capcat-case-study" target="_blank" rel="noopener" title="Read the case study (opens in new window)">Case Study</a></li>
+                    <li><a href="https://github.com/yourusername/capcat" class="btn-primary" title="Get started with Capcat on GitHub (opens in new window)" target="_blank" rel="noopener">Get Started</a></li>
+                </ul>
+                <button class="mobile-menu-toggle" aria-label="Toggle menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+
+    <div class="doc-container">
+        <div class="container">
+            <div class="doc-content">
+
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / tutorials</div>
+<h1>Interactive Mode Exhaustive Reference</h1>
+<br>
+<p>Complete documentation of EVERY function, menu, option, and workflow in Capcat&#x27;s interactive mode.</p>
+<br>
+<p>Source: Application/core/interactive.py</p>
+<br>
+<h2>System Architecture</h2>
+<br>
+<h3>Technology Stack</h3>
+<br>
+<strong>UI Framework:</strong>
+<ul>
+<li>questionary (prompt_toolkit based)</li>
+<li>ANSI escape codes for terminal control</li>
+<li>Context managers for logging suppression</li>
+</ul>
+<br>
+<strong>Styling:</strong>
+<div class="ascii-art"># Custom orange theme (Application/core/interactive.py:10-17)
+custom_style = Style([
+    (&#x27;questionmark&#x27;, &#x27;fg:#d75f00 bold&#x27;),  # Orange question mark
+    (&#x27;question&#x27;, &#x27;bold&#x27;),                 # Bold question text
+    (&#x27;selected&#x27;, &#x27;fg:#d75f00&#x27;),          # Orange for selected option
+    (&#x27;pointer&#x27;, &#x27;fg:#d75f00 bold&#x27;),      # Orange pointer (▶)
+    (&#x27;answer&#x27;, &#x27;fg:#d75f00&#x27;),            # Orange answer
+    (&#x27;instruction&#x27;, &#x27;&#x27;),                  # Instruction text
+])
+</div>
+<br>
+<strong>Color Code:</strong> <code>#d75f00</code> - Orange (RGB: 215, 95, 0)
+<br>
+<h3>Screen Management</h3>
+<br>
+<h4>position_menu_at_bottom(menu_lines=10)</h4>
+<p>Location: Application/core/interactive.py:39</p>
+<br>
+<strong>Purpose:</strong> Position cursor for bottom-aligned menu display with ASCII logo at top.
+<br>
+<strong>Parameters:</strong>
+<ul>
+<li><code>menu_lines</code> (int) - Number of lines menu will occupy (default: 10)</li>
+</ul>
+<br>
+<strong>Behavior:</strong>
+<ol>
+<li>Get terminal size using <code>shutil.get_terminal_size()</code></li>
+<li>Clear screen with ANSI code <code>\033[2J</code></li>
+<li>Print ASCII logo (8 lines)</li>
+<li>Calculate padding: <code>max(0, terminal_height - menu_lines - logo_lines - 1)</code></li>
+<li>Print newlines for padding</li>
+<li>Menu appears at bottom</li>
+</ol>
+<br>
+<strong>ASCII Logo:</strong>
+<div class="ascii-art">       ____
+     / ____|                     _
+    | |     __ _ _ __   ___ __ _| |_
+    | |    / _  |  _ \ / __/ _  | __|
+    | |___| (_| | |_) | (_| (_| | |_
+     \_____\__,_|  __/ \___\__,_|\__|
+                | |
+                |_|
+</div>
+<p>Source location: Application/core/interactive.py:54-64</p>
+<br>
+<strong>Terminal Control Codes:</strong>
+<ul>
+<li><code>\033[2J</code> - Clear entire screen</li>
+<li><code>\033[H</code> - Move cursor to home (0,0)</li>
+<li><code>\033[38;5;202m</code> - Orange foreground color</li>
+<li><code>\033[0m</code> - Reset formatting</li>
+<li><code>\033[F</code> - Move cursor up one line</li>
+<li><code>\033[K</code> - Clear line from cursor to end</li>
+</ul>
+<br>
+<strong>Fallback:</strong> If terminal size detection fails, uses standard clear: <code>print(&#x27;\033[2J\033[H&#x27;, end=&#x27;&#x27;)</code>
+<br>
+<h4>suppress_logging()</h4>
+<p>Location: Application/core/interactive.py:28</p>
+<br>
+<strong>Purpose:</strong> Context manager to temporarily suppress logging during menu display.
+<br>
+<strong>Implementation:</strong>
+<pre><code>@contextlib.contextmanager
+def suppress_logging():
+    logger = logging.getLogger()
+    original_level = logger.level
+    logger.setLevel(logging.CRITICAL)  # Suppress everything below CRITICAL
+    try:
+        yield
+    finally:
+        logger.setLevel(original_level)  # Restore original level
+</code></pre>
+<br>
+<strong>Usage:</strong>
+<pre><code>with suppress_logging():
+    response = questionary.select(...).ask()
+</code></pre>
+<br>
+<strong>Purpose:</strong> Prevents log messages from interfering with clean menu display.
+<br>
+<h2>Main Entry Point</h2>
+<br>
+<h3>start_interactive_mode()</h3>
+<p>Location: Application/core/interactive.py:78</p>
+<br>
+<strong>Purpose:</strong> Main interactive loop for Capcat UI.
+<br>
+<strong>Execution Flow:</strong>
+<ol>
+<li>Initialize <code>first_run = True</code> flag</li>
+<li>Enter infinite while loop</li>
+<li>Position menu at bottom (10 lines)</li>
+<li>Suppress logging</li>
+<li>Show main menu with questionary</li>
+<li>Process user selection</li>
+<li>Call handler function</li>
+<li>Return to step 2</li>
+</ol>
+<br>
+<strong>Main Menu Options:</strong>
+<br>
+<ul>
+<li><strong>Catch articles from a bundle of sources</strong> → bundle</li>
+<li><strong>Catch articles from a list of sources</strong> → fetch</li>
+<li><strong>Catch from a single source</strong> → single_source</li>
+<li><strong>Catch a single article by URL</strong> → single_url</li>
+<li><strong>Manage Sources (add/remove/configure)</strong> → manage_sources</li>
+<li><strong>Exit</strong> → exit</li>
+</ul>
+<br>
+<strong>Prompt Text:</strong>
+<ul>
+<li>First run: &quot;  What would you like me to do?&quot;</li>
+<li>Subsequent: &quot;  Select an option:&quot;</li>
+</ul>
+<br>
+<strong>Navigation:</strong>
+<ul>
+<li>Arrow keys: Move selection</li>
+<li>Enter: Confirm selection</li>
+<li>Ctrl+C: Exit (returns <code>None</code> from <code>.ask()</code>)</li>
+</ul>
+<br>
+<strong>Terminal Output:</strong>
+<div class="ascii-art">       ____
+     / ____|                     _
+    | |     __ _ _ __   ___ __ _| |_
+    | |    / _  |  _ \ / __/ _  | __|
+    | |___| (_| | |_) | (_| (_| | |_
+     \_____\__,_|  __/ \___\__,_|\__|
+                | |
+                |_|
+
+  What would you like me to do?
+
+  &gt; Catch articles from a bundle of sources
+    Catch articles from a list of sources
+    Catch from a single source
+    Catch a single article by URL
+    Manage Sources (add/remove/configure)
+    Exit
+
+   (Use arrow keys to navigate)
+</div>
+<br>
+<strong>Selection Echo Handling:</strong>
+<pre><code># Clear questionary&#x27;s selection echo and show custom message
+print(&#x27;\033[F\033[K&#x27;, end=&#x27;&#x27;)  # Move up, clear line
+print(f&quot;  Selected option: {action_names.get(action, action)}&quot;)
+</code></pre>
+<br>
+<strong>Exit Conditions:</strong>
+<ul>
+<li>User selects &quot;Exit&quot;</li>
+<li>User presses Ctrl+C</li>
+<li><code>action</code> is <code>None</code></li>
+<li><code>action == &#x27;exit&#x27;</code></li>
+</ul>
+<br>
+<p>Result: Prints &quot;Exiting interactive mode.&quot; and returns to shell.</p>
+<br>
+<h2>Source Management Submenu</h2>
+<br>
+<h3>_handle_manage_sources_flow()</h3>
+<p>Location: Application/core/interactive.py:132</p>
+<br>
+<strong>Purpose:</strong> Display and handle source management submenu operations.
+<br>
+<strong>Menu Options:</strong>
+<br>
+<ul>
+<li><strong>Add New Source from RSS Feed</strong> → add_rss</li>
+<li><strong>Generate Custom Source Config</strong> → generate_config</li>
+<li><strong>Remove Existing Sources</strong> → remove</li>
+<li><strong>List All Sources</strong> → list_sources</li>
+<li><strong>Test a Source</strong> → test_source</li>
+<li><strong>Manage Bundles</strong> → manage_bundles</li>
+<li><strong>(separator line)</strong> → N/A</li>
+<li><strong>Back to Main Menu</strong> → back</li>
+</ul>
+<br>
+<strong>Loop Structure:</strong>
+<pre><code>while True:
+    # Show menu with suppress_logging()
+    action = questionary.select(...).ask()
+
+    if not action or action == &#x27;back&#x27;:
+        return  # Exit to main menu
+
+    # Call handler based on action
+    if action == &#x27;add_rss&#x27;:
+        _handle_add_source_from_rss()
+    # ... etc
+</code></pre>
+<br>
+<strong>Navigation:</strong> Same as main menu (arrow keys, Enter, Ctrl+C)
+<br>
+<h3>_handle_add_source_from_rss()</h3>
+<p>Location: Application/core/interactive.py:171</p>
+<br>
+<strong>Purpose:</strong> Interactively add new RSS-based source.
+<br>
+<strong>Workflow:</strong>
+<br>
+<strong>Step 1: URL Input</strong>
+<pre><code>print(&quot;  (Use Ctrl+C to go back)&quot;)
+url = questionary.text(
+    &quot;  Enter the RSS feed URL:&quot;,
+    style=custom_style,
+    qmark=&quot;&quot;,
+).ask()
+</code></pre>
+<br>
+<strong>Validation:</strong>
+<ul>
+<li>If <code>url is None</code> or empty: Print &quot;No URL provided. Returning to menu.&quot; and return</li>
+<li>Otherwise: Proceed to step 2</li>
+</ul>
+<br>
+<strong>Step 2: RSS Introspection</strong>
+<pre><code>from cli import add_source, get_available_sources
+add_source(url)  # Calls Application/cli.py:200
+</code></pre>
+<br>
+<strong>add_source() performs:</strong>
+<ol>
+<li>RSS feed inspection with <code>RssFeedIntrospector(url)</code></li>
+<li>Source ID suggestion from feed title</li>
+<li>Category selection</li>
+<li>Config generation</li>
+<li>Optional bundle assignment</li>
+<li>Optional test fetch</li>
+</ol>
+<br>
+<strong>Step 3: Confirmation</strong>
+<pre><code>sources = get_available_sources()
+print(f&quot;\n[OK] Active sources: {len(sources)}&quot;)
+input(&quot;\nPress Enter to continue...&quot;)
+</code></pre>
+<br>
+<strong>Error Handling:</strong>
+<pre><code>except Exception as e:
+    print(f&quot;Error adding source: {e}&quot;)
+input(&quot;\nPress Enter to continue...&quot;)
+</code></pre>
+<br>
+<strong>Complete Terminal Flow:</strong>
+<pre><code>  (Use Ctrl+C to go back)
+  Enter the RSS feed URL: https://techcrunch.com/feed/
+
+Attempting to add new source from: https://techcrunch.com/feed/
+Inspecting RSS feed...
+[OK] Feed &#x27;TechCrunch&#x27; found.
+
+--- Configure New Source ---
+  Source ID (alphanumeric): techcrunch
+  Select category: tech
+  Add to bundle? Yes
+  Select bundle: tech
+[OK] Added &#x27;techcrunch&#x27; to bundle &#x27;tech&#x27;.
+
+--- Running Test Fetch ---
+  Test fetch? (recommended) Yes
+[OK] Source added and verified successfully!
+
+[OK] Active sources: 16
+
+Press Enter to continue...
+</code></pre>
+<br>
+<h3>_handle_generate_config()</h3>
+<p>Location: Application/core/interactive.py:200</p>
+<br>
+<strong>Purpose:</strong> Launch interactive config generator script.
+<br>
+<strong>Workflow:</strong>
+<br>
+<strong>Step 1: Confirmation</strong>
+<pre><code>print(&quot;\n--- Generate Custom Source Configuration ---&quot;)
+print(&quot;This will launch the interactive config generator.\n&quot;)
+
+confirm = questionary.confirm(
+    &quot;  Continue?&quot;,
+    default=True,
+    style=custom_style,
+    qmark=&quot;&quot;,
+).ask()
+</code></pre>
+<br>
+<strong>Step 2: Script Launch</strong>
+<pre><code>import subprocess
+script_path = os.path.join(
+    os.path.dirname(os.path.dirname(__file__)),
+    &quot;scripts&quot;,
+    &quot;generate_source_config.py&quot;
+)
+
+result = subprocess.run([sys.executable, script_path], check=False)
+</code></pre>
+<br>
+<strong>Script Path:</strong> Application/scripts/generate_source_config.py
+<br>
+<strong>Step 3: Result Handling</strong>
+<pre><code>if result.returncode != 0:
+    print(f&quot;\nConfig generation exited with code: {result.returncode}&quot;)
+
+input(&quot;\nPress Enter to continue...&quot;)
+</code></pre>
+<br>
+<strong>Error Handling:</strong>
+<pre><code>except Exception as e:
+    print(f&quot;Error launching config generator: {e}&quot;)
+    input(&quot;\nPress Enter to continue...&quot;)
+</code></pre>
+<br>
+<strong>Terminal Output:</strong>
+<pre><code>--- Generate Custom Source Configuration ---
+This will launch the interactive config generator.
+
+  Continue? Yes
+
+[Interactive config generator launches]
+[User goes through wizard...]
+[Config saved to sources/active/config_driven/configs/newsource.yaml]
+
+Press Enter to continue...
+</code></pre>
+<br>
+<h3>_handle_remove_source()</h3>
+<p>Location: Application/core/interactive.py:237</p>
+<br>
+<strong>Purpose:</strong> Launch interactive source removal tool with enhanced features.
+<br>
+<strong>Workflow:</strong>
+<br>
+<strong>Step 1: Service Initialization</strong>
+<pre><code>from core.source_system.remove_source_service import create_remove_source_service
+from core.source_system.enhanced_remove_command import RemovalOptions
+
+service = create_remove_source_service()
+command = service._create_remove_source_command()
+</code></pre>
+<br>
+<strong>Step 2: Options Configuration</strong>
+<pre><code>options = RemovalOptions(
+    dry_run=False,           # No preview mode in interactive
+    create_backup=True,      # Always create backup
+    show_analytics=True,     # Show usage statistics
+    batch_file=None,         # No batch file in interactive
+    force=False              # Always confirm
+)
+</code></pre>
+<br>
+<strong>Step 3: Enhanced Command Execution</strong>
+<pre><code>from core.source_system.removal_ui import QuestionaryRemovalUI
+from core.source_system.enhanced_remove_command import EnhancedRemoveCommand
+from core.source_system.source_backup_manager import SourceBackupManager
+from core.source_system.source_analytics import SourceAnalytics
+
+enhanced_command = EnhancedRemoveCommand(
+    base_command=command,
+    backup_manager=SourceBackupManager(),
+    analytics=SourceAnalytics(),
+    ui=QuestionaryRemovalUI(),
+    logger=get_logger(__name__)
+)
+
+enhanced_command.execute_with_options(options)
+</code></pre>
+<br>
+<strong>Step 4: Confirmation</strong>
+<pre><code>from cli import get_available_sources
+sources = get_available_sources()
+print(f&quot;\n[OK] Active sources: {len(sources)}&quot;)
+input(&quot;\nPress Enter to continue...&quot;)
+</code></pre>
+<br>
+<strong>Interactive Removal Flow:</strong>
+<ol>
+<li>Display all sources with checkbox selection</li>
+<li>Show usage analytics for each source</li>
+<li>User selects sources with spacebar</li>
+<li>Confirm removal</li>
+<li>Create automatic backup</li>
+<li>Remove sources</li>
+<li>Display results</li>
+</ol>
+<br>
+<strong>Terminal Output:</strong>
+<pre><code>--- Remove Sources ---
+This will launch the interactive source removal tool.
+
+Select sources to remove (Space to select, Enter to confirm):
+  [ ] hn              Hacker News
+  [x] oldsite         Old Site
+  [x] discontinued    Discontinued Source
+  [ ] bbc             BBC News
+
+Usage Analytics:
+  oldsite: Last used 90 days ago, 5 articles
+  discontinued: Last used 180 days ago, 0 articles
+
+Confirm removal? Yes
+
+[OK] Backup created: .capcat-backups/backup_20251125_143022/
+[OK] Removed 2 sources successfully
+
+[OK] Active sources: 14
+
+Press Enter to continue...
+</code></pre>
+<br>
+<h3>_handle_list_sources()</h3>
+<p>Location: Application/core/interactive.py:287</p>
+<br>
+<strong>Purpose:</strong> Display all sources grouped by category with interactive details view.
+<br>
+<strong>Workflow:</strong>
+<br>
+<strong>Step 1: Source Collection</strong>
+<pre><code>from cli import get_available_sources
+from core.source_system.source_registry import get_source_registry
+
+sources = get_available_sources()  # Dict[source_id, display_name]
+registry = get_source_registry()
+</code></pre>
+<br>
+<strong>Step 2: Category Grouping</strong>
+<pre><code>categories = {}  # Dict[category, List[Tuple[source_id, display_name]]]
+
+for source_id, display_name in sorted(sources.items()):
+    try:
+        config = registry.get_source_config(source_id)
+        category = config.category if config and hasattr(config, &#x27;category&#x27;) else &#x27;other&#x27;
+    except:
+        category = &#x27;other&#x27;
+
+    if category not in categories:
+        categories[category] = []
+
+    categories[category].append((source_id, display_name))
+</code></pre>
+<br>
+<strong>Step 3: Menu Construction</strong>
+<div class="ascii-art">choices = []
+
+# Header
+choices.append(questionary.Separator(f&quot;\n  Available Sources ({len(sources)} total)&quot;))
+choices.append(questionary.Separator())
+
+# Grouped sources
+for category, source_list in sorted(categories.items()):
+    # Category header
+    choices.append(questionary.Separator(f&quot;  {category.upper()}&quot;))
+
+    # Sources in category
+    for source_id, display_name in source_list:
+        formatted_name = f&quot;  {source_id:15} → {display_name}&quot;
+        choices.append(questionary.Choice(formatted_name, source_id))
+
+    # Blank line
+    choices.append(questionary.Separator())
+
+# Footer
+choices.append(questionary.Separator(&quot;─&quot; * 50))
+choices.append(questionary.Choice(&quot;Back to Source Management&quot;, &quot;back&quot;))
+</div>
+<br>
+<strong>Step 4: Interactive Selection</strong>
+<div class="ascii-art">selected = questionary.select(
+    &quot;  Browse sources (select to view details):&quot;,
+    choices=choices,
+    style=custom_style,
+    qmark=&quot;&quot;,
+    pointer=&quot;▶&quot;,
+    instruction=&quot;\n   (Use arrow keys, Enter to view details)&quot;,
+).ask()
+</div>
+<br>
+<strong>Step 5: Detail View (if source selected)</strong>
+<pre><code>if selected and selected != &#x27;back&#x27;:
+    _show_source_details(selected, registry)
+    _handle_list_sources()  # Recursive call to return to listing
+</code></pre>
+<br>
+<strong>Terminal Output:</strong>
+<div class="ascii-art">  Available Sources (15 total)
+
+  TECH
+    hn              → Hacker News
+    lb              → Lobsters
+    iq              → InfoQ
+
+  NEWS
+    bbc             → BBC News
+    guardian        → The Guardian
+
+  SCIENCE
+    nature          → Nature News
+
+─────────────────────────────────────────────────
+  Back to Source Management
+
+  Browse sources (select to view details):
+
+   (Use arrow keys, Enter to view details)
+</div>
+<br>
+<h3>_show_source_details(source_id, registry)</h3>
+<p>Location: Application/core/interactive.py:351</p>
+<br>
+<strong>Purpose:</strong> Display detailed information about a selected source.
+<br>
+<strong>Parameters:</strong>
+<ul>
+<li><code>source_id</code> (str) - Source identifier</li>
+<li><code>registry</code> (SourceRegistry) - Registry instance</li>
+</ul>
+<br>
+<strong>Display Format:</strong>
+<div class="ascii-art">print(&quot;\n&quot; + &quot;─&quot; * 70)
+print(f&quot;\033[38;5;202m  Source Details\033[0m&quot;)  # Orange heading
+print(&quot;─&quot; * 70)
+</div>
+<br>
+<strong>Information Displayed:</strong>
+<br>
+<ol>
+<li><strong>Core Information:</strong></li>
+<ul>
+<li>ID</li>
+</ol>
+<ul>
+<li>Name (display_name)</li>
+<li>Category</li>
+</ul>
+<br>
+<ol>
+<li><strong>Base URL:</strong></li>
+</ol>
+   <pre><code>   if hasattr(config, &#x27;base_url&#x27;):
+       print(f&quot;  \033[1mBase URL:\033[0m     {config.base_url}&quot;)
+   </code></pre>
+<br>
+<ol>
+<li><strong>Discovery Method:</strong></li>
+</ol>
+   <pre><code>   if hasattr(config, &#x27;discovery&#x27;) and hasattr(config.discovery, &#x27;method&#x27;):
+       print(f&quot;  \033[1mDiscovery:\033[0m    {config.discovery.method}&quot;)
+
+       # RSS URLs if available
+       if config.discovery.method == &#x27;rss&#x27; and hasattr(config.discovery, &#x27;rss_urls&#x27;):
+           if hasattr(rss_urls, &#x27;primary&#x27;):
+               print(f&quot;  \033[1mRSS Feed:\033[0m     {rss_urls.primary}&quot;)
+   </code></pre>
+<br>
+<ol>
+<li><strong>Source Type:</strong></li>
+</ol>
+   <pre><code>   source_type = &quot;Config-driven (YAML)&quot; if hasattr(config, &#x27;article_selectors&#x27;) else &quot;Custom (Python)&quot;
+   print(f&quot;  \033[1mType:\033[0m         {source_type}&quot;)
+   </code></pre>
+<br>
+<strong>Terminal Output:</strong>
+<div class="ascii-art">──────────────────────────────────────────────────────────────────────
+  Source Details
+──────────────────────────────────────────────────────────────────────
+
+  ID:           hn
+  Name:         Hacker News
+  Category:     tech
+  Base URL:     https://news.ycombinator.com/
+  Discovery:    api
+  Type:         Custom (Python)
+
+──────────────────────────────────────────────────────────────────────
+
+  Press Enter to continue...
+</div>
+<br>
+<strong>Error Handling:</strong>
+<pre><code>except Exception as e:
+    print(f&quot;\n  Error loading source details: {e}&quot;)
+input(&quot;\n  Press Enter to continue...&quot;)
+</code></pre>
+<br>
+<h3>_handle_test_source()</h3>
+<p>Location: Application/core/interactive.py:396</p>
+<br>
+<strong>Purpose:</strong> Test a source by fetching 3 sample articles.
+<br>
+<strong>Workflow:</strong>
+<br>
+<strong>Step 1: Source Selection</strong>
+<div class="ascii-art">from cli import get_available_sources
+
+sources = get_available_sources()
+source_choices = [questionary.Choice(name, sid) for sid, name in sources.items()]
+source_choices.append(questionary.Separator())
+source_choices.append(questionary.Choice(&quot;Back&quot;, &quot;back&quot;))
+
+source_id = questionary.select(
+    &quot;  Select source to test:&quot;,
+    choices=source_choices,
+    style=custom_style,
+    qmark=&quot;&quot;,
+    pointer=&quot;▶&quot;,
+    instruction=&quot;\n   (Use arrow keys to navigate)&quot;,
+).ask()
+</div>
+<br>
+<strong>Step 2: Test Execution</strong>
+<pre><code>print(f&quot;\n--- Testing Source: {source_id} ---&quot;)
+print(&quot;Fetching 3 articles...\n&quot;)
+
+from capcat import run_app
+args = [&#x27;fetch&#x27;, source_id, &#x27;--count&#x27;, &#x27;3&#x27;]
+run_app(args)
+</code></pre>
+<br>
+<strong>Step 3: Result Display</strong>
+<pre><code>print(f&quot;\n[OK] Source &#x27;{source_id}&#x27; test completed&quot;)
+</code></pre>
+<br>
+<strong>Error Handling:</strong>
+<pre><code>except SystemExit as e:
+    if e.code != 0:
+        print(f&quot;\n✗ Source test failed with code: {e.code}&quot;)
+except Exception as e:
+    print(f&quot;\n✗ Error testing source: {e}&quot;)
+
+input(&quot;\nPress Enter to continue...&quot;)
+</code></pre>
+<br>
+<strong>Terminal Output:</strong>
+<pre><code>  Select source to test:
+  &gt; Hacker News
+    Lobsters
+    BBC News
+    Back
+
+--- Testing Source: hn ---
+Fetching 3 articles...
+
+Processing hn articles...
+[Article processing output...]
+Successfully processed 3 articles
+
+[OK] Source &#x27;hn&#x27; test completed
+
+Press Enter to continue...
+</code></pre>
+<br>
+<h2>Main Menu Handlers</h2>
+<br>
+<h3>_handle_bundle_flow()</h3>
+<p>Location: Application/core/interactive.py:436</p>
+<br>
+<strong>Purpose:</strong> Handle bundle selection and execution.
+<br>
+<strong>Workflow:</strong>
+<br>
+<strong>Step 1: Menu Positioning</strong>
+<pre><code># Bundle menu can be long
+position_menu_at_bottom(menu_lines=15)
+</code></pre>
+<br>
+<strong>Step 2: Bundle Discovery</strong>
+<pre><code>from cli import get_available_bundles, get_available_sources
+from core.source_system.source_registry import get_source_registry
+
+bundles = get_available_bundles()
+all_sources_map = get_available_sources()
+registry = get_source_registry()
+</code></pre>
+<br>
+<strong>Step 3: Bundle Choices Construction</strong>
+<pre><code>bundle_choices = []
+
+for name, data in bundles.items():
+    description = data.get(&quot;description&quot;, &quot;&quot;)
+
+    # Special handling for &#x27;all&#x27; bundle
+    if name == &quot;all&quot;:
+        full_description = description
+    else:
+        # Explicit sources from bundles.yml
+        bundle_sources = data.get(&quot;sources&quot;, [])
+
+        # Auto-discover sources with matching category
+        category_sources = registry.get_sources_by_category(name)
+        for source_id in category_sources:
+            if source_id not in bundle_sources:
+                bundle_sources.append(source_id)
+
+        # Format with source names
+        source_names = [all_sources_map.get(sid, sid) for sid in bundle_sources]
+        sources_str = f&quot;\n   ({&#x27;, &#x27;.join(source_names)})&quot; if source_names else &quot;&quot;
+        full_description = f&quot;{description}{sources_str}&quot;
+
+    bundle_choices.append(questionary.Choice(f&quot;{name} - {full_description}&quot;, name))
+</code></pre>
+<br>
+<strong>Step 4: Interactive Selection</strong>
+<div class="ascii-art">bundle = questionary.select(
+    &quot;  Select a news bundle and hit Enter for activation.&quot;,
+    choices=bundle_choices,
+    style=custom_style,
+    qmark=&quot;&quot;,
+    pointer=&quot;▶&quot;,
+    instruction=&quot;\n   (Use arrow keys to navigate)&quot;,
+).ask()
+</div>
+<br>
+<strong>Step 5: HTML Prompt</strong>
+<pre><code>if bundle and bundle != &#x27;back&#x27;:
+    _prompt_for_html(&#x27;bundle&#x27;, bundle)
+</code></pre>
+<br>
+<strong>Terminal Output:</strong>
+<pre><code>  Select a news bundle and hit Enter for activation.
+
+  &gt; tech - Technology News
+   (IEEE Spectrum, Mashable, Gizmodo)
+
+    techpro - Advanced Technology
+   (Hacker News, Lobsters, InfoQ)
+
+    news - General News
+   (BBC News, The Guardian)
+
+    science - Science News
+   (Nature News, Scientific American)
+
+    all - All available sources
+
+    Back to Main Menu
+
+   (Use arrow keys to navigate)
+</code></pre>
+<br>
+<h3>_handle_fetch_flow()</h3>
+<p>Location: Application/core/interactive.py:492</p>
+<br>
+<strong>Purpose:</strong> Handle multi-source selection and execution.
+<br>
+<strong>Workflow:</strong>
+<br>
+<strong>Step 1: Menu Positioning</strong>
+<pre><code>position_menu_at_bottom(menu_lines=15)
+</code></pre>
+<br>
+<strong>Step 2: Source Choices</strong>
+<pre><code>from cli import get_available_sources
+sources = get_available_sources()
+
+source_choices = [questionary.Choice(name, sid) for sid, name in sources.items()]
+source_choices.append(questionary.Separator())
+source_choices.append(questionary.Choice(&quot;Back to Main Menu&quot;, &quot;back&quot;))
+</code></pre>
+<br>
+<strong>Step 3: Checkbox Selection</strong>
+<div class="ascii-art">selected_sources = questionary.checkbox(
+    &quot;  Select sources (Space to select, Enter to confirm):&quot;,
+    choices=source_choices,
+    style=custom_style,
+    qmark=&quot;&quot;,
+    pointer=&quot;▶&quot;,
+    instruction=&quot;\n   (Use Space to select multiple sources, Enter to confirm)&quot;,
+).ask()
+</div>
+<br>
+<strong>Checkbox Navigation:</strong>
+<ul>
+<li>Arrow keys: Move between sources</li>
+<li>Space: Toggle selection (checkbox)</li>
+<li>Enter: Confirm all selected</li>
+<li>Ctrl+C: Cancel</li>
+</ul>
+<br>
+<strong>Step 4: HTML Prompt</strong>
+<pre><code>if selected_sources and &#x27;back&#x27; not in selected_sources:
+    _prompt_for_html(&#x27;fetch&#x27;, selected_sources)
+</code></pre>
+<br>
+<strong>Terminal Output:</strong>
+<pre><code>  Select sources (Space to select, Enter to confirm):
+
+  [ ] hn              Hacker News
+  [x] lb              Lobsters
+  [x] iq              InfoQ
+  [ ] bbc             BBC News
+  [ ] guardian        The Guardian
+
+  Back to Main Menu
+
+   (Use Space to select multiple sources, Enter to confirm)
+</code></pre>
+<br>
+<h3>_handle_single_source_flow()</h3>
+<p>Location: Application/core/interactive.py:520</p>
+<br>
+<strong>Purpose:</strong> Handle single source selection and execution.
+<br>
+<strong>Workflow:</strong>
+<br>
+<strong>Step 1: Menu Positioning</strong>
+<pre><code>position_menu_at_bottom(menu_lines=15)
+</code></pre>
+<br>
+<strong>Step 2: Source Selection</strong>
+<div class="ascii-art">from cli import get_available_sources
+sources = get_available_sources()
+
+source_choices = [questionary.Choice(name, sid) for sid, name in sources.items()]
+source_choices.append(questionary.Separator())
+source_choices.append(questionary.Choice(&quot;Back to Main Menu&quot;, &quot;back&quot;))
+
+source = questionary.select(
+    &quot;  Select a source and hit Enter for activation.&quot;,
+    choices=source_choices,
+    style=custom_style,
+    qmark=&quot;&quot;,
+    pointer=&quot;▶&quot;,
+    instruction=&quot;\n   (Use arrow keys to navigate)&quot;,
+).ask()
+</div>
+<br>
+<strong>Step 3: HTML Prompt</strong>
+<pre><code>if source and source != &#x27;back&#x27;:
+    # For single source, call fetch with just one source
+    _prompt_for_html(&#x27;fetch&#x27;, [source])
+</code></pre>
+<br>
+<strong>Note:</strong> Internally uses <code>fetch</code> action with single-item list, not separate <code>single_source</code> action.
+<br>
+<h3>_handle_single_url_flow()</h3>
+<p>Location: Application/core/interactive.py:549</p>
+<br>
+<strong>Purpose:</strong> Handle single article URL input and execution.
+<br>
+<strong>Workflow:</strong>
+<br>
+<strong>Step 1: Menu Positioning</strong>
+<pre><code>position_menu_at_bottom(menu_lines=5)
+</code></pre>
+<br>
+<strong>Step 2: URL Input</strong>
+<pre><code>print(&quot;  (Use Ctrl+C to go to the Main Menu)&quot;)
+
+url = questionary.text(
+    &quot;  Please enter the article URL:&quot;,
+    style=custom_style,
+    qmark=&quot;&quot;,
+).ask()
+</code></pre>
+<br>
+<strong>Step 3: Validation</strong>
+<pre><code>if url:
+    _prompt_for_html(&#x27;single&#x27;, url)
+else:
+    repeat = questionary.confirm(
+        &quot;  No URL entered. Would you like to try again?&quot;,
+        default=True,
+        style=custom_style,
+        qmark=&quot;&quot;,
+    ).ask()
+
+    if repeat:
+        _handle_single_url_flow()  # Recursive call
+</code></pre>
+<br>
+<strong>Terminal Output:</strong>
+<pre><code>  (Use Ctrl+C to go to the Main Menu)
+  Please enter the article URL: https://example.com/article
+
+[Proceeds to HTML prompt]
+</code></pre>
+<br>
+<strong>Empty Input Handling:</strong>
+<pre><code>  Please enter the article URL: [Enter pressed]
+
+  No URL entered. Would you like to try again? Yes
+
+  Please enter the article URL:
+</code></pre>
+<br>
+<h2>Shared Functions</h2>
+<br>
+<h3>_prompt_for_html(action, selection)</h3>
+<p>Location: Application/core/interactive.py:578</p>
+<br>
+<strong>Purpose:</strong> Prompt user for HTML generation preference.
+<br>
+<strong>Parameters:</strong>
+<ul>
+<li><code>action</code> (str) - Action type: &#x27;bundle&#x27;, &#x27;fetch&#x27;, or &#x27;single&#x27;</li>
+<li><code>selection</code> - Bundle name, source list, or URL depending on action</li>
+</ul>
+<br>
+<strong>Workflow:</strong>
+<br>
+<strong>Step 1: Menu Positioning</strong>
+<pre><code>position_menu_at_bottom(menu_lines=8)
+</code></pre>
+<br>
+<strong>Step 2: HTML Prompt</strong>
+<div class="ascii-art">response = questionary.select(
+    &quot;  Generate HTML for web browsing?&quot;,
+    choices=[
+        questionary.Choice(&quot;Yes&quot;, &quot;yes&quot;),
+        questionary.Choice(&quot;No&quot;, &quot;no&quot;),
+        questionary.Separator(),
+        questionary.Choice(&quot;Back to Main Menu&quot;, &quot;back&quot;),
+    ],
+    style=custom_style,
+    qmark=&quot;&quot;,
+    pointer=&quot;▶&quot;,
+    instruction=&quot;\n   (Use arrow keys to navigate)&quot;,
+).ask()
+</div>
+<br>
+<strong>Step 3: Execution</strong>
+<pre><code>if response and response != &#x27;back&#x27;:
+    generate_html = response == &quot;yes&quot;
+    _confirm_and_execute(action, selection, generate_html)
+</code></pre>
+<br>
+<strong>Terminal Output:</strong>
+<pre><code>  Generate HTML for web browsing?
+
+  &gt; Yes
+    No
+
+    Back to Main Menu
+
+   (Use arrow keys to navigate)
+</code></pre>
+<br>
+<h3>_confirm_and_execute(action, selection, generate_html)</h3>
+<p>Location: Application/core/interactive.py:604</p>
+<br>
+<strong>Purpose:</strong> Display summary and execute command via run_app().
+<br>
+<strong>Parameters:</strong>
+<ul>
+<li><code>action</code> (str) - Action type: &#x27;bundle&#x27;, &#x27;fetch&#x27;, or &#x27;single&#x27;</li>
+<li><code>selection</code> - Action-specific data</li>
+<li><code>generate_html</code> (bool) - HTML generation flag</li>
+</ul>
+<br>
+<strong>Workflow:</strong>
+<br>
+<strong>Step 1: Summary Construction</strong>
+<pre><code>summary = f&quot;Action: {action}\n&quot;
+
+if action == &#x27;bundle&#x27;:
+    summary += f&quot;Bundle: {selection}\n&quot;
+elif action == &#x27;fetch&#x27;:
+    summary += f&quot;Sources: {&#x27;, &#x27;.join(selection)}\n&quot;
+elif action == &#x27;single&#x27;:
+    summary += f&quot;URL: {selection}\n&quot;
+
+summary += f&quot;Generate HTML: {generate_html}\n&quot;
+</code></pre>
+<br>
+<strong>Step 2: Summary Display</strong>
+<pre><code>print(&quot;--------------------&quot;)
+print(&quot;SUMMARY&quot;)
+print(summary)
+print(&quot;--------------------&quot;)
+</code></pre>
+<br>
+<strong>Step 3: Argument Construction</strong>
+<pre><code>args = [action]
+
+if action == &#x27;bundle&#x27;:
+    args.append(selection)
+elif action == &#x27;fetch&#x27;:
+    args.append(&#x27;,&#x27;.join(selection))
+elif action == &#x27;single&#x27;:
+    args.append(selection)
+
+if generate_html:
+    args.append(&#x27;--html&#x27;)
+</code></pre>
+<br>
+<strong>Step 4: Execution</strong>
+<pre><code>try:
+    print(&quot;Executing command...&quot;)
+    run_app(args)  # From Application/capcat.py:run_app()
+except SystemExit as e:
+    if e.code != 0:
+        print(f&quot;Command finished with error code: {e.code}&quot;)
+        sys.exit(e.code)  # Re-raise error for wrapper
+    # On success (code 0), continue without exiting
+</code></pre>
+<br>
+<strong>Step 5: Return to Menu</strong>
+<pre><code>input(&quot;\nPress Enter to return to main menu...&quot;)
+</code></pre>
+<br>
+<strong>Terminal Output:</strong>
+<pre><code>--------------------
+SUMMARY
+Action: bundle
+Bundle: tech
+Generate HTML: true
+--------------------
+
+Executing command...
+
+Processing ieee articles...
+Processing mashable articles...
+[Article processing output...]
+
+Successfully processed 2 sources
+
+Press Enter to return to main menu...
+</code></pre>
+<br>
+<h2>Bundle Management</h2>
+<br>
+<h3>_handle_manage_bundles()</h3>
+<p>Location: Application/core/interactive.py:649</p>
+<br>
+<strong>Purpose:</strong> Handle bundle management submenu.
+<br>
+<strong>Workflow:</strong>
+<br>
+<strong>Step 1: Service Initialization</strong>
+<pre><code>from pathlib import Path
+from core.source_system.bundle_service import BundleService
+
+bundles_path = Path(__file__).parent.parent / &quot;sources&quot; / &quot;active&quot; / &quot;bundles.yml&quot;
+service = BundleService(bundles_path)
+</code></pre>
+<br>
+<strong>Step 2: Menu Loop</strong>
+<pre><code>while True:
+    action = service.ui.show_bundle_menu()
+
+    if not action or action == &#x27;back&#x27;:
+        return
+
+    # Execute action
+    if action == &#x27;create&#x27;:
+        service.execute_create_bundle()
+    elif action == &#x27;edit&#x27;:
+        service.execute_edit_bundle()
+    elif action == &#x27;delete&#x27;:
+        service.execute_delete_bundle()
+    elif action == &#x27;add_sources&#x27;:
+        service.execute_add_sources()
+    elif action == &#x27;remove_sources&#x27;:
+        service.execute_remove_sources()
+    elif action == &#x27;move_sources&#x27;:
+        service.execute_move_source()
+    elif action == &#x27;list&#x27;:
+        service.execute_list_bundles()
+</code></pre>
+<br>
+<strong>Available Actions:</strong>
+<ul>
+<li><code>create</code> - Create new bundle</li>
+<li><code>edit</code> - Edit bundle name/description</li>
+<li><code>delete</code> - Delete bundle</li>
+<li><code>add_sources</code> - Add sources to bundle</li>
+<li><code>remove_sources</code> - Remove sources from bundle</li>
+<li><code>move_sources</code> - Move sources between bundles</li>
+<li><code>list</code> - List all bundles</li>
+</ul>
+<br>
+<strong>Service Location:</strong> Application/core/source_system/bundle_service.py
+<br>
+<h2>Integration with CLI</h2>
+<br>
+<h3>run_app() Integration</h3>
+<p>Location: Application/capcat.py</p>
+<br>
+<strong>How Interactive Mode Calls CLI:</strong>
+<br>
+<pre><code>from capcat import run_app
+
+# Example: Bundle execution
+args = [&#x27;bundle&#x27;, &#x27;tech&#x27;, &#x27;--html&#x27;]
+run_app(args)
+</code></pre>
+<br>
+<strong>Arguments Format:</strong>
+<pre><code># Bundle
+args = [&#x27;bundle&#x27;, bundle_name, &#x27;--html&#x27;]  # or without --html
+
+# Fetch
+args = [&#x27;fetch&#x27;, &#x27;source1,source2,source3&#x27;, &#x27;--html&#x27;]
+
+# Single
+args = [&#x27;single&#x27;, url, &#x27;--html&#x27;]
+</code></pre>
+<br>
+<strong>Exit Code Handling:</strong>
+<pre><code>try:
+    run_app(args)
+except SystemExit as e:
+    if e.code != 0:
+        # Handle error
+        print(f&quot;Error: {e.code}&quot;)
+        sys.exit(e.code)  # Re-raise for wrapper
+    # Success: Continue interactive mode
+</code></pre>
+<br>
+<strong>Why SystemExit:</strong> <code>run_app()</code> calls <code>sys.exit()</code> on completion, which raises <code>SystemExit</code> exception. Interactive mode catches this to prevent exiting.
+<br>
+<h2>Error Handling</h2>
+<br>
+<h3>Network Errors</h3>
+<pre><code>try:
+    run_app(args)
+except SystemExit as e:
+    if e.code != 0:
+        print(f&quot;Command finished with error code: {e.code}&quot;)
+</code></pre>
+<br>
+<h3>User Cancellation</h3>
+<pre><code>if response is None:  # User pressed Ctrl+C
+    return  # Go back to previous menu
+</code></pre>
+<br>
+<h3>Invalid Input</h3>
+<pre><code>if not url:
+    print(&quot;  No URL provided. Returning to menu.&quot;)
+    return
+</code></pre>
+<br>
+<h3>Service Errors</h3>
+<pre><code>except Exception as e:
+    print(f&quot;Error: {e}&quot;)
+    input(&quot;\nPress Enter to continue...&quot;)
+</code></pre>
+<br>
+<h2>Keyboard Navigation</h2>
+<br>
+<h3>All Menus</h3>
+<ul>
+<li><strong>Arrow Up/Down:</strong> Navigate options</li>
+<li><strong>Enter:</strong> Confirm selection</li>
+<li><strong>Ctrl+C:</strong> Cancel/go back</li>
+<li><strong>Escape:</strong> Same as Ctrl+C</li>
+</ul>
+<br>
+<h3>Checkbox Menus (Multi-select)</h3>
+<ul>
+<li><strong>Space:</strong> Toggle selection</li>
+<li><strong>Arrow Up/Down:</strong> Navigate</li>
+<li><strong>Enter:</strong> Confirm all selected</li>
+<li><strong>Ctrl+C:</strong> Cancel</li>
+</ul>
+<br>
+<h3>Text Input</h3>
+<ul>
+<li><strong>Type:</strong> Enter text</li>
+<li><strong>Backspace:</strong> Delete character</li>
+<li><strong>Ctrl+U:</strong> Clear entire line</li>
+<li><strong>Enter:</strong> Confirm input</li>
+<li><strong>Ctrl+C:</strong> Cancel input</li>
+</ul>
+<br>
+<h2>Session Management</h2>
+<br>
+<h3>State Persistence</h3>
+<ul>
+<li><strong>No persistent state:</strong> Each operation is independent</li>
+<li><strong>No session history:</strong> Previous selections not remembered</li>
+<li><strong>Fresh state:</strong> Each menu start is clean</li>
+</ul>
+<br>
+<h3>Configuration</h3>
+<ul>
+<li><strong>Uses global config:</strong> <code>capcat.yml</code> and environment variables</li>
+<li><strong>No interactive-specific config:</strong> Same settings as CLI</li>
+</ul>
+<br>
+<h2>Source Code Locations</h2>
+<br>
+<p>Function reference:</p>
+<ul>
+<li><code>start_interactive_mode()</code> - Application/core/interactive.py:78</li>
+<li><code>position_menu_at_bottom()</code> - Application/core/interactive.py:39</li>
+<li><code>suppress_logging()</code> - Application/core/interactive.py:28</li>
+<li><code>_handle_manage_sources_flow()</code> - Application/core/interactive.py:132</li>
+<li><code>_handle_bundle_flow()</code> - Application/core/interactive.py:436</li>
+<li><code>_handle_fetch_flow()</code> - Application/core/interactive.py:492</li>
+<li><code>_handle_single_source_flow()</code> - Application/core/interactive.py:520</li>
+<li><code>_handle_single_url_flow()</code> - Application/core/interactive.py:549</li>
+<li><code>_prompt_for_html()</code> - Application/core/interactive.py:578</li>
+<li><code>_confirm_and_execute()</code> - Application/core/interactive.py:604</li>
+<li><code>_show_source_details()</code> - Application/core/interactive.py:351</li>
+</ul>
+<br>
+<h2>Related Documentation</h2>
+<br>
+<ul>
+<li>CLI Commands: docs/tutorials/01-cli-commands-exhaustive.md</li>
+<li>Source System: docs/tutorials/04-source-system-exhaustive.md</li>
+<li>Configuration: docs/tutorials/03-configuration-exhaustive.md</li>
+</ul>
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+    <script src="../../js/main.js"></script>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <svg class="capcat-logo" viewBox="0 0 120 36" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve">
+                        <g transform="matrix(1,0,0,1,-25136.8,-9036.29)">
+                                <g transform="matrix(0.101942,0,0,0.101942,24610.1,8883.85)">
+                                    <path d="M5599.61,1616.47L5599.66,1616.38C5600.74,1622.26 5601.26,1628.65 5601.26,1635.54L5601.26,1701.4C5601.26,1704.57 5601.56,1707.02 5602.09,1708.92L5601.99,1709.02C5606.21,1723.62 5624.36,1704.6 5624.36,1723.41C5624.36,1732.23 5605.56,1747.52 5583.16,1745.91C5582.93,1745.92 5582.7,1745.92 5582.45,1745.92C5578.93,1745.92 5575.11,1745.16 5571.38,1743.78L5571.37,1743.78C5562.39,1740.41 5553.95,1733.47 5551.49,1724.98C5536.46,1738.54 5514.52,1747.96 5493.82,1749L5493.73,1749.09C5492.48,1749.15 5491.23,1749.18 5489.99,1749.18C5466.27,1749.18 5447.99,1732.07 5447.99,1707.96C5447.99,1707.61 5447.99,1707.26 5448,1706.91L5448.23,1706.74C5448.87,1663.44 5484.29,1647.39 5521.6,1642.33L5521.63,1642.29C5532.57,1640.82 5543.67,1640.29 5554.1,1640.29L5554.1,1618.51C5554.1,1614.47 5553.49,1610.72 5552.38,1607.31L5552.54,1607.1C5547.59,1592.27 5533.06,1583.85 5517.44,1585.07C5508.88,1585.74 5494.66,1592.62 5505.38,1603.35C5516.1,1614.07 5494.65,1633.45 5472.47,1628.01L5472.43,1628C5466.37,1626.51 5462.02,1621.44 5462.02,1611.33C5462.02,1589.79 5483.29,1578.82 5504.14,1573.64C5516.57,1570.55 5528.85,1569.51 5536.38,1569.51C5552,1569.51 5564.61,1572.36 5574.41,1577.84L5574.36,1577.94C5588.16,1585.72 5596.37,1598.77 5599.61,1616.47C5598.61,1618.1 5597.66,1619.69 5596.93,1620.96C5596.39,1621.89 5595.88,1622.76 5595.39,1623.58C5595.9,1622.73 5596.43,1621.84 5596.98,1620.88C5597.7,1619.62 5598.63,1618.07 5599.61,1616.47ZM5554.15,1674.61L5554.09,1674.68C5553.99,1671.49 5553.36,1668.44 5551.52,1665.83L5551.5,1665.79L5551.41,1665.68L5551.39,1665.65C5547.85,1660.68 5541.66,1659.07 5535.57,1658.92C5519.57,1658.53 5497.94,1661.21 5492.01,1680.51C5489.72,1687.93 5489.87,1697.98 5495.19,1706.19L5495.18,1706.19L5495.24,1706.28L5495.31,1706.37L5495.31,1706.37C5501.3,1714.11 5510.73,1717.92 5518.49,1717.88C5519.81,1717.87 5521.1,1717.78 5522.36,1717.61L5522.43,1717.52C5542.01,1714.91 5552.76,1693.79 5553.66,1683.39C5553.9,1680.5 5554.24,1677.5 5554.15,1674.61ZM5655.48,1606.94C5650.11,1592.14 5633.8,1610.33 5633.8,1591.19C5633.8,1582.01 5651.19,1565.8 5674.8,1568.98C5683.29,1569.97 5689.56,1573.73 5694.16,1578.52C5699.61,1584.19 5702.74,1591.31 5704.51,1596.99C5706.26,1602.63 5706.67,1606.85 5706.67,1606.85L5707.45,1606.85C5712.89,1587.4 5739.72,1569.51 5765.78,1569.51C5773.42,1569.51 5780.44,1570.87 5786.81,1573.3C5802.54,1579.32 5814.35,1591.95 5821.87,1607.23C5828.22,1620.14 5831.5,1634.93 5831.5,1649.24C5831.5,1656.97 5830.87,1664.41 5829.67,1671.48C5821.72,1718.11 5788.62,1749.18 5744.39,1749.18C5742.93,1749.18 5741.48,1749.14 5740.03,1749.07C5729.11,1748.48 5718.34,1745.59 5706.67,1739.07L5706.67,1762.41L5706.76,1762.37L5706.76,1774.83C5706.76,1776.77 5706.82,1778.53 5706.95,1780.11C5709.18,1808.27 5730.12,1782.01 5730.12,1803.7C5730.12,1812.89 5712.73,1829.1 5689.13,1825.92C5681.05,1824.97 5674.98,1822.11 5670.43,1818.32C5658.92,1808.73 5657.17,1793.24 5657.26,1788.05C5657.29,1785.83 5657.08,1783.58 5657.17,1781.4L5657.17,1620.07C5657.17,1614.05 5656.53,1609.85 5655.48,1606.94ZM5758.32,1602.3C5755.39,1601.38 5752.14,1600.88 5748.55,1600.88C5721.72,1600.88 5707.31,1633 5707.31,1659.84C5707.31,1664.6 5706.87,1673.25 5707.53,1682.86C5708.48,1696.5 5711.63,1712.06 5721.4,1721.14C5726.51,1725.9 5733.44,1728.88 5742.81,1728.88C5769.07,1728.88 5780.31,1701.62 5783.58,1676.51C5784.33,1670.76 5784.66,1665.12 5784.66,1659.94C5784.66,1638.52 5779.89,1609.05 5758.32,1602.3ZM5171.08,1669.46C5168.37,1658.28 5166.95,1646.44 5166.95,1634.13C5166.95,1610.06 5173.76,1587.85 5185.36,1568.57C5198.79,1546.25 5218.65,1527.87 5241.83,1515.1C5264.78,1502.45 5290.97,1495.32 5317.38,1495.32C5320.18,1495.32 5322.96,1495.45 5325.7,1495.71C5350.04,1497.99 5371.48,1509.87 5385.67,1521.82L5385.72,1521.75C5389.09,1524.58 5392.04,1527.42 5394.53,1530.14L5394.61,1530.18C5397.25,1533.07 5399.36,1535.82 5400.87,1538.27C5410.14,1553.33 5404.98,1573.26 5389.77,1581.12L5389.69,1581.13L5389.48,1581.3C5387.16,1582.47 5384.61,1583.36 5381.85,1583.91C5369.75,1586.33 5346.41,1584.08 5334.21,1555.59C5334.06,1555.23 5333.89,1554.86 5333.73,1554.5L5333.69,1554.53C5327.07,1540.04 5312.68,1525.35 5294.57,1522.11C5292.17,1521.68 5289.7,1521.45 5287.18,1521.45C5256.97,1521.45 5239.23,1548.98 5232.32,1579.7C5230.07,1589.73 5228.97,1600.11 5228.97,1609.97C5228.97,1629.41 5233.9,1648.72 5243.09,1665.52C5247.81,1674.17 5253.66,1682.15 5260.54,1689.14C5268.87,1697.6 5278.7,1704.62 5289.89,1709.63C5301.95,1715.03 5315.59,1718.1 5330.59,1718.1C5348.77,1718.1 5363.58,1713.34 5375.61,1707.41C5395.47,1697.63 5407.71,1684.66 5414.95,1684.66C5419.02,1684.66 5423.66,1688.72 5423.66,1692.21C5423.66,1716.94 5372.76,1752.65 5317.11,1761.57C5308.74,1762.91 5300.26,1763.64 5291.82,1763.64C5274.23,1763.64 5258.01,1760.54 5243.5,1754.83C5230.57,1749.76 5218.99,1742.62 5208.99,1733.79C5201.49,1727.17 5194.88,1719.59 5189.25,1711.21C5180.96,1698.87 5174.8,1684.79 5171.08,1669.46ZM5858.25,1647.84C5865.42,1607.08 5902.02,1576.76 5942.55,1570.55C5944.9,1570.19 5947.26,1569.91 5949.63,1569.72C5952.35,1569.49 5955.08,1569.38 5957.81,1569.38C5969.02,1569.38 5979.5,1572.6 5988.38,1577.1C6000.77,1583.39 6010.03,1592.2 6013.77,1598.28C6020.97,1609.97 6015.2,1626.02 6001.03,1628.85C5992.93,1630.47 5977.28,1628.96 5969.1,1609.87C5968.52,1608.51 5967.84,1607.14 5967.06,1605.8C5961.37,1595.95 5950.58,1586.9 5937.57,1586.9C5934.03,1586.9 5930.78,1587.45 5927.8,1588.47C5921.91,1590.48 5917.06,1594.31 5913.16,1599.32C5904.02,1611.07 5900.09,1629.27 5900.09,1645.62C5900.09,1656.62 5902.44,1667.56 5906.88,1677.48C5915.56,1696.86 5932.19,1712.35 5954.73,1716.8C5959.01,1717.65 5963.51,1718.1 5968.2,1718.1C5978.28,1718.1 5986.67,1715.97 5993.68,1713.05C6009.13,1706.61 6017.86,1696.29 6023.21,1696.29C6025.94,1696.29 6029.05,1699.01 6029.05,1701.35C6029.05,1717.25 5997.66,1739.92 5962.18,1747.02C5955.11,1748.44 5947.87,1749.23 5940.68,1749.23C5935.15,1749.23 5929.81,1748.77 5924.7,1747.89C5903.07,1744.15 5885.48,1732.81 5873.66,1716.57C5862.97,1701.87 5856.98,1683.15 5856.98,1662.42C5856.98,1657.43 5857.42,1652.57 5858.25,1647.84ZM6056.72,1728.59C6053.31,1722.59 6051.38,1715.5 6051.38,1707.68C6051.38,1662.41 6088.81,1646.4 6127.44,1641.7C6137.59,1640.46 6147.83,1640.01 6157.49,1640.01L6157.49,1618.23C6157.49,1614.6 6157,1611.2 6156.1,1608.07C6151.57,1592.47 6136.66,1583.53 6120.61,1584.79C6119.73,1584.86 6118.79,1584.99 6117.83,1585.18C6109.39,1586.91 6098.92,1593.44 6108.55,1603.06C6108.78,1603.3 6109,1603.53 6109.2,1603.77C6117.94,1614.13 6099.11,1631.45 6078.47,1628.29C6077.52,1628.15 6076.56,1627.95 6075.6,1627.72C6069.53,1626.22 6065.18,1621.16 6065.18,1611.05C6065.18,1580.13 6108.99,1571.01 6132.49,1569.48C6135.13,1569.31 6137.51,1569.23 6139.55,1569.23C6154.49,1569.23 6166.67,1571.83 6176.28,1576.85C6195.68,1586.99 6204.61,1606.99 6204.61,1635.34L6204.61,1701.21C6204.61,1708.61 6206.24,1712.14 6208.63,1713.74C6215.28,1718.16 6227.84,1707.63 6227.84,1723.27C6227.84,1732.09 6209.04,1747.39 6186.65,1745.78C6186.42,1745.79 6186.18,1745.79 6185.94,1745.79C6185.46,1745.79 6184.98,1745.77 6184.49,1745.75C6172.67,1745.07 6158.19,1736.37 6154.83,1724.79C6141.14,1737.14 6121.72,1746.06 6102.71,1748.33C6099.58,1748.7 6096.46,1748.9 6093.38,1748.9C6077.36,1748.9 6063.82,1741.09 6056.72,1728.59ZM6112.7,1662.32C6104.86,1665.41 6098.28,1670.86 6095.4,1680.23C6094.72,1682.43 6094.26,1684.86 6094.08,1687.41C6093.66,1693.45 6094.84,1700.13 6098.58,1705.91L6098.57,1705.91L6098.64,1706L6098.7,1706.09L6098.71,1706.09C6104.69,1713.83 6114.12,1717.63 6121.88,1717.6C6143.92,1717.48 6156.04,1694.27 6157,1683.19C6157.52,1677.12 6158.42,1670.53 6154.91,1665.54L6154.89,1665.51L6154.81,1665.39L6154.78,1665.36C6151.25,1660.4 6145.06,1658.79 6138.96,1658.64C6130.73,1658.44 6121.01,1659.05 6112.7,1662.32ZM6250.38,1599.35C6243.72,1597.06 6238.98,1592.74 6238.2,1585.08C6237.66,1579.82 6242.45,1574.94 6246.41,1573.75C6251.11,1572.34 6255.97,1571.79 6260.13,1572.06L6260.13,1568.57L6260.11,1568.57L6260.11,1552.35C6260.11,1552.35 6260.15,1552.37 6260.15,1552.35C6260.15,1537.61 6277.65,1516.47 6298.7,1513.73C6301.46,1513.39 6304.23,1514.26 6306.3,1516.11C6308.37,1517.97 6309.54,1520.63 6309.49,1523.42C6309.51,1526.69 6309.53,1530.53 6309.55,1534.49C6309.63,1547.47 6309.74,1561.74 6309.74,1561.74C6309.68,1562.93 6309.65,1564.21 6309.65,1565.58L6309.65,1568.57L6309.67,1568.57L6309.67,1575.96L6309.73,1575.97C6315.92,1576.58 6321.89,1574.97 6328.25,1573.92C6331.38,1573.4 6334.6,1573.02 6337.98,1573.1C6340.95,1573.17 6343.91,1575.81 6343.61,1579.03C6343.03,1585.23 6330.83,1597.16 6311.42,1599.51C6310.77,1602.68 6310.23,1605.22 6309.67,1607.42L6309.67,1654.6L6309.63,1654.58L6309.72,1699.33C6309.72,1709.22 6311.62,1714.47 6314.54,1717.03C6324,1725.32 6344.1,1705.13 6344.1,1722.65C6344.1,1731.83 6329.58,1749.33 6298.14,1749.33C6292.86,1749.33 6288.3,1748.79 6284.38,1747.85C6260.96,1742.22 6260.05,1722.04 6260.04,1714.17C6260.04,1713.55 6260.05,1713.01 6260.05,1712.55L6260.08,1671.95L6260.13,1601.31C6256.62,1600.98 6253.32,1600.36 6250.38,1599.35ZM5389.77,1581.29L5389.58,1581.39L5389.69,1581.3L5389.77,1581.29Z" style="fill:rgb(234,94,52);"></path>
+                                </g>
+                            </g>
+                        </svg>
+                </div>
+
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>Documentation</h4>
+                        <ul>
+                            <li><a href="../../docs/quick-start.html" title="Quick start guide">Quick Start</a></li>
+                            <li><a href="../../docs/architecture.html" title="System architecture">Architecture</a></li>
+                            <li><a href="../../docs/source-development.html" title="Develop custom sources">Source Development</a></li>
+                            <li><a href="../../docs/testing.html" title="Testing guide">Testing</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="footer-column">
+                        <h4>Resources</h4>
+                        <ul>
+                            <li><a href="../../docs/tutorials/index.html" title="Browse tutorials">Tutorials</a></li>
+                            <li><a href="https://github.com/yourusername/capcat" title="View on GitHub (opens in new window)" target="_blank" rel="noopener">GitHub</a></li>
+                            <li><a href="https://github.com/yourusername/capcat/issues" title="Report issues (opens in new window)" target="_blank" rel="noopener">Issues</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="footer-column">
+                        <h4>About</h4>
+                        <ul>
+                            <li><a href="https://stayux.substack.com" target="_blank" rel="noopener" title="Designer blog (opens in new window)">Designer Blog</a></li>
+                            <li><a href="../ethical-scraping.html" title="Ethical scraping guidelines">Ethical Scraping</a></li>
+                            <li><a href="https://github.com/yourusername/capcat/blob/main/LICENSE" title="View license (opens in new window)" target="_blank" rel="noopener">License</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-credit">
+                <p>Design and context engineering by <a href="https://stayux.com" title="Visit Stayux.com (opens in new window)" target="_blank" rel="noopener">Stayu Kasabov | Stayux.com</a></p>
+                <p>NLP driven and LLM generated MVP</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <button id="backToTopBtn" title="Go to top">
+        <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24">
+            <path d="M0 0h24v24H0V0z" fill="none"/>
+            <path fill="currentColor" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6 1.41 1.41z"/>
+        </svg>
+    </button>
+
+</body>
