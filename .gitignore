@@ -137,16 +137,19 @@ CLEANUP_ANALYSIS.md
 Session/
 
 # Development and build scripts (one-off utilities)
-cleanup_repo.py
+# Note: build_site.py is KEPT (active build script for website)
+cleanup_*.py
 add_jekyll_frontmatter.py
 update_includes.py
-fix_breadcrumbs.py
+update_html_*.py
 convert_docs_to_html.py
 convert_to_markdown.py
 delete_h4_colon.py
 fix_*.py
+fix_*.sh
 remove_*.py
 replace_*.py
+verify_*.sh
 
 # Test scripts in root (should be in tests/)
 test_*.py
