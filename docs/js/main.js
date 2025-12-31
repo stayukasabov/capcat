@@ -461,6 +461,12 @@ class HoverButton {
 
 // Initialize elastic hover with retry mechanism
 function initElasticHover() {
+  // Only run on pages with svg-wrapper (index page)
+  const svgWrapper = document.querySelector('.svg-wrapper');
+  if (!svgWrapper) {
+    return; // No svg-wrapper, skip initialization silently
+  }
+
   let attempts = 0;
   const maxAttempts = 20;
 
@@ -472,16 +478,6 @@ function initElasticHover() {
         requestAnimationFrame(tryInit);
       } else {
         console.error('GSAP library failed to load after maximum attempts');
-      }
-      return;
-    }
-
-    const svgWrapper = document.querySelector('.svg-wrapper');
-    if (!svgWrapper) {
-      if (attempts < maxAttempts) {
-        requestAnimationFrame(tryInit);
-      } else {
-        console.error('SVG wrapper not found after maximum attempts');
       }
       return;
     }
