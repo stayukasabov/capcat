@@ -1,0 +1,17 @@
+requests
+beautifulsoup4
+PyYAML
+markdownify
+markdown>=3.5.0
+pygments>=2.16.0
+charset_normalizer
+questionary
+prompt_toolkit
+feedparser
+ruamel.yaml
+validators
+pytest
+lxml
+brotli
+yt-dlp
+pynput>=1.7.6

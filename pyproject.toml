@@ -1,0 +1,30 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "capcat"
+version = "2.0.0"
+description = "A simple, multi-platform utility to archive news articles."
+authors = [{name = "Stayu Kasabov", email = "stayu.kasabov@gmail.com"}]
+license = {text = "MIT-Style Non-Commercial"}
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "requests",
+    "beautifulsoup4",
+    "PyYAML",
+    "markdownify",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "black",
+    "isort",
+    "flake8",
+    "mypy",
+]
+
+[project.scripts]
+capcat = "capcat.cli:main"
