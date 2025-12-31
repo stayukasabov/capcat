@@ -1,10 +1,12 @@
 # Capcat - Archive and Share Articles with Confidence
 
-A dual-mode news archiving tool that captures articles from 12 curated sources and converts them into **self-contained, shareable HTML files** with embedded CSS and JavaScript - no external dependencies required.
+A dual-mode news archiving tool that captures articles from 12 curated sources as **clean Markdown files** (Obsidian-ready) with optional **self-contained HTML** output - perfect for knowledge management and offline sharing.
 
 ## Why Capcat?
 
-**Share Articles That Never Break**: Every archived article is a complete, standalone HTML file with all styles and scripts embedded. Send to anyone, open anywhere, years later - it just works.
+**Build Your Knowledge Base**: Every article saved as clean Markdown - drop directly into Obsidian for full-text search, backlinks, and graph views. Perfect for researchers and lifelong learners.
+
+**Share Without Breaking**: Optional self-contained HTML output with all styles and scripts embedded. Send to anyone, open anywhere, years later - it just works.
 
 **Two Ways to Use**:
 - **Interactive Menu** (`./capcat catch`) - Visual interface for browsing sources and bundles
@@ -80,6 +82,13 @@ Every article is a **complete, portable HTML file**:
 - **Comment Preservation** - Captures discussions with privacy anonymization
 - **Media Handling** - Images always downloaded, video/audio/PDFs with `--media` flag
 
+### Markdown-Native Output
+
+- **Obsidian-Ready** - Clean markdown files you can drop directly into your vault
+- **Portable Archives** - Standard markdown format works everywhere
+- **Local Images** - All media downloaded and referenced with relative paths
+- **Metadata Headers** - Source, date, and URL preserved in frontmatter-style headers
+
 ### Bundle System
 
 Pre-configured topic collections:
@@ -123,6 +132,34 @@ pip install -r requirements.txt
 ./capcat fetch hn --count 5
 ```
 
+## Markdown-First Workflow (Obsidian Compatible)
+
+Every article is saved as **clean Markdown** with proper formatting:
+
+```markdown
+# Article Title
+
+**Source**: Hacker News | **Date**: 2025-12-31 | **URL**: [Original Link]
+
+## Content
+
+Article body with images referenced locally...
+
+![Image Description](../images/image.jpg)
+```
+
+**Perfect for Knowledge Management**:
+- **Obsidian**: Drag folders directly into your vault for full-text search and backlinks
+- **Notion**: Import markdown files while preserving structure
+- **Logseq/Roam**: Compatible with daily notes and graph views
+- **Standard Editors**: Works in VS Code, Typora, iA Writer, or any markdown editor
+
+**Metadata Included**:
+- Source attribution
+- Publication date
+- Original URLs
+- Local image paths (relative linking)
+
 ## Output Structure
 
 ### Batch Mode (fetch/bundle)
@@ -130,13 +167,13 @@ pip install -r requirements.txt
 ../News/news_31-12-2025/
 ├── Hacker-News_31-12-2025/
 │   ├── 01_Article_Title/
-│   │   ├── article.md
+│   │   ├── article.md           # Primary markdown file
 │   │   ├── html/
-│   │   │   └── article.html    # Self-contained HTML with embedded CSS/JS
+│   │   │   └── article.html     # Self-contained HTML with embedded CSS/JS
 │   │   ├── images/
 │   │   │   ├── content1.jpg
 │   │   │   └── content2.png
-│   │   └── comments.md
+│   │   └── comments.md          # Discussions (HN, Reddit sources)
 │   └── 02_Another_Article/
 └── BBC_31-12-2025/
     └── ...
@@ -145,9 +182,9 @@ pip install -r requirements.txt
 ### Single Article Mode
 ```
 ../Capcats/cc_31-12-2025-Article-Title/
-├── article.md
+├── article.md                    # Standalone markdown
 ├── html/
-│   └── article.html    # Complete standalone file
+│   └── article.html              # Complete standalone file
 └── images/
     └── ...
 ```
