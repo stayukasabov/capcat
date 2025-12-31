@@ -1,10 +1,10 @@
-# Capcat - Unified News Article Scanner
+# Capcat - Personal News Archiving Utility
 
-This directory contains the refactored and unified `capcat` tool. It combines the functionality of the previous `fetchhni` (Hacker News) and `fetchlb` (Lobsters) tools into a single, more maintainable codebase.
+A powerful, modular news article archiving system that fetches articles from 12 sources, converts them to Markdown and HTML with themes for sharing, and organizes them with media files.
 
 ## Features
 
-- **Smart Content Extraction**: Scans articles from 16+ major news sources with intelligent content recovery
+- **Smart Content Extraction**: Fetches articles from 12 news sources with intelligent content recovery
 - **Fallback Image Detection**: Automatically finds content images when primary extraction misses them
 - **Separated Workflows**: Independent article and comment processing for better reliability
 - **Advanced Media Handling**: Downloads and embeds images (always), plus PDFs, audio, video with --media flag
