@@ -603,6 +603,18 @@ Examples:
         '--update', '-U', action='store_true',
         help='Update existing article'
     )
+    single_parser.add_argument(
+        '--verbose', '-V', action='store_true',
+        help='Enable verbose output'
+    )
+    single_parser.add_argument(
+        '--quiet', '-q', action='store_true',
+        help='Show only warnings and errors'
+    )
+    single_parser.add_argument(
+        '--log-file', '-L', metavar='FILE',
+        help='Write detailed logs to file'
+    )
 
     # Fetch command
     fetch_parser = subparsers.add_parser(
@@ -654,6 +666,18 @@ Examples:
     fetch_parser.add_argument(
         '--update', '-U', action='store_true',
         help='Update existing articles'
+    )
+    fetch_parser.add_argument(
+        '--verbose', '-V', action='store_true',
+        help='Enable verbose output'
+    )
+    fetch_parser.add_argument(
+        '--quiet', '-q', action='store_true',
+        help='Show only warnings and errors'
+    )
+    fetch_parser.add_argument(
+        '--log-file', '-L', metavar='FILE',
+        help='Write detailed logs to file'
     )
 
     # Bundle command
@@ -711,6 +735,18 @@ Examples:
     bundle_parser.add_argument(
         '--update', '-U', action='store_true',
         help='Update existing bundle articles'
+    )
+    bundle_parser.add_argument(
+        '--verbose', '-V', action='store_true',
+        help='Enable verbose output'
+    )
+    bundle_parser.add_argument(
+        '--quiet', '-q', action='store_true',
+        help='Show only warnings and errors'
+    )
+    bundle_parser.add_argument(
+        '--log-file', '-L', metavar='FILE',
+        help='Write detailed logs to file'
     )
 
     # List command
