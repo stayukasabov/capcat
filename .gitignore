@@ -125,5 +125,39 @@ target/
 *.cpp
 *.h
 
-# Project Specific
-# (Add Capcat-specific exclusions here)
+# Project Specific - Development Artifacts
+# Internal documentation and session notes
+Reports/
+CLAUDE.md
+CLEANUP_ANALYSIS.md
+*ANALYSIS.md
+*SUMMARY.md
+*REPORT.md
+*COMPLETE.md
+Session/
+
+# Development and build scripts (one-off utilities)
+cleanup_repo.py
+add_jekyll_frontmatter.py
+update_includes.py
+fix_breadcrumbs.py
+convert_docs_to_html.py
+convert_to_markdown.py
+delete_h4_colon.py
+fix_*.py
+remove_*.py
+replace_*.py
+
+# Test scripts in root (should be in tests/)
+test_*.py
+TEST_*.sh
+TEST_*.md
+
+# Internal documentation source
+docs-markdown/
+
+# Development metrics
+metrics/
+
+# Optional: Tests directory (uncomment to make tests private)
+# tests/
