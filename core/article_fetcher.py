@@ -101,10 +101,10 @@ def get_global_update_mode() -> bool:
     return _GLOBAL_UPDATE_MODE
 from .utils import sanitize_filename
 from concurrent.futures import (
-    ThreadPoolExecutor,
     TimeoutError as FutureTimeoutError
 )
 from core.constants import CONVERSION_TIMEOUT_SECONDS
+from core.conversion_executor import get_conversion_executor
 
 
 def convert_html_with_timeout(
@@ -148,20 +148,21 @@ def convert_html_with_timeout(
     if not html_content:
         return ""
 
-    # Execute conversion in isolated thread with timeout
-    with ThreadPoolExecutor(max_workers=1) as executor:
-        future = executor.submit(html_to_markdown, html_content, url)
-        try:
-            result = future.result(timeout=timeout)
-            return result if result else ""
-        except FutureTimeoutError:
-            logger.warning(
-                f"Conversion timeout after {timeout}s for {url} - skipping"
-            )
-            return ""
-        except Exception as e:
-            logger.error(f"Conversion failed for {url}: {e}")
-            return ""
+    # Execute conversion in shared thread pool with timeout
+    # Using shared executor prevents nested ThreadPoolExecutor deadlock
+    executor = get_conversion_executor()
+    future = executor.submit(html_to_markdown, html_content, url)
+    try:
+        result = future.result(timeout=timeout)
+        return result if result else ""
+    except FutureTimeoutError:
+        logger.warning(
+            f"Conversion timeout after {timeout}s for {url} - skipping"
+        )
+        return ""
+    except Exception as e:
+        logger.error(f"Conversion failed for {url}: {e}")
+        return ""
 
 
 class ArticleFetcher(ABC):
