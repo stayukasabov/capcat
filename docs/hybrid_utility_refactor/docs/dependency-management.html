@@ -9,7 +9,7 @@
 </head>
 <body>
     <!-- Header -->
-    <div id="header-placeholder"></div>
+    {% include header.html %}
 
 
     <div class="doc-container">
@@ -365,7 +365,7 @@ python3 scripts/setup_dependencies.py --check-only || \
     </div>
 
     <!-- Footer -->
-    <div id="footer-placeholder"></div>
+    {% include footer.html %}
 
     <!-- Back to Top Button -->
     <button id="backToTopBtn" title="Go to top">
@@ -373,7 +373,4 @@ python3 scripts/setup_dependencies.py --check-only || \
             <path d="M0 0h24v24H0V0z" fill="none"/>
             <path fill="currentColor" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6 1.41 1.41z"/>
         </svg>
-    </button>
-
-    <script src="../../js/includes-loader.js"></script>
-  </body>
+    </button>  </body>
