@@ -1,0 +1,121 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv/
+
+# Distribution / Packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.hypothesis/
+
+# Logs
+*.log
+capcat.log
+*.log.*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Sensitive Data
+capcat.yml
+*.env
+.env.*
+credentials.json
+secrets/
+config/local.yml
+api_keys.txt
+
+# Temporary Files
+*.tmp
+*.bak
+*_backup
+*_old
+*_fixed
+test-diagnose-*.md
+temp/
+tmp/
+
+# Output Directories (if accidentally in repo)
+news_*/
+cc_*/
+
+# Documentation Backups
+docs_backup_*/
+website_backup_*/
+
+# Test Outputs
+test_output/
+test_results/
+
+# Coverage Reports
+.coverage.*
+coverage.xml
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre
+.pyre/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Compiled translations
+*.mo
+*.pot
+
+# Django/Flask (if future web UI)
+db.sqlite3
+db.sqlite3-journal
+instance/
+.webassets-cache
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
+
+# Cython
+*.c
+*.cpp
+*.h
+
+# Project Specific
+# (Add Capcat-specific exclusions here)
