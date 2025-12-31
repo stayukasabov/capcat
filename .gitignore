@@ -119,6 +119,7 @@ docs/_build/
 
 # Personal tutorials and guides
 docs/git-workflow.md
+docs/github-cli-workflow.md
 
 # PyBuilder
 target/
