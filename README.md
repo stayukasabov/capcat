@@ -1,247 +1,266 @@
-# Capcat - Personal News Archiving Utility
+# Capcat - Archive and Share Articles with Confidence
 
-A powerful, modular news article archiving system that fetches articles from 12 sources, converts them to Markdown and HTML with themes for sharing, and organizes them with media files.
+A dual-mode news archiving tool that captures articles from 17+ sources and converts them into **self-contained, shareable HTML files** with embedded CSS and JavaScript - no external dependencies required.
 
-## Features
+## Why Capcat?
 
-- **Smart Content Extraction**: Fetches articles from 12 news sources with intelligent content recovery
-- **Fallback Image Detection**: Automatically finds content images when primary extraction misses them
-- **Separated Workflows**: Independent article and comment processing for better reliability
-- **Advanced Media Handling**: Downloads and embeds images (always), plus PDFs, audio, video with --media flag
-- **Privacy-Compliant Comments**: User anonymization with profile link preservation
-- **Hybrid Architecture**: 94.6% code reduction with config-driven + custom source support
-- **Professional Output**: Structured folder hierarchy with date-based organization
-- **Cross-Platform Compatibility**: Works reliably on Windows, macOS, and Linux
-- **Parallel Processing**: Up to 8 concurrent workers for improved performance
-- **HTML Generation**: Professional templates with consistent navigation
+**Share Articles That Never Break**: Every archived article is a complete, standalone HTML file with all styles and scripts embedded. Send to anyone, open anywhere, years later - it just works.
 
-## Privacy & Ethics
+**Two Ways to Use**:
+- **Interactive Menu** (`./capcat catch`) - Visual interface for browsing sources and bundles
+- **Command Line** - Fast automation for power users
 
-**Capcat respects user privacy and follows ethical data practices:**
+**Curated Bundles**: Pre-configured collections like Tech, AI, Science, News - fetch multiple related sources at once.
 
-- **No Personal Data Collection**: Usernames are anonymized as "Anonymous" in all comment sections
-- **Profile Link Preservation**: Original profile links to source websites are preserved for reference
-- **Legal Compliance**: Meets privacy requirements by not storing personal identifying information
-- **Transparency**: Only publicly available article content is archived, no private data harvesting
-- **Source Attribution**: All content properly attributed to original sources with functioning links
+## Quick Start
 
-## Advanced Content Processing
+### Interactive Mode (Recommended)
 
-### Fallback Image Detection System
-
-**Automatic Smart Recovery**: When the primary content extraction finds few images, Capcat automatically activates a comprehensive fallback system that:
-
-- **Scans Full Pages**: Analyzes entire original HTML before filtering
-- **Intelligent Filtering**: Removes UI elements (logos, ads, navigation) using 50+ patterns
-- **Size Filtering**: Skips small images (< 150px) likely to be icons or decorative
-- **Duplicate Prevention**: Avoids re-downloading existing images
-- **Seamless Integration**: Adds found images as "Additional Images" section
-
-**Example Output**:
-```markdown
-# Article Title
-
-Original article content...
-
-## Additional Images
-
-*The following images were found using comprehensive page scanning:*
-
-![Additional Image 1](images/content-image1.jpg)
-![Additional Image 2](images/content-image2.png)
+```bash
+./capcat catch
 ```
 
-### Separated Article and Comment Workflows
+Choose from:
+- **Fetch by Source** - Browse 17 news sources (Hacker News, BBC, IEEE, Nature, etc.)
+- **Fetch by Bundle** - Curated collections (Tech, AI, Science, News, Sports)
+- **Single Article** - Archive any URL instantly
+- **Source Management** - Add custom RSS/news sources
 
-**Clean Architecture**: Articles and comments are processed independently for better:
+### Command Line Mode
 
-- **Reliability**: Comment failures don't break article downloads
-- **Performance**: Parallel processing possible
-- **Maintainability**: Clear separation of concerns
-- **Error Isolation**: Each workflow handles its own error domain
+```bash
+# Fetch curated tech bundle (HN + Lobsters + InfoQ + IEEE)
+./capcat bundle tech --count 10
 
-**Benefits for Users**:
-- Articles always save successfully, even if comments fail
-- Faster processing through independent workflows
-- Better error messages and recovery
+# Fetch specific sources with media
+./capcat fetch hn,bbc --count 15 --media
 
-## Improved Directory Structure (UX Enhancement)
+# Archive a single article
+./capcat single https://example.com/article
 
-Starting with the latest version, Capcat now separates application code from user content for better organization:
-
-```
-/Application/                 # Application code and executable (this directory)
-  capcat.py                  # Main application
-  core/                        # Core modules
-  sources/                     # Source-specific modules
-  requirements.txt             # Dependencies
-  README.md                    # Documentation
-  
-/News/                        # User content (created when app runs)
-  news_02-09-2025/             # Date-stamped content folder
-    Hacker-News_02-09-2025/    # Hacker News articles
-    Lobsters_02-09-2025/       # Lobsters articles
-    InfoQ_02-09-2025/          # InfoQ articles
+# List all available sources
+./capcat list sources
 ```
 
-This separation means:
-1. Application updates won't interfere with your downloaded content
-2. Content is stored outside the application directory for cleaner organization
-3. You can easily backup or move your content separately from the application
+## Key Features
 
-## Project Structure
+### Self-Contained HTML for Easy Sharing
 
-- `capcat.py`: The main entry point for the application.
-- `cli.py`: Handles command-line argument parsing and user interaction.
-- `sources/`: Directory containing source-specific scanning logic.
-  - `hn.py`: Module for scanning Hacker News.
-  - `lb.py`: Module for scanning Lobsters.
-  - `iq.py`: Module for scanning InfoQ with enhanced features.
-- `core/`: Directory containing shared/core logic.
-  - `downloader.py`: Handles downloading articles, images, and other media.
-  - `formatter.py`: Converts HTML content to Markdown with enhanced cleanup.
-  - `utils.py`: Utility functions for file handling, URL processing, etc.
-  - `article_fetcher.py`: Base class for article fetching with shared functionality.
+Every article is a **complete, portable HTML file**:
+- **Embedded CSS** - All styles inline, no external stylesheets
+- **Embedded JavaScript** - Interactive features work offline
+- **Local Images** - Downloaded and stored with the article
+- **No Dependencies** - Open in any browser, share via email, archive forever
 
-## Dependencies
+**Perfect for**:
+- Email attachments that always look right
+- Long-term archiving without link rot
+- Offline reading on any device
+- Sharing articles that might disappear
 
-- Python 3.7+
-- `requests`
-- `beautifulsoup4`
-- `PyYAML`
+### Dual Interface
+
+**Interactive Menu** (`./capcat catch`):
+- Visual source selection
+- Bundle browsing
+- Progress tracking
+- Error handling with retries
+- No commands to memorize
+
+**Command Line**:
+- Fast automation and scripting
+- Batch processing
+- CI/CD integration
+- Power user workflows
+
+### Smart Content Extraction
+
+- **17+ News Sources** - HN, BBC, Guardian, Nature, IEEE, Scientific American, and more
+- **Intelligent Fallback** - Finds images even when primary extraction misses them
+- **Comment Preservation** - Captures discussions with privacy anonymization
+- **Media Handling** - Images always downloaded, video/audio/PDFs with `--media` flag
+
+### Bundle System
+
+Pre-configured topic collections:
+
+| Bundle | Sources | Description |
+|--------|---------|-------------|
+| `tech` | HN, Lobsters, InfoQ | General tech news |
+| `techpro` | HN, Lobsters, InfoQ, IEEE, Gizmodo, Futurism | Extended tech coverage |
+| `ai` | LessWrong, Google AI, OpenAI, MIT News | AI research and developments |
+| `science` | Nature, Scientific American | Scientific publications |
+| `news` | BBC, Guardian | General news |
+| `sports` | BBC Sport | Sports coverage |
+
+Add your own bundles in `sources/active/bundles.yml`.
 
 ## Installation
 
-1. Clone or download this repository.
-2. Install the required dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-## Usage
+### Quick Setup
 
 ```bash
-python capcat.py --help
+# Clone the repository
+git clone https://github.com/stayukasabov/capcat.git
+cd capcat/Application
+
+# Auto-fix dependencies (recommended)
+./scripts/fix_dependencies.sh
+
+# Or manual setup
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
 ```
 
-To scan articles:
+### First Run
 
 ```bash
-# Scan top 30 from all sources (Hacker News, Lobsters, and InfoQ)
-python capcat.py
+# Launch interactive menu
+./capcat catch
 
-# Scan top 10 from Hacker News only
-python capcat.py --source hn --count 10
-
-# Scan from Lobsters only, output to a specific directory
-python capcat.py --source lb -o /path/to/output
-
-# Scan from InfoQ only
-python capcat.py --source iq --count 15
-
-# Scan top 20 from all sources
-python capcat.py --count 20
-
-# Scan from specific sources using direct flags
-python capcat.py --hn --lb --count 10
-python capcat.py --iq --count 5
+# Or try a quick fetch
+./capcat fetch hn --count 5
 ```
-
-## Enhanced InfoQ Support
-
-The InfoQ source module has been enhanced with several improvements:
-
-1. **Better Article Scanning**: Uses more specific selectors to accurately target InfoQ articles
-2. **Enhanced Metadata Extraction**: Improved extraction of author information and publication dates
-3. **Audio Content Detection**: Better detection and handling of InfoQ's audio versions of articles
-4. **Improved Media Processing**: Enhanced downloading and organization of images and other media
-5. **Content Cleanup**: Better removal of tracking elements and branding content
 
 ## Output Structure
 
-The tool creates a folder structure like this:
-
+### Batch Mode (fetch/bundle)
 ```
-news_DD-MM-YYYY/
-├── Hacker-News_DD-MM-YYYY/ (if Hacker News is fetched)
-│   ├── 01_Article_Title_1/
+../News/news_31-12-2025/
+├── Hacker-News_31-12-2025/
+│   ├── 01_Article_Title/
 │   │   ├── article.md
-│   │   ├── comments.md
+│   │   ├── html/
+│   │   │   └── article.html    # Self-contained HTML with embedded CSS/JS
 │   │   ├── images/
-│   │   │   ├── image1.jpg
-│   │   │   └── image2.png
-│   │   └── files/
-│   │       └── document1.pdf
-│   └── ...
-├── lb_DD-MM-YYYY/ (if Lobsters is fetched)
-│   ├── 01_Article_Title_1/
-│   │   ├── article.md
-│   │   ├── comments.md
-│   │   ├── images/
-│   │   │   ├── image1.jpg
-│   │   │   └── image2.png
-│   │   └── files/
-│   │       └── document1.pdf
-│   └── ...
-├── iq_DD-MM-YYYY/ (if InfoQ is fetched)
-│   ├── 01_Article_Title_1/
-│   │   ├── article.md
-│   │   ├── images/
-│   │   │   ├── image1.jpg
-│   │   │   └── image2.png
-│   │   ├── audio/
-│   │   │   └── audio1.mp3 (if audio version available)
-│   │   └── files/
-│   │       └── document1.pdf
-│   └── ...
+│   │   │   ├── content1.jpg
+│   │   │   └── content2.png
+│   │   └── comments.md
+│   └── 02_Another_Article/
+└── BBC_31-12-2025/
+    └── ...
 ```
 
-## Testing
+### Single Article Mode
+```
+../Capcats/cc_31-12-2025-Article-Title/
+├── article.md
+├── html/
+│   └── article.html    # Complete standalone file
+└── images/
+    └── ...
+```
 
-The application includes comprehensive tests to ensure functionality:
+## Privacy & Ethics
+
+**Privacy-First Design**:
+- Usernames anonymized as "Anonymous" in comments
+- Profile links preserved for reference
+- No personal data collection or storage
+- Only public content archived
+
+**Ethical Scraping**:
+- Respects robots.txt
+- Rate limiting (1 request per 10 seconds)
+- Prefers RSS/APIs over HTML scraping
+- No paywall circumvention
+- Proper source attribution
+
+## Advanced Usage
+
+### Add Custom Sources
 
 ```bash
-# Run all tests
-python test_capcat.py
-python test_article_structure.py
-python test_audio_video.py
-python test_infoq.py
-python test_enhanced_infoq.py
-python test_enhanced_formatter.py
+# Interactive source addition
+./capcat add-source --url https://example.com/rss
 
-# Run specific test
-python test_infoq.py  # Tests InfoQ-specific functionality
+# Or edit configuration
+nano sources/active/config_driven/configs/newsource.yaml
 ```
 
-## Configuration
+### Configuration Priority
 
-Capcat can be configured through:
-1. Command-line arguments
-2. Environment variables
-3. Configuration files (YAML or JSON)
+1. CLI arguments → 2. Environment variables → 3. `capcat.yml` → 4. Defaults
 
-Example configuration file (capcat.yml):
+Example `capcat.yml`:
 ```yaml
-network:
-  connect_timeout: 10
-  read_timeout: 8
-  user_agent: "Mozilla/5.0 (compatible; Capcat/1.0)"
-  
-processing:
-  max_workers: 8
-  download_images: true
-  download_videos: true
-  download_audio: true
-  download_documents: true
-  
-logging:
-  default_level: "INFO"
-  use_colors: true
+output_base_dir: "../MyNews"
+max_workers: 8
+download_media: true
 ```
 
-Environment variables:
+### Automation
+
 ```bash
-export CAPCAT_MAX_WORKERS=10
-export CAPCAT_DOWNLOAD_IMAGES=true
-export CAPCAT_USER_AGENT="Custom User Agent"
+# Daily tech news cron job
+0 9 * * * cd /path/to/capcat && ./capcat bundle tech --count 20
+
+# Weekly science digest
+0 10 * * 0 cd /path/to/capcat && ./capcat bundle science --count 30 --media
 ```
+
+## Available Sources
+
+**Tech**: Hacker News, Lobsters, InfoQ, IEEE Spectrum, Gizmodo, Futurism
+
+**AI**: LessWrong, Google AI Blog, OpenAI Blog, MIT News
+
+**News**: BBC, The Guardian
+
+**Science**: Nature, Scientific American
+
+**Sports**: BBC Sport
+
+**See all**: `./capcat list sources`
+
+## Documentation
+
+Full documentation at [capcat.org](https://capcat.org):
+- [Quick Start Guide](https://capcat.org/docs/quick-start.html)
+- [Architecture Overview](https://capcat.org/docs/architecture.html)
+- [Source Development](https://capcat.org/docs/source-development.html)
+- [Interactive Mode](https://capcat.org/docs/interactive-mode.html)
+
+## Requirements
+
+- Python 3.8+
+- Internet connection
+- ~50MB disk space for application
+- Additional space for archived content
+
+## Troubleshooting
+
+**Dependencies issues?**
+```bash
+./scripts/fix_dependencies.sh --force
+```
+
+**Module not found?**
+```bash
+./capcat list sources  # Wrapper handles venv activation
+```
+
+**Source failing?**
+- Check `test-diagnose-*.md` reports
+- Many sources use RSS to bypass anti-bot measures
+- Run `./capcat catch` and try individual sources
+
+## Contributing
+
+Contributions welcome! See [CONTRIBUTING.md](https://github.com/stayukasabov/capcat/blob/main/.github/CONTRIBUTING.md)
+
+## License
+
+MIT License - See [LICENSE.txt](LICENSE.txt)
+
+## Links
+
+- **Website**: [capcat.org](https://capcat.org)
+- **Repository**: [github.com/stayukasabov/capcat](https://github.com/stayukasabov/capcat)
+- **Issues**: [github.com/stayukasabov/capcat/issues](https://github.com/stayukasabov/capcat/issues)
+- **Case Study**: [stayux.substack.com](https://stayux.substack.com)
+
+---
+
+**Archive with confidence. Share without limits.**
