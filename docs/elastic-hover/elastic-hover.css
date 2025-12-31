@@ -1,0 +1,39 @@
+body{
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  justify-content: center;
+  align-items: center;
+  background: url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/127738/unsplahBg2.jpg) no-repeat center / cover;
+}
+ul{
+  padding: 0;
+}
+li{
+  display: inline-block;
+  list-style-type: none;
+  margin: 0 20px;
+  &:nth-child(1) button {
+	background: #F3FFBD;
+  }
+  &:nth-child(2) button {
+	background: #247BA0;
+  }
+  &:nth-child(3) button {
+	background: #FF1654;
+  }
+}
+button {
+  position: relative;
+  background: rebeccapurple;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  border:5px solid white;
+  color: white;
+  font-family: Verdana;
+  font-weight: bold;
+  font-size: 50px;
+  cursor: pointer;
+  padding: 0;
+}
