@@ -17,15 +17,6 @@ exclude:
 include:
   - _includes
 
-# Markdown settings
-markdown: kramdown
-kramdown:
-  input: GFM
-  syntax_highlighter: rouge
-
-# Permalink structure
-permalink: pretty
-
 # Build settings
 plugins: []
 theme: null
