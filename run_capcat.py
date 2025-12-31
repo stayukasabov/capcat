@@ -314,7 +314,8 @@ class CapcatWrapperRefactored:
     def _should_show_success_message(self, args: List[str]) -> bool:
         """Determine if success message should be shown.
 
-        Suppresses success message for help/version/list commands.
+        Suppresses success message for help/version/list commands and
+        detects when help was triggered by flag syntax errors.
 
         Args:
             args: Command line arguments
@@ -323,8 +324,72 @@ class CapcatWrapperRefactored:
             True if success message appropriate, False otherwise
         """
         help_flags = ["--help", "-h", "--version", "-v", "list"]
-        return (not any(arg in help_flags for arg in args) and
-                len(args) > 0)
+
+        # Check for explicit help/version flags
+        if any(arg in help_flags for arg in args):
+            return False
+
+        # Check for common flag mistakes that trigger help accidentally
+        problematic_flags = ["-html", "-verbose", "-count", "-media", "-output", "-update", "-quiet"]
+        detected_issues = [flag for flag in problematic_flags if flag in args]
+
+        if detected_issues:
+            # Help was likely triggered by syntax error, don't show success
+            self._show_intelligent_help(args, detected_issues)
+            return False
+
+        return len(args) > 0
+
+    def _show_intelligent_help(self, args: List[str], detected_issues: List[str]):
+        """Show intelligent help when flag syntax errors are detected.
+
+        Args:
+            args: Original command line arguments
+            detected_issues: List of problematic flags detected
+        """
+        print("\nCommand Error: Flag syntax issues detected", file=sys.stderr)
+
+        # Show specific corrections
+        corrections = {
+            '-html': '--html',
+            '-verbose': '--verbose',
+            '-count': '--count',
+            '-media': '--media',
+            '-output': '--output',
+            '-update': '--update',
+            '-quiet': '--quiet'
+        }
+
+        print("\nDetected issues and corrections:", file=sys.stderr)
+        for issue in detected_issues:
+            if issue in corrections:
+                print(f"  - '{issue}' should be '{corrections[issue]}'", file=sys.stderr)
+
+        # Auto-correct and show suggestion
+        corrected_args = []
+        for arg in args:
+            corrected_args.append(corrections.get(arg, arg))
+
+        original_cmd = " ".join(["./capcat"] + args)
+        corrected_cmd = " ".join(["./capcat"] + corrected_args)
+
+        print(f"\nSuggested command:", file=sys.stderr)
+        print(f"  {corrected_cmd}", file=sys.stderr)
+
+        # Show context-specific help
+        command_type = args[0] if args else None
+        if command_type in ['fetch', 'bundle', 'single']:
+            print(f"\nQuick help for '{command_type}' command:", file=sys.stderr)
+            if command_type == 'fetch':
+                print("  ./capcat fetch <sources> --html --count 10", file=sys.stderr)
+                print("  ./capcat fetch hn --verbose --media", file=sys.stderr)
+            elif command_type == 'bundle':
+                print("  ./capcat bundle tech --html --count 15", file=sys.stderr)
+                print("  ./capcat bundle news --verbose", file=sys.stderr)
+            elif command_type == 'single':
+                print("  ./capcat single <URL> --html --media", file=sys.stderr)
+
+        print(f"\nUse './capcat {command_type} --help' for all options", file=sys.stderr)
 
     def execute_capcat(self, args: List[str]) -> int:
         """Execute capcat.py with comprehensive error handling.
