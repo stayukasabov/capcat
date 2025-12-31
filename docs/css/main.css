@@ -170,7 +170,7 @@ hr {
   position: sticky;
   top: 0;
   z-index: var(--z-sticky);
-  background-color: rgba(250, 245, 238, 0.75); 
+  background-color: rgba(250, 245, 238, 0.75);
   backdrop-filter: blur(8px);
   transition: background 1s ease, box-shadow 0.3s ease;
 }
@@ -331,7 +331,7 @@ transition: background 1s ease, box-shadow 0.3s ease;
 }
 
 .hero h1 {
-  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-size: clamp(1.6rem, 5vw, 2.2rem);
   margin-bottom: var(--space-md);
   font-weight: var(--font-weight-light);
 }
@@ -1260,7 +1260,7 @@ transition: background 1s ease, box-shadow 0.3s ease;
   .footer-column {
     text-align: center;
   }
-  
+
   .feature-cat {
     margin: 0 auto;
     font-size: 2.5rem;
@@ -1301,7 +1301,7 @@ transition: background 1s ease, box-shadow 0.3s ease;
   .hero-subtitle {
     font-size: 0.95rem;
   }
-  
+
   /* Buttons full width */
   .btn-primary,
   .btn-secondary,
