@@ -60,8 +60,8 @@ def build_site():
             original = content
 
             # First, replace old header HTML with Jekyll include syntax
-            # Pattern: <!-- Header --> followed by <header...>...</header>
-            header_pattern = r'<!-- Header -->\s*<header class="site-header">.*?</header>\s*'
+            # Pattern: <header class="site-header">...</header>
+            header_pattern = r'<header class="site-header">.*?</header>\s*'
             content = re.sub(header_pattern, '{% include header.html %}\n\n', content, flags=re.DOTALL)
 
             # Replace old footer HTML with Jekyll include syntax
