@@ -1,0 +1,73 @@
+# IEEE Spectrum Configuration
+source_id: "ieee"
+name: "IEEE Spectrum"
+display_name: "IEEE Spectrum"
+category: tech
+
+# URL configuration
+base_url: https://spectrum.ieee.org
+rss_url: https://spectrum.ieee.org/feeds/feed.rss
+
+# Discovery method - use RSS
+discovery:
+  method: "rss"
+  rss_url: "https://spectrum.ieee.org/feeds/feed.rss"
+  max_articles: 30
+
+# Article selectors (fallback for HTML, not used when RSS is active)
+article_selectors:
+- article h1 a
+- .entry-title a
+- .post-title a
+
+# Content extraction selectors
+content_selectors:
+- .entry-content
+- .post-content
+- main article
+- .article-content
+- article
+
+# Template configuration
+template:
+  variant: article-no-comments
+  navigation:
+    show_breadcrumb: true
+    show_source_link: true
+
+# Request configuration
+timeout: 30
+rate_limit: 1.0
+
+# Skip patterns - URLs to avoid
+skip_patterns:
+- /subscribe
+- /login
+- /register
+- /podcast
+- /video
+- /type/
+- /topic/
+- /collections/
+- /magazine/
+- /customfeeds/
+- /feed/
+- /rss
+- utoronto.ca
+- "#comments"
+
+supports_comments: false
+
+# Image processing configuration
+image_processing:
+  selectors:
+    - "article img"
+    - "figure img"
+    - "picture img"
+    - ".article-body img"
+    - "main img"
+  skip_selectors:
+    - "nav img"
+    - "header img"
+    - "footer img"
+    - ".sidebar img"
