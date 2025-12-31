@@ -17,6 +17,7 @@ from core.source_system.source_registry import get_source_registry
 from core.logging_config import get_logger
 import yaml
 from pathlib import Path
+from __version__ import __version__
 
 # New imports for the add-source command
 from core.source_system.rss_feed_introspector import RssFeedIntrospector
@@ -535,7 +536,7 @@ For detailed help on any subcommand: capcat <command> --help
     
     # Global options
     parser.add_argument(
-        '--version', '-v', action='version', version='Capcat v2.0.0'
+        '--version', '-v', action='version', version=f'Capcat v{__version__}'
     )
     parser.add_argument(
         '--verbose', '-V', action='store_true',
