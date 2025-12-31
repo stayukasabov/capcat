@@ -1,0 +1,48 @@
+bundles:
+  tech:
+    description: "Consumer technology news sources"
+    sources:
+    - ieee
+    - mashable
+    default_count: 30
+
+  techpro:
+    description: "Professional developer news sources"
+    sources:
+    - hn
+    - lb
+    - iq
+    default_count: 30
+
+  news:
+    description: "General news sources"
+    sources:
+    - bbc
+    - guardian
+    default_count: 25
+
+  science:
+    description: "Science and research sources"
+    sources:
+    - nature
+    - scientificamerican
+    default_count: 20
+
+
+  ai:
+    description: "AI, Machine Learning, and Rationality sources"
+    sources:
+    - mitnews
+    - google-reserch
+    default_count: 20
+
+  sports:
+    description: "World sports news sources"
+    sources:
+    - bbcsport
+    default_count: 25
+
+  all:
+    description: "All available sources"
+    sources: []  # Will be populated dynamically
+    default_count: 10

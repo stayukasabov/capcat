@@ -1,0 +1,110 @@
+# Substack.com Specialized Source Configuration
+# Automatically activated for Substack URLs with paywall detection
+
+source_id: "substack"
+name: "Substack"
+display_name: "Substack.com"
+type: "specialized"
+
+# URL pattern matching for automatic activation
+url_patterns:
+  - "*.substack.com"
+  - "substack.com"
+  - "/p/*"
+  - "/archive"
+
+# Specialized configuration for Substack
+timeout: 30
+headers:
+  User-Agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+
+# Content extraction selectors optimized for Substack
+content_selectors:
+  - ".post-content"
+  - ".available-content"
+  - '[class*="post-content"]'
+  - ".body"
+  - "article"
+  - ".prose"
+  - "main"
+
+title_selectors:
+  - ".post-title"
+  - "h1.post-title"
+  - ".single-post-title"
+  - "h1"
+
+author_selectors:
+  - ".author-name"
+  - ".byline-names"
+  - ".author"
+  - '[rel="author"]'
+  - ".post-author"
+
+date_selectors:
+  - ".post-date"
+  - "time"
+  - ".published-date"
+  - ".post-meta time"
+
+# Image handling optimized for Substack
+image_selectors:
+  - ".post-content img"
+  - ".available-content img"
+  - "figure img"
+  - 'img[src*="substack"]'
+  - "img"
+
+# Paywall detection configuration
+paywall:
+  enabled: true
+  indicators:
+    - "paywall"
+    - "subscriber-only"
+    - "paid-subscription"
+    - "premium-content"
+    - "subscribe-to-continue"
+    - "login-to-continue"
+    - "upgrade to paid"
+    - "become a paid subscriber"
+    - "subscriber exclusive"
+  element_selectors:
+    - ".paywall"
+    - ".subscriber-only"
+    - ".paid-content"
+    - '[data-paywall]'
+    - ".premium-content"
+
+# Skip patterns for URLs to avoid
+skip_patterns:
+  - "/subscribe"
+  - "/account/login"
+  - "/sign-in"
+  - "paywall"
+  - "subscriber-only"
+
+# RSS feed discovery for supported Substacks
+rss:
+  enabled: true
+  feed_path: "/feed"
+  discovery_timeout: 10
+
+# Media handling
+media:
+  download_images: true
+  download_videos: true
+  download_audio: true
+  image_quality: "high"
+
+# Output formatting
+formatting:
+  optimize_for_substack: true
+  preserve_formatting: true
+  remove_subscription_callouts: true
+  clean_footer_patterns: true
+
+# Privacy compliance
+privacy:
+  anonymize_authors: false  # Keep Substack author attribution
+  preserve_links: true
+  preserve_substack_branding: true

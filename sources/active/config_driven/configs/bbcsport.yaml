@@ -1,0 +1,70 @@
+# BBC Sport Configuration
+source_id: "bbcsport"
+name: "BBC Sport"
+display_name: "BBC Sport"
+category: sports
+
+# URL configuration
+base_url: https://www.bbc.com/sport
+
+# Discovery method - RSS feed
+discovery:
+  method: "rss"
+  rss_url: "http://feeds.bbci.co.uk/sport/rss.xml"
+  max_articles: 30
+
+# Article selectors (fallback if RSS fails)
+article_selectors:
+- a[data-testid="internal-link"][href*="/sport/"]
+- a[href*="/sport/"]
+- h2 a[href*="/sport/"]
+- h3 a[href*="/sport/"]
+
+# Content extraction selectors
+content_selectors:
+- '[data-component="text-block"]'
+- article
+- .article-body
+- .post-content
+- main
+
+# Template configuration
+template:
+  variant: article-no-comments
+  navigation:
+    show_breadcrumb: true
+    show_source_link: true
+
+# Request configuration
+timeout: 10
+rate_limit: 1.0
+
+# Skip patterns - URLs to avoid
+skip_patterns:
+- /live
+- /video
+- /av/
+- /iplayer
+
+supports_comments: false
+
+# Image processing configuration
+image_processing:
+  selectors:
+    - "article img"
+    - 'img[data-component="image-block"]'
+    - "figure img"
+    - "picture img"
+    - ".ssrcss-evoj7m-Image img"
+
+  url_patterns:
+    - "bbc.com"
+    - "bbc.co.uk"
+    - "ichef.bbci.co.uk"
+
+  allow_extensionless: true
+
+  skip_selectors:
+    - "nav img"
+    - ".gs-c-promo-logo img"
+    - ".icon img"

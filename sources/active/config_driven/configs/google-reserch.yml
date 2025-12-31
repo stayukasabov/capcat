@@ -1,0 +1,12 @@
+display_name: The latest research from Google
+base_url: https://research.google/blog/
+category: ai
+discovery:
+  method: rss
+  rss_url: https://research.google/blog/rss/
+article_selectors:
+- summary
+content_selectors:
+- summary
+author_selectors: []
+publish_date_selectors: []

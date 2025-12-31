@@ -1,0 +1,67 @@
+# Hugging Face Brings Open-Source LLMs to GitHub Copilot Chat in VS Code - InfoQ
+
+**Source URL:** [https://www.infoq.com/news/2025/09/hugging-face-vscode/](https://www.infoq.com/news/2025/09/hugging-face-vscode/)
+
+---
+
+🎧 Audio content available in the original article.
+
+🎧 Audio content available in the original article.
+
+- [Reading list](https://www.infoq.com/showbookmarks.action)
+Hugging Face has introduced a [new integration](https://huggingface.co/docs/inference-providers/en/guides/vscode) that allows developers to connect Inference Providers directly with GitHub Copilot Chat in Visual Studio Code. The update means that open-source large language models — including Kimi K2, DeepSeek V3.1, GLM 4.5, and others — can now be accessed and tested from inside the VS Code editor, without the need to switch platforms or juggle multiple tools.
+
+The workflow is designed to be simple. Developers install the Hugging Face Copilot Chat extension, open VS Code’s chat interface, select the Hugging Face provider, enter their Hugging Face token, and then add the models they want to use. Once connected, they can seamlessly switch between providers and models using the familiar model picker interface.
+
+One practical note quickly surfaced in community discussions: the feature requires an up-to-date version of the editor. As AI researcher Aditya Wresniyandaka [www.linkedin.com (full URL)](https://www.linkedin.com/feed/update/urn:li:activity:7371970243478446081?commentUrn=urn:li:comment:(activity:7371970243478446081,7372106639098728448)&dashCommentUrn=urn:li:fsd_comment:(7372106639098728448,urn:li:activity:7371970243478446081)) on LinkedIn:
+
+> The document forgot to mention you need VS Code August 2025 version 1.104.0
+
+GitHub Copilot Chat has traditionally relied on a closed set of proprietary models. By linking it with Hugging Face’s network of Inference Providers, developers gain access to a much broader set of AI tools, including experimental and highly specialized open models.
+
+Muhammad Arshad Iqbal [www.linkedin.com (full URL)](https://www.linkedin.com/feed/update/urn:li:activity:7371970243478446081?commentUrn=urn:li:comment:(activity:7371970243478446081,7372164717374689280)&dashCommentUrn=urn:li:fsd_comment:(7372164717374689280,urn:li:activity:7371970243478446081)) the move, noting:
+
+> Oh, this is so cool! Now we can use all those powerful open-source coding AIs right inside VS Code. No more switching tabs just to test a model like Qwen3-Coder.
+
+This integration opens the door for developers to use Copilot Chat with models optimized for particular programming tasks, industries, or research domains, rather than being limited to the defaults. The update is powered by Hugging Face Inference Providers, a service that gives developers access to hundreds of machine learning models through a single API.
+
+The key value proposition is unification: instead of juggling multiple APIs with different reliability guarantees, developers can query models across providers through one consistent interface. Hugging Face emphasizes several benefits:
+
+ - Instant access to cutting-edge models, beyond what a single vendor catalog could offer.
+ - Zero vendor lock-in, since developers can switch between providers with minimal code changes.
+ - Production-ready performance, with high availability and low-latency inference.
+ - Developer-friendly integration, including drop-in compatibility with the OpenAI chat completions API and client SDKs for Python and JavaScript.
+Hugging Face has structured the integration for accessibility. There is a free tier of monthly inference credits to experiment with, while Pro, Team, and Enterprise plans provide additional capacity and pay-as-you-go pricing. According to Hugging Face, what developers pay is exactly what the providers charge — with no markup added.
+
+### Rate this Article
+
+Adoption
+Style
+
+Author Contacted
+#### This content is in the [AI, ML & Data Engineering](https://www.infoq.com/ai-ml-data-eng/) topic
+
+##### Related Topics:
+
+ - [AI, ML & Data Engineering](https://www.infoq.com/ai-ml-data-eng/)
+ - [Open Source](https://www.infoq.com/opensource/)
+ - [Large language models](https://www.infoq.com/llms/)
+ - [Visual Studio Code](https://www.infoq.com/Visual_Studio_Code/)
+ - [github](https://www.infoq.com/github/)
+
+## Additional Images
+
+*The following images were found using comprehensive page scanning:*
+
+![Fallback Image 1](images/ramya-krishnamoorthy-thumbnail-1756891897399.jpg)
+
+![Fallback Image 2](images/engineering-culture-podcast-thumbnail-1757933376136.jpg)
+
+![Fallback Image 3](images/eyJidWNrZXQiOiAiYXNzZXRzLmluZm9xLmNvbSIsImtleSI6ICJ3ZWIvaGVhZGVyL2NvbmZlcmVuY2VzLzIwMjUvSURTLU11bmljaC10b3AuanBnIiwiZWRpdHMiOiB7ImpwZWciOiB7ICJxdWFsaXR5Ijo4MH19fQ==)
+
+![Fallback Image 4](images/eyJidWNrZXQiOiAiYXNzZXRzLmluZm9xLmNvbSIsImtleSI6ICJ3ZWIvaGVhZGVyL2NvbmZlcmVuY2VzLzIwMjUvU0YtdG9wLmpwZyIsImVkaXRzIjogeyJqcGVnIjogeyAicXVhbGl0eSI6ODB9fX0=)
+
+![Fallback Image 5](images/eyJidWNrZXQiOiAiYXNzZXRzLmluZm9xLmNvbSIsImtleSI6ICJ3ZWIvaGVhZGVyL2NvbmZlcmVuY2VzLzIwMjUvUUNvbi1BSS5qcGciLCJlZGl0cyI6IHsianBlZyI6IHsgInF1YWxpdHkiOjgwfX19)
+
+![Fallback Image 6](images/eyJidWNrZXQiOiAiYXNzZXRzLmluZm9xLmNvbSIsImtleSI6ICJ3ZWIvaGVhZGVyL2NvbmZlcmVuY2VzLzIwMjYvUUNvbi1Mb25kb24tMjAyNi10b3AuanBnIiwiZWRpdHMiOiB7ImpwZWciOiB7ICJxdWFsaXR5Ijo4MH19fQ==)
+

@@ -1,0 +1,298 @@
+# HTML Generation Configuration Schema
+# This file defines the standardized YAML schema for source-specific HTML generation configurations.
+# All sources must conform to this schema for consistency and validation.
+
+# Schema Version: 1.0
+# Format: JSON Schema expressed in YAML for validation
+
+$schema: "http://json-schema.org/draft-07/schema#"
+title: "HTML Generator Source Configuration"
+description: "Configuration schema for source-specific HTML generation in the compartmentalized htmlgen system"
+type: "object"
+
+required:
+  - source_id
+  - display_name
+  - comments
+  - navigation
+  - layout
+  - directory_patterns
+
+properties:
+  # Source Identity
+  source_id:
+    type: "string"
+    pattern: "^[a-z][a-z0-9_]*$"
+    description: "Unique identifier for the source (lowercase, alphanumeric + underscore)"
+    examples: ["hn", "lesswrong", "bbc", "nature"]
+
+  display_name:
+    type: "string"
+    minLength: 1
+    maxLength: 50
+    description: "Human-readable name for display in UI"
+    examples: ["Hacker News", "LessWrong", "BBC News", "Nature"]
+
+  # Comment Configuration
+  comments:
+    type: "object"
+    required: ["enabled", "conditional_display", "no_comments_message"]
+    properties:
+      enabled:
+        type: "boolean"
+        description: "Whether this source supports comments"
+        default: true
+
+      pattern:
+        type: "string"
+        description: "Regex pattern to match comment entries (required if enabled=true)"
+        examples:
+          - '\*\*[^*]+\*\*\s*\(\[profile\]\([^)]*\)\)'  # HN/Lobsters format
+          - '\*\*[^*]+\*\*\s*\(<a[^>]*>profile</a>\)'    # LessWrong format
+
+      conditional_display:
+        type: "boolean"
+        description: "Only show comment links when comments exist (true for HN/Lobsters/LessWrong)"
+        default: false
+
+      no_comments_message:
+        type: "string"
+        description: "Message to display when no comments are found"
+        default: "No comments found for this article at the moment."
+
+      count_threshold:
+        type: "integer"
+        minimum: 0
+        description: "Minimum comment count to display link (only applies if conditional_display=true)"
+        default: 1
+
+    # Conditional validation: pattern required if enabled=true
+    if:
+      properties:
+        enabled:
+          const: true
+    then:
+      required: ["pattern"]
+
+  # Navigation Configuration
+  navigation:
+    type: "object"
+    required: ["breadcrumb_style", "show_source_link", "date_format"]
+    properties:
+      breadcrumb_style:
+        type: "string"
+        enum: ["technical", "academic", "news", "science", "business"]
+        description: "Style variant for breadcrumb navigation"
+        default: "technical"
+
+      show_source_link:
+        type: "boolean"
+        description: "Include link to original source in navigation"
+        default: true
+
+      date_format:
+        type: "string"
+        enum: ["YYYY-MM-DD", "DD MMM YYYY", "MM/DD/YYYY", "DD/MM/YYYY"]
+        description: "Date format preference for display"
+        default: "YYYY-MM-DD"
+
+      back_to_news_text:
+        type: "string"
+        description: "Custom text for 'Back to News' navigation link"
+        default: "Back to News"
+
+      view_comments_text:
+        type: "string"
+        description: "Custom text for 'View Comments' navigation link"
+        default: "View Comments"
+
+      back_to_article_text:
+        type: "string"
+        description: "Custom text for 'Back to Article' navigation link"
+        default: "Back to Article"
+
+  # Layout Configuration
+  layout:
+    type: "object"
+    required: ["template_set"]
+    properties:
+      template_set:
+        type: "string"
+        enum: ["base", "custom"]
+        description: "Whether to use base templates or custom templates"
+        default: "base"
+
+      custom_css_classes:
+        type: "array"
+        items:
+          type: "string"
+          pattern: "^[a-z][a-z0-9-]*$"
+        description: "Additional CSS classes to apply to body element"
+        examples: [["hn-style", "tech-focused"], ["academic", "science-journal"]]
+
+      article_template:
+        type: "string"
+        description: "Custom article template name (only used if template_set=custom)"
+        examples: ["academic-article.html", "news-article.html"]
+
+      comments_template:
+        type: "string"
+        description: "Custom comments template name (only used if template_set=custom)"
+        examples: ["threaded-comments.html", "flat-comments.html"]
+
+      news_template:
+        type: "string"
+        description: "Custom news listing template name (only used if template_set=custom)"
+        examples: ["journal-listing.html", "magazine-grid.html"]
+
+  # Directory Pattern Matching
+  directory_patterns:
+    type: "array"
+    minItems: 1
+    items:
+      type: "string"
+      minLength: 1
+    description: "Directory name patterns that identify this source"
+    examples:
+      - ["hacker-news", "hn_", "Hacker-News"]
+      - ["lesswrong", "LessWrong"]
+      - ["bbc", "BBC-News"]
+
+  # Bundle Configuration
+  bundle:
+    type: "object"
+    properties:
+      category:
+        type: "string"
+        enum: ["tech", "news", "business", "science", "aggregators", "other"]
+        description: "Bundle category for this source"
+        default: "other"
+
+      priority:
+        type: "integer"
+        minimum: 1
+        maximum: 100
+        description: "Sort priority within bundle (lower numbers = higher priority)"
+        default: 50
+
+      display_order:
+        type: "integer"
+        minimum: 1
+        description: "Custom display order override (optional)"
+
+  # Metadata Configuration
+  meta:
+    type: "object"
+    properties:
+      description_source:
+        type: "string"
+        enum: ["first_paragraph", "excerpt", "summary", "none"]
+        description: "How to extract article description for meta tags"
+        default: "first_paragraph"
+
+      show_read_time:
+        type: "boolean"
+        description: "Display estimated reading time"
+        default: true
+
+      show_tags:
+        type: "boolean"
+        description: "Display article tags/categories"
+        default: false
+
+      show_publish_date:
+        type: "boolean"
+        description: "Display article publication date"
+        default: true
+
+      author_display:
+        type: "string"
+        enum: ["full", "username", "initials", "none"]
+        description: "How to display author information"
+        default: "username"
+
+      social_sharing:
+        type: "boolean"
+        description: "Include social media sharing buttons"
+        default: false
+
+  # Content Processing
+  content:
+    type: "object"
+    properties:
+      remove_ads:
+        type: "boolean"
+        description: "Attempt to remove advertisement content"
+        default: true
+
+      clean_tracking:
+        type: "boolean"
+        description: "Remove tracking scripts and pixels"
+        default: true
+
+      preserve_images:
+        type: "boolean"
+        description: "Download and preserve images locally"
+        default: true
+
+      image_optimization:
+        type: "string"
+        enum: ["none", "compress", "convert", "responsive"]
+        description: "Image optimization strategy"
+        default: "none"
+
+      code_highlighting:
+        type: "boolean"
+        description: "Enable syntax highlighting for code blocks"
+        default: true
+
+      math_rendering:
+        type: "boolean"
+        description: "Enable LaTeX/MathJax rendering (for academic sources)"
+        default: false
+
+  # Advanced Configuration
+  advanced:
+    type: "object"
+    properties:
+      custom_generators:
+        type: "array"
+        items:
+          type: "string"
+        description: "List of custom generator class names to use"
+
+      preprocessing_hooks:
+        type: "array"
+        items:
+          type: "string"
+        description: "Custom preprocessing functions to apply"
+
+      postprocessing_hooks:
+        type: "array"
+        items:
+          type: "string"
+        description: "Custom postprocessing functions to apply"
+
+      cache_strategy:
+        type: "string"
+        enum: ["none", "template", "content", "aggressive"]
+        description: "Caching strategy for this source"
+        default: "template"
+
+      rate_limiting:
+        type: "object"
+        properties:
+          enabled:
+            type: "boolean"
+            default: false
+          requests_per_minute:
+            type: "integer"
+            minimum: 1
+            maximum: 300
+            default: 60
+
+# Example configurations would go in individual source files:
+# htmlgen/hn/config.yaml
+# htmlgen/lesswrong/config.yaml
+# htmlgen/bbc/config.yaml
+# etc.

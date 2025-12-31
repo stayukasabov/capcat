@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CLI Commands Comprehensive Reference</title>
+    <link rel="stylesheet" href="../../css/design-system.css">
+    <link rel="stylesheet" href="../../css/main.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="site-header">
+        <div class="container">
+            <nav class="main-nav">
+                <div class="logo">
+                    <a href="../../index.html">
+                    <svg class="capcat-logo" width="100%" height="20" viewBox="0 0 120 36" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve">
+                        <g transform="matrix(1,0,0,1,-25136.8,-9036.29)">
+                                <g transform="matrix(0.101942,0,0,0.101942,24610.1,8883.85)">
+                                    <path d="M5599.61,1616.47L5599.66,1616.38C5600.74,1622.26 5601.26,1628.65 5601.26,1635.54L5601.26,1701.4C5601.26,1704.57 5601.56,1707.02 5602.09,1708.92L5601.99,1709.02C5606.21,1723.62 5624.36,1704.6 5624.36,1723.41C5624.36,1732.23 5605.56,1747.52 5583.16,1745.91C5582.93,1745.92 5582.7,1745.92 5582.45,1745.92C5578.93,1745.92 5575.11,1745.16 5571.38,1743.78L5571.37,1743.78C5562.39,1740.41 5553.95,1733.47 5551.49,1724.98C5536.46,1738.54 5514.52,1747.96 5493.82,1749L5493.73,1749.09C5492.48,1749.15 5491.23,1749.18 5489.99,1749.18C5466.27,1749.18 5447.99,1732.07 5447.99,1707.96C5447.99,1707.61 5447.99,1707.26 5448,1706.91L5448.23,1706.74C5448.87,1663.44 5484.29,1647.39 5521.6,1642.33L5521.63,1642.29C5532.57,1640.82 5543.67,1640.29 5554.1,1640.29L5554.1,1618.51C5554.1,1614.47 5553.49,1610.72 5552.38,1607.31L5552.54,1607.1C5547.59,1592.27 5533.06,1583.85 5517.44,1585.07C5508.88,1585.74 5494.66,1592.62 5505.38,1603.35C5516.1,1614.07 5494.65,1633.45 5472.47,1628.01L5472.43,1628C5466.37,1626.51 5462.02,1621.44 5462.02,1611.33C5462.02,1589.79 5483.29,1578.82 5504.14,1573.64C5516.57,1570.55 5528.85,1569.51 5536.38,1569.51C5552,1569.51 5564.61,1572.36 5574.41,1577.84L5574.36,1577.94C5588.16,1585.72 5596.37,1598.77 5599.61,1616.47C5598.61,1618.1 5597.66,1619.69 5596.93,1620.96C5596.39,1621.89 5595.88,1622.76 5595.39,1623.58C5595.9,1622.73 5596.43,1621.84 5596.98,1620.88C5597.7,1619.62 5598.63,1618.07 5599.61,1616.47ZM5554.15,1674.61L5554.09,1674.68C5553.99,1671.49 5553.36,1668.44 5551.52,1665.83L5551.5,1665.79L5551.41,1665.68L5551.39,1665.65C5547.85,1660.68 5541.66,1659.07 5535.57,1658.92C5519.57,1658.53 5497.94,1661.21 5492.01,1680.51C5489.72,1687.93 5489.87,1697.98 5495.19,1706.19L5495.18,1706.19L5495.24,1706.28L5495.31,1706.37L5495.31,1706.37C5501.3,1714.11 5510.73,1717.92 5518.49,1717.88C5519.81,1717.87 5521.1,1717.78 5522.36,1717.61L5522.43,1717.52C5542.01,1714.91 5552.76,1693.79 5553.66,1683.39C5553.9,1680.5 5554.24,1677.5 5554.15,1674.61ZM5655.48,1606.94C5650.11,1592.14 5633.8,1610.33 5633.8,1591.19C5633.8,1582.01 5651.19,1565.8 5674.8,1568.98C5683.29,1569.97 5689.56,1573.73 5694.16,1578.52C5699.61,1584.19 5702.74,1591.31 5704.51,1596.99C5706.26,1602.63 5706.67,1606.85 5706.67,1606.85L5707.45,1606.85C5712.89,1587.4 5739.72,1569.51 5765.78,1569.51C5773.42,1569.51 5780.44,1570.87 5786.81,1573.3C5802.54,1579.32 5814.35,1591.95 5821.87,1607.23C5828.22,1620.14 5831.5,1634.93 5831.5,1649.24C5831.5,1656.97 5830.87,1664.41 5829.67,1671.48C5821.72,1718.11 5788.62,1749.18 5744.39,1749.18C5742.93,1749.18 5741.48,1749.14 5740.03,1749.07C5729.11,1748.48 5718.34,1745.59 5706.67,1739.07L5706.67,1762.41L5706.76,1762.37L5706.76,1774.83C5706.76,1776.77 5706.82,1778.53 5706.95,1780.11C5709.18,1808.27 5730.12,1782.01 5730.12,1803.7C5730.12,1812.89 5712.73,1829.1 5689.13,1825.92C5681.05,1824.97 5674.98,1822.11 5670.43,1818.32C5658.92,1808.73 5657.17,1793.24 5657.26,1788.05C5657.29,1785.83 5657.08,1783.58 5657.17,1781.4L5657.17,1620.07C5657.17,1614.05 5656.53,1609.85 5655.48,1606.94ZM5758.32,1602.3C5755.39,1601.38 5752.14,1600.88 5748.55,1600.88C5721.72,1600.88 5707.31,1633 5707.31,1659.84C5707.31,1664.6 5706.87,1673.25 5707.53,1682.86C5708.48,1696.5 5711.63,1712.06 5721.4,1721.14C5726.51,1725.9 5733.44,1728.88 5742.81,1728.88C5769.07,1728.88 5780.31,1701.62 5783.58,1676.51C5784.33,1670.76 5784.66,1665.12 5784.66,1659.94C5784.66,1638.52 5779.89,1609.05 5758.32,1602.3ZM5171.08,1669.46C5168.37,1658.28 5166.95,1646.44 5166.95,1634.13C5166.95,1610.06 5173.76,1587.85 5185.36,1568.57C5198.79,1546.25 5218.65,1527.87 5241.83,1515.1C5264.78,1502.45 5290.97,1495.32 5317.38,1495.32C5320.18,1495.32 5322.96,1495.45 5325.7,1495.71C5350.04,1497.99 5371.48,1509.87 5385.67,1521.82L5385.72,1521.75C5389.09,1524.58 5392.04,1527.42 5394.53,1530.14L5394.61,1530.18C5397.25,1533.07 5399.36,1535.82 5400.87,1538.27C5410.14,1553.33 5404.98,1573.26 5389.77,1581.12L5389.69,1581.13L5389.48,1581.3C5387.16,1582.47 5384.61,1583.36 5381.85,1583.91C5369.75,1586.33 5346.41,1584.08 5334.21,1555.59C5334.06,1555.23 5333.89,1554.86 5333.73,1554.5L5333.69,1554.53C5327.07,1540.04 5312.68,1525.35 5294.57,1522.11C5292.17,1521.68 5289.7,1521.45 5287.18,1521.45C5256.97,1521.45 5239.23,1548.98 5232.32,1579.7C5230.07,1589.73 5228.97,1600.11 5228.97,1609.97C5228.97,1629.41 5233.9,1648.72 5243.09,1665.52C5247.81,1674.17 5253.66,1682.15 5260.54,1689.14C5268.87,1697.6 5278.7,1704.62 5289.89,1709.63C5301.95,1715.03 5315.59,1718.1 5330.59,1718.1C5348.77,1718.1 5363.58,1713.34 5375.61,1707.41C5395.47,1697.63 5407.71,1684.66 5414.95,1684.66C5419.02,1684.66 5423.66,1688.72 5423.66,1692.21C5423.66,1716.94 5372.76,1752.65 5317.11,1761.57C5308.74,1762.91 5300.26,1763.64 5291.82,1763.64C5274.23,1763.64 5258.01,1760.54 5243.5,1754.83C5230.57,1749.76 5218.99,1742.62 5208.99,1733.79C5201.49,1727.17 5194.88,1719.59 5189.25,1711.21C5180.96,1698.87 5174.8,1684.79 5171.08,1669.46ZM5858.25,1647.84C5865.42,1607.08 5902.02,1576.76 5942.55,1570.55C5944.9,1570.19 5947.26,1569.91 5949.63,1569.72C5952.35,1569.49 5955.08,1569.38 5957.81,1569.38C5969.02,1569.38 5979.5,1572.6 5988.38,1577.1C6000.77,1583.39 6010.03,1592.2 6013.77,1598.28C6020.97,1609.97 6015.2,1626.02 6001.03,1628.85C5992.93,1630.47 5977.28,1628.96 5969.1,1609.87C5968.52,1608.51 5967.84,1607.14 5967.06,1605.8C5961.37,1595.95 5950.58,1586.9 5937.57,1586.9C5934.03,1586.9 5930.78,1587.45 5927.8,1588.47C5921.91,1590.48 5917.06,1594.31 5913.16,1599.32C5904.02,1611.07 5900.09,1629.27 5900.09,1645.62C5900.09,1656.62 5902.44,1667.56 5906.88,1677.48C5915.56,1696.86 5932.19,1712.35 5954.73,1716.8C5959.01,1717.65 5963.51,1718.1 5968.2,1718.10C5978.28,1718.1 5986.67,1715.97 5993.68,1713.05C6009.13,1706.61 6017.86,1696.29 6023.21,1696.29C6025.94,1696.29 6029.05,1699.01 6029.05,1701.35C6029.05,1717.25 5997.66,1739.92 5962.18,1747.02C5955.11,1748.44 5947.87,1749.23 5940.68,1749.23C5935.15,1749.23 5929.81,1748.77 5924.7,1747.89C5903.07,1744.15 5885.48,1732.81 5873.66,1716.57C5862.97,1701.87 5856.98,1683.15 5856.98,1662.42C5856.98,1657.43 5857.42,1652.57 5858.25,1647.84ZM6056.72,1728.59C6053.31,1722.59 6051.38,1715.5 6051.38,1707.68C6051.38,1662.41 6088.81,1646.4 6127.44,1641.7C6137.59,1640.46 6147.83,1640.01 6157.49,1640.01L6157.49,1618.23C6157.49,1614.6 6157,1611.2 6156.1,1608.07C6151.57,1592.47 6136.66,1583.53 6120.61,1584.79C6119.73,1584.86 6118.79,1584.99 6117.83,1585.18C6109.39,1586.91 6098.92,1593.44 6108.55,1603.06C6108.78,1603.3 6109,1603.53 6109.2,1603.77C6117.94,1614.13 6099.11,1631.45 6078.47,1628.29C6077.52,1628.15 6076.56,1627.95 6075.6,1627.72C6069.53,1626.22 6065.18,1621.16 6065.18,1611.05C6065.18,1580.13 6108.99,1571.01 6132.49,1569.48C6135.13,1569.31 6137.51,1569.23 6139.55,1569.23C6154.49,1569.23 6166.67,1571.83 6176.28,1576.85C6195.68,1586.99 6204.61,1606.99 6204.61,1635.34L6204.61,1701.21C6204.61,1708.61 6206.24,1712.14 6208.63,1713.74C6215.28,1718.16 6227.84,1707.63 6227.84,1723.27C6227.84,1732.09 6209.04,1747.39 6186.65,1745.78C6186.42,1745.79 6186.18,1745.79 6185.94,1745.79C6185.46,1745.79 6184.98,1745.77 6184.49,1745.75C6172.67,1745.07 6158.19,1736.37 6154.83,1724.79C6141.14,1737.14 6121.72,1746.06 6102.71,1748.33C6099.58,1748.7 6096.46,1748.9 6093.38,1748.9C6077.36,1748.9 6063.82,1741.09 6056.72,1728.59ZM6112.7,1662.32C6104.86,1665.41 6098.28,1670.86 6095.4,1680.23C6094.72,1682.43 6094.26,1684.86 6094.08,1687.41C6093.66,1693.45 6094.84,1700.13 6098.58,1705.91L6098.57,1705.91L6098.64,1706L6098.7,1706.09L6098.71,1706.09C6104.69,1713.83 6114.12,1717.63 6121.88,1717.6C6143.92,1717.48 6156.04,1694.27 6157,1683.19C6157.52,1677.12 6158.42,1670.53 6154.91,1665.54L6154.89,1665.51L6154.81,1665.39L6154.78,1665.36C6151.25,1660.4 6145.06,1658.79 6138.96,1658.64C6130.73,1658.44 6121.01,1659.05 6112.7,1662.32ZM6250.38,1599.35C6243.72,1597.06 6238.98,1592.74 6238.2,1585.08C6237.66,1579.82 6242.45,1574.94 6246.41,1573.75C6251.11,1572.34 6255.97,1571.79 6260.13,1572.06L6260.13,1568.57L6260.11,1568.57L6260.11,1552.35C6260.11,1552.35 6260.15,1552.37 6260.15,1552.35C6260.15,1537.61 6277.65,1516.47 6298.7,1513.73C6301.46,1513.39 6304.23,1514.26 6306.3,1516.11C6308.37,1517.97 6309.54,1520.63 6309.49,1523.42C6309.51,1526.69 6309.53,1530.53 6309.55,1534.49C6309.63,1547.47 6309.74,1561.74 6309.74,1561.74C6309.68,1562.93 6309.65,1564.21 6309.65,1565.58L6309.65,1568.57L6309.67,1568.57L6309.67,1575.96L6309.73,1575.97C6315.92,1576.58 6321.89,1574.97 6328.25,1573.92C6331.38,1573.4 6334.6,1573.02 6337.98,1573.1C6340.95,1573.17 6343.91,1575.81 6343.61,1579.03C6343.03,1585.23 6330.83,1597.16 6311.42,1599.51C6310.77,1602.68 6310.23,1605.22 6309.67,1607.42L6309.67,1654.6L6309.63,1654.58L6309.72,1699.33C6309.72,1709.22 6311.62,1714.47 6314.54,1717.03C6324,1725.32 6344.1,1705.13 6344.1,1722.65C6344.1,1731.83 6329.58,1749.33 6298.14,1749.33C6292.86,1749.33 6288.3,1748.79 6284.38,1747.85C6260.96,1742.22 6260.05,1722.04 6260.04,1714.17C6260.04,1713.55 6260.05,1713.01 6260.05,1712.55L6260.08,1671.95L6260.13,1601.31C6256.62,1600.98 6253.32,1600.36 6250.38,1599.35ZM5389.77,1581.29L5389.58,1581.39L5389.69,1581.3L5389.77,1581.29Z" style="fill:rgb(241,84,14);"></path>
+                                </g>
+                            </g>
+                        </svg>
+                    </a>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="../../index.html#features" title="View Capcat features">Features</a></li>
+                    <li><a href="../../index.html#how-it-works" title="Learn how Capcat works">How It Works</a></li>
+                    <li><a href="../../index.html#tutorials" title="Browse Capcat tutorials">Tutorials</a></li>
+                    <li><a href="https://substack.com/@yourusername/capcat-case-study" target="_blank" rel="noopener" title="Read the case study (opens in new window)">Case Study</a></li>
+                    <li><a href="https://github.com/yourusername/capcat" class="btn-primary" title="Get started with Capcat on GitHub (opens in new window)" target="_blank" rel="noopener">Get Started</a></li>
+                </ul>
+                <button class="mobile-menu-toggle" aria-label="Toggle menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+
+    <div class="doc-container">
+        <div class="container">
+            <div class="doc-content">
+
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / tutorials</div>
+<h1>CLI Commands Comprehensive Reference</h1>
+
+<p>Complete documentation of EVERY command-line interface option, flag, parameter, and workflow in Capcat.</p>
+
+<p>Source: Application/cli.py, Application/capcat.py</p>
+
+<h2>Global Options</h2>
+
+<p>These options work with ALL commands.</p>
+
+<h3>--version, -v</h3>
+<pre><code>./capcat --version
+./capcat -v
+</code></pre>
+<p>Displays: <code>Capcat v2.0.0</code></p>
+
+<h3>--verbose, -V</h3>
+<pre><code>./capcat --verbose &lt;command&gt;
+./capcat -V &lt;command&gt;
+</code></pre>
+<p>Enable verbose output logging. Shows:</p>
+<ul>
+<li>Detailed processing information</li>
+<li>Debug-level messages</li>
+<li>Source discovery details</li>
+<li>Network requests</li>
+<li>Article processing steps</li>
+</ul>
+
+<h4>Cannot be used with:</h4> --quiet
+
+<h3>--quiet, -q</h3>
+<pre><code>./capcat --quiet &lt;command&gt;
+./capcat -q &lt;command&gt;
+</code></pre>
+<p>Suppress informational messages. Shows only:</p>
+<ul>
+<li>Warnings</li>
+<li>Errors</li>
+<li>Critical messages</li>
+</ul>
+
+<h4>Cannot be used with:</h4> --verbose
+
+<h3>--config, -C FILE</h3>
+<pre><code>./capcat --config custom.yml &lt;command&gt;
+./capcat -C ~/.capcat/config.yml &lt;command&gt;
+</code></pre>
+<p>Specify custom configuration file path instead of default capcat.yml.</p>
+
+<h4>Default location:</h4> Application/capcat.yml
+
+<p>###</p>
+
+<p> --log-file, -L FILE</p>
+<pre><code>./capcat --log-file capcat.log &lt;command&gt;
+./capcat -L logs/debug-$(date +%Y%m%d).log &lt;command&gt;
+</code></pre>
+<p>Write detailed logs to specified file. File logging includes:</p>
+<ul>
+<li>All log levels (DEBUG, INFO, WARNING, ERROR, CRITICAL)</li>
+<li>Timestamps for every entry</li>
+<li>Module/function names</li>
+<li>Full stack traces for errors</li>
+<li>Network request/response details</li>
+</ul>
+
+<h4>Log format:</h4> <code>[YYYY-MM-DD HH:MM:SS] [LEVEL] [module.function:line] Message</code>
+
+<h2>Commands</h2>
+
+<h3>single - Download Single Article</h3>
+
+<p>Download and process a single article from any URL.</p>
+
+<h4>Syntax:</h4>
+<pre><code>./capcat single &lt;url&gt; [options]
+</code></pre>
+
+<h4>Required Arguments:</h4>
+<ul>
+<li><code>url</code> - Article URL to download (must be valid HTTP/HTTPS URL)</li>
+</ul>
+
+<h4>Options:</h4>
+
+<h3>--output, -o DIR</h3>
+<pre><code>./capcat single URL --output /path/to/output
+./capcat single URL -o ../Capcats
+</code></pre>
+<p>Specify output directory for article.</p>
+
+<h4>Default:</h4> Current directory (.)
+<h4>Output structure:</h4>
+<div class="ascii-art">&lt;output-dir&gt;/
+└── cc_DD-MM-YYYY-Article-Title/
+    ├── article.md
+    ├── images/
+    └── html/ (if --html specified)
+</div>
+
+<h3>--media, -M</h3>
+<pre><code>./capcat single URL --media
+./capcat single URL -M
+</code></pre>
+<p>Download ALL media types:</p>
+<ul>
+<li>Images (always downloaded, this flag adds others)</li>
+<li>Videos (MP4, WebM, etc.)</li>
+<li>Audio files (MP3, WAV, etc.)</li>
+<li>Documents (PDF, DOCX, etc.)</li>
+</ul>
+
+<h4>Default:</h4> Images only
+<h4>Storage:</h4> Files stored in <code>files/</code> subdirectory
+
+<h3>--html, -H</h3>
+<pre><code>./capcat single URL --html
+./capcat single URL -H
+</code></pre>
+<p>Generate HTML version of article in addition to Markdown.</p>
+
+<h4>Output:</h4> Article_Folder/html/article.html
+<h4>Features:</h4>
+<ul>
+<li>Professional styling with themes</li>
+<li>Navigation buttons</li>
+<li>Responsive design</li>
+<li>Dark/light mode support</li>
+</ul>
+
+<h3>--update, -U</h3>
+<pre><code>./capcat single URL --update
+./capcat single URL -U
+</code></pre>
+<p>Update existing article if it already exists.</p>
+
+<h4>Behavior:</h4>
+<ul>
+<li>Overwrites existing article.md</li>
+<li>Re-downloads media files</li>
+<li>Updates timestamps</li>
+<li>Preserves folder structure</li>
+</ul>
+
+<h4>Complete Examples:</h4>
+<pre><code># Basic single article download
+./capcat single https://example.com/article
+
+# Download with all media and HTML
+./capcat single https://bbc.com/news/article --media --html
+
+# Update existing article verbosely
+./capcat single URL --update --verbose
+
+# Custom output with logging
+./capcat single URL --output ~/Articles --log-file fetch.log
+</code></pre>
+
+<h3>fetch - Fetch from Specific Sources</h3>
+
+<p>Fetch articles from one or more specific sources.</p>
+
+<h4>Syntax:</h4>
+<pre><code>./capcat fetch &lt;sources&gt; [options]
+</code></pre>
+
+<h4>Required Arguments:</h4>
+<ul>
+<li><code>sources</code> - Comma-separated list of source IDs (no spaces)</li>
+</ul>
+
+<h4>Available Sources:</h4> Use <code>./capcat list sources</code> to see all available source IDs.
+
+<h4>Common Source IDs:</h4>
+<ul>
+<li><code>hn</code> - Hacker News</li>
+<li><code>lb</code> - Lobsters</li>
+<li><code>iq</code> - InfoQ</li>
+<li><code>bbc</code> - BBC News</li>
+<li><code>guardian</code> - The Guardian</li>
+<li><code>nature</code> - Nature News</li>
+<li><code>ieee</code> - IEEE Spectrum</li>
+<li><code>mitnews</code> - MIT News</li>
+<li><code>bbcsport</code> - BBC Sport</li>
+</ul>
+
+<h4>Options:</h4>
+
+<h3>--count, -c N</h3>
+<pre><code>./capcat fetch hn --count 10
+./capcat fetch hn,bbc -c 50
+</code></pre>
+<p>Number of articles to fetch per source.</p>
+
+<h4>Default:</h4> 30
+<h4>Range:</h4> 1-1000 (practical limit varies by source)
+<h4>Behavior:</h4> Each source fetches N articles independently
+
+<h3>--output, -o DIR</h3>
+<pre><code>./capcat fetch hn --output /path/to/output
+./capcat fetch hn -o ../News
+</code></pre>
+<p>Specify output directory for articles.</p>
+
+<h4>Default:</h4> Current directory (.)
+<h4>Output structure:</h4>
+<div class="ascii-art">&lt;output-dir&gt;/
+└── news_DD-MM-YYYY/
+    ├── Source1_DD-MM-YYYY/
+    │   ├── 01_Article_Title/
+    │   ├── 02_Article_Title/
+    │   └── ...
+    └── Source2_DD-MM-YYYY/
+        └── ...
+</div>
+
+<h3>--media, -M</h3>
+<pre><code>./capcat fetch hn,bbc --media
+./capcat fetch nature -M
+</code></pre>
+<p>Download ALL media types (videos, audio, documents) in addition to images.</p>
+
+<h4>Default:</h4> Images only
+<h4>Impact:</h4> Significantly increases download time and disk usage
+
+<h3>--html, -H</h3>
+<pre><code>./capcat fetch hn --html
+./capcat fetch hn,bbc -H
+</code></pre>
+<p>Generate HTML versions of all articles.</p>
+
+<h4>Output:</h4> Each article gets html/article.html
+<h4>Sources with comments:</h4> Also generates html/comments.html
+
+<h3>--update, -U</h3>
+<pre><code>./capcat fetch hn --update
+./capcat fetch hn -U
+</code></pre>
+<p>Update existing articles if they already exist.</p>
+
+<h4>Complete Examples:</h4>
+<pre><code># Fetch 10 articles from Hacker News
+./capcat fetch hn --count 10
+
+# Fetch from multiple sources
+./capcat fetch hn,lb,iq --count 20
+
+# Fetch with all features
+./capcat fetch bbc,guardian --count 15 --media --html --verbose
+
+# Fetch to custom location with logging
+./capcat fetch nature --count 5 --output ~/Science --log-file science.log
+</code></pre>
+
+<h3>bundle - Fetch from Source Bundles</h3>
+
+<p>Fetch articles from predefined source bundles (groups of related sources).</p>
+
+<h4>Syntax:</h4>
+<pre><code>./capcat bundle &lt;bundle-name&gt; [options]
+</code></pre>
+
+<h4>Required Arguments:</h4>
+<ul>
+<li><code>bundle-name</code> - Name of predefined bundle</li>
+</ul>
+
+<h4>Available Bundles:</h4> Use <code>./capcat list bundles</code> to see all available bundles.
+
+<h4>Predefined Bundles:</h4>
+<ul>
+<li><code>tech</code> - Technology news (ieee, mashable, gizmodo)</li>
+<li><code>techpro</code> - Advanced tech news (hn, lb, iq)</li>
+<li><code>news</code> - General news (bbc, guardian)</li>
+<li><code>science</code> - Science news (nature, scientificamerican)</li>
+<li><code>ai</code> - AI/ML news (mitnews, googleai, openai)</li>
+<li><code>sports</code> - Sports news (bbcsport)</li>
+<li><code>all</code> - All available sources</li>
+</ul>
+
+<h4>Options:</h4>
+
+<h3>--count, -c N</h3>
+<pre><code>./capcat bundle tech --count 10
+./capcat bundle news -c 50
+</code></pre>
+<p>Number of articles to fetch per source in bundle.</p>
+
+<h4>Default:</h4> 30
+<h4>Behavior:</h4> Each source in bundle fetches N articles
+
+<h3>--output, -o DIR</h3>
+<pre><code>./capcat bundle tech --output /path/to/output
+./capcat bundle tech -o ../News
+</code></pre>
+<p>Specify output directory.</p>
+
+<h4>Default:</h4> Current directory (.)
+<h4>Structure:</h4> Same as <code>fetch</code> command
+
+<h3>--media, -M</h3>
+<pre><code>./capcat bundle tech --media
+./capcat bundle science -M
+</code></pre>
+<p>Download ALL media types for all sources in bundle.</p>
+
+<h3>--html, -H</h3>
+<pre><code>./capcat bundle tech --html
+./capcat bundle news -H
+</code></pre>
+<p>Generate HTML for all articles from all sources.</p>
+
+<h3>--all, -A</h3>
+<pre><code>./capcat bundle --all
+./capcat bundle -A --count 10
+</code></pre>
+<p>Fetch from ALL available bundles in order: techpro, tech, news, science, ai.</p>
+
+<h4>Cannot be used with:</h4> bundle-name argument
+<h4>Behavior:</h4> Processes bundles sequentially
+
+<h3>--update, -U</h3>
+<pre><code>./capcat bundle tech --update
+./capcat bundle tech -U
+</code></pre>
+<p>Update existing articles in bundle.</p>
+
+<h4>Complete Examples:</h4>
+<pre><code># Fetch tech bundle
+./capcat bundle tech
+
+# Fetch with custom count
+./capcat bundle news --count 20
+
+# Fetch all bundles
+./capcat bundle --all --count 10
+
+# Full-featured bundle fetch
+./capcat bundle science --count 15 --media --html --verbose
+
+# All bundles with logging
+./capcat bundle --all --log-file bundles-$(date +%Y%m%d).log
+</code></pre>
+
+<h3>list - List Sources and Bundles</h3>
+
+<p>Display available sources, bundles, or both.</p>
+
+<h4>Syntax:</h4>
+<pre><code>./capcat list [what]
+</code></pre>
+
+<h4>Arguments:</h4>
+<ul>
+<li><code>what</code> - What to list: sources, bundles, or all (default: all)</li>
+</ul>
+
+<h4>Options:</h4> None (this command has no additional options)
+
+<h4>Examples:</h4>
+
+<h3>List All Sources</h3>
+<pre><code>./capcat list sources
+</code></pre>
+<h4>Output format:</h4>
+<pre><code>--- Available Sources ---
+
+TECH:
+  - ieee           IEEE Spectrum
+  - mashable       Mashable
+  - gizmodo        Gizmodo
+
+TECHPRO:
+  - hn             Hacker News
+  - lb             Lobsters
+  - iq             InfoQ
+
+NEWS:
+  - bbc            BBC News
+  - guardian       The Guardian
+
+SCIENCE:
+  - nature         Nature News
+  - scientificamerican Scientific American
+
+AI:
+  - mitnews        MIT News
+
+SPORTS:
+  - bbcsport       BBC Sport
+
+Total: 11 sources
+</code></pre>
+
+<h3>List All Bundles</h3>
+<pre><code>./capcat list bundles
+</code></pre>
+<h4>Output format:</h4>
+<pre><code>--- Available Bundles ---
+
+tech - Technology News
+  Sources: ieee, mashable, gizmodo
+
+techpro - Advanced Technology
+  Sources: hn, lb, iq
+
+news - General News
+  Sources: bbc, guardian
+
+science - Science News
+  Sources: nature, scientificamerican
+
+ai - AI &amp; Machine Learning
+  Sources: mitnews
+
+sports - Sports News
+  Sources: bbcsport
+
+Total: 6 bundles
+</code></pre>
+
+<h3>List Both</h3>
+<pre><code>./capcat list all
+./capcat list
+</code></pre>
+<p>Displays both sources and bundles sections.</p>
+
+<h3>config - Configuration Management</h3>
+
+<p>View or modify Capcat configuration.</p>
+
+<h4>Syntax:</h4>
+<pre><code>./capcat config [options]
+</code></pre>
+
+<h4>Options:</h4>
+
+<h3>--show, -s</h3>
+<pre><code>./capcat config --show
+./capcat config -s
+</code></pre>
+<p>Display current configuration from capcat.yml.</p>
+
+<h4>Output includes:</h4>
+<ul>
+<li>Network settings (timeouts, user agent)</li>
+<li>Processing settings (workers, media flags)</li>
+<li>Logging configuration</li>
+<li>Output directories</li>
+<li>Source-specific settings</li>
+</ul>
+
+<h3>--set KEY=VALUE</h3>
+<pre><code>./capcat config --set max_workers=16
+./capcat config --set download_images=true
+</code></pre>
+<p>Set configuration value.</p>
+
+<h4>Cannot be used with:</h4> --show
+
+<h4>Modifiable settings:</h4>
+<ul>
+<li><code>max_workers</code> - Number of parallel workers (1-32)</li>
+<li><code>download_images</code> - Enable/disable image downloads (true/false)</li>
+<li><code>download_videos</code> - Enable/disable video downloads (true/false)</li>
+<li><code>connect_timeout</code> - Network connection timeout (seconds)</li>
+<li><code>read_timeout</code> - Network read timeout (seconds)</li>
+<li><code>user_agent</code> - Custom user agent string</li>
+</ul>
+
+<h4>Note:</h4> Changes are written to capcat.yml immediately.
+
+<h4>Examples:</h4>
+<pre><code># Show current config
+./capcat config --show
+
+# Increase workers
+./capcat config --set max_workers=16
+
+# Set custom user agent
+./capcat config --set user_agent=&quot;MyBot/1.0&quot;
+</code></pre>
+
+<h3>add-source - Add New RSS Source</h3>
+
+<p>Interactively add a new RSS-based source.</p>
+
+<h4>Syntax:</h4>
+<pre><code>./capcat add-source --url &lt;rss-feed-url&gt;
+</code></pre>
+
+<h4>Required Options:</h4>
+<ul>
+<li><code>--url</code> - URL of RSS feed to add</li>
+</ul>
+
+<h4>Interactive Workflow:</h4>
+<ol>
+<li>RSS feed inspection and validation</li>
+<li>Source ID selection (auto-suggested from feed title)</li>
+<li>Category selection from existing categories</li>
+<li>Optional bundle assignment</li>
+<li>Optional test fetch (recommended)</li>
+</ol>
+
+<h4>What It Creates:</h4>
+<ul>
+<li>YAML config file in: sources/active/config_driven/configs/</li>
+<li>Filename: <code>&lt;source-id&gt;.yaml</code></li>
+<li>Bundle entry (if selected)</li>
+</ul>
+
+<h4>Examples:</h4>
+<pre><code># Add new RSS source
+./capcat add-source --url https://techcrunch.com/feed/
+
+# Interactive flow:
+# 1. Inspecting RSS feed...
+#    [OK] Feed &#x27;TechCrunch&#x27; found.
+#
+# 2. Configure New Source
+#    Source ID: techcrunch
+#    Category: tech
+#    Add to bundle? Yes
+#      Bundle: tech
+#    [OK] Added &#x27;techcrunch&#x27; to bundle &#x27;tech&#x27;.
+#
+# 3. Running Test Fetch
+#    Test fetch? Yes
+#    [OK] Source added and verified successfully!
+</code></pre>
+
+<h4>Cancellation:</h4> Press Ctrl+C at any prompt to cancel operation.
+
+<h3>remove-source - Remove Existing Sources</h3>
+
+<p>Interactively remove one or more sources with safety features.</p>
+
+<h4>Syntax:</h4>
+<pre><code>./capcat remove-source [options]
+</code></pre>
+
+<h4>Interactive Mode (No Options):</h4>
+<pre><code>./capcat remove-source
+</code></pre>
+<p>Launches interactive removal with checkbox selection:</p>
+<ol>
+<li>Displays all available sources</li>
+<li>Select sources with spacebar</li>
+<li>Review changes</li>
+<li>Confirm removal</li>
+<li>Automatic backup created</li>
+<li>Sources removed</li>
+</ol>
+
+<h4>Options:</h4>
+
+<h3>--dry-run, -n</h3>
+<pre><code>./capcat remove-source --dry-run
+./capcat remove-source -n
+</code></pre>
+<p>Preview changes without actually removing anything.</p>
+
+<h4>Output shows:</h4>
+<ul>
+<li>Which files would be removed</li>
+<li>Which bundle entries would be deleted</li>
+<li>Backup that would be created</li>
+<li>No actual changes made</li>
+</ul>
+
+<h3>--batch, -b FILE</h3>
+<pre><code>./capcat remove-source --batch sources.txt
+./capcat remove-source -b remove-list.txt
+</code></pre>
+<p>Remove sources listed in file (one source ID per line).</p>
+
+<h4>File format:</h4>
+<pre><code>techcrunch
+oldnewssite
+discontinued-source
+</code></pre>
+
+<h4>Behavior:</h4>
+<ul>
+<li>Reads file line by line</li>
+<li>Validates all source IDs first</li>
+<li>Confirms before removal (unless --force)</li>
+<li>Creates backup</li>
+</ul>
+
+<h3>--undo, -u [BACKUP_ID]</h3>
+<pre><code>./capcat remove-source --undo
+./capcat remove-source --undo latest
+./capcat remove-source --undo backup_20251025_143022
+</code></pre>
+<p>Restore sources from backup.</p>
+
+<h4>Arguments:</h4>
+<ul>
+<li>No argument or <code>latest</code> - Restore most recent backup</li>
+<li><code>BACKUP_ID</code> - Restore specific backup by ID</li>
+</ul>
+
+<h4>Backup ID format:</h4> <code>backup_YYYYMMDD_HHMMSS</code>
+
+<h4>Restores:</h4>
+<ul>
+<li>All config files</li>
+<li>Bundle definitions</li>
+<li>Registry cache</li>
+</ul>
+
+<h3>--no-backup</h3>
+<pre><code>./capcat remove-source --no-backup
+./capcat remove-source --no-backup --force
+</code></pre>
+<p>Skip creating backup before removal.</p>
+
+<h4>Warning:</h4> No undo capability without backup. Use with extreme caution.
+
+<h3>--no-analytics</h3>
+<pre><code>./capcat remove-source --no-analytics
+</code></pre>
+<p>Skip displaying usage analytics for sources.</p>
+
+<h4>Default behavior:</h4> Shows usage statistics before removal
+
+<h3>--force, -f</h3>
+<pre><code>./capcat remove-source --force
+./capcat remove-source -f --batch sources.txt
+</code></pre>
+<p>Skip all confirmation prompts.</p>
+
+<h4>Use cases:</h4>
+<ul>
+<li>Automated scripts</li>
+<li>CI/CD pipelines</li>
+<li>Batch operations</li>
+</ul>
+
+<h4>Warning:</h4> No confirmation, immediate removal.
+
+<h4>Complete Examples:</h4>
+<pre><code># Interactive removal
+./capcat remove-source
+
+# Preview without removing
+./capcat remove-source --dry-run
+
+# Batch removal
+./capcat remove-source --batch old-sources.txt
+
+# Forced batch removal without backup
+./capcat remove-source --force --no-backup --batch remove.txt
+
+# Restore last removal
+./capcat remove-source --undo
+
+# Restore specific backup
+./capcat remove-source --undo backup_20251025_120000
+</code></pre>
+
+<h4>Backup Locations:</h4>
+<div class="ascii-art">Application/
+└── .capcat-backups/
+    ├── backup_20251025_143022/
+    │   ├── configs/
+    │   ├── bundles.yml
+    │   └── manifest.json
+    └── backup_20251025_150033/
+        └── ...
+</div>
+
+<h3>generate-config - Generate Source Config</h3>
+
+<p>Launch interactive wizard to create comprehensive YAML source configuration.</p>
+
+<h4>Syntax:</h4>
+<pre><code>./capcat generate-config [options]
+</code></pre>
+
+<h4>Interactive Wizard Steps:</h4>
+<ol>
+<li>Source ID and display name</li>
+<li>Category selection</li>
+<li>Base URL</li>
+<li>Discovery method (RSS or HTML)</li>
+<li>Article link selectors (CSS/XPath)</li>
+<li>Content extraction selectors</li>
+<li>Image processing configuration</li>
+<li>Author/date extraction patterns</li>
+<li>Rate limiting settings</li>
+<li>Request timeout</li>
+<li>Skip patterns</li>
+<li>Template selection</li>
+</ol>
+
+<h4>Options:</h4>
+
+<h3>--output, -o FILE</h3>
+<pre><code>./capcat generate-config --output custom.yaml
+./capcat generate-config -o /path/to/config.yaml
+</code></pre>
+<p>Specify output file path.</p>
+
+<h4>Default:</h4> sources/active/config_driven/configs/&lt;source-id&gt;.yaml
+
+<h4>Output Format:</h4>
+<pre><code># Generated configuration
+display_name: &quot;Example Source&quot;
+base_url: &quot;https://example.com/&quot;
+category: &quot;tech&quot;
+timeout: 10.0
+rate_limit: 1.0
+
+rss_config:
+  feed_url: &quot;https://example.com/feed.xml&quot;
+  use_rss_content: true
+
+article_selectors:
+  - &quot;.headline a&quot;
+  - &quot;.article-title a&quot;
+
+content_selectors:
+  - &quot;.article-content&quot;
+  - &quot;.post-body&quot;
+
+image_processing:
+  selectors:
+    - &quot;img&quot;
+    - &quot;.content img&quot;
+  url_patterns:
+    - &quot;example.com/&quot;
+  skip_selectors:
+    - &quot;.sidebar img&quot;
+
+skip_patterns:
+  - &quot;/about&quot;
+  - &quot;/contact&quot;
+  - &quot;?utm_&quot;
+</code></pre>
+
+<h4>Examples:</h4>
+<pre><code># Interactive generation
+./capcat generate-config
+
+# Save to custom location
+./capcat generate-config --output ~/configs/newsource.yaml
+</code></pre>
+
+<h4>Next Steps After Generation:</h4>
+<pre><code># Review generated config
+cat sources/active/config_driven/configs/newsource.yaml
+
+# Test source
+./capcat fetch newsource --count 5
+
+# Add to bundle (manual edit)
+vim sources/active/bundles.yml
+</code></pre>
+
+<h3>catch - Interactive Mode</h3>
+
+<p>Launch interactive menu interface for all Capcat operations.</p>
+
+<h4>Syntax:</h4>
+<pre><code>./capcat catch
+</code></pre>
+
+<h4>No options:</h4> This command has no additional flags or options.
+
+<h4>Main Menu Options:</h4>
+<ol>
+<li>Catch articles from a bundle of sources</li>
+<li>Catch articles from a list of sources</li>
+<li>Catch from a single source</li>
+<li>Catch a single article by URL</li>
+<li>Manage Sources (add/remove/configure)</li>
+<li>Exit</li>
+</ol>
+
+<h4>Navigation:</h4>
+<ul>
+<li>Arrow keys: Move between options</li>
+<li>Enter: Select option</li>
+<li>Ctrl+C: Cancel/go back</li>
+</ul>
+
+<h4>Sub-menu: Manage Sources</h4>
+<ol>
+<li>Add New Source from RSS Feed</li>
+<li>Generate Custom Source Config</li>
+<li>Remove Existing Sources</li>
+<li>List All Sources</li>
+<li>Test a Source</li>
+<li>Back to Main Menu</li>
+</ol>
+
+<h4>Terminal Output:</h4>
+<div class="ascii-art">      ____
+    / ____|                     _
+   | |     __ _ _ __   ___ __ _| |_
+   | |    / _  |  _ \ / __/ _  | __|
+   | |___| (_| | |_) | (_| (_| | |_
+    \_____\__,_|  __/ \___\__,_|\__|
+               | |
+               |_|
+
+  What would you like me to do?
+
+  &gt; Catch articles from a bundle of sources
+    Catch articles from a list of sources
+    Catch from a single source
+    Catch a single article by URL
+    Manage Sources (add/remove/configure)
+    Exit
+
+   (Use arrow keys to navigate)
+</div>
+
+<h4>Example Session:</h4>
+<pre><code>$ ./capcat catch
+
+# User selects: &quot;Catch articles from a bundle of sources&quot;
+# System shows bundle list, user selects &quot;tech&quot;
+# System asks: &quot;Generate HTML for web browsing?&quot;
+# User selects: &quot;Yes&quot;
+
+--------------------
+SUMMARY
+Action: bundle
+Bundle: tech
+Generate HTML: true
+--------------------
+
+Executing command...
+[Article processing begins]
+</code></pre>
+
+<h4>See:</h4> docs/tutorials/02-interactive-mode-exhaustive.md for complete interactive mode documentation.
+
+<h2>Command Combinations</h2>
+
+<h3>Typical Workflows</h3>
+
+<h3>Daily News Collection</h3>
+<pre><code># Morning routine: fetch all news
+./capcat bundle news --count 20 --html
+
+# Evening: fetch tech updates
+./capcat bundle tech --count 10
+</code></pre>
+
+<h3>Research Workflow</h3>
+<pre><code># Collect science articles with all media
+./capcat bundle science --count 30 --media --log-file research.log
+
+# Add specific article found during research
+./capcat single https://nature.com/article/12345 --media --html
+</code></pre>
+
+<h3>Source Management Workflow</h3>
+<pre><code># List current sources
+./capcat list sources
+
+# Add new source
+./capcat add-source --url https://newssite.com/feed.xml
+
+# Test new source
+./capcat fetch newsource --count 3
+
+# Remove old sources
+./capcat remove-source --batch old-sources.txt
+</code></pre>
+
+<h3>Automated Collection Script</h3>
+<pre><code>#!/bin/bash
+# Daily collection script
+
+LOG_FILE=&quot;logs/daily-$(date +%Y%m%d).log&quot;
+
+# Collect from all bundles
+./capcat bundle --all --count 20 --html --log-file &quot;$LOG_FILE&quot;
+
+# Check if successful
+if [ $? -eq 0 ]; then
+    echo &quot;Collection successful&quot; &gt;&gt; &quot;$LOG_FILE&quot;
+else
+    echo &quot;Collection failed&quot; &gt;&gt; &quot;$LOG_FILE&quot;
+    exit 1
+fi
+</code></pre>
+
+<h2>Exit Codes</h2>
+
+<p>All commands return standard exit codes:</p>
+
+<ul>
+<li><code>0</code> - Success (all operations completed)</li>
+<li><code>1</code> - General error (command failed)</li>
+<li><code>2</code> - Invalid arguments (validation failed)</li>
+<li><code>130</code> - User interrupt (Ctrl+C pressed)</li>
+</ul>
+
+<h4>Usage in scripts:</h4>
+<pre><code>./capcat fetch hn --count 10
+if [ $? -eq 0 ]; then
+    echo &quot;Success&quot;
+else
+    echo &quot;Failed&quot;
+    exit 1
+fi
+</code></pre>
+
+<h2>Environment Variables</h2>
+
+<p>Capcat respects these environment variables:</p>
+
+<h3>CAPCAT_OUTPUT_DIR</h3>
+<pre><code>export CAPCAT_OUTPUT_DIR=&quot;/custom/path&quot;
+./capcat fetch hn
+</code></pre>
+<p>Override default output directory for all commands.</p>
+
+<h3>CAPCAT_DEFAULT_COUNT</h3>
+<pre><code>export CAPCAT_DEFAULT_COUNT=50
+./capcat fetch hn  # Uses 50 instead of 30
+</code></pre>
+<p>Override default article count.</p>
+
+<h3>CAPCAT_CONFIG</h3>
+<pre><code>export CAPCAT_CONFIG=&quot;~/.capcat/custom.yml&quot;
+./capcat fetch hn
+</code></pre>
+<p>Override default configuration file location.</p>
+
+<h3>CAPCAT_LOG_LEVEL</h3>
+<pre><code>export CAPCAT_LOG_LEVEL=DEBUG
+./capcat fetch hn
+</code></pre>
+<p>Set logging level: DEBUG, INFO, WARNING, ERROR, CRITICAL</p>
+
+<h3>CAPCAT_MAX_WORKERS</h3>
+<pre><code>export CAPCAT_MAX_WORKERS=16
+./capcat bundle all
+</code></pre>
+<p>Override parallel worker count.</p>
+
+<h2>Configuration Priority</h2>
+
+<p>Settings are applied in this order (highest to lowest priority):</p>
+
+<ol>
+<li>Command-line arguments (<code>--count 10</code>)</li>
+<li>Environment variables (<code>CAPCAT_DEFAULT_COUNT=10</code>)</li>
+<li>Configuration file (<code>capcat.yml: default_count: 10</code>)</li>
+<li>Default values (hard-coded: 30)</li>
+</ol>
+
+<h4>Example:</h4>
+<pre><code># capcat.yml has: default_count: 20
+# Environment: CAPCAT_DEFAULT_COUNT=40
+# Command: --count 10
+
+./capcat fetch hn  # Uses 10 (CLI wins)
+</code></pre>
+
+<h2>Error Handling</h2>
+
+<h3>Network Errors</h3>
+<pre><code>$ ./capcat fetch hn
+Error: Failed to connect to news.ycombinator.com
+Network timeout after 10 seconds
+</code></pre>
+
+<h3>Invalid Source</h3>
+<pre><code>$ ./capcat fetch nonexistent
+Error: Unknown sources: nonexistent
+Available: hn, lb, iq, bbc, guardian, ...
+</code></pre>
+
+<h3>Invalid URL</h3>
+<pre><code>$ ./capcat single not-a-url
+Error: Invalid URL format: not-a-url
+Must start with http:// or https://
+</code></pre>
+
+<h3>Permission Denied</h3>
+<pre><code>$ ./capcat fetch hn --output /root/articles
+Error: Permission denied: /root/articles
+Cannot create output directory
+</code></pre>
+
+<h3>Disk Space</h3>
+<pre><code>$ ./capcat bundle all --media
+Warning: Low disk space (&lt; 1GB available)
+Consider using --no-media flag
+</code></pre>
+
+<h2>Debugging Commands</h2>
+
+<h3>Verbose Output</h3>
+<pre><code># Maximum verbosity with file logging
+./capcat -V --log-file debug.log fetch hn --count 3
+</code></pre>
+
+<h3>Dry Run (Remove Command)</h3>
+<pre><code># Preview what would be removed
+./capcat remove-source --dry-run
+</code></pre>
+
+<h3>Test Single Article</h3>
+<pre><code># Test article processing
+./capcat single URL --verbose
+</code></pre>
+
+<h3>List and Verify Sources</h3>
+<pre><code># Check source availability
+./capcat list sources
+</code></pre>
+
+<h3>Configuration Validation</h3>
+<pre><code># Show current config
+./capcat config --show
+</code></pre>
+
+<h2>Source Code Locations</h2>
+
+<p>All CLI functionality implemented in:</p>
+<ul>
+<li>Application/cli.py - Argument parsing, subcommands</li>
+<li>Application/capcat.py - Main application logic</li>
+<li>Application/core/ - Core processing modules</li>
+</ul>
+
+<p>Function reference:</p>
+<ul>
+<li><code>create_parser()</code> - Application/cli.py:501 - Parser creation</li>
+<li><code>parse_arguments()</code> - Application/cli.py - Argument parsing</li>
+<li><code>validate_arguments()</code> - Application/cli.py:756 - Validation</li>
+<li><code>process_sources()</code> - Application/capcat.py:55 - Source processing</li>
+<li><code>add_source()</code> - Application/cli.py:200 - Add source command</li>
+<li><code>remove_source()</code> - Application/cli.py:339 - Remove source command</li>
+<li><code>generate_config_command()</code> - Application/cli.py:457 - Config generation</li>
+</ul>
+
+<h2>Related Documentation</h2>
+
+<ul>
+<li>Interactive Mode: docs/tutorials/02-interactive-mode-exhaustive.md</li>
+<li>Configuration: docs/tutorials/03-configuration-exhaustive.md</li>
+<li>Source System: docs/tutorials/04-source-system-exhaustive.md</li>
+<li>API Reference: docs/api-reference.md</li>
+</ul>
+
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      // Primary colors from design system (Capcat orange palette)
+      primaryColor: '#FFD4B7',           // --orange-200
+      primaryTextColor: '#201419',       // --ink
+      primaryBorderColor: '#F1540E',     // --orange-500 / --accent-primary
+
+      // Line and edge colors
+      lineColor: '#58444c',              // --ink-medium
+
+      // Secondary colors
+      secondaryColor: '#FFEADB',         // --orange-100
+      tertiaryColor: '#f9f8ed',          // --accent-cream-primary
+
+      // Text colors
+      textColor: '#201419',              // --ink
+      mainBkg: '#FAF8EE',                // --cream
+
+      // Node styling
+      nodeBorder: '#F1540E',             // --accent-primary
+      clusterBkg: '#faf2e7',             // --accent-cream-light
+      clusterBorder: '#D44400',          // --orange-600 / --accent-hover
+
+      // Font
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+      fontSize: '16px'
+    },
+    flowchart: {
+      nodeSpacing: 50,
+      rankSpacing: 50,
+      padding: 15,
+      useMaxWidth: true,
+      htmlLabels: true,
+      curve: 'basis'
+    }
+  });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+    <script src="../../js/main.js"></script>
+
+            
+<nav class="chapter-navigation" aria-label="Chapter navigation">
+    <div class="next-chapter-content">
+        <span class="next-chapter-label">Next Chapter</span>
+        <span class="next-chapter-arrow" aria-hidden="true">→</span>
+        <a href="02-interactive-mode-exhaustive.html" class="next-chapter-link" rel="next">Tutorial 2: Interactive Mode (Comprehensive)</a>
+    </div>
+</nav>
+</div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <svg class="capcat-logo" viewBox="0 0 120 36" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve">
+                        <g transform="matrix(1,0,0,1,-25136.8,-9036.29)">
+                                <g transform="matrix(0.101942,0,0,0.101942,24610.1,8883.85)">
+                                    <path d="M5599.61,1616.47L5599.66,1616.38C5600.74,1622.26 5601.26,1628.65 5601.26,1635.54L5601.26,1701.4C5601.26,1704.57 5601.56,1707.02 5602.09,1708.92L5601.99,1709.02C5606.21,1723.62 5624.36,1704.6 5624.36,1723.41C5624.36,1732.23 5605.56,1747.52 5583.16,1745.91C5582.93,1745.92 5582.7,1745.92 5582.45,1745.92C5578.93,1745.92 5575.11,1745.16 5571.38,1743.78L5571.37,1743.78C5562.39,1740.41 5553.95,1733.47 5551.49,1724.98C5536.46,1738.54 5514.52,1747.96 5493.82,1749L5493.73,1749.09C5492.48,1749.15 5491.23,1749.18 5489.99,1749.18C5466.27,1749.18 5447.99,1732.07 5447.99,1707.96C5447.99,1707.61 5447.99,1707.26 5448,1706.91L5448.23,1706.74C5448.87,1663.44 5484.29,1647.39 5521.6,1642.33L5521.63,1642.29C5532.57,1640.82 5543.67,1640.29 5554.1,1640.29L5554.1,1618.51C5554.1,1614.47 5553.49,1610.72 5552.38,1607.31L5552.54,1607.1C5547.59,1592.27 5533.06,1583.85 5517.44,1585.07C5508.88,1585.74 5494.66,1592.62 5505.38,1603.35C5516.1,1614.07 5494.65,1633.45 5472.47,1628.01L5472.43,1628C5466.37,1626.51 5462.02,1621.44 5462.02,1611.33C5462.02,1589.79 5483.29,1578.82 5504.14,1573.64C5516.57,1570.55 5528.85,1569.51 5536.38,1569.51C5552,1569.51 5564.61,1572.36 5574.41,1577.84L5574.36,1577.94C5588.16,1585.72 5596.37,1598.77 5599.61,1616.47C5598.61,1618.1 5597.66,1619.69 5596.93,1620.96C5596.39,1621.89 5595.88,1622.76 5595.39,1623.58C5595.9,1622.73 5596.43,1621.84 5596.98,1620.88C5597.7,1619.62 5598.63,1618.07 5599.61,1616.47ZM5554.15,1674.61L5554.09,1674.68C5553.99,1671.49 5553.36,1668.44 5551.52,1665.83L5551.5,1665.79L5551.41,1665.68L5551.39,1665.65C5547.85,1660.68 5541.66,1659.07 5535.57,1658.92C5519.57,1658.53 5497.94,1661.21 5492.01,1680.51C5489.72,1687.93 5489.87,1697.98 5495.19,1706.19L5495.18,1706.19L5495.24,1706.28L5495.31,1706.37L5495.31,1706.37C5501.3,1714.11 5510.73,1717.92 5518.49,1717.88C5519.81,1717.87 5521.1,1717.78 5522.36,1717.61L5522.43,1717.52C5542.01,1714.91 5552.76,1693.79 5553.66,1683.39C5553.9,1680.5 5554.24,1677.5 5554.15,1674.61ZM5655.48,1606.94C5650.11,1592.14 5633.8,1610.33 5633.8,1591.19C5633.8,1582.01 5651.19,1565.8 5674.8,1568.98C5683.29,1569.97 5689.56,1573.73 5694.16,1578.52C5699.61,1584.19 5702.74,1591.31 5704.51,1596.99C5706.26,1602.63 5706.67,1606.85 5706.67,1606.85L5707.45,1606.85C5712.89,1587.4 5739.72,1569.51 5765.78,1569.51C5773.42,1569.51 5780.44,1570.87 5786.81,1573.3C5802.54,1579.32 5814.35,1591.95 5821.87,1607.23C5828.22,1620.14 5831.5,1634.93 5831.5,1649.24C5831.5,1656.97 5830.87,1664.41 5829.67,1671.48C5821.72,1718.11 5788.62,1749.18 5744.39,1749.18C5742.93,1749.18 5741.48,1749.14 5740.03,1749.07C5729.11,1748.48 5718.34,1745.59 5706.67,1739.07L5706.67,1762.41L5706.76,1762.37L5706.76,1774.83C5706.76,1776.77 5706.82,1778.53 5706.95,1780.11C5709.18,1808.27 5730.12,1782.01 5730.12,1803.7C5730.12,1812.89 5712.73,1829.1 5689.13,1825.92C5681.05,1824.97 5674.98,1822.11 5670.43,1818.32C5658.92,1808.73 5657.17,1793.24 5657.26,1788.05C5657.29,1785.83 5657.08,1783.58 5657.17,1781.4L5657.17,1620.07C5657.17,1614.05 5656.53,1609.85 5655.48,1606.94ZM5758.32,1602.3C5755.39,1601.38 5752.14,1600.88 5748.55,1600.88C5721.72,1600.88 5707.31,1633 5707.31,1659.84C5707.31,1664.6 5706.87,1673.25 5707.53,1682.86C5708.48,1696.5 5711.63,1712.06 5721.4,1721.14C5726.51,1725.9 5733.44,1728.88 5742.81,1728.88C5769.07,1728.88 5780.31,1701.62 5783.58,1676.51C5784.33,1670.76 5784.66,1665.12 5784.66,1659.94C5784.66,1638.52 5779.89,1609.05 5758.32,1602.3ZM5171.08,1669.46C5168.37,1658.28 5166.95,1646.44 5166.95,1634.13C5166.95,1610.06 5173.76,1587.85 5185.36,1568.57C5198.79,1546.25 5218.65,1527.87 5241.83,1515.1C5264.78,1502.45 5290.97,1495.32 5317.38,1495.32C5320.18,1495.32 5322.96,1495.45 5325.7,1495.71C5350.04,1497.99 5371.48,1509.87 5385.67,1521.82L5385.72,1521.75C5389.09,1524.58 5392.04,1527.42 5394.53,1530.14L5394.61,1530.18C5397.25,1533.07 5399.36,1535.82 5400.87,1538.27C5410.14,1553.33 5404.98,1573.26 5389.77,1581.12L5389.69,1581.13L5389.48,1581.3C5387.16,1582.47 5384.61,1583.36 5381.85,1583.91C5369.75,1586.33 5346.41,1584.08 5334.21,1555.59C5334.06,1555.23 5333.89,1554.86 5333.73,1554.5L5333.69,1554.53C5327.07,1540.04 5312.68,1525.35 5294.57,1522.11C5292.17,1521.68 5289.7,1521.45 5287.18,1521.45C5256.97,1521.45 5239.23,1548.98 5232.32,1579.7C5230.07,1589.73 5228.97,1600.11 5228.97,1609.97C5228.97,1629.41 5233.9,1648.72 5243.09,1665.52C5247.81,1674.17 5253.66,1682.15 5260.54,1689.14C5268.87,1697.6 5278.7,1704.62 5289.89,1709.63C5301.95,1715.03 5315.59,1718.1 5330.59,1718.1C5348.77,1718.1 5363.58,1713.34 5375.61,1707.41C5395.47,1697.63 5407.71,1684.66 5414.95,1684.66C5419.02,1684.66 5423.66,1688.72 5423.66,1692.21C5423.66,1716.94 5372.76,1752.65 5317.11,1761.57C5308.74,1762.91 5300.26,1763.64 5291.82,1763.64C5274.23,1763.64 5258.01,1760.54 5243.5,1754.83C5230.57,1749.76 5218.99,1742.62 5208.99,1733.79C5201.49,1727.17 5194.88,1719.59 5189.25,1711.21C5180.96,1698.87 5174.8,1684.79 5171.08,1669.46ZM5858.25,1647.84C5865.42,1607.08 5902.02,1576.76 5942.55,1570.55C5944.9,1570.19 5947.26,1569.91 5949.63,1569.72C5952.35,1569.49 5955.08,1569.38 5957.81,1569.38C5969.02,1569.38 5979.5,1572.6 5988.38,1577.1C6000.77,1583.39 6010.03,1592.2 6013.77,1598.28C6020.97,1609.97 6015.2,1626.02 6001.03,1628.85C5992.93,1630.47 5977.28,1628.96 5969.1,1609.87C5968.52,1608.51 5967.84,1607.14 5967.06,1605.8C5961.37,1595.95 5950.58,1586.9 5937.57,1586.9C5934.03,1586.9 5930.78,1587.45 5927.8,1588.47C5921.91,1590.48 5917.06,1594.31 5913.16,1599.32C5904.02,1611.07 5900.09,1629.27 5900.09,1645.62C5900.09,1656.62 5902.44,1667.56 5906.88,1677.48C5915.56,1696.86 5932.19,1712.35 5954.73,1716.8C5959.01,1717.65 5963.51,1718.1 5968.2,1718.1C5978.28,1718.1 5986.67,1715.97 5993.68,1713.05C6009.13,1706.61 6017.86,1696.29 6023.21,1696.29C6025.94,1696.29 6029.05,1699.01 6029.05,1701.35C6029.05,1717.25 5997.66,1739.92 5962.18,1747.02C5955.11,1748.44 5947.87,1749.23 5940.68,1749.23C5935.15,1749.23 5929.81,1748.77 5924.7,1747.89C5903.07,1744.15 5885.48,1732.81 5873.66,1716.57C5862.97,1701.87 5856.98,1683.15 5856.98,1662.42C5856.98,1657.43 5857.42,1652.57 5858.25,1647.84ZM6056.72,1728.59C6053.31,1722.59 6051.38,1715.5 6051.38,1707.68C6051.38,1662.41 6088.81,1646.4 6127.44,1641.7C6137.59,1640.46 6147.83,1640.01 6157.49,1640.01L6157.49,1618.23C6157.49,1614.6 6157,1611.2 6156.1,1608.07C6151.57,1592.47 6136.66,1583.53 6120.61,1584.79C6119.73,1584.86 6118.79,1584.99 6117.83,1585.18C6109.39,1586.91 6098.92,1593.44 6108.55,1603.06C6108.78,1603.3 6109,1603.53 6109.2,1603.77C6117.94,1614.13 6099.11,1631.45 6078.47,1628.29C6077.52,1628.15 6076.56,1627.95 6075.6,1627.72C6069.53,1626.22 6065.18,1621.16 6065.18,1611.05C6065.18,1580.13 6108.99,1571.01 6132.49,1569.48C6135.13,1569.31 6137.51,1569.23 6139.55,1569.23C6154.49,1569.23 6166.67,1571.83 6176.28,1576.85C6195.68,1586.99 6204.61,1606.99 6204.61,1635.34L6204.61,1701.21C6204.61,1708.61 6206.24,1712.14 6208.63,1713.74C6215.28,1718.16 6227.84,1707.63 6227.84,1723.27C6227.84,1732.09 6209.04,1747.39 6186.65,1745.78C6186.42,1745.79 6186.18,1745.79 6185.94,1745.79C6185.46,1745.79 6184.98,1745.77 6184.49,1745.75C6172.67,1745.07 6158.19,1736.37 6154.83,1724.79C6141.14,1737.14 6121.72,1746.06 6102.71,1748.33C6099.58,1748.7 6096.46,1748.9 6093.38,1748.9C6077.36,1748.9 6063.82,1741.09 6056.72,1728.59ZM6112.7,1662.32C6104.86,1665.41 6098.28,1670.86 6095.4,1680.23C6094.72,1682.43 6094.26,1684.86 6094.08,1687.41C6093.66,1693.45 6094.84,1700.13 6098.58,1705.91L6098.57,1705.91L6098.64,1706L6098.7,1706.09L6098.71,1706.09C6104.69,1713.83 6114.12,1717.63 6121.88,1717.6C6143.92,1717.48 6156.04,1694.27 6157,1683.19C6157.52,1677.12 6158.42,1670.53 6154.91,1665.54L6154.89,1665.51L6154.81,1665.39L6154.78,1665.36C6151.25,1660.4 6145.06,1658.79 6138.96,1658.64C6130.73,1658.44 6121.01,1659.05 6112.7,1662.32ZM6250.38,1599.35C6243.72,1597.06 6238.98,1592.74 6238.2,1585.08C6237.66,1579.82 6242.45,1574.94 6246.41,1573.75C6251.11,1572.34 6255.97,1571.79 6260.13,1572.06L6260.13,1568.57L6260.11,1568.57L6260.11,1552.35C6260.11,1552.35 6260.15,1552.37 6260.15,1552.35C6260.15,1537.61 6277.65,1516.47 6298.7,1513.73C6301.46,1513.39 6304.23,1514.26 6306.3,1516.11C6308.37,1517.97 6309.54,1520.63 6309.49,1523.42C6309.51,1526.69 6309.53,1530.53 6309.55,1534.49C6309.63,1547.47 6309.74,1561.74 6309.74,1561.74C6309.68,1562.93 6309.65,1564.21 6309.65,1565.58L6309.65,1568.57L6309.67,1568.57L6309.67,1575.96L6309.73,1575.97C6315.92,1576.58 6321.89,1574.97 6328.25,1573.92C6331.38,1573.4 6334.6,1573.02 6337.98,1573.1C6340.95,1573.17 6343.91,1575.81 6343.61,1579.03C6343.03,1585.23 6330.83,1597.16 6311.42,1599.51C6310.77,1602.68 6310.23,1605.22 6309.67,1607.42L6309.67,1654.6L6309.63,1654.58L6309.72,1699.33C6309.72,1709.22 6311.62,1714.47 6314.54,1717.03C6324,1725.32 6344.1,1705.13 6344.1,1722.65C6344.1,1731.83 6329.58,1749.33 6298.14,1749.33C6292.86,1749.33 6288.3,1748.79 6284.38,1747.85C6260.96,1742.22 6260.05,1722.04 6260.04,1714.17C6260.04,1713.55 6260.05,1713.01 6260.05,1712.55L6260.08,1671.95L6260.13,1601.31C6256.62,1600.98 6253.32,1600.36 6250.38,1599.35ZM5389.77,1581.29L5389.58,1581.39L5389.69,1581.3L5389.77,1581.29Z" style="fill:rgb(241,84,14);"></path>
+                                </g>
+                            </g>
+                        </svg>
+                </div>
+
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h3>Documentation</h3>
+                        <ul>
+                            <li><a href="../../docs/quick-start.html" title="Quick start guide">Quick Start</a></li>
+                            <li><a href="../../docs/architecture.html" title="System architecture">Architecture</a></li>
+                            <li><a href="../../docs/source-development.html" title="Develop custom sources">Source Development</a></li>                        </ul>
+                    </div>
+
+                    <div class="footer-column">
+                        <h3>Resources</h3>
+                        <ul>
+                            <li><a href="../../docs/tutorials/index.html" title="Browse tutorials">Tutorials</a></li>
+                            <li><a href="https://github.com/yourusername/capcat" title="View on GitHub (opens in new window)" target="_blank" rel="noopener">GitHub</a></li>
+                            <li><a href="https://github.com/yourusername/capcat/issues" title="Report issues (opens in new window)" target="_blank" rel="noopener">Issues</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="footer-column">
+                        <h3>About</h3>
+                        <ul>
+                            <li><a href="https://stayux.substack.com" target="_blank" rel="noopener" title="Designer blog (opens in new window)">Designer Blog</a></li>
+                            <li><a href="../ethical-scraping.html" title="Ethical scraping guidelines">Ethical Scraping</a></li>
+                            <li><a href="https://github.com/yourusername/capcat/blob/main/LICENSE" title="View license (opens in new window)" target="_blank" rel="noopener">License</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-credit">
+                <p>Design, illustration and context engineering by <a href="https://stayux.com" title="Visit Stayux.com (opens in new window)" target="_blank" rel="noopener">Stayu Kasabov | Stayux.com</a></p>
+                <p>NLP driven and LLM generated MVP</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <button id="backToTopBtn" title="Go to top">
+        <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24">
+            <path d="M0 0h24v24H0V0z" fill="none"/>
+            <path fill="currentColor" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6 1.41 1.41z"/>
+        </svg>
+    </button>
+
+</body>

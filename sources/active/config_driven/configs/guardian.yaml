@@ -1,0 +1,95 @@
+# The Guardian - International News Source
+source_id: "guardian"
+# Category: News
+# URL: https://www.theguardian.com/international
+# Added: 2025-10-09
+# Type: Config-driven RSS-first source
+
+display_name: "The Guardian"
+base_url: "https://www.theguardian.com/international"
+category: "news"
+timeout: 10.0
+rate_limit: 2.0
+
+discovery:
+  method: "rss"
+  rss_url: "https://www.theguardian.com/international/rss"
+
+# Article discovery selectors (fallback if RSS fails)
+article_selectors:
+  - ".fc-item__link"
+  - "a[data-link-name='article']"
+  - ".js-headline-text"
+  - ".u-faux-block-link__overlay"
+
+# Content extraction selectors
+# Note: Guardian uses dynamic class names (DCR - Dotcom Rendering)
+# Multiple selectors for reliability
+content_selectors:
+  - ".article-body-commercial-selector"
+  - ".article-body-viewer-selector"
+  - "div[class*='dcr-'] p"
+  - "article p"
+  - ".content__article-body"
+
+# Skip patterns - content types to avoid
+# Following Guardian robots.txt and ethical scraping guidelines
+skip_patterns:
+  - "/live/"          # Live blogs
+  - "/gallery/"       # Image galleries
+  - "/video/"         # Video pages
+  - "?CMP="           # Campaign tracking URLs
+  - "/series/"        # Series pages
+  - "/discussion/"    # Comments (disallowed by robots.txt)
+  - "/share/"         # Share pages
+  - "/email/"         # Email forms
+
+# Comment support
+# Guardian robots.txt explicitly disallows /discussion/* paths
+supports_comments: false
+
+# Image processing configuration
+image_processing:
+  selectors:
+    - "article img"
+    - ".content__main-column img"
+    - "figure img"
+    - "picture img"
+    - ".dcr-evn1e9"
+
+  url_patterns:
+    - "theguardian.com"
+    - "guim.co.uk"      # Guardian image CDN
+    - "i.guim.co.uk"    # Image CDN
+
+  # Allow URLs without traditional extensions (modern CDN patterns)
+  allow_extensionless: true
+
+  skip_selectors:
+    - ".badge img"
+    - ".contributor-image img"
+    - ".user-avatar img"
+    - "nav img"
+    - ".logo img"
+    - ".icon img"
+
+# Template configuration for HTML generation
+template:
+  variant: "article-no-comments"
+  navigation:
+    back_to_news_url: "../../news.html"
+    back_to_news_text: "Back to News"
+    has_comments: false
+
+# Custom configuration
+custom_config:
+  user_agent: "Mozilla/5.0 (compatible; Capcat/2.0; +Personal News Archiver)"
+  headers:
+    Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+    Accept-Language: "en-US,en;q=0.5"
+
+  # Ethical scraping notes
+  notes: |
+    The Guardian robots.txt contains restrictions on LLM/AI usage for commercial purposes.
+    This configuration is for personal news archiving only, which is permitted.
+    Respect rate limits and avoid comment sections as per robots.txt disallow rules.

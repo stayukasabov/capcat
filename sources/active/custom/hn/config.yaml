@@ -1,0 +1,21 @@
+base_url: https://news.ycombinator.com
+category: techpro
+display_name: Hacker News
+rate_limit: 1.0
+supports_comments: true
+has_comments: true
+comments_function: fetch_comments
+timeout: 10
+
+# Template system configuration
+template:
+  # Which template variant to use for articles
+  variant: "article-with-comments"
+
+  # Template data
+  navigation:
+    back_to_news_url: "../../news.html"
+    back_to_news_text: "Back to News"
+    has_comments: true
+    comments_url: "comments.html"
+    comments_text: "View Comments"

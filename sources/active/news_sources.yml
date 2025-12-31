@@ -1,0 +1,13 @@
+sources:
+  bbc:
+    name: "BBC News"
+    category: "news"
+    base_url: "https://www.bbc.com"
+    timeout: 10
+
+  guardian:
+    name: "The Guardian"
+    category: "news"
+    base_url: "https://www.theguardian.com/international"
+    timeout: 10
+

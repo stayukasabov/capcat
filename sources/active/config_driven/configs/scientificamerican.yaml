@@ -1,0 +1,67 @@
+# Scientific American Configuration
+source_id: "scientificamerican"
+name: "Scientific American"
+display_name: "Scientific American"
+category: science
+
+# URL configuration
+base_url: https://www.scientificamerican.com
+
+# Discovery method - HTML scraping
+discovery:
+  method: "html"
+  max_articles: 30
+
+# Article selectors for discovery
+article_selectors:
+- a[href*="/article/"]
+- .t_article-title a
+- h2 a
+- h3 a
+- .listing__title a
+
+# Content extraction selectors
+content_selectors:
+- .article-text
+- .article-body
+- .post-content
+- article
+- main
+
+# Template configuration
+template:
+  variant: article-no-comments
+  navigation:
+    show_breadcrumb: true
+    show_source_link: true
+
+# Request configuration
+timeout: 10
+rate_limit: 1.0
+
+# Skip patterns - URLs to avoid
+skip_patterns:
+- /about
+- /contact
+- /privacy
+- /terms
+- /author
+- /topic
+- /subscribe
+- /newsletter
+
+supports_comments: false
+
+# Image processing configuration
+image_processing:
+  selectors:
+    - "article img"
+    - "figure img"
+    - "picture img"
+    - ".article-body img"
+    - "main img"
+  skip_selectors:
+    - "nav img"
+    - "header img"
+    - "footer img"
+    - ".sidebar img"

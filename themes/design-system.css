@@ -1,0 +1,518 @@
+/* Capcat Design System - Golden Ratio Typography & Multiples of 8 Spacing */
+/* Mathematical foundation for consistent, scalable design */
+
+/* ====================================
+   FONT DECLARATIONS - IBM PLEX SERIF
+   ================================== */
+
+@font-face {
+  font-family: "IBM Plex Serif";
+  src: url("../IBMPlex/IBMPlexSerif-Thin.woff2") format("woff2"),
+    url("../IBMPlex/IBMPlexSerif-Thin.woff") format("woff"),
+    url("../IBMPlex/IBMPlexSerif-Thin.ttf") format("truetype");
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IBM Plex Serif";
+  src: url("../IBMPlex/IBMPlexSerif-Light.woff2") format("woff2"),
+    url("../IBMPlex/IBMPlexSerif-Light.woff") format("woff"),
+    url("../IBMPlex/IBMPlexSerif-Light.ttf") format("truetype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IBM Plex Serif";
+  src: url("../IBMPlex/IBMPlexSerif-Regular.woff2") format("woff2"),
+    url("../IBMPlex/IBMPlexSerif-Regular.woff") format("woff"),
+    url("../IBMPlex/IBMPlexSerif-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IBM Plex Serif";
+  src: url("../IBMPlex/IBMPlexSerif-Medium.woff2") format("woff2"),
+    url("../IBMPlex/IBMPlexSerif-Medium.woff") format("woff"),
+    url("../IBMPlex/IBMPlexSerif-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IBM Plex Serif";
+  src: url("../IBMPlex/IBMPlexSerif-SemiBold.woff2") format("woff2"),
+    url("../IBMPlex/IBMPlexSerif-SemiBold.woff") format("woff"),
+    url("../IBMPlex/IBMPlexSerif-SemiBold.ttf") format("truetype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IBM Plex Serif";
+  src: url("../IBMPlex/IBMPlexSerif-Bold.woff2") format("woff2"),
+    url("../IBMPlex/IBMPlexSerif-Bold.woff") format("woff"),
+    url("../IBMPlex/IBMPlexSerif-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Root font size for rem calculations - 16px base */
+html {
+  font-size: 16px; /* 1rem = 16px */
+}
+
+/* ====================================
+   GOLDEN RATIO TYPOGRAPHY SYSTEM
+   ================================== */
+
+:root {
+  /* Golden Ratio Font Scale - Intentional progression */
+  --text-xxlarge: 2.618rem; /* 41.888px ≈ 42px - h1 headers */
+  --text-xlarge: 1.618rem; /* 25.888px ≈ 26px - h2 headers */
+  --text-large: 1.25rem; /* 20px - h3 headers, large text */
+  --text-base: 1.125rem; /* 18px - body text, base size, breaking ratio for character*/
+  --text-small: 0.875rem; /* 14px - small text, captions */
+
+  /* Typography hierarchy - meaningful relationships */
+  --font-size-h1: var(--text-xxlarge);
+  --font-size-h2: var(--text-xlarge);
+  --font-size-h3: var(--text-large);
+  --font-size-h4: var(--text-base);
+  --font-size-body: var(--text-base);
+  --font-size-small: var(--text-small);
+  --font-size-code: 0.9rem;
+
+  /* Mobile typography scale - proportional reduction */
+  --mobile-text-xxlarge: 1.618rem; /* 25.888px ≈ 26px */
+  --mobile-text-xlarge: 1.25rem; /* 20px */
+  --mobile-text-large: 1.125rem; /* 18px */
+  --mobile-text-base: 1rem; /* 16px */
+  --mobile-text-small: 0.875rem; /* 14px */
+}
+
+/* ====================================
+   MULTIPLES OF 8 SPACING SYSTEM
+   ================================== */
+
+:root {
+  /* Multiples of 8px spacing scale - systematic layout */
+  --space-xs: 0.5rem; /* 8px */
+  --space-sm: 1rem; /* 16px */
+  --space-md: 1.5rem; /* 24px */
+  --space-lg: 2rem; /* 32px */
+  --space-xl: 3rem; /* 48px */
+  --space-xxl: 4rem; /* 64px */
+
+  /* Semantic spacing tokens */
+  --padding-tight: var(--space-xs);
+  --padding-normal: var(--space-sm);
+  --padding-loose: var(--space-md);
+  --padding-section: var(--space-lg);
+  --margin-element: var(--space-sm);
+  --margin-section: var(--space-xl);
+  --margin-page: var(--space-xxl);
+
+  /* Layout spacing */
+  --content-padding: var(--space-md);
+  --header-padding: var(--space-lg);
+  --component-gap: var(--space-sm);
+}
+
+/* ====================================
+   FONT WEIGHT SYSTEM
+   ================================== */
+
+:root {
+  /* Standard font weight scale */
+  --font-weight-thin: 200;
+  --font-weight-thin-plus: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Semantic font weights */
+  --weight-body: var(--font-weight-normal);
+  --weight-heading: var(--font-weight-thin);
+  --weight-emphasis: var(--font-weight-semibold);
+  --weight-display: var(--font-weight-thin-plus);
+
+  /* Font family tokens */
+  --font-family-serif: "IBM Plex Serif", Georgia, "Times New Roman", serif;
+  --font-family-heading: var(--font-family-serif);
+  --font-family-directory: var(--font-family-serif);
+  /*  Sans-serif*/
+  --font-family-sans-serif: -apple-system, BlinkMacSystemFont, Aptos, Roboto,
+    "Segoe UI Variable", "Segoe UI", system-ui, ui-sans-serif, Helvetica, Arial,
+    sans-serif;
+  --font-family-heading-sans: var(--font-family-sans-serif);
+  --font-family-directory-sans: var(--font-family-sans-serif);
+}
+
+/* ====================================
+   LINE HEIGHT SYSTEM
+   ================================== */
+
+:root {
+  /* Optimal line heights for readability */
+  --line-height-tight: 1.2; /* Headings - standard tight */
+  --line-height-normal: 1.4; /* Comfortable default */
+  --line-height-relaxed: 1.6; /* Body text - golden ratio optimal */
+  --line-height-loose: 1.8; /* Very spacious, special cases */
+
+  /* Semantic line heights - Direct values for performance */
+  --line-height-heading: 1.2;
+  --line-height-subheading: 1.3;
+  --line-height-body: 1.6;
+  --line-height-ui: 1.4;
+}
+
+/* ====================================
+   LAYOUT WIDTH SYSTEM
+   ================================== */
+
+:root {
+  /* Consistent rem-based widths for predictable layout */
+  --measure-narrow: 30rem; /* 480px - Narrow columns, sidebars */
+  --measure-optimal: 45.5rem; /* 728px - Optimal reading length */
+  --measure-wide: 60rem; /* 960px - Wide content, technical docs */
+
+  /* Component-specific widths */
+  --width-content: 45.5rem; /* 728px - Main content container */
+  --width-wide: 75rem; /* 1200px - Wide layout maximum */
+  --width-card: 45rem; /* 720px - Directory card width */
+}
+
+/* ====================================
+   RESPONSIVE BREAKPOINTS
+   ================================== */
+
+:root {
+  /* Consistent breakpoint values */
+  --breakpoint-tablet: 768px;
+  --breakpoint-mobile: 480px;
+}
+
+/* ====================================
+   COLOR SYSTEM - DARK THEME (DEFAULT)
+   ================================== */
+
+:root {
+  /* Semantic Colors */
+  --bg-color: #151515;
+  --text-color: #e1e1e1;
+  --text-color-white: white;
+  --link-color: #67bafe;
+  --theme-link-color: #151515;
+  --theme-link-bgcolor: #ff531f;
+  --bg-color-nav-button: #171717;
+  --bg-color-nav-button-on: #1c1c1c;
+  --nav-link-color: #ceecff;
+  --link-hover-color: #1fa9ff;
+  --nav-link-hover-color: #1fa9ff;
+  --border-color: #202020;
+  --code-bg: #0a0a0a;
+  --header-bg: #1b1b1b;
+  --header-bg-on: #1b1b1b;
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  --theme-toggle-bg: #262626;
+  --progress-bar-bg: #ff7349;
+  --footer-credit-color: #555555;
+  --footer-credit-link-hover-color: #ff7349;
+
+  /* Navigation */
+  --nav-button-text-color: #ff7349;
+  --nav-button-text-hover-color: #ff9372;
+  --nav-button-border-hover-color: #ff7349;
+
+  /* Comment Threading Colors */
+  --comment-gradient: linear-gradient(
+    to bottom,
+    #67bafe 0%,
+    #8bcbff 25%,
+    #5aaffd 50%,
+    #67bafe 75%,
+    #8bcbff 100%
+  );
+  --comment-color-0: #67bafe;
+  --comment-color-1: #8bcbff;
+  --comment-color-2: #5aaffd;
+  --comment-color-3: #7bc6ff;
+  --comment-color-4: #9bd2ff;
+  --comment-color-5: #bbdeff;
+
+  /* Copy Button Colors */
+  --copy-success-bg: #22c55e;
+
+  /* Syntax Highlighting */
+  --syntax-text-color: #abb2bf;
+  --syntax-comment-color: #5c6370;
+  --syntax-keyword-color: #c678dd;
+  --syntax-string-color: #98c379;
+  --syntax-number-color: #d19a66;
+  --syntax-function-color: #61afef;
+  --syntax-variable-color: #e06c75;
+  --syntax-class-color: #e5c07b;
+  --syntax-tag-color: #e06c75;
+  --syntax-attribute-color: #d19a66;
+  --syntax-builtin-color: #61afef;
+  --syntax-constant-color: #d19a66;
+  --syntax-operator-color: #abb2bf;
+  --syntax-linenos-color: #6e7681;
+  --syntax-hll-bg: rgba(255, 212, 59, 0.2);
+  --syntax-err-color: #f85149;
+}
+
+/* ====================================
+   COLOR SYSTEM - LIGHT THEME
+   ================================== */
+
+[data-theme="light"] {
+  /* Semantic Colors */
+  --bg-color: #fafafa;
+  --text-color: #151515;
+  --link-color: #4b70f5;
+  --theme-link-color: #e8e8e8;
+  --theme-link-bgcolor: #d63900;
+  --nav-link-color: #131b22;
+  --link-hover-color: #8bcbff;
+  --nav-link-hover-color: #1fa9ff;
+  --border-color: #e6e2e2;
+  --code-bg: #f5f5f5;
+  --header-bg: #f5f6f6;
+  --shadow-color: rgba(0, 0, 0, 0);
+  --theme-toggle-bg: #eff1f3;
+  --progress-bar-bg: #151515;
+
+  /* Navigation */
+  --nav-button-text-color: #d63900;
+  --nav-button-border-hover-color: #ff7349;
+
+  /* Comment Threading Colors */
+  --comment-gradient: linear-gradient(
+    to bottom,
+    #4b70f5 0%,
+    #3b60e5 25%,
+    #5b80f7 50%,
+    #4b70f5 75%,
+    #3b60e5 100%
+  );
+  --comment-color-0: #4b70f5;
+  --comment-color-1: #3b60e5;
+  --comment-color-2: #5b80f7;
+  --comment-color-3: #6b90f9;
+  --comment-color-4: #7ba0fb;
+  --comment-color-5: #8bb0fd;
+
+  /* Copy Button Colors */
+  --copy-success-bg: #22c55e;
+
+  /* Syntax Highlighting */
+  --syntax-text-color: #24292f;
+  --syntax-comment-color: #6a737d;
+  --syntax-keyword-color: #d73a49;
+  --syntax-string-color: #032f62;
+  --syntax-number-color: #005cc5;
+  --syntax-function-color: #6f42c1;
+  --syntax-variable-color: #e36209;
+  --syntax-class-color: #6f42c1;
+  --syntax-tag-color: #d73a49;
+  --syntax-attribute-color: #e36209;
+  --syntax-builtin-color: #6f42c1;
+  --syntax-constant-color: #005cc5;
+  --syntax-operator-color: #24292f;
+  --syntax-linenos-color: #8b949e;
+  --syntax-hll-bg: rgba(255, 212, 59, 0.3);
+  --syntax-err-color: #f85149;
+}
+
+/* ====================================
+   DESIGN SYSTEM APPLICATION
+   ================================== */
+
+/* Typography Application */
+h1 {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-h1);
+  line-height: var(--line-height-heading);
+  font-weight: var(--weight-heading);
+  margin-bottom: var(--margin-element);
+}
+
+h2 {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-h2);
+  line-height: var(--line-height-heading);
+  font-weight: var(--weight-heading);
+  margin-bottom: var(--margin-element);
+}
+
+h3 {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-h3);
+  line-height: var(--line-height-subheading);
+  font-weight: var(--weight-heading);
+  margin-bottom: var(--margin-element);
+}
+
+h4,
+h5,
+h6 {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-h4);
+  line-height: var(--line-height-ui);
+  font-weight: var(--weight-heading);
+  margin-bottom: var(--margin-element);
+}
+
+p,
+body {
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+  font-weight: var(--weight-body);
+  margin-bottom: var(--margin-element);
+}
+
+/* Small text elements */
+small,
+.small-text,
+.caption {
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-ui);
+}
+
+/* Code elements */
+code,
+pre,
+.code {
+  font-size: var(--font-size-code);
+  line-height: var(--line-height-normal);
+}
+
+/* Content width constraints */
+.content,
+.article-content,
+.main-content {
+  max-width: var(--measure-optimal);
+  padding: var(--content-padding);
+}
+
+.content-wide {
+  max-width: var(--measure-wide);
+}
+
+.content-narrow {
+  max-width: var(--measure-narrow);
+}
+
+/* Spacing utilities */
+.spacing-tight {
+  padding: var(--padding-tight);
+}
+.spacing-normal {
+  padding: var(--padding-normal);
+}
+.spacing-loose {
+  padding: var(--padding-loose);
+}
+.spacing-section {
+  padding: var(--padding-section);
+}
+
+.margin-element {
+  margin-bottom: var(--margin-element);
+}
+.margin-section {
+  margin-bottom: var(--margin-section);
+}
+.margin-page {
+  margin-bottom: var(--margin-page);
+}
+
+/* Component spacing */
+.component {
+  gap: var(--component-gap);
+}
+
+.header {
+  padding: var(--header-padding);
+}
+
+/* Mobile responsive typography */
+@media (max-width: 768px) {
+  h1 {
+    font-size: var(--mobile-text-xxlarge);
+  }
+
+  h2 {
+    font-size: var(--mobile-text-xlarge);
+  }
+
+  h3 {
+    font-size: var(--mobile-text-large);
+  }
+
+  h4,
+  h5,
+  h6 {
+    font-size: var(--mobile-text-base);
+  }
+
+  p,
+  body {
+    font-size: var(--mobile-text-base);
+  }
+
+  small,
+  .small-text,
+  .caption {
+    font-size: var(--mobile-text-small);
+  }
+}
+
+/* ====================================
+   COMPILED VALUES FOR RUNTIME
+   ================================== */
+
+/*
+This section will be replaced by the design system compiler
+with hardcoded values for performance optimization.
+The compiler will replace CSS custom properties with their
+computed values based on the configuration.
+*/
+
+/* ====================================
+   DIRECTORY-NAME & CONTENT-AREA STYLES
+   ================================== */
+
+/* Directory name styling - uses IBM Plex Serif */
+.directory-name {
+  font-family: var(--font-family-directory);
+}
+
+.directory-name a {
+  font-family: var(--font-family-directory);
+}
+
+/* Content area heading styles - uses IBM Plex Serif */
+.content-area h1,
+.content-area h2,
+.content-area h3,
+.content-area h4,
+.content-area h5,
+.content-area h6 {
+  font-family: var(--font-family-heading);
+}
+
+/* COMPILATION_TARGET_START */
+/* This section is replaced by the design system compiler */
+/* COMPILATION_TARGET_END */

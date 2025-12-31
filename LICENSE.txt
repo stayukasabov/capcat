@@ -1,0 +1,42 @@
+MIT-Style Non-Commercial License
+
+Copyright (c) 2025 Stayu Kasabov
+
+Original Product: Capcat - News Article Archiving System
+Author: Stayu Kasabov | https://stayux.com
+Product Designer with Holistic Production Expertise
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction for NON-COMMERCIAL PURPOSES ONLY,
+including without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+1. NON-COMMERCIAL USE ONLY: This software may not be used for commercial
+   purposes. Commercial purposes include, but are not limited to: selling
+   the software, using it in a commercial product or service, or using it
+   to generate revenue.
+
+2. ATTRIBUTION: The above copyright notice and this permission notice shall
+   be included in all copies or substantial portions of the Software. Credit
+   must be given to the original author: Stayu Kasabov (https://stayux.com)
+
+3. SHARE ALIKE: Any modifications or derivative works must be released under
+   the same non-commercial terms.
+
+4. CONTRIBUTIONS WELCOME: Users are encouraged to contribute improvements
+   back to the original project.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+A free and open-source tool to make people's lives easier.
+Contributions welcome! Contact: Stayu Kasabov | https://stayux.com

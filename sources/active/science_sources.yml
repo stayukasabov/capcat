@@ -1,0 +1,20 @@
+sources:
+  nature:
+    name: "Nature"
+    category: "science"
+    base_url: "https://www.nature.com"
+    timeout: 10
+
+  scientificamerican:
+    name: "Scientific American"
+    category: "science"
+    base_url: "https://www.scientificamerican.com"
+    timeout: 10
+    media_processing:
+      url_patterns:
+        static_images: ['static.scientificamerican.com/dam/']
+      image_selectors:
+        - '.featured-image img'
+        - '.article-image img'
+        - 'img'
+

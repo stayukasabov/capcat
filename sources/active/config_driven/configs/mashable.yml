@@ -1,0 +1,12 @@
+display_name: Mashable
+base_url: https://mashable.com
+category: tech
+discovery:
+  method: rss
+  rss_url: http://feeds.mashable.com/Mashable
+article_selectors:
+- summary
+content_selectors:
+- summary
+author_selectors: []
+publish_date_selectors: []

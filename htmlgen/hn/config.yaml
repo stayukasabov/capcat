@@ -1,0 +1,65 @@
+# HTML Generation Configuration for Hacker News
+# Compartmentalized configuration for source-specific behavior
+
+source_id: "hn"
+display_name: "Hacker News"
+
+# Comment handling configuration
+comments:
+  enabled: true
+  pattern: '\*\*Anonymous\*\*\s*\(\[profile\]\([^)]*\)\)'  # HN markdown format: **Anonymous** ([profile](URL))
+  conditional_display: true  # Only show comment links when comments exist
+  no_comments_message: "No comments found for this article at the moment."
+  count_threshold: 1
+
+# Navigation configuration
+navigation:
+  breadcrumb_style: "technical"
+  show_source_link: true
+  date_format: "YYYY-MM-DD"
+  back_to_news_text: "Back to News"
+  view_comments_text: "View Comments"
+  back_to_article_text: "Back to Article"
+
+# Layout configuration
+layout:
+  template_set: "base"  # Use base templates
+  custom_css_classes:
+    - "hn-style"
+    - "tech-focused"
+  # Note: Custom templates can be added in htmlgen/hn/templates/ to override base templates
+
+# Directory pattern matching
+directory_patterns:
+  - "hacker-news"
+  - "hn_"
+  - "Hacker-News"
+
+# Bundle configuration
+bundle:
+  category: "tech"
+  priority: 1  # Highest priority in tech bundle
+
+# Metadata configuration
+meta:
+  description_source: "first_paragraph"
+  show_read_time: true
+  show_tags: false
+  show_publish_date: true
+  author_display: "username"
+  social_sharing: false
+
+# Content processing configuration
+content:
+  remove_ads: true
+  clean_tracking: true
+  preserve_images: true
+  image_optimization: "none"
+  code_highlighting: true
+  math_rendering: false
+
+# Advanced configuration
+advanced:
+  cache_strategy: "template"
+  rate_limiting:
+    enabled: false

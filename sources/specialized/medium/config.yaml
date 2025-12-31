@@ -1,0 +1,98 @@
+# Medium.com Specialized Source Configuration
+# Automatically activated for Medium URLs with paywall detection
+
+source_id: "medium"
+name: "Medium"
+display_name: "Medium.com"
+type: "specialized"
+
+# URL pattern matching for automatic activation
+url_patterns:
+  - "medium.com"
+  - "*.medium.com"
+  - "/@*"
+  - "/p/*"
+
+# Specialized configuration for Medium
+base_url: "https://medium.com"
+timeout: 30
+headers:
+  User-Agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+
+# Content extraction selectors optimized for Medium
+content_selectors:
+  - "article"
+  - '[data-testid="storyContent"]'
+  - ".postArticle-content"
+  - ".section-content"
+  - ".p-name"
+  - "main"
+
+title_selectors:
+  - 'h1[data-testid="storyTitle"]'
+  - ".p-name"
+  - ".postArticle-title"
+  - "h1"
+
+author_selectors:
+  - '[data-testid="authorName"]'
+  - ".p-author"
+  - ".postMetaInline-authorLockup a"
+  - ".author-name"
+
+date_selectors:
+  - '[data-testid="storyPublishDate"]'
+  - ".dt-published"
+  - "time"
+
+# Image handling optimized for Medium
+image_selectors:
+  - "figure img"
+  - ".medium-image"
+  - 'img[src*="medium.com"]'
+  - ".story-image img"
+  - "img"
+
+# Paywall detection configuration
+paywall:
+  enabled: true
+  indicators:
+    - "paywall"
+    - "member-only"
+    - "subscription-required"
+    - "premium-content"
+    - "upgrade-to-continue"
+    - "sign-in-to-continue"
+    - "become a member"
+    - "unlock this story"
+  redirect_patterns:
+    - "sign-in"
+    - "membership"
+    - "subscribe"
+
+# Skip patterns for URLs to avoid
+skip_patterns:
+  - "/sign-in"
+  - "/membership"
+  - "/subscribe"
+  - "/upgrade"
+  - "paywall"
+
+# Media handling
+media:
+  download_images: true
+  download_videos: false  # Medium rarely has videos
+  download_audio: false
+  image_quality: "high"
+
+# Output formatting
+formatting:
+  optimize_for_medium: true
+  preserve_formatting: true
+  clean_excessive_breaks: true
+  fix_dividers: true
+
+# Privacy compliance
+privacy:
+  anonymize_authors: false  # Keep Medium author attribution
+  preserve_links: true

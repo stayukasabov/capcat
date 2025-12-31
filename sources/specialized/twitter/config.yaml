@@ -1,0 +1,33 @@
+# Twitter/X.com Specialized Source Configuration
+source_id: twitter
+name: Twitter/X.com
+display_name: "X.com"
+base_url: "https://x.com"
+
+# URL pattern matching (regex)
+url_patterns:
+  - "twitter\\.com"
+  - "x\\.com"
+
+# Template for placeholder articles
+template:
+  title: "X.com post"
+  body: "Visit the original publication."
+  source_label: "Source URL"
+
+# Metadata
+metadata:
+  category: social_media
+  requires_js: true
+  archivable: false
+  reason: "JavaScript-based dynamic content, API access required for archiving"
+
+# Optional: Rate limiting
+rate_limit:
+  requests_per_minute: 10
+
+# Optional: Update mode behavior
+update:
+  check_validity: true
+  update_timestamp: true
+  preserve_on_404: true
