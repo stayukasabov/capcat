@@ -735,20 +735,6 @@ Examples:
         help='What to list'
     )
 
-    # Config command
-    config_parser = subparsers.add_parser(
-        'config', help='Configuration management'
-    )
-    config_group = config_parser.add_mutually_exclusive_group()
-    config_group.add_argument(
-        '--show', '-s', action='store_true',
-        help='Show current configuration'
-    )
-    config_group.add_argument(
-        '--set', metavar='KEY=VALUE',
-        help='Set configuration value'
-    )
-
     # Add-source command
     add_source_parser = subparsers.add_parser(
         'add-source', help='Add a new RSS source interactively',
@@ -929,7 +915,7 @@ def validate_arguments(args: argparse.Namespace) -> Dict[str, Any]:
             'all_bundles': getattr(args, 'all', False),
         })
     elif args.command in [
-        'list', 'config', 'catch', 'add-source', 'remove-source'
+        'list', 'catch', 'add-source', 'remove-source'
     ]:
         # These commands are handled directly or have simple args
         if args.command == 'add-source':
@@ -1022,10 +1008,6 @@ def parse_arguments(argv: Optional[List[str]] = None) -> Dict[str, Any]:
         sys.exit(0)
     elif args.command == 'generate-config':
         generate_config_command(args)
-        sys.exit(0)
-    elif args.command == 'config':
-        # ... (config logic)
-        print("Config command not yet implemented.")
         sys.exit(0)
 
     try:
