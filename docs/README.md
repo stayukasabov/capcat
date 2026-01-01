@@ -15,7 +15,7 @@ Inspired by the UX Writing Skill design with warm, readable colors:
 
 ### Typography
 
-- **Font Family:** IBM Plex Serif for headings and body text
+- **Font Family:** SourceSerif4 for headings and body text
 - **Golden Ratio Scale:** 1.618 progression for harmonious hierarchy
 - **Base Size:** 18px (1.125rem) for optimal readability
 - **Line Height:** 1.6 for body text, 1.2 for headings
@@ -42,7 +42,7 @@ website/
 ├── js/
 │   └── main.js             # Interactive behaviors
 ├── fonts/
-│   └── IBMPlex/            # IBM Plex Serif font files
+│   └── IBMPlex/            # SourceSerif4 font files
 ├── images/
 │   └── ...                 # Website assets
 └── README.md               # This file
@@ -232,7 +232,7 @@ All design tokens are defined in `css/design-system.css`:
 ## Credits
 
 - **Design & Development:** Stayu Kasabov
-- **Typography:** IBM Plex Serif by IBM
+- **Typography:** SourceSerif4 by IBM
 - **Inspiration:** Source Serif 4 design palette
 - **Architecture:** Based on Capcat case study
 
