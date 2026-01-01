@@ -219,15 +219,7 @@ Based on golden ratio (1.618):
 
 ### Font Files
 
-IBM Plex Serif font files should be placed in `fonts/IBMPlex/`:
-- IBMPlexSerif-Thin.woff2
-- IBMPlexSerif-Light.woff2
-- IBMPlexSerif-Regular.woff2
-- IBMPlexSerif-Medium.woff2
-- IBMPlexSerif-SemiBold.woff2
-- IBMPlexSerif-Bold.woff2
-
-Download from: https://github.com/IBM/plex/releases
+SourceSerif4 font files should be placed in `fonts/
 
 ### Customization
 
