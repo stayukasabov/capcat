@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Read(//Users/xpro/SynologyDrive/_/_!0-CURRENT-LEARNING/_!0START/_!0NEWS/GEMINI-Capcat copy/News/News_26-10-2025/Hacker_News_26-10-2025/Show HN ShadcnUI theme editor – Design and share Shadcn themes/html/**)",
+      "Read(//Users/xpro/SynologyDrive/_/_!0-CURRENT-LEARNING/_!0START/_!0NEWS/GEMINI-Capcat copy/News/News_26-10-2025/Hacker_News_26-10-2025/Show HN Status of my favorite bike share stations/html/**)",
+      "Read(//Users/xpro/SynologyDrive/_/_!0-CURRENT-LEARNING/_!0START/_!0NEWS/GEMINI-Capcat copy/News/News_26-10-2025/Hacker_News_26-10-2025/Making a micro Linux distro 2023/html/**)",
+      "Read(//Users/xpro/SynologyDrive/_/_!0-CURRENT-LEARNING/_!0START/_!0NEWS/GEMINI-Capcat copy/News/News_26-10-2025/Hacker_News_26-10-2025/**)",
+      "Bash(xargs hexdump:*)",
+      "Read(//Users/xpro/SynologyDrive/_/_!0-CURRENT-LEARNING/_!0START/_!0NEWS/GEMINI-Capcat copy/**)",
+      "Bash(source:*)",
+      "Bash(./capcat:*)",
+      "Bash(mkdir:*)",
+      "Bash(python3:*)",
+      "Skill(portfolio-designer-skill)",
+      "Bash(tree:*)",
+      "Bash(rm:*)",
+      "Bash(curl:*)",
+      "Bash(python -m pytest tests/ -v --tb=short)",
+      "Bash(python -m pytest:*)",
+      "Bash(cat:*)",
+      "Bash(python tests/test_list_command.py:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

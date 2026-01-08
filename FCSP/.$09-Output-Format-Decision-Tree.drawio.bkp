@@ -1,0 +1,91 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/28.2.8 Chrome/140.0.7339.240 Electron/38.4.0 Safari/537.36" version="28.2.8">
+  <diagram name="Output Format Decision Tree" id="output-format">
+    <mxGraphModel dx="1186" dy="829" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="input" value="Content Collection" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=14;fontStyle=1" parent="1" vertex="1">
+          <mxGeometry x="620" y="40" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="q1" value="Usage Intent?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=14;fontStyle=1" parent="1" vertex="1">
+          <mxGeometry x="630" y="140" width="140" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="personal" value="Markdown Only" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#60a5fa;strokeColor=#0066CC;fontColor=#ffffff;fontSize=12;fontStyle=1" parent="1" vertex="1">
+          <mxGeometry x="200" y="280" width="140" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="obsidian" value="Import to&#xa;Obsidian Vault" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#7c3aed;strokeColor=#5b21b6;fontColor=#ffffff;fontSize=12" parent="1" vertex="1">
+          <mxGeometry x="200" y="380" width="140" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="search" value="Full-text Search&#xa;Cross-linking&#xa;Knowledge Graph" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#16a34a;strokeColor=#0d7a33;fontColor=#ffffff;fontSize=11" parent="1" vertex="1">
+          <mxGeometry x="200" y="480" width="140" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="sharing" value="Markdown + HTML" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f472b6;strokeColor=#CC0066;fontColor=#ffffff;fontSize=12;fontStyle=1" parent="1" vertex="1">
+          <mxGeometry x="630" y="280" width="140" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="html1" value="Professional HTML&#xa;Embedded CSS/JS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fbbf24;strokeColor=#d79b00;fontSize=11" parent="1" vertex="1">
+          <mxGeometry x="630" y="380" width="140" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="dist1" value="Email to Team&#xa;or Internal Server" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11" parent="1" vertex="1">
+          <mxGeometry x="630" y="480" width="140" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="offline1" value="Recipients Browse&#xa;Offline Access" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#16a34a;strokeColor=#0d7a33;fontColor=#ffffff;fontSize=11" parent="1" vertex="1">
+          <mxGeometry x="630" y="580" width="140" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="public" value="Markdown + HTML&#xa;with Themes" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#a78bfa;strokeColor=#7c3aed;fontColor=#ffffff;fontSize=12;fontStyle=1" parent="1" vertex="1">
+          <mxGeometry x="1060" y="280" width="140" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="html2" value="Themed HTML&#xa;Custom Styling" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fbbf24;strokeColor=#d79b00;fontSize=11" parent="1" vertex="1">
+          <mxGeometry x="1060" y="380" width="140" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="dist2" value="Web Hosting&#xa;or Public Share" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11" parent="1" vertex="1">
+          <mxGeometry x="1060" y="480" width="140" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="offline2" value="Public Access&#xa;Self-contained" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#16a34a;strokeColor=#0d7a33;fontColor=#ffffff;fontSize=11" parent="1" vertex="1">
+          <mxGeometry x="1060" y="580" width="140" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;" parent="1" source="input" target="q1" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a2" value="Personal Research" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;" parent="1" source="q1" target="personal" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a3" value="Team Sharing" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;" parent="1" source="q1" target="sharing" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a4" value="Public Archive" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;" parent="1" source="q1" target="public" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;" parent="1" source="personal" target="obsidian" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#16a34a;" parent="1" source="obsidian" target="search" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;" parent="1" source="sharing" target="html1" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;" parent="1" source="html1" target="dist1" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#16a34a;" parent="1" source="dist1" target="offline1" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;" parent="1" source="public" target="html2" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;" parent="1" source="html2" target="dist2" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#16a34a;" parent="1" source="dist2" target="offline2" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="label1" value="Personal Research" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontStyle=2" parent="1" vertex="1">
+          <mxGeometry x="210" y="250" width="120" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="label3" value="Public Archive" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontStyle=2" parent="1" vertex="1">
+          <mxGeometry x="1070" y="250" width="120" height="20" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
