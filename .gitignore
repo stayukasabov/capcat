@@ -17,9 +17,6 @@ dist/
 *.egg-info/
 .eggs/
 
-# Scripts
-scripts/
-
 # Testing
 .pytest_cache/
 .coverage
