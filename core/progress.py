@@ -5,6 +5,8 @@ Provides user-friendly feedback during long-running operations.
 """
 
 import atexit
+import re
+import shutil
 import signal
 import sys
 import threading
@@ -35,6 +37,64 @@ def _signal_handler(signum, frame):
 
 signal.signal(signal.SIGINT, _signal_handler)
 signal.signal(signal.SIGTERM, _signal_handler)
+
+
+def _get_terminal_width() -> int:
+    """Get terminal width, with fallback to 80 columns."""
+    try:
+        return shutil.get_terminal_size().columns
+    except (AttributeError, ValueError, OSError):
+        return 80
+
+
+def _strip_ansi_codes(text: str) -> str:
+    """Remove ANSI escape codes from text to measure visible width."""
+    ansi_escape = re.compile(r'\033\[[0-9;]*m')
+    return ansi_escape.sub('', text)
+
+
+def _truncate_to_width(text: str, max_width: int) -> str:
+    """
+    Truncate text to fit within terminal width, preserving ANSI codes.
+
+    Args:
+        text: Text with ANSI codes
+        max_width: Maximum visible character width
+
+    Returns:
+        Truncated text that fits within max_width
+    """
+    visible_text = _strip_ansi_codes(text)
+    if len(visible_text) <= max_width:
+        return text
+
+    # Need to truncate - preserve ANSI codes while shortening visible text
+    # Strategy: Remove characters from the middle section (operation name or stage info)
+    # Keep spinner, progress bar, and percentage intact
+
+    # Find components using ANSI pattern boundaries
+    # Format: [spinner] [operation] [progress_bar] [count/percentage] [(stage)]
+
+    # Simple truncation: just cut at max_width of visible chars
+    visible_chars = 0
+    result = []
+    i = 0
+
+    while i < len(text) and visible_chars < max_width:
+        if text[i:i+2] == '\033[':
+            # ANSI code - don't count toward visible width
+            end = text.find('m', i)
+            if end != -1:
+                result.append(text[i:end+1])
+                i = end + 1
+            else:
+                break
+        else:
+            result.append(text[i])
+            visible_chars += 1
+            i += 1
+
+    return ''.join(result)
 
 
 class ProgressIndicator:
@@ -282,6 +342,9 @@ class ProgressIndicator:
 
                 # Clear line and write status - ensure clean display
                 if sys.stdout.isatty():
+                    # Truncate status to terminal width to prevent line wrapping
+                    term_width = _get_terminal_width()
+                    status = _truncate_to_width(status, term_width - 1)
                     # Move to beginning of line, clear entire line, then write status
                     sys.stdout.write(f"\r\033[2K{status}")
                     sys.stdout.flush()
@@ -539,6 +602,9 @@ class BatchProgress:
 
             # Clear line and write status - ensure clean display
             if sys.stdout.isatty():
+                # Truncate status to terminal width to prevent line wrapping
+                term_width = _get_terminal_width()
+                status = _truncate_to_width(status, term_width - 1)
                 # Move to beginning of line, clear entire line, then write status
                 sys.stdout.write(f"\r\033[2K{status}")
                 sys.stdout.flush()
@@ -907,6 +973,9 @@ class BatchProgress:
 
             # Clear line and write status - ensure clean display
             if sys.stdout.isatty():
+                # Truncate status to terminal width to prevent line wrapping
+                term_width = _get_terminal_width()
+                status = _truncate_to_width(status, term_width - 1)
                 # Move to beginning of line, clear entire line, then write status
                 sys.stdout.write(f"\r\033[2K{status}")
                 sys.stdout.flush()
