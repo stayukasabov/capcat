@@ -150,14 +150,14 @@ class ProgressIndicator:
                 "▂",
             ],
             "loading": [
-                "CATCHING ▷ ",
-                "CATCHING ▷ ",
-                "CATCHING ▷ ",
-                "CATCHING ▷ ",
-                "CATCHING ▷ ",
-                "CATCHING ▷ ",
-                "CATCHING ▷ ",
-                "CATCHING ▷ ",
+                "CATCHING ▶",
+                "CATCHING ▶",
+                "CATCHING ▶",
+                "CATCHING ▶",
+                "CATCHING ▶",
+                "CATCHING ▶",
+                "CATCHING ▶",
+                "CATCHING ▶",
             ],
             "pulse": ["◐", "◓", "◑", "◒"],
             "bounce": ["◐", "◓", "◑", "◒"],
@@ -305,25 +305,25 @@ class ProgressIndicator:
                 # Spinner characters with colors if supported
                 if use_colors:
                     spinner_chars = [
-                        "\033[38;5;166m CATCHING ▷\033[0m",
-                        "\033[38;5;166m CATCHING ▷\033[0m",
-                        "\033[38;5;166m CATCHING ▷\033[0m",
-                        "\033[38;5;166m CATCHING ▷\033[0m",
-                        "\033[38;5;166m CATCHING ▷\033[0m",
-                        "\033[38;5;166m CATCHING ▷\033[0m",
-                        "\033[38;5;166m CATCHING ▷\033[0m",
-                        "\033[38;5;166m CATCHING ▷\033[0m",
+                        "\033[38;5;166m CATCHING ▶\033[0m",
+                        "\033[38;5;166m CATCHING ▶\033[0m",
+                        "\033[38;5;166m CATCHING ▶\033[0m",
+                        "\033[38;5;166m CATCHING ▶\033[0m",
+                        "\033[38;5;166m CATCHING ▶\033[0m",
+                        "\033[38;5;166m CATCHING ▶\033[0m",
+                        "\033[38;5;166m CATCHING ▶\033[0m",
+                        "\033[38;5;166m CATCHING ▶\033[0m",
                     ]
                 else:
                     spinner_chars = [
-                        "CATCHING ▷",
-                        "CATCHING ▷",
-                        "CATCHING ▷",
-                        "CATCHING ▷",
-                        "CATCHING ▷",
-                        "CATCHING ▷",
-                        "CATCHING ▷",
-                        "CATCHING ▷",
+                        "CATCHING ▶",
+                        "CATCHING ▶",
+                        "CATCHING ▶",
+                        "CATCHING ▶",
+                        "CATCHING ▶",
+                        "CATCHING ▶",
+                        "CATCHING ▶",
+                        "CATCHING ▶",
                     ]
                 spinner_char = spinner_chars[
                     self.spinner_index % len(spinner_chars)
@@ -415,14 +415,14 @@ class BatchProgress:
         # Enhanced spinner with multiple animation sets
         self.spinner_sets = {
             "activity": [
-                "CATCHING ▷ ",
-                "CATCHING ▷ ",
-                "CATCHING ▷ ",
-                "CATCHING ▷ ",
-                "CATCHING ▷ ",
-                "CATCHING ▷ ",
-                "CATCHING ▷ ",
-                "CATCHING ▷ ",
+                "CATCHING ▶",
+                "CATCHING ▶",
+                "CATCHING ▶",
+                "CATCHING ▶",
+                "CATCHING ▶",
+                "CATCHING ▶",
+                "CATCHING ▶",
+                "CATCHING ▶",
             ],
             "progress": ["◐", "◓", "◑", "◒"],
             "pulse": ["◐", "◓", "◑", "◒"],
@@ -534,25 +534,25 @@ class BatchProgress:
 
         if use_colors:
             spinner_chars = [
-                "\033[38;5;166m CATCHING ▷\033[0m",
-                "\033[38;5;166m CATCHING ▷\033[0m",
-                "\033[38;5;166m CATCHING ▷\033[0m",
-                "\033[38;5;166m CATCHING ▷\033[0m",
-                "\033[38;5;166m CATCHING ▷\033[0m",
-                "\033[38;5;166m CATCHING ▷\033[0m",
-                "\033[38;5;166m CATCHING ▷\033[0m",
-                "\033[38;5;166m CATCHING ▷\033[0m",
+                "\033[38;5;166m CATCHING ▶\033[0m",
+                "\033[38;5;166m CATCHING ▶\033[0m",
+                "\033[38;5;166m CATCHING ▶\033[0m",
+                "\033[38;5;166m CATCHING ▶\033[0m",
+                "\033[38;5;166m CATCHING ▶\033[0m",
+                "\033[38;5;166m CATCHING ▶\033[0m",
+                "\033[38;5;166m CATCHING ▶\033[0m",
+                "\033[38;5;166m CATCHING ▶\033[0m",
             ]
         else:
             spinner_chars = [
-                " CATCHING ▷ ",
-                " CATCHING ▷ ",
-                " CATCHING ▷ ",
-                " CATCHING ▷ ",
-                " CATCHING ▷ ",
-                " CATCHING ▷ ",
-                " CATCHING ▷ ",
-                " CATCHING ▷ ",
+                " CATCHING ▶",
+                " CATCHING ▶",
+                " CATCHING ▶",
+                " CATCHING ▶",
+                " CATCHING ▶",
+                " CATCHING ▶",
+                " CATCHING ▶",
+                " CATCHING ▶",
             ]
         spinner_char = spinner_chars[self.spinner_index % len(spinner_chars)]
 
@@ -628,20 +628,20 @@ class BatchProgress:
             if self.total_items > 1:
                 if use_colors:
                     print(
-                        f"\033[1;38;5;157m✦\033[0m STARTING {self.operation_name.upper()} ({self.total_items} ITEMS)"
+                        f"\033[1;38;5;157m▷\033[0m STARTING {self.operation_name.upper()} ({self.total_items} ITEMS)"
                     )
                 else:
                     print(
-                        f"✦ STARTING {self.operation_name.upper()} ({self.total_items} ITEMS)"
+                        f"▷ STARTING {self.operation_name.upper()} ({self.total_items} ITEMS)"
                     )
             else:
                 if use_colors:
                     print(
-                        f"\033[1;38;5;157m✦\033[0m STARTING {self.operation_name.upper()}"
+                        f"\033[1;38;5;157m▷\033[0m STARTING {self.operation_name.upper()}"
                     )
                 else:
                     print(
-                        f"✦ STARTING {self.operation_name.upper()}"
+                        f"▷ STARTING {self.operation_name.upper()}"
                     )
 
         self.logger.info(
@@ -729,11 +729,11 @@ class BatchProgress:
                     else "\033[1;31m\u2612\033[0m"
                 )
                 dice_char = "\033[1;38;5;166m◐\033[0m"
-                spinner_char = "\033[38;5;166m CATCHING ▷\033[0m"
+                spinner_char = "\033[38;5;166m CATCHING ▶\033[0m"
             else:
                 status_symbol = "\u2611" if success else "\u2612"
                 dice_char = "◐"
-                spinner_char = " CATCHING ▷ "
+                spinner_char = " CATCHING ▶"
 
             # Clear progress line before printing item completion
             if sys.stdout.isatty():
@@ -815,9 +815,9 @@ class BatchProgress:
 
             # Print summary on next line
             if use_colors:
-                print(f"\033[38;5;166m CATCHING ▷\033[0m {summary.upper()}")
+                print(f"\033[38;5;166m CATCHING ▶\033[0m {summary.upper()}")
             else:
-                print(f" CATCHING ▷ {summary.upper()}")
+                print(f" CATCHING ▶{summary.upper()}")
         else:
             # In quiet mode, only show essential information
             if self.failed > 0:
@@ -905,25 +905,25 @@ class BatchProgress:
 
         if use_colors:
             spinner_chars = [
-                "\033[38;5;166m CATCHING ▷\033[0m",
-                "\033[38;5;166m CATCHING ▷\033[0m",
-                "\033[38;5;166m CATCHING ▷\033[0m",
-                "\033[38;5;166m CATCHING ▷\033[0m",
-                "\033[38;5;166m CATCHING ▷\033[0m",
-                "\033[38;5;166m CATCHING ▷\033[0m",
-                "\033[38;5;166m CATCHING ▷\033[0m",
-                "\033[38;5;166m CATCHING ▷\033[0m",
+                "\033[38;5;166m CATCHING ▶\033[0m",
+                "\033[38;5;166m CATCHING ▶\033[0m",
+                "\033[38;5;166m CATCHING ▶\033[0m",
+                "\033[38;5;166m CATCHING ▶\033[0m",
+                "\033[38;5;166m CATCHING ▶\033[0m",
+                "\033[38;5;166m CATCHING ▶\033[0m",
+                "\033[38;5;166m CATCHING ▶\033[0m",
+                "\033[38;5;166m CATCHING ▶\033[0m",
             ]
         else:
             spinner_chars = [
-                " CATCHING ▷ ",
-                " CATCHING ▷ ",
-                " CATCHING ▷ ",
-                " CATCHING ▷ ",
-                " CATCHING ▷ ",
-                " CATCHING ▷ ",
-                " CATCHING ▷ ",
-                " CATCHING ▷ ",
+                " CATCHING ▶",
+                " CATCHING ▶",
+                " CATCHING ▶",
+                " CATCHING ▶",
+                " CATCHING ▶",
+                " CATCHING ▶",
+                " CATCHING ▶",
+                " CATCHING ▶",
             ]
         spinner_char = spinner_chars[self.spinner_index % len(spinner_chars)]
 

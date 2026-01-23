@@ -323,9 +323,9 @@ class CapcatWrapperRefactored:
         Returns:
             True if success message appropriate, False otherwise
         """
-        help_flags = ["--help", "-h", "--version", "-v", "list"]
+        help_flags = ["--help", "-h", "--version", "-v", "list", "catch"]
 
-        # Check for explicit help/version flags
+        # Check for explicit help/version flags or interactive commands
         if any(arg in help_flags for arg in args):
             return False
 
