@@ -15,6 +15,7 @@
     <link rel="icon" type="image/x-icon" href="icons/Capcat.ico" />
   </head>
   <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
     <header class="site-header">
       <div class="container">
         <nav class="main-nav">
@@ -41,7 +42,7 @@
               </svg>
             </a>
           </div>
-          <ul class="nav-links">
+          <ul class="nav-links" id="main-navigation">
             <li>
               <a href="/#features" title="View Capcat features">Features</a>
             </li>
@@ -75,7 +76,10 @@
               >
             </li>
           </ul>
-          <button class="mobile-menu-toggle" aria-label="Toggle menu">
+          <button class="mobile-menu-toggle"
+                  aria-label="Toggle menu"
+                  aria-expanded="false"
+                  aria-controls="main-navigation">
             <span></span>
             <span></span>
             <span></span>
@@ -85,7 +89,7 @@
     </header>
 
     <!-- Hero Section -->
-    <section class="hero">
+    <section id="main-content" class="hero">
       <div class="container">
         <div class="hero-content">
           <h1>Archive Articles with Confidence. Share without Limits.</h1>
@@ -96,8 +100,9 @@
               >Ethical Scraping</a
             >.
           </p>
+          <span id="demo-heading" class="visually-hidden">Example command-line usage</span>
           <div class="hero-demo">
-            <pre class="code-demo"><code>$ ./capcat bundle tech --count 30
+            <pre class="code-demo" role="region" aria-labelledby="demo-heading"><code class="language-bash">$ ./capcat bundle tech --count 30
 
 Fetching from 3 sources in bundle 'tech'
 ◯ STARTING HACKER NEWS (30 ITEMS)
@@ -112,16 +117,17 @@ Saved to: ../News/news_2025-11-24/</code></pre>
       <!-- LLM Generated Software Alert -->
       <div class="container">
         <h2 class="NLP-alert">
-          Defined with natural language processing. Built with large language
-          models.<br />A Minimum viable product.
+          Defined with natural language processing. Built with large language models.
+          <br />
+          A Minimum Viable Product.
         </h2>
       </div>
     </section>
     <hr />
     <!-- Problem Section -->
-    <section id="problem" class="section">
+    <section id="problem" class="section" aria-labelledby="problem-heading">
       <div class="container">
-        <h2>The Problem: Information Overload and Inefficient Recall</h2>
+        <h2 id="problem-heading">The Problem: Information Overload and Inefficient Recall</h2>
         <div class="problem-grid">
           <div class="problem-card">
             <h3>Browser Inefficiencies</h3>
@@ -148,9 +154,9 @@ Saved to: ../News/news_2025-11-24/</code></pre>
       </div>
     </section>
     <!-- Features Section -->
-    <section id="features" class="section section-alt">
+    <section id="features" class="section section-alt" aria-labelledby="features-heading">
       <div class="container">
-        <h2>Two Complete Interfaces, One Powerful Backend</h2>
+        <h2 id="features-heading">Two Complete Interfaces, One Powerful Backend</h2>
         <p class="section-intro">
           Capcat offers two modes optimized for different workflows - both
           sharing a unified backend for consistent, reliable results.
@@ -161,7 +167,7 @@ Saved to: ../News/news_2025-11-24/</code></pre>
             <div class="feature-icon">
               <img
                 src="icons/Command-Line-Mode-icon.svg"
-                alt="Command-Line Mode"
+                alt="Terminal window icon with command prompt"
               />
             </div>
             <h2>Command-Line Mode</h2>
@@ -175,7 +181,7 @@ Saved to: ../News/news_2025-11-24/</code></pre>
             <div class="feature-icon">
               <img
                 src="icons/Interactive-Menu-icon.svg"
-                alt="Interactive Menu"
+                alt="Menu icon with checkboxes and selection indicators"
               />
             </div>
             <h2>Interactive Menu (TUI)</h2>
@@ -189,7 +195,7 @@ Saved to: ../News/news_2025-11-24/</code></pre>
             <div class="feature-icon">
               <img
                 src="icons/Bulk-RSS-Fetching-icon.svg"
-                alt="Bulk RSS Fetching"
+                alt="RSS feed icon with multiple streams converging"
               />
             </div>
             <h2>Bulk RSS Fetching</h2>
@@ -203,7 +209,7 @@ Saved to: ../News/news_2025-11-24/</code></pre>
             <div class="feature-icon">
               <img
                 src="icons/Local-Markdown-Storage-icon.svg"
-                alt="Local Markdown Storage"
+                alt="Document folder icon with Markdown symbol"
               />
             </div>
             <h2>Local Markdown Storage</h2>
@@ -215,7 +221,7 @@ Saved to: ../News/news_2025-11-24/</code></pre>
 
           <div class="feature-card">
             <div class="feature-icon">
-              <img src="icons/HTML-Generation-icon.svg" alt="HTML Generation" />
+              <img src="icons/HTML-Generation-icon.svg" alt="Web page icon with HTML brackets" />
             </div>
             <h2>HTML Generation</h2>
             <p>
@@ -228,7 +234,7 @@ Saved to: ../News/news_2025-11-24/</code></pre>
             <div class="feature-icon">
               <img
                 src="icons/Offline-Accessibility-icon.svg"
-                alt="Offline Accessibility"
+                alt="Download icon with checkmark indicating local storage"
               />
             </div>
             <h2>Offline Accessibility</h2>
@@ -242,13 +248,12 @@ Saved to: ../News/news_2025-11-24/</code></pre>
     </section>
     <hr />
     <!-- How It Works -->
-    <section id="how-it-works" class="section">
+    <section id="how-it-works" class="section" aria-labelledby="how-heading">
       <div class="container">
-        <h2>How Capcat Works</h2>
+        <h2 id="how-heading">How Capcat Works</h2>
 
-        <div class="workflow">
-          <div class="workflow-step">
-            <div class="step-number">1</div>
+        <ol class="workflow" aria-label="How Capcat works in 5 steps">
+          <li class="workflow-step">
             <div class="step-content">
               <h3>Choose Your Interface</h3>
               <p>
@@ -256,10 +261,9 @@ Saved to: ../News/news_2025-11-24/</code></pre>
                 provide complete functionality.
               </p>
             </div>
-          </div>
+          </li>
 
-          <div class="workflow-step">
-            <div class="step-number">2</div>
+          <li class="workflow-step">
             <div class="step-content">
               <h3>Select Sources</h3>
               <p>
@@ -267,10 +271,9 @@ Saved to: ../News/news_2025-11-24/</code></pre>
                 Nature, etc.) or use predefined bundles.
               </p>
             </div>
-          </div>
+          </li>
 
-          <div class="workflow-step">
-            <div class="step-number">3</div>
+          <li class="workflow-step">
             <div class="step-content">
               <h3>Parallel Fetching</h3>
               <p>
@@ -278,10 +281,9 @@ Saved to: ../News/news_2025-11-24/</code></pre>
                 than sequential processing.
               </p>
             </div>
-          </div>
+          </li>
 
-          <div class="workflow-step">
-            <div class="step-number">4</div>
+          <li class="workflow-step">
             <div class="step-content">
               <h3>Organized Storage</h3>
               <p>
@@ -289,10 +291,9 @@ Saved to: ../News/news_2025-11-24/</code></pre>
                 matter, images preserved, optional HTML.
               </p>
             </div>
-          </div>
+          </li>
 
-          <div class="workflow-step">
-            <div class="step-number">5</div>
+          <li class="workflow-step">
             <div class="step-content">
               <h3>Search & Recall</h3>
               <p>
@@ -300,14 +301,14 @@ Saved to: ../News/news_2025-11-24/</code></pre>
                 with HTML themes.
               </p>
             </div>
-          </div>
-        </div>
+          </li>
+        </ol>
       </div>
     </section>
     <!-- Dual Mode Benefits -->
-    <section id="modes" class="section section-alt">
+    <section id="modes" class="section section-alt" aria-labelledby="modes-heading">
       <div class="container">
-        <h2>Why Two Modes?</h2>
+        <h2 id="modes-heading">Why Two Modes?</h2>
         <div class="dual-mode-grid">
           <div class="mode-comparison">
             <h3>TUI Mode: Discovery & Learning</h3>
@@ -342,9 +343,9 @@ Saved to: ../News/news_2025-11-24/</code></pre>
     </section>
     <hr />
     <!-- Tutorials Section -->
-    <section id="tutorials" class="section">
+    <section id="tutorials" class="section" aria-labelledby="tutorials-heading">
       <div class="container">
-        <h2>Tutorials & Documentation</h2>
+        <h2 id="tutorials-heading">Tutorials & Documentation</h2>
         <p class="section-intro">
           Tutorials for mastering both CLI and interactive menu modes.
         </p>
@@ -363,22 +364,22 @@ Saved to: ../News/news_2025-11-24/</code></pre>
               <li>
                 <a
                   href="docs/tutorials/user/02-daily-workflow.html"
-                  title="Daily news collection"
-                  >Daily News Collection Workflow</a
+                  title="Daily news collection in interactive mode"
+                  >Daily Workflow (Interactive)</a
                 >
               </li>
               <li>
                 <a
                   href="docs/tutorials/user/04-managing-sources.html"
-                  title="Add, remove, organize sources"
-                  >Managing Your Sources</a
+                  title="Add, remove, organize sources in interactive mode"
+                  >Managing Sources (Interactive)</a
                 >
               </li>
               <li>
                 <a
                   href="docs/tutorials/user/05-bundles.html"
-                  title="Group sources efficiently"
-                  >Organizing with Bundles</a
+                  title="Group sources efficiently in interactive mode"
+                  >Organizing Bundles (Interactive)</a
                 >
               </li>
             </ul>
@@ -397,22 +398,22 @@ Saved to: ../News/news_2025-11-24/</code></pre>
               <li>
                 <a
                   href="docs/tutorials/user/02-daily-workflow.html"
-                  title="Daily news collection"
-                  >Daily News Collection Workflow</a
+                  title="Daily news collection via CLI"
+                  >Daily Workflow (CLI)</a
                 >
               </li>
               <li>
                 <a
                   href="docs/tutorials/user/04-managing-sources.html"
-                  title="Add, remove, organize sources"
-                  >Managing Your Sources</a
+                  title="Add, remove, organize sources via command line"
+                  >Managing Sources (CLI)</a
                 >
               </li>
               <li>
                 <a
                   href="docs/tutorials/user/05-bundles.html"
-                  title="Group sources efficiently"
-                  >Organizing with Bundles</a
+                  title="Group sources efficiently with CLI commands"
+                  >Organizing Bundles (CLI)</a
                 >
               </li>
             </ul>
@@ -451,9 +452,9 @@ Saved to: ../News/news_2025-11-24/</code></pre>
       </div>
     </section>
     <!-- Sources & Capabilities -->
-    <section id="sources" class="section section-alt">
+    <section id="sources" class="section section-alt" aria-labelledby="sources-heading">
       <div class="container">
-        <h2>Sources Ready to Archive</h2>
+        <h2 id="sources-heading">Sources Ready to Archive</h2>
         <p class="section-intro">
           Preconfigured sources across technology, news, science, and AI - or
           add your own RSS feeds.
@@ -494,7 +495,7 @@ Saved to: ../News/news_2025-11-24/</code></pre>
         </div>
       </div>
       <div class="feature-icon-sources">
-        <img src="icons/Your-Own-Sources-icon.svg" alt="Your Own Sources" />
+        <img src="icons/Your-Own-Sources-icon.svg" alt="Plus icon with RSS feed symbol for adding sources" />
       </div>
       <div class="custom-sources">
         <h2>Add Your Own Sources</h2>
@@ -506,40 +507,43 @@ Saved to: ../News/news_2025-11-24/</code></pre>
     </section>
 
     <!-- Get Started Section -->
-    <section id="get-started" class="section cta-section">
+    <section id="get-started" class="section cta-section" aria-labelledby="get-started-heading">
       <div class="container">
         <div class="feature-cat">
           <div class="holographic-container">
             <!-- Static background layer: Crowd illustration (NOT affected by JS transforms) -->
             <div class="crowd-background">
-              <img src="icons/Crowd.svg" alt="Crowd background illustration" />
+              <img src="icons/Crowd.svg" alt="" role="presentation" />
             </div>
             <!-- Interactive card layer: Cat mascot (receives JS 3D transforms on #capcatCard) -->
             <div class="capcat-card" id="capcatCard">
               <div class="svg-wrapper">
                 <img
                   src="icons/Capcat-Cat-Color.svg"
-                  alt="Capcat mascot is catching the loading ball from the Capcat progress bar indicator. | Illustration by Stayu Kasabov | Stayux.com"
+                  alt="Capcat mascot catching a loading ball from progress bar"
                 />
+                <p class="image-credit visually-hidden" aria-label="Image attribution">
+                  Illustration by Stayu Kasabov | Stayux.com
+                </p>
               </div>
             </div>
           </div>
         </div>
-        <h1 class="title-accent">Ready to Start Archiving?</h1>
+        <h1 id="get-started-heading" class="title-accent">Ready to Start Archiving?</h1>
         <div class="installation-steps">
           <div class="install-step">
             <h3>1. Clone Repository</h3>
-            <pre><code>git clone https://github.com/stayukasabov/capcat.git</code></pre>
+            <pre role="region" aria-label="Git clone command"><code class="language-bash">git clone https://github.com/stayukasabov/capcat.git</code></pre>
           </div>
 
           <div class="install-step">
             <h3>2. Setup Dependencies</h3>
-            <pre><code>./scripts/fix_dependencies.sh</code></pre>
+            <pre role="region" aria-label="Setup dependencies command"><code class="language-bash">./scripts/fix_dependencies.sh</code></pre>
           </div>
 
           <div class="install-step">
             <h3>3. Start Archiving</h3>
-            <pre><code>./capcat catch</code></pre>
+            <pre role="region" aria-label="Start Capcat command"><code class="language-bash">./capcat catch</code></pre>
           </div>
         </div>
 
