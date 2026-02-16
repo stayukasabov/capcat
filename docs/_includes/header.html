@@ -2,7 +2,7 @@
   <div class="container">
     <nav class="main-nav">
       <div class="logo">
-        <a href="/" title="Back to Home"><svg
+        <a href="/" aria-label="Back to Home"><svg
           class="capcat-logo"
           width="100%"
           height="20"
@@ -23,7 +23,7 @@
         </svg>
         </a>
       </div>
-      <ul class="nav-links">
+      <ul class="nav-links" id="main-navigation">
         <li>
           <a href="/#features" title="View Capcat features">Features</a>
         </li>
@@ -55,7 +55,10 @@
           >
         </li>
       </ul>
-      <button class="mobile-menu-toggle" aria-label="Toggle menu">
+      <button class="mobile-menu-toggle"
+              aria-label="Toggle menu"
+              aria-expanded="false"
+              aria-controls="main-navigation">
         <span></span>
         <span></span>
         <span></span>
