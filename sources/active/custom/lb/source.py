@@ -613,10 +613,47 @@ class LbSource(BaseSource):
                 })
                 self.logger.debug("Using cache-busting headers for comment update")
 
-            response = self.session.get(
-                comment_url, timeout=self.config.timeout, headers=headers
-            )
-            response.raise_for_status()
+            # Rate limiting and retry logic for 429 errors
+            max_retries = self.config.custom_config.get('max_retries', 3) if self.config.custom_config else 3
+            base_delay = self.config.custom_config.get('base_delay', 2.0) if self.config.custom_config else 2.0
+            response = None
+
+            for attempt in range(max_retries + 1):
+                try:
+                    # Apply rate limiting before request
+                    time.sleep(self.config.rate_limit)
+
+                    response = self.session.get(
+                        comment_url, timeout=self.config.timeout, headers=headers
+                    )
+                    response.raise_for_status()
+
+                    if attempt > 0:
+                        self.logger.info(
+                            f"Successfully fetched comments for {article_title} after {attempt} retry attempt(s)"
+                        )
+                    break  # Success, exit retry loop
+
+                except requests.exceptions.HTTPError as e:
+                    if e.response.status_code == 429 and attempt < max_retries:
+                        # Exponential backoff: 2s, 4s, 8s
+                        retry_delay = base_delay * (2 ** attempt)
+                        self.logger.warning(
+                            f"Rate limit (429) hit for {article_title}, retrying in {retry_delay}s (attempt {attempt + 1}/{max_retries})"
+                        )
+                        time.sleep(retry_delay)
+                        continue
+                    elif e.response.status_code == 429:
+                        self.logger.error(
+                            f"Rate limit (429) exceeded for {article_title} after {max_retries} retry attempts"
+                        )
+                        raise
+                    else:
+                        raise  # Re-raise if not 429
+
+            if response is None:
+                self.logger.error(f"Failed to fetch comments for {article_title}: No response received")
+                return False
 
             # Use optimized streamlined comment processor
             from core.streamlined_comment_processor import create_optimized_comment_processor
