@@ -21,6 +21,39 @@ body {
 }
 
 /* ====================================
+   ACCESSIBILITY
+   ================================== */
+
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--brand-orange);
+  color: white;
+  padding: var(--space-sm) var(--space-md);
+  text-decoration: none;
+  font-weight: 700;
+  z-index: 9999;
+  transition: top 0.2s ease-in;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ====================================
    TYPOGRAPHY
    ================================== */
 
@@ -56,6 +89,7 @@ h4 {
 
 .NLP-alert {
   font-size: var(--text-large);
+  font-weight: 500;
   color: var(--accent-primary);
   text-align: center;
   margin-bottom: var(--margin-element);
@@ -483,6 +517,8 @@ transition: background 1s ease, box-shadow 0.3s ease;
 .workflow {
   max-width: var(--measure-optimal);
   margin: var(--margin-section) auto 0;
+  list-style: none;
+  counter-reset: workflow-counter;
 }
 
 .workflow-step {
@@ -490,9 +526,11 @@ transition: background 1s ease, box-shadow 0.3s ease;
   gap: var(--space-lg);
   margin-bottom: var(--space-xl);
   align-items: flex-start;
+  counter-increment: workflow-counter;
 }
 
-.step-number {
+.workflow-step::before {
+  content: counter(workflow-counter);
   flex-shrink: 0;
   width: 48px;
   height: 48px;
@@ -505,9 +543,13 @@ transition: background 1s ease, box-shadow 0.3s ease;
   font-family: var(--font-family-serif);
   font-weight: var(--font-weight-bold);
   font-size: 1.25rem;
-  line-height: 1;
   padding-top: 13px;
   margin: 0;
+}
+
+/* Legacy .step-number class - deprecated, kept for compatibility */
+.step-number {
+  display: none;
 }
 
 .step-content h3 {
@@ -1228,7 +1270,7 @@ transition: background 1s ease, box-shadow 0.3s ease;
     text-align: center;
   }
 
-  .step-number {
+  .workflow-step::before {
     margin: 0 auto var(--space-md);
   }
 
