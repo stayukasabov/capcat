@@ -435,6 +435,9 @@ class HTMLGenerator:
             # Remove grey-placeholder images from HTML
             html_content = self._remove_grey_placeholder_images(html_content)
 
+            # Remove anchor wrappers around downloaded images
+            html_content = self._remove_image_anchor_wrappers(html_content)
+
             # Remove headerlink anchor tags
             html_content = self._remove_headerlink_anchors(html_content)
 
@@ -530,6 +533,7 @@ class HTMLGenerator:
 
             # Apply content transformations
             html_content = self._remove_grey_placeholder_images(html_content)
+            html_content = self._remove_image_anchor_wrappers(html_content)
             html_content = self._remove_headerlink_anchors(html_content)
             html_content = self._remove_duplicate_h1_title(
                 html_content, article_title
@@ -1396,6 +1400,28 @@ class HTMLGenerator:
         return re.sub(
             pattern, "", html_content, flags=re.IGNORECASE | re.DOTALL
         )
+
+    def _remove_image_anchor_wrappers(self, html_content: str) -> str:
+        """Remove anchor tags that wrap image tags.
+
+        Substack and other sources download images locally but markdown-to-HTML
+        conversion wraps them in <a href> linking to original URL. This removes
+        those anchor wrappers while preserving the image tags and their attributes.
+
+        Args:
+            html_content: HTML content to process
+
+        Returns:
+            HTML with image anchor wrappers removed
+        """
+        import re
+
+        # Pattern matches: <a ...href="..."...><optional whitespace><img ...><optional whitespace></a>
+        # Captures the img tag to preserve it
+        pattern = r'<a[^>]*href="[^"]*"[^>]*>\s*(<img[^>]*>)\s*</a>'
+
+        # Replace with just the captured img tag
+        return re.sub(pattern, r'\1', html_content, flags=re.IGNORECASE | re.DOTALL)
 
     def _remove_duplicate_h1_title(
         self, html_content: str, article_title: str
