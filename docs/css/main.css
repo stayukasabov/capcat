@@ -532,7 +532,7 @@ transition: background 1s ease, box-shadow 0.3s ease;
 .workflow-step::before {
   content: counter(workflow-counter);
   flex-shrink: 0;
-  width: 48px;
+  width: 60px;
   height: 48px;
   background-color: var(--accent-primary);
   color: #ffffff;
