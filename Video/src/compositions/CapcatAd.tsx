@@ -8,6 +8,21 @@ import { colors } from "../tokens";
 import { S1_B1 } from "../beats/s1/S1_B1";
 // Scene 2
 import { S2_B1 } from "../beats/s2/S2_B1";
+// Scene 4
+import { S4_B1 } from "../beats/s4/S4_B1";
+import { S4_B2 } from "../beats/s4/S4_B2";
+import { S4_B3 } from "../beats/s4/S4_B3";
+import { S4_B4 } from "../beats/s4/S4_B4";
+import { S4_B5 } from "../beats/s4/S4_B5";
+import { S4_B6 } from "../beats/s4/S4_B6";
+import { S4_B7 } from "../beats/s4/S4_B7";
+import { S4_B8 } from "../beats/s4/S4_B8";
+import { S4_B9 } from "../beats/s4/S4_B9";
+import { S4_B10 } from "../beats/s4/S4_B10";
+import { S4_B11 } from "../beats/s4/S4_B11";
+import { S4_B12 } from "../beats/s4/S4_B12";
+import { S4_B13 } from "../beats/s4/S4_B13";
+import { S4_B14 } from "../beats/s4/S4_B14";
 import { S2_B2 } from "../beats/s2/S2_B2";
 import { S2_B3 } from "../beats/s2/S2_B3";
 import { S2_B4 } from "../beats/s2/S2_B4";
@@ -78,7 +93,50 @@ export const CapcatAd: React.FC = () => {
         <Series.Sequence durationInFrames={dur("s3_b2")} premountFor={fps}>
           <S3_B2 fontFamily={fontFamily} />
         </Series.Sequence>
-        {/* Scene 4+ beats added as tasks complete */}
+        {/* Scene 4 */}
+        <Series.Sequence durationInFrames={dur("s4_b1")} premountFor={fps}>
+          <S4_B1 fontFamily={fontFamily} />
+        </Series.Sequence>
+        <Series.Sequence durationInFrames={dur("s4_b2")} premountFor={fps}>
+          <S4_B2 fontFamily={fontFamily} />
+        </Series.Sequence>
+        <Series.Sequence durationInFrames={dur("s4_b3")} premountFor={fps}>
+          <S4_B3 fontFamily={fontFamily} />
+        </Series.Sequence>
+        <Series.Sequence durationInFrames={dur("s4_b4")} premountFor={fps}>
+          <S4_B4 fontFamily={fontFamily} />
+        </Series.Sequence>
+        <Series.Sequence durationInFrames={dur("s4_b5")} premountFor={fps}>
+          <S4_B5 fontFamily={fontFamily} />
+        </Series.Sequence>
+        <Series.Sequence durationInFrames={dur("s4_b6")} premountFor={fps}>
+          <S4_B6 fontFamily={fontFamily} />
+        </Series.Sequence>
+        <Series.Sequence durationInFrames={dur("s4_b7")} premountFor={fps}>
+          <S4_B7 fontFamily={fontFamily} />
+        </Series.Sequence>
+        <Series.Sequence durationInFrames={dur("s4_b8")} premountFor={fps}>
+          <S4_B8 fontFamily={fontFamily} />
+        </Series.Sequence>
+        <Series.Sequence durationInFrames={dur("s4_b9")} premountFor={fps}>
+          <S4_B9 fontFamily={fontFamily} />
+        </Series.Sequence>
+        <Series.Sequence durationInFrames={dur("s4_b10")} premountFor={fps}>
+          <S4_B10 fontFamily={fontFamily} />
+        </Series.Sequence>
+        <Series.Sequence durationInFrames={dur("s4_b11")} premountFor={fps}>
+          <S4_B11 fontFamily={fontFamily} />
+        </Series.Sequence>
+        <Series.Sequence durationInFrames={dur("s4_b12")} premountFor={fps}>
+          <S4_B12 fontFamily={fontFamily} />
+        </Series.Sequence>
+        <Series.Sequence durationInFrames={dur("s4_b13")} premountFor={fps}>
+          <S4_B13 fontFamily={fontFamily} />
+        </Series.Sequence>
+        <Series.Sequence durationInFrames={dur("s4_b14")} premountFor={fps}>
+          <S4_B14 fontFamily={fontFamily} />
+        </Series.Sequence>
+        {/* Scene 5+ beats added as tasks complete */}
       </Series>
     </AbsoluteFill>
   );
