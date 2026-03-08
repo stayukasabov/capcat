@@ -14,6 +14,15 @@ import { S4_B1 } from "../beats/s4/S4_B1";
 import { S5_B1 } from "../beats/s5/S5_B1";
 // Scene 6
 import { S6_B1 } from "../beats/s6/S6_B1";
+// Scene 7
+import { S7_B1 } from "../beats/s7/S7_B1";
+import { S7_B2 } from "../beats/s7/S7_B2";
+import { S7_B3 } from "../beats/s7/S7_B3";
+import { S7_B4 } from "../beats/s7/S7_B4";
+import { S7_B5 } from "../beats/s7/S7_B5";
+import { S7_B6 } from "../beats/s7/S7_B6";
+import { S7_B7 } from "../beats/s7/S7_B7";
+import { S7_B8 } from "../beats/s7/S7_B8";
 import { S6_B2 } from "../beats/s6/S6_B2";
 import { S6_B3 } from "../beats/s6/S6_B3";
 import { S6_B4 } from "../beats/s6/S6_B4";
@@ -172,7 +181,31 @@ export const CapcatAd: React.FC = () => {
         <Series.Sequence durationInFrames={dur("s6_b5")} premountFor={fps}>
           <S6_B5 fontFamily={fontFamily} />
         </Series.Sequence>
-        {/* Scene 7 beats added as tasks complete */}
+        {/* Scene 7 */}
+        <Series.Sequence durationInFrames={dur("s7_b1")} premountFor={fps}>
+          <S7_B1 fontFamily={fontFamily} />
+        </Series.Sequence>
+        <Series.Sequence durationInFrames={dur("s7_b2")} premountFor={fps}>
+          <S7_B2 fontFamily={fontFamily} />
+        </Series.Sequence>
+        <Series.Sequence durationInFrames={dur("s7_b3")} premountFor={fps}>
+          <S7_B3 fontFamily={fontFamily} />
+        </Series.Sequence>
+        <Series.Sequence durationInFrames={dur("s7_b4")} premountFor={fps}>
+          <S7_B4 fontFamily={fontFamily} />
+        </Series.Sequence>
+        <Series.Sequence durationInFrames={dur("s7_b5")} premountFor={fps}>
+          <S7_B5 fontFamily={fontFamily} />
+        </Series.Sequence>
+        <Series.Sequence durationInFrames={dur("s7_b6")} premountFor={fps}>
+          <S7_B6 fontFamily={fontFamily} />
+        </Series.Sequence>
+        <Series.Sequence durationInFrames={dur("s7_b7")} premountFor={fps}>
+          <S7_B7 fontFamily={fontFamily} />
+        </Series.Sequence>
+        <Series.Sequence durationInFrames={dur("s7_b8")} premountFor={fps}>
+          <S7_B8 fontFamily={fontFamily} />
+        </Series.Sequence>
       </Series>
     </AbsoluteFill>
   );
