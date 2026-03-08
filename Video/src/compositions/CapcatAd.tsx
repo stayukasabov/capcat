@@ -6,6 +6,14 @@ import { colors } from "../tokens";
 
 // Scene 1
 import { S1_B1 } from "../beats/s1/S1_B1";
+// Scene 2
+import { S2_B1 } from "../beats/s2/S2_B1";
+import { S2_B2 } from "../beats/s2/S2_B2";
+import { S2_B3 } from "../beats/s2/S2_B3";
+import { S2_B4 } from "../beats/s2/S2_B4";
+// Scene 3
+import { S3_B1 } from "../beats/s3/S3_B1";
+import { S3_B2 } from "../beats/s3/S3_B2";
 import { S1_B2 } from "../beats/s1/S1_B2";
 import { S1_B3 } from "../beats/s1/S1_B3";
 import { S1_B4 } from "../beats/s1/S1_B4";
@@ -50,7 +58,27 @@ export const CapcatAd: React.FC = () => {
         <Series.Sequence durationInFrames={dur("s1_b8")} premountFor={fps}>
           <S1_B8 fontFamily={fontFamily} />
         </Series.Sequence>
-        {/* Scene 2+ beats added as tasks complete */}
+        {/* Scene 2 */}
+        <Series.Sequence durationInFrames={dur("s2_b1")} premountFor={fps}>
+          <S2_B1 fontFamily={fontFamily} />
+        </Series.Sequence>
+        <Series.Sequence durationInFrames={dur("s2_b2")} premountFor={fps}>
+          <S2_B2 fontFamily={fontFamily} />
+        </Series.Sequence>
+        <Series.Sequence durationInFrames={dur("s2_b3")} premountFor={fps}>
+          <S2_B3 fontFamily={fontFamily} />
+        </Series.Sequence>
+        <Series.Sequence durationInFrames={dur("s2_b4")} premountFor={fps}>
+          <S2_B4 fontFamily={fontFamily} />
+        </Series.Sequence>
+        {/* Scene 3 */}
+        <Series.Sequence durationInFrames={dur("s3_b1")} premountFor={fps}>
+          <S3_B1 fontFamily={fontFamily} />
+        </Series.Sequence>
+        <Series.Sequence durationInFrames={dur("s3_b2")} premountFor={fps}>
+          <S3_B2 fontFamily={fontFamily} />
+        </Series.Sequence>
+        {/* Scene 4+ beats added as tasks complete */}
       </Series>
     </AbsoluteFill>
   );
