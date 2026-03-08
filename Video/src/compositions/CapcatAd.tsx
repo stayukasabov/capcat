@@ -10,6 +10,10 @@ import { S1_B1 } from "../beats/s1/S1_B1";
 import { S2_B1 } from "../beats/s2/S2_B1";
 // Scene 4
 import { S4_B1 } from "../beats/s4/S4_B1";
+// Scene 5
+import { S5_B1 } from "../beats/s5/S5_B1";
+import { S5_B2 } from "../beats/s5/S5_B2";
+import { S5_B3 } from "../beats/s5/S5_B3";
 import { S4_B2 } from "../beats/s4/S4_B2";
 import { S4_B3 } from "../beats/s4/S4_B3";
 import { S4_B4 } from "../beats/s4/S4_B4";
@@ -136,7 +140,17 @@ export const CapcatAd: React.FC = () => {
         <Series.Sequence durationInFrames={dur("s4_b14")} premountFor={fps}>
           <S4_B14 fontFamily={fontFamily} />
         </Series.Sequence>
-        {/* Scene 5+ beats added as tasks complete */}
+        {/* Scene 5 */}
+        <Series.Sequence durationInFrames={dur("s5_b1")} premountFor={fps}>
+          <S5_B1 fontFamily={fontFamily} />
+        </Series.Sequence>
+        <Series.Sequence durationInFrames={dur("s5_b2")} premountFor={fps}>
+          <S5_B2 fontFamily={fontFamily} />
+        </Series.Sequence>
+        <Series.Sequence durationInFrames={dur("s5_b3")} premountFor={fps}>
+          <S5_B3 fontFamily={fontFamily} />
+        </Series.Sequence>
+        {/* Scene 6+ beats added as tasks complete */}
       </Series>
     </AbsoluteFill>
   );
