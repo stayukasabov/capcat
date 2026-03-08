@@ -6,29 +6,23 @@ import { colors } from "../tokens";
 
 // Scene 1
 import { S1_B1 } from "../beats/s1/S1_B1";
+import { S1_B2 } from "../beats/s1/S1_B2";
+import { S1_B3 } from "../beats/s1/S1_B3";
+import { S1_B4 } from "../beats/s1/S1_B4";
+import { S1_B5 } from "../beats/s1/S1_B5";
+import { S1_B6 } from "../beats/s1/S1_B6";
+import { S1_B7 } from "../beats/s1/S1_B7";
+import { S1_B8 } from "../beats/s1/S1_B8";
 // Scene 2
 import { S2_B1 } from "../beats/s2/S2_B1";
+import { S2_B2 } from "../beats/s2/S2_B2";
+import { S2_B3 } from "../beats/s2/S2_B3";
+import { S2_B4 } from "../beats/s2/S2_B4";
+// Scene 3
+import { S3_B1 } from "../beats/s3/S3_B1";
+import { S3_B2 } from "../beats/s3/S3_B2";
 // Scene 4
 import { S4_B1 } from "../beats/s4/S4_B1";
-// Scene 5
-import { S5_B1 } from "../beats/s5/S5_B1";
-// Scene 6
-import { S6_B1 } from "../beats/s6/S6_B1";
-// Scene 7
-import { S7_B1 } from "../beats/s7/S7_B1";
-import { S7_B2 } from "../beats/s7/S7_B2";
-import { S7_B3 } from "../beats/s7/S7_B3";
-import { S7_B4 } from "../beats/s7/S7_B4";
-import { S7_B5 } from "../beats/s7/S7_B5";
-import { S7_B6 } from "../beats/s7/S7_B6";
-import { S7_B7 } from "../beats/s7/S7_B7";
-import { S7_B8 } from "../beats/s7/S7_B8";
-import { S6_B2 } from "../beats/s6/S6_B2";
-import { S6_B3 } from "../beats/s6/S6_B3";
-import { S6_B4 } from "../beats/s6/S6_B4";
-import { S6_B5 } from "../beats/s6/S6_B5";
-import { S5_B2 } from "../beats/s5/S5_B2";
-import { S5_B3 } from "../beats/s5/S5_B3";
 import { S4_B2 } from "../beats/s4/S4_B2";
 import { S4_B3 } from "../beats/s4/S4_B3";
 import { S4_B4 } from "../beats/s4/S4_B4";
@@ -42,19 +36,25 @@ import { S4_B11 } from "../beats/s4/S4_B11";
 import { S4_B12 } from "../beats/s4/S4_B12";
 import { S4_B13 } from "../beats/s4/S4_B13";
 import { S4_B14 } from "../beats/s4/S4_B14";
-import { S2_B2 } from "../beats/s2/S2_B2";
-import { S2_B3 } from "../beats/s2/S2_B3";
-import { S2_B4 } from "../beats/s2/S2_B4";
-// Scene 3
-import { S3_B1 } from "../beats/s3/S3_B1";
-import { S3_B2 } from "../beats/s3/S3_B2";
-import { S1_B2 } from "../beats/s1/S1_B2";
-import { S1_B3 } from "../beats/s1/S1_B3";
-import { S1_B4 } from "../beats/s1/S1_B4";
-import { S1_B5 } from "../beats/s1/S1_B5";
-import { S1_B6 } from "../beats/s1/S1_B6";
-import { S1_B7 } from "../beats/s1/S1_B7";
-import { S1_B8 } from "../beats/s1/S1_B8";
+// Scene 5
+import { S5_B1 } from "../beats/s5/S5_B1";
+import { S5_B2 } from "../beats/s5/S5_B2";
+import { S5_B3 } from "../beats/s5/S5_B3";
+// Scene 6
+import { S6_B1 } from "../beats/s6/S6_B1";
+import { S6_B2 } from "../beats/s6/S6_B2";
+import { S6_B3 } from "../beats/s6/S6_B3";
+import { S6_B4 } from "../beats/s6/S6_B4";
+import { S6_B5 } from "../beats/s6/S6_B5";
+// Scene 7
+import { S7_B1 } from "../beats/s7/S7_B1";
+import { S7_B2 } from "../beats/s7/S7_B2";
+import { S7_B3 } from "../beats/s7/S7_B3";
+import { S7_B4 } from "../beats/s7/S7_B4";
+import { S7_B5 } from "../beats/s7/S7_B5";
+import { S7_B6 } from "../beats/s7/S7_B6";
+import { S7_B7 } from "../beats/s7/S7_B7";
+import { S7_B8 } from "../beats/s7/S7_B8";
 
 const { fontFamily } = loadFont("normal", { weights: ["400", "700"], subsets: ["latin"] });
 
