@@ -135,16 +135,13 @@ def test_bundle_calls_run_legacy() -> None:
     assert call_args["action"] == "bundle"
 
 
-def test_list_calls_legacy_list(capsys) -> None:
-    """'capcat list sources' calls legacy list_sources_and_bundles."""
-    with patch("capcat.cli._run_legacy") as _:
-        # list command uses a BRIDGE import, mock the bridge module
-        mock_cli = MagicMock()
-        with patch.dict(sys.modules, {"cli": mock_cli}):
-            with patch.object(sys, "argv", ["capcat", "list", "sources"]):
-                from capcat.cli import main
-                main()
-    mock_cli.list_sources_and_bundles.assert_called_once_with("sources")
+def test_list_sources_prints_sources(capsys) -> None:
+    """'capcat list sources' prints available sources from the registry."""
+    with patch.object(sys, "argv", ["capcat", "list", "sources"]):
+        from capcat.cli import main
+        main()
+    out = capsys.readouterr().out
+    assert "Available sources" in out
 
 
 def test_add_source_missing_url_exits() -> None:
