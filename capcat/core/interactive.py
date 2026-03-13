@@ -632,6 +632,7 @@ def _confirm_and_execute(action, selection, generate_html):
 
     try:
         print("Executing command...")
+        from capcat_legacy import run_app  # BRIDGE: remove when run_app ported to capcat/
         run_app(args)
     except SystemExit as e:
         # The run_app function calls sys.exit(), which we intercept.
