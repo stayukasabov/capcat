@@ -260,7 +260,7 @@ def _cmd_bundle(args: list[str], log_file: str | None = None) -> None:
     log_file = lf or log_file
 
     # Resolve bundle sources via legacy cli module
-    from cli import get_available_bundles
+    from cli import get_available_bundles  # BRIDGE: remove when logic ported to capcat/cli.py
     bundles = get_available_bundles()
 
     if all_bundles:
@@ -309,7 +309,7 @@ def _cmd_list(args: list[str]) -> None:
         print("Usage: capcat list [sources|bundles|all]")
         return
 
-    from cli import list_sources_and_bundles
+    from cli import list_sources_and_bundles  # BRIDGE: remove when logic ported to capcat/cli.py
     list_sources_and_bundles(what)
 
 
@@ -328,7 +328,7 @@ def _cmd_add_source(args: list[str]) -> None:
         print("capcat add-source: --url is required")
         raise SystemExit(1)
 
-    from cli import add_source
+    from cli import add_source  # BRIDGE: remove when logic ported to capcat/cli.py
     add_source(url)
 
 
@@ -372,7 +372,7 @@ def _cmd_remove_source(args: list[str]) -> None:
         undo=undo_val,
     )
 
-    from cli import remove_source
+    from cli import remove_source  # BRIDGE: remove when logic ported to capcat/cli.py
     remove_source(ns)
 
 
@@ -390,7 +390,7 @@ def _cmd_generate_config(args: list[str]) -> None:
     output, _ = _pop_value(args, "-o", "--output")
     ns = argparse.Namespace(output=output)
 
-    from cli import generate_config_command
+    from cli import generate_config_command  # BRIDGE: remove when logic ported to capcat/cli.py
     generate_config_command(ns)
 
 
@@ -399,221 +399,19 @@ def _cmd_generate_config(args: list[str]) -> None:
 # ---------------------------------------------------------------------------
 
 def _run_legacy(config_dict: dict) -> None:
-    """Run the legacy application logic with the given config dict.
+    """Run a command via the legacy capcat_legacy module.
 
-    Imports capcat_legacy and invokes its run_app path by constructing the
-    same config dict that cli.parse_arguments() would return, then feeding
-    it to capcat_legacy.run_app's internal flow.
+    BRIDGE: This function depends on capcat_legacy.py and cli.py being on
+    sys.path. These are transitional shims to be removed once all command
+    logic is ported directly into capcat/cli.py.
     """
-    import os
-    from capcat.core.logging_config import get_logger, setup_logging
-    from capcat.core.config import get_config
-
-    setup_logging(
-        level=config_dict.get("log_level", "INFO"),
-        log_file=config_dict.get("log_file"),
-        verbose=config_dict.get("verbose", False),
-        quiet=config_dict.get("quiet", False),
-    )
-    logger = get_logger(__name__)
-
-    action = config_dict["action"]
-
-    if action == "single":
-        from capcat_legacy import scrape_single_article
-        from capcat.core.html_post_processor import launch_web_view
-
-        url = config_dict["url"]
-        output_dir = config_dict["output"]
-        download_media = config_dict["media"]
-        generate_html = config_dict.get("html", False)
-        update_mode = config_dict.get("update", False)
-
-        if update_mode:
-            from capcat.core.update_manager import get_update_manager
-            from capcat.core.article_fetcher import set_global_update_mode
-            set_global_update_mode(True)
-            um = get_update_manager()
-            if not um.check_and_handle_update("single", url=url):
-                logger.info("Update cancelled by user")
-                set_global_update_mode(False)
-                return
-
-        if not url.lower().endswith(".pdf"):
-            logger.info(f"Scraping single article: {url}")
-
-        base_dir = None
-        try:
-            success, base_dir = scrape_single_article(
-                url,
-                output_dir,
-                verbose=config_dict.get("verbose", False),
-                files=download_media,
-                generate_html=generate_html,
-                update_mode=update_mode,
-            )
-            if success:
-                if base_dir is None:
-                    logger.info("Operation completed (user skip)")
-                    sys.exit(0)
-
-                application_dir = os.path.dirname(os.path.abspath(
-                    __import__("capcat_legacy").__file__
-                ))
-                project_root = os.path.dirname(application_dir)
-                rel_path = os.path.relpath(base_dir, project_root)
-                output_location = f"../{rel_path}/"
-
-                if generate_html:
-                    try:
-                        logger.info("Generating HTML web view...")
-                        launch_web_view(base_dir, is_single_article=True)
-                        import glob
-                        pattern = os.path.join(
-                            base_dir, "**/html/article.html"
-                        )
-                        html_files = glob.glob(pattern, recursive=True)
-                        if html_files:
-                            article_rel = os.path.relpath(
-                                html_files[0], project_root
-                            )
-                            output_location = f"../{article_rel}"
-                    except Exception as html_err:
-                        logger.warning(f"HTML generation failed: {html_err}")
-
-                logger.info(f"You can find your files in {output_location}")
-            else:
-                sys.exit(1)
-
-            if update_mode:
-                from capcat.core.article_fetcher import set_global_update_mode
-                set_global_update_mode(False)
-            sys.exit(0)
-        except Exception as e:
-            logger.error(f"Single article processing failed: {e}")
-            if config_dict.get("update", False):
-                from capcat.core.article_fetcher import set_global_update_mode
-                set_global_update_mode(False)
-            sys.exit(1)
-
-    elif action in ("fetch", "bundle"):
-        from capcat_legacy import process_sources
-        from capcat.core.shutdown import GracefulShutdown
-
-        config = get_config()
-        sources = config_dict["sources"]
-        generate_html = config_dict.get("html", False)
-        output_dir = config_dict["output"]
-        bundle_name = config_dict.get("bundle_name")
-        update_mode = config_dict.get("update", False)
-
-        if update_mode:
-            from capcat.core.update_manager import get_update_manager
-            from capcat.core.article_fetcher import set_global_update_mode
-            set_global_update_mode(True)
-            um = get_update_manager()
-            if action == "bundle":
-                if not um.check_and_handle_update(
-                    "bundle", bundle_name=bundle_name
-                ):
-                    logger.info("Update cancelled by user")
-                    set_global_update_mode(False)
-                    return
-            else:
-                if not um.check_and_handle_update(
-                    "fetch", sources=sources
-                ):
-                    logger.info("Update cancelled by user")
-                    set_global_update_mode(False)
-                    return
-
-        try:
-            # Create args-like object for backward compat
-            class Args:
-                def __init__(self, cd):
-                    self.count = cd.get("count", 30)
-                    self.quiet = cd.get("quiet", False)
-                    self.verbose = cd.get("verbose", False)
-                    self.media = cd.get("media", False)
-
-            args_obj = Args(config_dict)
-
-            if bundle_name and bundle_name.startswith("all-bundles-ordered"):
-                from cli import get_available_bundles
-                bundles = get_available_bundles()
-                for bn in sources:
-                    if bn in bundles and bundles[bn]:
-                        bsources = bundles[bn]["sources"]
-                        logger.info(
-                            f"Processing bundle '{bn}': "
-                            f"{', '.join(bsources)}"
-                        )
-                        process_sources(
-                            bsources, args_obj, config, logger,
-                            generate_html, output_dir,
-                        )
-                logger.info("All bundles processing completed")
-            else:
-                if bundle_name:
-                    logger.info(
-                        f"Fetching articles from bundle '{bundle_name}': "
-                        f"{', '.join(sources)}"
-                    )
-                else:
-                    logger.info(
-                        f"Fetching articles from sources: "
-                        f"{', '.join(sources)}"
-                    )
-                result = process_sources(
-                    sources, args_obj, config, logger,
-                    generate_html, output_dir,
-                )
-                if result["failed"] and not result["successful"]:
-                    print(
-                        "\nCapcat Info: No articles fetched "
-                        "- all sources unavailable\n"
-                    )
-                    sys.exit(1)
-
-            # Output location
-            from datetime import datetime
-            formatted_date = datetime.now().strftime("%d-%m-%Y")
-            if output_dir == ".":
-                output_location = f"../News/news_{formatted_date}/"
-            else:
-                output_location = os.path.abspath(output_dir)
-                if not output_location.endswith("/"):
-                    output_location += "/"
-
-            if generate_html:
-                try:
-                    from capcat.core.html_post_processor import launch_web_view
-                    if output_location.startswith("../"):
-                        project_root = os.path.dirname(
-                            os.path.dirname(os.path.abspath(
-                                __import__("capcat_legacy").__file__
-                            ))
-                        )
-                        html_dir = os.path.join(
-                            project_root, output_location[3:]
-                        )
-                    else:
-                        html_dir = output_location
-                    logger.info("Generating HTML web view...")
-                    launch_web_view(html_dir)
-                except Exception as html_err:
-                    logger.warning(f"HTML generation failed: {html_err}")
-
-            logger.info(f"You can find your files in {output_location}")
-
-            if update_mode:
-                from capcat.core.article_fetcher import set_global_update_mode
-                set_global_update_mode(False)
-            sys.exit(0)
-
-        except Exception as e:
-            logger.error(f"Batch processing failed: {e}")
-            if config_dict.get("update", False):
-                from capcat.core.article_fetcher import set_global_update_mode
-                set_global_update_mode(False)
-            sys.exit(1)
+    try:
+        import capcat_legacy  # BRIDGE: remove when logic ported to capcat/cli.py
+        capcat_legacy.run_app(config_dict)
+    except ImportError as exc:
+        print(
+            "Error: legacy modules not found. "
+            "Run from the project root or use a development install.\n"
+            f"Details: {exc}"
+        )
+        raise SystemExit(1)
