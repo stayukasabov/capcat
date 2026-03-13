@@ -140,6 +140,79 @@ __all__ = [
     "NetworkConfig",
     "ProcessingConfig",
     "LoggingConfig",
+    # Project-model path resolution
+    "NoProjectError",
+    "find_project_root",
+    "get_news_dir",
+    "get_capcats_dir",
 ]
 
 __version__ = "2.0.0"
+
+
+class NoProjectError(Exception):
+    """Raised when no capcat project root (.capcat/) is found."""
+
+
+def find_project_root(start: "Path | None" = None) -> "Path":
+    """Walk up from start to find the directory containing .capcat/.
+
+    Args:
+        start: Starting directory. Defaults to cwd.
+
+    Returns:
+        Path to the project root.
+
+    Raises:
+        NoProjectError: If no .capcat/ found up to filesystem root.
+    """
+    from pathlib import Path
+
+    current = (start or Path.cwd()).resolve()
+    while True:
+        if (current / ".capcat").is_dir():
+            return current
+        parent = current.parent
+        if parent == current:
+            raise NoProjectError(
+                "Not a capcat project. Run 'capcat init' to initialize one."
+            )
+        current = parent
+
+
+def get_news_dir(project_root: "Path | None" = None) -> "Path":
+    """Return the News output directory, creating it if absent.
+
+    Args:
+        project_root: Project root path. Defaults to find_project_root().
+
+    Returns:
+        Path to the News/ directory (guaranteed to exist).
+    """
+    from pathlib import Path
+
+    root: "Path" = project_root or find_project_root()
+    news = root / "News"
+    if not news.exists():
+        news.mkdir(parents=True)
+        print(f"Created output directory: {news}")
+    return news
+
+
+def get_capcats_dir(project_root: "Path | None" = None) -> "Path":
+    """Return the Capcats output directory, creating it if absent.
+
+    Args:
+        project_root: Project root path. Defaults to find_project_root().
+
+    Returns:
+        Path to the Capcats/ directory (guaranteed to exist).
+    """
+    from pathlib import Path
+
+    root: "Path" = project_root or find_project_root()
+    capcats = root / "Capcats"
+    if not capcats.exists():
+        capcats.mkdir(parents=True)
+        print(f"Created output directory: {capcats}")
+    return capcats

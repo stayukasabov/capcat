@@ -234,51 +234,28 @@ def create_output_directory_capcat(
 
 
 def create_batch_output_directory(source_prefix: str) -> str:
-    """
-    Create the proper nested directory structure for batch processing (fetch/bundle commands).
-    Creates: ../News/news_DD-MM-YYYY/source_DD-MM-YYYY/
+    """Create the nested directory structure for batch processing.
+
+    Creates: News/News_DD-MM-YYYY/source_DD-MM-YYYY/
 
     Args:
-        source_prefix (str): The prefix for the source (e.g., 'hn', 'lb').
+        source_prefix: The prefix for the source (e.g., 'hn', 'lb').
 
     Returns:
-        str: The full path to the created source directory.
+        Full path to the created source directory.
     """
     import os
     from datetime import datetime
+    from capcat.core.config import get_news_dir  # BRIDGE: project-model path
 
-    # Get current date in DD-MM-YYYY format
     current_date = datetime.now().strftime("%d-%m-%Y")
+    news_base_dir = get_news_dir()
 
-    # Determine project root (one level up from Application directory)
-    application_dir = os.path.dirname(
-        os.path.dirname(os.path.abspath(__file__))
-    )
-    project_root = os.path.dirname(application_dir)
-
-    # Create News directory structure: ../News/News_DD-MM-YYYY/ (check for existing capitalized first)
-    news_base_dir = os.path.join(project_root, "News")
-
-    # Check if capitalized version exists first
-    capitalized_news_date_dir = os.path.join(
-        news_base_dir, f"News_{current_date}"
-    )
-    lowercase_news_date_dir = os.path.join(
-        news_base_dir, f"news_{current_date}"
-    )
-
-    if os.path.exists(capitalized_news_date_dir):
-        news_date_dir = capitalized_news_date_dir
-    else:
-        news_date_dir = capitalized_news_date_dir  # Use capitalized by default
-
-    # Create the nested directory structure
+    news_date_dir = os.path.join(str(news_base_dir), f"News_{current_date}")
     os.makedirs(news_date_dir, exist_ok=True)
 
-    # Create source-specific directory within the date directory
     folder_name = get_source_folder_name(source_prefix)
-    source_dir_name = f"{folder_name}_{current_date}"
-    source_dir_path = os.path.join(news_date_dir, source_dir_name)
+    source_dir_path = os.path.join(news_date_dir, f"{folder_name}_{current_date}")
     os.makedirs(source_dir_path, exist_ok=True)
 
     return source_dir_path
