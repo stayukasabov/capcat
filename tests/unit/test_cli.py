@@ -81,16 +81,16 @@ def test_single_help_flag(capsys) -> None:
     assert "Usage" in out
 
 
-def test_single_calls_run_legacy() -> None:
-    """'capcat single <url>' delegates to _run_legacy."""
-    with patch("capcat.cli._run_legacy") as mock_legacy:
-        with patch.object(sys, "argv", ["capcat", "single", "https://example.com"]):
-            from capcat.cli import main
-            main()
-    mock_legacy.assert_called_once()
-    call_args = mock_legacy.call_args[0][0]
-    assert call_args["action"] == "single"
-    assert call_args["url"] == "https://example.com"
+def test_single_calls_scrape_single_article() -> None:
+    """'capcat single <url>' delegates to scrape_single_article."""
+    with patch("capcat.commands.single.scrape_single_article") as mock_scrape:
+        with patch("capcat.cli._setup_logging"):
+            with patch.object(sys, "argv", ["capcat", "single", "https://example.com"]):
+                from capcat.cli import main
+                main()
+    mock_scrape.assert_called_once()
+    call_kwargs = mock_scrape.call_args[1]
+    assert call_kwargs["url"] == "https://example.com"
 
 
 def test_fetch_no_source_prints_usage(capsys) -> None:
@@ -102,16 +102,17 @@ def test_fetch_no_source_prints_usage(capsys) -> None:
     assert "Usage" in out
 
 
-def test_fetch_calls_run_legacy() -> None:
-    """'capcat fetch hn --count 5' delegates to _run_legacy."""
-    with patch("capcat.cli._run_legacy") as mock_legacy:
-        with patch.object(sys, "argv", ["capcat", "fetch", "hn", "--count", "5"]):
-            from capcat.cli import main
-            main()
-    mock_legacy.assert_called_once()
-    call_args = mock_legacy.call_args[0][0]
-    assert call_args["action"] == "fetch"
-    assert call_args["count"] == 5
+def test_fetch_calls_process_sources() -> None:
+    """'capcat fetch hn --count 5' delegates to process_sources."""
+    with patch("capcat.commands.fetch.process_sources") as mock_proc:
+        with patch("capcat.cli._setup_logging"):
+            with patch.object(sys, "argv", ["capcat", "fetch", "hn", "--count", "5"]):
+                from capcat.cli import main
+                main()
+    mock_proc.assert_called_once()
+    call_kwargs = mock_proc.call_args[1]
+    assert "hn" in call_kwargs["sources"]
+    assert call_kwargs["args"].count == 5
 
 
 def test_bundle_help_flag() -> None:
@@ -121,18 +122,19 @@ def test_bundle_help_flag() -> None:
         main()
 
 
-def test_bundle_calls_run_legacy() -> None:
-    """'capcat bundle tech' delegates to _run_legacy."""
-    mock_cli = MagicMock()
-    mock_cli.get_available_bundles.return_value = {"tech": {"sources": ["hn", "lb"]}}
-    with patch("capcat.cli._run_legacy") as mock_legacy:
-        with patch.dict(sys.modules, {"cli": mock_cli}):
-            with patch.object(sys, "argv", ["capcat", "bundle", "tech"]):
-                from capcat.cli import main
-                main()
-    mock_legacy.assert_called_once()
-    call_args = mock_legacy.call_args[0][0]
-    assert call_args["action"] == "bundle"
+def test_bundle_calls_process_sources() -> None:
+    """'capcat bundle tech' delegates to process_sources."""
+    mock_bundles = {"tech": {"sources": ["hn", "lb"], "description": ""}}
+    with patch("capcat.core.source_system.bundle_service.get_available_bundles",
+               return_value=mock_bundles):
+        with patch("capcat.commands.fetch.process_sources") as mock_proc:
+            with patch("capcat.cli._setup_logging"):
+                with patch.object(sys, "argv", ["capcat", "bundle", "tech"]):
+                    from capcat.cli import main
+                    main()
+    mock_proc.assert_called_once()
+    call_kwargs = mock_proc.call_args[1]
+    assert set(call_kwargs["sources"]) == {"hn", "lb"}
 
 
 def test_list_sources_prints_sources(capsys) -> None:
@@ -182,13 +184,14 @@ def test_generate_config_calls_legacy(capsys) -> None:
     mock_cli.generate_config_command.assert_called_once()
 
 
-def test_run_legacy_import_error_exits() -> None:
-    """_run_legacy exits with code 1 when capcat_legacy is not importable."""
-    with patch.dict(sys.modules, {"capcat_legacy": None}):
-        from capcat.cli import _run_legacy
-        with pytest.raises(SystemExit) as exc_info:
-            _run_legacy({"action": "test"})
-    assert exc_info.value.code == 1
+def test_setup_logging_called_for_fetch() -> None:
+    """_setup_logging is invoked when 'capcat fetch' runs."""
+    with patch("capcat.cli._setup_logging") as mock_log:
+        with patch("capcat.commands.fetch.process_sources"):
+            with patch.object(sys, "argv", ["capcat", "fetch", "hn"]):
+                from capcat.cli import main
+                main()
+    mock_log.assert_called_once()
 
 
 def test_init_reinit_flag(tmp_path) -> None:
