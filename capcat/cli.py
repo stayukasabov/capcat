@@ -178,18 +178,17 @@ def _cmd_single(args: list[str], log_file: str | None = None) -> None:
 
     url = args[0]
 
-    # Delegate to legacy run_app via config dict
-    _run_legacy({
-        "action": "single",
-        "url": url,
-        "output": output,
-        "media": media,
-        "html": html,
-        "update": update,
-        "verbose": verbose,
-        "quiet": quiet,
-        "log_file": log_file,
-    })
+    _setup_logging(verbose=verbose, quiet=quiet, log_file=log_file)
+
+    from capcat.commands.single import scrape_single_article
+    scrape_single_article(
+        url=url,
+        output_dir=output,
+        verbose=verbose,
+        files=media,
+        generate_html=html,
+        update_mode=update,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -220,19 +219,26 @@ def _cmd_fetch(args: list[str], log_file: str | None = None) -> None:
         raise SystemExit(1)
 
     sources = [s.strip() for s in args[0].split(",")]
+    count = int(count_str)
 
-    _run_legacy({
-        "action": "fetch",
-        "sources": sources,
-        "count": int(count_str),
-        "output": output,
-        "media": media,
-        "html": html,
-        "update": update,
-        "verbose": verbose,
-        "quiet": quiet,
-        "log_file": log_file,
-    })
+    _setup_logging(verbose=verbose, quiet=quiet, log_file=log_file)
+
+    import argparse as _argparse
+    from capcat.core.logging_config import get_logger
+    from capcat.commands.fetch import process_sources
+
+    _args = _argparse.Namespace(
+        count=count, quiet=quiet, verbose=verbose, media=media
+    )
+    logger = get_logger(__name__)
+    process_sources(
+        sources=sources,
+        args=_args,
+        config=None,
+        logger=logger,
+        generate_html=html,
+        output_dir=output,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -259,8 +265,7 @@ def _cmd_bundle(args: list[str], log_file: str | None = None) -> None:
     lf, args = _pop_value(args, "-L", "--log-file")
     log_file = lf or log_file
 
-    # Resolve bundle sources via legacy cli module
-    from cli import get_available_bundles  # BRIDGE: remove when logic ported to capcat/cli.py
+    from capcat.core.source_system.bundle_service import get_available_bundles
     bundles = get_available_bundles()
 
     if all_bundles:
@@ -279,20 +284,26 @@ def _cmd_bundle(args: list[str], log_file: str | None = None) -> None:
             raise SystemExit(1)
         sources = bundles[bundle_name]["sources"]
 
-    _run_legacy({
-        "action": "bundle",
-        "sources": sources,
-        "count": int(count_str),
-        "output": output,
-        "media": media,
-        "html": html,
-        "update": update,
-        "bundle_name": bundle_name,
-        "all_bundles": all_bundles,
-        "verbose": verbose,
-        "quiet": quiet,
-        "log_file": log_file,
-    })
+    count = int(count_str)
+
+    _setup_logging(verbose=verbose, quiet=quiet, log_file=log_file)
+
+    import argparse as _argparse
+    from capcat.core.logging_config import get_logger
+    from capcat.commands.fetch import process_sources
+
+    _args = _argparse.Namespace(
+        count=count, quiet=quiet, verbose=verbose, media=media
+    )
+    logger = get_logger(__name__)
+    process_sources(
+        sources=sources,
+        args=_args,
+        config=None,
+        logger=logger,
+        generate_html=html,
+        output_dir=output,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -412,23 +423,14 @@ def _cmd_generate_config(args: list[str]) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Legacy bridge: feed a config dict into capcat_legacy.run_app logic
+# Logging setup
 # ---------------------------------------------------------------------------
 
-def _run_legacy(config_dict: dict) -> None:
-    """Run a command via the legacy capcat_legacy module.
-
-    BRIDGE: This function depends on capcat_legacy.py and cli.py being on
-    sys.path. These are transitional shims to be removed once all command
-    logic is ported directly into capcat/cli.py.
-    """
-    try:
-        import capcat_legacy  # BRIDGE: remove when logic ported to capcat/cli.py
-        capcat_legacy.run_app(config_dict)
-    except ImportError as exc:
-        print(
-            "Error: legacy modules not found. "
-            "Run from the project root or use a development install.\n"
-            f"Details: {exc}"
-        )
-        raise SystemExit(1)
+def _setup_logging(
+    verbose: bool = False,
+    quiet: bool = False,
+    log_file: str | None = None,
+) -> None:
+    """Configure logging for the current command."""
+    from capcat.core.logging_config import setup_logging
+    setup_logging(verbose=verbose, quiet=quiet, log_file=log_file)

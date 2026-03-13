@@ -16,6 +16,35 @@ from capcat.core.source_system.source_registry import (  # BRIDGE: was from cli
 )
 
 
+def get_available_bundles() -> dict:
+    """Load bundles from the package's builtin bundles.yml.
+
+    Returns:
+        Dict mapping bundle_id → {"sources": [...], "description": "..."}
+    """
+    import importlib.resources
+    import yaml
+    from capcat.core.logging_config import get_logger
+
+    logger = get_logger(__name__)
+    try:
+        bundles_path = (
+            Path(__file__).parent.parent.parent / "sources" / "builtin" / "bundles.yml"
+        )
+        with open(bundles_path, "r") as fh:
+            data = yaml.safe_load(fh)
+        result = {}
+        for bundle_id, bundle_data in data.get("bundles", {}).items():
+            result[bundle_id] = {
+                "sources": bundle_data.get("sources", []),
+                "description": bundle_data.get("description", ""),
+            }
+        return result
+    except Exception as exc:
+        logger.warning(f"Failed to load bundles.yml: {exc}")
+        return {}
+
+
 def get_available_sources() -> dict:
     """Get available sources from the source registry."""
     registry = _get_source_registry()
