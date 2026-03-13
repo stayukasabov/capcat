@@ -11,7 +11,19 @@ from capcat.core.source_system.bundle_validator import BundleValidator
 from capcat.core.source_system.bundle_ui import BundleUI
 from capcat.core.source_system.source_registry import get_source_registry
 from capcat.core.logging_config import get_logger
-from cli import get_available_sources
+from capcat.core.source_system.source_registry import (  # BRIDGE: was from cli
+    get_source_registry as _get_source_registry,
+)
+
+
+def get_available_sources() -> dict:
+    """Get available sources from the source registry."""
+    registry = _get_source_registry()
+    return {
+        sid: cfg.display_name
+        for sid in registry.get_available_sources()
+        if (cfg := registry.get_source_config(sid))
+    }
 
 
 class BundleService:
