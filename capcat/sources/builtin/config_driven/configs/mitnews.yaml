@@ -1,0 +1,89 @@
+# MIT News - Artificial Intelligence
+source_id: "mitnews"
+# Category: AI
+# URL: https://news.mit.edu/topic/artificial-intelligence2
+# Added: 2025-10-09
+# Type: Config-driven RSS-first source
+
+display_name: "MIT News AI"
+base_url: "https://news.mit.edu/topic/artificial-intelligence2"
+category: "ai"
+timeout: 10.0
+rate_limit: 2.0
+
+discovery:
+  method: "rss"
+  rss_url: "https://news.mit.edu/rss/topic/artificial-intelligence2"
+
+# Article discovery selectors (fallback)
+article_selectors:
+  - ".term-listing--news--item__title a"
+  - ".news-article h2 a"
+  - "article h3 a"
+
+# Content extraction selectors
+content_selectors:
+  - ".news-article--body"
+  - "article .field--body"
+  - ".node__content"
+
+# Skip patterns
+skip_patterns:
+  - "/search"
+  - "/archive"
+
+# Comment support
+supports_comments: false
+
+# Image processing
+image_processing:
+  selectors:
+    - "article img"
+    - ".news-article img"
+    - ".field--body img"
+    - "figure img"
+    - "picture img"
+
+  url_patterns:
+    - "news.mit.edu"
+    - "mit.edu"
+
+  allow_extensionless: true
+
+  skip_selectors:
+    - "nav img"
+    - ".logo img"
+    - ".icon img"
+    - ".author-image img"
+    - ".news-article--recent-news img"
+
+  # Advanced filtering: limit to first N images
+  max_images: 3
+
+  # Optional: minimum image size (bytes) to filter small icons/thumbnails
+  min_image_size: 10240  # 10KB minimum
+
+  # URL transformations to get full-size images
+  url_transforms:
+    - pattern: '/files/styles/[^/]+/public/'
+      replacement: '/files/'
+
+# Template configuration
+template:
+  variant: "article-no-comments"
+  navigation:
+    back_to_ai_url: "../../ai.html"
+    back_to_ai_text: "Back to AI"
+    has_comments: false
+
+# Custom configuration
+custom_config:
+  user_agent: "Mozilla/5.0 (compatible; Capcat/2.0; +Personal News Archiver)"
+  headers:
+    Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+    Accept-Language: "en-US,en;q=0.5"
+
+  notes: |
+    MIT News AI section covers artificial intelligence research from MIT,
+    often with focus on practical applications and new technologies.
+    Medium-high quality technical content.
