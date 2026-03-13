@@ -33,13 +33,13 @@ class AddSourceService:
             base_path: Optional base path for the application (defaults to CLI's parent)
         """
         if base_path is None:
-            # Default to the application directory
-            import cli
-            base_path = Path(cli.__file__).parent
+            # capcat package root: capcat/core/source_system/ → up 3 levels → capcat/
+            base_path = Path(__file__).parent.parent.parent
 
         self._base_path = base_path
-        self._config_path = base_path / "sources" / "active" / "config_driven" / "configs"
-        self._bundles_path = base_path / "sources" / "active" / "bundles.yml"
+        builtin = base_path / "sources" / "builtin"
+        self._config_path = builtin / "config_driven" / "configs"
+        self._bundles_path = builtin / "bundles.yml"
         self._logger = get_logger(__name__)
 
     def add_source(self, url: str) -> None:

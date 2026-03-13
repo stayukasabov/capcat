@@ -245,7 +245,7 @@ def create_batch_output_directory(source_prefix: str) -> str:
     Returns:
         Full path to the created source directory.
     """
-    from capcat.core.config import get_news_dir  # BRIDGE: project-model path
+    from capcat.core.config import get_news_dir
 
     current_date = datetime.now().strftime("%d-%m-%Y")
     news_base_dir = get_news_dir()

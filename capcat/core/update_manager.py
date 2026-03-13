@@ -171,7 +171,7 @@ class UpdateManager:
             return self._prompt_start_todays_batch("bundle", [bundle_name])
 
         # Get bundle sources
-        from cli import get_available_bundles
+        from capcat.core.source_system.bundle_service import get_available_bundles
 
         bundles = get_available_bundles()
 

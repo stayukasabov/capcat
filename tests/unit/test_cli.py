@@ -154,34 +154,31 @@ def test_add_source_missing_url_exits() -> None:
             main()
 
 
-def test_add_source_calls_legacy(capsys) -> None:
-    """'capcat add-source --url URL' calls legacy add_source."""
-    mock_cli = MagicMock()
-    with patch.dict(sys.modules, {"cli": mock_cli}):
+def test_add_source_calls_add_source_command(capsys) -> None:
+    """'capcat add-source --url URL' calls capcat.commands.add_source.add_source."""
+    with patch("capcat.commands.add_source.add_source") as mock_add:
         with patch.object(sys, "argv", ["capcat", "add-source", "--url", "https://feed.example.com"]):
             from capcat.cli import main
             main()
-    mock_cli.add_source.assert_called_once_with("https://feed.example.com")
+    mock_add.assert_called_once_with("https://feed.example.com")
 
 
-def test_remove_source_calls_legacy(capsys) -> None:
-    """'capcat remove-source' calls legacy remove_source."""
-    mock_cli = MagicMock()
-    with patch.dict(sys.modules, {"cli": mock_cli}):
+def test_remove_source_calls_remove_source_command(capsys) -> None:
+    """'capcat remove-source' calls capcat.commands.remove_source.remove_source."""
+    with patch("capcat.commands.remove_source.remove_source") as mock_rm:
         with patch.object(sys, "argv", ["capcat", "remove-source"]):
             from capcat.cli import main
             main()
-    mock_cli.remove_source.assert_called_once()
+    mock_rm.assert_called_once()
 
 
-def test_generate_config_calls_legacy(capsys) -> None:
-    """'capcat generate-config' calls legacy generate_config_command."""
-    mock_cli = MagicMock()
-    with patch.dict(sys.modules, {"cli": mock_cli}):
+def test_generate_config_calls_generate_config_command(capsys) -> None:
+    """'capcat generate-config' calls capcat.commands.generate_config.generate_config."""
+    with patch("capcat.commands.generate_config.generate_config") as mock_gen:
         with patch.object(sys, "argv", ["capcat", "generate-config"]):
             from capcat.cli import main
             main()
-    mock_cli.generate_config_command.assert_called_once()
+    mock_gen.assert_called_once()
 
 
 def test_setup_logging_called_for_fetch() -> None:
