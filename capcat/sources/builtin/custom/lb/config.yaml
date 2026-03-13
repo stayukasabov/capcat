@@ -1,0 +1,26 @@
+base_url: https://lobste.rs
+category: techpro
+display_name: Lobsters
+rate_limit: 1.0
+supports_comments: true
+has_comments: true
+comments_function: fetch_comments
+timeout: 10
+
+# RSS configuration (REQUIRED - robots.txt blocks HTML scraping)
+rss_config:
+  feed_url: "https://lobste.rs/newest.rss"
+  use_rss_content: false  # RSS provides links only, fetch full content from article URLs
+
+# Template system configuration
+template:
+  # Which template variant to use for articles
+  variant: "article-with-comments"
+
+  # Template data
+  navigation:
+    back_to_news_url: "../../news.html"
+    back_to_news_text: "Back to News"
+    has_comments: true
+    comments_url: "comments.html"
+    comments_text: "View Comments"
