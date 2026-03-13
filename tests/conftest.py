@@ -20,3 +20,11 @@ def mock_pynput(monkeypatch):
     monkeypatch.setitem(sys.modules, "pynput.keyboard", mock)
     monkeypatch.setitem(sys.modules, "pynput.mouse", mock)
     return mock
+
+
+@pytest.fixture(autouse=True)
+def mock_yt_dlp(monkeypatch):
+    """Mock yt_dlp in unit tests to avoid requiring the package at test time."""
+    mock = MagicMock()
+    monkeypatch.setitem(sys.modules, "yt_dlp", mock)
+    return mock
