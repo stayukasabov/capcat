@@ -332,13 +332,17 @@ def _cmd_list(args: list[str]) -> None:
             print(f"  {sid:<20} {name}")
 
     if what in ("bundles", "all"):
-        # Attempt to load bundles from Config/capcat.yml or fall back to legacy
-        try:
-            from cli import list_sources_and_bundles  # BRIDGE
-            if what == "bundles":
-                list_sources_and_bundles(what)
-        except ImportError:
-            pass  # bundles listing requires legacy module; skip gracefully
+        from capcat.core.source_system.bundle_service import get_available_bundles
+        bundles = get_available_bundles()
+        print("\nAvailable bundles:")
+        for bundle_id, bundle_data in sorted(bundles.items()):
+            sources_list = bundle_data["sources"]
+            sources_str = ", ".join(sources_list[:3])
+            if len(sources_list) > 3:
+                sources_str += f", ... ({len(sources_list)} total)"
+            desc = bundle_data.get("description", "")
+            print(f"  {bundle_id:<20} {desc}")
+            print(f"  {'':20} Sources: {sources_str}")
 
 
 # ---------------------------------------------------------------------------
@@ -356,7 +360,7 @@ def _cmd_add_source(args: list[str]) -> None:
         print("capcat add-source: --url is required")
         raise SystemExit(1)
 
-    from cli import add_source  # BRIDGE: remove when logic ported to capcat/cli.py
+    from capcat.commands.add_source import add_source
     add_source(url)
 
 
@@ -400,7 +404,7 @@ def _cmd_remove_source(args: list[str]) -> None:
         undo=undo_val,
     )
 
-    from cli import remove_source  # BRIDGE: remove when logic ported to capcat/cli.py
+    from capcat.commands.remove_source import remove_source
     remove_source(ns)
 
 
@@ -418,8 +422,8 @@ def _cmd_generate_config(args: list[str]) -> None:
     output, _ = _pop_value(args, "-o", "--output")
     ns = argparse.Namespace(output=output)
 
-    from cli import generate_config_command  # BRIDGE: remove when logic ported to capcat/cli.py
-    generate_config_command(ns)
+    from capcat.commands.generate_config import generate_config
+    generate_config(ns)
 
 
 # ---------------------------------------------------------------------------

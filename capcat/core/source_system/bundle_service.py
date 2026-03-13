@@ -11,7 +11,7 @@ from capcat.core.source_system.bundle_validator import BundleValidator
 from capcat.core.source_system.bundle_ui import BundleUI
 from capcat.core.source_system.source_registry import get_source_registry
 from capcat.core.logging_config import get_logger
-from capcat.core.source_system.source_registry import (  # BRIDGE: was from cli
+from capcat.core.source_system.source_registry import (
     get_source_registry as _get_source_registry,
 )
 
