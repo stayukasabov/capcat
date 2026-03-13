@@ -1,0 +1,67 @@
+# InfoQ Configuration
+source_id: "iq"
+name: "InfoQ"
+display_name: "InfoQ"
+category: techpro
+
+# URL configuration
+base_url: https://www.infoq.com/news/
+rss_url: https://feed.infoq.com
+
+# Discovery method - use RSS for latest news articles only
+discovery:
+  method: "rss"
+  rss_url: "https://feed.infoq.com"
+  max_articles: 30
+
+# Article selectors (fallback for non-RSS discovery)
+article_selectors:
+- h3 a[href*="/news/"]
+- .news-headline a
+
+# Content extraction
+content_selectors:
+- .article__content
+- article.article
+- .article-content
+- .content
+- .article-body
+
+# Template configuration
+template:
+  variant: article-no-comments
+  navigation:
+    show_breadcrumb: true
+    show_source_link: true
+
+# Request configuration
+timeout: 15
+rate_limit: 20.0
+
+# Skip patterns - URLs to avoid
+skip_patterns:
+- /about
+- /contact
+- /privacy
+- /terms
+- /profile
+- /presentations/
+- /interviews/
+- infoq.com/presentations
+- infoq.com/interviews
+
+supports_comments: false
+
+# Image processing configuration
+image_processing:
+  selectors:
+    - "article img"
+    - "figure img"
+    - "picture img"
+    - ".article-body img"
+    - "main img"
+  skip_selectors:
+    - "nav img"
+    - "header img"
+    - "footer img"
+    - ".sidebar img"

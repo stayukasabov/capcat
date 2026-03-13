@@ -1,0 +1,63 @@
+# BBC News Configuration
+source_id: "bbc"
+name: "BBC News"
+display_name: "BBC News"
+category: news
+
+# URL configuration
+base_url: https://www.bbc.com/news
+
+# Discovery method - HTML scraping
+discovery:
+  method: "html"
+  max_articles: 30
+
+# Article selectors for discovery (BBC-specific)
+article_selectors:
+- a[data-testid="internal-link"][href*="/news/articles/"]
+- a[href*="/news/articles/"]
+- h2 a[href*="/news/"]
+- h3 a[href*="/news/"]
+
+# Content extraction selectors
+content_selectors:
+- '[data-component="text-block"]'
+- article
+- .article-body
+- .post-content
+- main
+
+# Template configuration
+template:
+  variant: article-no-comments
+  navigation:
+    show_breadcrumb: true
+    show_source_link: true
+
+# Request configuration
+timeout: 10
+rate_limit: 1.0
+
+# Skip patterns - URLs to avoid
+skip_patterns:
+- /sport
+- /weather
+- /travel
+- /live
+- /video
+- /av/
+- /iplayer
+
+supports_comments: false
+
+# Image processing configuration
+image_processing:
+  selectors:
+    - "article img"
+    - "figure img"
+    - "picture img"
+    - ".article-body img"
+  skip_selectors:
+    - "nav img"
+    - "header img"
+    - "footer img"

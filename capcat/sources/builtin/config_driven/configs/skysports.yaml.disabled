@@ -1,0 +1,46 @@
+# Sky Sports Configuration
+source_id: "skysports"
+name: "Sky Sports"
+display_name: "Sky Sports"
+category: sports
+
+# URL configuration
+base_url: https://www.skysports.com
+
+# Discovery method - RSS feed
+discovery:
+  method: "rss"
+  rss_url: "https://www.skysports.com/rss/11095"
+  max_articles: 30
+
+# Article selectors (fallback if RSS fails)
+article_selectors:
+- '.news-list__headline a'
+- 'h3 a'
+- 'article a'
+- '.sdc-site-tile__headline a'
+
+# Content extraction selectors
+content_selectors:
+- '.sdc-article-body'
+- '.article-body'
+- '.post-content'
+
+# Template configuration
+template:
+  variant: article-no-comments
+  navigation:
+    show_breadcrumb: true
+    show_source_link: true
+
+# Request configuration
+timeout: 10
+rate_limit: 1.0
+
+# Skip patterns - URLs to avoid
+skip_patterns:
+- /live
+- /video
+- /watch
+
+supports_comments: false
