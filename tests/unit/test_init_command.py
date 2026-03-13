@@ -1,0 +1,62 @@
+"""TDD for capcat init command."""
+from __future__ import annotations
+from pathlib import Path
+import pytest
+
+
+def test_init_creates_capcat_dir(project_dir: Path):
+    from capcat.commands.init import init_project
+    init_project(project_dir)
+    assert (project_dir / ".capcat").is_dir()
+
+
+def test_init_creates_config_dir(project_dir: Path):
+    from capcat.commands.init import init_project
+    init_project(project_dir)
+    assert (project_dir / "Config").is_dir()
+    assert (project_dir / "Config" / "capcat.yml").is_file()
+
+
+def test_init_creates_source_dirs(project_dir: Path):
+    from capcat.commands.init import init_project
+    init_project(project_dir)
+    assert (project_dir / "Config" / "sources" / "active" / "config_driven").is_dir()
+    assert (project_dir / "Config" / "sources" / "active" / "custom").is_dir()
+
+
+def test_init_creates_gitignore(project_dir: Path):
+    from capcat.commands.init import init_project
+    init_project(project_dir)
+    gitignore = project_dir / ".gitignore"
+    assert gitignore.is_file()
+    content = gitignore.read_text()
+    assert "News/" in content
+    assert "Capcats/" in content
+    assert ".capcat/" in content
+
+
+def test_init_appends_to_existing_gitignore(project_dir: Path):
+    from capcat.commands.init import init_project
+    gitignore = project_dir / ".gitignore"
+    gitignore.write_text("node_modules/\n")
+    init_project(project_dir)
+    content = gitignore.read_text()
+    assert "node_modules/" in content
+    assert "News/" in content
+
+
+def test_init_fails_if_already_initialized(project_dir: Path):
+    from capcat.commands.init import init_project, AlreadyInitializedError
+    init_project(project_dir)
+    with pytest.raises(AlreadyInitializedError):
+        init_project(project_dir)
+
+
+def test_reinit_resets_capcat_dir_only(project_dir: Path):
+    from capcat.commands.init import init_project
+    init_project(project_dir)
+    user_config = project_dir / "Config" / "capcat.yml"
+    user_config.write_text("custom: true\n")
+    init_project(project_dir, reinit=True)
+    assert (project_dir / ".capcat").is_dir()
+    assert user_config.read_text() == "custom: true\n"
