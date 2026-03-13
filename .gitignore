@@ -161,8 +161,14 @@ test_*.py
 TEST_*.sh
 TEST_*.md
 
+# Allow test files inside the tests/ package
+!tests/**/*.py
+
 # Internal documentation source
 docs-markdown/
+
+# Internal development docs (decision records, plans, session notes)
+Work-docs/
 
 # Development metrics
 metrics/
