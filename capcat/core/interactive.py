@@ -183,7 +183,7 @@ def _handle_add_source_from_rss():
 
     # Call the existing add_source function from cli
     try:
-        from cli import add_source, get_available_sources
+        from capcat.commands.add_source import add_source; from capcat.core.source_system.bundle_service import get_available_sources
         add_source(url)
 
         # Show updated source count
@@ -272,7 +272,7 @@ def _handle_remove_source():
         enhanced_command.execute_with_options(options)
 
         # Show updated source count
-        from cli import get_available_sources
+        from capcat.core.source_system.bundle_service import get_available_sources
         sources = get_available_sources()
         print(f"\n✓ Active sources: {len(sources)}")
 
@@ -285,7 +285,7 @@ def _handle_remove_source():
 
 def _handle_list_sources():
     """Handle listing all available sources."""
-    from cli import get_available_sources
+    from capcat.core.source_system.bundle_service import get_available_sources
     from capcat.core.source_system.source_registry import get_source_registry
 
     sources = get_available_sources()
@@ -394,7 +394,7 @@ def _show_source_details(source_id, registry):
 
 def _handle_test_source():
     """Handle testing a source."""
-    from cli import get_available_sources
+    from capcat.core.source_system.bundle_service import get_available_sources
 
     sources = get_available_sources()
     source_choices = [questionary.Choice(name, sid) for sid, name in sources.items()]
@@ -437,7 +437,7 @@ def _handle_bundle_flow():
     # Position menu at bottom (bundle menu can be long)
     position_menu_at_bottom(menu_lines=15)
 
-    from cli import get_available_bundles, get_available_sources
+    from capcat.core.source_system.bundle_service import get_available_bundles, get_available_sources
     from capcat.core.source_system.source_registry import get_source_registry
 
     bundles = get_available_bundles()
@@ -493,7 +493,7 @@ def _handle_fetch_flow():
     # Position menu at bottom (source list can be long)
     position_menu_at_bottom(menu_lines=15)
 
-    from cli import get_available_sources
+    from capcat.core.source_system.bundle_service import get_available_sources
     sources = get_available_sources()
 
     source_choices = [questionary.Choice(name, sid) for sid, name in sources.items()]
@@ -521,7 +521,7 @@ def _handle_single_source_flow():
     # Position menu at bottom (source list can be long)
     position_menu_at_bottom(menu_lines=15)
 
-    from cli import get_available_sources
+    from capcat.core.source_system.bundle_service import get_available_sources
     sources = get_available_sources()
 
     source_choices = [questionary.Choice(name, sid) for sid, name in sources.items()]
@@ -632,8 +632,8 @@ def _confirm_and_execute(action, selection, generate_html):
 
     try:
         print("Executing command...")
-        from capcat_legacy import run_app  # BRIDGE: remove when run_app ported to capcat/
-        run_app(args)
+        from capcat.cli import _dispatch
+        _dispatch(args)
     except SystemExit as e:
         # The run_app function calls sys.exit(), which we intercept.
         if e.code != 0:
