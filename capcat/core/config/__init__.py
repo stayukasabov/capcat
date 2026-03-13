@@ -25,6 +25,10 @@ Example usage:
     sources = registry.list_available_sources()
 """
 
+from __future__ import annotations
+
+from pathlib import Path
+
 from .source_base import BundleConfig, SourceConfig, SourceConfigLoader
 from .source_registry import (
     SourceRegistry,
@@ -154,7 +158,7 @@ class NoProjectError(Exception):
     """Raised when no capcat project root (.capcat/) is found."""
 
 
-def find_project_root(start: "Path | None" = None) -> "Path":
+def find_project_root(start: Path | None = None) -> Path:
     """Walk up from start to find the directory containing .capcat/.
 
     Args:
@@ -166,8 +170,6 @@ def find_project_root(start: "Path | None" = None) -> "Path":
     Raises:
         NoProjectError: If no .capcat/ found up to filesystem root.
     """
-    from pathlib import Path
-
     current = (start or Path.cwd()).resolve()
     while True:
         if (current / ".capcat").is_dir():
@@ -180,7 +182,7 @@ def find_project_root(start: "Path | None" = None) -> "Path":
         current = parent
 
 
-def get_news_dir(project_root: "Path | None" = None) -> "Path":
+def get_news_dir(project_root: Path | None = None) -> Path:
     """Return the News output directory, creating it if absent.
 
     Args:
@@ -189,9 +191,7 @@ def get_news_dir(project_root: "Path | None" = None) -> "Path":
     Returns:
         Path to the News/ directory (guaranteed to exist).
     """
-    from pathlib import Path
-
-    root: "Path" = project_root or find_project_root()
+    root = project_root or find_project_root()
     news = root / "News"
     if not news.exists():
         news.mkdir(parents=True)
@@ -199,7 +199,7 @@ def get_news_dir(project_root: "Path | None" = None) -> "Path":
     return news
 
 
-def get_capcats_dir(project_root: "Path | None" = None) -> "Path":
+def get_capcats_dir(project_root: Path | None = None) -> Path:
     """Return the Capcats output directory, creating it if absent.
 
     Args:
@@ -208,9 +208,7 @@ def get_capcats_dir(project_root: "Path | None" = None) -> "Path":
     Returns:
         Path to the Capcats/ directory (guaranteed to exist).
     """
-    from pathlib import Path
-
-    root: "Path" = project_root or find_project_root()
+    root = project_root or find_project_root()
     capcats = root / "Capcats"
     if not capcats.exists():
         capcats.mkdir(parents=True)
