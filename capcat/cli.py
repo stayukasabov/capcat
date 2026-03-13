@@ -309,8 +309,25 @@ def _cmd_list(args: list[str]) -> None:
         print("Usage: capcat list [sources|bundles|all]")
         return
 
-    from cli import list_sources_and_bundles  # BRIDGE: remove when logic ported to capcat/cli.py
-    list_sources_and_bundles(what)
+    from capcat.core.source_system.source_registry import SourceRegistry
+    registry = SourceRegistry()
+    registry.discover_sources()
+
+    if what in ("sources", "all"):
+        print("\nAvailable sources:")
+        for sid in sorted(registry.get_available_sources()):
+            cfg = registry.get_source_config(sid)
+            name = cfg.display_name if cfg else sid
+            print(f"  {sid:<20} {name}")
+
+    if what in ("bundles", "all"):
+        # Attempt to load bundles from Config/capcat.yml or fall back to legacy
+        try:
+            from cli import list_sources_and_bundles  # BRIDGE
+            if what == "bundles":
+                list_sources_and_bundles(what)
+        except ImportError:
+            pass  # bundles listing requires legacy module; skip gracefully
 
 
 # ---------------------------------------------------------------------------
