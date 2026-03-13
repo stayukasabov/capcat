@@ -6,6 +6,7 @@ Handles file system operations, URL processing, and other shared functionalities
 
 import os
 import re
+from datetime import datetime
 from urllib.parse import urlparse
 
 from .config import get_config
@@ -244,8 +245,6 @@ def create_batch_output_directory(source_prefix: str) -> str:
     Returns:
         Full path to the created source directory.
     """
-    import os
-    from datetime import datetime
     from capcat.core.config import get_news_dir  # BRIDGE: project-model path
 
     current_date = datetime.now().strftime("%d-%m-%Y")
