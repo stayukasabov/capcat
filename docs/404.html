@@ -73,12 +73,10 @@
     }
 
     .error-link-group h4 {
-      font-family: var(--font-family-sans-serif);
-      font-size: var(--text-small);
-      font-weight: var(--font-weight-bold);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--text-color-muted);
+      color: var(--imprint);
+      padding-top: 0;
+      font-size: 1.2rem;
+      font-weight: var(--font-weight-medium);
       margin: 0 0 var(--space-xs);
     }
 
@@ -88,24 +86,18 @@
       padding: 0;
     }
 
-    .error-link-group li + li {
-      margin-top: var(--space-xs);
+    .error-link-group li {
+      margin-bottom: var(--space-xs);
+      font-size: var(--text-small);
     }
 
     .error-link-group a {
-      font-family: var(--font-family-sans-serif);
-      font-weight: var(--font-weight-bold);
-      font-size: var(--text-small);
-      color: var(--text-color-light);
-      text-decoration: underline;
-      text-decoration-color: transparent;
-      text-underline-offset: 2px;
-      transition: color 0.2s, text-decoration-color 0.2s;
+      color: var(--imprint-muted);
+      transition: all 1s ease;
     }
 
     .error-link-group a:hover {
-      color: var(--accent-primary);
-      text-decoration-color: var(--accent-primary);
+      color: var(--imprint);
     }
   </style>
 </head>
