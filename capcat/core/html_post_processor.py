@@ -616,6 +616,7 @@ class HTMLPostProcessor:
 
         try:
             self.logger.info(f"HTML archive available at: {index_url}")
+            print(f"\nHTML archive: {index_url}")
 
             return True
 
