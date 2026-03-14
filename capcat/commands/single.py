@@ -220,13 +220,25 @@ def scrape_single_article(
                 f"Article from {url}", url, 1, base_dir, None
             )
 
-            if success and returned_title is None and content_path is None:
-                return True, None
-
     except Exception as e:
         logger.error(f"Failed to process single article: {e}")
         success = False
 
     if not success:
         logger.warning("Failed to fetch article content, but folder structure created")
+        return success, base_dir
+
+    if generate_html:
+        try:
+            from capcat.core.html_post_processor import HTMLPostProcessor
+            processor = HTMLPostProcessor()
+            processor.process_directory_tree(
+                base_dir,
+                incremental=False,
+                is_single_article=True,
+            )
+            logger.info(f"Generated HTML in: {base_dir}")
+        except Exception as e:
+            logger.warning(f"Failed to generate HTML: {e}")
+
     return success, base_dir
