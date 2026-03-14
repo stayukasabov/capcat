@@ -53,6 +53,7 @@ class SourceConfigDict(dict):
     """
 
     def __init__(self):
+        """Initialize with an empty dict; configs are loaded on first access."""
         super().__init__()
         self._loaded = False
 
@@ -64,38 +65,97 @@ class SourceConfigDict(dict):
             self._loaded = True
 
     def __getitem__(self, key):
+        """Load configs if needed, then return item for *key*.
+
+        Args:
+            key: Source identifier string.
+
+        Returns:
+            Source configuration dict for *key*.
+
+        Raises:
+            KeyError: If *key* is not a registered source.
+        """
         self._ensure_loaded()
         return super().__getitem__(key)
 
     def __setitem__(self, key, value):
+        """Load configs if needed, then set *key* to *value*.
+
+        Args:
+            key: Source identifier string.
+            value: Configuration dict to store.
+        """
         self._ensure_loaded()
         super().__setitem__(key, value)
 
     def __contains__(self, key):
+        """Load configs if needed, then test membership.
+
+        Args:
+            key: Source identifier string.
+
+        Returns:
+            ``True`` if *key* is a registered source.
+        """
         self._ensure_loaded()
         return super().__contains__(key)
 
     def get(self, key, default=None):
+        """Load configs if needed, then return item or *default*.
+
+        Args:
+            key: Source identifier string.
+            default: Value to return when *key* is absent.
+
+        Returns:
+            Config dict for *key*, or *default*.
+        """
         self._ensure_loaded()
         return super().get(key, default)
 
     def keys(self):
+        """Load configs if needed, then return all source IDs.
+
+        Returns:
+            Dict keys view of all registered source identifiers.
+        """
         self._ensure_loaded()
         return super().keys()
 
     def values(self):
+        """Load configs if needed, then return all config dicts.
+
+        Returns:
+            Dict values view of all source configuration dicts.
+        """
         self._ensure_loaded()
         return super().values()
 
     def items(self):
+        """Load configs if needed, then return (source_id, config) pairs.
+
+        Returns:
+            Dict items view of ``(source_id, config_dict)`` pairs.
+        """
         self._ensure_loaded()
         return super().items()
 
     def __len__(self):
+        """Load configs if needed, then return the number of registered sources.
+
+        Returns:
+            Count of registered source configurations.
+        """
         self._ensure_loaded()
         return super().__len__()
 
     def __iter__(self):
+        """Load configs if needed, then iterate over source IDs.
+
+        Returns:
+            Iterator over all registered source identifier strings.
+        """
         self._ensure_loaded()
         return super().__iter__()
 
