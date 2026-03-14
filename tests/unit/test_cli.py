@@ -83,7 +83,7 @@ def test_single_help_flag(capsys) -> None:
 
 def test_single_calls_scrape_single_article() -> None:
     """'capcat single <url>' delegates to scrape_single_article."""
-    with patch("capcat.commands.single.scrape_single_article") as mock_scrape:
+    with patch("capcat.commands.single.scrape_single_article", return_value=(True, "/tmp/out")) as mock_scrape:
         with patch("capcat.cli._setup_logging"):
             with patch.object(sys, "argv", ["capcat", "single", "https://example.com"]):
                 from capcat.cli import main
