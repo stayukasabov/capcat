@@ -1509,8 +1509,24 @@ class HTMLGenerator:
         pattern = r'(<p[^>]*>)\s*(<strong>(?:Source URL|Comments URL):</strong>\s*<a\s+href="[^"]*"[^>]*>[^<]*</a>)\s*(</p>)'
 
         # Replacement function - extracts content and wraps in semantic div
+        # Also truncates long display URLs to keep them readable
+        _MAX_URL_DISPLAY = 80
+
+        def _truncate_anchor_text(anchor_match):
+            href = anchor_match.group(1)
+            text = anchor_match.group(2)
+            if len(text) > _MAX_URL_DISPLAY:
+                text = text[:_MAX_URL_DISPLAY - 3] + "..."
+            return f'<a href="{href}">{text}</a>'
+
         def replace_source_url(match):
             p_open, content, p_close = match.groups()
+            content = re.sub(
+                r'<a\s+href="([^"]*)"[^>]*>([^<]*)</a>',
+                _truncate_anchor_text,
+                content,
+                flags=re.IGNORECASE,
+            )
             return f'<div class="source-url">{content}</div>'
 
         # Apply transformation with case-insensitive matching
