@@ -201,7 +201,40 @@ template:
 - 4 spaces, 79 char max
 - Imports: stdlib → third-party → local
 - Descriptive names (no single letters except counters)
-- Google docstrings, type hints
+
+**Docstrings — REQUIRED, NO EXCEPTIONS:**
+
+Every module, class, and public method must have a Google-style docstring.
+This is a DX requirement: Capcat is designed for contributors. Undocumented
+code is a contribution barrier.
+
+Format:
+```python
+def fetch_articles(self, count: int = 30) -> List[Article]:
+    """Fetch the latest articles from this source.
+
+    Args:
+        count: Maximum number of articles to return.
+
+    Returns:
+        List of Article objects, newest first.
+
+    Raises:
+        NetworkError: If the source cannot be reached.
+    """
+```
+
+Rules:
+- All modules: one-line summary at the top describing purpose
+- All classes: describe what it represents and when to use it
+- All public methods: Args, Returns, Raises where applicable
+- Private methods (`_name`): docstring if logic is non-obvious
+- No docstring = PR is not mergeable
+- This applies to ALL new and modified code — not just future work
+
+**Type hints:**
+- All function signatures must have type hints
+- Use `from __future__ import annotations` for forward references
 
 **Principles:**
 - DRY, single responsibility
