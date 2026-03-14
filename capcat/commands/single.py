@@ -196,7 +196,22 @@ def scrape_single_article(
             from capcat.core.session_pool import get_global_session
 
             class GenericArticleFetcher(ArticleFetcher):
+                """ArticleFetcher subclass that never skips any URL.
+
+                Used as the generic fallback when no registered source
+                matches the requested URL.
+                """
+
                 def should_skip_url(self, url: str, title: str) -> bool:
+                    """Always return False — no URL is skipped in generic mode.
+
+                    Args:
+                        url: The article URL being evaluated.
+                        title: The article title being evaluated.
+
+                    Returns:
+                        Always ``False``.
+                    """
                     return False
 
             session = get_global_session("generic")
