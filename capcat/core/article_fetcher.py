@@ -6,7 +6,6 @@ This module contains the base ArticleFetcher class that eliminates
 code duplication between source-specific implementations.
 """
 
-import io
 import os
 import sys
 import threading
@@ -18,7 +17,6 @@ from urllib.parse import urljoin, urlparse
 
 import requests
 from bs4 import BeautifulSoup
-from pynput import keyboard
 
 from .config import get_config
 from .downloader import (
@@ -43,51 +41,41 @@ SKIP_PROMPT_TIMEOUT_SECONDS = 20
 BYTES_TO_MB = 1024 * 1024
 
 
-@contextmanager
-def _suppress_stderr():
+def _listen_for_esc(stop_event: threading.Event) -> None:
     """
-    Context manager to temporarily suppress stderr output at OS level.
+    Background thread target: set stop_event when ESC is pressed.
 
-    Used to suppress pynput's misleading accessibility warning on macOS.
-    The warning says "Input event monitoring will not be possible" but
-    keyboard detection actually works correctly. Uses os.dup2() for
-    OS-level redirection to catch warnings from subprocesses/threads.
+    Uses termios to put stdin in raw mode so individual keypresses are
+    readable without waiting for Enter. Exits silently if stdin is not
+    a tty (piped input, CI, etc.).
 
-    Falls back to Python-level redirection in test environments where
-    stderr is replaced with StringIO.
+    Args:
+        stop_event: Event to set when ESC (0x1b) is detected.
     """
-    # Check if stderr has fileno (real file descriptor)
+    if not sys.stdin.isatty():
+        return
     try:
-        stderr_fd = sys.stderr.fileno()
-        has_fileno = True
-    except (AttributeError, io.UnsupportedOperation):
-        has_fileno = False
+        import termios
+        import tty
+    except ImportError:
+        return
 
-    if has_fileno:
-        # OS-level redirection for production (catches subprocess warnings)
-        saved_stderr_fd = os.dup(stderr_fd)
-        devnull_fd = None
+    fd = sys.stdin.fileno()
+    old = termios.tcgetattr(fd)
+    try:
+        tty.setraw(fd)
+        while not stop_event.is_set():
+            ch = sys.stdin.read(1)
+            if ch == '\x1b':  # ESC
+                stop_event.set()
+                break
+    except Exception:
+        pass
+    finally:
         try:
-            devnull_fd = os.open(os.devnull, os.O_WRONLY)
-            os.dup2(devnull_fd, stderr_fd)
-            yield
-        finally:
-            os.dup2(saved_stderr_fd, stderr_fd)
-            os.close(saved_stderr_fd)
-            if devnull_fd is not None:
-                os.close(devnull_fd)
-    else:
-        # Python-level redirection for test environments
-        old_stderr = sys.stderr
-        devnull = None
-        try:
-            devnull = open(os.devnull, 'w')
-            sys.stderr = devnull
-            yield
-        finally:
-            sys.stderr = old_stderr
-            if devnull is not None:
-                devnull.close()
+            termios.tcsetattr(fd, termios.TCSADRAIN, old)
+        except Exception:
+            pass
 
 
 def set_global_update_mode(update_mode: bool):
@@ -730,27 +718,10 @@ class ArticleFetcher(ABC):
             True if ESC pressed (skip), False on timeout (proceed)
         """
         esc_pressed = threading.Event()
-
-        def on_press(key):
-            """Handle key press events."""
-            try:
-                # Check if ESC key was pressed
-                if key == keyboard.Key.esc:
-                    esc_pressed.set()
-                    return False  # Stop listener
-            except AttributeError:
-                pass
-
-        # Start keyboard listener in background
-        # Suppress pynput's misleading accessibility warning on stderr
-        # The warning is emitted asynchronously after listener starts,
-        # so we suppress stderr during and after startup with longer sleep
-        with _suppress_stderr():
-            listener = keyboard.Listener(on_press=on_press)
-            listener.start()
-            # Sleep to allow async warning to be emitted and suppressed
-            # Warning appears 0.5-1s after start on macOS
-            time.sleep(1.0)
+        listener = threading.Thread(
+            target=_listen_for_esc, args=(esc_pressed,), daemon=True
+        )
+        listener.start()
 
         # Context-aware message
         context_msg = "operation will stop" if is_direct_pdf else "bundle will continue"
@@ -784,8 +755,7 @@ class ArticleFetcher(ABC):
             return False
 
         finally:
-            # Clean up listener
-            listener.stop()
+            esc_pressed.set()  # signal thread to exit
 
     def _fetch_web_content(
         self,
