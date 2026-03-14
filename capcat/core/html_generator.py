@@ -710,9 +710,8 @@ class HTMLGenerator:
             template_path = app_dir / "templates" / template_filename
             if not template_path.exists():
                 self.logger.error(f"Template not found: {template_path}")
-                # Fallback to old method if template doesn't exist
-                return self._generate_directory_index_legacy(
-                    directory_path, title, breadcrumb_path
+                return self._generate_error_page(
+                    f"Template not found: {template_path}"
                 )
 
             with open(template_path, "r", encoding="utf-8") as f:
