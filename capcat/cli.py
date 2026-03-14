@@ -79,6 +79,8 @@ def _dispatch(args: list[str]) -> None:
     command = args[0]
     rest = args[1:]
 
+    _auto_init(command)
+
     if command == "init":
         _cmd_init(rest)
     elif command == "single":
@@ -430,6 +432,27 @@ def _cmd_generate_config(args: list[str]) -> None:
 
     from capcat.commands.generate_config import generate_config
     generate_config(ns)
+
+
+# ---------------------------------------------------------------------------
+# Auto-init
+# ---------------------------------------------------------------------------
+
+def _auto_init(command: str) -> None:
+    """Initialize a capcat project in cwd if not already initialized.
+
+    Runs silently before any command except init/help/version.
+    """
+    _skip = {"init", "--help", "-h", "--version"}
+    if command in _skip:
+        return
+    from pathlib import Path
+    from capcat.commands.init import init_project, AlreadyInitializedError
+    try:
+        init_project(Path.cwd())
+        print("Initialized capcat in ./")
+    except AlreadyInitializedError:
+        pass
 
 
 # ---------------------------------------------------------------------------
