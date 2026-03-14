@@ -520,45 +520,44 @@ for source_id in sources:
 
           <script type="module">
             import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
-            mermaid.initialize({
-              startOnLoad: true,
-              theme: "base",
-              themeVariables: {
-                // Primary colors from design system (Capcat orange palette)
-                primaryColor: "#FFD4B7", // --orange-200
-                primaryTextColor: "#201419", // --ink
-                primaryBorderColor: "#F1540E", // --orange-500 / --accent-primary
+              mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      // Primary colors from design system (Capcat orange palette)
+      primaryColor: '#FFD4B7',           // --orange-200
+      primaryTextColor: '#201419',       // --ink
+      primaryBorderColor: '#F1540E',     // --orange-500 / --accent-primary
 
-                // Line and edge colors
-                lineColor: "#58444c", // --ink-medium
+      // Line and edge colors
+      lineColor: '#58444c',              // --ink-medium
 
-                // Secondary colors
-                secondaryColor: "#FFEADB", // --orange-100
-                tertiaryColor: "#f9f8ed", // --accent-cream-primary
+      // Secondary colors
+      secondaryColor: '#FFEADB',         // --orange-100
+      tertiaryColor: '#f9f8ed',          // --accent-cream-primary
 
-                // Text colors
-                textColor: "#201419", // --ink
-                mainBkg: "#FAF8EE", // --cream
+      // Text colors
+      textColor: '#201419',              // --ink
+      mainBkg: '#FAF8EE',                // --cream
 
-                // Node styling
-                nodeBorder: "#F1540E", // --accent-primary
-                clusterBkg: "#faf2e7", // --accent-cream-light
-                clusterBorder: "#D44400", // --orange-600 / --accent-hover
+      // Node styling
+      nodeBorder: '#F1540E',             // --accent-primary
+      clusterBkg: '#faf2e7',             // --accent-cream-light
+      clusterBorder: '#D44400',          // --orange-600 / --accent-hover
 
-                // Font
-                fontFamily:
-                  '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-                fontSize: "16px",
-              },
-              flowchart: {
-                nodeSpacing: 50,
-                rankSpacing: 50,
-                padding: 15,
-                useMaxWidth: true,
-                htmlLabels: true,
-                curve: "basis",
-              },
-            });
+      // Font
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+      fontSize: '16px'
+    },
+    flowchart: {
+      nodeSpacing: 50,
+      rankSpacing: 50,
+      padding: 15,
+      useMaxWidth: true,
+      htmlLabels: true,
+      curve: 'basis'
+    }
+  });
 
             // Add copy buttons to Mermaid diagrams after rendering
             document.addEventListener("DOMContentLoaded", function () {
