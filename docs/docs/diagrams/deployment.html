@@ -215,26 +215,22 @@ pip install --user capcat
 ~/.local/bin/capcat bundle tech --count 10
 </code></pre>
 
-<h3>2. Virtual Environment</h3>
-<pre><code># Development setup
-python3 -m venv capcat-env
-source capcat-env/bin/activate
-pip install -r requirements.txt
-./capcat bundle tech --count 10
+<h3>2. Development Install</h3>
+<pre><code># Editable install for contributing
+git clone https://github.com/stayukasabov/capcat.git
+cd capcat
+pip install -e ".[dev]"
+capcat bundle tech --count 10
 </code></pre>
 
 <h3>3. Docker Deployment</h3>
 <pre><code>FROM python:3.11-slim
 
 WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-
-COPY . .
-RUN chmod +x capcat
+RUN pip install capcat
 
 VOLUME [&quot;/app/output&quot;]
-CMD [&quot;./capcat&quot;, &quot;bundle&quot;, &quot;tech&quot;, &quot;--count&quot;, &quot;10&quot;]
+CMD [&quot;capcat&quot;, &quot;bundle&quot;, &quot;tech&quot;, &quot;--count&quot;, &quot;10&quot;]
 </code></pre>
 
 <h3>4. Systemd Service</h3>
@@ -245,8 +241,7 @@ After=network.target
 [Service]
 Type=oneshot
 User=capcat
-WorkingDirectory=/opt/capcat
-ExecStart=/opt/capcat/venv/bin/python capcat.py bundle tech --count 30
+ExecStart=/usr/local/bin/capcat bundle tech --count 30
 Environment=CAPCAT_OUTPUT_DIR=/var/lib/capcat/news
 
 [Install]
@@ -255,7 +250,7 @@ WantedBy=multi-user.target
 
 <h3>5. Cron Job</h3>
 <pre><code># Daily news archiving at 6 AM
-0 6 * * * /opt/capcat/venv/bin/python /opt/capcat/capcat.py bundle tech --count 30
+0 6 * * * /usr/local/bin/capcat bundle tech --count 30
 </code></pre>
 
 <h2>Security Considerations</h2>

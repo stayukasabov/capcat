@@ -85,13 +85,12 @@
 
 <div class="mermaid">graph TB
     subgraph "User Interface Layer"
-        CLI[CLI Interfacecli.py]
-        Wrapper[Bash Wrappercapcat]
-        PythonWrapper[Python Wrapperrun_capcat.py]
+        CLI[CLI Interfacecapcat/cli.py]
+        Wrapper[Entry Pointcapcat command]
     end
 
     subgraph "Application Layer"
-        Main[Main Applicationcapcat.py]
+        Main[CLI Dispatchercapcat/cli.py]
         Config[Configurationcore.config]
         ErrorHandler[Error Handlingcore.error_handling]
         Progress[Progress Trackingcore.progress]
@@ -133,7 +132,6 @@
     %% User interactions
     CLI --> Main
     Wrapper --> Main
-    PythonWrapper --> Main
 
     %% Application flow
     Main --> Config
