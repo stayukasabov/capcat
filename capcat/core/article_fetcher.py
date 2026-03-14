@@ -18,10 +18,7 @@ from urllib.parse import urljoin, urlparse
 
 import requests
 from bs4 import BeautifulSoup
-try:
-    from pynput import keyboard as _pynput_keyboard
-except Exception:
-    _pynput_keyboard = None
+from pynput import keyboard
 
 from .config import get_config
 from .downloader import (
@@ -738,7 +735,7 @@ class ArticleFetcher(ABC):
             """Handle key press events."""
             try:
                 # Check if ESC key was pressed
-                if _pynput_keyboard and key == _pynput_keyboard.Key.esc:
+                if key == keyboard.Key.esc:
                     esc_pressed.set()
                     return False  # Stop listener
             except AttributeError:
@@ -748,11 +745,8 @@ class ArticleFetcher(ABC):
         # Suppress pynput's misleading accessibility warning on stderr
         # The warning is emitted asynchronously after listener starts,
         # so we suppress stderr during and after startup with longer sleep
-        if _pynput_keyboard is None:
-            return False
-
         with _suppress_stderr():
-            listener = _pynput_keyboard.Listener(on_press=on_press)
+            listener = keyboard.Listener(on_press=on_press)
             listener.start()
             # Sleep to allow async warning to be emitted and suppressed
             # Warning appears 0.5-1s after start on macOS
