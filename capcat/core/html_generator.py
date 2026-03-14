@@ -546,7 +546,9 @@ class HTMLGenerator:
 
             # Generate breadcrumb navigation
             current_file = (
-                "comments.html" if html_subfolder else "comments.html"
+                "comments.html"
+                if "comments" in markdown_path.lower()
+                else "article.html"
             )
             breadcrumb_html = self._generate_breadcrumb(
                 breadcrumb_path,
@@ -812,81 +814,52 @@ class HTMLGenerator:
         html_subfolder: bool = False,
         current_file_path: str = None,
     ) -> str:
-        """Generate breadcrumb navigation HTML with proper directory-aware links."""
-        if not breadcrumb_path:
+        """Generate breadcrumb navigation HTML.
+
+        Always shows exactly two links:
+          [0] date folder  → date-level index.html
+          [1] source folder → source-level news.html
+
+        The current page title is already in the h1. The "Article" level on
+        comments pages is intentionally omitted — Back to Article button
+        handles that. Depths are fixed by the physical directory structure,
+        not derived from breadcrumb length.
+
+        Depth from the generated file to each level:
+          news.html  (source dir)      → date=1 up
+          article.html (no subfolder)  → date=2 up, source=1 up
+          article/comments.html (html/) → date=3 up, source=2 up
+        """
+        if not breadcrumb_path or len(breadcrumb_path) < 2:
             return ""
 
-        # For comments pages, filter out date-based breadcrumbs to simplify navigation
-        is_comments_page = (
-            current_file_path and "comments.html" in current_file_path
-        )
-        if is_comments_page and len(breadcrumb_path) > 2:
-            # Remove news date from comments breadcrumb (e.g., "news 20-09-2025" -> "Lobsters 20-09-2025" -> "Article" -> "Comments")
-            # Becomes: "Lobsters 20-09-2025" -> "Article" -> "Comments"
-            filtered_breadcrumb = []
-            for item in breadcrumb_path:
-                if not item.startswith("news "):
-                    filtered_breadcrumb.append(item)
-            breadcrumb_path = filtered_breadcrumb
+        # Determine file depth based on where the file lives.
+        is_source_index = current_file_path and "news.html" in current_file_path
+        if is_source_index:
+            # news.html sits directly inside source_dir/
+            # Only one link needed: date folder → ../index.html
+            show_items = breadcrumb_path[:1]
+            base_depth = 1
+        elif html_subfolder:
+            # html/article.html or html/comments.html — 3 levels from date-level
+            show_items = breadcrumb_path[:2]
+            base_depth = 3
+        else:
+            # article_dir/article.html — 2 levels from date-level
+            show_items = breadcrumb_path[:2]
+            base_depth = 2
 
-        # Hide breadcrumb if it's just a single item with no navigation links
-        if len(breadcrumb_path) == 1:
-            return ""
+        # filename for each breadcrumb position
+        filenames = ["index.html", "news.html"]
 
         breadcrumb_items = []
-
-        # Skip the last item (current page title) since it's already in the header
-        for i, item in enumerate(breadcrumb_path[:-1]):
-                # Generate proper link based on position and context
-                levels_up = len(breadcrumb_path) - i - 1
-
-                if i == 0:
-                    # First item handling
-                    if item.startswith("news "):
-                        # This is a news date folder - link to index.html
-                        if html_subfolder:
-                            href = "../" * (levels_up + 1) + "index.html"
-                        else:
-                            href = "../" * levels_up + "index.html"
-                    else:
-                        # This is a source folder - link to news.html in that folder
-                        if html_subfolder:
-                            # From html/ subfolder, go up 2 levels to reach the source folder
-                            href = "../../news.html"
-                        else:
-                            # From within the source folder, reference news.html directly
-                            href = "news.html"
-
-                elif i == 1:
-                    if len(breadcrumb_path) == 3 and is_comments_page:
-                        # Comments page: [source, article, comments]
-                        # i=1 is the article title — link to article.html
-                        href = "article.html"
-                    else:
-                        # Article page: [news DATE, source, article title]
-                        # i=1 is the source name — link to source's news.html
-                        if html_subfolder:
-                            href = "../" * (levels_up + 1) + "news.html"
-                        else:
-                            href = "../" * levels_up + "news.html"
-                else:
-                    # Fallback for other cases - determine correct file type
-                    if item.startswith("news "):
-                        # News date folder - use index.html
-                        filename = "index.html"
-                    else:
-                        # Source folder - use news.html
-                        filename = "news.html"
-
-                    if html_subfolder:
-                        href = "../" * (levels_up + 1) + filename
-                    else:
-                        href = "../" * levels_up + filename
-
-                cleaned_title = self._clean_title_for_display(item)
-                breadcrumb_items.append(
-                    f'<a href="{href}" title="Navigate to {cleaned_title}">{cleaned_title}</a>'
-                )
+        for i, item in enumerate(show_items):
+            levels_up = base_depth - i
+            href = "../" * levels_up + filenames[i]
+            cleaned_title = self._clean_title_for_display(item)
+            breadcrumb_items.append(
+                f'<a href="{href}" title="Navigate to {cleaned_title}">{cleaned_title}</a>'
+            )
 
         return "".join(breadcrumb_items)
 
