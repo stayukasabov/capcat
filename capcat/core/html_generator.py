@@ -858,30 +858,17 @@ class HTMLGenerator:
                             href = "news.html"
 
                 elif i == 1:
-                    # Second item handling - this should be article title for most cases
                     if len(breadcrumb_path) == 3 and is_comments_page:
-                        # For comments pages: source -> article -> comments
-                        # Link to the article.html file
+                        # Comments page: [source, article, comments]
+                        # i=1 is the article title — link to article.html
                         href = "article.html"
-                    elif len(breadcrumb_path) >= 3:
-                        # For article pages with multiple levels:
-                        # If we're in html/ subfolder, link to article.html in same folder
-                        if html_subfolder:
-                            href = "article.html"
-                        else:
-                            # From article directory, link to html/article.html
-                            href = "html/article.html"
                     else:
-                        # Fallback - determine file type
-                        if item.startswith("news "):
-                            filename = "index.html"
-                        else:
-                            filename = "news.html"
-
+                        # Article page: [news DATE, source, article title]
+                        # i=1 is the source name — link to source's news.html
                         if html_subfolder:
-                            href = "../" * (levels_up + 1) + filename
+                            href = "../" * (levels_up + 1) + "news.html"
                         else:
-                            href = "../" * levels_up + filename
+                            href = "../" * levels_up + "news.html"
                 else:
                     # Fallback for other cases - determine correct file type
                     if item.startswith("news "):
