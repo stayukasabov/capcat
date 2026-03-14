@@ -87,6 +87,7 @@ class UnifiedSourceProcessor:
         verbose: bool = False,
         download_files: bool = False,
         batch_mode: bool = False,
+        generate_html: bool = False,
     ) -> None:
         """
         Universal article processing function that replaces all 46+ process_*_articles functions.
@@ -102,7 +103,8 @@ class UnifiedSourceProcessor:
         # Check if source is available in the new system first (hybrid approach)
         if self._is_source_in_new_system(source_name):
             return self._process_with_new_system(
-                source_name, count, output_dir, quiet, verbose, download_files, batch_mode
+                source_name, count, output_dir, quiet, verbose, download_files,
+                batch_mode, generate_html,
             )
 
         # Fall back to legacy system
@@ -480,6 +482,7 @@ class UnifiedSourceProcessor:
         verbose: bool = False,
         download_files: bool = False,
         batch_mode: bool = False,
+        generate_html: bool = False,
     ) -> None:
         """Process articles using the new source system."""
         self.logger.debug(f"Using new source system for {source_name}")
@@ -549,6 +552,10 @@ class UnifiedSourceProcessor:
             self._process_articles_with_new_system(
                 source, articles, base_dir, download_files, quiet, verbose
             )
+
+            if generate_html:
+                from capcat.core.html_post_processor import process_html_generation
+                process_html_generation(base_dir)
 
         except SourceError as e:
             self.logger.error(f"New source system error: {e}")
@@ -788,6 +795,7 @@ def process_source_articles(
     verbose: bool = False,
     download_files: bool = False,
     batch_mode: bool = False,
+    generate_html: bool = False,
 ) -> None:
     """
     Convenience function to process articles from any source.
@@ -803,5 +811,6 @@ def process_source_articles(
     """
     processor = get_unified_processor()
     processor.process_source_articles(
-        source_name, count, output_dir, quiet, verbose, download_files, batch_mode
+        source_name, count, output_dir, quiet, verbose, download_files, batch_mode,
+        generate_html,
     )
