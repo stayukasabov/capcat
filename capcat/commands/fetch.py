@@ -50,6 +50,7 @@ def process_sources(
                 verbose=getattr(args, "verbose", False),
                 download_files=getattr(args, "media", False),
                 batch_mode=is_batch,
+                generate_html=generate_html,
             )
             successful_sources.append(source)
             logger.info(f"Successfully processed {source}")
