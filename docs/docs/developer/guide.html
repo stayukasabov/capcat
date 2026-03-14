@@ -96,43 +96,37 @@
 <h3>Setup Development Environment</h3>
 
 <pre><code># Clone the repository
-git clone &lt;repository-url&gt;
+git clone https://github.com/stayukasabov/capcat.git
 cd capcat
 
-# Create virtual environment
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Install development dependencies
-pip install -r requirements-dev.txt
+# Install in editable mode with dev extras
+pip install -e &quot;.[dev]&quot;
 
 # Verify installation
-./capcat list sources
+capcat list sources
 </code></pre>
 
 <h2>Project Structure</h2>
 
-<div class="ascii-art">Application/
-├── capcat.py              # Main application entry point
-├── capcat                 # Bash wrapper script
-├── run_capcat.py          # Python wrapper
-├── cli.py                 # Command-line interface
-├── core/                  # Core functionality
-│   ├── source_system/     # Source management framework
-│   ├── config.py          # Configuration management
-│   ├── article_fetcher.py # Article processing
-│   └── unified_media_processor.py  # Media handling
-├── sources/               # News source implementations
-│   ├── active/           # Active sources
-│   │   ├── config_driven/ # YAML-configured sources
-│   │   └── custom/        # Python-implemented sources
-│   └── base/             # Base classes and schemas
-├── htmlgen/              # HTML generation system
-├── themes/               # CSS themes for HTML output
-└── docs/                 # Documentation
+<div class="ascii-art">capcat/                        # Installable package
+├── capcat/
+│   ├── cli.py                 # Entry point (capcat command)
+│   ├── commands/              # One module per CLI subcommand
+│   │   ├── single.py
+│   │   ├── fetch.py
+│   │   ├── add_source.py
+│   │   └── remove_source.py
+│   ├── core/                  # Core functionality
+│   │   ├── source_system/     # Source management
+│   │   ├── config.py
+│   │   └── article_fetcher.py
+│   └── sources/
+│       └── builtin/           # Bundled sources (read-only)
+│           ├── config_driven/
+│           ├── custom/
+│           └── bundles.yml
+├── pyproject.toml
+└── docs/
 </div>
 
 <h2>Development Workflow</h2>
@@ -145,7 +139,7 @@ pip install -r requirements-dev.txt
 <li>Create YAML configuration:</li>
 </ol>
 
-<pre><code># sources/active/config_driven/configs/newsource.yaml
+<pre><code># capcat/sources/builtin/config_driven/configs/newsource.yaml
 display_name: &quot;New Source&quot;
 base_url: &quot;https://newsource.com/&quot;
 category: tech
@@ -157,7 +151,7 @@ content_selectors: [&quot;.article-content&quot;]
 <li>Verify the source:</li>
 </ol>
 
-<pre><code>./capcat fetch newsource --count 5
+<pre><code>capcat fetch newsource --count 5
 </code></pre>
 
 <h3>Option 2: Custom Source (Advanced)</h3>
@@ -166,15 +160,15 @@ content_selectors: [&quot;.article-content&quot;]
 <li>Create source directory:</li>
 </ol>
 
-<pre><code>mkdir -p sources/active/custom/newsource
+<pre><code>mkdir -p capcat/sources/builtin/custom/newsource
 </code></pre>
 
 <ol>
 <li>Implement source class:</li>
 </ol>
 
-<pre><code># sources/active/custom/newsource/source.py
-from core.source_system.base_source import BaseSource
+<pre><code># capcat/sources/builtin/custom/newsource/source.py
+from capcat.core.source_system.base_source import BaseSource
 
 class NewSource(BaseSource):
     def __init__(self):
@@ -195,7 +189,7 @@ class NewSource(BaseSource):
 <li>Validate implementation:</li>
 </ol>
 
-<pre><code>./capcat fetch newsource --count 5
+<pre><code>capcat fetch newsource --count 5
 </code></pre>
 
 <h3>Code Style Guidelines</h3>
@@ -236,10 +230,10 @@ class NewSource(BaseSource):
 <p>Verify your changes work correctly:</p>
 
 <pre><code># Fetch from source
-./capcat fetch sourcename --count 5
+capcat fetch sourcename --count 5
 
 # Try bundle
-./capcat bundle tech --count 10
+capcat bundle tech --count 10
 </code></pre>
 
 <h3>Documentation</h3>
@@ -259,10 +253,10 @@ python scripts/generate_diagrams.py
 
 <pre><code># Enable debug mode
 export CAPCAT_DEBUG=1
-./capcat fetch hn --count 5
+capcat fetch hn --count 5
 
 # Or use Python directly
-python capcat.py --debug fetch hn --count 5
+CAPCAT_DEBUG=1 capcat fetch hn --count 5
 </code></pre>
 
 <p>Common debugging techniques:</p>
