@@ -1,11 +1,10 @@
 
-from ruamel.yaml import YAML
+import yaml
 from pathlib import Path
 
 class BundleManager:
     """
-    Manages the addition of sources to bundles in the bundles.yml file,
-    preserving comments and structure.
+    Manages the addition of sources to bundles in the bundles.yml file.
     """
 
     def __init__(self, bundle_file_path: str):
@@ -14,22 +13,20 @@ class BundleManager:
             bundle_file_path: The absolute path to the bundles.yml file.
         """
         self.bundle_file_path = Path(bundle_file_path)
-        self.yaml = YAML()
-        self.yaml.preserve_quotes = True
         self._load_data()
 
     def _load_data(self):
         """Loads the YAML data from the file."""
         try:
-            self.data = self.yaml.load(self.bundle_file_path)
+            with open(self.bundle_file_path, 'r') as f:
+                self.data = yaml.safe_load(f) or {'bundles': {}}
         except FileNotFoundError:
-            # Handle case where file might not exist, though it should
             self.data = {'bundles': {}}
 
     def _save_data(self):
         """Saves the modified YAML data back to the file."""
         with open(self.bundle_file_path, 'w') as f:
-            self.yaml.dump(self.data, f)
+            yaml.dump(self.data, f, default_flow_style=False, allow_unicode=True)
 
     def get_bundle_names(self) -> list[str]:
         """Returns a list of all available bundle names."""
