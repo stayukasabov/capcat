@@ -95,52 +95,31 @@
 
 <h2>Installation</h2>
 
-<h3>Automatic Setup (Recommended)</h3>
+<h3>pip install (Recommended)</h3>
 
-<p>The new wrapper system handles all setup automatically:</p>
+<p>Install capcat from PyPI into any Python 3.8+ environment:</p>
 
-<pre><code># Navigate to Capcat directory
-cd &quot;Capcat/Application&quot;
-
-# Everything is handled automatically - just run capcat!
-./capcat list sources
+<pre><code>pip install capcat
+capcat list sources
 </code></pre>
 
-<h4>What happens automatically</h4>
-<ul>
-<li>Detects or creates virtual environment</li>
-<li>Installs dependencies from requirements.txt</li>
-<li>Activates proper Python environment</li>
-<li>Runs capcat command</li>
-</ul>
+<h3>Development Install (Contributing)</h3>
 
-<h3>Manual Setup (Advanced Users)</h3>
+<p>Clone the repo and install in editable mode:</p>
 
-<p>If you prefer manual control:</p>
-
-<pre><code># Navigate to Capcat directory
-cd &quot;Capcat/Application&quot;
-
-# Create virtual environment (if not exists)
-python3 -m venv venv
-
-# Activate virtual environment
-source venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run capcat directly
-python capcat.py list sources
+<pre><code>git clone https://github.com/stayukasabov/capcat.git
+cd capcat
+pip install -e &quot;.[dev]&quot;
+capcat list sources
 </code></pre>
 
 <h3>Verification</h3>
 
-<pre><code># Test wrapper system
-./capcat list sources
+<pre><code># List available sources
+capcat list sources
 
-# Should show 25+ sources across 4 categories
-# Output: &quot;Tech (4), News (5), Science (3), etc.&quot;
+# List available bundles
+capcat list bundles
 </code></pre>
 
 <h2>Basic Usage</h2>
