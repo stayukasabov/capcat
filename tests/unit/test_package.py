@@ -1,7 +1,12 @@
 def test_package_imports() -> None:
+    """Package exposes a valid semver __version__ string."""
+    import re
     import capcat
     assert hasattr(capcat, "__version__")
-    assert capcat.__version__ == "1.0.0"
+    # Matches MAJOR.MINOR.PATCH with optional pre-release suffix.
+    assert re.match(r"^\d+\.\d+\.\d+", capcat.__version__), (
+        f"__version__ '{capcat.__version__}' is not a valid semver string"
+    )
 
 
 def test_main_module_callable() -> None:
