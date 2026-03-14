@@ -101,7 +101,7 @@
 <h4>Example Resolution:</h4>
 <pre><code># capcat.yml has: default_count: 20
 # Environment: export CAPCAT_DEFAULT_COUNT=40
-# Command: ./capcat fetch hn --count 10
+# Command: capcat fetch hn --count 10
 
 # Result: Uses 10 (CLI wins)
 </code></pre>
@@ -113,8 +113,8 @@
 <h4>Search Order:</h4>
 <ol>
 <li>Path specified with <code>--config FILE</code> flag</li>
-<li><code>./capcat.yml</code> (current directory)</li>
-<li><code>./capcat.json</code> (current directory)</li>
+<li><code>capcat.yml</code> (current directory)</li>
+<li><code>capcat.json</code> (current directory)</li>
 <li><code>~/.capcat/capcat.yml</code> (user home)</li>
 <li><code>~/.capcat/capcat.json</code> (user home)</li>
 </ol>
@@ -568,12 +568,12 @@ CAPCAT_UI_SHOW_DETAILED_PROGRESS=false
 
 <h4>Temporary Override:</h4>
 <pre><code># Override for single command
-CAPCAT_PROCESSING_MAX_WORKERS=16 ./capcat bundle tech
+CAPCAT_PROCESSING_MAX_WORKERS=16 capcat bundle tech
 
 # Override multiple settings
 CAPCAT_LOGGING_DEFAULT_LEVEL=DEBUG \
 CAPCAT_PROCESSING_MAX_WORKERS=16 \
-./capcat fetch hn --count 20
+capcat fetch hn --count 20
 </code></pre>
 
 <h4>Session-Wide:</h4>
@@ -581,8 +581,8 @@ CAPCAT_PROCESSING_MAX_WORKERS=16 \
 export CAPCAT_PROCESSING_MAX_WORKERS=16
 export CAPCAT_LOGGING_DEFAULT_LEVEL=DEBUG
 
-./capcat bundle tech
-./capcat fetch hn
+capcat bundle tech
+capcat fetch hn
 </code></pre>
 
 <h4>Persistent (Shell Profile):</h4>
@@ -700,7 +700,7 @@ custom:
 </code></pre>
 
 <h4>Interactive Management:</h4>
-<pre><code>./capcat catch
+<pre><code>capcat catch
 # Select: Manage Sources
 # Select: Manage Bundles
 # Select: Create New Bundle

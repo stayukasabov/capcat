@@ -88,7 +88,7 @@
 <h2>What You&#x27;ll Learn</h2>
 
 <ul>
-<li>Install and verify Capcat</li>
+<li>Install Capcat on your OS</li>
 <li>Run your first article fetch</li>
 <li>Understand the output structure</li>
 </ul>
@@ -101,27 +101,33 @@
 <li>5 minutes of time</li>
 </ul>
 
-<h2>Step 1: Verify Installation</h2>
+<h2>Step 1: Install Capcat</h2>
 
-<p>Check if Capcat is ready:</p>
-
-<pre><code>./capcat --version
+<h3>macOS</h3>
+<pre><code>pip install capcat
 </code></pre>
 
-<p>Expected output:</p>
-<pre><code>Capcat v2.0.0
+<h3>Windows</h3>
+<pre><code>pip install capcat
 </code></pre>
 
-<p>If you see an error, run the fix script:</p>
-
-<pre><code>./scripts/fix_dependencies.sh
+<h3>Linux (Ubuntu / Debian)</h3>
+<p>Ubuntu and Debian block system-wide pip installs. Use <code>pipx</code> instead:</p>
+<pre><code>sudo apt install pipx
+pipx install capcat
 </code></pre>
+
+<h3>Verify</h3>
+<pre><code>capcat list sources
+</code></pre>
+
+<p>Expected output: a list of available sources (Hacker News, BBC, Guardian, etc.).</p>
 
 <h2>Step 2: Your First Fetch</h2>
 
 <p>Collect 5 articles from Hacker News:</p>
 
-<pre><code>./capcat fetch hn --count 5
+<pre><code>capcat fetch hn --count 5
 </code></pre>
 
 <p>You&#x27;ll see:</p>
@@ -147,7 +153,7 @@ Successfully processed 5 articles
 
 <p>Grab a specific article by URL:</p>
 
-<pre><code>./capcat single https://example.com/article
+<pre><code>capcat single https://example.com/article
 </code></pre>
 
 <p>Result saved in:</p>
@@ -186,19 +192,19 @@ Successfully processed 5 articles
 <h2>Quick Reference</h2>
 
 <pre><code># Fetch articles
-./capcat fetch SOURCE --count N
+capcat fetch SOURCE --count N
 
 # Fetch with HTML
-./capcat fetch SOURCE --count N --html
+capcat fetch SOURCE --count N --html
 
 # Grab single article
-./capcat single URL
+capcat single URL
 
 # List available sources
-./capcat list sources
+capcat list sources
 
 # Interactive menu
-./capcat catch
+capcat catch
 </code></pre>
 
 

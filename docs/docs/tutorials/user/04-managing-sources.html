@@ -100,7 +100,7 @@
 
 <p>See what&#x27;s available:</p>
 
-<pre><code>./capcat list sources
+<pre><code>capcat list sources
 </code></pre>
 
 <p>Output organized by category:</p>
@@ -125,7 +125,7 @@ Total: 15 sources
 
 <p>Add an RSS source in one command:</p>
 
-<pre><code>./capcat add-source --url https://techcrunch.com/feed/
+<pre><code>capcat add-source --url https://techcrunch.com/feed/
 </code></pre>
 
 <p>Interactive prompts:</p>
@@ -142,7 +142,7 @@ Test fetch? Yes
 
 <p>Use the visual menu:</p>
 
-<pre><code>./capcat catch
+<pre><code>capcat catch
 # Select: Manage Sources
 # Select: Add New Source from RSS Feed
 # Paste URL
@@ -152,7 +152,7 @@ Test fetch? Yes
 
 <p>For complex sources:</p>
 
-<pre><code>./capcat generate-config
+<pre><code>capcat generate-config
 </code></pre>
 
 <p>Interactive wizard for:</p>
@@ -171,7 +171,7 @@ Test fetch? Yes
 
 <p>Remove sources interactively:</p>
 
-<pre><code>./capcat remove-source
+<pre><code>capcat remove-source
 </code></pre>
 
 <p>Process:</p>
@@ -189,7 +189,7 @@ Confirm removal? Yes
 
 <p>See what would be removed:</p>
 
-<pre><code>./capcat remove-source --dry-run
+<pre><code>capcat remove-source --dry-run
 </code></pre>
 
 <p>Shows:</p>
@@ -203,12 +203,12 @@ Confirm removal? Yes
 
 <p>Restore last removed sources:</p>
 
-<pre><code>./capcat remove-source --undo
+<pre><code>capcat remove-source --undo
 </code></pre>
 
 <p>Or restore specific backup:</p>
 
-<pre><code>./capcat remove-source --undo backup_20251126_100000
+<pre><code>capcat remove-source --undo backup_20251126_100000
 </code></pre>
 
 <h2>Testing Sources</h2>
@@ -217,7 +217,7 @@ Confirm removal? Yes
 
 <p>Verify a source works:</p>
 
-<pre><code>./capcat fetch sourcename --count 3
+<pre><code>capcat fetch sourcename --count 3
 </code></pre>
 
 <p>Success indicators:</p>
@@ -229,7 +229,7 @@ Confirm removal? Yes
 
 <h3>Test in Interactive Mode</h3>
 
-<pre><code>./capcat catch
+<pre><code>capcat catch
 # Select: Manage Sources
 # Select: Test a Source
 # Choose source
@@ -254,7 +254,7 @@ vim sources/active/config_driven/configs/sourcename.yaml
 
 # Update feed_url if RSS moved
 # Save and test again
-./capcat fetch sourcename --count 3
+capcat fetch sourcename --count 3
 </code></pre>
 
 <h2>Source Organization</h2>
@@ -264,7 +264,7 @@ vim sources/active/config_driven/configs/sourcename.yaml
 <p>Sources auto-group by category field in config.</p>
 
 <p>View by category:</p>
-<pre><code>./capcat list sources
+<pre><code>capcat list sources
 </code></pre>
 
 <h3>Add to Bundles</h3>
@@ -364,19 +364,19 @@ content_selectors:
 <p>Test all sources:</p>
 
 <pre><code># List sources
-./capcat list sources
+capcat list sources
 
 # Test each that matters to you
-./capcat fetch hn --count 3
-./capcat fetch bbc --count 3
-./capcat fetch nature --count 3
+capcat fetch hn --count 3
+capcat fetch bbc --count 3
+capcat fetch nature --count 3
 </code></pre>
 
 <h3>Clean Up Unused Sources</h3>
 
 <p>Remove sources you don&#x27;t use:</p>
 
-<pre><code>./capcat remove-source
+<pre><code>capcat remove-source
 # Select unused sources
 # Confirm removal
 </code></pre>
@@ -390,7 +390,7 @@ vim sources/active/config_driven/configs/sourcename.yaml
 
 # Update selectors or URLs
 # Test
-./capcat fetch sourcename --count 3
+capcat fetch sourcename --count 3
 </code></pre>
 
 <h2>Pro Tips</h2>
@@ -427,7 +427,7 @@ vim sources/active/config_driven/configs/sourcename.yaml
 
 <h4>Source not found:</h4>
 <pre><code># Refresh registry
-./capcat list sources
+capcat list sources
 
 # Verify file exists
 ls sources/active/config_driven/configs/sourcename.yaml
@@ -438,7 +438,7 @@ ls sources/active/config_driven/configs/sourcename.yaml
 vim sources/active/config_driven/configs/sourcename.yaml
 # Change rss_url
 # Test
-./capcat fetch sourcename --count 3
+capcat fetch sourcename --count 3
 </code></pre>
 
 <h4>Source has anti-bot protection:</h4>
@@ -465,22 +465,22 @@ vim sources/active/config_driven/configs/sourcename.yaml
 <h2>Quick Reference</h2>
 
 <pre><code># Add source
-./capcat add-source --url RSS_URL
+capcat add-source --url RSS_URL
 
 # Remove source
-./capcat remove-source
+capcat remove-source
 
 # Test source
-./capcat fetch SOURCE --count 3
+capcat fetch SOURCE --count 3
 
 # List sources
-./capcat list sources
+capcat list sources
 
 # Generate config
-./capcat generate-config
+capcat generate-config
 
 # Undo removal
-./capcat remove-source --undo
+capcat remove-source --undo
 </code></pre>
 
 

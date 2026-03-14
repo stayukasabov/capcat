@@ -100,7 +100,7 @@
 
 <p>Collect 20 articles from tech sources:</p>
 
-<pre><code>./capcat bundle tech --count 20 --html
+<pre><code>capcat bundle tech --count 20 --html
 </code></pre>
 
 <p>This fetches from:</p>
@@ -116,7 +116,7 @@
 
 <p>Get deeper technical content:</p>
 
-<pre><code>./capcat bundle techpro --count 15 --html
+<pre><code>capcat bundle techpro --count 15 --html
 </code></pre>
 
 <p>This fetches from:</p>
@@ -130,9 +130,9 @@
 
 <p>Get everything:</p>
 
-<pre><code>./capcat bundle news --count 10
-./capcat bundle tech --count 15
-./capcat bundle science --count 10
+<pre><code>capcat bundle news --count 10
+capcat bundle tech --count 15
+capcat bundle science --count 10
 </code></pre>
 
 <h2>The Evening Routine</h2>
@@ -153,7 +153,7 @@ ls -la
 
 <p>Found something interesting during the day?</p>
 
-<pre><code>./capcat single https://interesting-article.com/story --html
+<pre><code>capcat single https://interesting-article.com/story --html
 </code></pre>
 
 <p>Saved in <code>../Capcats/</code> for quick access.</p>
@@ -164,8 +164,8 @@ ls -la
 
 <p>Collect more articles for weekend reading:</p>
 
-<pre><code>./capcat bundle science --count 30 --html --media
-./capcat bundle ai --count 25 --html
+<pre><code>capcat bundle science --count 30 --html --media
+capcat bundle ai --count 25 --html
 </code></pre>
 
 <p>The <code>--media</code> flag downloads videos and PDFs for offline reading.</p>
@@ -193,7 +193,7 @@ ls -la
 
 <p>Use it:</p>
 
-<pre><code>./capcat bundle daily --html
+<pre><code>capcat bundle daily --html
 </code></pre>
 
 <h2>Automation with Cron</h2>
@@ -207,12 +207,12 @@ ls -la
 
 <p>Add morning collection (8 AM):</p>
 
-<pre><code>0 8 * * * cd /path/to/Capcat/Application &amp;&amp; ./capcat bundle tech --count 20 --html &gt;&gt; ~/capcat.log 2&gt;&amp;1
+<pre><code>0 8 * * * cd /path/to/Capcat/Application &amp;&amp; capcat bundle tech --count 20 --html &gt;&gt; ~/capcat.log 2&gt;&amp;1
 </code></pre>
 
 <p>Add evening collection (6 PM):</p>
 
-<pre><code>0 18 * * * cd /path/to/Capcat/Application &amp;&amp; ./capcat bundle news --count 15 --html &gt;&gt; ~/capcat.log 2&gt;&amp;1
+<pre><code>0 18 * * * cd /path/to/Capcat/Application &amp;&amp; capcat bundle news --count 15 --html &gt;&gt; ~/capcat.log 2&gt;&amp;1
 </code></pre>
 
 <p>Check your log:</p>
@@ -238,9 +238,9 @@ ls -la
 
 <h4>Don&#x27;t Miss Content:</h4>
 <ul>
-<li>Bundle &#x27;all&#x27; sources: <code>./capcat bundle all --count 10</code></li>
-<li>Test new sources: <code>./capcat fetch newsource --count 3</code></li>
-<li>Check source health: <code>./capcat list sources</code></li>
+<li>Bundle &#x27;all&#x27; sources: <code>capcat bundle all --count 10</code></li>
+<li>Test new sources: <code>capcat fetch newsource --count 3</code></li>
+<li>Check source health: <code>capcat list sources</code></li>
 </ul>
 
 <h2>Example Daily Script</h2>
@@ -256,13 +256,13 @@ LOG=&quot;$HOME/capcat-$DATE.log&quot;
 echo &quot;Collecting news for $DATE...&quot; | tee -a &quot;$LOG&quot;
 
 # Morning tech news
-./capcat bundle tech --count 20 --html &gt;&gt; &quot;$LOG&quot; 2&gt;&amp;1
+capcat bundle tech --count 20 --html &gt;&gt; &quot;$LOG&quot; 2&gt;&amp;1
 
 # General news
-./capcat bundle news --count 15 --html &gt;&gt; &quot;$LOG&quot; 2&gt;&amp;1
+capcat bundle news --count 15 --html &gt;&gt; &quot;$LOG&quot; 2&gt;&amp;1
 
 # AI updates
-./capcat bundle ai --count 10 --html &gt;&gt; &quot;$LOG&quot; 2&gt;&amp;1
+capcat bundle ai --count 10 --html &gt;&gt; &quot;$LOG&quot; 2&gt;&amp;1
 
 echo &quot;Collection complete!&quot; | tee -a &quot;$LOG&quot;
 </code></pre>
@@ -291,19 +291,19 @@ echo &quot;Collection complete!&quot; | tee -a &quot;$LOG&quot;
 <h2>Quick Reference</h2>
 
 <pre><code># Morning routine
-./capcat bundle tech --count 20 --html
+capcat bundle tech --count 20 --html
 
 # Evening catch-up
-./capcat bundle news --count 15
+capcat bundle news --count 15
 
 # Weekend deep dive
-./capcat bundle science --count 30 --html --media
+capcat bundle science --count 30 --html --media
 
 # Check what&#x27;s available
-./capcat list bundles
+capcat list bundles
 
 # Custom bundle
-./capcat bundle mybundle --count 25
+capcat bundle mybundle --count 25
 </code></pre>
 
 

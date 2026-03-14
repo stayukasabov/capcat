@@ -100,10 +100,10 @@
 <h3>Set Count Per Fetch</h3>
 
 <pre><code># Fetch 10 articles
-./capcat fetch hn --count 10
+capcat fetch hn --count 10
 
 # Fetch 50 articles
-./capcat bundle tech --count 50
+capcat bundle tech --count 50
 </code></pre>
 
 <h4>Guidelines:</h4>
@@ -118,11 +118,11 @@
 <p>Sources and bundles have defaults (usually 30).</p>
 
 <p>Use defaults:</p>
-<pre><code>./capcat fetch hn  # Uses 30
+<pre><code>capcat fetch hn  # Uses 30
 </code></pre>
 
 <p>Override:</p>
-<pre><code>./capcat fetch hn --count 15  # Uses 15
+<pre><code>capcat fetch hn --count 15  # Uses 15
 </code></pre>
 
 <h2>HTML Generation</h2>
@@ -141,9 +141,9 @@
 
 <p>Add <code>--html</code> flag:</p>
 
-<pre><code>./capcat fetch hn --count 10 --html
-./capcat bundle tech --html
-./capcat single URL --html
+<pre><code>capcat fetch hn --count 10 --html
+capcat bundle tech --html
+capcat single URL --html
 </code></pre>
 
 <h3>HTML Output Structure</h3>
@@ -168,7 +168,7 @@
 
 <p>Images are always downloaded and embedded:</p>
 
-<pre><code>./capcat fetch hn --count 10
+<pre><code>capcat fetch hn --count 10
 # Images automatically downloaded
 </code></pre>
 
@@ -176,7 +176,7 @@
 
 <p>Use <code>--media</code> flag for additional files:</p>
 
-<pre><code>./capcat fetch nature --count 10 --media
+<pre><code>capcat fetch nature --count 10 --media
 </code></pre>
 
 <p>Downloads:</p>
@@ -218,13 +218,13 @@
 <p>Use <code>--output</code> flag:</p>
 
 <pre><code># Custom directory
-./capcat fetch hn --count 10 --output /path/to/output
+capcat fetch hn --count 10 --output /path/to/output
 
 # Relative path
-./capcat single URL --output ~/Articles
+capcat single URL --output ~/Articles
 
 # Current directory
-./capcat fetch bbc --output .
+capcat fetch bbc --output .
 </code></pre>
 
 <h2>Updating Existing Articles</h2>
@@ -233,9 +233,9 @@
 
 <p>Re-fetch and overwrite existing articles:</p>
 
-<pre><code>./capcat fetch hn --count 10 --update
-./capcat bundle tech --update
-./capcat single URL --update
+<pre><code>capcat fetch hn --count 10 --update
+capcat bundle tech --update
+capcat single URL --update
 </code></pre>
 
 <h4>Use when:</h4>
@@ -296,7 +296,7 @@ rate_limit: 2.0            # Slower rate limiting
 
 <p>Fast, no frills:</p>
 
-<pre><code>./capcat bundle tech --count 15
+<pre><code>capcat bundle tech --count 15
 # No --html (faster)
 # No --media (smaller)
 # Default output location
@@ -306,7 +306,7 @@ rate_limit: 2.0            # Slower rate limiting
 
 <p>Full featured:</p>
 
-<pre><code>./capcat bundle science --count 40 --html --media
+<pre><code>capcat bundle science --count 40 --html --media
 # HTML for browser reading
 # Media for offline viewing
 # Large count for weekend
@@ -316,7 +316,7 @@ rate_limit: 2.0            # Slower rate limiting
 
 <p>Custom location, specific sources:</p>
 
-<pre><code>./capcat fetch nature,scientificamerican --count 30 \
+<pre><code>capcat fetch nature,scientificamerican --count 30 \
   --html --media --output ~/Research/Climate
 </code></pre>
 
@@ -324,7 +324,7 @@ rate_limit: 2.0            # Slower rate limiting
 
 <p>Refresh existing collection:</p>
 
-<pre><code>./capcat bundle news --count 20 --update --html
+<pre><code>capcat bundle news --count 20 --update --html
 # Updates existing articles
 # Regenerates HTML
 </code></pre>
@@ -335,7 +335,7 @@ rate_limit: 2.0            # Slower rate limiting
 
 <p>Save detailed logs:</p>
 
-<pre><code>./capcat --log-file capcat.log fetch hn --count 10
+<pre><code>capcat --log-file capcat.log fetch hn --count 10
 </code></pre>
 
 <p>Log includes:</p>
@@ -349,17 +349,17 @@ rate_limit: 2.0            # Slower rate limiting
 <h3>Verbosity Levels</h3>
 
 <h4>Normal (default):</h4>
-<pre><code>./capcat fetch hn --count 10
+<pre><code>capcat fetch hn --count 10
 </code></pre>
 
 <h4>Verbose:</h4>
-<pre><code>./capcat --verbose fetch hn --count 10
-./capcat -V fetch hn --count 10
+<pre><code>capcat --verbose fetch hn --count 10
+capcat -V fetch hn --count 10
 </code></pre>
 
 <h4>Quiet (errors only):</h4>
-<pre><code>./capcat --quiet fetch hn --count 10
-./capcat -q fetch hn --count 10
+<pre><code>capcat --quiet fetch hn --count 10
+capcat -q fetch hn --count 10
 </code></pre>
 
 <h2>Output Organization Tips</h2>
@@ -388,17 +388,17 @@ rate_limit: 2.0            # Slower rate limiting
 <h2>Performance vs Quality</h2>
 
 <h4>Fast Collection (no frills):</h4>
-<pre><code>./capcat bundle tech --count 10
+<pre><code>capcat bundle tech --count 10
 # ~1-2 minutes
 </code></pre>
 
 <h4>Balanced:</h4>
-<pre><code>./capcat bundle tech --count 20 --html
+<pre><code>capcat bundle tech --count 20 --html
 # ~3-5 minutes
 </code></pre>
 
 <h4>Full Archive:</h4>
-<pre><code>./capcat bundle tech --count 50 --html --media
+<pre><code>capcat bundle tech --count 50 --html --media
 # ~10-15 minutes
 </code></pre>
 
@@ -408,11 +408,11 @@ rate_limit: 2.0            # Slower rate limiting
 
 <pre><code># More parallel workers
 export CAPCAT_PROCESSING_MAX_WORKERS=16
-./capcat bundle tech
+capcat bundle tech
 
 # Custom timeout
 export CAPCAT_NETWORK_CONNECT_TIMEOUT=20
-./capcat fetch bbc --count 30
+capcat fetch bbc --count 30
 </code></pre>
 
 <h2>Next Steps</h2>
@@ -447,7 +447,7 @@ export CAPCAT_NETWORK_CONNECT_TIMEOUT=20
 --quiet / -q
 
 # Combined example
-./capcat bundle tech --count 20 --html --output ~/News
+capcat bundle tech --count 20 --html --output ~/News
 </code></pre>
 
 
