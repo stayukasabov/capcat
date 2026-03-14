@@ -296,11 +296,20 @@ def _cmd_bundle(args: list[str], log_file: str | None = None) -> None:
     from capcat.core.source_system.bundle_service import get_available_bundles
     bundles = get_available_bundles()
 
+    def _expand_bundles(bundle_names):
+        seen, result = set(), []
+        for b in bundle_names:
+            for sid in bundles.get(b, {}).get("sources", []):
+                if sid not in seen:
+                    seen.add(sid)
+                    result.append(sid)
+        return result
+
     if all_bundles:
         ordered = ["techpro", "tech", "news", "science", "ai"]
         active = [b for b in ordered if b in bundles and bundles[b]]
         bundle_name = f"all-bundles-ordered({', '.join(active)})"
-        sources = active
+        sources = _expand_bundles(active)
     else:
         if not args:
             print("capcat bundle: bundle name required (or --all)")
@@ -310,7 +319,7 @@ def _cmd_bundle(args: list[str], log_file: str | None = None) -> None:
             ordered = ["techpro", "tech", "news", "science", "ai"]
             active = [b for b in ordered if b in bundles and bundles[b]]
             bundle_name = f"all-bundles-ordered({', '.join(active)})"
-            sources = active
+            sources = _expand_bundles(active)
         else:
             if bundle_name not in bundles:
                 print(f"capcat bundle: unknown bundle '{bundle_name}'. "
