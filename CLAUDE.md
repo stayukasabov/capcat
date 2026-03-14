@@ -82,6 +82,15 @@ Key rules relevant to Capcat:
 - Exit 0 on success, non-zero on failure
 - Prefer `--flag` over positional args for optional parameters
 
+## Versioning and Release Rules
+
+Semver: `MAJOR.MINOR.PATCH`
+- **patch** — bug fixes, no new behavior
+- **minor** — new features, backwards compatible
+- **major** — breaking changes
+
+**Do not tag/publish on every commit.** Batch related changes, then release when the set is meaningful and tested. Tag format: `v1.2.3` — pushing the tag triggers PyPI publish via GitHub Actions.
+
 ## Project Overview
 
 News archiving: 17+ sources → Markdown + media. Plugin-based architecture.
