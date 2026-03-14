@@ -1,10 +1,13 @@
 Capcat Documentation Manifest
-Generated: 2026-01-01 05:56:50 UTC
+Generated: 2026-03-14 04:39:06 UTC
 Success rate: 2/2 tasks
 
 Generated Documentation:
+  - ACCESSIBILITY-REMEDIATION-PLAN.md
   - README.md
   - api/README.md
+  - api/Video/README.md
+  - api/Video/analyze_audio.md
   - api/__version__/README.md
   - api/__version__/__version__.md
   - api/add_jekyll_frontmatter/README.md
@@ -12,7 +15,96 @@ Generated Documentation:
   - api/build_site/README.md
   - api/build_site/build_site.md
   - api/capcat/README.md
+  - api/capcat/__init__.md
+  - api/capcat/__main__.md
+  - api/capcat/add_source.md
+  - api/capcat/add_source_command.md
+  - api/capcat/add_source_service.md
+  - api/capcat/article_fetcher.md
+  - api/capcat/base_generator.md
+  - api/capcat/base_source.md
+  - api/capcat/bundle_manager.md
+  - api/capcat/bundle_models.md
+  - api/capcat/bundle_service.md
+  - api/capcat/bundle_ui.md
+  - api/capcat/bundle_validator.md
   - api/capcat/capcat.md
+  - api/capcat/circuit_breaker.md
+  - api/capcat/cli.md
+  - api/capcat/cli_recovery.md
+  - api/capcat/cli_validation.md
+  - api/capcat/command_logging.md
+  - api/capcat/config.md
+  - api/capcat/config_driven_source.md
+  - api/capcat/config_schema.md
+  - api/capcat/constants.md
+  - api/capcat/conversion_executor.md
+  - api/capcat/design_system_compiler.md
+  - api/capcat/discovery_strategies.md
+  - api/capcat/downloader.md
+  - api/capcat/enhanced_argparse.md
+  - api/capcat/enhanced_remove_command.md
+  - api/capcat/error_handling.md
+  - api/capcat/ethical_scraping.md
+  - api/capcat/exceptions.md
+  - api/capcat/factory.md
+  - api/capcat/feed_discovery.md
+  - api/capcat/feed_parser.md
+  - api/capcat/fetch.md
+  - api/capcat/formatter.md
+  - api/capcat/generate_config.md
+  - api/capcat/generator.md
+  - api/capcat/html_generator.md
+  - api/capcat/html_post_processor.md
+  - api/capcat/image_processor.md
+  - api/capcat/init.md
+  - api/capcat/interactive.md
+  - api/capcat/logging_config.md
+  - api/capcat/media_config.md
+  - api/capcat/media_executor.md
+  - api/capcat/media_processor.md
+  - api/capcat/network_resilience.md
+  - api/capcat/news_source_adapter.md
+  - api/capcat/performance_monitor.md
+  - api/capcat/progress.md
+  - api/capcat/questionary_ui.md
+  - api/capcat/rate_limiter.md
+  - api/capcat/removal_ui.md
+  - api/capcat/remove_source.md
+  - api/capcat/remove_source_command.md
+  - api/capcat/remove_source_service.md
+  - api/capcat/retry.md
+  - api/capcat/retry_skip.md
+  - api/capcat/rss_feed_introspector.md
+  - api/capcat/session_pool.md
+  - api/capcat/shutdown.md
+  - api/capcat/single.md
+  - api/capcat/source.md
+  - api/capcat/source_analytics.md
+  - api/capcat/source_backup_manager.md
+  - api/capcat/source_base.md
+  - api/capcat/source_config.md
+  - api/capcat/source_config_generator.md
+  - api/capcat/source_configs.md
+  - api/capcat/source_factory.md
+  - api/capcat/source_registry.md
+  - api/capcat/specialized_source_manager.md
+  - api/capcat/storage_manager.md
+  - api/capcat/streamlined_comment_processor.md
+  - api/capcat/template_renderer.md
+  - api/capcat/theme_utils.md
+  - api/capcat/timeout_config.md
+  - api/capcat/timeout_wrapper.md
+  - api/capcat/tui.md
+  - api/capcat/unified_article_processor.md
+  - api/capcat/unified_media_processor.md
+  - api/capcat/unified_source_processor.md
+  - api/capcat/update_manager.md
+  - api/capcat/url_utils.md
+  - api/capcat/utils.md
+  - api/capcat/validation_engine.md
+  - api/capcat_legacy/README.md
+  - api/capcat_legacy/capcat_legacy.md
   - api/cleanup_development_files/README.md
   - api/cleanup_development_files/cleanup_development_files.md
   - api/cleanup_repo/README.md
@@ -117,6 +209,9 @@ Generated Documentation:
   - api/htmlgen/__init__.md
   - api/htmlgen/base_generator.md
   - api/htmlgen/generator.md
+  - api/legacy/README.md
+  - api/legacy/cli.md
+  - api/legacy/run_capcat.md
   - api/quick_cli_fix/README.md
   - api/quick_cli_fix/quick_cli_fix.md
   - api/remove_br_tags/README.md
@@ -170,7 +265,14 @@ Generated Documentation:
   - diagrams/source_system.md
   - diagrams/system_architecture.md
   - index.md
+  - plans/2026-03-05-capcat-video-design.md
+  - plans/2026-03-05-capcat-video-implementation.md
+  - plans/2026-03-08-capcat-ad-design.md
+  - plans/2026-03-08-capcat-ad-implementation.md
+  - plans/2026-03-08-video-brainstorm-notes.md
+  - plans/typography-animation-ae-resources.md
   - reference/modules.md
+  - troubleshooting.md
 
-Total files: 456
-Documentation size: 8.9 MB
+Total files: 568
+Documentation size: 9.5 MB

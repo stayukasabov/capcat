@@ -415,6 +415,31 @@ Remove headerlink anchor tags from HTML content.
 
 **Returns:** str
 
+##### _remove_image_anchor_wrappers
+
+```python
+def _remove_image_anchor_wrappers(self, html_content: str) -> str
+```
+
+Remove anchor tags that wrap image tags.
+
+Substack and other sources download images locally but markdown-to-HTML
+conversion wraps them in <a href> linking to original URL. This removes
+those anchor wrappers while preserving the image tags and their attributes.
+
+Args:
+    html_content: HTML content to process
+
+Returns:
+    HTML with image anchor wrappers removed
+
+**Parameters:**
+
+- `self`
+- `html_content` (str)
+
+**Returns:** str
+
 ##### _remove_duplicate_h1_title
 
 ```python
