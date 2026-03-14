@@ -45,7 +45,7 @@ class SourceRegistry:
         self.config = config or SourceRegistryConfig(
             config_dir=Path(__file__).parent.parent.parent
             / "sources"
-            / "active"
+            / "builtin"
         )
 
         # Storage
