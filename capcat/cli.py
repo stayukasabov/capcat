@@ -207,7 +207,7 @@ def _cmd_single(args: list[str], log_file: str | None = None) -> None:
     _setup_logging(verbose=verbose, quiet=quiet, log_file=log_file)
 
     from capcat.commands.single import scrape_single_article
-    scrape_single_article(
+    success, out_dir = scrape_single_article(
         url=url,
         output_dir=output,
         verbose=verbose,
@@ -215,6 +215,8 @@ def _cmd_single(args: list[str], log_file: str | None = None) -> None:
         generate_html=html,
         update_mode=update,
     )
+    if success and out_dir:
+        print(f"Saved to: {out_dir}")
 
 
 # ---------------------------------------------------------------------------
