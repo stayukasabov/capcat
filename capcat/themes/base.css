@@ -448,7 +448,7 @@ h1 {
 }
 
 .header .container h1 {
-  font-size: var(--font-size-h2);
+  font-size: var(--text-large);
   padding: 0 var(--space-md);
   font-weight: var(--weight-heading);
 }
