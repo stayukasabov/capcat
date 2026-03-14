@@ -306,11 +306,17 @@ def _cmd_bundle(args: list[str], log_file: str | None = None) -> None:
             print("capcat bundle: bundle name required (or --all)")
             raise SystemExit(1)
         bundle_name = args[0]
-        if bundle_name not in bundles:
-            print(f"capcat bundle: unknown bundle '{bundle_name}'. "
-                  f"Available: {', '.join(sorted(bundles.keys()))}")
-            raise SystemExit(1)
-        sources = bundles[bundle_name]["sources"]
+        if bundle_name == "all":
+            ordered = ["techpro", "tech", "news", "science", "ai"]
+            active = [b for b in ordered if b in bundles and bundles[b]]
+            bundle_name = f"all-bundles-ordered({', '.join(active)})"
+            sources = active
+        else:
+            if bundle_name not in bundles:
+                print(f"capcat bundle: unknown bundle '{bundle_name}'. "
+                      f"Available: {', '.join(sorted(bundles.keys()))}")
+                raise SystemExit(1)
+            sources = bundles[bundle_name]["sources"]
 
     count = int(count_str)
 
