@@ -87,11 +87,15 @@ class HTMLPostProcessor:
         from capcat.core.progress import get_batch_progress
         import time
 
-        # Collect article directories that need processing
+        # Collect article directories that need processing.
+        # Also check root_path itself: when single command passes the article
+        # folder directly (e.g. Capcats/Substack_DD-MM-YYYY/Article_Title/),
+        # rglob("**/*/") only finds subdirectories, missing article.md at root.
         article_dirs = []
         current_time = time.time()
 
-        for article_dir in root_path.rglob("**/*/"):
+        candidates = [root_path] + list(root_path.rglob("**/*/"))
+        for article_dir in candidates:
             if self._is_article_directory(article_dir):
                 should_process = True
 

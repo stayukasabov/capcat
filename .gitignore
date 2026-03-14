@@ -152,7 +152,6 @@ convert_to_markdown.py
 delete_h4_colon.py
 fix_*.py
 fix_*.sh
-remove_*.py
 replace_*.py
 verify_*.sh
 
@@ -175,3 +174,8 @@ metrics/
 
 # Optional: Tests directory (uncomment to make tests private)
 # tests/
+
+# capcat — managed entries
+.capcat/
+News/
+Capcats/
