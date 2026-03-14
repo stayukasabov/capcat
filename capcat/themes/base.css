@@ -450,7 +450,7 @@ h1 {
 .header .container h1 {
   font-size: var(--text-large);
   padding: 0 var(--space-md);
-  font-weight: var(--weight-heading);
+  font-weight: var(--font-weight-thin-plus);
 }
 
 h2 {
