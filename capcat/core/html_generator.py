@@ -589,6 +589,22 @@ class HTMLGenerator:
             # Debug logging
             self.logger.debug(f"Using template: {template_variant} for {article_title}")
 
+            # Generate navigation HTML using design-system methods so CSS classes
+            # (navigation-container, index-nav, index-link, comments-nav, comments-link)
+            # are always correct and consistent with the established design.
+            if is_single_article:
+                navigation_html = ""
+            else:
+                index_nav = self._generate_index_navigation(
+                    str(markdown_path), show=True, html_subfolder=html_subfolder
+                )
+                comments_nav = self._generate_comments_navigation(
+                    str(markdown_path), html_subfolder=html_subfolder
+                )
+                navigation_html = self._create_navigation_container(
+                    index_nav, comments_nav
+                )
+
             # Prepare template context
             context = {
                 "page_title": f"Capcat - {article_title}",
@@ -597,6 +613,8 @@ class HTMLGenerator:
                 "article_content": html_content,
                 "comments_button": comments_button_html,
                 "index_filename": index_filename,
+                "top_navigation": navigation_html,
+                "bottom_navigation": navigation_html,
             }
 
             # Render template with dynamic CSS paths
