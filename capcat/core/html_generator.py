@@ -594,6 +594,17 @@ class HTMLGenerator:
             # are always correct and consistent with the established design.
             if is_single_article:
                 navigation_html = ""
+            elif is_comments_page:
+                # Comments page: only "Back to Article" on the LEFT using orange
+                # index-nav/index-link styling — no "Back to News" button.
+                navigation_html = """<div class="navigation-container">
+            <div class="index-nav">
+                <a href="article.html" class="index-link" title="Back to the main article">
+                    <span>Back to Article</span>
+                </a>
+            </div>
+            <div class="comments-nav"></div>
+        </div>"""
             else:
                 index_nav = self._generate_index_navigation(
                     str(markdown_path), show=True, html_subfolder=html_subfolder
