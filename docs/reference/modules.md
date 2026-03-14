@@ -11,7 +11,7 @@ Complete reference of all modules, classes, and functions in Capcat.
 
 ### Capcat
 
-- [capcat.__init__](../api/capcat/__init__.md) - Capcat — content preservation CLI with Ethical Scraping
+- [capcat.__init__](../api/capcat/__init__.md) - Capcat — A command-line tool designed to solve content preservation challenges with Ethical Scraping
 - [capcat.__main__](../api/capcat/__main__.md)
 - [capcat.cli](../api/capcat/cli.md) - CLI entry point for Capcat
 - [capcat.commands.__init__](../api/capcat/__init__.md)
