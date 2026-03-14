@@ -104,23 +104,9 @@ def validate_feed(content: bytes) -> bool:
         True if content appears to be a valid feed
     """
     try:
-        # Try to parse as XML and check for feed indicators
-        soup = BeautifulSoup(content, 'xml')
-
-        # Check for RSS elements
-        if soup.find('rss') or soup.find('channel'):
-            return True
-
-        # Check for Atom elements
-        if soup.find('feed', {'xmlns': 'http://www.w3.org/2005/Atom'}):
-            return True
-
-        # Check for basic structure
-        if soup.find('item') or soup.find('entry'):
-            return True
-
-        return False
-
+        import feedparser as _fp
+        parsed = _fp.parse(content)
+        return bool(parsed.entries) or bool(parsed.feed.get('title'))
     except Exception:
         return False
 

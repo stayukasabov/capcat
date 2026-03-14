@@ -68,7 +68,7 @@ class SubstackSource(BaseSource):
             response.raise_for_status()
 
             articles = []
-            soup = BeautifulSoup(response.content, "xml")
+            soup = BeautifulSoup(response.content, "html.parser")
 
             items = soup.find_all("item")[:count]
 
