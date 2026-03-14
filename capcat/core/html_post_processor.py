@@ -123,7 +123,7 @@ class HTMLPostProcessor:
 
         self.logger.info(f"Processed {len(article_dirs)} article directories")
 
-    _TEMPLATE_MARKER = "<!-- capcat-template-v2 -->"
+    _TEMPLATE_MARKER = "<!-- capcat-template-v3 -->"
 
     def _should_process_article(self, article_dir: Path) -> bool:
         """
