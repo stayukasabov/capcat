@@ -13,7 +13,19 @@ import requests
 
 @dataclass
 class SourceConfig:
-    """Configuration data class for news sources."""
+    """Configuration data class for news sources.
+
+    Attributes:
+        name: Machine-readable identifier (e.g. ``"hn"``).
+        display_name: Human-readable name shown in menus (e.g. ``"Hacker News"``).
+        base_url: Root URL of the source.
+        timeout: HTTP request timeout in seconds.
+        rate_limit: Minimum delay between requests in seconds.
+        supports_comments: True if the source has comment threads.
+        has_comments: True if the current fetch includes comments.
+        category: Topic category (e.g. ``"tech"``, ``"science"``).
+        custom_config: Source-specific extra config key/value pairs.
+    """
 
     name: str
     display_name: str
@@ -27,7 +39,8 @@ class SourceConfig:
     # Optional custom configuration
     custom_config: Dict[str, Any] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
+        """Ensure custom_config is never None after construction."""
         if self.custom_config is None:
             self.custom_config = {}
 
@@ -58,7 +71,17 @@ class SourceConfig:
 
 @dataclass
 class Article:
-    """Data class representing a news article."""
+    """Lightweight data transfer object for a single news article.
+
+    Attributes:
+        title: Article headline.
+        url: Canonical URL of the article.
+        comment_url: URL of the comments page, if available.
+        author: Byline, anonymized to ``"Anonymous"`` where applicable.
+        published_date: Publication date string (format varies by source).
+        summary: Short excerpt or lede, if provided by the feed.
+        tags: List of topic tags associated with the article.
+    """
 
     title: str
     url: str
@@ -70,7 +93,8 @@ class Article:
     summary: Optional[str] = None
     tags: List[str] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
+        """Ensure tags is never None after construction."""
         if self.tags is None:
             self.tags = []
 
@@ -431,10 +455,23 @@ class SourceError(Exception):
     """Base exception for source-related errors."""
 
     def __init__(self, message: str, source_name: str = None):
+        """Create a SourceError with an optional source name prefix.
+
+        Args:
+            message: Human-readable description of the error.
+            source_name: Source identifier prepended to the message in
+                ``__str__`` (e.g. ``"hn"``). Defaults to ``None``.
+        """
         self.source_name = source_name
         super().__init__(message)
 
     def __str__(self):
+        """Return message prefixed with ``[source_name]`` when set.
+
+        Returns:
+            ``"[source_name] message"`` if *source_name* is set, otherwise
+            the plain *message* string.
+        """
         if self.source_name:
             return f"[{self.source_name}] {super().__str__()}"
         return super().__str__()

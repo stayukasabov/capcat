@@ -192,30 +192,81 @@ class MockUserInterface:
         self.calls = []
 
     def get_source_id(self, suggested: str) -> str:
+        """Record call and return the configured source_id response.
+
+        Args:
+            suggested: Suggested source ID passed by the workflow.
+
+        Returns:
+            ``responses['source_id']`` if set, otherwise *suggested*.
+        """
         self.calls.append(('get_source_id', suggested))
         return self.responses.get('source_id', suggested)
 
     def select_category(self, categories: List[str]) -> str:
+        """Record call and return the configured category response.
+
+        Args:
+            categories: Available category names.
+
+        Returns:
+            ``responses['category']`` if set, otherwise the first category or
+            ``'tech'`` when the list is empty.
+        """
         self.calls.append(('select_category', categories))
         return self.responses.get('category', categories[0] if categories else 'tech')
 
     def confirm_bundle_addition(self) -> bool:
+        """Record call and return the configured confirm_bundle response.
+
+        Returns:
+            ``responses['confirm_bundle']`` if set, otherwise ``False``.
+        """
         self.calls.append(('confirm_bundle_addition',))
         return self.responses.get('confirm_bundle', False)
 
     def select_bundle(self, bundles: List[str]) -> Optional[str]:
+        """Record call and return the configured bundle response.
+
+        Args:
+            bundles: Available bundle names.
+
+        Returns:
+            ``responses['bundle']`` if set, otherwise the first bundle or
+            ``None`` when the list is empty.
+        """
         self.calls.append(('select_bundle', bundles))
         return self.responses.get('bundle', bundles[0] if bundles else None)
 
     def confirm_test_fetch(self) -> bool:
+        """Record call and return the configured confirm_test response.
+
+        Returns:
+            ``responses['confirm_test']`` if set, otherwise ``False``.
+        """
         self.calls.append(('confirm_test_fetch',))
         return self.responses.get('confirm_test', False)
 
     def show_success(self, message: str) -> None:
+        """Record success message call without producing output.
+
+        Args:
+            message: Success message passed by the workflow.
+        """
         self.calls.append(('show_success', message))
 
     def show_error(self, message: str) -> None:
+        """Record error message call without producing output.
+
+        Args:
+            message: Error message passed by the workflow.
+        """
         self.calls.append(('show_error', message))
 
     def show_info(self, message: str) -> None:
+        """Record info message call without producing output.
+
+        Args:
+            message: Informational message passed by the workflow.
+        """
         self.calls.append(('show_info', message))
