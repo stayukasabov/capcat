@@ -58,17 +58,15 @@ def _scrape_with_specialized_source(
             )
             if generate_html:
                 try:
-                    from capcat.core.html_generator import HTMLGenerator
+                    from capcat.core.html_post_processor import HTMLPostProcessor
 
-                    html_generator = HTMLGenerator()
-                    article_md = os.path.join(folder_path, "article.md")
-                    if os.path.exists(article_md):
-                        html_generator.generate_html_file(
-                            markdown_file=article_md,
-                            article_folder=folder_path,
-                            source_name=source_id.title(),
-                        )
-                        logger.info(f"Generated HTML for {source_id.title()} article")
+                    processor = HTMLPostProcessor()
+                    processor.process_directory_tree(
+                        folder_path,
+                        incremental=False,
+                        is_single_article=True,
+                    )
+                    logger.info(f"Generated HTML for {source_id.title()} article")
                 except Exception as e:
                     logger.warning(f"Failed to generate HTML: {e}")
 
