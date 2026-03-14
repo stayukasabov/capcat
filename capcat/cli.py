@@ -13,6 +13,7 @@ import sys
 # ---------------------------------------------------------------------------
 
 def _print_help() -> None:
+    """Print the top-level usage text to stdout and return."""
     print(
         "Usage: capcat <command> [options]\n\n"
         "Commands:\n"
@@ -56,6 +57,14 @@ def main() -> None:
 # ---------------------------------------------------------------------------
 
 def _dispatch(args: list[str]) -> None:
+    """Route a raw argument list to the appropriate command handler.
+
+    Handles global flags (-L, --version, --help) before delegating to
+    per-command functions. Exits with code 1 on unknown commands.
+
+    Args:
+        args: sys.argv[1:] with the program name already removed.
+    """
     if not args or args[0] in ("-h", "--help"):
         _print_help()
         return
@@ -141,6 +150,15 @@ def _pop_value(args: list[str], *flags: str,
 # ---------------------------------------------------------------------------
 
 def _cmd_init(args: list[str]) -> None:
+    """Handle the ``capcat init`` command.
+
+    Creates ``.capcat/`` state directory and ``Config/`` scaffold in cwd.
+    Exits with code 1 if the project is already initialized (unless
+    ``--reinit`` is passed).
+
+    Args:
+        args: Remaining arguments after ``init`` (e.g. ``["--reinit"]``).
+    """
     from pathlib import Path
     from capcat.commands.init import init_project, AlreadyInitializedError
     reinit = "--reinit" in args
