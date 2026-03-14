@@ -578,6 +578,52 @@ Handle interruption signals and restore cursor.
 - `signum`
 - `frame`
 
+### _get_terminal_width
+
+```python
+def _get_terminal_width() -> int
+```
+
+Get terminal width, with fallback to 80 columns.
+
+**Returns:** int
+
+### _strip_ansi_codes
+
+```python
+def _strip_ansi_codes(text: str) -> str
+```
+
+Remove ANSI escape codes from text to measure visible width.
+
+**Parameters:**
+
+- `text` (str)
+
+**Returns:** str
+
+### _truncate_to_width
+
+```python
+def _truncate_to_width(text: str, max_width: int) -> str
+```
+
+Truncate text to fit within terminal width, preserving ANSI codes.
+
+Args:
+    text: Text with ANSI codes
+    max_width: Maximum visible character width
+
+Returns:
+    Truncated text that fits within max_width
+
+**Parameters:**
+
+- `text` (str)
+- `max_width` (int)
+
+**Returns:** str
+
 ### with_progress
 
 ```python
