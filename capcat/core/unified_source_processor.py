@@ -160,6 +160,12 @@ class UnifiedSourceProcessor:
             verbose=verbose,
         )
 
+        if generate_html:
+            from capcat.core.html_post_processor import process_html_generation
+            from pathlib import Path
+            html_root = str(Path(base_dir).parent) if output_dir == "." else base_dir
+            process_html_generation(html_root)
+
     def _get_articles(
         self, source_name: str, source_config: dict, count: int
     ) -> List[Tuple[str, str, Optional[str]]]:
@@ -555,7 +561,12 @@ class UnifiedSourceProcessor:
 
             if generate_html:
                 from capcat.core.html_post_processor import process_html_generation
-                process_html_generation(base_dir)
+                from pathlib import Path
+                # For default output, base_dir is News_DD-MM-YYYY/Source_DD-MM-YYYY/.
+                # Process from the parent (News_DD-MM-YYYY/) so index.html is created
+                # at the correct level, not inside the source subfolder.
+                html_root = str(Path(base_dir).parent) if output_dir == "." else base_dir
+                process_html_generation(html_root)
 
         except SourceError as e:
             self.logger.error(f"New source system error: {e}")
