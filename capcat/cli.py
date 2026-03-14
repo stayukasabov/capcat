@@ -32,6 +32,7 @@ def _print_help() -> None:
         "  --media          Download media files\n"
         "  --html           Generate HTML output\n"
         "  --update         Update existing articles\n"
+        "  --version        Show version and exit\n"
         "  --help           Show this help\n"
     )
 
@@ -57,6 +58,11 @@ def main() -> None:
 def _dispatch(args: list[str]) -> None:
     if not args or args[0] in ("-h", "--help"):
         _print_help()
+        return
+
+    if args[0] == "--version":
+        from capcat import __version__
+        print(f"capcat {__version__}")
         return
 
     # Handle -L <file> global option before command routing

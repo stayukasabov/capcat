@@ -70,6 +70,18 @@ Task Order:
 Proceeding with execution...
 ```
 
+## CLI Standards
+
+Follow https://clig.dev/ for all CLI design decisions.
+
+Key rules relevant to Capcat:
+- `--version` prints `<tool> <version>` and exits 0
+- `--help` / `-h` prints usage and exits 0
+- Short flags for frequently used options; long flags always available
+- Errors go to stderr; output to stdout
+- Exit 0 on success, non-zero on failure
+- Prefer `--flag` over positional args for optional parameters
+
 ## Project Overview
 
 News archiving: 17+ sources → Markdown + media. Plugin-based architecture.
