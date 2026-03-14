@@ -31,6 +31,7 @@ class HTMLGenerator:
     """
 
     def __init__(self):
+        """Initialize the HTML generator with config, markdown, and template dependencies."""
         self.logger = get_logger(__name__)
         self.config = get_config()
         self.markdown_processor = self._setup_markdown_processor()
@@ -943,6 +944,14 @@ class HTMLGenerator:
 
         # 6. Helper: Find category for a source (using auto-discovered mapping)
         def find_category(source_id):
+            """Return the category name for a source ID, or None if unknown.
+
+            Args:
+                source_id: Source identifier string to look up.
+
+            Returns:
+                Category string (e.g. ``"tech"``), or ``None`` if not found.
+            """
             if not source_id:
                 return None
             for category, sources in category_sources.items():
@@ -952,6 +961,15 @@ class HTMLGenerator:
 
         # 7. Custom sorting function for category-based organization
         def sort_items(item):
+            """Return a sort key for a directory entry based on category order.
+
+            Args:
+                item: A ``pathlib.Path``-like directory entry with a ``name``
+                    attribute.
+
+            Returns:
+                Tuple used as a sort key: ``(category_index, source_order, name)``.
+            """
             source_id = extract_source_id(item.name)
             category = find_category(source_id)
 
@@ -1280,6 +1298,17 @@ class HTMLGenerator:
 
         # Extract content from div wrappers more carefully
         def extract_content(html_content: str, div_class: str) -> str:
+            """Extract the inner HTML from a known div wrapper, if present.
+
+            Args:
+                html_content: HTML string that may contain a ``<div class="…">``
+                    wrapper.
+                div_class: CSS class name of the wrapper div to strip.
+
+            Returns:
+                Inner content string with the outer div removed, or the original
+                *html_content* if the wrapper is not found.
+            """
             if not html_content:
                 return ""
             # If the content already has the div wrapper, extract just the inner content
@@ -1484,6 +1513,14 @@ class HTMLGenerator:
         _MAX_URL_DISPLAY = 80
 
         def _truncate_anchor_text(anchor_match):
+            """Shorten anchor display text to ``_MAX_URL_DISPLAY`` characters.
+
+            Args:
+                anchor_match: Regex match with groups ``(href, text)``.
+
+            Returns:
+                Replacement ``<a>`` tag with truncated display text.
+            """
             href = anchor_match.group(1)
             text = anchor_match.group(2)
             if len(text) > _MAX_URL_DISPLAY:
@@ -1491,6 +1528,15 @@ class HTMLGenerator:
             return f'<a href="{href}">{text}</a>'
 
         def replace_source_url(match):
+            """Replace a ``<p>`` containing a source URL with a semantic div.
+
+            Args:
+                match: Regex match with groups ``(p_open, content, p_close)``.
+
+            Returns:
+                ``<div class="source-url">`` wrapping the (possibly truncated)
+                anchor content.
+            """
             p_open, content, p_close = match.groups()
             content = re.sub(
                 r'<a\s+href="([^"]*)"[^>]*>([^<]*)</a>',

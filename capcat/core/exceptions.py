@@ -17,12 +17,24 @@ class CapcatError(Exception):
         original_error: Exception = None,
         error_code: int = None,
     ):
+        """Create a CapcatError with separate technical and user-facing messages.
+
+        Args:
+            message: Technical error message (logged, not shown to user).
+            user_message: Human-readable message shown in the CLI. Defaults
+                to *message* if not provided.
+            original_error: The underlying exception that triggered this one,
+                preserved for logging and ``to_dict()``.
+            error_code: Numeric code from ``ErrorCode``. Defaults to
+                ``ErrorCode.UNKNOWN_ERROR``.
+        """
         super().__init__(message)
         self.user_message = user_message or message
         self.original_error = original_error
         self.error_code = error_code or ErrorCode.UNKNOWN_ERROR
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """Return the user-facing message string."""
         return self.user_message
 
     def to_dict(self) -> dict:
@@ -53,9 +65,15 @@ class CapcatError(Exception):
 
 
 class NetworkError(CapcatError):
-    """Raised when network operations fail."""
+    """Raised when network operations fail (DNS, timeout, HTTP errors)."""
 
     def __init__(self, url: str, original_error: Exception = None):
+        """Create a NetworkError for a failed URL request.
+
+        Args:
+            url: The URL that could not be reached.
+            original_error: The underlying ``requests`` exception.
+        """
         message = f"Network error accessing {url}: {original_error}"
         user_message = (
             f"Could not access {url}. The server may be temporarily "
@@ -71,7 +89,7 @@ class NetworkError(CapcatError):
 
 
 class ContentFetchError(CapcatError):
-    """Raised when content fetching fails."""
+    """Raised when an article's content cannot be extracted after a successful request."""
 
     def __init__(
         self,
@@ -80,6 +98,14 @@ class ContentFetchError(CapcatError):
         reason: str,
         original_error: Exception = None,
     ):
+        """Create a ContentFetchError.
+
+        Args:
+            title: Article title (for the error message).
+            url: Article URL that failed content extraction.
+            reason: Human-readable explanation of why extraction failed.
+            original_error: The underlying exception, if any.
+        """
         message = f"Failed to fetch '{title}' from {url}: {reason}"
         user_message = f"Could not fetch article '{title}': {reason}"
         super().__init__(
@@ -96,6 +122,12 @@ class ConfigurationError(CapcatError):
     """Raised when configuration is invalid or missing."""
 
     def __init__(self, config_issue: str, suggestion: str = None):
+        """Create a ConfigurationError.
+
+        Args:
+            config_issue: Description of what is wrong with the config.
+            suggestion: Optional fix suggestion appended to the user message.
+        """
         message = f"Configuration error: {config_issue}"
         user_message = f"Configuration problem: {config_issue}"
         if suggestion:
@@ -108,11 +140,18 @@ class ConfigurationError(CapcatError):
 
 
 class FileSystemError(CapcatError):
-    """Raised when file system operations fail."""
+    """Raised when file system operations fail (read, write, mkdir, unlink)."""
 
     def __init__(
         self, operation: str, path: str, original_error: Exception = None
     ):
+        """Create a FileSystemError.
+
+        Args:
+            operation: Verb describing the failed operation (e.g. ``"write"``).
+            path: Filesystem path where the operation failed.
+            original_error: The underlying ``OSError`` or ``IOError``.
+        """
         message = (
             f"File system error during {operation} at "
             f"{path}: {original_error}"
@@ -132,9 +171,15 @@ class FileSystemError(CapcatError):
 
 
 class ParsingError(CapcatError):
-    """Raised when HTML/content parsing fails."""
+    """Raised when HTML or feed content cannot be parsed (structure changed, truncated, etc.)."""
 
     def __init__(self, url: str, reason: str):
+        """Create a ParsingError.
+
+        Args:
+            url: The URL whose content failed to parse.
+            reason: Technical description of the parse failure.
+        """
         message = f"Parsing error for {url}: {reason}"
         user_message = (
             f"Could not parse content from {url}. "
@@ -149,9 +194,16 @@ class ParsingError(CapcatError):
 
 
 class ValidationError(CapcatError):
-    """Raised when input validation fails."""
+    """Raised when input validation fails (invalid URL, bad config value, etc.)."""
 
     def __init__(self, field: str, value: str, requirement: str):
+        """Create a ValidationError.
+
+        Args:
+            field: Name of the field that failed validation (e.g. ``"url"``).
+            value: The invalid value that was provided.
+            requirement: Description of what the value should satisfy.
+        """
         message = (
             f"Validation error for {field}='{value}': {requirement}"
         )
@@ -170,8 +222,14 @@ class InvalidFeedError(CapcatError):
     def __init__(
         self,
         url: str,
-        reason: str = "Not a valid RSS/Atom feed."
+        reason: str = "Not a valid RSS/Atom feed.",
     ):
+        """Create an InvalidFeedError.
+
+        Args:
+            url: The URL that was tested as a feed.
+            reason: Optional description of why it is not a valid feed.
+        """
         message = f"Invalid feed at {url}: {reason}"
         user_message = (
             f"The content at {url} doesn't appear to be "

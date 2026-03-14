@@ -53,7 +53,10 @@ except ImportError:
         """Fallback get_config function."""
 
         class FallbackConfig:
+            """Minimal hard-coded defaults used when capcat.yml is absent."""
+
             class network:
+                """Network timeout and connection pool defaults."""
                 connect_timeout = 10
                 read_timeout = 8
                 media_download_timeout = 10
@@ -65,6 +68,7 @@ except ImportError:
                 retry_delay = 1.0
 
             class processing:
+                """Article processing and media download defaults."""
                 max_workers = 8
                 max_filename_length = 100
                 remove_script_tags = True
@@ -76,6 +80,7 @@ except ImportError:
                 download_documents = True
 
             class logging:
+                """Logging output defaults."""
                 default_level = "INFO"
                 use_colors = True
 
@@ -116,16 +121,16 @@ except ImportError:
     save_config = lambda x, _="yaml": True
 
     class FetchNewsConfig:
-        pass
+        """Stub for FetchNewsConfig when the main config module is unavailable."""
 
     class NetworkConfig:
-        pass
+        """Stub for NetworkConfig when the main config module is unavailable."""
 
     class ProcessingConfig:
-        pass
+        """Stub for ProcessingConfig when the main config module is unavailable."""
 
     class LoggingConfig:
-        pass
+        """Stub for LoggingConfig when the main config module is unavailable."""
 
 
 __all__ = [

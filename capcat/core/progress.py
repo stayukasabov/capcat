@@ -991,7 +991,24 @@ def with_progress(message: str, show_spinner: bool = True):
     """
 
     def decorator(func: Callable) -> Callable:
+        """Wrap *func* with a ``ProgressIndicator`` context manager.
+
+        Args:
+            func: The callable to decorate.
+
+        Returns:
+            A wrapper that shows progress while *func* executes.
+        """
         def wrapper(*args, **kwargs) -> Any:
+            """Run *func* inside a progress indicator.
+
+            Args:
+                *args: Positional arguments forwarded to *func*.
+                **kwargs: Keyword arguments forwarded to *func*.
+
+            Returns:
+                The return value of *func*.
+            """
             with ProgressIndicator(message, show_spinner=show_spinner):
                 return func(*args, **kwargs)
 
@@ -1007,40 +1024,68 @@ class QuietProgress:
     """
 
     def __init__(self, *args, **kwargs):
-        pass
+        """Accept and discard all constructor arguments."""
 
     def __enter__(self):
+        """Context manager entry — returns self."""
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        pass
+        """Context manager exit — no-op."""
 
     def start(self):
-        pass
+        """No-op start."""
 
     def stop(self, success_message: Optional[str] = None):
-        pass
+        """No-op stop.
+
+        Args:
+            success_message: Ignored.
+        """
 
     def update(self, increment: int = 1, status_message: Optional[str] = None):
-        pass
+        """No-op update.
+
+        Args:
+            increment: Ignored.
+            status_message: Ignored.
+        """
 
     def update_item_progress(self, progress: float, stage: str = ""):
-        """No-op implementation of update_item_progress for interface compatibility."""
-        pass
+        """No-op implementation of update_item_progress for interface compatibility.
+
+        Args:
+            progress: Ignored.
+            stage: Ignored.
+        """
 
     def error(self, error_message: str):
-        pass
+        """No-op error display.
+
+        Args:
+            error_message: Ignored.
+        """
 
     def item_completed(
         self, success: bool = True, item_name: Optional[str] = None
     ):
-        pass
+        """No-op item completion marker.
+
+        Args:
+            success: Ignored.
+            item_name: Ignored.
+        """
 
     def get_summary(self) -> str:
+        """Return empty summary string.
+
+        Returns:
+            Always returns an empty string.
+        """
         return ""
 
     def finish(self):
-        pass
+        """No-op finish."""
 
 
 def get_progress_indicator(
