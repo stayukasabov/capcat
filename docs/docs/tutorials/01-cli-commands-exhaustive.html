@@ -92,14 +92,14 @@
 <p>These options work with ALL commands.</p>
 
 <h3>--version, -v</h3>
-<pre><code>./capcat --version
-./capcat -v
+<pre><code>capcat --version
+capcat -v
 </code></pre>
 <p>Displays: <code>Capcat v2.0.0</code></p>
 
 <h3>--verbose, -V</h3>
-<pre><code>./capcat --verbose &lt;command&gt;
-./capcat -V &lt;command&gt;
+<pre><code>capcat --verbose &lt;command&gt;
+capcat -V &lt;command&gt;
 </code></pre>
 <p>Enable verbose output logging. Shows:</p>
 <ul>
@@ -113,8 +113,8 @@
 <h4>Cannot be used with:</h4> --quiet
 
 <h3>--quiet, -q</h3>
-<pre><code>./capcat --quiet &lt;command&gt;
-./capcat -q &lt;command&gt;
+<pre><code>capcat --quiet &lt;command&gt;
+capcat -q &lt;command&gt;
 </code></pre>
 <p>Suppress informational messages. Shows only:</p>
 <ul>
@@ -126,8 +126,8 @@
 <h4>Cannot be used with:</h4> --verbose
 
 <h3>--config, -C FILE</h3>
-<pre><code>./capcat --config custom.yml &lt;command&gt;
-./capcat -C ~/.capcat/config.yml &lt;command&gt;
+<pre><code>capcat --config custom.yml &lt;command&gt;
+capcat -C ~/.capcat/config.yml &lt;command&gt;
 </code></pre>
 <p>Specify custom configuration file path instead of default capcat.yml.</p>
 
@@ -136,8 +136,8 @@
 <p>###</p>
 
 <p> --log-file, -L FILE</p>
-<pre><code>./capcat --log-file capcat.log &lt;command&gt;
-./capcat -L logs/debug-$(date +%Y%m%d).log &lt;command&gt;
+<pre><code>capcat --log-file capcat.log &lt;command&gt;
+capcat -L logs/debug-$(date +%Y%m%d).log &lt;command&gt;
 </code></pre>
 <p>Write detailed logs to specified file. File logging includes:</p>
 <ul>
@@ -157,7 +157,7 @@
 <p>Download and process a single article from any URL.</p>
 
 <h4>Syntax:</h4>
-<pre><code>./capcat single &lt;url&gt; [options]
+<pre><code>capcat single &lt;url&gt; [options]
 </code></pre>
 
 <h4>Required Arguments:</h4>
@@ -168,8 +168,8 @@
 <h4>Options:</h4>
 
 <h3>--output, -o DIR</h3>
-<pre><code>./capcat single URL --output /path/to/output
-./capcat single URL -o ../Capcats
+<pre><code>capcat single URL --output /path/to/output
+capcat single URL -o ../Capcats
 </code></pre>
 <p>Specify output directory for article.</p>
 
@@ -183,8 +183,8 @@
 </div>
 
 <h3>--media, -M</h3>
-<pre><code>./capcat single URL --media
-./capcat single URL -M
+<pre><code>capcat single URL --media
+capcat single URL -M
 </code></pre>
 <p>Download ALL media types:</p>
 <ul>
@@ -198,8 +198,8 @@
 <h4>Storage:</h4> Files stored in <code>files/</code> subdirectory
 
 <h3>--html, -H</h3>
-<pre><code>./capcat single URL --html
-./capcat single URL -H
+<pre><code>capcat single URL --html
+capcat single URL -H
 </code></pre>
 <p>Generate HTML version of article in addition to Markdown.</p>
 
@@ -213,8 +213,8 @@
 </ul>
 
 <h3>--update, -U</h3>
-<pre><code>./capcat single URL --update
-./capcat single URL -U
+<pre><code>capcat single URL --update
+capcat single URL -U
 </code></pre>
 <p>Update existing article if it already exists.</p>
 
@@ -228,16 +228,16 @@
 
 <h4>Complete Examples:</h4>
 <pre><code># Basic single article download
-./capcat single https://example.com/article
+capcat single https://example.com/article
 
 # Download with all media and HTML
-./capcat single https://bbc.com/news/article --media --html
+capcat single https://bbc.com/news/article --media --html
 
 # Update existing article verbosely
-./capcat single URL --update --verbose
+capcat single URL --update --verbose
 
 # Custom output with logging
-./capcat single URL --output ~/Articles --log-file fetch.log
+capcat single URL --output ~/Articles --log-file fetch.log
 </code></pre>
 
 <h3>fetch - Fetch from Specific Sources</h3>
@@ -245,7 +245,7 @@
 <p>Fetch articles from one or more specific sources.</p>
 
 <h4>Syntax:</h4>
-<pre><code>./capcat fetch &lt;sources&gt; [options]
+<pre><code>capcat fetch &lt;sources&gt; [options]
 </code></pre>
 
 <h4>Required Arguments:</h4>
@@ -253,7 +253,7 @@
 <li><code>sources</code> - Comma-separated list of source IDs (no spaces)</li>
 </ul>
 
-<h4>Available Sources:</h4> Use <code>./capcat list sources</code> to see all available source IDs.
+<h4>Available Sources:</h4> Use <code>capcat list sources</code> to see all available source IDs.
 
 <h4>Common Source IDs:</h4>
 <ul>
@@ -271,8 +271,8 @@
 <h4>Options:</h4>
 
 <h3>--count, -c N</h3>
-<pre><code>./capcat fetch hn --count 10
-./capcat fetch hn,bbc -c 50
+<pre><code>capcat fetch hn --count 10
+capcat fetch hn,bbc -c 50
 </code></pre>
 <p>Number of articles to fetch per source.</p>
 
@@ -281,8 +281,8 @@
 <h4>Behavior:</h4> Each source fetches N articles independently
 
 <h3>--output, -o DIR</h3>
-<pre><code>./capcat fetch hn --output /path/to/output
-./capcat fetch hn -o ../News
+<pre><code>capcat fetch hn --output /path/to/output
+capcat fetch hn -o ../News
 </code></pre>
 <p>Specify output directory for articles.</p>
 
@@ -299,8 +299,8 @@
 </div>
 
 <h3>--media, -M</h3>
-<pre><code>./capcat fetch hn,bbc --media
-./capcat fetch nature -M
+<pre><code>capcat fetch hn,bbc --media
+capcat fetch nature -M
 </code></pre>
 <p>Download ALL media types (videos, audio, documents) in addition to images.</p>
 
@@ -308,8 +308,8 @@
 <h4>Impact:</h4> Significantly increases download time and disk usage
 
 <h3>--html, -H</h3>
-<pre><code>./capcat fetch hn --html
-./capcat fetch hn,bbc -H
+<pre><code>capcat fetch hn --html
+capcat fetch hn,bbc -H
 </code></pre>
 <p>Generate HTML versions of all articles.</p>
 
@@ -317,23 +317,23 @@
 <h4>Sources with comments:</h4> Also generates html/comments.html
 
 <h3>--update, -U</h3>
-<pre><code>./capcat fetch hn --update
-./capcat fetch hn -U
+<pre><code>capcat fetch hn --update
+capcat fetch hn -U
 </code></pre>
 <p>Update existing articles if they already exist.</p>
 
 <h4>Complete Examples:</h4>
 <pre><code># Fetch 10 articles from Hacker News
-./capcat fetch hn --count 10
+capcat fetch hn --count 10
 
 # Fetch from multiple sources
-./capcat fetch hn,lb,iq --count 20
+capcat fetch hn,lb,iq --count 20
 
 # Fetch with all features
-./capcat fetch bbc,guardian --count 15 --media --html --verbose
+capcat fetch bbc,guardian --count 15 --media --html --verbose
 
 # Fetch to custom location with logging
-./capcat fetch nature --count 5 --output ~/Science --log-file science.log
+capcat fetch nature --count 5 --output ~/Science --log-file science.log
 </code></pre>
 
 <h3>bundle - Fetch from Source Bundles</h3>
@@ -341,7 +341,7 @@
 <p>Fetch articles from predefined source bundles (groups of related sources).</p>
 
 <h4>Syntax:</h4>
-<pre><code>./capcat bundle &lt;bundle-name&gt; [options]
+<pre><code>capcat bundle &lt;bundle-name&gt; [options]
 </code></pre>
 
 <h4>Required Arguments:</h4>
@@ -349,7 +349,7 @@
 <li><code>bundle-name</code> - Name of predefined bundle</li>
 </ul>
 
-<h4>Available Bundles:</h4> Use <code>./capcat list bundles</code> to see all available bundles.
+<h4>Available Bundles:</h4> Use <code>capcat list bundles</code> to see all available bundles.
 
 <h4>Predefined Bundles:</h4>
 <ul>
@@ -365,8 +365,8 @@
 <h4>Options:</h4>
 
 <h3>--count, -c N</h3>
-<pre><code>./capcat bundle tech --count 10
-./capcat bundle news -c 50
+<pre><code>capcat bundle tech --count 10
+capcat bundle news -c 50
 </code></pre>
 <p>Number of articles to fetch per source in bundle.</p>
 
@@ -374,8 +374,8 @@
 <h4>Behavior:</h4> Each source in bundle fetches N articles
 
 <h3>--output, -o DIR</h3>
-<pre><code>./capcat bundle tech --output /path/to/output
-./capcat bundle tech -o ../News
+<pre><code>capcat bundle tech --output /path/to/output
+capcat bundle tech -o ../News
 </code></pre>
 <p>Specify output directory.</p>
 
@@ -383,20 +383,20 @@
 <h4>Structure:</h4> Same as <code>fetch</code> command
 
 <h3>--media, -M</h3>
-<pre><code>./capcat bundle tech --media
-./capcat bundle science -M
+<pre><code>capcat bundle tech --media
+capcat bundle science -M
 </code></pre>
 <p>Download ALL media types for all sources in bundle.</p>
 
 <h3>--html, -H</h3>
-<pre><code>./capcat bundle tech --html
-./capcat bundle news -H
+<pre><code>capcat bundle tech --html
+capcat bundle news -H
 </code></pre>
 <p>Generate HTML for all articles from all sources.</p>
 
 <h3>--all, -A</h3>
-<pre><code>./capcat bundle --all
-./capcat bundle -A --count 10
+<pre><code>capcat bundle --all
+capcat bundle -A --count 10
 </code></pre>
 <p>Fetch from ALL available bundles in order: techpro, tech, news, science, ai.</p>
 
@@ -404,26 +404,26 @@
 <h4>Behavior:</h4> Processes bundles sequentially
 
 <h3>--update, -U</h3>
-<pre><code>./capcat bundle tech --update
-./capcat bundle tech -U
+<pre><code>capcat bundle tech --update
+capcat bundle tech -U
 </code></pre>
 <p>Update existing articles in bundle.</p>
 
 <h4>Complete Examples:</h4>
 <pre><code># Fetch tech bundle
-./capcat bundle tech
+capcat bundle tech
 
 # Fetch with custom count
-./capcat bundle news --count 20
+capcat bundle news --count 20
 
 # Fetch all bundles
-./capcat bundle --all --count 10
+capcat bundle --all --count 10
 
 # Full-featured bundle fetch
-./capcat bundle science --count 15 --media --html --verbose
+capcat bundle science --count 15 --media --html --verbose
 
 # All bundles with logging
-./capcat bundle --all --log-file bundles-$(date +%Y%m%d).log
+capcat bundle --all --log-file bundles-$(date +%Y%m%d).log
 </code></pre>
 
 <h3>list - List Sources and Bundles</h3>
@@ -431,7 +431,7 @@
 <p>Display available sources, bundles, or both.</p>
 
 <h4>Syntax:</h4>
-<pre><code>./capcat list [what]
+<pre><code>capcat list [what]
 </code></pre>
 
 <h4>Arguments:</h4>
@@ -444,7 +444,7 @@
 <h4>Examples:</h4>
 
 <h3>List All Sources</h3>
-<pre><code>./capcat list sources
+<pre><code>capcat list sources
 </code></pre>
 <h4>Output format:</h4>
 <pre><code>--- Available Sources ---
@@ -477,7 +477,7 @@ Total: 11 sources
 </code></pre>
 
 <h3>List All Bundles</h3>
-<pre><code>./capcat list bundles
+<pre><code>capcat list bundles
 </code></pre>
 <h4>Output format:</h4>
 <pre><code>--- Available Bundles ---
@@ -504,8 +504,8 @@ Total: 6 bundles
 </code></pre>
 
 <h3>List Both</h3>
-<pre><code>./capcat list all
-./capcat list
+<pre><code>capcat list all
+capcat list
 </code></pre>
 <p>Displays both sources and bundles sections.</p>
 
@@ -514,14 +514,14 @@ Total: 6 bundles
 <p>View or modify Capcat configuration.</p>
 
 <h4>Syntax:</h4>
-<pre><code>./capcat config [options]
+<pre><code>capcat config [options]
 </code></pre>
 
 <h4>Options:</h4>
 
 <h3>--show, -s</h3>
-<pre><code>./capcat config --show
-./capcat config -s
+<pre><code>capcat config --show
+capcat config -s
 </code></pre>
 <p>Display current configuration from capcat.yml.</p>
 
@@ -535,8 +535,8 @@ Total: 6 bundles
 </ul>
 
 <h3>--set KEY=VALUE</h3>
-<pre><code>./capcat config --set max_workers=16
-./capcat config --set download_images=true
+<pre><code>capcat config --set max_workers=16
+capcat config --set download_images=true
 </code></pre>
 <p>Set configuration value.</p>
 
@@ -556,13 +556,13 @@ Total: 6 bundles
 
 <h4>Examples:</h4>
 <pre><code># Show current config
-./capcat config --show
+capcat config --show
 
 # Increase workers
-./capcat config --set max_workers=16
+capcat config --set max_workers=16
 
 # Set custom user agent
-./capcat config --set user_agent=&quot;MyBot/1.0&quot;
+capcat config --set user_agent=&quot;MyBot/1.0&quot;
 </code></pre>
 
 <h3>add-source - Add New RSS Source</h3>
@@ -570,7 +570,7 @@ Total: 6 bundles
 <p>Interactively add a new RSS-based source.</p>
 
 <h4>Syntax:</h4>
-<pre><code>./capcat add-source --url &lt;rss-feed-url&gt;
+<pre><code>capcat add-source --url &lt;rss-feed-url&gt;
 </code></pre>
 
 <h4>Required Options:</h4>
@@ -596,7 +596,7 @@ Total: 6 bundles
 
 <h4>Examples:</h4>
 <pre><code># Add new RSS source
-./capcat add-source --url https://techcrunch.com/feed/
+capcat add-source --url https://techcrunch.com/feed/
 
 # Interactive flow:
 # 1. Inspecting RSS feed...
@@ -621,11 +621,11 @@ Total: 6 bundles
 <p>Interactively remove one or more sources with safety features.</p>
 
 <h4>Syntax:</h4>
-<pre><code>./capcat remove-source [options]
+<pre><code>capcat remove-source [options]
 </code></pre>
 
 <h4>Interactive Mode (No Options):</h4>
-<pre><code>./capcat remove-source
+<pre><code>capcat remove-source
 </code></pre>
 <p>Launches interactive removal with checkbox selection:</p>
 <ol>
@@ -640,8 +640,8 @@ Total: 6 bundles
 <h4>Options:</h4>
 
 <h3>--dry-run, -n</h3>
-<pre><code>./capcat remove-source --dry-run
-./capcat remove-source -n
+<pre><code>capcat remove-source --dry-run
+capcat remove-source -n
 </code></pre>
 <p>Preview changes without actually removing anything.</p>
 
@@ -654,8 +654,8 @@ Total: 6 bundles
 </ul>
 
 <h3>--batch, -b FILE</h3>
-<pre><code>./capcat remove-source --batch sources.txt
-./capcat remove-source -b remove-list.txt
+<pre><code>capcat remove-source --batch sources.txt
+capcat remove-source -b remove-list.txt
 </code></pre>
 <p>Remove sources listed in file (one source ID per line).</p>
 
@@ -674,9 +674,9 @@ discontinued-source
 </ul>
 
 <h3>--undo, -u [BACKUP_ID]</h3>
-<pre><code>./capcat remove-source --undo
-./capcat remove-source --undo latest
-./capcat remove-source --undo backup_20251025_143022
+<pre><code>capcat remove-source --undo
+capcat remove-source --undo latest
+capcat remove-source --undo backup_20251025_143022
 </code></pre>
 <p>Restore sources from backup.</p>
 
@@ -696,23 +696,23 @@ discontinued-source
 </ul>
 
 <h3>--no-backup</h3>
-<pre><code>./capcat remove-source --no-backup
-./capcat remove-source --no-backup --force
+<pre><code>capcat remove-source --no-backup
+capcat remove-source --no-backup --force
 </code></pre>
 <p>Skip creating backup before removal.</p>
 
 <h4>Warning:</h4> No undo capability without backup. Use with extreme caution.
 
 <h3>--no-analytics</h3>
-<pre><code>./capcat remove-source --no-analytics
+<pre><code>capcat remove-source --no-analytics
 </code></pre>
 <p>Skip displaying usage analytics for sources.</p>
 
 <h4>Default behavior:</h4> Shows usage statistics before removal
 
 <h3>--force, -f</h3>
-<pre><code>./capcat remove-source --force
-./capcat remove-source -f --batch sources.txt
+<pre><code>capcat remove-source --force
+capcat remove-source -f --batch sources.txt
 </code></pre>
 <p>Skip all confirmation prompts.</p>
 
@@ -727,22 +727,22 @@ discontinued-source
 
 <h4>Complete Examples:</h4>
 <pre><code># Interactive removal
-./capcat remove-source
+capcat remove-source
 
 # Preview without removing
-./capcat remove-source --dry-run
+capcat remove-source --dry-run
 
 # Batch removal
-./capcat remove-source --batch old-sources.txt
+capcat remove-source --batch old-sources.txt
 
 # Forced batch removal without backup
-./capcat remove-source --force --no-backup --batch remove.txt
+capcat remove-source --force --no-backup --batch remove.txt
 
 # Restore last removal
-./capcat remove-source --undo
+capcat remove-source --undo
 
 # Restore specific backup
-./capcat remove-source --undo backup_20251025_120000
+capcat remove-source --undo backup_20251025_120000
 </code></pre>
 
 <h4>Backup Locations:</h4>
@@ -761,7 +761,7 @@ discontinued-source
 <p>Launch interactive wizard to create comprehensive YAML source configuration.</p>
 
 <h4>Syntax:</h4>
-<pre><code>./capcat generate-config [options]
+<pre><code>capcat generate-config [options]
 </code></pre>
 
 <h4>Interactive Wizard Steps:</h4>
@@ -783,8 +783,8 @@ discontinued-source
 <h4>Options:</h4>
 
 <h3>--output, -o FILE</h3>
-<pre><code>./capcat generate-config --output custom.yaml
-./capcat generate-config -o /path/to/config.yaml
+<pre><code>capcat generate-config --output custom.yaml
+capcat generate-config -o /path/to/config.yaml
 </code></pre>
 <p>Specify output file path.</p>
 
@@ -827,10 +827,10 @@ skip_patterns:
 
 <h4>Examples:</h4>
 <pre><code># Interactive generation
-./capcat generate-config
+capcat generate-config
 
 # Save to custom location
-./capcat generate-config --output ~/configs/newsource.yaml
+capcat generate-config --output ~/configs/newsource.yaml
 </code></pre>
 
 <h4>Next Steps After Generation:</h4>
@@ -838,7 +838,7 @@ skip_patterns:
 cat sources/active/config_driven/configs/newsource.yaml
 
 # Test source
-./capcat fetch newsource --count 5
+capcat fetch newsource --count 5
 
 # Add to bundle (manual edit)
 vim sources/active/bundles.yml
@@ -849,7 +849,7 @@ vim sources/active/bundles.yml
 <p>Launch interactive menu interface for all Capcat operations.</p>
 
 <h4>Syntax:</h4>
-<pre><code>./capcat catch
+<pre><code>capcat catch
 </code></pre>
 
 <h4>No options:</h4> This command has no additional flags or options.
@@ -904,7 +904,7 @@ vim sources/active/bundles.yml
 </div>
 
 <h4>Example Session:</h4>
-<pre><code>$ ./capcat catch
+<pre><code>$ capcat catch
 
 # User selects: &quot;Catch articles from a bundle of sources&quot;
 # System shows bundle list, user selects &quot;tech&quot;
@@ -930,32 +930,32 @@ Executing command...
 
 <h3>Daily News Collection</h3>
 <pre><code># Morning routine: fetch all news
-./capcat bundle news --count 20 --html
+capcat bundle news --count 20 --html
 
 # Evening: fetch tech updates
-./capcat bundle tech --count 10
+capcat bundle tech --count 10
 </code></pre>
 
 <h3>Research Workflow</h3>
 <pre><code># Collect science articles with all media
-./capcat bundle science --count 30 --media --log-file research.log
+capcat bundle science --count 30 --media --log-file research.log
 
 # Add specific article found during research
-./capcat single https://nature.com/article/12345 --media --html
+capcat single https://nature.com/article/12345 --media --html
 </code></pre>
 
 <h3>Source Management Workflow</h3>
 <pre><code># List current sources
-./capcat list sources
+capcat list sources
 
 # Add new source
-./capcat add-source --url https://newssite.com/feed.xml
+capcat add-source --url https://newssite.com/feed.xml
 
 # Test new source
-./capcat fetch newsource --count 3
+capcat fetch newsource --count 3
 
 # Remove old sources
-./capcat remove-source --batch old-sources.txt
+capcat remove-source --batch old-sources.txt
 </code></pre>
 
 <h3>Automated Collection Script</h3>
@@ -965,7 +965,7 @@ Executing command...
 LOG_FILE=&quot;logs/daily-$(date +%Y%m%d).log&quot;
 
 # Collect from all bundles
-./capcat bundle --all --count 20 --html --log-file &quot;$LOG_FILE&quot;
+capcat bundle --all --count 20 --html --log-file &quot;$LOG_FILE&quot;
 
 # Check if successful
 if [ $? -eq 0 ]; then
@@ -988,7 +988,7 @@ fi
 </ul>
 
 <h4>Usage in scripts:</h4>
-<pre><code>./capcat fetch hn --count 10
+<pre><code>capcat fetch hn --count 10
 if [ $? -eq 0 ]; then
     echo &quot;Success&quot;
 else
@@ -1003,31 +1003,31 @@ fi
 
 <h3>CAPCAT_OUTPUT_DIR</h3>
 <pre><code>export CAPCAT_OUTPUT_DIR=&quot;/custom/path&quot;
-./capcat fetch hn
+capcat fetch hn
 </code></pre>
 <p>Override default output directory for all commands.</p>
 
 <h3>CAPCAT_DEFAULT_COUNT</h3>
 <pre><code>export CAPCAT_DEFAULT_COUNT=50
-./capcat fetch hn  # Uses 50 instead of 30
+capcat fetch hn  # Uses 50 instead of 30
 </code></pre>
 <p>Override default article count.</p>
 
 <h3>CAPCAT_CONFIG</h3>
 <pre><code>export CAPCAT_CONFIG=&quot;~/.capcat/custom.yml&quot;
-./capcat fetch hn
+capcat fetch hn
 </code></pre>
 <p>Override default configuration file location.</p>
 
 <h3>CAPCAT_LOG_LEVEL</h3>
 <pre><code>export CAPCAT_LOG_LEVEL=DEBUG
-./capcat fetch hn
+capcat fetch hn
 </code></pre>
 <p>Set logging level: DEBUG, INFO, WARNING, ERROR, CRITICAL</p>
 
 <h3>CAPCAT_MAX_WORKERS</h3>
 <pre><code>export CAPCAT_MAX_WORKERS=16
-./capcat bundle all
+capcat bundle all
 </code></pre>
 <p>Override parallel worker count.</p>
 
@@ -1047,37 +1047,37 @@ fi
 # Environment: CAPCAT_DEFAULT_COUNT=40
 # Command: --count 10
 
-./capcat fetch hn  # Uses 10 (CLI wins)
+capcat fetch hn  # Uses 10 (CLI wins)
 </code></pre>
 
 <h2>Error Handling</h2>
 
 <h3>Network Errors</h3>
-<pre><code>$ ./capcat fetch hn
+<pre><code>$ capcat fetch hn
 Error: Failed to connect to news.ycombinator.com
 Network timeout after 10 seconds
 </code></pre>
 
 <h3>Invalid Source</h3>
-<pre><code>$ ./capcat fetch nonexistent
+<pre><code>$ capcat fetch nonexistent
 Error: Unknown sources: nonexistent
 Available: hn, lb, iq, bbc, guardian, ...
 </code></pre>
 
 <h3>Invalid URL</h3>
-<pre><code>$ ./capcat single not-a-url
+<pre><code>$ capcat single not-a-url
 Error: Invalid URL format: not-a-url
 Must start with http:// or https://
 </code></pre>
 
 <h3>Permission Denied</h3>
-<pre><code>$ ./capcat fetch hn --output /root/articles
+<pre><code>$ capcat fetch hn --output /root/articles
 Error: Permission denied: /root/articles
 Cannot create output directory
 </code></pre>
 
 <h3>Disk Space</h3>
-<pre><code>$ ./capcat bundle all --media
+<pre><code>$ capcat bundle all --media
 Warning: Low disk space (&lt; 1GB available)
 Consider using --no-media flag
 </code></pre>
@@ -1086,27 +1086,27 @@ Consider using --no-media flag
 
 <h3>Verbose Output</h3>
 <pre><code># Maximum verbosity with file logging
-./capcat -V --log-file debug.log fetch hn --count 3
+capcat -V --log-file debug.log fetch hn --count 3
 </code></pre>
 
 <h3>Dry Run (Remove Command)</h3>
 <pre><code># Preview what would be removed
-./capcat remove-source --dry-run
+capcat remove-source --dry-run
 </code></pre>
 
 <h3>Test Single Article</h3>
 <pre><code># Test article processing
-./capcat single URL --verbose
+capcat single URL --verbose
 </code></pre>
 
 <h3>List and Verify Sources</h3>
 <pre><code># Check source availability
-./capcat list sources
+capcat list sources
 </code></pre>
 
 <h3>Configuration Validation</h3>
 <pre><code># Show current config
-./capcat config --show
+capcat config --show
 </code></pre>
 
 <h2>Source Code Locations</h2>

@@ -99,19 +99,19 @@
 <p>Bundles are named groups of sources you can fetch from with one command.</p>
 
 <p>Instead of:</p>
-<pre><code>./capcat fetch hn --count 20
-./capcat fetch lb --count 20
-./capcat fetch iq --count 20
+<pre><code>capcat fetch hn --count 20
+capcat fetch lb --count 20
+capcat fetch iq --count 20
 </code></pre>
 
 <p>Use:</p>
-<pre><code>./capcat bundle techpro --count 20
+<pre><code>capcat bundle techpro --count 20
 </code></pre>
 
 <h2>Pre-Made Bundles</h2>
 
 <h3>tech - Consumer Technology</h3>
-<pre><code>./capcat bundle tech --count 20
+<pre><code>capcat bundle tech --count 20
 </code></pre>
 
 <p>Sources:</p>
@@ -124,7 +124,7 @@
 <h4>Use for:</h4> General tech news, consumer electronics, gadgets
 
 <h3>techpro - Professional Developer</h3>
-<pre><code>./capcat bundle techpro --count 15
+<pre><code>capcat bundle techpro --count 15
 </code></pre>
 
 <p>Sources:</p>
@@ -137,7 +137,7 @@
 <h4>Use for:</h4> Programming, software development, technical discussions
 
 <h3>news - General News</h3>
-<pre><code>./capcat bundle news --count 25
+<pre><code>capcat bundle news --count 25
 </code></pre>
 
 <p>Sources:</p>
@@ -149,7 +149,7 @@
 <h4>Use for:</h4> World news, current events
 
 <h3>science - Scientific Research</h3>
-<pre><code>./capcat bundle science --count 20
+<pre><code>capcat bundle science --count 20
 </code></pre>
 
 <p>Sources:</p>
@@ -161,7 +161,7 @@
 <h4>Use for:</h4> Scientific discoveries, research papers
 
 <h3>ai - AI &amp; Machine Learning</h3>
-<pre><code>./capcat bundle ai --count 20
+<pre><code>capcat bundle ai --count 20
 </code></pre>
 
 <p>Sources:</p>
@@ -172,7 +172,7 @@
 <h4>Use for:</h4> AI developments, ML research
 
 <h3>sports - Sports News</h3>
-<pre><code>./capcat bundle bbcsport --count 25
+<pre><code>capcat bundle bbcsport --count 25
 </code></pre>
 
 <p>Sources:</p>
@@ -183,7 +183,7 @@
 <h4>Use for:</h4> Sports coverage, match reports
 
 <h3>all - Everything</h3>
-<pre><code>./capcat bundle all --count 10
+<pre><code>capcat bundle all --count 10
 </code></pre>
 
 <h4>Use for:</h4> Sample from all available sources
@@ -192,7 +192,7 @@
 
 <p>See all bundles:</p>
 
-<pre><code>./capcat list bundles
+<pre><code>capcat list bundles
 </code></pre>
 
 <p>Output:</p>
@@ -231,12 +231,12 @@ Total: 6 bundles
 
 <p>Save and use:</p>
 
-<pre><code>./capcat bundle mybundle
+<pre><code>capcat bundle mybundle
 </code></pre>
 
 <h3>Method 2: Interactive Bundle Management</h3>
 
-<pre><code>./capcat catch
+<pre><code>capcat catch
 # Select: Manage Sources
 # Select: Manage Bundles
 # Select: Create New Bundle
@@ -266,7 +266,7 @@ Total: 6 bundles
 </code></pre>
 
 <p>Use:</p>
-<pre><code>./capcat bundle morning --html
+<pre><code>capcat bundle morning --html
 </code></pre>
 
 <h3>Research Bundle</h3>
@@ -283,7 +283,7 @@ Total: 6 bundles
 </code></pre>
 
 <p>Use:</p>
-<pre><code>./capcat bundle research --media --html
+<pre><code>capcat bundle research --media --html
 </code></pre>
 
 <h3>Weekend Reading Bundle</h3>
@@ -300,7 +300,7 @@ Total: 6 bundles
 </code></pre>
 
 <p>Use:</p>
-<pre><code>./capcat bundle weekend --count 50 --html
+<pre><code>capcat bundle weekend --count 50 --html
 </code></pre>
 
 <h2>Managing Bundle Sources</h2>
@@ -371,13 +371,13 @@ news:
 <p>Morning, noon, evening collections:</p>
 
 <pre><code># Morning (8 AM)
-./capcat bundle morning --count 10 --html
+capcat bundle morning --count 10 --html
 
 # Noon update
-./capcat bundle news --count 5
+capcat bundle news --count 5
 
 # Evening deep dive
-./capcat bundle research --count 20 --media
+capcat bundle research --count 20 --media
 </code></pre>
 
 <h3>Weekly Automation</h3>
@@ -385,16 +385,16 @@ news:
 <p>Different bundles each day:</p>
 
 <pre><code># Monday - Professional news
-./capcat bundle techpro --count 20
+capcat bundle techpro --count 20
 
 # Wednesday - General news
-./capcat bundle news --count 25
+capcat bundle news --count 25
 
 # Friday - Science
-./capcat bundle science --count 30
+capcat bundle science --count 30
 
 # Sunday - Everything
-./capcat bundle all --count 15
+capcat bundle all --count 15
 </code></pre>
 
 <h2>Advanced Bundle Usage</h2>
@@ -404,33 +404,33 @@ news:
 <p>Bundles have default counts, but you can override:</p>
 
 <pre><code># Use default count
-./capcat bundle tech
+capcat bundle tech
 
 # Override with custom count
-./capcat bundle tech --count 50
+capcat bundle tech --count 50
 </code></pre>
 
 <h3>Generate HTML Selectively</h3>
 
 <pre><code># With HTML for browsing
-./capcat bundle tech --html
+capcat bundle tech --html
 
 # Without HTML (faster)
-./capcat bundle tech
+capcat bundle tech
 </code></pre>
 
 <h3>Fetch Multiple Bundles</h3>
 
 <p>One after another:</p>
 
-<pre><code>./capcat bundle tech --count 15
-./capcat bundle news --count 10
-./capcat bundle science --count 10
+<pre><code>capcat bundle tech --count 15
+capcat bundle news --count 10
+capcat bundle science --count 10
 </code></pre>
 
 <p>Or all bundles:</p>
 
-<pre><code>./capcat bundle --all --count 10
+<pre><code>capcat bundle --all --count 10
 </code></pre>
 
 <h2>Bundle Best Practices</h2>
@@ -470,12 +470,12 @@ news:
 ls sources/active/bundles.yml
 
 # List available bundles
-./capcat list bundles
+capcat list bundles
 </code></pre>
 
 <h4>Source in bundle fails:</h4>
 <pre><code># Test individual source
-./capcat fetch sourcename --count 3
+capcat fetch sourcename --count 3
 
 # Remove failing source from bundle
 vim sources/active/bundles.yml
@@ -504,19 +504,19 @@ vim sources/active/bundles.yml
 <h2>Quick Reference</h2>
 
 <pre><code># Use bundle
-./capcat bundle BUNDLE_NAME
+capcat bundle BUNDLE_NAME
 
 # List bundles
-./capcat list bundles
+capcat list bundles
 
 # Override count
-./capcat bundle BUNDLE_NAME --count N
+capcat bundle BUNDLE_NAME --count N
 
 # With HTML
-./capcat bundle BUNDLE_NAME --html
+capcat bundle BUNDLE_NAME --html
 
 # All bundles
-./capcat bundle --all
+capcat bundle --all
 
 # Edit bundles
 vim sources/active/bundles.yml
