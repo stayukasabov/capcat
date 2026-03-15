@@ -59,6 +59,43 @@ git push origin main && git push origin v1.0.31
 Pushing a `v*` tag triggers GitHub Actions → PyPI publish automatically.
 See `docs/developer/release.md` for full release checklist.
 
+## SSH Authentication (Required)
+
+All git operations must use SSH, not HTTPS. HTTPS requires a password on every push.
+
+### Check current remote
+
+```bash
+git remote -v
+```
+
+If it shows `https://github.com/...`, switch it to SSH:
+
+```bash
+git remote set-url origin git@github.com:stayukasabov/capcat.git
+```
+
+### Set up SSH key (one-time)
+
+```bash
+# Generate key (skip if ~/.ssh/id_ed25519 already exists)
+ssh-keygen -t ed25519 -C "your@email.com"
+
+# Copy public key to clipboard
+cat ~/.ssh/id_ed25519.pub | pbcopy
+```
+
+Paste it in GitHub → Settings → SSH and GPG keys → New SSH key.
+
+### Verify
+
+```bash
+ssh -T git@github.com
+# Expected: Hi stayukasabov! You've successfully authenticated...
+```
+
+After this, all pushes work without a password.
+
 ## Working with the Synology Symlink
 
 The repo is symlinked: `~/capcat` → Synology Drive path.
