@@ -59,42 +59,46 @@ git push origin main && git push origin v1.0.31
 Pushing a `v*` tag triggers GitHub Actions → PyPI publish automatically.
 See `docs/developer/release.md` for full release checklist.
 
-## SSH Authentication (Required)
+## GitHub Authentication
 
-All git operations must use SSH, not HTTPS. HTTPS requires a password on every push.
-
-### Check current remote
+GitHub remote uses HTTPS. Credentials are stored in macOS Keychain after the first successful push — no password prompt on subsequent pushes.
 
 ```bash
 git remote -v
+# must show: https://github.com/stayukasabov/capcat.git
+
+# If wrong, restore:
+git remote set-url origin https://github.com/stayukasabov/capcat.git
 ```
 
-If it shows `https://github.com/...`, switch it to SSH:
+Credential helper (set once per machine):
+```bash
+git config --global credential.helper osxkeychain
+```
+
+## VPS Deployment (rsync)
+
+The `id_ed25519` SSH key is for `stayux-vps` (`orinz@172.104.146.194`), not GitHub.
+
+Sync the repo to the VPS for Ubuntu/pipx testing:
 
 ```bash
-git remote set-url origin git@github.com:stayukasabov/capcat.git
+rsync -avz --exclude='.git' --exclude='venv/' --exclude='__pycache__/' \
+  ~/capcat/ orinz@172.104.146.194:~/capcat/
 ```
 
-### Set up SSH key (one-time)
-
+Or using the SSH alias:
 ```bash
-# Generate key (skip if ~/.ssh/id_ed25519 already exists)
-ssh-keygen -t ed25519 -C "your@email.com"
-
-# Copy public key to clipboard
-cat ~/.ssh/id_ed25519.pub | pbcopy
+rsync -avz --exclude='.git' --exclude='venv/' --exclude='__pycache__/' \
+  ~/capcat/ stayux-vps:~/capcat/
 ```
 
-Paste it in GitHub → Settings → SSH and GPG keys → New SSH key.
-
-### Verify
-
+After syncing, test on VPS:
 ```bash
-ssh -T git@github.com
-# Expected: Hi stayukasabov! You've successfully authenticated...
+ssh stayux-vps
+pipx install --editable ~/capcat/
+capcat --version
 ```
-
-After this, all pushes work without a password.
 
 ## Working with the Synology Symlink
 
