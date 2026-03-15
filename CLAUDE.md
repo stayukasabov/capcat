@@ -15,6 +15,22 @@
 - Never `cd` into the raw Synology path
 - Canonical test command: `cd ~/capcat && source venv/bin/activate && pytest tests/unit/ -v`
 
+## Git Authentication (MANDATORY)
+
+All git push/pull operations use SSH. Never use HTTPS remotes.
+
+Before any push, verify the remote is SSH:
+```bash
+git remote -v   # must show git@github.com:..., not https://
+```
+
+If HTTPS is set, fix it immediately:
+```bash
+git remote set-url origin git@github.com:stayukasabov/capcat.git
+```
+
+SSH setup instructions: `docs/developer/git-workflow.md#ssh-authentication-required`
+
 ## Git Branching (MANDATORY)
 
 Never commit directly to `main`. All work — including single-file changes — happens on a feature branch.
