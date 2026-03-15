@@ -468,17 +468,20 @@ class HTMLPostProcessor:
         self._write_html_file(index_path, html_content)
 
     def _build_breadcrumb_path(self, current_path: Path) -> List[str]:
-        """Build breadcrumb navigation path for a given directory."""
-        # Start from the archive root (e.g., news_DD-MM-YYYY)
+        """Build breadcrumb navigation path for a given directory.
+
+        Walks up the directory tree and stops at (and includes) the date
+        folder (News_DD-MM-YYYY). Source folders are included as intermediate
+        levels, not as stopping points.
+        """
         parts = []
         path = current_path
 
-        # Walk up the path until we reach a recognizable root
         while path.parent != path:
-            if self._is_archive_root(path):
-                parts.append(path.name.replace("_", " "))
-                break
             parts.append(path.name.replace("_", " "))
+            # Stop only at the date folder — the top-level archive boundary
+            if path.name.lower().startswith("news_"):
+                break
             path = path.parent
 
         # Reverse to get proper order (root -> current)
