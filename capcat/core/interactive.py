@@ -630,20 +630,84 @@ def _confirm_and_execute(action, selection, generate_html):
     if generate_html:
         args.append('--html')
 
+    success = True
     try:
         print("Executing command...")
         from capcat.cli import _dispatch
         _dispatch(args)
     except SystemExit as e:
-        # The run_app function calls sys.exit(), which we intercept.
         if e.code != 0:
-            print(f"Command finished with error code: {e.code}")
-            # Re-exit with error code so wrapper script sees the failure
-            sys.exit(e.code)
-        # On success (code 0), continue - don't exit interactive mode
+            print(f"\nCommand finished with error code: {e.code}")
+            success = False
+        # code 0 = success, continue
+    except Exception as e:
+        print(f"\nError: {e}")
+        success = False
 
-    # Pause so user can see output before returning to menu
-    input("\nPress Enter to return to main menu...")
+    _show_completion_screen(generate_html, success)
+
+
+def _show_completion_screen(generate_html: bool, success: bool) -> None:
+    """Show post-execution screen with status, HTML link, and navigation choices.
+
+    Args:
+        generate_html: Whether HTML generation was requested.
+        success: Whether the command completed without errors.
+    """
+    position_menu_at_bottom(menu_lines=10)
+
+    status_label = "Done" if success else "Completed with errors"
+    print(f"\n  {status_label}")
+
+    if generate_html:
+        html_path = _find_latest_index_html()
+        if html_path:
+            print(f"\n  HTML index: file://{html_path}")
+        else:
+            print("\n  HTML index: not found")
+
+    print()
+
+    with suppress_logging():
+        choice = questionary.select(
+            "  What would you like to do next?",
+            choices=[
+                questionary.Choice("Back to Main Menu", "menu"),
+                questionary.Choice("Exit", "exit"),
+            ],
+            style=custom_style,
+            qmark="",
+            pointer="▶",
+            instruction="\n   (Use arrow keys to navigate)",
+        ).ask()
+
+    if not choice or choice == "exit":
+        print("Exiting interactive mode.")
+        sys.exit(0)
+    # choice == "menu": return, call stack unwinds to start_interactive_mode() while loop
+
+
+def _find_latest_index_html() -> str | None:
+    """Find the most recently modified index.html under the News output directory.
+
+    Returns:
+        Absolute path string to index.html, or None if not found.
+    """
+    try:
+        from capcat.core.config import get_news_dir
+        news_dir = get_news_dir()
+        date_dirs = sorted(
+            news_dir.glob("News_*"),
+            key=lambda p: p.stat().st_mtime,
+            reverse=True,
+        )
+        for date_dir in date_dirs:
+            index = date_dir / "index.html"
+            if index.exists():
+                return str(index.resolve())
+    except Exception:
+        pass
+    return None
 
 
 def _handle_manage_bundles():
