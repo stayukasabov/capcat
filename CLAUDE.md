@@ -61,6 +61,15 @@ Before starting any multi-step task:
 
 When adding a new domain, feature area, or behavioral pattern — stop and ask the user to define the trigger rule and create the corresponding `context-engineering/` file before proceeding.
 
+## Context Engineering: Local Only (MANDATORY)
+
+The `context-engineering/`, `docs/superpowers/`, and `Archive/` directories are **local-only**.
+
+- Never `git add` any file from these directories
+- Never commit them — they are in `.gitignore` for this reason
+- They exist only on the working machine to guide Claude; they must never appear in the remote repo or its history
+- If you accidentally stage one, run `git rm --cached <file>` before committing
+
 ## Subagent Rules
 
 - Never dispatch a subagent to write fully-specified code — write files directly using Write/Edit tools
