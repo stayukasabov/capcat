@@ -16,6 +16,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Goal: restore independent, high-fidelity thinking
 - Outcome: model obsolescence via user self-sufficiency
 
+## Git Branching (MANDATORY)
+
+**Never commit implementation or test work directly to `main`.**
+
+Before starting any multi-step task or plan execution:
+1. Create a feature branch: `git checkout -b <type>/<short-description>`
+2. Do all work on that branch
+3. Merge to `main` only via PR or explicit local merge after tests pass
+
+Branch naming:
+- `feat/` — new features
+- `fix/` — bug fixes
+- `test/` — test-only changes
+- `refactor/` — refactoring
+
+This applies to plan execution (executing-plans, subagent-driven-development) and any task spanning more than one commit.
+
 ## Path and Shell Rules (PERMANENT)
 
 **Symlink:** `~/capcat` → full Synology Drive project path. Use it for all bash commands.
