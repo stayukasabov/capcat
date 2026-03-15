@@ -15,21 +15,16 @@
 - Never `cd` into the raw Synology path
 - Canonical test command: `cd ~/capcat && source venv/bin/activate && pytest tests/unit/ -v`
 
-## Git Authentication (MANDATORY)
+## Git Authentication
 
-All git push/pull operations use SSH. Never use HTTPS remotes.
+GitHub remote uses HTTPS. macOS Keychain stores credentials — no password after first push.
 
-Before any push, verify the remote is SSH:
 ```bash
-git remote -v   # must show git@github.com:..., not https://
+git remote -v  # must show https://github.com/stayukasabov/capcat.git
+git config --global credential.helper osxkeychain  # set once per machine
 ```
 
-If HTTPS is set, fix it immediately:
-```bash
-git remote set-url origin git@github.com:stayukasabov/capcat.git
-```
-
-SSH setup instructions: `docs/developer/git-workflow.md#ssh-authentication-required`
+The `id_ed25519` SSH key is for the VPS (`stayux-vps`), not GitHub. Use rsync to deploy to VPS for Ubuntu/pipx testing. See `docs/developer/git-workflow.md#vps-deployment-rsync`.
 
 ## Git Branching (MANDATORY)
 
