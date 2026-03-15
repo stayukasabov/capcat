@@ -260,3 +260,60 @@ def test_single_article_mode_generates_html(single_article_dir: Path) -> None:
 
     html_file = article_folder / "html" / "article.html"
     assert html_file.exists(), "html/article.html not created in single article mode"
+
+
+# ---------------------------------------------------------------------------
+# _is_archive_root — canonical Source-Name_DD-MM-YYYY format
+# ---------------------------------------------------------------------------
+
+class TestIsArchiveRoot:
+    """_is_archive_root must recognise only the canonical Source-Name_DD-MM-YYYY format.
+
+    Uses monkeypatch to isolate from live registry state:
+    - list_available_sources() returns ['hn']
+    - get_source_folder_name('hn') returns 'Hacker-News' (after Phase 1 fix)
+    """
+
+    @pytest.fixture()
+    def processor(self):
+        from capcat.core.html_post_processor import HTMLPostProcessor
+        return HTMLPostProcessor()
+
+    @pytest.fixture(autouse=True)
+    def mock_registry(self, monkeypatch):
+        """Isolate from live registry — always exposes 'hn' with display_name 'Hacker News'."""
+        from unittest.mock import MagicMock
+        mock_reg = MagicMock()
+        mock_reg.list_available_sources.return_value = ["hn"]
+
+        monkeypatch.setattr(
+            "capcat.core.utils.get_source_folder_name",
+            lambda code: "Hacker-News" if code == "hn" else code,
+        )
+
+        import capcat.core.config as cfg_mod
+        monkeypatch.setattr(cfg_mod, "get_source_registry", lambda: mock_reg)
+
+    def test_new_hyphen_format_is_recognised(self, processor, tmp_path):
+        """Hacker-News_15-03-2026 is the canonical format — must return True."""
+        path = tmp_path / "Hacker-News_15-03-2026"
+        path.mkdir()
+        assert processor._is_archive_root(path) is True
+
+    def test_old_underscore_format_is_not_recognised(self, processor, tmp_path):
+        """Hacker_News_15-03-2026 is the old format — must return False."""
+        path = tmp_path / "Hacker_News_15-03-2026"
+        path.mkdir()
+        assert processor._is_archive_root(path) is False
+
+    def test_sg_prefix_is_not_recognised(self, processor, tmp_path):
+        """sg_15-03-2026 is dead legacy code — must return False."""
+        path = tmp_path / "sg_15-03-2026"
+        path.mkdir()
+        assert processor._is_archive_root(path) is False
+
+    def test_news_date_folder_is_recognised(self, processor, tmp_path):
+        """News_15-03-2026 is the date folder — must still return True."""
+        path = tmp_path / "News_15-03-2026"
+        path.mkdir()
+        assert processor._is_archive_root(path) is True

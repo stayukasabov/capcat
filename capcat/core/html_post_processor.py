@@ -486,35 +486,36 @@ class HTMLPostProcessor:
         return parts if parts else [current_path.name]
 
     def _is_archive_root(self, path: Path) -> bool:
-        """Check if path is an archive root directory."""
+        """Check if path is an archive root directory.
+
+        Recognises:
+          - Date folder:   News_DD-MM-YYYY  (startswith "news_")
+          - Source folder: Source-Name_DD-MM-YYYY  (canonical format only)
+        """
         name = path.name.lower()
-        # Match patterns like news_DD-MM-YYYY, News_DD-MM-YYYY, Hacker-News_DD-MM-YYYY, sg_DD-MM-YYYY
-        if name.startswith(("news_", "sg_")):
+        # Date folder: News_DD-MM-YYYY
+        if name.startswith("news_"):
             return True
 
-        # Check if it matches any source folder pattern (both old and new formats)
+        # Source folder: Source-Name_DD-MM-YYYY — match via registry
         from capcat.core.utils import get_source_folder_name
 
-        # Get source codes dynamically from registry
         source_codes = []
         try:
             from capcat.core.config import get_source_registry
             registry = get_source_registry()
             source_codes = registry.list_available_sources()
         except Exception:
-            # No fallback - only use registered sources
             source_codes = []
 
         for source_code in source_codes:
-            # Check old format (hn_DD-MM-YYYY) — require digit after prefix so
-            # "bbc_" does not accidentally match "bbc_sport_15-03-2026"
+            # Check short source-code prefix format (hn_DD-MM-YYYY)
             prefix = f"{source_code}_"
             if name.startswith(prefix) and len(name) > len(prefix) and name[len(prefix)].isdigit():
                 return True
-            # New format check kept for legacy compatibility (no-op in practice since
-            # actual folders use underscores, not spaces)
+            # Check canonical display-name format (Hacker-News_DD-MM-YYYY)
             folder_name = get_source_folder_name(source_code)
-            if name.startswith(f"{folder_name.lower()} "):
+            if name.startswith(f"{folder_name.lower()}_"):
                 return True
 
         return False
