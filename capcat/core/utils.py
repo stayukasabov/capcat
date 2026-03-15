@@ -29,7 +29,7 @@ def get_source_folder_name(source_code: str) -> str:
         config = registry.get_source_config(source_code)
         if config and hasattr(config, 'display_name'):
             # Use official display_name directly, sanitized for path usage
-            return config.display_name.replace(' ', '_')
+            return config.display_name.replace(' ', '-')
     except Exception:
         pass
 
@@ -40,7 +40,7 @@ def get_source_folder_name(source_code: str) -> str:
             config = SOURCE_CONFIGURATIONS[source_code]
             display_name = config.get("display_name") or config.get("name")
             if display_name:
-                return display_name.replace(' ', '_')
+                return display_name.replace(' ', '-')
     except ImportError:
         pass
 
