@@ -1,428 +1,87 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+## Absolute Mode
 
-## System Instruction: Absolute Mode
+- No emojis, filler, hype, soft asks, conversational transitions, or call-to-action appendixes
+- Blunt, directive phrasing — no tone-matching, no sentiment-boosting
+- No questions, offers, suggestions, motivational content
+- No Claude Code attribution footers (`Co-Authored-By`, `🤖 Generated with`)
+- Terminate reply immediately after delivering info — no closures
+- Usernames → "Anonymous" in all output — never store personal data
 
-- Eliminate: emojis, filler, hype, soft asks, conversational transitions, call-to-action appendixes
-- Assume: user retains high-perception despite blunt tone
-- Prioritize: blunt, directive phrasing; aim at cognitive rebuilding, not tone-matching
-- Disable: engagement/sentiment-boosting behaviors
-- Suppress: metrics like satisfaction scores, emotional softening, continuation bias
-- Never mirror: user's diction, mood, or affect
-- Speak only: to underlying cognitive tier
-- No: questions, offers, suggestions, transitions, motivational content
-- Terminate reply: immediately after delivering info - no closures
-- Goal: restore independent, high-fidelity thinking
-- Outcome: model obsolescence via user self-sufficiency
+## Critical Constants
+
+- Symlink: `~/capcat` → full Synology Drive project path — use for all bash commands
+- Never `cd` into the raw Synology path
+- Canonical test command: `cd ~/capcat && source venv/bin/activate && pytest tests/unit/ -v`
+
+## Git Authentication
+
+GitHub remote uses HTTPS. macOS Keychain stores credentials — no password after first push.
+
+```bash
+git remote -v  # must show https://github.com/stayukasabov/capcat.git
+git config --global credential.helper osxkeychain  # set once per machine
+```
+
+The `id_ed25519` SSH key is for the VPS (`stayux-vps`), not GitHub. Use rsync to deploy to VPS for Ubuntu/pipx testing. See `docs/developer/git-workflow.md#vps-deployment-rsync`.
 
 ## Git Branching (MANDATORY)
 
-**Never commit implementation or test work directly to `main`.**
+Never commit directly to `main`. All work — including single-file changes — happens on a feature branch.
 
-Before starting any multi-step task or plan execution:
-1. Create a feature branch: `git checkout -b <type>/<short-description>`
-2. Do all work on that branch
-3. Merge to `main` only via PR or explicit local merge after tests pass
-
-Branch naming:
-- `feat/` — new features
-- `fix/` — bug fixes
-- `test/` — test-only changes
-- `refactor/` — refactoring
-
-This applies to plan execution (executing-plans, subagent-driven-development) and any task spanning more than one commit.
-
-## Path and Shell Rules (PERMANENT)
-
-**Symlink:** `~/capcat` → full Synology Drive project path. Use it for all bash commands.
-
-- Never `cd` into the raw Synology path — use `~/capcat/` instead
-- Never use `ls` to explore before writing — if the plan specifies the code, write it
-- Never dispatch a subagent to write fully-specified code — write files directly using Write/Edit tools in the main conversation
-- Subagents only for tasks requiring research, judgment, or open-ended exploration
-- `npx tsc --noEmit` runs from `~/capcat/Video/`
-
-## Git Workflow: Synology Drive to Git Repository
-
-**CRITICAL WORKFLOW RULE**
-
-User edits in Synology Drive folder. Claude commits/pushes from local git repo.
-
-**Locations:**
-- Working folder: `/Users/xpro/SynologyDrive/_/_!0-CURRENT-LEARNING/_!0START/_!0NEWS/GEMINI-Capcat copy/Application/`
-- Git repository: `~/Projects/capcat/`
-
-**Automatic Process:**
-When user says "commit and push" or mentions changes:
-1. Copy changed files from Synology to `~/Projects/capcat/`
-2. Git add, commit, push from `~/Projects/capcat/`
-3. Never ask for confirmation - execute automatically
-
-**Example:**
 ```bash
-# User says "commit docs/index.html"
-cp "/Users/xpro/SynologyDrive/.../Application/docs/index.html" ~/Projects/capcat/docs/index.html
-cd ~/Projects/capcat && git add docs/index.html && git commit && git push
+git checkout -b feat/my-feature   # or fix/, test/, refactor/, docs/
 ```
 
-## PRIORITY RULE: Task Execution Protocol
+Branch, implement, PR, merge. No exceptions.
 
-**WHEN EXECUTING TASKS ALWAYS PROVIDE TASK ORDER LIST FIRST**
+## Versioning
+
+Semver: patch = bug fix | minor = new feature | major = breaking change.
+Do not tag/publish on every commit. Tag format: `v1.2.3`.
+
+## Trigger Table
+
+Read the listed file(s) **before starting** any work in that domain.
+
+| Task type | Read before starting |
+|-----------|----------------------|
+| Any git operation | `context-engineering/git.md` |
+| Writing or running tests | `context-engineering/testing.md` |
+| Adding/modifying sources | `context-engineering/sources.md` |
+| PyPI release / version bump | `context-engineering/release.md` |
+| Bug investigation | `context-engineering/debugging.md` |
+| Architecture / structural change | `context-engineering/architecture.md` |
+| CLI design / new commands | `context-engineering/cli.md` |
+| Plan execution | `context-engineering/plan-execution.md` (load first, then domain files) |
+
+**Multi-trigger rule:** When multiple triggers match, load ALL matching files.
+`plan-execution.md` always loads first when plan execution is in scope.
+Example: TDD bug fix → load `plan-execution.md`, then `debugging.md`, then `testing.md`.
+
+## PRIORITY RULE: Task Execution Protocol
 
 Before starting any multi-step task:
 1. List all steps in order
 2. Show clear task breakdown
-3. Get implicit/explicit confirmation
-4. Execute sequentially
-5. Report completion status
+3. Execute sequentially
+4. Report completion status
 
-Example:
-```
-Task Order:
-1. Add rule to CLAUDE.md
-2. Update dependency script
-3. Find test PDF file
+## Meta-Rule (self-maintenance)
 
-Proceeding with execution...
-```
+When adding a new domain, feature area, or behavioral pattern — stop and ask the user to define the trigger rule and create the corresponding `context-engineering/` file before proceeding.
 
-## CLI Standards
+## Context Engineering: Local Only (MANDATORY)
 
-Follow https://clig.dev/ for all CLI design decisions.
+The `context-engineering/`, `docs/superpowers/`, and `Archive/` directories are **local-only**.
 
-Key rules relevant to Capcat:
-- `--version` prints `<tool> <version>` and exits 0
-- `--help` / `-h` prints usage and exits 0
-- Short flags for frequently used options; long flags always available
-- Errors go to stderr; output to stdout
-- Exit 0 on success, non-zero on failure
-- Prefer `--flag` over positional args for optional parameters
+- Never `git add` any file from these directories
+- Never commit them — they are in `.gitignore` for this reason
+- They exist only on the working machine to guide Claude; they must never appear in the remote repo or its history
+- If you accidentally stage one, run `git rm --cached <file>` before committing
 
-## Versioning and Release Rules
+## Subagent Rules
 
-Semver: `MAJOR.MINOR.PATCH`
-- **patch** — bug fixes, no new behavior
-- **minor** — new features, backwards compatible
-- **major** — breaking changes
-
-**Do not tag/publish on every commit.** Batch related changes, then release when the set is meaningful and tested. Tag format: `v1.2.3` — pushing the tag triggers PyPI publish via GitHub Actions.
-
-## Project Overview
-
-News archiving: 17+ sources → Markdown + media. Plugin-based architecture.
-
-- Python 3.8+
-- Config YAML or custom Python sources
-- Usernames → "Anonymous"
-- Output: `../News/` (batch), `../Capcats/` (single)
-
-## Essential Commands
-
-```bash
-# Setup
-./scripts/fix_dependencies.sh          # Auto-fix
-./scripts/fix_dependencies.sh --force  # Rebuild venv
-python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt
-
-# Usage
-./capcat single https://example.com/article
-./capcat fetch hn,bbc --count 15 --media
-./capcat bundle tech --count 10
-./capcat list sources
-./capcat catch                          # Interactive menu
-./capcat generate-config                # YAML generator
-./capcat add-source --url URL
-./capcat remove-source
-./capcat -L capcat.log bundle tech --count 10  # Log to file
-python capcat.py bundle tech --count 10        # Direct Python
-```
-
-## Architecture Overview
-
-```
-Application/
-├── capcat.py, capcat, run_capcat.py, cli.py
-├── core/
-│   ├── interactive.py, source_system/, config.py
-│   ├── article_fetcher.py, unified_media_processor.py
-├── sources/active/
-│   ├── config_driven/  # YAML sources
-│   └── custom/         # Python sources
-├── htmlgen/, themes/, docs/
-```
-
-**Source Types:**
-1. Config YAML: InfoQ, IEEE (15-30 min)
-2. Custom Python: HN, BBC with comments (2-4 hr)
-
-**Core Systems:**
-- SourceRegistry: Auto-discovers `sources/active/`
-- SessionPool: Shared HTTP connections
-- UnifiedMediaProcessor: Media handling
-- Template System: HTML generation
-- **UnifiedArticleProcessor: Universal article processing entry point (Dec 2025)**
-
-## Unified Article Processing (Dec 2025)
-
-**Problem Solved:**
-- Single/fetch/bundle commands had separate processing paths
-- Batch mode (fetch/bundle) bypassed specialized sources (Twitter, YouTube)
-- HN article → YouTube link = HTTP 403 error
-
-**Solution:**
-`core/unified_article_processor.py` - All commands route through single entry point
-
-**Processing Flow:**
-```
-All Commands → UnifiedArticleProcessor.process_article()
-                          ↓
-          Check URL against specialized sources
-                          ↓
-        ┌─────────────────┴─────────────────┐
-        ↓                                     ↓
-  Specialized Match?                    No Match
-  (Twitter, YouTube,                         ↓
-   Medium, Substack)              Source-specific or Generic
-        ↓                           ArticleFetcher
-  Config-driven placeholder
-```
-
-**Specialized Sources:**
-- `sources/specialized/twitter/` - Twitter/X.com placeholder ("X.com post")
-- `sources/specialized/youtube/` - YouTube placeholder ("YouTube Video")
-- `sources/specialized/medium/` - Medium paywall handling
-- `sources/specialized/substack/` - Substack handling
-
-**Config-Driven Templates:**
-```yaml
-# sources/specialized/twitter/config.yaml
-template:
-  title: "X.com post"
-  body: "Visit the original publication."
-```
-
-**Integration Points:**
-1. `core/unified_source_processor.py:343` - Batch processing (_process_single_article)
-2. `core/article_fetcher.py:328` - Single article (fetch_article_content)
-
-**Adding New Specialized Source:**
-1. Create `sources/specialized/newsource/config.yaml`
-2. Create `sources/specialized/newsource/source.py` (extends BaseSource)
-3. Add to `sources/specialized/__init__.py` SPECIALIZED_SOURCES dict
-4. Zero code changes needed - config-driven
-
-## Development Standards
-
-**PEP 8:**
-- 4 spaces, 79 char max
-- Imports: stdlib → third-party → local
-- Descriptive names (no single letters except counters)
-
-**Docstrings — REQUIRED, NO EXCEPTIONS:**
-
-Every module, class, and public method must have a Google-style docstring.
-This is a DX requirement: Capcat is designed for contributors. Undocumented
-code is a contribution barrier.
-
-Format:
-```python
-def fetch_articles(self, count: int = 30) -> List[Article]:
-    """Fetch the latest articles from this source.
-
-    Args:
-        count: Maximum number of articles to return.
-
-    Returns:
-        List of Article objects, newest first.
-
-    Raises:
-        NetworkError: If the source cannot be reached.
-    """
-```
-
-Rules:
-- All modules: one-line summary at the top describing purpose
-- All classes: describe what it represents and when to use it
-- All public methods: Args, Returns, Raises where applicable
-- Private methods (`_name`): docstring if logic is non-obvious
-- No docstring = PR is not mergeable
-- This applies to ALL new and modified code — not just future work
-
-**Type hints:**
-- All function signatures must have type hints
-- Use `from __future__ import annotations` for forward references
-
-**Principles:**
-- DRY, single responsibility
-- Built-ins over custom
-- Exception handling for network/file ops
-
-**Testing:**
-- Unit tests for new functions
-- `pytest --cov=core` before commits
-- Test sources individually first
-
-## Critical Rules
-
-**Media:**
-- Images: Always download
-- Video/Audio/Docs: --media flag only
-
-**Scraping:**
-- Check robots.txt
-- RSS/API over HTML
-- Anti-bot sources: use RSS
-- No paywalls
-- 1 req/10 sec rate limit
-
-**Versioning:**
-- New: `capcat` not `capcat_fixed`
-- Backup: `capcat_backup`, `capcat_old`
-
-**PyPI Publish Workflow:**
-Every release to PyPI requires a version bump — never publish without incrementing.
-
-1. Bump `__version__` in `capcat/__init__.py` (e.g. `1.0.2` → `1.0.3`)
-2. Commit: `git add capcat/__init__.py && git commit -m "bump: version to 1.0.x"`
-3. Tag: `git tag v1.0.x`
-4. Push both: `git push origin main && git push origin v1.0.x`
-5. GitHub Actions detects the `v*` tag and publishes to PyPI automatically
-
-Verify publish: `pipx upgrade capcat` on Ubuntu; `pip install --upgrade capcat` elsewhere.
-
-**Git Commits:**
-- Never add Claude Code attribution footer
-- No "🤖 Generated with [Claude Code]"
-- No "Co-Authored-By: Claude Sonnet"
-- Keep commit messages concise and factual
-
-**No emojis**
-
-## Testing
-
-**Flow:**
-1. Present plan, get approval
-2. Test bundles first
-3. Create `test-diagnose-[item].md`
-4. Categorize: HIGH/MEDIUM/LOW
-5. Fix by priority
-
-```bash
-source venv/bin/activate
-./capcat bundle tech --count 5
-./capcat fetch hn --count 10
-python test_comprehensive_sources.py
-```
-
-**Success:**
-- No import/syntax errors
-- 80%+ source success
-- Correct media filtering
-- Valid output structure
-
-## Adding New Sources
-
-**Config-Driven (Simple):**
-```yaml
-# sources/active/config_driven/configs/newsource.yaml
-display_name: "New Source"
-base_url: "https://newsource.com/"
-category: tech
-article_selectors: [".headline a"]
-content_selectors: [".article-content"]
-```
-
-**Custom (Complex):**
-```python
-# sources/active/custom/newsource/source.py
-from core.source_system.base_source import BaseSource
-
-class NewSource(BaseSource):
-    def get_articles(self, count=30):
-        # Custom implementation
-        pass
-```
-
-## Bug Investigation
-
-**Check docs/ FIRST before searching code**
-1. Search `docs/` for patterns
-2. User specs may be documented
-3. Example: truncation limits → search docs for "truncat|max.*len|title"
-
-## Common Issues
-
-**Dependencies:**
-```bash
-./scripts/fix_dependencies.sh --force
-python3 scripts/setup_dependencies.py --verbose --force-rebuild
-rm -rf venv && python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt
-```
-
-**Module Not Found:**
-```bash
-./capcat list sources  # Wrapper handles venv
-source venv/bin/activate
-```
-
-**Source Failures:**
-- RSS bypasses anti-bot (Cloudflare)
-- DNS/network → feed URL changed
-- Check `test-diagnose-*.md`
-
-**Wrapper Issues:**
-```bash
-python3 run_capcat.py list sources
-```
-
-## Key Files
-
-**Docs:**
-- `docs/quick-start.md`, `docs/architecture.md`
-- `docs/source-development.md`, `docs/interactive-mode.md`
-- `docs/source-management-menu.md`, `docs/dependency-management.md`
-
-**Config:**
-- `requirements.txt`, `capcat.yml`, `sources/active/bundles.yml`
-
-**Scripts:**
-- `scripts/setup_dependencies.py`, `scripts/fix_dependencies.sh`
-- `scripts/generate_source_config.py`
-
-**Testing:**
-- `test_comprehensive_sources.py`, `test-diagnose-*.md`
-
-## Documentation Philosophy
-
-CLAUDE.md minimal - details in `docs/`:
-- Factual only
-- No obvious instructions
-- Architecture, commands, non-obvious patterns
-
-## Config Priority
-
-1. CLI args → 2. ENV vars → 3. `capcat.yml` → 4. Defaults
-
-## Privacy
-
-- Usernames → "Anonymous"
-- Profile links preserved
-- No personal data stored
-
-## Quick Reference
-
-**Sources:**
-- Tech: hn, lb, iq, gizmodo, ieee, futurism, lesswrong
-- News: bbc, guardian
-- Science: nature, scientificamerican
-- AI: lesswrong, googleai, openai, mitnews
-- Sports: bbcsport
-
-**Bundles:**
-- tech, techpro, news, science, ai, sports
-
-**Output:**
-- Batch: `../News/news_DD-MM-YYYY/Source_DD-MM-YYYY/NN_Title/`
-- Single: `../Capcats/cc_DD-MM-YYYY-Title/`
-- HTML: `*/html/` with --html flag
+- Never dispatch a subagent to write fully-specified code — write files directly using Write/Edit tools
+- Subagents only for tasks requiring research, judgment, or open-ended exploration

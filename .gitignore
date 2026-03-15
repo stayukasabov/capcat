@@ -175,6 +175,11 @@ metrics/
 # Optional: Tests directory (uncomment to make tests private)
 # tests/
 
+# Internal AI context and process files — local only, never commit
+context-engineering/
+docs/superpowers/
+Archive/
+
 # capcat — managed entries
 .capcat/
 News/
