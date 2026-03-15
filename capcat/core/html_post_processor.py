@@ -506,10 +506,13 @@ class HTMLPostProcessor:
             source_codes = []
 
         for source_code in source_codes:
-            # Check old format (hn_DD-MM-YYYY)
-            if name.startswith(f"{source_code}_"):
+            # Check old format (hn_DD-MM-YYYY) — require digit after prefix so
+            # "bbc_" does not accidentally match "bbc_sport_15-03-2026"
+            prefix = f"{source_code}_"
+            if name.startswith(prefix) and len(name) > len(prefix) and name[len(prefix)].isdigit():
                 return True
-            # Check new format (Hacker News DD-MM-YYYY)
+            # New format check kept for legacy compatibility (no-op in practice since
+            # actual folders use underscores, not spaces)
             folder_name = get_source_folder_name(source_code)
             if name.startswith(f"{folder_name.lower()} "):
                 return True
