@@ -551,7 +551,9 @@ class HTMLGenerator:
             if html_subfolder:
                 html_content = self._adjust_paths_for_subfolder(html_content)
 
-            # Determine if this is a comments page (must precede breadcrumb call)
+            # Determine if this is a comments page (must precede breadcrumb call).
+            # The third clause checks element equality — post_processor appends
+            # the exact string "Comments" as breadcrumb_path[2] for comments pages.
             is_comments_page = (
                 article_title.endswith(" - Comments")
                 or "comments" in markdown_path.lower()
