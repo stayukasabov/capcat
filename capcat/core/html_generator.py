@@ -551,23 +551,30 @@ class HTMLGenerator:
             if html_subfolder:
                 html_content = self._adjust_paths_for_subfolder(html_content)
 
+            # Determine if this is a comments page (must precede breadcrumb call)
+            is_comments_page = (
+                article_title.endswith(" - Comments")
+                or "comments" in markdown_path.lower()
+                or "Comments" in breadcrumb_path
+            )
+
             # Generate breadcrumb navigation
             current_file = (
                 "comments.html"
                 if "comments" in markdown_path.lower()
                 else "article.html"
             )
+            if is_comments_page:
+                base_article_title = re.sub(
+                    r"\s*-\s*Comments$", "", article_title, flags=re.IGNORECASE
+                ).strip()
+                breadcrumb_for_render = list(breadcrumb_path[:2]) + [base_article_title]
+            else:
+                breadcrumb_for_render = breadcrumb_path
             breadcrumb_html = self._generate_breadcrumb(
-                breadcrumb_path,
+                breadcrumb_for_render,
                 html_subfolder=html_subfolder,
                 current_file_path=current_file,
-            )
-
-            # Determine if this is a comments page
-            is_comments_page = (
-                article_title.endswith(" - Comments")
-                or "comments" in markdown_path.lower()
-                or "Comments" in breadcrumb_path
             )
 
             # Select appropriate template
@@ -823,52 +830,70 @@ class HTMLGenerator:
     ) -> str:
         """Generate breadcrumb navigation HTML.
 
-        Always shows exactly two links:
-          [0] date folder  → date-level index.html
-          [1] source folder → source-level news.html
+        Renders 1–3 links depending on page type:
+          news.html  (source dir)      → date only (1 link)
+          article.html                 → date + source (2 links)
+          html/article.html            → date + source (2 links)
+          html/comments.html           → date + source + article (3 links)
 
-        The current page title is already in the h1. The "Article" level on
-        comments pages is intentionally omitted — Back to Article button
-        handles that. Depths are fixed by the physical directory structure,
-        not derived from breadcrumb length.
+        Display format:
+          Level 0 (date):    "News 15 March 2026"
+          Level 1 (source):  "Hacker News"
+          Level 2 (article): article title as-is
 
-        Depth from the generated file to each level:
-          news.html  (source dir)      → date=1 up
-          article.html (no subfolder)  → date=2 up, source=1 up
-          article/comments.html (html/) → date=3 up, source=2 up
+        Depths are fixed by physical directory structure, not breadcrumb length.
         """
         if not breadcrumb_path or len(breadcrumb_path) < 2:
             return ""
 
-        # Determine file depth based on where the file lives.
         is_source_index = current_file_path and "news.html" in current_file_path
+        is_comments = current_file_path == "comments.html"
+
         if is_source_index:
-            # news.html sits directly inside source_dir/
-            # Only one link needed: date folder → ../index.html
             show_items = breadcrumb_path[:1]
             base_depth = 1
+        elif html_subfolder and is_comments and len(breadcrumb_path) >= 3:
+            show_items = breadcrumb_path[:3]
+            base_depth = 3
         elif html_subfolder:
-            # html/article.html or html/comments.html — 3 levels from date-level
             show_items = breadcrumb_path[:2]
             base_depth = 3
         else:
-            # article_dir/article.html — 2 levels from date-level
             show_items = breadcrumb_path[:2]
             base_depth = 2
 
-        # filename for each breadcrumb position
-        filenames = ["index.html", "news.html"]
+        filenames = ["index.html", "news.html", "article.html"]
+        months = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December",
+        ]
 
         breadcrumb_items = []
         for i, item in enumerate(show_items):
             levels_up = base_depth - i
             href = "../" * levels_up + filenames[i]
-            cleaned_title = self._clean_title_for_display(item)
-            if i >= 1:
-                # Source folder: strip trailing date — show source name only, not "BBC News 15-03-2026"
-                cleaned_title = re.sub(r"\s+\d{2}-\d{2}-\d{4}$", "", cleaned_title).strip()
+
+            if i == 0:
+                # Date folder: "News 15-03-2026" → "News 15 March 2026"
+                m = re.search(r"(\d{2})-(\d{2})-(\d{4})", item)
+                if m:
+                    day, month, year = m.groups()
+                    try:
+                        display = f"News {int(day)} {months[int(month) - 1]} {year}"
+                    except (ValueError, IndexError):
+                        display = item
+                else:
+                    display = item
+            elif i == 1:
+                # Source folder: strip trailing date, normalise hyphens to spaces
+                display = re.sub(r"\s+\d{2}-\d{2}-\d{4}$", "", item).strip()
+                display = display.replace("-", " ")
+            else:
+                # Article title (comments only): use as-is
+                display = item
+
             breadcrumb_items.append(
-                f'<a href="{href}" title="Navigate to {cleaned_title}">{cleaned_title}</a>'
+                f'<a href="{href}" title="Navigate to {display}">{display}</a>'
             )
 
         return "".join(breadcrumb_items)
