@@ -340,7 +340,7 @@ main {
 
 .header .container {
   width: var(--width-content);
-  max-width: var(--measure-optimal);
+  max-width: 42rem;
   margin: 0 auto;
   padding: 0 1rem;
   position: relative;
