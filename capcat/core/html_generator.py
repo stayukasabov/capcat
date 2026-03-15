@@ -864,6 +864,9 @@ class HTMLGenerator:
             levels_up = base_depth - i
             href = "../" * levels_up + filenames[i]
             cleaned_title = self._clean_title_for_display(item)
+            if i >= 1:
+                # Source folder: strip trailing date — show source name only, not "BBC News 15-03-2026"
+                cleaned_title = re.sub(r"\s+\d{2}-\d{2}-\d{4}$", "", cleaned_title).strip()
             breadcrumb_items.append(
                 f'<a href="{href}" title="Navigate to {cleaned_title}">{cleaned_title}</a>'
             )
@@ -927,17 +930,17 @@ class HTMLGenerator:
         def extract_source_id(name):
             """
             Extract source ID from folder name.
-            Folder names use display_name (e.g., 'Hacker_News_19-10-2025')
+            Folder names use display_name (e.g., 'Hacker-News_19-10-2025')
             Need to map back to source_id (e.g., 'hn')
             """
             # Build reverse mapping using the same logic as get_source_folder_name()
-            # which only replaces spaces with underscores, preserving special chars like |
+            # which replaces spaces with hyphens, preserving special chars like |
 
             for source_id in all_source_ids:
                 config = registry.get_source_config(source_id)
                 if config and config.display_name:
                     # Match the exact logic from capcat.core.utils.get_source_folder_name
-                    folder_prefix = config.display_name.replace(' ', '_')
+                    folder_prefix = config.display_name.replace(' ', '-')
                     if name.startswith(folder_prefix + '_'):
                         return source_id
 
@@ -1014,7 +1017,7 @@ class HTMLGenerator:
                         # Determine if we're in Capcats (single article captures)
                         is_capcats = path.name.lower() == "capcats"
 
-                        # For Capcats, allow all directories (sg_* captures don't have source_id)
+                        # For Capcats, allow all directories — source_id matching does not apply
                         # For News archives, only allow directories with valid source_id
                         if not is_capcats:
                             # Skip orphaned directories for deleted or unknown sources
@@ -1056,7 +1059,7 @@ class HTMLGenerator:
                     # Determine if we're in Capcats (single article captures)
                     is_capcats = path.name.lower() == "capcats"
 
-                    # For Capcats, allow all directories (sg_* captures don't have source_id)
+                    # For Capcats, allow all directories — source_id matching does not apply
                     # For News archives, only allow directories with valid source_id
                     if not is_capcats:
                         # Skip orphaned directories for deleted or unknown sources
