@@ -19,7 +19,8 @@
 pre {
   background-color: var(--code-bg);
   line-height: var(--line-height-normal);
-  font-family: "SF Mono", "Monaco", "Inconsolata", "Fira Code", "Fira Mono",
+  font-family:
+    "SF Mono", "Monaco", "Inconsolata", "Fira Code", "Fira Mono",
     "Droid Sans Mono", "Source Code Pro", monospace;
 
   /* Smart wrapping - eliminates horizontal scroll creeks */
@@ -55,7 +56,9 @@ pre {
   border-radius: 4px;
   cursor: pointer;
   opacity: 0;
-  transition: opacity 0.2s ease, background-color 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    background-color 0.2s ease;
   z-index: 10;
 }
 
@@ -79,7 +82,8 @@ pre:hover .copy-button {
 /* Inline code styles - Consolidated */
 code {
   background-color: var(--code-bg);
-  font-family: "SF Mono", "Monaco", "Inconsolata", "Fira Code", "Fira Mono",
+  font-family:
+    "SF Mono", "Monaco", "Inconsolata", "Fira Code", "Fira Mono",
     "Droid Sans Mono", "Source Code Pro", monospace;
   font-size: var(--font-size-code);
   padding: var(--space-xs) var(--padding-tight);
@@ -1492,7 +1496,7 @@ span.linenos {
   opacity: 0;
   visibility: hidden;
   position: fixed;
-  bottom: 20px;
+  bottom: 33px;
   right: 30px;
   z-index: 99;
   border: 1px solid var(--border-color);
@@ -1505,7 +1509,10 @@ span.linenos {
   width: 48px;
   height: 48px;
   box-shadow: 0 2px 8px var(--shadow-color);
-  transition: opacity 0.3s, visibility 0.3s, background-color 1s ease,
+  transition:
+    opacity 0.3s,
+    visibility 0.3s,
+    background-color 1s ease,
     color 1s ease;
   display: flex;
   align-items: center;
