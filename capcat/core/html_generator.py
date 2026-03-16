@@ -873,6 +873,10 @@ class HTMLGenerator:
         breadcrumb_items = []
         for i, item in enumerate(show_items):
             levels_up = base_depth - i
+            # article.html (i=2) on comments page lives in the same html/ dir
+            # as comments.html — 0 levels up, not 1.
+            if is_comments and i == 2:
+                levels_up = 0
             href = "../" * levels_up + filenames[i]
 
             if i == 0:
