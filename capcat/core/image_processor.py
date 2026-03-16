@@ -112,8 +112,15 @@ class ImageProcessor:
                 if self._should_skip_image(img, skip_selectors):
                     continue
 
-                # Prioritize data-src for lazy-loaded images
-                src = img.get("data-src") or img.get("src")
+                # Mirror formatter._process_images URL-selection priority:
+                # srcset highest-res > data-src (lazy) > src
+                srcset = img.get("srcset", "")
+                if srcset:
+                    from capcat.core.formatter import _parse_srcset
+                    best = _parse_srcset(srcset)
+                    src = best if best else (img.get("data-src") or img.get("src"))
+                else:
+                    src = img.get("data-src") or img.get("src")
                 if not src or not isinstance(src, str):
                     continue
 
