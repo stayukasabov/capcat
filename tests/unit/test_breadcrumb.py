@@ -114,7 +114,7 @@ def test_comments_breadcrumb_has_article_level(generator) -> None:
     crumbs = ["News 14-03-2026", "Hacker-News 14-03-2026", "Some Article"]
     html = _call(generator, crumbs, html_subfolder=True, current_file="comments.html")
     assert html.count("<a ") == 3
-    assert 'href="article.html"' in html
+    assert 'href="../article.html"' in html
 
 
 # ---------------------------------------------------------------------------
@@ -176,15 +176,10 @@ def test_level1_has_no_trailing_date(generator) -> None:
 # ---------------------------------------------------------------------------
 
 def test_comments_third_link_points_to_article(generator) -> None:
-    """Third breadcrumb on comments page must link to article.html (same html/ dir).
-
-    comments.html and article.html both live in html/, so the link must be
-    'article.html' (0 levels up), NOT '../article.html' (1 level up, wrong dir).
-    """
+    """Third breadcrumb on comments page must link to ../article.html."""
     crumbs = ["News 15-03-2026", "Hacker-News 15-03-2026", "My Article Title"]
     html = _call(generator, crumbs, html_subfolder=True, current_file="comments.html")
-    assert 'href="article.html"' in html
-    assert 'href="../article.html"' not in html
+    assert 'href="../article.html"' in html
 
 
 def test_comments_third_link_shows_article_title(generator) -> None:
