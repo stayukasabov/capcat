@@ -183,3 +183,39 @@ def test_design_system_compiler_uses_user_dir(tmp_path, monkeypatch):
 
     gen = HTMLGenerator()
     assert gen.design_system_compiler.themes_dir == themes
+
+
+# ---------------------------------------------------------------------------
+# TemplateRenderer: user themes priority (article pages)
+# ---------------------------------------------------------------------------
+
+from capcat.core.template_renderer import TemplateRenderer
+
+
+def test_template_renderer_embeds_user_base_css(tmp_path, monkeypatch):
+    """TemplateRenderer reads base.css from Config/themes/ when present."""
+    themes = tmp_path / "Config" / "themes"
+    themes.mkdir(parents=True)
+    (themes / "base.css").write_text("/* user-article-base */")
+
+    import capcat.core.template_renderer as tr
+    monkeypatch.setattr(tr, "find_project_root", lambda: tmp_path)
+
+    renderer = TemplateRenderer()
+    assets = renderer._get_embedded_assets()
+    assert "/* user-article-base */" in assets["embedded_styles"]
+
+
+def test_template_renderer_falls_back_to_package(monkeypatch):
+    """TemplateRenderer falls back to package base.css when no project root."""
+    import capcat.core.template_renderer as tr
+
+    def _raise_no_project():
+        raise NoProjectError("no project")
+
+    monkeypatch.setattr(tr, "find_project_root", _raise_no_project)
+
+    renderer = TemplateRenderer()
+    assets = renderer._get_embedded_assets()
+    assert assets["embedded_styles"]  # non-empty
+    assert "user-article-base" not in assets["embedded_styles"]
