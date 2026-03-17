@@ -489,6 +489,16 @@ def _auto_init(command: str) -> None:
     except AlreadyInitializedError:
         pass
 
+    # Check if package themes have been updated since last init
+    try:
+        from capcat.core.config import find_project_root, check_theme_upgrade, NoProjectError
+        check_theme_upgrade(find_project_root())
+    except NoProjectError:
+        pass  # Not in a capcat project — skip silently
+    except Exception:
+        import logging
+        logging.getLogger("capcat.cli").debug("Theme upgrade check failed", exc_info=True)
+
 
 # ---------------------------------------------------------------------------
 # Logging setup
