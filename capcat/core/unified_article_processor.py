@@ -7,6 +7,7 @@ consistent behavior across the application.
 """
 
 import os
+from pathlib import Path
 from typing import Callable, Optional, Tuple
 import requests
 
@@ -14,6 +15,7 @@ from capcat.core.logging_config import get_logger
 from capcat.core.specialized_source_manager import get_specialized_source_manager
 from capcat.core.source_config import detect_source
 from capcat.core.utils import sanitize_filename
+from capcat.core.storage_manager import find_article_md
 
 
 class UnifiedArticleProcessor:
@@ -287,9 +289,10 @@ class UnifiedArticleProcessor:
         from datetime import datetime
 
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        article_md = os.path.join(article_folder, "article.md")
+        _md = find_article_md(Path(article_folder))
+        article_md = str(_md) if _md is not None else None
 
-        if os.path.exists(article_md):
+        if article_md is not None:
             # Read existing content
             with open(article_md, "r", encoding="utf-8") as f:
                 content = f.read()
@@ -323,9 +326,10 @@ class UnifiedArticleProcessor:
             article_folder: Path to article folder
             url: Invalid URL
         """
-        article_md = os.path.join(article_folder, "article.md")
+        _md = find_article_md(Path(article_folder))
+        article_md = str(_md) if _md is not None else None
 
-        if os.path.exists(article_md):
+        if article_md is not None:
             with open(article_md, "a", encoding="utf-8") as f:
                 f.write(
                     f"\n\n---\n\n"

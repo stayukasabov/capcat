@@ -15,6 +15,45 @@ from .logging_config import get_logger
 from .utils import sanitize_filename
 
 
+# ---------------------------------------------------------------------------
+# Module-level filename helpers — single source of truth for naming convention
+# ---------------------------------------------------------------------------
+
+def article_md_filename(title: str) -> str:
+    """Return sanitized markdown filename for an article (e.g. 'My-Title.md').
+
+    The base stem is truncated at 200 chars before adding the extension.
+    Spaces are replaced with hyphens.
+    """
+    return sanitize_filename(title, max_length=200).replace(" ", "-") + ".md"
+
+
+def comments_md_filename(title: str) -> str:
+    """Return sanitized markdown filename for comments (e.g. 'My-Title-Comments.md').
+
+    The base stem is truncated at 200 chars; '-Comments.md' is appended after truncation.
+    Spaces are replaced with hyphens.
+    """
+    return sanitize_filename(title, max_length=200).replace(" ", "-") + "-Comments.md"
+
+
+def find_article_md(folder: Path) -> "Path | None":
+    """Return the article markdown path in folder, or None if absent.
+
+    Non-recursive: only searches direct children of folder.
+    Returns the first .md file whose stem does not end in '-Comments'.
+    """
+    return next(
+        (p for p in folder.glob("*.md") if not p.stem.endswith("-Comments")),
+        None,
+    )
+
+
+def find_comments_md(folder: Path) -> "Path | None":
+    """Return the comments markdown path in folder, or None if absent."""
+    return next(folder.glob("*-Comments.md"), None)
+
+
 class StorageManager:
     """
     Manages all file system operations for article storage.
@@ -56,18 +95,19 @@ class StorageManager:
         
         return article_folder_path
     
-    def save_article_content(self, article_folder_path: str, content: str) -> str:
+    def save_article_content(self, article_folder_path: str, content: str, title: str) -> str:
         """
         Save article content to the article folder.
-        
+
         Args:
             article_folder_path: Path to the article folder
             content: Content to save
-            
+            title: Article title used to generate the markdown filename
+
         Returns:
             Path to the saved content file
         """
-        filename = os.path.join(article_folder_path, "article.md")
+        filename = os.path.join(article_folder_path, article_md_filename(title))
         try:
             with open(filename, "w", encoding="utf-8") as f:
                 f.write(content)

@@ -12,6 +12,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from capcat.core.news_source_adapter import NewsSourceArticleFetcher
+from capcat.core.storage_manager import article_md_filename, find_article_md
 from capcat.core.source_system.base_source import (
     Article,
     ArticleDiscoveryError,
@@ -297,7 +298,7 @@ class SubstackSource(BaseSource):
             )
 
             # Save article content with processed media
-            article_file = os.path.join(article_folder, "article.md")
+            article_file = os.path.join(article_folder, article_md_filename(title))
             with open(article_file, "w", encoding="utf-8") as f:
                 f.write(f"# {title}\n\n")
                 if author:
@@ -487,7 +488,7 @@ class SubstackSource(BaseSource):
             )
 
             # Save content
-            article_file = os.path.join(article_folder, "article.md")
+            article_file = os.path.join(article_folder, article_md_filename(article.title))
             with open(article_file, "w", encoding="utf-8") as f:
                 f.write(content)
 
@@ -646,17 +647,18 @@ class SubstackSource(BaseSource):
         Apply Substack-specific content optimizations.
         """
         try:
-            article_file = os.path.join(folder_path, "article.md")
-            if not os.path.exists(article_file):
+            from pathlib import Path
+            article_path = find_article_md(Path(folder_path))
+            if article_path is None or not article_path.exists():
                 return
 
-            with open(article_file, "r", encoding="utf-8") as f:
+            with open(article_path, "r", encoding="utf-8") as f:
                 content = f.read()
 
             # Substack-specific optimizations
             optimized_content = self._apply_substack_formatting(content)
 
-            with open(article_file, "w", encoding="utf-8") as f:
+            with open(article_path, "w", encoding="utf-8") as f:
                 f.write(optimized_content)
 
         except Exception as e:

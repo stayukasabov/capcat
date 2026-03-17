@@ -17,6 +17,7 @@ import re
 from pathlib import Path
 from typing import List
 
+from capcat.core.storage_manager import find_comments_md
 from htmlgen.base.base_generator import BaseHTMLGenerator, HTMLGeneratorFactory
 
 
@@ -368,9 +369,9 @@ class LobstersGenerator(BaseHTMLGenerator):
         """Generate comments navigation for Lobsters with conditional display."""
         article_path = Path(current_path)
         article_dir = article_path.parent
-        comments_path = article_dir / "comments.md"
+        comments_path = find_comments_md(article_dir)
 
-        if not comments_path.exists():
+        if comments_path is None:
             return ""
 
         # Check comment count for conditional display
@@ -379,7 +380,7 @@ class LobstersGenerator(BaseHTMLGenerator):
             return ""
 
         # Determine navigation based on current page
-        if article_path.name == "comments.md":
+        if article_path.stem.endswith("-Comments"):
             # On comments page - show back to article
             back_text = self.source_config['navigation']['back_to_article_text']
             return f'<a href="article.html" class="article-link community" title="{back_text}"><span>{back_text}</span></a>'
