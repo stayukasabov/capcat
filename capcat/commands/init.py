@@ -25,6 +25,27 @@ class AlreadyInitializedError(Exception):
     """Raised when init is called on an existing project without --reinit."""
 
 
+def _copy_themes_to(dest: Path) -> None:
+    """Copy base.css, design-system.css, and Space-Grotesk/ from package themes to dest."""
+    from capcat import __version__
+
+    pkg_themes = Path(__file__).parent.parent / "themes"
+
+    for filename in ("base.css", "design-system.css"):
+        src = pkg_themes / filename
+        if src.exists():
+            shutil.copy2(src, dest / filename)
+
+    font_src = pkg_themes / "Space-Grotesk"
+    font_dst = dest / "Space-Grotesk"
+    if font_src.is_dir():
+        if font_dst.exists():
+            shutil.rmtree(font_dst)
+        shutil.copytree(font_src, font_dst)
+
+    (dest / ".capcat-version").write_text(__version__ + "\n")
+
+
 def init_project(root: Path, reinit: bool = False) -> None:
     """Initialize a capcat project in the given directory.
 
@@ -59,7 +80,9 @@ def init_project(root: Path, reinit: bool = False) -> None:
     sources_dir = config_dir / "sources" / "active"
     (sources_dir / "config_driven").mkdir(parents=True, exist_ok=True)
     (sources_dir / "custom").mkdir(parents=True, exist_ok=True)
-    (config_dir / "themes").mkdir(exist_ok=True)
+    themes_dir = config_dir / "themes"
+    themes_dir.mkdir(exist_ok=True)
+    _copy_themes_to(themes_dir)
 
     config_file = config_dir / "capcat.yml"
     if not config_file.exists():
