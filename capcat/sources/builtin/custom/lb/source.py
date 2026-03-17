@@ -380,20 +380,6 @@ class LbSource(BaseSource):
                     progress_callback=progress_callback,
                 )
 
-                # Fetch comments separately if article fetch was successful
-                if success and article.comment_url and folder_path:
-                    try:
-                        self.fetch_comments(
-                            comment_url=article.comment_url,
-                            article_title=title or article.title,
-                            article_folder_path=folder_path,
-                        )
-                    except Exception as e:
-                        self.logger.warning(
-                            f"Failed to fetch comments for {article.title}: {e}"
-                        )
-                        # Don't fail the entire article fetch if comments fail
-
                 if success:
                     self.logger.info(f"Successfully fetched content for: {article.title}")
                     return True, folder_path

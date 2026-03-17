@@ -212,20 +212,6 @@ class HnSource(BaseSource):
                 elif hasattr(self.session, 'timeout'):
                     delattr(self.session, 'timeout')
 
-            # Fetch comments separately if article fetch was successful
-            if success and article.comment_url and folder_path:
-                try:
-                    self.fetch_comments(
-                        comment_url=article.comment_url,
-                        article_title=title or article.title,
-                        article_folder_path=folder_path,
-                    )
-                except Exception as e:
-                    self.logger.debug(
-                        f"Failed to fetch comments for {article.title}: {e}"
-                    )
-                    # Don't fail the entire article fetch if comments fail
-
             if success:
                 return True, folder_path
             else:
