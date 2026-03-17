@@ -11,6 +11,7 @@ from typing import Any, Dict
 
 from capcat.core.logging_config import get_logger
 from capcat.core.design_system_compiler import DesignSystemCompiler
+from capcat.core.config import find_project_root, NoProjectError
 
 
 class TemplateRenderer:
@@ -23,7 +24,22 @@ class TemplateRenderer:
         self.logger = get_logger(__name__)
         self.templates_dir = Path(__file__).parent.parent / "templates"
         self.app_dir = Path(__file__).parent.parent.absolute()
-        self.design_system_compiler = DesignSystemCompiler()
+        self._user_themes_dir = self._resolve_user_themes_dir()
+        user_ds = self._user_themes_dir / "design-system.css" if self._user_themes_dir else None
+        self.design_system_compiler = (
+            DesignSystemCompiler(themes_dir=self._user_themes_dir)
+            if user_ds and user_ds.exists()
+            else DesignSystemCompiler()
+        )
+
+    def _resolve_user_themes_dir(self) -> "Path | None":
+        """Return Config/themes/ if it exists in the project root, else None."""
+        try:
+            project_root = find_project_root()
+            user_themes = project_root / "Config" / "themes"
+            return user_themes if user_themes.is_dir() else None
+        except NoProjectError:
+            return None
 
     def render_template(
         self,
@@ -112,8 +128,12 @@ class TemplateRenderer:
             Dictionary containing embedded styles and scripts
         """
         try:
-            # Read base.css (includes all styles and syntax highlighting)
-            base_css_path = self.app_dir / "themes" / "base.css"
+            # Read base.css — prefer Config/themes/ over package copy
+            user_base = self._user_themes_dir / "base.css" if self._user_themes_dir else None
+            base_css_path = (
+                user_base if user_base and user_base.exists()
+                else self.app_dir / "themes" / "base.css"
+            )
             base_css_content = ""
             if base_css_path.exists():
                 with open(base_css_path, "r", encoding="utf-8") as f:
