@@ -101,3 +101,61 @@ def test_save_article_content_writes_titled_filename(tmp_path):
     path = sm.save_article_content(str(tmp_path), "hello", "My Title")
     assert (tmp_path / "My-Title.md").exists()
     assert "My-Title.md" in path
+
+
+# ---------------------------------------------------------------------------
+# HTMLGenerator: discovers articles via find_article_md / find_comments_md
+# ---------------------------------------------------------------------------
+
+from capcat.core.html_generator import HTMLGenerator
+
+
+def test_generator_directory_listing_finds_titled_article(tmp_path):
+    """_generate_directory_listing must find a titled .md article."""
+    source = tmp_path / "News" / "HN"
+    article_dir = source / "My-Article"
+    html_dir = article_dir / "html"
+    html_dir.mkdir(parents=True)
+    (article_dir / "My-Article.md").write_text("# My Article\n\nContent.")
+    (html_dir / "article.html").write_text("<html></html>")
+
+    gen = HTMLGenerator()
+    html = gen._generate_directory_listing(str(source))
+    assert "My-Article" in html
+
+
+def test_generator_comments_count_via_find_comments_md(tmp_path):
+    """Comment count must be non-zero when *-Comments.md exists."""
+    source = tmp_path / "News" / "HN"
+    article_dir = source / "My-Article"
+    html_dir = article_dir / "html"
+    html_dir.mkdir(parents=True)
+    (article_dir / "My-Article.md").write_text("# My Article\n\nContent.")
+    (article_dir / "My-Article-Comments.md").write_text(
+        "# Comments\n\n**user1** ([profile](https://news.ycombinator.com/user?id=user1))\n\nGreat!\n\n"
+        "**user2** ([profile](https://news.ycombinator.com/user?id=user2))\n\nAgreed!"
+    )
+    (html_dir / "article.html").write_text("<html></html>")
+
+    gen = HTMLGenerator()
+    html = gen._generate_directory_listing(str(source))
+    assert "Comments" in html
+
+
+def test_generator_selects_with_comments_template(tmp_path):
+    """generate_article_html_from_template selects article-with-comments when *-Comments.md present."""
+    article_dir = tmp_path / "My-Article"
+    article_dir.mkdir()
+    md_file = article_dir / "My-Article.md"
+    md_file.write_text("# My Article\n\nContent.")
+    (article_dir / "My-Article-Comments.md").write_text("# Comments\n\n**u**: hi")
+
+    gen = HTMLGenerator()
+    result = gen.generate_article_html_from_template(
+        markdown_path=str(md_file),
+        article_title="My Article",
+        breadcrumb_path=["News", "HN"],
+        source_config=None,
+        html_subfolder=True,
+    )
+    assert "comments.html" in result
