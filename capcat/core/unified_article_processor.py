@@ -115,13 +115,14 @@ class UnifiedArticleProcessor:
 
         source_instance, source_id = source_result
 
-        # Create output directory for specialized content
-        safe_title = sanitize_filename(title or source_id)
-        article_folder = os.path.join(base_folder, safe_title)
-        os.makedirs(article_folder, exist_ok=True)
+        article_folder = None  # defined inside update_mode block; safe because only read when update_mode=True
 
-        # Update mode: re-check URL validity and update timestamp
+        # Update mode: operate on existing intermediate folder for backward compat
         if update_mode:
+            safe_title = sanitize_filename(title or source_id)
+            article_folder = os.path.join(base_folder, safe_title)
+            os.makedirs(article_folder, exist_ok=True)
+
             if not self._check_url_validity(url):
                 self._add_url_warning(article_folder, url)
                 self.logger.warning(
@@ -136,17 +137,18 @@ class UnifiedArticleProcessor:
         from capcat.core.source_system.base_source import Article
         article = Article(title=title or "", url=url)
 
-        # Fetch content with specialized handler
-        success, article_title = source_instance.fetch_article_content(
-            article, article_folder, progress_callback=None
+        # Pass base_folder directly — specialized source creates its own subfolder
+        output_dir = article_folder if update_mode else base_folder
+        success, content_folder = source_instance.fetch_article_content(
+            article, output_dir, progress_callback=None
         )
 
         if success:
             self.logger.info(
                 f"Specialized source '{source_id}' created placeholder: "
-                f"{article_title}"
+                f"{content_folder}"
             )
-            return True, article_title, article_folder
+            return True, title or source_id, content_folder
 
         self.logger.error(
             f"Specialized source '{source_id}' failed for: {url}"
