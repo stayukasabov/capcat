@@ -118,3 +118,68 @@ def test_upgrade_n_updates_version_marker(tmp_path, monkeypatch):
     check_theme_upgrade(tmp_path)
     marker = tmp_path / "Config" / "themes" / ".capcat-version"
     assert marker.read_text().strip() == __version__
+
+
+# ---------------------------------------------------------------------------
+# HTMLGenerator: user themes priority
+# ---------------------------------------------------------------------------
+
+from pathlib import Path as _Path
+from capcat.core.html_generator import HTMLGenerator
+from capcat.core.config import NoProjectError
+
+
+def test_generator_embeds_user_base_css(tmp_path, monkeypatch):
+    """Generator reads base.css from Config/themes/ when present."""
+    themes = tmp_path / "Config" / "themes"
+    themes.mkdir(parents=True)
+    (themes / "base.css").write_text("/* user-base */")
+
+    import capcat.core.html_generator as hg
+    monkeypatch.setattr(hg, "find_project_root", lambda: tmp_path)
+
+    gen = HTMLGenerator()
+    result = gen._get_embedded_css(_Path(tmp_path))
+    assert "/* user-base */" in result
+
+
+def test_generator_falls_back_to_package_base_css(monkeypatch):
+    """Generator falls back to package base.css when no project root found."""
+    import capcat.core.html_generator as hg
+
+    def _raise_no_project():
+        raise NoProjectError("no project")
+
+    monkeypatch.setattr(hg, "find_project_root", _raise_no_project)
+
+    gen = HTMLGenerator()
+    result = gen._get_embedded_css(_Path("."))
+    assert result  # non-empty — package CSS loaded
+    assert "user-base" not in result
+
+
+def test_generator_per_file_fallback(tmp_path, monkeypatch):
+    """If Config/themes/base.css absent but dir exists, falls back to package."""
+    themes = tmp_path / "Config" / "themes"
+    themes.mkdir(parents=True)
+    # dir exists but base.css not present
+
+    import capcat.core.html_generator as hg
+    monkeypatch.setattr(hg, "find_project_root", lambda: tmp_path)
+
+    gen = HTMLGenerator()
+    result = gen._get_embedded_css(_Path(tmp_path))
+    assert result  # fell back to package
+
+
+def test_design_system_compiler_uses_user_dir(tmp_path, monkeypatch):
+    """HTMLGenerator passes user themes_dir to DesignSystemCompiler when present."""
+    themes = tmp_path / "Config" / "themes"
+    themes.mkdir(parents=True)
+    (themes / "design-system.css").write_text(":root { --color-accent: pink; }")
+
+    import capcat.core.html_generator as hg
+    monkeypatch.setattr(hg, "find_project_root", lambda: tmp_path)
+
+    gen = HTMLGenerator()
+    assert gen.design_system_compiler.themes_dir == themes
