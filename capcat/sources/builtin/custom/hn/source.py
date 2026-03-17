@@ -11,6 +11,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from capcat.core.article_fetcher import get_global_update_mode
+from capcat.core.storage_manager import comments_md_filename
 from capcat.core.news_source_adapter import NewsSourceArticleFetcher
 from capcat.core.source_system.base_source import (
     Article,
@@ -354,7 +355,7 @@ class HnSource(BaseSource):
                 content = processor.process_hacker_news_comments_optimized(
                     soup, article_title, comment_url
                 )
-                filename = os.path.join(article_folder_path, "comments.md")
+                filename = os.path.join(article_folder_path, comments_md_filename(article_title))
 
             # Get metrics for logging
             metrics = processor.get_performance_metrics()

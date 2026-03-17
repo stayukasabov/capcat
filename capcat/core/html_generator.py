@@ -22,6 +22,7 @@ from capcat.core.logging_config import get_logger
 from capcat.core.template_renderer import TemplateRenderer
 from capcat.core.design_system_compiler import DesignSystemCompiler
 from capcat.core.utils import truncate_title_intelligently
+from capcat.core.storage_manager import find_article_md, find_comments_md
 
 
 class HTMLGenerator:
@@ -615,8 +616,8 @@ class HTMLGenerator:
                 # Batch mode articles get navigation
                 # Check if comments.md exists in the same directory as the article
                 article_dir = Path(markdown_path).parent
-                comments_file = article_dir / "comments.md"
-                has_comments = comments_file.exists()
+                comments_file = find_comments_md(article_dir)
+                has_comments = comments_file is not None
 
                 if has_comments:
                     template_variant = "article-with-comments"
@@ -697,8 +698,8 @@ class HTMLGenerator:
         Returns:
             Article title string
         """
-        article_md = article_dir / "article.md"
-        if not article_md.exists():
+        article_md = find_article_md(article_dir)
+        if article_md is None:
             return self._get_display_name_without_date(
                 self._clean_title_for_display(article_dir.name)
             )
@@ -1053,10 +1054,11 @@ class HTMLGenerator:
         # Process all items in directory, sorted correctly
         for item in sorted(path.iterdir(), key=sort_items):
             if item.is_dir():
-                if (item / "article.md").exists():
+                if find_article_md(item) is not None:
                     meta_text = "Article"
-                    if (item / "comments.md").exists():
-                        comment_count = self._count_comments(item / "comments.md")
+                    _comments_md = find_comments_md(item)
+                    if _comments_md is not None:
+                        comment_count = self._count_comments(_comments_md)
                         if comment_count > 0:
                             meta_text += f" | {comment_count} Comments"
 
@@ -1104,7 +1106,7 @@ class HTMLGenerator:
                         "category": category,
                     })
                 else:
-                    article_count = len(list(item.glob("**/article.md")))
+                    article_count = sum(1 for d in item.rglob("*") if d.is_dir() and find_article_md(d) is not None)
                     source_id = extract_source_id(item.name)
 
                     # Determine if we're in Capcats (single article captures)
@@ -1328,13 +1330,13 @@ class HTMLGenerator:
         article_path = Path(current_article_path)
         article_dir = article_path.parent
 
-        # Check if comments.md exists in the same directory
-        comments_path = article_dir / "comments.md"
-        if not comments_path.exists():
+        # Check if comments file exists in the same directory
+        comments_path = find_comments_md(article_dir)
+        if comments_path is None:
             return ""
 
         # Check if we're already on the comments page
-        if article_path.name == "comments.md":
+        if article_path.stem.endswith("-Comments"):
             # On comments page - show "Back to Article" link
             article_url = "article.html"
             return f"""<div class="comments-nav">
@@ -1413,9 +1415,9 @@ class HTMLGenerator:
             # Check if comments exist for this article
             comments_nav = ""
             article_dir = Path(markdown_path).parent
-            comments_file = article_dir / "comments.md"
+            comments_file = find_comments_md(article_dir)
 
-            if comments_file.exists():
+            if comments_file is not None:
                 # Generate comments navigation
                 if html_subfolder:
                     comments_url = "comments.html"

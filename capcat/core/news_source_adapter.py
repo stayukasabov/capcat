@@ -16,6 +16,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from capcat.core.article_fetcher import ArticleFetcher
+from capcat.core.storage_manager import article_md_filename, comments_md_filename
 from capcat.core.config import get_config
 from capcat.core.downloader import (
     download_file,
@@ -476,7 +477,7 @@ class NewsSourceAdapter(ABC):
         comment_content = f"# Comments for: {title}\n\n"
         comment_content += f"Comments are not available for this source.\n\n"
 
-        filename = os.path.join(article_folder_path, "comments.md")
+        filename = os.path.join(article_folder_path, comments_md_filename(title))
 
         try:
             with open(filename, "w", encoding="utf-8") as f:
@@ -751,7 +752,7 @@ class NewsSourceArticleFetcher(ArticleFetcher):
         article_content += markdown_content
 
         # Save the preliminary article
-        filename = os.path.join(article_folder_path, "article.md")
+        filename = os.path.join(article_folder_path, article_md_filename(page_title))
         try:
             with open(filename, "w", encoding="utf-8") as f:
                 f.write(article_content)
