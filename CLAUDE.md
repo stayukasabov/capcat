@@ -1,5 +1,12 @@
 # CLAUDE.md
 
+# Global Claude Instructions
+
+## File Paths
+- Always output **absolute file paths** when referencing saved files, plans, reports, or any created/modified files.
+- Never use relative paths in output messages (e.g. use `/Users/xmac/project/docs/plan.md` not `docs/plan.md`).
+- This ensures file links are clickable in WezTerm via `Cmd+Click`.
+
 ## Absolute Mode
 
 - No emojis, filler, hype, soft asks, conversational transitions, or call-to-action appendixes
@@ -35,6 +42,26 @@ git checkout -b feat/my-feature   # or fix/, test/, refactor/, docs/
 ```
 
 Branch, implement, PR, merge. No exceptions.
+
+## Git Worktrees (MANDATORY for multi-step development)
+
+All plan execution and multi-step feature work must use a git worktree for isolation. Never implement a plan directly in the main working tree.
+
+```bash
+# Create worktree for a feature branch
+cd ~/capcat && git worktree add ../capcat-feat-my-feature -b feat/my-feature
+
+# Work inside the worktree
+cd ~/capcat-feat-my-feature
+
+# Remove worktree after merging/PR (Options 1, 2, 4 of finishing-a-development-branch)
+git worktree remove ../capcat-feat-my-feature
+```
+
+- One worktree per feature branch
+- Worktree path: `~/capcat-<branch-slug>` (e.g. `~/capcat-fix-double-nesting`)
+- Always remove the worktree after the branch is merged or discarded
+- Use the `superpowers:using-git-worktrees` skill when setting up a worktree
 
 ## Versioning
 
@@ -80,6 +107,15 @@ The `context-engineering/`, `docs/superpowers/`, and `Archive/` directories are 
 - Never commit them — they are in `.gitignore` for this reason
 - They exist only on the working machine to guide Claude; they must never appear in the remote repo or its history
 - If you accidentally stage one, run `git rm --cached <file>` before committing
+
+## Session Reports
+
+Use the `/save-report` skill when the user says "Save Report" or `/save-report`.
+
+- Reports are saved to `Reports/YYYY-MM-DD_HH-MM.md` in the project root
+- The `Reports/` directory is created on first use
+- Content is inferred from the conversation — goals, accomplishments, files changed, open TODOs, resume context
+- `Reports/` is local-only — never `git add` any file from it
 
 ## Subagent Rules
 
