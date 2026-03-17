@@ -16,6 +16,7 @@ from capcat.core.source_system.base_source import (
     ArticleDiscoveryError,
     BaseSource,
 )
+from capcat.core.storage_manager import article_md_filename
 
 
 class YouTubeSource(BaseSource):
@@ -115,7 +116,7 @@ class YouTubeSource(BaseSource):
             article_content += "---\n\n"
             article_content += f"{body_text}\n"
 
-            filename = os.path.join(article_folder, "article.md")
+            filename = os.path.join(article_folder, article_md_filename(display_title))
             with open(filename, "w", encoding="utf-8") as f:
                 f.write(article_content)
 
