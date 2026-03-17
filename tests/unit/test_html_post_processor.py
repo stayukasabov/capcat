@@ -56,7 +56,7 @@ def article_with_comments_dir(tmp_path: Path) -> Path:
         "# Article With Comments\n\nContent.",
         encoding="utf-8",
     )
-    (article_folder / "comments.md").write_text(
+    (article_folder / "Article-With-Comments-Comments.md").write_text(
         "# Comments\n\n**Anonymous**: Great read!",
         encoding="utf-8",
     )

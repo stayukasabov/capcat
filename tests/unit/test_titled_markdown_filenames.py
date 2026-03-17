@@ -159,3 +159,24 @@ def test_generator_selects_with_comments_template(tmp_path):
         html_subfolder=True,
     )
     assert "comments.html" in result
+
+
+# ---------------------------------------------------------------------------
+# HTMLPostProcessor: _is_article_directory with titled .md
+# ---------------------------------------------------------------------------
+
+from capcat.core.html_post_processor import HTMLPostProcessor
+
+
+def test_post_processor_is_article_directory_with_titled_md(tmp_path):
+    """_is_article_directory returns True when titled .md present."""
+    article_dir = tmp_path / "My-Article"
+    article_dir.mkdir()
+    (article_dir / "My-Article.md").write_text("# content")
+    processor = HTMLPostProcessor()
+    assert processor._is_article_directory(article_dir) is True
+
+
+def test_post_processor_is_article_directory_false_when_empty(tmp_path):
+    processor = HTMLPostProcessor()
+    assert processor._is_article_directory(tmp_path) is False

@@ -16,6 +16,7 @@ import yaml
 from capcat.core.config import get_config
 from capcat.core.html_generator import HTMLGenerator
 from capcat.core.logging_config import get_logger
+from capcat.core.storage_manager import find_article_md, find_comments_md
 import re
 
 
@@ -158,15 +159,15 @@ class HTMLPostProcessor:
         html_mtime = article_html.stat().st_mtime
 
         # Check article.md
-        article_md = article_dir / "article.md"
-        if article_md.exists():
+        article_md = find_article_md(article_dir)
+        if article_md is not None:
             source_mtime = article_md.stat().st_mtime
             if source_mtime > html_mtime:
                 return True
 
         # Check comments.md
-        comments_md = article_dir / "comments.md"
-        if comments_md.exists():
+        comments_md = find_comments_md(article_dir)
+        if comments_md is not None:
             comments_html = html_dir / "comments.html"
             if not comments_html.exists():
                 return True
@@ -179,9 +180,7 @@ class HTMLPostProcessor:
 
     def _is_article_directory(self, directory: Path) -> bool:
         """Check if directory contains article content."""
-        return (directory / "article.md").exists() or (
-            directory / "comments.md"
-        ).exists()
+        return find_article_md(directory) is not None or find_comments_md(directory) is not None
 
     def _get_source_config(self, article_dir: Path) -> Optional[Dict]:
         """Get source configuration if it has template metadata."""
@@ -276,8 +275,8 @@ class HTMLPostProcessor:
         index_filename = self._get_index_filename(output_mode)
 
         # Generate article.html from article.md
-        article_md = article_dir / "article.md"
-        if article_md.exists():
+        article_md = find_article_md(article_dir)
+        if article_md:
             if progress:
                 progress.update_item_progress(0.3, "generating")
 
@@ -305,8 +304,8 @@ class HTMLPostProcessor:
             self._write_html_file(article_html, html_content)
 
         # Generate comments.html from comments.md
-        comments_md = article_dir / "comments.md"
-        if comments_md.exists():
+        comments_md = find_comments_md(article_dir)
+        if comments_md:
             if progress:
                 progress.update_item_progress(0.7, "generating")
 
@@ -356,7 +355,7 @@ class HTMLPostProcessor:
     def _should_have_index(self, directory: Path) -> bool:
         """Determine if directory should have an index.html file."""
         # Skip if it's an article directory (has article.md)
-        if (directory / "article.md").exists():
+        if find_article_md(directory) is not None:
             return False
 
         # Skip utility directories
@@ -379,7 +378,7 @@ class HTMLPostProcessor:
             if not item.name.startswith(".")
         )
         has_articles = any(
-            item.is_dir() and (item / "article.md").exists()
+            item.is_dir() and find_article_md(item) is not None
             for item in directory.iterdir()
         )
 
