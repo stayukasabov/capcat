@@ -17,7 +17,7 @@ import markdown
 from markdown.extensions import fenced_code, tables, toc
 
 
-from capcat.core.config import get_config
+from capcat.core.config import get_config, find_project_root, NoProjectError
 from capcat.core.logging_config import get_logger
 from capcat.core.template_renderer import TemplateRenderer
 from capcat.core.design_system_compiler import DesignSystemCompiler
@@ -36,7 +36,31 @@ class HTMLGenerator:
         self.config = get_config()
         self.markdown_processor = self._setup_markdown_processor()
         self.template_renderer = TemplateRenderer()
-        self.design_system_compiler = DesignSystemCompiler()
+        # Resolve user themes dir once; pass to DesignSystemCompiler if present
+        self._user_themes_dir = self._resolve_user_themes_dir()
+        user_ds = self._user_themes_dir / "design-system.css" if self._user_themes_dir else None
+        self.design_system_compiler = (
+            DesignSystemCompiler(themes_dir=self._user_themes_dir)
+            if user_ds and user_ds.exists()
+            else DesignSystemCompiler()
+        )
+
+    def _resolve_user_themes_dir(self) -> "Path | None":
+        """Return Config/themes/ path if it exists in the project root, else None."""
+        try:
+            project_root = find_project_root()
+            user_themes = project_root / "Config" / "themes"
+            return user_themes if user_themes.is_dir() else None
+        except NoProjectError:
+            return None
+
+    def _resolve_base_css_path(self, app_dir: "Path") -> "Path":
+        """Return the base.css path, preferring Config/themes/ over the package copy."""
+        user_base = self._user_themes_dir / "base.css" if self._user_themes_dir else None
+        return (
+            user_base if user_base and user_base.exists()
+            else app_dir / "themes" / "base.css"
+        )
 
     def _setup_markdown_processor(self):
         """Configure markdown processor with syntax highlighting and extensions."""
@@ -73,7 +97,7 @@ class HTMLGenerator:
         """
         try:
             # Read base.css (includes all styles and syntax highlighting)
-            base_css_path = app_dir / "themes" / "base.css"
+            base_css_path = self._resolve_base_css_path(app_dir)
             base_css_content = ""
             if base_css_path.exists():
                 with open(base_css_path, "r", encoding="utf-8") as f:
@@ -102,7 +126,7 @@ class HTMLGenerator:
         """
         try:
             # Read base.css (includes all styles and syntax highlighting)
-            base_css_path = app_dir / "themes" / "base.css"
+            base_css_path = self._resolve_base_css_path(app_dir)
             base_css_content = ""
             if base_css_path.exists():
                 with open(base_css_path, "r", encoding="utf-8") as f:

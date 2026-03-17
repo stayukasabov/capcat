@@ -154,6 +154,8 @@ __all__ = [
     "find_project_root",
     "get_news_dir",
     "get_capcats_dir",
+    # Theme upgrade helper
+    "check_theme_upgrade",
 ]
 
 __version__ = "2.0.0"
@@ -219,3 +221,40 @@ def get_capcats_dir(project_root: Path | None = None) -> Path:
         capcats.mkdir(parents=True)
         print(f"Created output directory: {capcats}")
     return capcats
+
+
+def check_theme_upgrade(project_root: "Path") -> None:
+    """Prompt user to overwrite Config/themes/ if package version has changed.
+
+    Args:
+        project_root: Capcat project root (directory containing .capcat/).
+    """
+    from capcat import __version__
+    from capcat.commands.init import _copy_themes_to
+
+    themes_dir = Path(project_root) / "Config" / "themes"
+    if not themes_dir.exists():
+        return  # uninitialised — silent no-op
+
+    marker = themes_dir / ".capcat-version"
+    try:
+        stored = marker.read_text().strip() if marker.exists() else None
+    except OSError:
+        stored = None
+
+    if stored == __version__:
+        return  # up to date — no prompt
+
+    try:
+        answer = input(
+            f"\nCapcat themes updated (v{__version__}). "
+            f"Overwrite your Config/themes/? [Y/n] "
+        ).strip().lower()
+    except (EOFError, KeyboardInterrupt):
+        answer = "n"
+
+    if answer in ("", "y", "yes"):
+        _copy_themes_to(themes_dir)
+    else:
+        # Keep user files — update marker only to suppress re-prompt
+        marker.write_text(__version__ + "\n")
