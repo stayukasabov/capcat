@@ -29,6 +29,7 @@ from .formatter import html_to_markdown
 from .logging_config import get_logger
 from .rate_limiter import acquire_rate_limit
 from .retry import network_retry
+from .storage_manager import article_md_filename
 from .timeout_config import get_timeout_for_source, record_response_time
 from .timeout_wrapper import safe_network_operation
 
@@ -520,7 +521,7 @@ class ArticleFetcher(ABC):
                 )
 
                 # Create filename for article content
-                filename = os.path.join(article_folder_path, "article.md")
+                filename = os.path.join(article_folder_path, article_md_filename(title))
 
                 with open(filename, "w", encoding="utf-8") as f:
                     f.write(md_content)
@@ -575,7 +576,7 @@ class ArticleFetcher(ABC):
                 )
 
             # Create filename for article content
-            filename = os.path.join(article_folder_path, "article.md")
+            filename = os.path.join(article_folder_path, article_md_filename(title))
 
             with open(filename, "w", encoding="utf-8") as f:
                 f.write(md_content)
@@ -1018,7 +1019,7 @@ class ArticleFetcher(ABC):
         # TODO: Separate comment fetching from article fetching completely
 
         # Save the preliminary article
-        filename = os.path.join(article_folder_path, "article.md")
+        filename = os.path.join(article_folder_path, article_md_filename(page_title))
         try:
             with open(filename, "w", encoding="utf-8") as f:
                 f.write(article_content)
@@ -2504,7 +2505,7 @@ class ArticleFetcher(ABC):
             markdown_content += f"**Downloaded file:** [{original_filename}]({original_filename}) ({pdf_size_mb:.2f} MB)\n"
 
             # Save markdown placeholder
-            md_path = os.path.join(article_folder, "article.md")
+            md_path = os.path.join(article_folder, article_md_filename(title))
             with open(md_path, 'w', encoding='utf-8') as f:
                 f.write(markdown_content)
 
@@ -2647,7 +2648,7 @@ class ArticleFetcher(ABC):
             )
 
             # Save error article
-            filename = os.path.join(article_folder_path, "article.md")
+            filename = os.path.join(article_folder_path, article_md_filename(title))
             with open(filename, "w", encoding="utf-8") as f:
                 f.write(article_content)
 
