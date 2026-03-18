@@ -349,6 +349,11 @@ class HnSource(BaseSource):
                 f"Processed {metrics['comments_processed']} comments with {metrics['links_processed']} links for: {article_title}"
             )
 
+            # Skip writing if no comments were found
+            if metrics['comments_processed'] == 0:
+                self.logger.debug(f"No comments found for: {article_title} — skipping file write")
+                return False
+
             # File I/O operations with error handling
             try:
                 # In update mode, always overwrite. In normal mode, always write (new files).
