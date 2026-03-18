@@ -29,6 +29,12 @@ from capcat.core.source_system.base_source import (
     ContentFetchError,
 )
 
+_LB_SELECTORS = {
+    "comment_selector": ".comment",
+    "user_selector": ".user",
+    "comment_text_selector": ".comment_text",
+}
+
 
 class LbSource(BaseSource):
     """
@@ -652,17 +658,19 @@ class LbSource(BaseSource):
 
             # Generate content based on mode (HTML or Markdown)
             if html_mode:
-                # Generate HTML directly - skip markdown conversion
-                content = processor.process_lobsters_comments_html_optimized(
-                    soup, article_title, comment_url
+                content = processor.generate_inline_comments_html(
+                    processor.process_comments_flattened(soup, **_LB_SELECTORS),
+                    article_title,
+                    comment_url,
                 )
                 filename = os.path.join(article_folder_path, "html", "comments.html")
-                # Ensure html directory exists
                 os.makedirs(os.path.dirname(filename), exist_ok=True)
             else:
-                # Generate markdown (default behavior)
-                content = processor.process_lobsters_comments_optimized(
-                    soup, article_title, comment_url, article_folder_path
+                content = processor.generate_inline_comments_markdown(
+                    processor.process_comments_flattened(soup, **_LB_SELECTORS),
+                    article_title,
+                    comment_url,
+                    article_folder_path,
                 )
                 filename = os.path.join(article_folder_path, comments_md_filename(article_title))
 

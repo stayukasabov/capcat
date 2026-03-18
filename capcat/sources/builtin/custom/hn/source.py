@@ -20,6 +20,12 @@ from capcat.core.source_system.base_source import (
     ContentFetchError,
 )
 
+_HN_SELECTORS = {
+    "comment_selector": ".comment-tree .athing",
+    "user_selector": ".hnuser",
+    "comment_text_selector": ".comment",
+}
+
 
 class HnSource(BaseSource):
     """
@@ -329,17 +335,19 @@ class HnSource(BaseSource):
 
             # Generate content based on mode (HTML or Markdown)
             if html_mode:
-                # Generate HTML directly - skip markdown conversion
-                content = processor.process_hacker_news_comments_html_optimized(
-                    soup, article_title, comment_url
+                content = processor.generate_inline_comments_html(
+                    processor.process_comments_flattened(soup, **_HN_SELECTORS),
+                    article_title,
+                    comment_url,
                 )
                 filename = os.path.join(article_folder_path, "html", "comments.html")
-                # Ensure html directory exists
                 os.makedirs(os.path.dirname(filename), exist_ok=True)
             else:
-                # Generate markdown (default behavior)
-                content = processor.process_hacker_news_comments_optimized(
-                    soup, article_title, comment_url, article_folder_path
+                content = processor.generate_inline_comments_markdown(
+                    processor.process_comments_flattened(soup, **_HN_SELECTORS),
+                    article_title,
+                    comment_url,
+                    article_folder_path,
                 )
                 filename = os.path.join(article_folder_path, comments_md_filename(article_title))
 
