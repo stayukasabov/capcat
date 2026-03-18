@@ -14,6 +14,7 @@ from urllib.parse import urlparse
 from .logging_config import get_logger
 from .utils import sanitize_filename
 
+_logger = get_logger(__name__)
 
 # ---------------------------------------------------------------------------
 # Module-level filename helpers — single source of truth for naming convention
@@ -61,17 +62,19 @@ def inject_comments_wikilink(article_folder_path: str, comments_stem: str) -> bo
     Returns False on any error without raising.
     Module-level function, not a StorageManager method.
     """
-    logger = get_logger("inject_comments_wikilink")
     try:
         article_path = find_article_md(Path(article_folder_path))
         if article_path is None:
-            logger.warning(f"No article .md found in: {article_folder_path}")
+            _logger.warning(f"No article .md found in: {article_folder_path}")
             return False
 
         content = article_path.read_text(encoding="utf-8")
         lines = content.splitlines()
-        if not lines or lines[0].startswith("→ [["):
-            logger.debug(f"Wikilink already present or file empty: {article_path}")
+        if not lines:
+            _logger.warning(f"Article file is empty: {article_path}")
+            return False
+        if lines[0].startswith("→ [["):
+            _logger.debug(f"Wikilink already present: {article_path}")
             return True
 
         content = content.rstrip()
@@ -81,7 +84,7 @@ def inject_comments_wikilink(article_folder_path: str, comments_stem: str) -> bo
         return True
 
     except Exception as e:
-        logger.warning(f"Failed to inject wikilink into {article_folder_path}: {e}")
+        _logger.warning(f"Failed to inject wikilink into {article_folder_path}: {e}")
         return False
 
 
