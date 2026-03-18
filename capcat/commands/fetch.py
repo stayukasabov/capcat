@@ -2,7 +2,15 @@
 from __future__ import annotations
 
 import argparse
+import sys
 from typing import Dict, List, Tuple
+
+from capcat.core.shutdown import GracefulShutdown
+from capcat.core.unified_source_processor import (
+    UnifiedSourceProcessor,
+    process_source_articles,
+)
+from capcat.core.source_system.base_source import SourceError
 
 
 def process_sources(
@@ -26,46 +34,49 @@ def process_sources(
     Returns:
         Dict with keys 'successful' (list), 'failed' (list of tuples), 'total'.
     """
-    from capcat.core.unified_source_processor import (
-        UnifiedSourceProcessor,
-        process_source_articles,
-    )
-    from capcat.core.source_system.base_source import SourceError
-
     UnifiedSourceProcessor.clear_url_cache()
     logger.debug("Cleared URL deduplication cache for new session")
 
     successful_sources: List[str] = []
     failed_sources: List[Tuple[str, str]] = []
     is_batch = len(sources) > 1
+    completed = 0
 
-    for source in sources:
-        try:
-            logger.info(f"Processing {source} articles...")
-            process_source_articles(
-                source_name=source,
-                count=getattr(args, "count", 30),
-                output_dir=output_dir,
-                quiet=getattr(args, "quiet", False),
-                verbose=getattr(args, "verbose", False),
-                download_files=getattr(args, "media", False),
-                batch_mode=is_batch,
-                generate_html=generate_html,
-            )
-            successful_sources.append(source)
-            logger.info(f"Successfully processed {source}")
-
-        except SourceError:
-            failed_sources.append((source, "Source unavailable"))
-            if is_batch:
-                logger.info("Continuing with remaining sources...")
-        except Exception as exc:
-            logger.error(f"Error processing {source}: {exc}")
-            failed_sources.append((source, str(exc)))
-            if is_batch:
-                logger.warning(
-                    f"Skipping {source} and continuing with remaining sources"
+    with GracefulShutdown() as shutdown:
+        for source in sources:
+            if shutdown.should_shutdown():
+                break
+            try:
+                logger.info(f"Processing {source} articles...")
+                process_source_articles(
+                    source_name=source,
+                    count=getattr(args, "count", 30),
+                    output_dir=output_dir,
+                    quiet=getattr(args, "quiet", False),
+                    verbose=getattr(args, "verbose", False),
+                    download_files=getattr(args, "media", False),
+                    batch_mode=is_batch,
+                    generate_html=generate_html,
                 )
+                successful_sources.append(source)
+                completed += 1
+                logger.info(f"Successfully processed {source}")
+
+            except SourceError:
+                failed_sources.append((source, "Source unavailable"))
+                if is_batch:
+                    logger.info("Continuing with remaining sources...")
+            except Exception as exc:
+                logger.error(f"Error processing {source}: {exc}")
+                failed_sources.append((source, str(exc)))
+                if is_batch:
+                    logger.warning(
+                        f"Skipping {source} and continuing with remaining sources"
+                    )
+
+        if shutdown.should_shutdown():
+            print(f"\nCancelled — fetched {completed} of {len(sources)} sources.")
+            sys.exit(130)
 
     return {
         "successful": successful_sources,
