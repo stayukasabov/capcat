@@ -11,6 +11,7 @@ import importlib
 import os
 import time
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 from typing import Callable, List, Optional, Tuple
 
 from capcat.core.circuit_breaker import CircuitBreakerOpenError, call_with_circuit_breaker
@@ -20,6 +21,7 @@ from capcat.core.logging_config import get_logger
 from capcat.core.progress import get_batch_progress
 from capcat.core.source_configs import get_source_config, is_source_configured
 from capcat.core.source_factory import SourceFactory
+from capcat.core.storage_manager import find_comments_md, inject_comments_wikilink
 from capcat.core.utils import create_batch_output_directory
 
 # Import new source system for hybrid architecture
@@ -744,9 +746,17 @@ class UnifiedSourceProcessor:
                         self.logger.info(
                             f"Fetching comments for: {article.title}"
                         )
-                        source.fetch_comments(
+                        comments_written = source.fetch_comments(
                             article.comment_url, article.title, article_path
                         )
+                        if comments_written:
+                            comments_md = find_comments_md(Path(article_path))
+                            if comments_md:
+                                inject_comments_wikilink(article_path, comments_md.stem)
+                            else:
+                                self.logger.warning(
+                                    f"Comments file not found after fetch_comments returned True: {article_path}"
+                                )
                     except Exception as comment_error:
                         self.logger.warning(
                             f"Failed to fetch comments for '{article.title}': {comment_error}"
