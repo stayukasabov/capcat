@@ -5,9 +5,12 @@ Designed to flatten complex comment hierarchies and provide inline comment displ
 """
 
 import re
+from pathlib import Path
 from typing import List, Dict, Any, Optional
 from bs4 import BeautifulSoup, NavigableString
 import logging
+
+from capcat.core.storage_manager import article_md_filename, find_article_md
 
 logger = logging.getLogger(__name__)
 
@@ -167,16 +170,29 @@ class StreamlinedCommentProcessor:
         self,
         comments: List[Dict[str, Any]],
         article_title: str,
-        comment_url: str
+        comment_url: str,
+        article_folder_path: str = None
     ) -> str:
         """
         Generate inline comments markdown with flattened structure.
+
+        If article_folder_path is provided, prepends and appends a
+        ← [[article_stem|Article]] wikilink for Obsidian graph connectivity.
         """
         if not comments:
             return f"# Comments for: {article_title}\n\n**Comments URL:** [{comment_url}]({comment_url})\n\n---\n\nNo comments available.\n\n"
 
+        # Derive article stem for Obsidian wikilink
+        if article_folder_path:
+            article_md = find_article_md(Path(article_folder_path))
+            article_stem = article_md.stem if article_md else article_md_filename(article_title)[:-3]
+        else:
+            article_stem = article_md_filename(article_title)[:-3]
+        wikilink = f"← [[{article_stem}|Article]]"
+
         # Header
-        md_content = f"# Comments for: {article_title}\n\n"
+        md_content = f"{wikilink}\n\n"
+        md_content += f"# Comments for: {article_title}\n\n"
         md_content += f"**Comments URL:** [{comment_url}]({comment_url})\n\n"
         md_content += "---\n\n"
 
@@ -187,6 +203,7 @@ class StreamlinedCommentProcessor:
             md_content += f"{comment['text']}\n\n"
             md_content += "---\n\n"
 
+        md_content += f"\n{wikilink}\n"
         return md_content
 
     def generate_inline_comments_html(
@@ -245,7 +262,8 @@ class StreamlinedCommentProcessor:
         self,
         soup: BeautifulSoup,
         article_title: str,
-        comment_url: str
+        comment_url: str,
+        article_folder_path: str = None
     ) -> str:
         """
         Optimized HN comment processing with flattened structure.
@@ -258,14 +276,15 @@ class StreamlinedCommentProcessor:
         )
 
         return self.generate_inline_comments_markdown(
-            comments, article_title, comment_url
+            comments, article_title, comment_url, article_folder_path
         )
 
     def process_lobsters_comments_optimized(
         self,
         soup: BeautifulSoup,
         article_title: str,
-        comment_url: str
+        comment_url: str,
+        article_folder_path: str = None
     ) -> str:
         """
         Optimized Lobsters comment processing with flattened structure.
@@ -278,7 +297,7 @@ class StreamlinedCommentProcessor:
         )
 
         return self.generate_inline_comments_markdown(
-            comments, article_title, comment_url
+            comments, article_title, comment_url, article_folder_path
         )
 
     def process_lesswrong_comments_optimized(
