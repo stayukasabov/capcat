@@ -156,40 +156,20 @@ def scrape_single_article(
 
     try:
         if source and not use_generic:
-            from capcat.sources.base.factory import get_modular_source_factory
+            from capcat.core.source_system.source_factory import get_source_factory
+            from capcat.core.source_system.base_source import Article
 
-            factory = get_modular_source_factory()
-            modular_source = factory.create_source(source)
-
-            if modular_source:
-                (success, _article_path, _folder_path) = modular_source.fetch_article_content(
-                    title=f"Article from {url}",
-                    url=url,
-                    index=1,
-                    base_folder=base_dir,
-                    progress_callback=None,
-                )
+            factory = get_source_factory()
+            if source in factory.get_available_sources():
+                source_obj = factory.create_source(source)
+                article = Article(title=f"Article from {url}", url=url)
+                # BaseSource.fetch_article_content returns (bool, Optional[str]) — 2-tuple
+                success, _ = source_obj.fetch_article_content(article, base_dir, None)
             else:
-                try:
-                    from capcat.core.unified_source_processor import get_unified_processor
-                    from capcat.core.source_configs import get_source_config
-
-                    processor = get_unified_processor()
-                    source_config = get_source_config(source)
-                    success = processor._process_single_article(
-                        source,
-                        source_config,
-                        (1, f"Article from {url}", url, None),
-                        base_dir,
-                        files,
-                        None,
-                    )
-                except ValueError:
-                    logger.info(
-                        f"Source {source} detected but not configured, "
-                        "using generic scraper"
-                    )
-                    use_generic = True
+                logger.info(
+                    f"Source {source} not found in registry, using generic scraper"
+                )
+                use_generic = True
 
         if not source or use_generic:
             from capcat.core.article_fetcher import ArticleFetcher

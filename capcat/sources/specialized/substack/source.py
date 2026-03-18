@@ -11,7 +11,7 @@ from typing import List, Optional, Tuple
 import requests
 from bs4 import BeautifulSoup
 
-from capcat.core.news_source_adapter import NewsSourceArticleFetcher
+from capcat.core.article_fetcher import NewsSourceArticleFetcher
 from capcat.core.storage_manager import article_md_filename, find_article_md
 from capcat.core.source_system.base_source import (
     Article,
