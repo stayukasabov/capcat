@@ -15,7 +15,7 @@ from typing import List, Optional, Tuple
 
 import requests
 
-from ..news_source_adapter import NewsSourceArticleFetcher
+from ..article_fetcher import NewsSourceArticleFetcher
 from .base_source import (
     Article,
     ArticleDiscoveryError,

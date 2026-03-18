@@ -12,7 +12,7 @@ from bs4 import BeautifulSoup
 
 from capcat.core.article_fetcher import get_global_update_mode
 from capcat.core.storage_manager import comments_md_filename
-from capcat.core.news_source_adapter import NewsSourceArticleFetcher
+from capcat.core.article_fetcher import NewsSourceArticleFetcher
 from capcat.core.source_system.base_source import (
     Article,
     ArticleDiscoveryError,
