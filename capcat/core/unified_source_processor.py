@@ -80,6 +80,20 @@ class UnifiedSourceProcessor:
         except Exception:
             return False
 
+    def _assert_all_sources_in_new_system(self) -> None:
+        """
+        Assert that every source in the legacy config is also registered in the new system.
+        Raises ValueError listing any sources that would fall through to the deleted legacy path.
+        """
+        from capcat.core.source_configs import SOURCE_CONFIGURATIONS
+        legacy_names = list(SOURCE_CONFIGURATIONS.keys())
+        missing = [name for name in legacy_names if not self._is_source_in_new_system(name)]
+        if missing:
+            raise ValueError(
+                f"Sources in legacy config but not in new registry: {missing}. "
+                "Register them in the new source system before proceeding."
+            )
+
     def process_source_articles(
         self,
         source_name: str,
