@@ -339,7 +339,7 @@ class HnSource(BaseSource):
             else:
                 # Generate markdown (default behavior)
                 content = processor.process_hacker_news_comments_optimized(
-                    soup, article_title, comment_url
+                    soup, article_title, comment_url, article_folder_path
                 )
                 filename = os.path.join(article_folder_path, comments_md_filename(article_title))
 
