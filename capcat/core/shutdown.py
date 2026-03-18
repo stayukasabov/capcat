@@ -13,19 +13,21 @@ from typing import Callable, Optional
 from .logging_config import get_logger
 
 
+_shutdown_instance: Optional["GracefulShutdown"] = None
+
+
+def get_shutdown() -> Optional["GracefulShutdown"]:
+    """Return the active GracefulShutdown instance, or None if not installed."""
+    return _shutdown_instance
+
+
 class GracefulShutdown:
     """
     Context manager for handling graceful shutdown on signals.
     """
 
-    def __init__(self, cleanup_func: Optional[Callable] = None):
-        """
-        Initialize graceful shutdown handler.
-
-        Args:
-            cleanup_func: Optional cleanup function to call on shutdown
-        """
-        self.cleanup_func = cleanup_func
+    def __init__(self):
+        """Initialize graceful shutdown handler."""
         self.shutdown_event = threading.Event()
         self.logger = get_logger(__name__)
         self._original_handlers = {}
@@ -39,40 +41,26 @@ class GracefulShutdown:
         self._original_handlers[signal.SIGTERM] = signal.signal(
             signal.SIGTERM, self._signal_handler
         )
+        global _shutdown_instance
+        _shutdown_instance = self
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Restore original signal handlers."""
         for sig, handler in self._original_handlers.items():
             signal.signal(sig, handler)
+        global _shutdown_instance
+        _shutdown_instance = None
 
     def _signal_handler(self, signum: int, frame):
-        """Handle shutdown signals."""
+        """Handle shutdown signals — sets event only. No sys.exit, no sleep."""
         signal_names = {
             signal.SIGINT: "SIGINT (Ctrl+C)",
             signal.SIGTERM: "SIGTERM",
         }
-
         signal_name = signal_names.get(signum, f"Signal {signum}")
-        self.logger.info(
-            f"Received {signal_name}, initiating graceful shutdown..."
-        )
-
+        self.logger.info(f"Received {signal_name}, initiating graceful shutdown...")
         self.shutdown_event.set()
-
-        # Run cleanup function if provided
-        if self.cleanup_func:
-            try:
-                self.logger.debug("Running cleanup function...")
-                self.cleanup_func()
-            except Exception as e:
-                self.logger.error(f"Error during cleanup: {e}")
-
-        # Give some time for cleanup to complete
-        time.sleep(0.5)
-
-        self.logger.info("Shutdown complete.")
-        sys.exit(130)  # Standard exit code for SIGINT
 
     def should_shutdown(self) -> bool:
         """Check if shutdown has been requested."""
@@ -186,7 +174,7 @@ def with_graceful_shutdown(cleanup_func: Optional[Callable] = None):
 
     def decorator(func: Callable) -> Callable:
         def wrapper(*args, **kwargs):
-            with GracefulShutdown(cleanup_func):
+            with GracefulShutdown():
                 return func(*args, **kwargs)
 
         return wrapper
