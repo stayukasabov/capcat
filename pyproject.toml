@@ -11,7 +11,7 @@ license = { file = "LICENSE.txt" }
 authors = [
     { name = "Stayu Kasabov - Product Designer and Experiences Builder | AI-powered Prototyping & MVP | Strategic Generalist" }
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",

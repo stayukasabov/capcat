@@ -7,7 +7,6 @@ Provides user-friendly feedback during long-running operations.
 import atexit
 import re
 import shutil
-import signal
 import sys
 import threading
 import time
@@ -27,16 +26,6 @@ def _restore_cursor():
 # Register cursor restoration on program exit
 atexit.register(_restore_cursor)
 
-
-# Handle interruption signals
-def _signal_handler(signum, frame):
-    """Handle interruption signals and restore cursor."""
-    _restore_cursor()
-    sys.exit(1)
-
-
-signal.signal(signal.SIGINT, _signal_handler)
-signal.signal(signal.SIGTERM, _signal_handler)
 
 
 def _get_terminal_width() -> int:
