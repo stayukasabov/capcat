@@ -54,6 +54,37 @@ def find_comments_md(folder: Path) -> "Path | None":
     return next(folder.glob("*-Comments.md"), None)
 
 
+def inject_comments_wikilink(article_folder_path: str, comments_stem: str) -> bool:
+    """Inject a → [[comments_stem|Comments]] wikilink at top and bottom of the article .md.
+
+    Idempotent: if line 1 already starts with '→ [[', returns True without modifying.
+    Returns False on any error without raising.
+    Module-level function, not a StorageManager method.
+    """
+    logger = get_logger("inject_comments_wikilink")
+    try:
+        article_path = find_article_md(Path(article_folder_path))
+        if article_path is None:
+            logger.warning(f"No article .md found in: {article_folder_path}")
+            return False
+
+        content = article_path.read_text(encoding="utf-8")
+        lines = content.splitlines()
+        if not lines or lines[0].startswith("→ [["):
+            logger.debug(f"Wikilink already present or file empty: {article_path}")
+            return True
+
+        content = content.rstrip()
+        wikilink = f"→ [[{comments_stem}|Comments]]"
+        new_content = f"{wikilink}\n\n{content}\n\n{wikilink}\n"
+        article_path.write_text(new_content, encoding="utf-8")
+        return True
+
+    except Exception as e:
+        logger.warning(f"Failed to inject wikilink into {article_folder_path}: {e}")
+        return False
+
+
 class StorageManager:
     """
     Manages all file system operations for article storage.
