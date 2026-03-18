@@ -45,7 +45,6 @@ class TestLobstersCommentRateLimiting:
             # Mock successful response
             mock_response = Mock()
             mock_response.status_code = 200
-            mock_response.json.return_value = {'comments': []}
             mock_response.raise_for_status = Mock()
             mock_get.return_value = mock_response
 
@@ -83,20 +82,6 @@ class TestLobstersCommentRateLimiting:
                 article_title='Test Article',
                 article_folder_path='/tmp/test'
             )
-
-            # Verify exponential backoff: rate_limit + retry delays
-            # First call: sleep(1.0) for rate limit
-            # Retry 1: sleep(2.0)
-            # Retry 2: sleep(4.0)
-            # Retry 3: sleep(8.0)
-            expected_calls = [
-                ((1.0,),),  # Initial rate limit
-                ((2.0,),),  # First retry backoff
-                ((1.0,),),  # Rate limit before retry
-                ((4.0,),),  # Second retry backoff
-                ((1.0,),),  # Rate limit before retry
-                ((8.0,),),  # Third retry backoff
-            ]
 
             # Should have multiple sleep calls for backoff
             assert mock_sleep.call_count >= 4, "Expected multiple sleep calls for retries"
@@ -202,7 +187,6 @@ class TestLobstersCommentRetryConfiguration:
 
             mock_response = Mock()
             mock_response.status_code = 200
-            mock_response.json.return_value = {'comments': []}
             mock_response.raise_for_status = Mock()
             mock_get.return_value = mock_response
 
@@ -231,7 +215,6 @@ class TestLobstersCommentRetryConfiguration:
 
             mock_response = Mock()
             mock_response.status_code = 200
-            mock_response.json.return_value = {'comments': []}
             mock_response.raise_for_status = Mock()
             mock_get.return_value = mock_response
 

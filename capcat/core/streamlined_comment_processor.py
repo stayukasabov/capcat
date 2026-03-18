@@ -7,7 +7,7 @@ Designed to flatten complex comment hierarchies and provide inline comment displ
 import re
 from pathlib import Path
 from typing import List, Dict, Any, Optional
-from bs4 import BeautifulSoup, NavigableString
+from bs4 import BeautifulSoup
 import logging
 
 from capcat.core.storage_manager import article_md_filename, find_article_md
