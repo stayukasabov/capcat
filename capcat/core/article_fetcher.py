@@ -11,6 +11,7 @@ import sys
 import threading
 import time
 from abc import ABC, abstractmethod
+from concurrent.futures import TimeoutError as FutureTimeoutError
 from contextlib import contextmanager
 from typing import Any, Callable, Dict, List, Optional, Tuple
 from urllib.parse import urljoin, urlparse
@@ -18,6 +19,8 @@ from urllib.parse import urljoin, urlparse
 import requests
 from bs4 import BeautifulSoup
 
+from capcat.core.constants import CONVERSION_TIMEOUT_SECONDS
+from capcat.core.conversion_executor import get_conversion_executor
 from .config import get_config
 from .downloader import (
     download_file,
@@ -90,12 +93,6 @@ def set_global_update_mode(update_mode: bool):
 def get_global_update_mode() -> bool:
     """Get the global update mode flag."""
     return _GLOBAL_UPDATE_MODE
-from .utils import sanitize_filename
-from concurrent.futures import (
-    TimeoutError as FutureTimeoutError
-)
-from capcat.core.constants import CONVERSION_TIMEOUT_SECONDS
-from capcat.core.conversion_executor import get_conversion_executor
 
 
 def convert_html_with_timeout(
