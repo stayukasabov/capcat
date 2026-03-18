@@ -672,6 +672,11 @@ class LbSource(BaseSource):
                 f"Processed {metrics['comments_processed']} comments with {metrics['links_processed']} links for: {article_title}"
             )
 
+            # Skip writing if no comments were found
+            if metrics['comments_processed'] == 0:
+                self.logger.debug(f"No comments found for: {article_title} — skipping file write")
+                return False
+
             with open(filename, "w", encoding="utf-8") as f:
                 f.write(content)
 
