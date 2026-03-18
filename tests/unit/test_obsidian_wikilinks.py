@@ -2,6 +2,7 @@
 import pytest
 from pathlib import Path
 from capcat.core.storage_manager import inject_comments_wikilink
+from capcat.core.streamlined_comment_processor import create_optimized_comment_processor
 
 
 def _make_article(folder: Path, stem: str, content: str) -> Path:
@@ -48,3 +49,30 @@ def test_inject_idempotent_on_second_call(tmp_path):
     inject_comments_wikilink(str(tmp_path), "My-Article-Comments")
     content = (tmp_path / "My-Article.md").read_text(encoding="utf-8")
     assert content.count("→ [[My-Article-Comments|Comments]]") == 2  # one top, one bottom
+
+
+def _make_fake_comments():
+    """Return a minimal list of comment dicts as produce by process_comments_flattened."""
+    return [{"user": "bob", "user_link": "https://example.com/bob", "text": "Great article!"}]
+
+
+def test_comments_md_has_article_wikilink_top(tmp_path):
+    """generate_inline_comments_markdown prepends ← [[...|Article]] when article_folder_path given."""
+    _make_article(tmp_path, "My-Article", "# My Article\n\nBody.\n")
+    processor = create_optimized_comment_processor(max_comments=None)
+    md = processor.generate_inline_comments_markdown(
+        _make_fake_comments(), "My Article", "https://example.com", str(tmp_path)
+    )
+    lines = md.splitlines()
+    assert lines[0] == "← [[My-Article|Article]]"
+
+
+def test_comments_md_has_article_wikilink_bottom(tmp_path):
+    """generate_inline_comments_markdown appends ← [[...|Article]] at the end."""
+    _make_article(tmp_path, "My-Article", "# My Article\n\nBody.\n")
+    processor = create_optimized_comment_processor(max_comments=None)
+    md = processor.generate_inline_comments_markdown(
+        _make_fake_comments(), "My Article", "https://example.com", str(tmp_path)
+    )
+    non_blank = [l for l in md.splitlines() if l.strip()]
+    assert non_blank[-1] == "← [[My-Article|Article]]"
