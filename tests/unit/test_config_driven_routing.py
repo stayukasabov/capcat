@@ -56,3 +56,9 @@ def test_all_configured_sources_in_new_system():
         f"Sources in legacy config but not in new registry: {missing}\n"
         "These must be migrated before the legacy adapter chain can be deleted."
     )
+
+
+def test_news_source_article_fetcher_importable_from_article_fetcher():
+    """NewsSourceArticleFetcher must be importable from article_fetcher after migration."""
+    from capcat.core.article_fetcher import NewsSourceArticleFetcher
+    assert NewsSourceArticleFetcher is not None

@@ -12,7 +12,7 @@ import threading
 import time
 from abc import ABC, abstractmethod
 from contextlib import contextmanager
-from typing import Callable, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 from urllib.parse import urljoin, urlparse
 
 import requests
@@ -29,7 +29,9 @@ from .formatter import html_to_markdown
 from .logging_config import get_logger
 from .rate_limiter import acquire_rate_limit
 from .retry import network_retry
-from .storage_manager import article_md_filename
+from .storage_manager import article_md_filename, comments_md_filename
+from .unified_media_processor import UnifiedMediaProcessor
+from .utils import sanitize_filename
 from .timeout_config import get_timeout_for_source, record_response_time
 from .timeout_wrapper import safe_network_operation
 
@@ -2689,3 +2691,572 @@ class LobstersArticleFetcher(ArticleFetcher):
         return url.startswith("https://lobste.rs") and not url.startswith(
             "https://lobste.rs/s/"
         )
+
+
+class NewsSourceArticleFetcher(ArticleFetcher):
+    """
+    Configurable article fetcher that works with any news source.
+    """
+
+    def __init__(
+        self, source_config: Dict[str, Any], session: requests.Session
+    ):
+        super().__init__(session)
+        self.source_config = source_config
+        self.logger = get_logger(
+            f"{__name__.replace('core.', '')}.{source_config['name']}"
+        )
+
+    def should_skip_url(self, url: str, title: str) -> bool:
+        """Skip URLs based on source configuration."""
+        # Skip patterns from configuration
+        for pattern in self.source_config.get("skip_patterns", []):
+            if pattern in url:
+                return True
+
+        # Skip only clearly non-content URLs (keep binary files for proper handling by article fetcher)
+        skip_extensions = [".zip", ".tar", ".gz", ".exe", ".dmg", ".iso"]
+        if any(url.lower().endswith(ext) for ext in skip_extensions):
+            return True
+
+        return False
+
+    def _fetch_web_content(
+        self,
+        title: str,
+        url: str,
+        index: int,
+        base_folder: str,
+        progress_callback=None,
+    ):
+        """Override to extract content using configured selectors."""
+        from .config import get_config
+
+        config = get_config()
+
+        # Report initial progress
+        if progress_callback:
+            progress_callback(0.0, "fetching")
+
+        try:
+            # Use source-specific timeout instead of global read_timeout
+            source_timeout = self.source_config.get(
+                "timeout", config.network.read_timeout
+            )
+            response = self.session.get(url, timeout=source_timeout)
+            response.raise_for_status()
+
+            # Ensure UTF-8 encoding to prevent Unicode corruption
+            response.encoding = 'utf-8'
+        except requests.exceptions.Timeout:
+            self.logger.warning(f"Timeout fetching article content from {url}")
+            return False, None, None
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 403:
+                self.logger.warning(
+                    f"Access forbidden for article {url} - anti-bot protection detected"
+                )
+            elif e.response.status_code == 404:
+                self.logger.warning(
+                    f"Article not found at {url} - may have been deleted"
+                )
+            elif e.response.status_code == 429:
+                self.logger.warning(
+                    f"Rate limited accessing {url} - try reducing request frequency"
+                )
+            elif e.response.status_code >= 500:
+                self.logger.warning(
+                    f"Server error ({e.response.status_code}) fetching {url} - temporary issue"
+                )
+            else:
+                self.logger.warning(
+                    f"HTTP error {e.response.status_code} fetching {url}"
+                )
+            return False, None, None
+        except requests.exceptions.ConnectionError:
+            self.logger.warning(
+                f"Connection error fetching {url} - network may be unavailable"
+            )
+            return False, None, None
+        except requests.exceptions.RequestException as e:
+            self.logger.warning(f"Request error fetching {url}: {e}")
+            return False, None, None
+        except Exception as e:
+            self.logger.error(f"Unexpected error fetching {url}: {e}")
+            return False, None, None
+
+        # Report parsing progress
+        if progress_callback:
+            progress_callback(0.2, "parsing")
+
+        try:
+            soup = BeautifulSoup(response.text, "html.parser")
+        except Exception as e:
+            self.logger.debug(f"Failed to parse HTML from {url}: {e}")
+            return False, None, None
+
+        # Remove script and style elements
+        for script in soup(
+            ["script", "style", "nav", "header", "footer", "aside"]
+        ):
+            script.decompose()
+
+        # Report cleanup progress
+        if progress_callback:
+            progress_callback(0.3, "cleaning")
+
+        # Extract content using configured selectors
+        content_html = None
+        for selector in self.source_config.get("content_selectors", []):
+            try:
+                content_elements = soup.select(selector)
+                if content_elements:
+                    # Combine all found content elements
+                    content_html = ""
+                    for element in content_elements:
+                        content_html += str(element)
+                    break
+            except Exception as e:
+                self.logger.debug(f"Selector '{selector}' failed: {e}")
+                continue
+
+        # Fallback to article body if no selectors worked
+        if not content_html:
+            self.logger.debug(
+                f"No content found with configured selectors, using fallback"
+            )
+            article_body = (
+                soup.find("article")
+                or soup.find("main")
+                or soup.find("div", class_="content")
+            )
+            if article_body:
+                content_html = str(article_body)
+            else:
+                # Last resort: use the entire cleaned soup
+                content_html = str(soup)
+
+        # Get page title (prefer meta title, fallback to h1, then provided title)
+        page_title = title  # Default to provided title
+
+        # Try to get a better title from the page
+        if soup.title and soup.title.string:
+            page_title = soup.title.string.strip()
+        elif soup.find("h1"):
+            h1 = soup.find("h1")
+            if h1 and h1.get_text().strip():
+                page_title = h1.get_text().strip()
+
+        # Create individual folder for this article
+        safe_title = sanitize_filename(page_title)
+
+        # Handle potential duplicate folder names by appending a counter
+        article_folder_name = self._get_unique_folder_name(
+            base_folder, safe_title
+        )
+        article_folder_path = os.path.join(base_folder, article_folder_name)
+
+        try:
+            os.makedirs(article_folder_path, exist_ok=True)
+        except PermissionError:
+            self.logger.error(
+                f"Permission denied creating directory {article_folder_path} - check folder permissions"
+            )
+            return False, None, None
+        except OSError as e:
+            self.logger.error(
+                f"OS error creating directory {article_folder_path}: {e}"
+            )
+            return False, None, None
+        except Exception as e:
+            self.logger.error(
+                f"Unexpected error creating directory {article_folder_path}: {e}"
+            )
+            return False, None, None
+
+        # MANDATORY: Create images folder for ALL articles (regardless of --media flag)
+        # This ensures compliance with media download requirements
+        images_folder = os.path.join(article_folder_path, "images")
+        try:
+            os.makedirs(images_folder, exist_ok=True)
+            self.logger.debug(
+                f"Created mandatory images folder: {images_folder}"
+            )
+        except Exception as e:
+            self.logger.debug(
+                f"Failed to create images directory {images_folder}: {e}"
+            )
+            # Continue processing - images folder creation failure shouldn't stop article processing
+
+        # Create a separate directory for raw HTML files
+        raw_html_dir = os.path.join(article_folder_path, "raw_html")
+        try:
+            os.makedirs(raw_html_dir, exist_ok=True)
+        except Exception as e:
+            self.logger.debug(f"Could not create raw HTML directory: {e}")
+            raw_html_dir = article_folder_path  # Fallback to article folder
+
+        # Save raw HTML immediately for future processing
+        try:
+            raw_html_path = os.path.join(raw_html_dir, "raw_content.html")
+            with open(raw_html_path, "w", encoding="utf-8") as f:
+                f.write(content_html)
+            self.logger.debug(f"Saved raw HTML to: {raw_html_path}")
+        except Exception as e:
+            self.logger.debug(f"Could not save raw HTML: {e}")
+
+        # Report conversion progress
+        if progress_callback:
+            progress_callback(0.5, "converting")
+
+        # Convert HTML to Markdown using only the extracted content
+        try:
+            markdown_content = html_to_markdown(content_html, url)
+        except Exception as e:
+            self.logger.debug(
+                f"Failed to convert HTML to Markdown for {url}: {e}"
+            )
+            return False, None, None
+
+        # Remove duplicate title if it appears at the beginning of the content
+        markdown_lines = markdown_content.strip().split("\n")
+        if (
+            markdown_lines
+            and markdown_lines[0].startswith("# ")
+            and markdown_lines[0][2:].strip() == page_title.strip()
+        ):
+            # Remove the first line (duplicate title)
+            markdown_content = "\n".join(markdown_lines[1:]).strip()
+
+        # Remove stray "html" text that sometimes appears at the beginning
+        if markdown_content.startswith("html\n"):
+            markdown_content = markdown_content[5:].strip()
+        elif markdown_content.startswith("html"):
+            markdown_content = markdown_content[4:].strip()
+
+        # Remove "Read the full article:" links that appear in scraped content
+        import re
+
+        markdown_content = re.sub(
+            r"\*\*Read the full article:\*\*\s*\[.*?\]\(.*?\)",
+            "",
+            markdown_content,
+            flags=re.IGNORECASE,
+        )
+        markdown_content = re.sub(
+            r"Read the full article:\s*\[.*?\]\(.*?\)",
+            "",
+            markdown_content,
+            flags=re.IGNORECASE,
+        )
+        # Clean up any extra whitespace left behind
+        markdown_content = re.sub(r"\n\s*\n\s*\n", "\n\n", markdown_content)
+
+        # Save preliminary content immediately (before media processing)
+        article_content = f"# {page_title}\n\n"
+        article_content += f"**Source URL:** [{url}]({url})\n\n"
+        article_content += "---\n\n"
+        article_content += markdown_content
+
+        # Save the preliminary article
+        filename = os.path.join(article_folder_path, article_md_filename(page_title))
+        try:
+            with open(filename, "w", encoding="utf-8") as f:
+                f.write(article_content)
+        except PermissionError:
+            self.logger.error(
+                f"Permission denied writing article file {filename} - check folder permissions"
+            )
+            return False, None, None
+        except OSError as e:
+            self.logger.error(f"OS error writing article file {filename}: {e}")
+            return False, None, None
+        except UnicodeEncodeError as e:
+            self.logger.error(
+                f"Unicode encoding error writing article {filename}: {e}"
+            )
+            return False, None, None
+        except Exception as e:
+            self.logger.error(
+                f"Unexpected error writing article file {filename}: {e}"
+            )
+            return False, None, None
+
+        # Process and download embedded media using unified system
+        try:
+            # Use source_id from config if available (config-driven sources)
+            # Otherwise fall back to URL domain parsing (custom sources)
+            source_name = self.source_config.get("source_id")
+
+            if not source_name:
+                # Fallback: Extract source name from URL domain for custom sources
+                from urllib.parse import urlparse
+
+                parsed_url = urlparse(url)
+                domain = parsed_url.netloc.lower()
+                if "futurism.com" in domain:
+                    source_name = "futurism"
+                elif "gizmodo.com" in domain:
+                    source_name = "gizmodo"
+                elif "spectrum.ieee.org" in domain:
+                    source_name = "ieee"
+                elif "news.ycombinator.com" in domain:
+                    source_name = "hn"
+                elif "lobste.rs" in domain:
+                    source_name = "lb"
+                elif "bbc.co.uk" in domain or "bbc.com" in domain:
+                    # Differentiate between BBC News and BBC Sport
+                    if "/sport" in url:
+                        source_name = "bbcsport"
+                    else:
+                        source_name = "bbc"
+                elif "cnn.com" in domain:
+                    source_name = "cnn"
+                elif "nature.com" in domain:
+                    source_name = "nature"
+                elif "blog.research.google" in domain or "googleblog.com" in domain:
+                    source_name = "googleai"
+                elif "news.mit.edu" in domain:
+                    source_name = "mitnews"
+                elif "scientificamerican.com" in domain:
+                    source_name = "scientificamerican"
+                elif "theguardian.com" in domain:
+                    source_name = "guardian"
+                elif "infoq.com" in domain:
+                    source_name = "iq"
+                else:
+                    source_name = "unknown"
+
+            # Use unified media processor for consistent results across all sources
+            self.logger.debug(
+                f"Processing media for {source_name} using unified system"
+            )
+            updated_markdown = UnifiedMediaProcessor.process_article_media(
+                content=article_content,
+                html_content=response.text,
+                url=url,
+                article_folder=article_folder_path,
+                source_name=source_name,
+                session=self.session,
+            )
+
+            # Save the final content with processed media
+            # The unified media processor already updated the content with local image paths
+            with open(filename, "w", encoding="utf-8") as f:
+                f.write(updated_markdown)
+
+        except Exception as e:
+            self.logger.error(
+                f"Could not process embedded media for {url}: {e}"
+            )
+            # Continue with preliminary content - core article is already saved
+
+        # Delete the raw HTML directory after processing
+        try:
+            import shutil
+
+            raw_html_dir = os.path.join(article_folder_path, "raw_html")
+            if os.path.exists(raw_html_dir) and os.path.isdir(raw_html_dir):
+                shutil.rmtree(raw_html_dir)
+                self.logger.debug(
+                    f"Deleted raw HTML directory: {raw_html_dir}"
+                )
+        except Exception as e:
+            self.logger.debug(f"Could not delete raw HTML directory: {e}")
+
+        # Report completion
+        if progress_callback:
+            progress_callback(1.0, "complete")
+
+        # Clean up empty images folder if no images were downloaded
+        self._cleanup_empty_images_folder(article_folder_path)
+
+        self.logger.info(f"Saved article: {page_title}")
+        return True, filename, article_folder_path
+
+    def _cleanup_empty_images_folder(self, article_folder_path: str) -> None:
+        """Remove images folder if it exists but is empty."""
+        images_folder = os.path.join(article_folder_path, "images")
+        try:
+            if os.path.exists(images_folder) and os.path.isdir(images_folder):
+                # Check if folder is empty (no files)
+                if not os.listdir(images_folder):
+                    os.rmdir(images_folder)
+                    self.logger.debug(
+                        f"Removed empty images folder: {images_folder}"
+                    )
+        except Exception as e:
+            self.logger.debug(
+                f"Could not remove empty images folder {images_folder}: {e}"
+            )
+
+    def _fallback_image_detection(
+        self,
+        full_page_html: str,
+        existing_images: set,
+        article_folder_path: str,
+        base_url: str,
+    ):
+        """
+        Fallback image detection system that scans the entire page for images
+        when the primary extraction method finds few images.
+        """
+        self.logger.info("Activating fallback image detection system")
+
+        # Parse the full page HTML
+        full_soup = BeautifulSoup(full_page_html, "html.parser")
+        all_img_tags = full_soup.find_all("img")
+
+        self.logger.debug(
+            f"Found {len(all_img_tags)} total img tags on full page"
+        )
+
+        # UI element patterns to filter out
+        ui_patterns = {
+            "class_patterns": [
+                "logo", "icon", "avatar", "profile", "nav", "menu",
+                "header", "footer", "ad", "advertisement", "banner",
+                "sidebar", "social", "share", "button", "close", "arrow",
+                "chevron", "loading", "spinner",
+            ],
+            "id_patterns": [
+                "logo", "icon", "nav", "menu", "header", "footer", "ad",
+                "banner", "sidebar", "social", "avatar", "profile",
+            ],
+            "alt_patterns": [
+                "logo", "icon", "avatar", "profile", "advertisement", "ad",
+                "banner", "nav", "menu", "social", "share", "button",
+                "arrow", "loading",
+            ],
+            "src_patterns": [
+                "logo", "icon", "avatar", "profile", "ad", "banner",
+                "pixel", "tracker", "beacon", "analytics", "1x1",
+                "transparent",
+            ],
+        }
+
+        candidate_images = []
+
+        for img in all_img_tags:
+            img_src = img.get("src")
+            if not img_src:
+                # Try lazy-loading attributes
+                img_src = (
+                    img.get("data-src")
+                    or img.get("data-lazy")
+                    or img.get("data-original")
+                )
+
+            if not img_src or img_src.startswith(
+                ("data:", "javascript:", "mailto:")
+            ):
+                continue
+
+            # Convert to absolute URL
+            from urllib.parse import urljoin
+
+            if img_src.startswith("/"):
+                img_src = urljoin(base_url, img_src)
+            elif not img_src.startswith(("http://", "https://")):
+                img_src = urljoin(base_url, img_src)
+
+            # Skip if already processed
+            if img_src in existing_images:
+                continue
+
+            # Apply intelligent filtering
+            if self._should_skip_image(img, img_src, ui_patterns):
+                self.logger.debug(f"Skipping UI element image: {img_src}")
+                continue
+
+            # Check image dimensions if available
+            width = img.get("width")
+            height = img.get("height")
+            if width and height:
+                try:
+                    w, h = int(width), int(height)
+                    if w < 150 or h < 150:  # Skip small images
+                        self.logger.debug(
+                            f"Skipping small image ({w}x{h}): {img_src}"
+                        )
+                        continue
+                except ValueError:
+                    pass  # Non-numeric dimensions, proceed
+
+            candidate_images.append(
+                (img_src, img.get("alt", "fallback-image"))
+            )
+
+        self.logger.info(
+            f"Found {len(candidate_images)} candidate images after filtering"
+        )
+
+        # Download the candidate images
+        downloaded_images = []
+        for img_src, alt_text in candidate_images:
+            try:
+                self.logger.debug(f"Downloading fallback image: {img_src}")
+                from capcat.core.downloader import download_file
+
+                local_path = download_file(
+                    img_src, article_folder_path, "image"
+                )
+                if local_path:
+                    downloaded_images.append(img_src)
+                    self.logger.debug(
+                        f"Successfully downloaded fallback image: {local_path}"
+                    )
+            except Exception as e:
+                self.logger.debug(
+                    f"Failed to download fallback image {img_src}: {e}"
+                )
+                continue
+
+        self.logger.info(
+            f"Fallback system downloaded {len(downloaded_images)} additional images"
+        )
+        return downloaded_images
+
+    def _should_skip_image(
+        self, img_tag, img_src: str, ui_patterns: dict
+    ) -> bool:
+        """
+        Determine if an image should be skipped based on UI element patterns.
+        """
+        # Check class attributes
+        img_classes = img_tag.get("class", [])
+        if isinstance(img_classes, list):
+            img_classes = " ".join(img_classes).lower()
+        else:
+            img_classes = str(img_classes).lower()
+
+        for pattern in ui_patterns["class_patterns"]:
+            if pattern in img_classes:
+                return True
+
+        # Check id attribute
+        img_id = str(img_tag.get("id", "")).lower()
+        for pattern in ui_patterns["id_patterns"]:
+            if pattern in img_id:
+                return True
+
+        # Check alt text
+        alt_text = str(img_tag.get("alt", "")).lower()
+        for pattern in ui_patterns["alt_patterns"]:
+            if pattern in alt_text:
+                return True
+
+        # Check src URL for common UI image names
+        src_lower = img_src.lower()
+        for pattern in ui_patterns["src_patterns"]:
+            if pattern in src_lower:
+                return True
+
+        # Check if image is very likely a tracking pixel or beacon
+        if any(
+            term in src_lower
+            for term in ["pixel", "beacon", "track", "analytics", "1x1"]
+        ):
+            return True
+
+        return False
