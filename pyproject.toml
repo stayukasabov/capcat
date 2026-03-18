@@ -63,9 +63,6 @@ exclude = ["legacy*", "tests*"]
 capcat = [
     "themes/**/*",
     "templates/**/*",
-    "htmlgen/**/*.html",
-    "htmlgen/**/*.css",
-    "htmlgen/**/*.js",
     "sources/builtin/**/*.yaml",
     "sources/builtin/**/*.yml",
 ]
@@ -94,7 +91,6 @@ omit = [
     "*/capcat/core/formatter*",
     "*/capcat/core/html_generator*",
     "*/capcat/core/html_post_processor*",
-    "*/capcat/core/htmlgen_bridge*",
     "*/capcat/core/image_processor*",
     "*/capcat/core/interactive*",
     "*/capcat/core/logging_config*",
@@ -157,7 +153,6 @@ omit = [
     "*/capcat/core/config/source_base*",
     "*/capcat/core/config/source_registry*",
     "*/capcat/core/config.py",
-    "*/capcat/htmlgen/*",
     "*/capcat/sources/base/*",
     "*/capcat/sources/builtin/*",
     "*/capcat/sources/specialized/*",
