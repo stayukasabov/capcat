@@ -79,6 +79,28 @@ class YouTubeSource(BaseSource):
             self.logger.warning(f"Failed to extract YouTube title from {url}: {e}")
             return None
 
+    def _fetch_oembed_title(self, url: str) -> Optional[str]:
+        """
+        Fetch video title from YouTube oEmbed API (no API key required).
+
+        Args:
+            url: YouTube video URL
+
+        Returns:
+            Video title or None if fetch fails
+        """
+        try:
+            import json
+            oembed_url = f"https://www.youtube.com/oembed?url={url}&format=json"
+            response = self.session.get(oembed_url, timeout=10)
+            response.raise_for_status()
+            data = json.loads(response.text)
+            title = data.get("title", "").strip()
+            return title if title else None
+        except Exception as e:
+            self.logger.debug(f"oEmbed title fetch failed for {url}: {e}")
+            return None
+
     def fetch_article_content(
         self, article: Article, output_dir: str, progress_callback=None
     ) -> Tuple[bool, Optional[str]]:
@@ -91,18 +113,15 @@ class YouTubeSource(BaseSource):
             body_text = template.get("body", "Visit the original link.")
             source_label = template.get("source_label", "Source URL")
 
-            # Try to extract actual video title
-            video_title = self._extract_video_title(article.url)
-
-            # Use extracted title or fall back to config template
-            if video_title:
-                display_title = video_title
-                self.logger.info(f"Extracted YouTube title: '{video_title}'")
-            else:
-                display_title = template.get("title", "YouTube Video")
-                self.logger.warning(
-                    f"Could not extract title, using placeholder: '{display_title}'"
-                )
+            # Try to extract actual video title — yt-dlp → oEmbed → article.title → placeholder
+            video_title = (
+                self._extract_video_title(article.url)
+                or self._fetch_oembed_title(article.url)
+                or (article.title.strip() if article.title and article.title.strip() else None)
+                or template.get("title", "YouTube Video")
+            )
+            display_title = video_title
+            self.logger.info(f"Using YouTube title: '{display_title}'")
 
             # Create subdirectory for article (matches regular source structure)
             from capcat.core.utils import sanitize_filename
