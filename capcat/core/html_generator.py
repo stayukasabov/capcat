@@ -1452,6 +1452,9 @@ class HTMLGenerator:
         # Remove other common template-like patterns that cause issues
         content = re.sub(r"\{\{\s*[^}]+\s*\}\}", "", content)
 
+        # Strip lines containing Obsidian wikilinks — HTML has its own navigation
+        content = re.sub(r"^[^\S\n]*.*\[\[.*?\]\].*$", "", content, flags=re.MULTILINE)
+
         # Clean up any resulting empty lines
         content = re.sub(r"\n\s*\n\s*\n", "\n\n", content)
 
