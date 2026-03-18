@@ -7,7 +7,6 @@ Handles signal interrupts and cleanup operations.
 import signal
 import sys
 import threading
-import time
 from typing import Callable, Optional
 
 from .logging_config import get_logger
