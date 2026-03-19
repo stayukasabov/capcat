@@ -94,6 +94,12 @@ code {
   overflow-wrap: break-word;
 }
 
+/* Prevent long URLs used as link text from causing horizontal overflow */
+a {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
 /* Base Styles */
 * {
   box-sizing: border-box;
@@ -1043,7 +1049,7 @@ figcaption {
     font-size: 0.85rem;
     margin-top: 0.25rem;
     margin-left: 0;
-    padding: 0.5rem 1rem;
+    padding: 1.2rem 1rem;
     display: flex;
     align-items: center;
     flex-wrap: wrap;
