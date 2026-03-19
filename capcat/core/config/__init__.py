@@ -245,6 +245,13 @@ def check_theme_upgrade(project_root: "Path") -> None:
     if stored == __version__:
         return  # up to date — no prompt
 
+    # When called from inside the TUI, raw input() corrupts the terminal and
+    # conflicts with questionary's control of stdin. Skip the prompt entirely
+    # and let the next bare CLI invocation handle the upgrade dialogue.
+    from capcat.core.tui_context import is_tui_active
+    if is_tui_active():
+        return
+
     try:
         answer = input(
             f"\nCapcat themes updated (v{__version__}). "

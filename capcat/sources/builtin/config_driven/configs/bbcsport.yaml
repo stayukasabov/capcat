@@ -10,7 +10,7 @@ base_url: https://www.bbc.com/sport
 # Discovery method - RSS feed
 discovery:
   method: "rss"
-  rss_url: "http://feeds.bbci.co.uk/sport/rss.xml"
+  rss_url: "https://feeds.bbci.co.uk/sport/rss.xml"
   max_articles: 30
 
 # Article selectors (fallback if RSS fails)
