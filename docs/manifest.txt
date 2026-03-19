@@ -1,5 +1,5 @@
 Capcat Documentation Manifest
-Generated: 2026-03-14 04:39:06 UTC
+Generated: 2026-03-19 19:00:00 UTC
 Success rate: 2/2 tasks
 
 Generated Documentation:
@@ -96,6 +96,7 @@ Generated Documentation:
   - api/capcat/timeout_config.md
   - api/capcat/timeout_wrapper.md
   - api/capcat/tui.md
+  - api/capcat/tui_context.md
   - api/capcat/unified_article_processor.md
   - api/capcat/unified_media_processor.md
   - api/capcat/unified_source_processor.md
@@ -255,9 +256,13 @@ Generated Documentation:
   - api/update_includes/README.md
   - api/update_includes/update_includes.md
   - architecture/components.md
+  - architecture/roadmap.md
   - architecture/system.md
   - css/UTILITY-CLASSES.md
+  - developer/git-workflow.md
   - developer/guide.md
+  - developer/release.md
+  - developer/testing.md
   - diagrams/class_diagrams.md
   - diagrams/data_flow.md
   - diagrams/deployment.md
@@ -265,14 +270,27 @@ Generated Documentation:
   - diagrams/source_system.md
   - diagrams/system_architecture.md
   - index.md
-  - plans/2026-03-05-capcat-video-design.md
-  - plans/2026-03-05-capcat-video-implementation.md
-  - plans/2026-03-08-capcat-ad-design.md
-  - plans/2026-03-08-capcat-ad-implementation.md
-  - plans/2026-03-08-video-brainstorm-notes.md
-  - plans/typography-animation-ae-resources.md
   - reference/modules.md
+  - reference/quick-reference.md
+  - superpowers/plans/2026-03-15-breadcrumb-phase1-folder-naming.md
+  - superpowers/plans/2026-03-15-breadcrumb-phase2-html-rendering.md
+  - superpowers/plans/2026-03-15-claude-md-context-engineering.md
+  - superpowers/plans/2026-03-17-titled-markdown-filenames.md
+  - superpowers/plans/2026-03-17-user-themes-config.md
+  - superpowers/plans/2026-03-18-clean-architecture-config-driven-sources.md
+  - superpowers/plans/2026-03-18-fix-duplicate-comments-md.md
+  - superpowers/plans/2026-03-18-fix-specialized-source-double-nesting.md
+  - superpowers/plans/2026-03-18-obsidian-wikilinks.md
+  - superpowers/plans/2026-03-19-graceful-shutdown.md
+  - superpowers/specs/2026-03-15-breadcrumb-phase1-folder-naming-design.md
+  - superpowers/specs/2026-03-15-breadcrumb-phase2-html-rendering-design.md
+  - superpowers/specs/2026-03-15-claude-md-context-engineering-design.md
+  - superpowers/specs/2026-03-17-titled-markdown-filenames-design.md
+  - superpowers/specs/2026-03-17-user-themes-copy-design.md
+  - superpowers/specs/2026-03-18-clean-architecture-config-driven-sources-design.md
+  - superpowers/specs/2026-03-18-obsidian-wikilinks-design.md
+  - superpowers/specs/2026-03-19-graceful-shutdown-design.md
   - troubleshooting.md
 
-Total files: 568
-Documentation size: 9.5 MB
+Total files: 588
+Documentation size: 9.7 MB

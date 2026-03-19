@@ -4,7 +4,7 @@
 
 This package contains the following modules:
 
-- [`capcat.__init__`](./__init__.md) - Capcat — content preservation CLI with Ethical Scraping
+- [`capcat.__init__`](./__init__.md) - Capcat — A command-line tool designed to solve content preservation challenges with Ethical Scraping
 - [`capcat.cli`](./cli.md) - CLI entry point for Capcat
 - [`capcat.tui`](./tui.md) - TUI entry point — delegates to core interactive module
 - [`capcat.__main__`](./__main__.md)
@@ -20,13 +20,11 @@ This package contains the following modules:
 - [`capcat.core.logging_config`](./logging_config.md) - Logging configuration for Capcat
 - [`capcat.core.downloader`](./downloader.md) - Media downloader for Capcat
 - [`capcat.core.theme_utils`](./theme_utils.md) - Theme utilities for hash-based theme persistence
-- [`capcat.core.news_source_adapter`](./news_source_adapter.md) - Base NewsSourceAdapter class to eliminate code duplication across source modules
 - [`capcat.core.article_fetcher`](./article_fetcher.md) - Shared article fetching functionality for Capcat sources
 - [`capcat.core.retry_skip`](./retry_skip.md) - Retry-and-Skip Logic for Network Resilience
 
 Implements intelligent retry-and-skip mechanism for sources that timeout
 or refuse connection
-- [`capcat.core.source_factory`](./source_factory.md) - Modernized factory for creating news source adapters
 - [`capcat.core.unified_source_processor`](./unified_source_processor.md) - Unified Source Processor for Capcat
 - [`capcat.core.network_resilience`](./network_resilience.md) - Network Resilience Patterns for Source Processing
 
@@ -57,6 +55,7 @@ Handles post-processing HTML generation after article scraping is complete
 - [`capcat.core.exceptions`](./exceptions.md) - Custom exceptions for Capcat application
 - [`capcat.core.update_manager`](./update_manager.md) - Update Manager for Capcat
 - [`capcat.core.cli_recovery`](./cli_recovery.md) - CLI error recovery and user guidance system
+- [`capcat.core.tui_context`](./tui_context.md) - TUI context flag
 - [`capcat.core.progress`](./progress.md) - Progress indicators and status reporting for Capcat
 - [`capcat.core.media_processor`](./media_processor.md) - Media processing component for Capcat
 - [`capcat.core.source_config`](./source_config.md) - Source configuration for optimized URL detection in Capcat
@@ -72,7 +71,6 @@ for performance optimization and self-contained HTML generation
 - [`capcat.core.template_renderer`](./template_renderer.md) - Simple Template Renderer for Capcat
 Replaces {{placeholder}} variables with actual values from configuration
 - [`capcat.core.specialized_source_manager`](./specialized_source_manager.md) - Specialized Source Manager for automatic URL-based source activation
-- [`capcat.htmlgen.__init__`](./__init__.md) - Compartmentalized HTML Generation System for Capcat
 - [`capcat.sources.__init__`](./__init__.md)
 - [`capcat.commands.fetch`](./fetch.md) - Batch fetch command — processes multiple sources via the unified processor
 - [`capcat.commands.add_source`](./add_source.md) - Add-source command — interactive RSS source addition
@@ -83,9 +81,7 @@ Replaces {{placeholder}} variables with actual values from configuration
 - [`capcat.commands.init`](./init.md) - Implementation of capcat init command
 - [`capcat.sources.specialized.__init__`](./__init__.md) - Specialized source implementations for platforms like Medium and Substack
 - [`capcat.sources.builtin.__init__`](./__init__.md)
-- [`capcat.sources.base.config_schema`](./config_schema.md) - Base configuration schema for news sources
 - [`capcat.sources.base.__init__`](./__init__.md) - Base classes and interfaces for the source system
-- [`capcat.sources.base.factory`](./factory.md) - Clean factory pattern for creating news source adapters
 - [`capcat.sources.builtin.custom.lb.source`](./source.md) - Lobsters source implementation for the new source system
 - [`capcat.sources.builtin.custom.hn.source`](./source.md) - Hacker News source implementation for the new source system
 - [`capcat.sources.specialized.twitter.__init__`](./__init__.md) - Twitter/X
@@ -96,15 +92,11 @@ Replaces {{placeholder}} variables with actual values from configuration
 - [`capcat.sources.specialized.medium.source`](./source.md) - Medium
 - [`capcat.sources.specialized.youtube.__init__`](./__init__.md) - YouTube specialized source
 - [`capcat.sources.specialized.youtube.source`](./source.md) - YouTube specialized source implementation
-- [`capcat.htmlgen.lb.generator`](./generator.md) - Lobsters specific HTML generator implementation
-- [`capcat.htmlgen.hn.generator`](./generator.md) - Hacker News specific HTML generator implementation
-- [`capcat.htmlgen.base.base_generator`](./base_generator.md) - Base HTML Generator for Compartmentalized HTML Generation System
-- [`capcat.htmlgen.lesswrong.generator`](./generator.md) - LessWrong specific HTML generator implementation
 - [`capcat.core.config.__init__`](./__init__.md) - Configuration management package for Capcat
 - [`capcat.core.config.source_registry`](./source_registry.md) - Source Registry for managing all available news sources and their configurations
 - [`capcat.core.config.source_base`](./source_base.md) - Base configuration classes for news sources
 - [`capcat.core.source_system.bundle_manager`](./bundle_manager.md)
-- [`capcat.core.source_system.remove_source_command`](./remove_source_command.md) - Professional implementation of the remove-source command using clean architecture
+- [`capcat.core.source_system.remove_source_command`](./remove_source_command.md) - Base classes and implementations for the remove-source command
 - [`capcat.core.source_system.add_source_command`](./add_source_command.md) - Professional implementation of the add-source command using clean architecture principles
 - [`capcat.core.source_system.removal_ui`](./removal_ui.md) - User interface implementation for remove-source command
 - [`capcat.core.source_system.feed_discovery`](./feed_discovery.md) - RSS/Atom feed discovery utilities

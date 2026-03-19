@@ -12,6 +12,11 @@ Single article fetch command.
 
 **Inherits from:** ArticleFetcher
 
+ArticleFetcher subclass that never skips any URL.
+
+Used as the generic fallback when no registered source
+matches the requested URL.
+
 #### Methods
 
 ##### should_skip_url
@@ -19,6 +24,15 @@ Single article fetch command.
 ```python
 def should_skip_url(self, url: str, title: str) -> bool
 ```
+
+Always return False — no URL is skipped in generic mode.
+
+Args:
+    url: The article URL being evaluated.
+    title: The article title being evaluated.
+
+Returns:
+    Always ``False``.
 
 **Parameters:**
 
@@ -82,5 +96,5 @@ Returns:
 
 **Returns:** Tuple[bool, Optional[str]]
 
-⚠️ **High complexity:** 16
+⚠️ **High complexity:** 14
 

@@ -166,6 +166,14 @@ Args:
 def select_sources_to_remove(self, sources: List[tuple[str, str]]) -> List[str]
 ```
 
+Record call and return the configured selected_sources response.
+
+Args:
+    sources: List of ``(source_id, display_name)`` tuples.
+
+Returns:
+    ``responses['selected_sources']`` if set, otherwise ``[]``.
+
 **Parameters:**
 
 - `self`
@@ -178,6 +186,11 @@ def select_sources_to_remove(self, sources: List[tuple[str, str]]) -> List[str]
 ```python
 def show_removal_summary(self, sources_info: List[SourceRemovalInfo]) -> None
 ```
+
+Record call without printing the summary.
+
+Args:
+    sources_info: Source removal info objects passed by the workflow.
 
 **Parameters:**
 
@@ -192,6 +205,14 @@ def show_removal_summary(self, sources_info: List[SourceRemovalInfo]) -> None
 def confirm_removal(self, sources_info: List[SourceRemovalInfo]) -> bool
 ```
 
+Record call and return the configured confirm_removal response.
+
+Args:
+    sources_info: Source removal info objects passed by the workflow.
+
+Returns:
+    ``responses['confirm_removal']`` if set, otherwise ``False``.
+
 **Parameters:**
 
 - `self`
@@ -204,6 +225,11 @@ def confirm_removal(self, sources_info: List[SourceRemovalInfo]) -> bool
 ```python
 def show_success(self, message: str) -> None
 ```
+
+Record success message call without producing output.
+
+Args:
+    message: Success message passed by the workflow.
 
 **Parameters:**
 
@@ -218,6 +244,11 @@ def show_success(self, message: str) -> None
 def show_error(self, message: str) -> None
 ```
 
+Record error message call without producing output.
+
+Args:
+    message: Error message passed by the workflow.
+
 **Parameters:**
 
 - `self`
@@ -230,6 +261,11 @@ def show_error(self, message: str) -> None
 ```python
 def show_info(self, message: str) -> None
 ```
+
+Record info message call without producing output.
+
+Args:
+    message: Informational message passed by the workflow.
 
 **Parameters:**
 

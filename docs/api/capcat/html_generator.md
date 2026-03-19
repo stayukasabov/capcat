@@ -8,6 +8,12 @@ HTML Generator for Capcat - Static Site Generation
 Creates self-contained HTML files from markdown content with embedded CSS and JavaScript.
 Follows minimalist design principles with dark/light theme support using SVG icon toggle.
 
+## Constants
+
+### _MAX_URL_DISPLAY
+
+**Value:** `80`
+
 ## Classes
 
 ### HTMLGenerator
@@ -23,9 +29,40 @@ Creates self-contained HTML files with embedded CSS and JavaScript.
 def __init__(self)
 ```
 
+Initialize the HTML generator with config, markdown, and template dependencies.
+
 **Parameters:**
 
 - `self`
+
+##### _resolve_user_themes_dir
+
+```python
+def _resolve_user_themes_dir(self) -> 'Path | None'
+```
+
+Return Config/themes/ path if it exists in the project root, else None.
+
+**Parameters:**
+
+- `self`
+
+**Returns:** 'Path | None'
+
+##### _resolve_base_css_path
+
+```python
+def _resolve_base_css_path(self, app_dir: 'Path') -> 'Path'
+```
+
+Return the base.css path, preferring Config/themes/ over the package copy.
+
+**Parameters:**
+
+- `self`
+- `app_dir` ('Path')
+
+**Returns:** 'Path'
 
 ##### _setup_markdown_processor
 
@@ -164,6 +201,8 @@ Returns:
 
 **Returns:** str
 
+⚠️ **High complexity:** 12
+
 ##### _get_display_name_without_date
 
 ```python
@@ -250,7 +289,20 @@ Determine whether to use index.html (root) or news.html (directory).
 def _generate_breadcrumb(self, breadcrumb_path: List[str], html_subfolder: bool = False, current_file_path: str = None) -> str
 ```
 
-Generate breadcrumb navigation HTML with proper directory-aware links.
+Generate breadcrumb navigation HTML.
+
+Renders 1–3 links depending on page type:
+  news.html  (source dir)      → date only (1 link)
+  article.html                 → date + source (2 links)
+  html/article.html            → date + source (2 links)
+  html/comments.html           → date + source + article (3 links)
+
+Display format:
+  Level 0 (date):    "News 15 March 2026"
+  Level 1 (source):  "Hacker News"
+  Level 2 (article): article title as-is
+
+Depths are fixed by physical directory structure, not breadcrumb length.
 
 **Parameters:**
 
@@ -261,7 +313,7 @@ Generate breadcrumb navigation HTML with proper directory-aware links.
 
 **Returns:** str
 
-⚠️ **High complexity:** 22
+⚠️ **High complexity:** 16
 
 ##### _generate_directory_listing
 
@@ -280,7 +332,7 @@ Auto-discovers categories from source configurations.
 
 **Returns:** str
 
-⚠️ **High complexity:** 48
+⚠️ **High complexity:** 49
 
 ##### _generate_index_navigation
 
@@ -610,7 +662,7 @@ def extract_source_id(name)
 ```
 
 Extract source ID from folder name.
-Folder names use display_name (e.g., 'Hacker_News_19-10-2025')
+Folder names use display_name (e.g., 'Hacker-News_19-10-2025')
 Need to map back to source_id (e.g., 'hn')
 
 **Parameters:**
@@ -623,6 +675,14 @@ Need to map back to source_id (e.g., 'hn')
 def find_category(source_id)
 ```
 
+Return the category name for a source ID, or None if unknown.
+
+Args:
+    source_id: Source identifier string to look up.
+
+Returns:
+    Category string (e.g. ``"tech"``), or ``None`` if not found.
+
 **Parameters:**
 
 - `source_id`
@@ -632,6 +692,15 @@ def find_category(source_id)
 ```python
 def sort_items(item)
 ```
+
+Return a sort key for a directory entry based on category order.
+
+Args:
+    item: A ``pathlib.Path``-like directory entry with a ``name``
+        attribute.
+
+Returns:
+    Tuple used as a sort key: ``(category_index, source_order, name)``.
 
 **Parameters:**
 
@@ -643,6 +712,17 @@ def sort_items(item)
 def extract_content(html_content: str, div_class: str) -> str
 ```
 
+Extract the inner HTML from a known div wrapper, if present.
+
+Args:
+    html_content: HTML string that may contain a ``<div class="…">``
+        wrapper.
+    div_class: CSS class name of the wrapper div to strip.
+
+Returns:
+    Inner content string with the outer div removed, or the original
+    *html_content* if the wrapper is not found.
+
 **Parameters:**
 
 - `html_content` (str)
@@ -650,11 +730,38 @@ def extract_content(html_content: str, div_class: str) -> str
 
 **Returns:** str
 
+### _truncate_anchor_text
+
+```python
+def _truncate_anchor_text(anchor_match)
+```
+
+Shorten anchor display text to ``_MAX_URL_DISPLAY`` characters.
+
+Args:
+    anchor_match: Regex match with groups ``(href, text)``.
+
+Returns:
+    Replacement ``<a>`` tag with truncated display text.
+
+**Parameters:**
+
+- `anchor_match`
+
 ### replace_source_url
 
 ```python
 def replace_source_url(match)
 ```
+
+Replace a ``<p>`` containing a source URL with a semantic div.
+
+Args:
+    match: Regex match with groups ``(p_open, content, p_close)``.
+
+Returns:
+    ``<div class="source-url">`` wrapping the (possibly truncated)
+    anchor content.
 
 **Parameters:**
 

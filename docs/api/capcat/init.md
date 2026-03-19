@@ -12,10 +12,6 @@ Implementation of capcat init command.
 
 **Value:** `'\n# capcat — managed entries\n.capcat/\nNews/\nCapcats/\n'`
 
-### DEFAULT_CONFIG
-
-**Value:** `'# Capcat configuration\n# See: https://github.com/<owner>/capcat/docs/quick-start.md\n\nsources: []\nbundles: {}\n'`
-
 ## Classes
 
 ### AlreadyInitializedError
@@ -26,6 +22,20 @@ Raised when init is called on an existing project without --reinit.
 
 
 ## Functions
+
+### _copy_themes_to
+
+```python
+def _copy_themes_to(dest: Path) -> None
+```
+
+Copy base.css, design-system.css, and Space-Grotesk/ from package themes to dest.
+
+**Parameters:**
+
+- `dest` (Path)
+
+**Returns:** None
 
 ### init_project
 
