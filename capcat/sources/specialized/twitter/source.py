@@ -68,7 +68,10 @@ class TwitterSource(BaseSource):
             article_content += "---\n\n"
             article_content += f"{body_text}\n"
 
-            filename = os.path.join(output_dir, article_md_filename(display_title))
+            article_folder = os.path.join(output_dir, sanitize_filename(display_title))
+            os.makedirs(article_folder, exist_ok=True)
+
+            filename = os.path.join(article_folder, article_md_filename(display_title))
             with open(filename, "w", encoding="utf-8") as f:
                 f.write(article_content)
 
@@ -76,7 +79,7 @@ class TwitterSource(BaseSource):
                 f"Created Twitter placeholder: '{display_title}'"
             )
 
-            return True, display_title
+            return True, article_folder
 
         except Exception as e:
             self.logger.error(
