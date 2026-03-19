@@ -9,7 +9,7 @@ Follows DRY principle while maintaining source-specific optimizations.
 
 import os
 import time
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed, TimeoutError
 from pathlib import Path
 from typing import Callable, List, Optional, Tuple
 
@@ -17,6 +17,7 @@ from capcat.core.config import get_config
 from capcat.core.exceptions import NetworkError
 from capcat.core.logging_config import get_logger
 from capcat.core.progress import get_batch_progress
+from capcat.core.shutdown import get_shutdown
 from capcat.core.storage_manager import find_comments_md, inject_comments_wikilink
 from capcat.core.utils import create_batch_output_directory
 
@@ -266,7 +267,8 @@ class UnifiedSourceProcessor:
             quiet,
             verbose,
         ) as progress:
-            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            executor = ThreadPoolExecutor(max_workers=max_workers)
+            try:
                 # Submit all tasks
                 futures = {}
                 for i, article in filtered_articles:
@@ -281,9 +283,6 @@ class UnifiedSourceProcessor:
                     )
                     futures[future] = (i, article)
 
-                # Process completed tasks as they finish
-                from concurrent.futures import as_completed, TimeoutError
-
                 successful_count = 0
                 failed_count = 0
 
@@ -293,8 +292,12 @@ class UnifiedSourceProcessor:
                 total_timeout = per_article_timeout * len(futures)
                 start_time = time.time()
 
+                shutdown = get_shutdown()  # MUST be after executor is constructed
+
                 try:
                     for future in as_completed(futures, timeout=total_timeout):
+                        if shutdown and shutdown.should_shutdown():
+                            break
                         i, article = futures[future]
                         try:
                             # Check if we've exceeded per-article timeout
@@ -334,6 +337,12 @@ class UnifiedSourceProcessor:
                             future.cancel()
                             failed_count += 1
                             progress.item_completed(False, article.title)
+
+            finally:
+                # Always runs — on normal exit, on shutdown break, and on timeout.
+                # cancel_futures=True prevents queued futures from starting.
+                # Calling shutdown() twice is idempotent per Python docs.
+                executor.shutdown(wait=False, cancel_futures=True)
 
         # Log summary
         successful = successful_count
