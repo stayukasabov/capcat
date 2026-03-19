@@ -91,10 +91,13 @@ Streamlined comment text processing with minimal link handling.
 ##### generate_inline_comments_markdown
 
 ```python
-def generate_inline_comments_markdown(self, comments: List[Dict[str, Any]], article_title: str, comment_url: str) -> str
+def generate_inline_comments_markdown(self, comments: List[Dict[str, Any]], article_title: str, comment_url: str, article_folder_path: str = None) -> str
 ```
 
 Generate inline comments markdown with flattened structure.
+
+If article_folder_path is provided, prepends and appends a
+← [[article_stem|Article]] wikilink for Obsidian graph connectivity.
 
 **Parameters:**
 
@@ -102,6 +105,7 @@ Generate inline comments markdown with flattened structure.
 - `comments` (List[Dict[str, Any]])
 - `article_title` (str)
 - `comment_url` (str)
+- `article_folder_path` (str) *optional*
 
 **Returns:** str
 
@@ -118,93 +122,6 @@ Optimized for HTML post-processor performance.
 
 - `self`
 - `comments` (List[Dict[str, Any]])
-- `article_title` (str)
-- `comment_url` (str)
-
-**Returns:** str
-
-##### process_hacker_news_comments_optimized
-
-```python
-def process_hacker_news_comments_optimized(self, soup: BeautifulSoup, article_title: str, comment_url: str) -> str
-```
-
-Optimized HN comment processing with flattened structure.
-
-**Parameters:**
-
-- `self`
-- `soup` (BeautifulSoup)
-- `article_title` (str)
-- `comment_url` (str)
-
-**Returns:** str
-
-##### process_lobsters_comments_optimized
-
-```python
-def process_lobsters_comments_optimized(self, soup: BeautifulSoup, article_title: str, comment_url: str) -> str
-```
-
-Optimized Lobsters comment processing with flattened structure.
-
-**Parameters:**
-
-- `self`
-- `soup` (BeautifulSoup)
-- `article_title` (str)
-- `comment_url` (str)
-
-**Returns:** str
-
-##### process_lesswrong_comments_optimized
-
-```python
-def process_lesswrong_comments_optimized(self, soup: BeautifulSoup, article_title: str, comment_url: str) -> str
-```
-
-Optimized LessWrong comment processing with flattened structure.
-
-**Parameters:**
-
-- `self`
-- `soup` (BeautifulSoup)
-- `article_title` (str)
-- `comment_url` (str)
-
-**Returns:** str
-
-##### process_hacker_news_comments_html_optimized
-
-```python
-def process_hacker_news_comments_html_optimized(self, soup: BeautifulSoup, article_title: str, comment_url: str) -> str
-```
-
-Optimized HN comment processing with direct HTML generation.
-Skips markdown conversion for HTML output.
-
-**Parameters:**
-
-- `self`
-- `soup` (BeautifulSoup)
-- `article_title` (str)
-- `comment_url` (str)
-
-**Returns:** str
-
-##### process_lobsters_comments_html_optimized
-
-```python
-def process_lobsters_comments_html_optimized(self, soup: BeautifulSoup, article_title: str, comment_url: str) -> str
-```
-
-Optimized Lobsters comment processing with direct HTML generation.
-Skips markdown conversion for HTML output.
-
-**Parameters:**
-
-- `self`
-- `soup` (BeautifulSoup)
 - `article_title` (str)
 - `comment_url` (str)
 
