@@ -1,5 +1,5 @@
 Capcat Documentation Manifest
-Generated: 2026-03-19 19:00:00 UTC
+Generated: 2026-03-19 21:52:02 UTC
 Success rate: 2/2 tasks
 
 Generated Documentation:
@@ -282,6 +282,7 @@ Generated Documentation:
   - superpowers/plans/2026-03-18-fix-specialized-source-double-nesting.md
   - superpowers/plans/2026-03-18-obsidian-wikilinks.md
   - superpowers/plans/2026-03-19-graceful-shutdown.md
+  - superpowers/plans/2026-03-19-htmlgen-refactor.md
   - superpowers/specs/2026-03-15-breadcrumb-phase1-folder-naming-design.md
   - superpowers/specs/2026-03-15-breadcrumb-phase2-html-rendering-design.md
   - superpowers/specs/2026-03-15-claude-md-context-engineering-design.md
@@ -290,7 +291,8 @@ Generated Documentation:
   - superpowers/specs/2026-03-18-clean-architecture-config-driven-sources-design.md
   - superpowers/specs/2026-03-18-obsidian-wikilinks-design.md
   - superpowers/specs/2026-03-19-graceful-shutdown-design.md
+  - superpowers/specs/2026-03-19-htmlgen-refactor-design.md
   - troubleshooting.md
 
-Total files: 588
+Total files: 590
 Documentation size: 9.7 MB

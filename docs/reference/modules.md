@@ -43,8 +43,6 @@ for performance optimization and self-contained HTML generation
 - [capcat.core.ethical_scraping](../api/capcat/ethical_scraping.md) - Ethical scraping utilities for Capcat
 - [capcat.core.exceptions](../api/capcat/exceptions.md) - Custom exceptions for Capcat application
 - [capcat.core.formatter](../api/capcat/formatter.md) - HTML to Markdown converter for Capcat
-- [capcat.core.html_generator](../api/capcat/html_generator.md) - HTML Generator for Capcat - Static Site Generation
-Creates self-contained HTML files from markdown content with embedded CSS and JavaScript
 - [capcat.core.html_post_processor](../api/capcat/html_post_processor.md) - HTML Post-Processor for Capcat Archives
 Handles post-processing HTML generation after article scraping is complete
 - [capcat.core.image_processor](../api/capcat/image_processor.md) - Global Image Processor for Capcat
@@ -119,6 +117,10 @@ Replaces {{placeholder}} variables with actual values from configuration
 - [capcat.core.update_manager](../api/capcat/update_manager.md) - Update Manager for Capcat
 - [capcat.core.url_utils](../api/capcat/url_utils.md) - URL validation and normalization utilities for Capcat
 - [capcat.core.utils](../api/capcat/utils.md) - Core utilities for the Capcat application
+- [capcat.htmlgen.__init__](../api/capcat/__init__.md) - HTML generation module for Capcat
+- [capcat.htmlgen.factory](../api/capcat/factory.md) - Factory for creating ArticleHTMLGenerator instances
+- [capcat.htmlgen.generator](../api/capcat/generator.md) - HTML Generator for Capcat - Static Site Generation
+Creates self-contained HTML files from markdown content with embedded CSS and JavaScript
 - [capcat.sources.__init__](../api/capcat/__init__.md)
 - [capcat.sources.base.__init__](../api/capcat/__init__.md) - Base classes and interfaces for the source system
 - [capcat.sources.builtin.__init__](../api/capcat/__init__.md)
@@ -338,8 +340,8 @@ Usage:
 
 ## Statistics
 
-- **Total Modules**: 234
-- **Total Classes**: 413
+- **Total Modules**: 236
+- **Total Classes**: 414
 - **Total Functions**: 514
 - **Public Functions**: 418
 - **Documentation Coverage**: 81.3%
