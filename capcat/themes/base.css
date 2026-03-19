@@ -94,9 +94,11 @@ code {
   overflow-wrap: break-word;
 }
 
-/* Prevent long URLs used as link text from causing horizontal overflow */
-a {
+/* Prevent long unbreakable strings from causing horizontal overflow */
+a, p, li {
   overflow-wrap: break-word;
+}
+a {
   word-break: break-word;
 }
 
