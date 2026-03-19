@@ -107,7 +107,7 @@ def test_save_article_content_writes_titled_filename(tmp_path):
 # HTMLGenerator: discovers articles via find_article_md / find_comments_md
 # ---------------------------------------------------------------------------
 
-from capcat.core.html_generator import HTMLGenerator
+from capcat.htmlgen import ArticleHTMLGenerator as HTMLGenerator
 
 
 def test_generator_directory_listing_finds_titled_article(tmp_path):
