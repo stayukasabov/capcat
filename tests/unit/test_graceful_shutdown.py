@@ -133,3 +133,87 @@ def test_process_sources_returns_normally_without_cancel(tmp_path):
 
     assert isinstance(result, dict)
     assert "successful" in result
+
+
+def test_usp_executor_shutdown_called_in_finally():
+    """executor.shutdown(wait=False, cancel_futures=True) is called in the finally block."""
+    from unittest.mock import patch, MagicMock
+    from concurrent.futures import Future
+    from capcat.core.unified_source_processor import UnifiedSourceProcessor
+
+    usp = UnifiedSourceProcessor()
+
+    mock_source = MagicMock()
+    mock_source.config.display_name = "TestSource"
+    mock_article = MagicMock()
+    mock_article.url = "https://example.com/1"
+    mock_article.title = "Test Article"
+    articles = [mock_article]
+
+    mock_executor = MagicMock()
+    mock_future = MagicMock(spec=Future)
+    mock_executor.submit.return_value = mock_future
+
+    with patch("capcat.core.unified_source_processor.ThreadPoolExecutor", return_value=mock_executor), \
+         patch("capcat.core.unified_source_processor.as_completed", return_value=iter([])), \
+         patch("capcat.core.unified_source_processor.get_shutdown", return_value=None), \
+         patch("capcat.core.unified_source_processor.get_batch_progress") as mock_progress_ctx:
+
+        mock_progress = MagicMock()
+        mock_progress.__enter__ = MagicMock(return_value=mock_progress)
+        mock_progress.__exit__ = MagicMock(return_value=False)
+        mock_progress_ctx.return_value = mock_progress
+
+        usp._process_articles_with_new_system(
+            mock_source, articles, "/tmp", False, False, False
+        )
+
+    mock_executor.shutdown.assert_called_with(wait=False, cancel_futures=True)
+
+
+def test_usp_loop_breaks_on_shutdown():
+    """as_completed loop breaks when should_shutdown() returns True."""
+    from unittest.mock import patch, MagicMock
+    from concurrent.futures import Future
+    from capcat.core.unified_source_processor import UnifiedSourceProcessor
+
+    usp = UnifiedSourceProcessor()
+
+    mock_source = MagicMock()
+    mock_source.config.display_name = "TestSource"
+    mock_article = MagicMock()
+    mock_article.url = "https://example.com/shutdown-test-unique"
+    mock_article.title = "Art1"
+    articles = [mock_article]
+
+    future1 = MagicMock(spec=Future)
+    future1.result.return_value = True
+
+    def fake_as_completed(fs, timeout):
+        for f in fs:
+            yield f
+
+    mock_executor = MagicMock()
+    mock_executor.submit.return_value = future1
+
+    mock_shutdown = MagicMock()
+    mock_shutdown.should_shutdown.return_value = True  # always True → break immediately
+
+    with patch("capcat.core.unified_source_processor.ThreadPoolExecutor", return_value=mock_executor), \
+         patch("capcat.core.unified_source_processor.as_completed", side_effect=fake_as_completed), \
+         patch("capcat.core.unified_source_processor.get_shutdown", return_value=mock_shutdown), \
+         patch("capcat.core.unified_source_processor.get_batch_progress") as mock_progress_ctx:
+
+        mock_progress = MagicMock()
+        mock_progress.__enter__ = MagicMock(return_value=mock_progress)
+        mock_progress.__exit__ = MagicMock(return_value=False)
+        mock_progress_ctx.return_value = mock_progress
+
+        usp._process_articles_with_new_system(
+            mock_source, articles, "/tmp", False, False, False
+        )
+
+    # Loop broke before calling result()
+    assert future1.result.call_count == 0, "result() must not be called after shutdown"
+    # Finally block still ran
+    mock_executor.shutdown.assert_called_with(wait=False, cancel_futures=True)
