@@ -45,14 +45,18 @@ def find_article_md(folder: Path) -> "Path | None":
     Returns the first .md file whose stem does not end in '-Comments'.
     """
     return next(
-        (p for p in folder.glob("*.md") if not p.stem.endswith("-Comments")),
+        (
+            p
+            for p in folder.glob("*.md")
+            if p.is_file() and not p.stem.endswith("-Comments")
+        ),
         None,
     )
 
 
 def find_comments_md(folder: Path) -> "Path | None":
     """Return the comments markdown path in folder, or None if absent."""
-    return next(folder.glob("*-Comments.md"), None)
+    return next((p for p in folder.glob("*-Comments.md") if p.is_file()), None)
 
 
 def inject_comments_wikilink(article_folder_path: str, comments_stem: str) -> bool:
