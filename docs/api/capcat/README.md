@@ -36,8 +36,6 @@ Clean architecture implementation applying SOLID principles:
 - Dependency Inversion: Depend on abstractions not concretions
 - [`capcat.core.session_pool`](./session_pool.md) - Global session pooling for optimal network performance across all sources
 - [`capcat.core.constants`](./constants.md) - Application-wide constants for Capcat
-- [`capcat.core.html_generator`](./html_generator.md) - HTML Generator for Capcat - Static Site Generation
-Creates self-contained HTML files from markdown content with embedded CSS and JavaScript
 - [`capcat.core.shutdown`](./shutdown.md) - Graceful shutdown handling for Capcat
 - [`capcat.core.rate_limiter`](./rate_limiter.md) - Rate limiting system for Capcat to prevent overwhelming source servers
 - [`capcat.core.__init__`](./__init__.md)
@@ -71,6 +69,10 @@ for performance optimization and self-contained HTML generation
 - [`capcat.core.template_renderer`](./template_renderer.md) - Simple Template Renderer for Capcat
 Replaces {{placeholder}} variables with actual values from configuration
 - [`capcat.core.specialized_source_manager`](./specialized_source_manager.md) - Specialized Source Manager for automatic URL-based source activation
+- [`capcat.htmlgen.__init__`](./__init__.md) - HTML generation module for Capcat
+- [`capcat.htmlgen.factory`](./factory.md) - Factory for creating ArticleHTMLGenerator instances
+- [`capcat.htmlgen.generator`](./generator.md) - HTML Generator for Capcat - Static Site Generation
+Creates self-contained HTML files from markdown content with embedded CSS and JavaScript
 - [`capcat.sources.__init__`](./__init__.md)
 - [`capcat.commands.fetch`](./fetch.md) - Batch fetch command — processes multiple sources via the unified processor
 - [`capcat.commands.add_source`](./add_source.md) - Add-source command — interactive RSS source addition
