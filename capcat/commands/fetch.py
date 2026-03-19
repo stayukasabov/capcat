@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 from typing import Dict, List, Tuple
 
@@ -76,7 +77,7 @@ def process_sources(
 
         if shutdown.should_shutdown():
             print(f"\nCancelled — fetched {completed} of {len(sources)} sources.")
-            sys.exit(130)
+            os._exit(130)
 
     return {
         "successful": successful_sources,
