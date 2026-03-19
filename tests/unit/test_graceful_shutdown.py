@@ -73,13 +73,13 @@ def test_process_sources_exits_130_on_cancel(tmp_path):
         mock_gs.should_shutdown.side_effect = [False, True, True]
         MockGS.return_value = mock_gs
 
-        with patch("capcat.commands.fetch.process_source_articles") as mock_fetch:
+        with patch("capcat.commands.fetch.process_source_articles") as mock_fetch, \
+             patch("os._exit") as mock_exit:
             mock_fetch.return_value = None
-            with pytest.raises(SystemExit) as exc_info:
-                from capcat.commands.fetch import process_sources
-                process_sources(["hn", "lb"], args, config, logger, output_dir=str(tmp_path))
+            from capcat.commands.fetch import process_sources
+            process_sources(["hn", "lb"], args, config, logger, output_dir=str(tmp_path))
 
-    assert exc_info.value.code == 130
+    mock_exit.assert_called_once_with(130)
 
 
 def test_process_sources_prints_cancel_message(tmp_path, capsys):
@@ -101,10 +101,10 @@ def test_process_sources_prints_cancel_message(tmp_path, capsys):
         mock_gs.should_shutdown.side_effect = [False, True, True]
         MockGS.return_value = mock_gs
 
-        with patch("capcat.commands.fetch.process_source_articles"):
-            with pytest.raises(SystemExit):
-                from capcat.commands.fetch import process_sources
-                process_sources(["hn", "lb"], args, config, logger, output_dir=str(tmp_path))
+        with patch("capcat.commands.fetch.process_source_articles"), \
+             patch("os._exit"):
+            from capcat.commands.fetch import process_sources
+            process_sources(["hn", "lb"], args, config, logger, output_dir=str(tmp_path))
 
     captured = capsys.readouterr()
     assert "Cancelled" in captured.out
