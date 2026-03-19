@@ -53,7 +53,7 @@ Returns:
 ##### save_article_content
 
 ```python
-def save_article_content(self, article_folder_path: str, content: str) -> str
+def save_article_content(self, article_folder_path: str, content: str, title: str) -> str
 ```
 
 Save article content to the article folder.
@@ -61,7 +61,8 @@ Save article content to the article folder.
 Args:
     article_folder_path: Path to the article folder
     content: Content to save
-    
+    title: Article title used to generate the markdown filename
+
 Returns:
     Path to the saved content file
 
@@ -70,6 +71,7 @@ Returns:
 - `self`
 - `article_folder_path` (str)
 - `content` (str)
+- `title` (str)
 
 **Returns:** str
 
@@ -108,4 +110,90 @@ When user runs repeatedly, content is replaced instead of creating duplicates.
 
 **Returns:** str
 
+
+## Functions
+
+### article_md_filename
+
+```python
+def article_md_filename(title: str) -> str
+```
+
+Return sanitized markdown filename for an article (e.g. 'My-Title.md').
+
+The base stem is truncated at 200 chars before adding the extension.
+Spaces are replaced with hyphens.
+
+**Parameters:**
+
+- `title` (str)
+
+**Returns:** str
+
+### comments_md_filename
+
+```python
+def comments_md_filename(title: str) -> str
+```
+
+Return sanitized markdown filename for comments (e.g. 'My-Title-Comments.md').
+
+The base stem is truncated at 200 chars; '-Comments.md' is appended after truncation.
+Spaces are replaced with hyphens.
+
+**Parameters:**
+
+- `title` (str)
+
+**Returns:** str
+
+### find_article_md
+
+```python
+def find_article_md(folder: Path) -> 'Path | None'
+```
+
+Return the article markdown path in folder, or None if absent.
+
+Non-recursive: only searches direct children of folder.
+Returns the first .md file whose stem does not end in '-Comments'.
+
+**Parameters:**
+
+- `folder` (Path)
+
+**Returns:** 'Path | None'
+
+### find_comments_md
+
+```python
+def find_comments_md(folder: Path) -> 'Path | None'
+```
+
+Return the comments markdown path in folder, or None if absent.
+
+**Parameters:**
+
+- `folder` (Path)
+
+**Returns:** 'Path | None'
+
+### inject_comments_wikilink
+
+```python
+def inject_comments_wikilink(article_folder_path: str, comments_stem: str) -> bool
+```
+
+Inject a → [[comments_stem|Comments]] wikilink at top and bottom of the article .md.
+
+Idempotent: if line 1 already starts with '→ [[', returns True without modifying.
+Returns False on any error without raising.
+Module-level function, not a StorageManager method.
+
+**Parameters:**
+
+- `article_folder_path` (str)
+- `comments_stem` (str)
+
+**Returns:** bool
 

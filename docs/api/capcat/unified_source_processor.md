@@ -94,13 +94,28 @@ Check if source is available in the new source system.
 
 **Returns:** bool
 
+##### _assert_all_sources_in_new_system
+
+```python
+def _assert_all_sources_in_new_system(self) -> None
+```
+
+Assert that every source in the legacy config is also registered in the new system.
+Raises ValueError listing any sources that would fall through to the deleted legacy path.
+
+**Parameters:**
+
+- `self`
+
+**Returns:** None
+
 ##### process_source_articles
 
 ```python
-def process_source_articles(self, source_name: str, count: int, output_dir: str, quiet: bool = False, verbose: bool = False, download_files: bool = False, batch_mode: bool = False) -> None
+def process_source_articles(self, source_name: str, count: int, output_dir: str, quiet: bool = False, verbose: bool = False, download_files: bool = False, batch_mode: bool = False, generate_html: bool = False) -> None
 ```
 
-Universal article processing function that replaces all 46+ process_*_articles functions.
+Universal article processing function. All sources route through the new system.
 
 Args:
     source_name: The source identifier (e.g., 'hn', 'bbc', 'cnn')
@@ -109,6 +124,7 @@ Args:
     verbose: Enable verbose logging
     download_files: Enable media file downloads
     batch_mode: Whether processing multiple sources (affects retry messages)
+    generate_html: Generate HTML version after fetching
 
 **Parameters:**
 
@@ -120,130 +136,14 @@ Args:
 - `verbose` (bool) *optional*
 - `download_files` (bool) *optional*
 - `batch_mode` (bool) *optional*
+- `generate_html` (bool) *optional*
 
 **Returns:** None
-
-##### _get_articles
-
-```python
-def _get_articles(self, source_name: str, source_config: dict, count: int) -> List[Tuple[str, str, Optional[str]]]
-```
-
-Get articles using either custom scraping function or generic adapter.
-
-Returns:
-    List of (title, url, comment_url) tuples
-
-**Parameters:**
-
-- `self`
-- `source_name` (str)
-- `source_config` (dict)
-- `count` (int)
-
-**Returns:** List[Tuple[str, str, Optional[str]]]
-
-##### _get_articles_custom
-
-```python
-def _get_articles_custom(self, source_name: str, source_config: dict, count: int) -> List[Tuple[str, str, Optional[str]]]
-```
-
-Get articles using custom scraping function.
-
-**Parameters:**
-
-- `self`
-- `source_name` (str)
-- `source_config` (dict)
-- `count` (int)
-
-**Returns:** List[Tuple[str, str, Optional[str]]]
-
-##### _get_articles_generic
-
-```python
-def _get_articles_generic(self, source_name: str, source_config: dict, count: int) -> List[Tuple[str, str, Optional[str]]]
-```
-
-Get articles using generic configuration-driven adapter.
-
-**Parameters:**
-
-- `self`
-- `source_name` (str)
-- `source_config` (dict)
-- `count` (int)
-
-**Returns:** List[Tuple[str, str, Optional[str]]]
-
-##### _process_articles_parallel
-
-```python
-def _process_articles_parallel(self, source_name: str, source_config: dict, articles: List[Tuple], base_dir: str, download_files: bool, quiet: bool, verbose: bool) -> None
-```
-
-Process articles in parallel using ThreadPoolExecutor.
-
-**Parameters:**
-
-- `self`
-- `source_name` (str)
-- `source_config` (dict)
-- `articles` (List[Tuple])
-- `base_dir` (str)
-- `download_files` (bool)
-- `quiet` (bool)
-- `verbose` (bool)
-
-**Returns:** None
-
-⚠️ **High complexity:** 16
-
-##### _process_single_article
-
-```python
-def _process_single_article(self, source_name: str, source_config: dict, article_info: tuple, base_dir: str, download_files: bool, progress_tracker = None) -> bool
-```
-
-Process a single article with progress reporting.
-
-**Parameters:**
-
-- `self`
-- `source_name` (str)
-- `source_config` (dict)
-- `article_info` (tuple)
-- `base_dir` (str)
-- `download_files` (bool)
-- `progress_tracker` *optional*
-
-**Returns:** bool
-
-##### _process_article_custom
-
-```python
-def _process_article_custom(self, source_name: str, source_config: dict, article_info: tuple, base_dir: str, download_files: bool, progress_callback: Optional[Callable[[float, str], None]] = None) -> bool
-```
-
-Process article using source-specific functions.
-
-**Parameters:**
-
-- `self`
-- `source_name` (str)
-- `source_config` (dict)
-- `article_info` (tuple)
-- `base_dir` (str)
-- `download_files` (bool)
-- `progress_callback` (Optional[Callable[[float, str], None]]) *optional*
-
-**Returns:** bool
 
 ##### _process_with_new_system
 
 ```python
-def _process_with_new_system(self, source_name: str, count: int, output_dir: str, quiet: bool = False, verbose: bool = False, download_files: bool = False, batch_mode: bool = False) -> None
+def _process_with_new_system(self, source_name: str, count: int, output_dir: str, quiet: bool = False, verbose: bool = False, download_files: bool = False, batch_mode: bool = False, generate_html: bool = False) -> None
 ```
 
 Process articles using the new source system.
@@ -258,6 +158,7 @@ Process articles using the new source system.
 - `verbose` (bool) *optional*
 - `download_files` (bool) *optional*
 - `batch_mode` (bool) *optional*
+- `generate_html` (bool) *optional*
 
 **Returns:** None
 
@@ -279,7 +180,7 @@ Process articles using the new source system with parallel execution.
 - `quiet` (bool)
 - `verbose` (bool)
 
-⚠️ **High complexity:** 14
+⚠️ **High complexity:** 16
 
 ##### _process_single_article_new_system
 
@@ -301,27 +202,7 @@ Process a single article using the new source system.
 
 **Returns:** bool
 
-⚠️ **High complexity:** 14
-
-##### _process_article_generic
-
-```python
-def _process_article_generic(self, source_name: str, source_config: dict, article_info: tuple, base_dir: str, download_files: bool, progress_callback: Optional[Callable[[float, str], None]] = None) -> bool
-```
-
-Process article using generic configuration-driven approach.
-
-**Parameters:**
-
-- `self`
-- `source_name` (str)
-- `source_config` (dict)
-- `article_info` (tuple)
-- `base_dir` (str)
-- `download_files` (bool)
-- `progress_callback` (Optional[Callable[[float, str], None]]) *optional*
-
-**Returns:** bool
+⚠️ **High complexity:** 16
 
 
 ## Functions
@@ -339,7 +220,7 @@ Get global unified processor instance.
 ### process_source_articles
 
 ```python
-def process_source_articles(source_name: str, count: int, output_dir: str, quiet: bool = False, verbose: bool = False, download_files: bool = False, batch_mode: bool = False) -> None
+def process_source_articles(source_name: str, count: int, output_dir: str, quiet: bool = False, verbose: bool = False, download_files: bool = False, batch_mode: bool = False, generate_html: bool = False) -> None
 ```
 
 Convenience function to process articles from any source.
@@ -362,19 +243,9 @@ Args:
 - `verbose` (bool) *optional*
 - `download_files` (bool) *optional*
 - `batch_mode` (bool) *optional*
+- `generate_html` (bool) *optional*
 
 **Returns:** None
-
-### progress_callback
-
-```python
-def progress_callback(progress: float, stage: str)
-```
-
-**Parameters:**
-
-- `progress` (float)
-- `stage` (str)
 
 ### progress_callback
 

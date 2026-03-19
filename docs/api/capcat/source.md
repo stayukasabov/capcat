@@ -81,6 +81,27 @@ Returns:
 
 **Returns:** Optional[str]
 
+##### _fetch_oembed_title
+
+```python
+def _fetch_oembed_title(self, url: str) -> Optional[str]
+```
+
+Fetch video title from YouTube oEmbed API (no API key required).
+
+Args:
+    url: YouTube video URL
+
+Returns:
+    Video title or None if fetch fails
+
+**Parameters:**
+
+- `self`
+- `url` (str)
+
+**Returns:** Optional[str]
+
 ##### fetch_article_content
 
 ```python
