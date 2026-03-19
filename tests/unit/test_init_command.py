@@ -14,14 +14,14 @@ def test_init_creates_config_dir(project_dir: Path):
     from capcat.commands.init import init_project
     init_project(project_dir)
     assert (project_dir / "Config").is_dir()
-    assert (project_dir / "Config" / "capcat.yml").is_file()
+    assert (project_dir / "Config" / "themes").is_dir()
+    assert not (project_dir / "Config" / "capcat.yml").exists()
 
 
-def test_init_creates_source_dirs(project_dir: Path):
+def test_init_does_not_create_source_dirs(project_dir: Path):
     from capcat.commands.init import init_project
     init_project(project_dir)
-    assert (project_dir / "Config" / "sources" / "active" / "config_driven").is_dir()
-    assert (project_dir / "Config" / "sources" / "active" / "custom").is_dir()
+    assert not (project_dir / "Config" / "sources").exists()
 
 
 def test_init_creates_gitignore(project_dir: Path):
@@ -55,8 +55,10 @@ def test_init_fails_if_already_initialized(project_dir: Path):
 def test_reinit_resets_capcat_dir_only(project_dir: Path):
     from capcat.commands.init import init_project
     init_project(project_dir)
-    user_config = project_dir / "Config" / "capcat.yml"
-    user_config.write_text("custom: true\n")
+    user_file = project_dir / "Config" / "themes" / "base.css"
+    original = user_file.read_text()
+    user_file.write_text("/* custom */\n")
     init_project(project_dir, reinit=True)
     assert (project_dir / ".capcat").is_dir()
-    assert user_config.read_text() == "custom: true\n"
+    # reinit must not touch Config/
+    assert user_file.read_text() == "/* custom */\n"

@@ -12,14 +12,6 @@ News/
 Capcats/
 """
 
-DEFAULT_CONFIG = """\
-# Capcat configuration
-# See: https://github.com/<owner>/capcat/docs/quick-start.md
-
-sources: []
-bundles: {}
-"""
-
 
 class AlreadyInitializedError(Exception):
     """Raised when init is called on an existing project without --reinit."""
@@ -77,16 +69,9 @@ def init_project(root: Path, reinit: bool = False) -> None:
         return  # Config is user-owned; never touch it on reinit
 
     config_dir.mkdir(exist_ok=True)
-    sources_dir = config_dir / "sources" / "active"
-    (sources_dir / "config_driven").mkdir(parents=True, exist_ok=True)
-    (sources_dir / "custom").mkdir(parents=True, exist_ok=True)
     themes_dir = config_dir / "themes"
     themes_dir.mkdir(exist_ok=True)
     _copy_themes_to(themes_dir)
-
-    config_file = config_dir / "capcat.yml"
-    if not config_file.exists():
-        config_file.write_text(DEFAULT_CONFIG)
 
     gitignore = root / ".gitignore"
     if gitignore.exists():
