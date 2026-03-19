@@ -70,7 +70,7 @@ def test_generate_article_html_single_article_has_no_navigation(article_md):
         str(article_md), "My Title", BREADCRUMB, SOURCE_CONFIG,
         html_subfolder=True, is_single_article=True,
     )
-    assert "navigation-container" not in result
+    assert 'class="navigation-container"' not in result
 
 
 def test_generate_article_html_with_comments_md_shows_comments_button(article_with_comments):
@@ -81,7 +81,7 @@ def test_generate_article_html_with_comments_md_shows_comments_button(article_wi
         {"template": {"variant": "article-with-comments"}},
         html_subfolder=True,
     )
-    assert "comments-link" in result
+    assert 'href="comments.html"' in result
 
 
 def test_generate_article_html_without_comments_md_hides_comments_button(article_md):
@@ -91,4 +91,4 @@ def test_generate_article_html_without_comments_md_hides_comments_button(article
         str(article_md), "My Title", BREADCRUMB, SOURCE_CONFIG,
         html_subfolder=True,
     )
-    assert "comments-link" not in result
+    assert 'href="comments.html"' not in result
