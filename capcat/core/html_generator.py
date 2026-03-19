@@ -898,6 +898,11 @@ class HTMLGenerator:
         breadcrumb_items = []
         for i, item in enumerate(show_items):
             levels_up = base_depth - i
+            # comments.html and article.html both live in html/ — same directory.
+            # The formula gives levels_up=1 for the article link, but that would
+            # point to ../article.html (wrong directory). Override to 0.
+            if is_comments and i == 2:
+                levels_up = 0
             href = "../" * levels_up + filenames[i]
 
             if i == 0:
