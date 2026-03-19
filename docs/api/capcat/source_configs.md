@@ -89,6 +89,8 @@ Provides full backward compatibility with SOURCE_CONFIGURATIONS.
 def __init__(self)
 ```
 
+Initialize with an empty dict; configs are loaded on first access.
+
 **Parameters:**
 
 - `self`
@@ -111,6 +113,17 @@ Ensure configurations are loaded.
 def __getitem__(self, key)
 ```
 
+Load configs if needed, then return item for *key*.
+
+Args:
+    key: Source identifier string.
+
+Returns:
+    Source configuration dict for *key*.
+
+Raises:
+    KeyError: If *key* is not a registered source.
+
 **Parameters:**
 
 - `self`
@@ -121,6 +134,12 @@ def __getitem__(self, key)
 ```python
 def __setitem__(self, key, value)
 ```
+
+Load configs if needed, then set *key* to *value*.
+
+Args:
+    key: Source identifier string.
+    value: Configuration dict to store.
 
 **Parameters:**
 
@@ -134,6 +153,14 @@ def __setitem__(self, key, value)
 def __contains__(self, key)
 ```
 
+Load configs if needed, then test membership.
+
+Args:
+    key: Source identifier string.
+
+Returns:
+    ``True`` if *key* is a registered source.
+
 **Parameters:**
 
 - `self`
@@ -144,6 +171,15 @@ def __contains__(self, key)
 ```python
 def get(self, key, default = None)
 ```
+
+Load configs if needed, then return item or *default*.
+
+Args:
+    key: Source identifier string.
+    default: Value to return when *key* is absent.
+
+Returns:
+    Config dict for *key*, or *default*.
 
 **Parameters:**
 
@@ -157,6 +193,11 @@ def get(self, key, default = None)
 def keys(self)
 ```
 
+Load configs if needed, then return all source IDs.
+
+Returns:
+    Dict keys view of all registered source identifiers.
+
 **Parameters:**
 
 - `self`
@@ -166,6 +207,11 @@ def keys(self)
 ```python
 def values(self)
 ```
+
+Load configs if needed, then return all config dicts.
+
+Returns:
+    Dict values view of all source configuration dicts.
 
 **Parameters:**
 
@@ -177,6 +223,11 @@ def values(self)
 def items(self)
 ```
 
+Load configs if needed, then return (source_id, config) pairs.
+
+Returns:
+    Dict items view of ``(source_id, config_dict)`` pairs.
+
 **Parameters:**
 
 - `self`
@@ -187,6 +238,11 @@ def items(self)
 def __len__(self)
 ```
 
+Load configs if needed, then return the number of registered sources.
+
+Returns:
+    Count of registered source configurations.
+
 **Parameters:**
 
 - `self`
@@ -196,6 +252,11 @@ def __len__(self)
 ```python
 def __iter__(self)
 ```
+
+Load configs if needed, then iterate over source IDs.
+
+Returns:
+    Iterator over all registered source identifier strings.
 
 **Parameters:**
 

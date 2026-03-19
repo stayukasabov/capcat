@@ -26,6 +26,20 @@ def __init__(self)
 
 - `self`
 
+##### _resolve_user_themes_dir
+
+```python
+def _resolve_user_themes_dir(self) -> 'Path | None'
+```
+
+Return Config/themes/ if it exists in the project root, else None.
+
+**Parameters:**
+
+- `self`
+
+**Returns:** 'Path | None'
+
 ##### render_template
 
 ```python
