@@ -25,7 +25,7 @@ from capcat.core.utils import truncate_title_intelligently
 from capcat.core.storage_manager import find_article_md, find_comments_md
 
 
-class HTMLGenerator:
+class ArticleHTMLGenerator:
     """
     Static HTML generator for Capcat archives.
     Creates self-contained HTML files with embedded CSS and JavaScript.
@@ -1741,7 +1741,7 @@ class HTMLGenerator:
             source_part = source_date_match.group(1)
             # The source_part is the display name with spaces replaced by underscores.
             # Just reverse that transformation to get the proper name and casing.
-            return source_part.replace('_', ' ')
+            return source_part.replace('_', ' ').replace('-', ' ')
 
         # Fallback for article titles (e.g., "01_My_Article_Title")
         cleaned = re.sub(r"^\d+_", "", title)

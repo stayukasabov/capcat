@@ -14,7 +14,7 @@ from typing import Dict, List, Optional, Tuple
 import yaml
 
 from capcat.core.config import get_config
-from capcat.core.html_generator import HTMLGenerator
+from capcat.htmlgen import HTMLGeneratorFactory
 from capcat.core.logging_config import get_logger
 from capcat.core.storage_manager import find_article_md, find_comments_md
 import re
@@ -29,7 +29,7 @@ class HTMLPostProcessor:
     def __init__(self):
         self.logger = get_logger(__name__)
         self.config = get_config()
-        self.html_generator = HTMLGenerator()
+        self.html_generator = HTMLGeneratorFactory.create()
 
     def process_directory_tree(self, root_path: str, incremental: bool = True, is_single_article: bool = False) -> str:
         """

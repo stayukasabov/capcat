@@ -2513,14 +2513,17 @@ class ArticleFetcher(ABC):
                 if progress_callback:
                     progress_callback(0.8, "generating HTML")
 
-                from capcat.core.html_generator import HTMLGenerator
-                html_gen = HTMLGenerator()
+                from capcat.htmlgen import HTMLGeneratorFactory
+                html_gen = HTMLGeneratorFactory.create()
 
                 try:
-                    html_gen.generate_article_html(
-                        markdown_path=md_path,
-                        output_dir=article_folder,
-                        theme=None  # Use default theme
+                    html_gen.generate_article_html_from_template(
+                        str(md_path),
+                        title,
+                        [],   # no breadcrumb for PDF single-article path
+                        {"template": {"variant": "article-no-comments"}},
+                        html_subfolder=False,
+                        is_single_article=True,
                     )
                 except Exception as e:
                     self.logger.warning(f"HTML generation failed: {e}, skipping HTML output")

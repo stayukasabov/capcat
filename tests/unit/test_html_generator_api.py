@@ -18,7 +18,7 @@ import pytest
 @pytest.fixture()
 def generator():
     """Return a bare HTMLGenerator instance (no file I/O)."""
-    from capcat.core.html_generator import HTMLGenerator
+    from capcat.htmlgen import ArticleHTMLGenerator as HTMLGenerator
     return HTMLGenerator()
 
 
