@@ -19,7 +19,7 @@ import pytest
 @pytest.fixture()
 def generator():
     """HTMLGenerator instance with access to the private breadcrumb method."""
-    from capcat.core.html_generator import HTMLGenerator
+    from capcat.htmlgen import ArticleHTMLGenerator as HTMLGenerator
     return HTMLGenerator()
 
 
