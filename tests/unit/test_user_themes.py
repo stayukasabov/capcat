@@ -125,7 +125,7 @@ def test_upgrade_n_updates_version_marker(tmp_path, monkeypatch):
 # ---------------------------------------------------------------------------
 
 from pathlib import Path as _Path
-from capcat.core.html_generator import HTMLGenerator
+from capcat.htmlgen import ArticleHTMLGenerator as HTMLGenerator
 from capcat.core.config import NoProjectError
 
 
@@ -135,7 +135,7 @@ def test_generator_embeds_user_base_css(tmp_path, monkeypatch):
     themes.mkdir(parents=True)
     (themes / "base.css").write_text("/* user-base */")
 
-    import capcat.core.html_generator as hg
+    import capcat.htmlgen.generator as hg
     monkeypatch.setattr(hg, "find_project_root", lambda: tmp_path)
 
     gen = HTMLGenerator()
@@ -145,7 +145,7 @@ def test_generator_embeds_user_base_css(tmp_path, monkeypatch):
 
 def test_generator_falls_back_to_package_base_css(monkeypatch):
     """Generator falls back to package base.css when no project root found."""
-    import capcat.core.html_generator as hg
+    import capcat.htmlgen.generator as hg
 
     def _raise_no_project():
         raise NoProjectError("no project")
@@ -164,7 +164,7 @@ def test_generator_per_file_fallback(tmp_path, monkeypatch):
     themes.mkdir(parents=True)
     # dir exists but base.css not present
 
-    import capcat.core.html_generator as hg
+    import capcat.htmlgen.generator as hg
     monkeypatch.setattr(hg, "find_project_root", lambda: tmp_path)
 
     gen = HTMLGenerator()
@@ -178,7 +178,7 @@ def test_design_system_compiler_uses_user_dir(tmp_path, monkeypatch):
     themes.mkdir(parents=True)
     (themes / "design-system.css").write_text(":root { --color-accent: pink; }")
 
-    import capcat.core.html_generator as hg
+    import capcat.htmlgen.generator as hg
     monkeypatch.setattr(hg, "find_project_root", lambda: tmp_path)
 
     gen = HTMLGenerator()
