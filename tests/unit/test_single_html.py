@@ -73,7 +73,7 @@ def test_single_html_does_not_call_generate_html_file(tmp_path: Path) -> None:
         with patch(
             "capcat.core.html_post_processor.HTMLPostProcessor.process_directory_tree"
         ):
-            from capcat.core.html_generator import HTMLGenerator
+            from capcat.htmlgen import ArticleHTMLGenerator as HTMLGenerator
 
             # Verify the ghost method still doesn't exist
             assert not hasattr(HTMLGenerator(), "generate_html_file"), (
