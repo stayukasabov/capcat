@@ -18,18 +18,14 @@ Context manager for handling graceful shutdown on signals.
 ##### __init__
 
 ```python
-def __init__(self, cleanup_func: Optional[Callable] = None)
+def __init__(self)
 ```
 
 Initialize graceful shutdown handler.
 
-Args:
-    cleanup_func: Optional cleanup function to call on shutdown
-
 **Parameters:**
 
 - `self`
-- `cleanup_func` (Optional[Callable]) *optional*
 
 ##### __enter__
 
@@ -64,7 +60,7 @@ Restore original signal handlers.
 def _signal_handler(self, signum: int, frame)
 ```
 
-Handle shutdown signals.
+Handle shutdown signals — sets event only. No sys.exit, no sleep.
 
 **Parameters:**
 
@@ -191,6 +187,16 @@ Returns:
 
 
 ## Functions
+
+### get_shutdown
+
+```python
+def get_shutdown() -> Optional['GracefulShutdown']
+```
+
+Return the active GracefulShutdown instance, or None if not installed.
+
+**Returns:** Optional['GracefulShutdown']
 
 ### setup_signal_handlers
 

@@ -13,17 +13,32 @@ Defines the contract that all source implementations must follow.
 
 Configuration data class for news sources.
 
+Attributes:
+    name: Machine-readable identifier (e.g. ``"hn"``).
+    display_name: Human-readable name shown in menus (e.g. ``"Hacker News"``).
+    base_url: Root URL of the source.
+    timeout: HTTP request timeout in seconds.
+    rate_limit: Minimum delay between requests in seconds.
+    supports_comments: True if the source has comment threads.
+    has_comments: True if the current fetch includes comments.
+    category: Topic category (e.g. ``"tech"``, ``"science"``).
+    custom_config: Source-specific extra config key/value pairs.
+
 #### Methods
 
 ##### __post_init__
 
 ```python
-def __post_init__(self)
+def __post_init__(self) -> None
 ```
+
+Ensure custom_config is never None after construction.
 
 **Parameters:**
 
 - `self`
+
+**Returns:** None
 
 ##### to_dict
 
@@ -45,19 +60,32 @@ Returns:
 
 ### Article
 
-Data class representing a news article.
+Lightweight data transfer object for a single news article.
+
+Attributes:
+    title: Article headline.
+    url: Canonical URL of the article.
+    comment_url: URL of the comments page, if available.
+    author: Byline, anonymized to ``"Anonymous"`` where applicable.
+    published_date: Publication date string (format varies by source).
+    summary: Short excerpt or lede, if provided by the feed.
+    tags: List of topic tags associated with the article.
 
 #### Methods
 
 ##### __post_init__
 
 ```python
-def __post_init__(self)
+def __post_init__(self) -> None
 ```
+
+Ensure tags is never None after construction.
 
 **Parameters:**
 
 - `self`
+
+**Returns:** None
 
 
 ### BaseSource
@@ -471,6 +499,13 @@ Base exception for source-related errors.
 def __init__(self, message: str, source_name: str = None)
 ```
 
+Create a SourceError with an optional source name prefix.
+
+Args:
+    message: Human-readable description of the error.
+    source_name: Source identifier prepended to the message in
+        ``__str__`` (e.g. ``"hn"``). Defaults to ``None``.
+
 **Parameters:**
 
 - `self`
@@ -482,6 +517,12 @@ def __init__(self, message: str, source_name: str = None)
 ```python
 def __str__(self)
 ```
+
+Return message prefixed with ``[source_name]`` when set.
+
+Returns:
+    ``"[source_name] message"`` if *source_name* is set, otherwise
+    the plain *message* string.
 
 **Parameters:**
 

@@ -435,6 +435,8 @@ Maintains the same interface but produces no output.
 def __init__(self)
 ```
 
+Accept and discard all constructor arguments.
+
 **Parameters:**
 
 - `self`
@@ -445,6 +447,8 @@ def __init__(self)
 def __enter__(self)
 ```
 
+Context manager entry — returns self.
+
 **Parameters:**
 
 - `self`
@@ -454,6 +458,8 @@ def __enter__(self)
 ```python
 def __exit__(self, exc_type, exc_val, exc_tb)
 ```
+
+Context manager exit — no-op.
 
 **Parameters:**
 
@@ -468,6 +474,8 @@ def __exit__(self, exc_type, exc_val, exc_tb)
 def start(self)
 ```
 
+No-op start.
+
 **Parameters:**
 
 - `self`
@@ -477,6 +485,11 @@ def start(self)
 ```python
 def stop(self, success_message: Optional[str] = None)
 ```
+
+No-op stop.
+
+Args:
+    success_message: Ignored.
 
 **Parameters:**
 
@@ -488,6 +501,12 @@ def stop(self, success_message: Optional[str] = None)
 ```python
 def update(self, increment: int = 1, status_message: Optional[str] = None)
 ```
+
+No-op update.
+
+Args:
+    increment: Ignored.
+    status_message: Ignored.
 
 **Parameters:**
 
@@ -503,6 +522,10 @@ def update_item_progress(self, progress: float, stage: str = '')
 
 No-op implementation of update_item_progress for interface compatibility.
 
+Args:
+    progress: Ignored.
+    stage: Ignored.
+
 **Parameters:**
 
 - `self`
@@ -515,6 +538,11 @@ No-op implementation of update_item_progress for interface compatibility.
 def error(self, error_message: str)
 ```
 
+No-op error display.
+
+Args:
+    error_message: Ignored.
+
 **Parameters:**
 
 - `self`
@@ -525,6 +553,12 @@ def error(self, error_message: str)
 ```python
 def item_completed(self, success: bool = True, item_name: Optional[str] = None)
 ```
+
+No-op item completion marker.
+
+Args:
+    success: Ignored.
+    item_name: Ignored.
 
 **Parameters:**
 
@@ -538,6 +572,11 @@ def item_completed(self, success: bool = True, item_name: Optional[str] = None)
 def get_summary(self) -> str
 ```
 
+Return empty summary string.
+
+Returns:
+    Always returns an empty string.
+
 **Parameters:**
 
 - `self`
@@ -549,6 +588,8 @@ def get_summary(self) -> str
 ```python
 def finish(self)
 ```
+
+No-op finish.
 
 **Parameters:**
 
@@ -564,19 +605,6 @@ def _restore_cursor()
 ```
 
 Global function to ensure cursor is always restored on exit.
-
-### _signal_handler
-
-```python
-def _signal_handler(signum, frame)
-```
-
-Handle interruption signals and restore cursor.
-
-**Parameters:**
-
-- `signum`
-- `frame`
 
 ### _get_terminal_width
 
@@ -697,6 +725,14 @@ Returns:
 def decorator(func: Callable) -> Callable
 ```
 
+Wrap *func* with a ``ProgressIndicator`` context manager.
+
+Args:
+    func: The callable to decorate.
+
+Returns:
+    A wrapper that shows progress while *func* executes.
+
 **Parameters:**
 
 - `func` (Callable)
@@ -708,6 +744,15 @@ def decorator(func: Callable) -> Callable
 ```python
 def wrapper() -> Any
 ```
+
+Run *func* inside a progress indicator.
+
+Args:
+    *args: Positional arguments forwarded to *func*.
+    **kwargs: Keyword arguments forwarded to *func*.
+
+Returns:
+    The return value of *func*.
 
 **Returns:** Any
 

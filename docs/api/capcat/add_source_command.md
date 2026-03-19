@@ -36,6 +36,9 @@ Validate source metadata.
 
 Protocol for RSS feed introspection.
 
+Implementations read a feed URL and expose its title and base URL.
+See ``RssFeedIntrospector`` for the production implementation.
+
 #### Methods
 
 ##### feed_title
@@ -43,6 +46,8 @@ Protocol for RSS feed introspection.
 ```python
 def feed_title(self) -> str
 ```
+
+Human-readable title extracted from the RSS/Atom feed.
 
 **Parameters:**
 
@@ -56,6 +61,8 @@ def feed_title(self) -> str
 def base_url(self) -> str
 ```
 
+Root URL of the publisher (stripped of path).
+
 **Parameters:**
 
 - `self`
@@ -67,7 +74,10 @@ def base_url(self) -> str
 
 **Inherits from:** Protocol
 
-Protocol for user interaction.
+Protocol for user interaction during the add-source workflow.
+
+Implementations may use questionary (interactive TUI), a mock (tests),
+or any other mechanism that satisfies this contract.
 
 #### Methods
 
@@ -76,6 +86,14 @@ Protocol for user interaction.
 ```python
 def get_source_id(self, suggested: str) -> str
 ```
+
+Prompt the user to confirm or override the suggested source ID.
+
+Args:
+    suggested: Auto-derived source ID (e.g. ``"mysite"``).
+
+Returns:
+    The confirmed or overridden source ID string.
 
 **Parameters:**
 
@@ -90,6 +108,14 @@ def get_source_id(self, suggested: str) -> str
 def select_category(self, categories: List[str]) -> str
 ```
 
+Prompt the user to choose a topic category.
+
+Args:
+    categories: Available category names.
+
+Returns:
+    The selected category string.
+
 **Parameters:**
 
 - `self`
@@ -103,6 +129,11 @@ def select_category(self, categories: List[str]) -> str
 def confirm_bundle_addition(self) -> bool
 ```
 
+Ask whether to add the new source to an existing bundle.
+
+Returns:
+    ``True`` if the user wants to add to a bundle.
+
 **Parameters:**
 
 - `self`
@@ -114,6 +145,14 @@ def confirm_bundle_addition(self) -> bool
 ```python
 def select_bundle(self, bundles: List[str]) -> Optional[str]
 ```
+
+Prompt the user to pick a bundle to add the source to.
+
+Args:
+    bundles: Available bundle names.
+
+Returns:
+    Selected bundle name, or ``None`` if cancelled.
 
 **Parameters:**
 
@@ -128,6 +167,11 @@ def select_bundle(self, bundles: List[str]) -> Optional[str]
 def confirm_test_fetch(self) -> bool
 ```
 
+Ask whether to run a test fetch after saving the config.
+
+Returns:
+    ``True`` if the user wants a test fetch.
+
 **Parameters:**
 
 - `self`
@@ -139,6 +183,11 @@ def confirm_test_fetch(self) -> bool
 ```python
 def show_success(self, message: str) -> None
 ```
+
+Display a success notification.
+
+Args:
+    message: Success text to show the user.
 
 **Parameters:**
 
@@ -152,6 +201,11 @@ def show_success(self, message: str) -> None
 ```python
 def show_error(self, message: str) -> None
 ```
+
+Display an error notification.
+
+Args:
+    message: Error text to show the user.
 
 **Parameters:**
 
@@ -174,6 +228,15 @@ Protocol for configuration file generation.
 ```python
 def generate_and_save(self, metadata: SourceMetadata, config_path: Path) -> Path
 ```
+
+Generate a YAML config file and write it to disk.
+
+Args:
+    metadata: Source metadata to serialize.
+    config_path: Directory where the config file should be saved.
+
+Returns:
+    Path to the written config file.
 
 **Parameters:**
 
@@ -198,6 +261,11 @@ Protocol for bundle management.
 def get_bundle_names(self) -> List[str]
 ```
 
+Return the names of all available bundles.
+
+Returns:
+    List of bundle name strings.
+
 **Parameters:**
 
 - `self`
@@ -209,6 +277,12 @@ def get_bundle_names(self) -> List[str]
 ```python
 def add_source_to_bundle(self, source_id: str, bundle_name: str) -> None
 ```
+
+Add a source to a named bundle in bundles.yml.
+
+Args:
+    source_id: Source identifier to add.
+    bundle_name: Bundle to add the source to.
 
 **Parameters:**
 
@@ -233,6 +307,15 @@ Protocol for testing new sources.
 def test_source(self, source_id: str, count: int = 1) -> bool
 ```
 
+Run a test fetch to verify the source is functional.
+
+Args:
+    source_id: The source identifier to test.
+    count: Number of articles to attempt fetching.
+
+Returns:
+    ``True`` if at least one article was fetched successfully.
+
 **Parameters:**
 
 - `self`
@@ -255,6 +338,11 @@ Protocol for category management.
 ```python
 def get_available_categories(self) -> List[str]
 ```
+
+Return all available topic category names.
+
+Returns:
+    List of category strings (e.g. ``["tech", "science", "news"]``).
 
 **Parameters:**
 
@@ -279,8 +367,21 @@ Follows SOLID principles:
 ##### __init__
 
 ```python
-def __init__(self, introspector_factory: 'IntrospectorFactory', ui: UserInterface, config_generator: ConfigGenerator, bundle_manager: BundleManager, source_tester: SourceTester, category_provider: CategoryProvider, config_path: Path, bundles_path: Path, logger: Optional[Any] = None)
+def __init__(self, introspector_factory: 'IntrospectorFactory', ui: UserInterface, config_generator: ConfigGenerator, bundle_manager: BundleManager, source_tester: SourceTester, category_provider: CategoryProvider, config_path: Path, bundles_path: Path, logger: Optional[Any] = None) -> None
 ```
+
+Wire up all dependencies for the add-source workflow.
+
+Args:
+    introspector_factory: Creates FeedIntrospector instances for URLs.
+    ui: User interaction layer (questionary, mock, etc.).
+    config_generator: Writes YAML config files to disk.
+    bundle_manager: Reads and updates bundles.yml.
+    source_tester: Runs test fetches against new sources.
+    category_provider: Returns available topic categories.
+    config_path: Directory where new source configs are saved.
+    bundles_path: Path to bundles.yml.
+    logger: Optional logger; defaults to module logger.
 
 **Parameters:**
 
@@ -294,6 +395,8 @@ def __init__(self, introspector_factory: 'IntrospectorFactory', ui: UserInterfac
 - `config_path` (Path)
 - `bundles_path` (Path)
 - `logger` (Optional[Any]) *optional*
+
+**Returns:** None
 
 ##### execute
 
@@ -422,6 +525,14 @@ Factory for creating feed introspectors.
 def create(self, url: str) -> FeedIntrospector
 ```
 
+Create a FeedIntrospector for the given feed URL.
+
+Args:
+    url: RSS/Atom feed URL to introspect.
+
+Returns:
+    A FeedIntrospector instance ready to expose feed metadata.
+
 **Parameters:**
 
 - `self`
@@ -442,6 +553,12 @@ Adapter to make existing RssFeedIntrospector compatible with protocol.
 def __init__(self, introspector)
 ```
 
+Wrap an existing RssFeedIntrospector instance.
+
+Args:
+    introspector: An ``RssFeedIntrospector`` instance whose
+        ``feed_title`` and ``base_url`` attributes will be proxied.
+
 **Parameters:**
 
 - `self`
@@ -452,6 +569,8 @@ def __init__(self, introspector)
 ```python
 def feed_title(self) -> str
 ```
+
+Human-readable title extracted from the wrapped introspector.
 
 **Parameters:**
 
@@ -464,6 +583,8 @@ def feed_title(self) -> str
 ```python
 def base_url(self) -> str
 ```
+
+Root URL of the publisher from the wrapped introspector.
 
 **Parameters:**
 
@@ -483,6 +604,19 @@ Factory for creating RSS feed introspectors.
 ```python
 def create(self, url: str) -> FeedIntrospector
 ```
+
+Create an adapted RSS feed introspector for the given URL.
+
+Instantiates ``RssFeedIntrospector`` and wraps it in
+``RssFeedIntrospectorAdapter`` so it satisfies the
+``FeedIntrospector`` protocol.
+
+Args:
+    url: RSS/Atom feed URL to introspect.
+
+Returns:
+    An ``RssFeedIntrospectorAdapter`` exposing ``feed_title``
+    and ``base_url`` for the given feed.
 
 **Parameters:**
 
@@ -504,6 +638,13 @@ Adapter for existing SourceConfigGenerator.
 def __init__(self, generator_class)
 ```
 
+Store the SourceConfigGenerator class for deferred instantiation.
+
+Args:
+    generator_class: The ``SourceConfigGenerator`` class (not an
+        instance). It will be instantiated per call to
+        ``generate_and_save`` with the serialized metadata dict.
+
 **Parameters:**
 
 - `self`
@@ -514,6 +655,19 @@ def __init__(self, generator_class)
 ```python
 def generate_and_save(self, metadata: SourceMetadata, config_path: Path) -> Path
 ```
+
+Serialize metadata and delegate to the wrapped generator class.
+
+Converts ``SourceMetadata`` to the dict format expected by
+``SourceConfigGenerator``, instantiates it, and calls its own
+``generate_and_save`` method.
+
+Args:
+    metadata: Source metadata to serialize into a YAML config file.
+    config_path: Directory where the config file should be written.
+
+Returns:
+    Path to the written YAML config file.
 
 **Parameters:**
 
@@ -536,6 +690,20 @@ Source tester using subprocess calls.
 def test_source(self, source_id: str, count: int = 1) -> bool
 ```
 
+Run a test fetch via the ``./capcat fetch`` subprocess.
+
+Invokes ``./capcat fetch <source_id> --count <count>`` and treats
+a zero exit code as success.
+
+Args:
+    source_id: The source identifier to test.
+    count: Number of articles to attempt fetching. Defaults to 1.
+
+Returns:
+    ``True`` if the subprocess exits with code 0 within 30 seconds,
+    ``False`` on non-zero exit, timeout, or if the ``capcat``
+    wrapper is not found.
+
 **Parameters:**
 
 - `self`
@@ -556,6 +724,17 @@ Category provider using source registry.
 ```python
 def get_available_categories(self) -> List[str]
 ```
+
+Return categories derived from all currently registered sources.
+
+Queries the global ``SourceRegistry`` for all active source configs
+and collects unique ``category`` values. Falls back to a hard-coded
+default list if the registry is unavailable or yields no categories.
+
+Returns:
+    Sorted list of category strings (e.g. ``["ai", "news", "tech"]``).
+    Defaults to ``['tech', 'news', 'science', 'ai', 'sports', 'general']``
+    if the registry cannot be reached.
 
 **Parameters:**
 

@@ -7,12 +7,6 @@
 Feed parser abstraction for RSS and Atom feeds.
 Provides clean separation of feed parsing logic.
 
-## Constants
-
-### ATOM_NS
-
-**Value:** `{'atom': 'http://www.w3.org/2005/Atom'}`
-
 ## Classes
 
 ### FeedItem
@@ -72,48 +66,15 @@ Args:
 Returns:
     List of FeedItem objects sorted by date (most recent first)
 
+Raises:
+    ValueError: If the content cannot be parsed as RSS
+
 **Parameters:**
 
 - `self`
 - `content` (bytes)
 
 **Returns:** List[FeedItem]
-
-##### _get_text
-
-```python
-def _get_text(element) -> str
-```
-
-Extract and clean text from XML element.
-
-**Parameters:**
-
-- `element`
-
-**Returns:** str
-
-##### _parse_rss_date
-
-```python
-def _parse_rss_date(element) -> Optional[datetime]
-```
-
-Parse RSS pubDate to datetime.
-
-RSS uses RFC 822/2822 format: "Mon, 08 Dec 2025 12:00:00 GMT"
-
-Args:
-    element: XML element containing date
-
-Returns:
-    datetime object or None if parsing fails
-
-**Parameters:**
-
-- `element`
-
-**Returns:** Optional[datetime]
 
 
 ### AtomParser
@@ -138,94 +99,15 @@ Args:
 Returns:
     List of FeedItem objects sorted by date (most recent first)
 
+Raises:
+    ValueError: If the content cannot be parsed as Atom
+
 **Parameters:**
 
 - `self`
 - `content` (bytes)
 
 **Returns:** List[FeedItem]
-
-##### _extract_title
-
-```python
-def _extract_title(self, entry) -> Optional[str]
-```
-
-Extract title from Atom entry.
-
-**Parameters:**
-
-- `self`
-- `entry`
-
-**Returns:** Optional[str]
-
-##### _extract_link
-
-```python
-def _extract_link(self, entry) -> Optional[str]
-```
-
-Extract link from Atom entry.
-
-**Parameters:**
-
-- `self`
-- `entry`
-
-**Returns:** Optional[str]
-
-##### _extract_description
-
-```python
-def _extract_description(self, entry) -> Optional[str]
-```
-
-Extract description/summary from Atom entry.
-
-**Parameters:**
-
-- `self`
-- `entry`
-
-**Returns:** Optional[str]
-
-##### _extract_date
-
-```python
-def _extract_date(self, entry) -> Optional[datetime]
-```
-
-Extract publication date from Atom entry.
-
-Atom uses <published> and <updated> tags in ISO 8601 format.
-
-Args:
-    entry: Atom entry element
-
-Returns:
-    datetime object or None if parsing fails
-
-**Parameters:**
-
-- `self`
-- `entry`
-
-**Returns:** Optional[datetime]
-
-##### _get_text
-
-```python
-def _get_text(element) -> str
-```
-
-Extract and clean text from XML element.
-
-**Parameters:**
-
-- `element`
-
-**Returns:** str
 
 
 ### FeedParserFactory
@@ -257,4 +139,46 @@ Raises:
 
 **Returns:** List[FeedItem]
 
+
+## Functions
+
+### _parse_feedparser_date
+
+```python
+def _parse_feedparser_date(time_struct) -> Optional[datetime]
+```
+
+Convert a feedparser time_struct to datetime.
+
+Args:
+    time_struct: A time.struct_time returned by feedparser
+
+Returns:
+    datetime object or None
+
+**Parameters:**
+
+- `time_struct`
+
+**Returns:** Optional[datetime]
+
+### _entries_to_feed_items
+
+```python
+def _entries_to_feed_items(entries) -> List[FeedItem]
+```
+
+Convert feedparser entries to FeedItem objects sorted by date.
+
+Args:
+    entries: Sequence of feedparser entry objects
+
+Returns:
+    List of FeedItem objects sorted by date (most recent first)
+
+**Parameters:**
+
+- `entries`
+
+**Returns:** List[FeedItem]
 

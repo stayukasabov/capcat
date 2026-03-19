@@ -159,6 +159,40 @@ Prints a summary and executes the command by calling run_app directly.
 - `selection`
 - `generate_html`
 
+⚠️ **High complexity:** 11
+
+### _show_completion_screen
+
+```python
+def _show_completion_screen(generate_html: bool, success: bool) -> None
+```
+
+Show post-execution screen with status, HTML link, and navigation choices.
+
+Args:
+    generate_html: Whether HTML generation was requested.
+    success: Whether the command completed without errors.
+
+**Parameters:**
+
+- `generate_html` (bool)
+- `success` (bool)
+
+**Returns:** None
+
+### _find_latest_index_html
+
+```python
+def _find_latest_index_html() -> str | None
+```
+
+Find the most recently modified index.html under the News output directory.
+
+Returns:
+    Absolute path string to index.html, or None if not found.
+
+**Returns:** str | None
+
 ### _handle_manage_bundles
 
 ```python

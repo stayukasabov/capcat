@@ -76,7 +76,7 @@ Extract image URLs using source-specific selectors.
 
 **Returns:** List[str]
 
-⚠️ **High complexity:** 13
+⚠️ **High complexity:** 15
 
 ##### _should_skip_image
 
