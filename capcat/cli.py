@@ -165,7 +165,7 @@ def _cmd_init(args: list[str]) -> None:
     try:
         init_project(Path.cwd(), reinit=reinit)
         print("Capcat project initialized.")
-        print("  Config/   -- your sources, themes, and config")
+        print("  Config/   -- your themes")
         print("  .capcat/  -- internal state (don't edit)")
         print(
             "\nRun 'capcat catch' for the interactive menu "
