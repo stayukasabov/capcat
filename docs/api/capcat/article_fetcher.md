@@ -728,23 +728,137 @@ Skip Lobste.rs internal links that don't point to external content.
 **Returns:** bool
 
 
-## Functions
+### NewsSourceArticleFetcher
 
-### _suppress_stderr
+**Inherits from:** ArticleFetcher
+
+Configurable article fetcher that works with any news source.
+
+#### Methods
+
+##### __init__
 
 ```python
-def _suppress_stderr()
+def __init__(self, source_config: Dict[str, Any], session: requests.Session)
 ```
 
-Context manager to temporarily suppress stderr output at OS level.
+**Parameters:**
 
-Used to suppress pynput's misleading accessibility warning on macOS.
-The warning says "Input event monitoring will not be possible" but
-keyboard detection actually works correctly. Uses os.dup2() for
-OS-level redirection to catch warnings from subprocesses/threads.
+- `self`
+- `source_config` (Dict[str, Any])
+- `session` (requests.Session)
 
-Falls back to Python-level redirection in test environments where
-stderr is replaced with StringIO.
+##### should_skip_url
+
+```python
+def should_skip_url(self, url: str, title: str) -> bool
+```
+
+Skip URLs based on source configuration.
+
+**Parameters:**
+
+- `self`
+- `url` (str)
+- `title` (str)
+
+**Returns:** bool
+
+##### _fetch_web_content
+
+```python
+def _fetch_web_content(self, title: str, url: str, index: int, base_folder: str, progress_callback = None)
+```
+
+Override to extract content using configured selectors.
+
+**Parameters:**
+
+- `self`
+- `title` (str)
+- `url` (str)
+- `index` (int)
+- `base_folder` (str)
+- `progress_callback` *optional*
+
+⚠️ **High complexity:** 67
+
+##### _cleanup_empty_images_folder
+
+```python
+def _cleanup_empty_images_folder(self, article_folder_path: str) -> None
+```
+
+Remove images folder if it exists but is empty.
+
+**Parameters:**
+
+- `self`
+- `article_folder_path` (str)
+
+**Returns:** None
+
+##### _fallback_image_detection
+
+```python
+def _fallback_image_detection(self, full_page_html: str, existing_images: set, article_folder_path: str, base_url: str)
+```
+
+Fallback image detection system that scans the entire page for images
+when the primary extraction method finds few images.
+
+**Parameters:**
+
+- `self`
+- `full_page_html` (str)
+- `existing_images` (set)
+- `article_folder_path` (str)
+- `base_url` (str)
+
+⚠️ **High complexity:** 19
+
+##### _should_skip_image
+
+```python
+def _should_skip_image(self, img_tag, img_src: str, ui_patterns: dict) -> bool
+```
+
+Determine if an image should be skipped based on UI element patterns.
+
+**Parameters:**
+
+- `self`
+- `img_tag`
+- `img_src` (str)
+- `ui_patterns` (dict)
+
+**Returns:** bool
+
+⚠️ **High complexity:** 11
+
+
+## Functions
+
+### _listen_for_esc
+
+```python
+def _listen_for_esc(stop_event: threading.Event) -> None
+```
+
+Background thread target: set stop_event when ESC is pressed.
+
+Uses termios to put stdin in raw mode so individual keypresses are
+readable without waiting for Enter. Exits silently if stdin is not
+a tty (piped input, CI, etc.).
+
+Args:
+    stop_event: Event to set when ESC (0x1b) is detected.
+
+**Parameters:**
+
+- `stop_event` (threading.Event)
+
+**Returns:** None
 
 ### set_global_update_mode
 
@@ -819,18 +933,6 @@ Create replacement text with fallback for empty groups.
 **Parameters:**
 
 - `match`
-
-### on_press
-
-```python
-def on_press(key)
-```
-
-Handle key press events.
-
-**Parameters:**
-
-- `key`
 
 ### replace_if_image_link
 

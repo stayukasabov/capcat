@@ -18,6 +18,8 @@ startup stays fast and circular-import-safe.
 def _print_help() -> None
 ```
 
+Print the top-level usage text to stdout and return.
+
 **Returns:** None
 
 ### main
@@ -36,13 +38,21 @@ Main entry point.  Routes to TUI or CLI dispatch.
 def _dispatch(args: list[str]) -> None
 ```
 
+Route a raw argument list to the appropriate command handler.
+
+Handles global flags (-L, --version, --help) before delegating to
+per-command functions. Exits with code 1 on unknown commands.
+
+Args:
+    args: sys.argv[1:] with the program name already removed.
+
 **Parameters:**
 
 - `args` (list[str])
 
 **Returns:** None
 
-⚠️ **High complexity:** 13
+⚠️ **High complexity:** 14
 
 ### _pop_flag
 
@@ -77,6 +87,15 @@ Remove a flag that takes one value, return (value, remaining).
 ```python
 def _cmd_init(args: list[str]) -> None
 ```
+
+Handle the ``capcat init`` command.
+
+Creates ``.capcat/`` state directory and ``Config/`` scaffold in cwd.
+Exits with code 1 if the project is already initialized (unless
+``--reinit`` is passed).
+
+Args:
+    args: Remaining arguments after ``init`` (e.g. ``["--reinit"]``).
 
 **Parameters:**
 
@@ -131,6 +150,8 @@ capcat bundle <name> [--count N] [--output DIR] [--media] [--html]
 - `log_file` (str | None) *optional*
 
 **Returns:** None
+
+⚠️ **High complexity:** 13
 
 ### _cmd_list
 
@@ -189,6 +210,22 @@ capcat generate-config [--output FILE]
 
 **Returns:** None
 
+### _auto_init
+
+```python
+def _auto_init(command: str) -> None
+```
+
+Initialize a capcat project in cwd if not already initialized.
+
+Runs silently before any command except init/help/version.
+
+**Parameters:**
+
+- `command` (str)
+
+**Returns:** None
+
 ### _setup_logging
 
 ```python
@@ -204,4 +241,14 @@ Configure logging for the current command.
 - `log_file` (str | None) *optional*
 
 **Returns:** None
+
+### _expand_bundles
+
+```python
+def _expand_bundles(bundle_names)
+```
+
+**Parameters:**
+
+- `bundle_names`
 

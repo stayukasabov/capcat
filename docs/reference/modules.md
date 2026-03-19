@@ -61,7 +61,6 @@ Clean architecture implementation applying SOLID principles:
 - Liskov Substitution: RetryStrategy implementations interchangeable
 - Interface Segregation: Small, focused interfaces
 - Dependency Inversion: Depend on abstractions not concretions
-- [capcat.core.news_source_adapter](../api/capcat/news_source_adapter.md) - Base NewsSourceAdapter class to eliminate code duplication across source modules
 - [capcat.core.progress](../api/capcat/progress.md) - Progress indicators and status reporting for Capcat
 - [capcat.core.rate_limiter](../api/capcat/rate_limiter.md) - Rate limiting system for Capcat to prevent overwhelming source servers
 - [capcat.core.retry](../api/capcat/retry.md) - Retry mechanisms with exponential backoff for Capcat
@@ -73,7 +72,6 @@ or refuse connection
 - [capcat.core.shutdown](../api/capcat/shutdown.md) - Graceful shutdown handling for Capcat
 - [capcat.core.source_config](../api/capcat/source_config.md) - Source configuration for optimized URL detection in Capcat
 - [capcat.core.source_configs](../api/capcat/source_configs.md) - Modular source configuration system with backward compatibility
-- [capcat.core.source_factory](../api/capcat/source_factory.md) - Modernized factory for creating news source adapters
 - [capcat.core.source_system.__init__](../api/capcat/__init__.md)
 - [capcat.core.source_system.add_source_command](../api/capcat/add_source_command.md) - Professional implementation of the add-source command using clean architecture principles
 - [capcat.core.source_system.add_source_service](../api/capcat/add_source_service.md) - Service layer for the add-source command
@@ -96,7 +94,7 @@ or refuse connection
 - [capcat.core.source_system.performance_monitor](../api/capcat/performance_monitor.md) - Source performance monitoring system for the hybrid architecture
 - [capcat.core.source_system.questionary_ui](../api/capcat/questionary_ui.md) - User interface implementation using questionary for interactive prompts
 - [capcat.core.source_system.removal_ui](../api/capcat/removal_ui.md) - User interface implementation for remove-source command
-- [capcat.core.source_system.remove_source_command](../api/capcat/remove_source_command.md) - Professional implementation of the remove-source command using clean architecture
+- [capcat.core.source_system.remove_source_command](../api/capcat/remove_source_command.md) - Base classes and implementations for the remove-source command
 - [capcat.core.source_system.remove_source_service](../api/capcat/remove_source_service.md) - Service layer for remove-source command
 - [capcat.core.source_system.rss_feed_introspector](../api/capcat/rss_feed_introspector.md)
 - [capcat.core.source_system.source_analytics](../api/capcat/source_analytics.md) - Source usage analytics and statistics
@@ -114,21 +112,15 @@ Replaces {{placeholder}} variables with actual values from configuration
 - [capcat.core.theme_utils](../api/capcat/theme_utils.md) - Theme utilities for hash-based theme persistence
 - [capcat.core.timeout_config](../api/capcat/timeout_config.md) - Adaptive timeout configuration for Capcat
 - [capcat.core.timeout_wrapper](../api/capcat/timeout_wrapper.md) - Timeout wrapper utilities for preventing hanging operations
+- [capcat.core.tui_context](../api/capcat/tui_context.md) - TUI context flag
 - [capcat.core.unified_article_processor](../api/capcat/unified_article_processor.md) - Unified Article Processor - Universal entry point for all article processing
 - [capcat.core.unified_media_processor](../api/capcat/unified_media_processor.md) - Unified Media Processor Integration Layer
 - [capcat.core.unified_source_processor](../api/capcat/unified_source_processor.md) - Unified Source Processor for Capcat
 - [capcat.core.update_manager](../api/capcat/update_manager.md) - Update Manager for Capcat
 - [capcat.core.url_utils](../api/capcat/url_utils.md) - URL validation and normalization utilities for Capcat
 - [capcat.core.utils](../api/capcat/utils.md) - Core utilities for the Capcat application
-- [capcat.htmlgen.__init__](../api/capcat/__init__.md) - Compartmentalized HTML Generation System for Capcat
-- [capcat.htmlgen.base.base_generator](../api/capcat/base_generator.md) - Base HTML Generator for Compartmentalized HTML Generation System
-- [capcat.htmlgen.hn.generator](../api/capcat/generator.md) - Hacker News specific HTML generator implementation
-- [capcat.htmlgen.lb.generator](../api/capcat/generator.md) - Lobsters specific HTML generator implementation
-- [capcat.htmlgen.lesswrong.generator](../api/capcat/generator.md) - LessWrong specific HTML generator implementation
 - [capcat.sources.__init__](../api/capcat/__init__.md)
 - [capcat.sources.base.__init__](../api/capcat/__init__.md) - Base classes and interfaces for the source system
-- [capcat.sources.base.config_schema](../api/capcat/config_schema.md) - Base configuration schema for news sources
-- [capcat.sources.base.factory](../api/capcat/factory.md) - Clean factory pattern for creating news source adapters
 - [capcat.sources.builtin.__init__](../api/capcat/__init__.md)
 - [capcat.sources.builtin.custom.hn.source](../api/capcat/source.md) - Hacker News source implementation for the new source system
 - [capcat.sources.builtin.custom.lb.source](../api/capcat/source.md) - Lobsters source implementation for the new source system
@@ -270,10 +262,15 @@ handling, and comprehensive validation
 A free and open-source tool to make people's lives easier
 - [cleanup_development_files](../api/root/cleanup_development_files.md) - Remove internal development files from git tracking
 - [cleanup_repo](../api/root/cleanup_repo.md) - Repository cleanup script: Remove unnecessary files from git tracking
+- [cli](../api/root/cli.md) - Professional CLI interface for Capcat using subcommand architecture
 - [convert_docs_to_html](../api/root/convert_docs_to_html.md) - Convert Markdown documentation to clean HTML with minimal styling
 - [convert_to_markdown](../api/root/convert_to_markdown.md)
 - [delete_h4_colon](../api/root/delete_h4_colon.md) - Delete colon after </h4> tags
 - [quick_cli_fix](../api/root/quick_cli_fix.md) - Quick CLI validation fix to catch common flag mistakes
+- [run_capcat](../api/root/run_capcat.md) - Capcat - News Article Archiving System (Enhanced Python Wrapper)
+
+Refactored wrapper with robust dependency management, intelligent error
+handling, and comprehensive validation
 - [update_html_includes](../api/root/update_html_includes.md) - Update all HTML files in docs/ to use includes system for header and footer
 - [update_html_jekyll](../api/root/update_html_jekyll.md) - Update all HTML files in docs/ to use Jekyll includes for header and footer
 - [update_includes](../api/root/update_includes.md) - Update script: Replace old header/footer HTML with new includes
@@ -341,9 +338,9 @@ Usage:
 
 ## Statistics
 
-- **Total Modules**: 240
-- **Total Classes**: 425
-- **Total Functions**: 491
-- **Public Functions**: 405
-- **Documentation Coverage**: 82.5%
+- **Total Modules**: 234
+- **Total Classes**: 413
+- **Total Functions**: 514
+- **Public Functions**: 418
+- **Documentation Coverage**: 81.3%
 
