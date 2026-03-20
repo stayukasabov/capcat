@@ -715,7 +715,15 @@ def _handle_manage_bundles():
     from pathlib import Path
     from capcat.core.source_system.bundle_service import BundleService
 
-    bundles_path = Path(__file__).parent.parent / "sources" / "active" / "bundles.yml"
+    from capcat.core.config import find_project_root, NoProjectError
+    try:
+        project_root = find_project_root()
+        user_path = project_root / "Config" / "sources" / "active" / "bundles" / "bundles.yml"
+        bundles_path = user_path if user_path.exists() else (
+            Path(__file__).parent.parent / "sources" / "builtin" / "bundles.yml"
+        )
+    except NoProjectError:
+        bundles_path = Path(__file__).parent.parent / "sources" / "builtin" / "bundles.yml"
     service = BundleService(bundles_path)
 
     while True:

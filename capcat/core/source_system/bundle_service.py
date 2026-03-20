@@ -16,21 +16,32 @@ from capcat.core.source_system.source_registry import (
 )
 
 
-def get_available_bundles() -> dict:
-    """Load bundles from the package's builtin bundles.yml.
+def get_available_bundles(project_root: Path = None) -> dict:
+    """Load bundles from userspace (if mirrored) or builtin bundles.yml.
 
-    Returns:
-        Dict mapping bundle_id → {"sources": [...], "description": "..."}
+    Args:
+        project_root: Project root path. When provided and user bundles.yml
+            exists there, reads from userspace. Falls back to builtin.
     """
-    import importlib.resources
     import yaml
     from capcat.core.logging_config import get_logger
-
     logger = get_logger(__name__)
-    try:
+
+    bundles_path = None
+
+    if project_root is not None:
+        user_path = (
+            project_root / "Config" / "sources" / "active" / "bundles" / "bundles.yml"
+        )
+        if user_path.exists():
+            bundles_path = user_path
+
+    if bundles_path is None:
         bundles_path = (
             Path(__file__).parent.parent.parent / "sources" / "builtin" / "bundles.yml"
         )
+
+    try:
         with open(bundles_path, "r") as fh:
             data = yaml.safe_load(fh)
         result = {}

@@ -172,8 +172,7 @@ class UpdateManager:
 
         # Get bundle sources
         from capcat.core.source_system.bundle_service import get_available_bundles
-
-        bundles = get_available_bundles()
+        bundles = get_available_bundles(project_root=Path(self.project_root))
 
         if bundle_name not in bundles:
             self.logger.error(f"Unknown bundle: {bundle_name}")
