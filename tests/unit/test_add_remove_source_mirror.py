@@ -118,3 +118,37 @@ def test_write_manifest_entry_after_add_is_gone():
     """_write_manifest_entry_after_add must not exist on AddSourceService."""
     from capcat.core.source_system.add_source_service import AddSourceService
     assert not hasattr(AddSourceService, "_write_manifest_entry_after_add")
+
+
+def test_write_manifest_entry_tolerates_zero_byte_manifest(project):
+    """_write_manifest_entry must not raise or lose data when manifest is zero-byte."""
+    config_dir = project / "Config" / "sources" / "active" / "config_driven" / "configs"
+    config_dir.mkdir(parents=True)
+    cfg = config_dir / "mysource.yaml"
+    cfg.write_text("source_id: mysource\n", encoding="utf-8")
+
+    manifest_path = project / ".capcat" / "source_hashes.json"
+    manifest_path.write_bytes(b"")  # zero-byte file
+
+    svc = AddSourceService(project_root=project)
+    svc._write_manifest_entry("mysource.yaml")  # must not raise
+
+    result = json.loads(manifest_path.read_text(encoding="utf-8"))
+    assert "config_driven/configs/mysource.yaml" in result
+
+
+def test_write_manifest_entry_tolerates_malformed_manifest(project):
+    """_write_manifest_entry must not raise when manifest is malformed JSON."""
+    config_dir = project / "Config" / "sources" / "active" / "config_driven" / "configs"
+    config_dir.mkdir(parents=True)
+    cfg = config_dir / "mysource.yaml"
+    cfg.write_text("source_id: mysource\n", encoding="utf-8")
+
+    manifest_path = project / ".capcat" / "source_hashes.json"
+    manifest_path.write_text("not json", encoding="utf-8")
+
+    svc = AddSourceService(project_root=project)
+    svc._write_manifest_entry("mysource.yaml")  # must not raise
+
+    result = json.loads(manifest_path.read_text(encoding="utf-8"))
+    assert "config_driven/configs/mysource.yaml" in result
