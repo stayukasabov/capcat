@@ -68,3 +68,26 @@ capcat --version                    # print version
 | `--log FILE` | `-L FILE` | Write log to file |
 | `--version` | | Print version and exit |
 | `--help` | `-h` | Print usage and exit |
+
+## Source Management
+
+On first fetch, Capcat mirrors all builtin source configs to `Config/sources/active/` in your
+project. Edit files there freely — they are never overwritten without your consent.
+
+### Commands
+
+| Command | Description |
+|---------|-------------|
+| `capcat add-source <url>` | Add a new RSS source (saved to `Config/sources/active/config_driven/configs/`) |
+| `capcat remove-source <id>` | Remove a source from `Config/sources/active/` |
+| `capcat list sources` | Show all registered sources |
+| `capcat list bundles` | Show all available bundles |
+
+### Paths
+
+| Path | Purpose |
+|------|---------|
+| `Config/sources/active/config_driven/configs/` | Per-source YAML/JSON config files |
+| `Config/sources/active/custom/` | Custom source directories (with `source.py`) |
+| `Config/sources/active/bundles/bundles.yml` | Bundle definitions |
+| `.capcat/source_hashes.json` | Tracks builtin-synced vs user-added sources |
