@@ -78,11 +78,10 @@ def test_tui_tests_use_catch_subcommand():
                 f"TUI test {t['id']} cmd should be ['capcat', 'catch']"
 
 
-def test_fixture_url_sentinel_only_in_test_54():
+def test_no_fixture_url_sentinel_in_any_test():
     for t in get_tests():
-        has_sentinel = "__FIXTURE_URL__" in t["cmd"]
-        assert has_sentinel == (t["id"] == 54), \
-            f"Test {t['id']}: unexpected __FIXTURE_URL__ sentinel"
+        assert "__FIXTURE_URL__" not in t["cmd"], \
+            f"Test {t['id']}: unexpected __FIXTURE_URL__ sentinel (use real URLs)"
 
 
 def test_tmp_sentinel_in_expected_tests():
