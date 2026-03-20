@@ -85,10 +85,12 @@ class AddSourceService:
         manifest_path.parent.mkdir(parents=True, exist_ok=True)
         manifest = {}
         if manifest_path.exists():
-            try:
-                manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-            except Exception as exc:
-                self._logger.warning(f"Failed to read manifest, starting fresh: {exc}")
+            content = manifest_path.read_text(encoding="utf-8").strip()
+            if content:
+                try:
+                    manifest = json.loads(content)
+                except json.JSONDecodeError as exc:
+                    self._logger.warning(f"Failed to read manifest, starting fresh: {exc}")
         manifest[key] = {"builtin_hash": "", "user_hash": user_hash}
         try:
             manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
