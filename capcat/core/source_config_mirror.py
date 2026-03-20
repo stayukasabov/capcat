@@ -392,4 +392,45 @@ class SourceConfigMirror:
         return None
 
     def _resync_manifest(self) -> None:
-        pass  # placeholder
+        """Rebuild manifest from current user files when source_hashes.json is missing.
+        Never overwrites user files."""
+        from capcat.core.logging_config import get_logger
+        logger = get_logger(__name__)
+        logger.warning("Capcat: source_hashes.json missing — rebuilt from current state.")
+
+        manifest = {}
+
+        # config_driven
+        user_cfg = self._user_config_driven_dir()
+        if user_cfg.exists():
+            for f in user_cfg.iterdir():
+                if f.is_file() and (
+                    f.suffix in self._CONFIG_DRIVEN_EXTS
+                    or f.name.endswith(".yaml.disabled")
+                ):
+                    h = self._compute_hash(f)
+                    key = f"config_driven/configs/{f.name}"
+                    manifest[key] = {"builtin_hash": h, "user_hash": h}
+
+        # custom
+        user_custom = self._user_custom_dir()
+        if user_custom.exists():
+            for source_dir in user_custom.iterdir():
+                if source_dir.is_dir():
+                    for f in source_dir.rglob("*"):
+                        if f.is_file():
+                            rel = f.relative_to(source_dir)
+                            h = self._compute_hash(f)
+                            key = f"custom/{source_dir.name}/{rel}"
+                            manifest[key] = {"builtin_hash": h, "user_hash": h}
+
+        # bundles
+        user_bundles = self._user_bundles_dir()
+        if user_bundles.exists():
+            for f in user_bundles.iterdir():
+                if f.is_file() and f.suffix == ".yml":
+                    h = self._compute_hash(f)
+                    key = f"bundles/{f.name}"
+                    manifest[key] = {"builtin_hash": h, "user_hash": h}
+
+        self._save_manifest(manifest)
