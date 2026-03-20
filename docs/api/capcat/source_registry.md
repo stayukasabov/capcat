@@ -305,10 +305,18 @@ Reload all sources (useful for development).
 ### get_source_registry
 
 ```python
-def get_source_registry() -> SourceRegistry
+def get_source_registry(project_root: Optional[Path] = None) -> SourceRegistry
 ```
 
-Get the global source registry instance.
+Get the source registry.
+
+When project_root is None, return the cached global singleton (backward-compatible).
+When project_root is non-None, always construct and return a fresh instance
+(singleton bypass — avoids stale-singleton bugs with user-overridden sources).
+
+**Parameters:**
+
+- `project_root` (Optional[Path]) *optional*
 
 **Returns:** SourceRegistry
 

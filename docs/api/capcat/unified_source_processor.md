@@ -16,7 +16,15 @@ Follows DRY principle while maintaining source-specific optimizations.
 
 **Value:** `True`
 
+### MIRROR_AVAILABLE
+
+**Value:** `True`
+
 ### NEW_SOURCE_SYSTEM_AVAILABLE
+
+**Value:** `False`
+
+### MIRROR_AVAILABLE
 
 **Value:** `False`
 
@@ -32,12 +40,13 @@ Eliminates code duplication while preserving source-specific functionality.
 ##### __init__
 
 ```python
-def __init__(self)
+def __init__(self, project_root: Optional[Path] = None)
 ```
 
 **Parameters:**
 
 - `self`
+- `project_root` (Optional[Path]) *optional*
 
 ##### clear_url_cache
 
@@ -162,6 +171,8 @@ Process articles using the new source system.
 
 **Returns:** None
 
+⚠️ **High complexity:** 15
+
 ##### _process_articles_with_new_system
 
 ```python
@@ -210,17 +221,21 @@ Process a single article using the new source system.
 ### get_unified_processor
 
 ```python
-def get_unified_processor() -> UnifiedSourceProcessor
+def get_unified_processor(project_root: Optional[Path] = None) -> UnifiedSourceProcessor
 ```
 
 Get global unified processor instance.
+
+**Parameters:**
+
+- `project_root` (Optional[Path]) *optional*
 
 **Returns:** UnifiedSourceProcessor
 
 ### process_source_articles
 
 ```python
-def process_source_articles(source_name: str, count: int, output_dir: str, quiet: bool = False, verbose: bool = False, download_files: bool = False, batch_mode: bool = False, generate_html: bool = False) -> None
+def process_source_articles(source_name: str, count: int, output_dir: str, quiet: bool = False, verbose: bool = False, download_files: bool = False, batch_mode: bool = False, generate_html: bool = False, project_root: Optional[Path] = None) -> None
 ```
 
 Convenience function to process articles from any source.
@@ -233,6 +248,7 @@ Args:
     verbose: Enable verbose logging
     download_files: Enable media file downloads
     batch_mode: Whether processing multiple sources (affects retry messages)
+    project_root: Optional project root override
 
 **Parameters:**
 
@@ -244,6 +260,7 @@ Args:
 - `download_files` (bool) *optional*
 - `batch_mode` (bool) *optional*
 - `generate_html` (bool) *optional*
+- `project_root` (Optional[Path]) *optional*
 
 **Returns:** None
 

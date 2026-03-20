@@ -40,6 +40,7 @@ Clean architecture implementation applying SOLID principles:
 - [`capcat.core.rate_limiter`](./rate_limiter.md) - Rate limiting system for Capcat to prevent overwhelming source servers
 - [`capcat.core.__init__`](./__init__.md)
 - [`capcat.core.ethical_scraping`](./ethical_scraping.md) - Ethical scraping utilities for Capcat
+- [`capcat.core.source_config_mirror`](./source_config_mirror.md) - Mirror builtin source configs to userspace Config/sources/active/
 - [`capcat.core.error_handling`](./error_handling.md) - Comprehensive error handling and recovery system for Capcat
 - [`capcat.core.retry`](./retry.md) - Retry mechanisms with exponential backoff for Capcat
 - [`capcat.core.conversion_executor`](./conversion_executor.md) - Shared executor pool for HTML-to-Markdown conversion to prevent nested ThreadPoolExecutor deadlock

@@ -1,0 +1,337 @@
+# capcat.core.source_config_mirror
+
+**File:** `Application/capcat/core/source_config_mirror.py`
+
+## Description
+
+Mirror builtin source configs to userspace Config/sources/active/.
+
+## Constants
+
+### _CONFIG_DRIVEN_EXTS
+
+**Value:** `{'.yaml', '.yml', '.json'}`
+
+## Classes
+
+### SourceConfigMirror
+
+Copy and track builtin source configs in userspace.
+
+#### Methods
+
+##### __init__
+
+```python
+def __init__(self, project_root: Path, tui_mode: bool) -> None
+```
+
+**Parameters:**
+
+- `self`
+- `project_root` (Path)
+- `tui_mode` (bool)
+
+**Returns:** None
+
+##### is_mirrored
+
+```python
+def is_mirrored(self) -> bool
+```
+
+True if any domain dir exists under Config/sources/active/.
+
+**Parameters:**
+
+- `self`
+
+**Returns:** bool
+
+##### run_first_mirror
+
+```python
+def run_first_mirror(self) -> None
+```
+
+Copy all three domains, write manifest, print message.
+
+**Parameters:**
+
+- `self`
+
+**Returns:** None
+
+##### check_for_upgrades
+
+```python
+def check_for_upgrades(self) -> None
+```
+
+Diff all domains vs manifest. Prompt for new items and changed builtins.
+
+**Parameters:**
+
+- `self`
+
+**Returns:** None
+
+##### _compute_hash
+
+```python
+def _compute_hash(self, path: Path) -> str
+```
+
+**Parameters:**
+
+- `self`
+- `path` (Path)
+
+**Returns:** str
+
+##### _load_manifest
+
+```python
+def _load_manifest(self) -> Optional[dict]
+```
+
+**Parameters:**
+
+- `self`
+
+**Returns:** Optional[dict]
+
+##### _save_manifest
+
+```python
+def _save_manifest(self, manifest: dict) -> None
+```
+
+**Parameters:**
+
+- `self`
+- `manifest` (dict)
+
+**Returns:** None
+
+##### _prompt
+
+```python
+def _prompt(self, message: str) -> str
+```
+
+Display prompt; use questionary in TUI mode, print+input in CLI mode.
+
+**Parameters:**
+
+- `self`
+- `message` (str)
+
+**Returns:** str
+
+##### _builtin_config_driven_dir
+
+```python
+def _builtin_config_driven_dir(self) -> Path
+```
+
+**Parameters:**
+
+- `self`
+
+**Returns:** Path
+
+##### _user_config_driven_dir
+
+```python
+def _user_config_driven_dir(self) -> Path
+```
+
+**Parameters:**
+
+- `self`
+
+**Returns:** Path
+
+##### _builtin_custom_dir
+
+```python
+def _builtin_custom_dir(self) -> Path
+```
+
+**Parameters:**
+
+- `self`
+
+**Returns:** Path
+
+##### _user_custom_dir
+
+```python
+def _user_custom_dir(self) -> Path
+```
+
+**Parameters:**
+
+- `self`
+
+**Returns:** Path
+
+##### _builtin_bundles_dir
+
+```python
+def _builtin_bundles_dir(self) -> Path
+```
+
+**Parameters:**
+
+- `self`
+
+**Returns:** Path
+
+##### _user_bundles_dir
+
+```python
+def _user_bundles_dir(self) -> Path
+```
+
+**Parameters:**
+
+- `self`
+
+**Returns:** Path
+
+##### _mirror_config_driven
+
+```python
+def _mirror_config_driven(self, manifest: dict) -> None
+```
+
+**Parameters:**
+
+- `self`
+- `manifest` (dict)
+
+**Returns:** None
+
+##### _mirror_custom
+
+```python
+def _mirror_custom(self, manifest: dict) -> None
+```
+
+**Parameters:**
+
+- `self`
+- `manifest` (dict)
+
+**Returns:** None
+
+##### _mirror_bundles
+
+```python
+def _mirror_bundles(self, manifest: dict) -> None
+```
+
+**Parameters:**
+
+- `self`
+- `manifest` (dict)
+
+**Returns:** None
+
+##### _step1_new_items
+
+```python
+def _step1_new_items(self, manifest: dict) -> dict
+```
+
+Detect and optionally copy items present in builtins but absent from user mirror.
+
+**Parameters:**
+
+- `self`
+- `manifest` (dict)
+
+**Returns:** dict
+
+⚠️ **High complexity:** 27
+
+##### _step2_3_changed_builtins
+
+```python
+def _step2_3_changed_builtins(self, manifest: dict) -> dict
+```
+
+**Parameters:**
+
+- `self`
+- `manifest` (dict)
+
+**Returns:** dict
+
+⚠️ **High complexity:** 13
+
+##### _backup
+
+```python
+def _backup(self, resolved_user_files: list) -> Path
+```
+
+Copy user files to timestamped backup dir. Raises OSError on failure.
+
+**Parameters:**
+
+- `self`
+- `resolved_user_files` (list)
+
+**Returns:** Path
+
+##### _resolve_user_file
+
+```python
+def _resolve_user_file(self, key: str) -> Optional[Path]
+```
+
+Locate the actual user file for a manifest key. Returns None if absent.
+
+**Parameters:**
+
+- `self`
+- `key` (str)
+
+**Returns:** Optional[Path]
+
+##### _builtin_file_for_key
+
+```python
+def _builtin_file_for_key(self, key: str) -> Optional[Path]
+```
+
+Return the builtin file Path for a manifest key, or None if not present.
+
+**Parameters:**
+
+- `self`
+- `key` (str)
+
+**Returns:** Optional[Path]
+
+##### _resync_manifest
+
+```python
+def _resync_manifest(self) -> None
+```
+
+Rebuild manifest from current user files when source_hashes.json is missing.
+Never overwrites user files.
+
+**Parameters:**
+
+- `self`
+
+**Returns:** None
+
+⚠️ **High complexity:** 15
+
+

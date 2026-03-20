@@ -142,13 +142,18 @@ Execute list bundles workflow.
 ### get_available_bundles
 
 ```python
-def get_available_bundles() -> dict
+def get_available_bundles(project_root: Path = None) -> dict
 ```
 
-Load bundles from the package's builtin bundles.yml.
+Load bundles from userspace (if mirrored) or builtin bundles.yml.
 
-Returns:
-    Dict mapping bundle_id → {"sources": [...], "description": "..."}
+Args:
+    project_root: Project root path. When provided and user bundles.yml
+        exists there, reads from userspace. Falls back to builtin.
+
+**Parameters:**
+
+- `project_root` (Path) *optional*
 
 **Returns:** dict
 
