@@ -6,6 +6,7 @@ Provides a high-level interface for source instantiation and management.
 
 import time
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import requests
@@ -374,9 +375,16 @@ class SourceFactory:
 _global_factory: Optional[SourceFactory] = None
 
 
-def get_source_factory() -> SourceFactory:
-    """Get the global source factory instance."""
+def get_source_factory(project_root: Optional[Path] = None) -> SourceFactory:
+    """Get the source factory.
+
+    When project_root is None, return the cached global singleton (backward-compatible).
+    When project_root is non-None, always construct and return a fresh instance
+    with a registry scoped to that project root.
+    """
     global _global_factory
+    if project_root is not None:
+        return SourceFactory(registry=get_source_registry(project_root=project_root))
     if _global_factory is None:
         _global_factory = SourceFactory()
     return _global_factory

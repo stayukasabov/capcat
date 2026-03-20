@@ -91,3 +91,59 @@ def test_legacy_sources_dir_still_works(tmp_path):
     registry = SourceRegistry(sources_dir=str(tmp_path))
     sources = registry.discover_sources()
     assert "legacy" in sources
+
+
+def test_get_source_registry_returns_singleton_when_no_project_root():
+    from capcat.core.source_system.source_registry import (
+        get_source_registry,
+        reset_source_registry,
+    )
+
+    reset_source_registry()
+    r1 = get_source_registry()
+    r2 = get_source_registry()
+    assert r1 is r2
+
+
+def test_get_source_registry_returns_fresh_instance_with_project_root(tmp_path):
+    from capcat.core.source_system.source_registry import (
+        get_source_registry,
+        reset_source_registry,
+    )
+
+    reset_source_registry()
+    r1 = get_source_registry()
+    r2 = get_source_registry(project_root=tmp_path)
+    assert r1 is not r2
+
+
+def test_get_source_registry_two_project_root_calls_return_different_instances(tmp_path):
+    from capcat.core.source_system.source_registry import get_source_registry
+
+    r1 = get_source_registry(project_root=tmp_path)
+    r2 = get_source_registry(project_root=tmp_path)
+    assert r1 is not r2
+
+
+def test_get_source_factory_returns_singleton_when_no_project_root():
+    from capcat.core.source_system.source_factory import (
+        get_source_factory,
+        reset_source_factory,
+    )
+
+    reset_source_factory()
+    f1 = get_source_factory()
+    f2 = get_source_factory()
+    assert f1 is f2
+
+
+def test_get_source_factory_returns_fresh_instance_with_project_root(tmp_path):
+    from capcat.core.source_system.source_factory import (
+        get_source_factory,
+        reset_source_factory,
+    )
+
+    reset_source_factory()
+    f1 = get_source_factory()
+    f2 = get_source_factory(project_root=tmp_path)
+    assert f1 is not f2
