@@ -326,3 +326,204 @@ def _print_tui_header(test: dict, total: int, fixture_url: str) -> None:
     print()
     print("Press [Enter] to launch TUI, interact, then return here.")
     input()
+
+
+# ── Verdict handler ───────────────────────────────────────────────────────────
+
+def _wait_verdict() -> tuple[str, str]:
+    """Return (verdict, note). verdict is one of: pass, fail, skip, quit."""
+    while True:
+        ch = _getch().lower()
+        if ch in ("\r", "\n", " "):
+            return "pass", ""
+        if ch == "f":
+            return "fail", ""
+        if ch == "n":
+            # Restore normal terminal for line input
+            note = input("\nNote: ")
+            return "pass", note
+        if ch == "s":
+            return "skip", ""
+        if ch == "q":
+            return "quit", ""
+
+
+# ── Per-test runner ───────────────────────────────────────────────────────────
+
+def _run_one_test(
+    test: dict,
+    total: int,
+    reporter,
+    counts: dict,
+    failed_tests: list[str],
+    global_timeout: int | None,
+) -> str:
+    """Execute one test. Returns 'quit' to signal session end, else 'continue'."""
+    tmp_dir = tempfile.mkdtemp(prefix=f"cap_t{test['id']}_")
+
+    # Pre-setup: copy fixture
+    if test["fixture"]:
+        _copy_fixture(test["fixture"], tmp_dir)
+
+    # Pre-setup: silent init
+    if test["needs_init"] or test["pre_init"]:
+        _silent_init(tmp_dir)
+
+    # Resolve cmd (substitute sentinels)
+    resolved_cmd = _resolve_cmd(test["cmd"], tmp_dir, test["fixture"])
+    effective_timeout = global_timeout if global_timeout is not None else test["timeout"]
+
+    group = test["group"]
+    counts.setdefault(group, {"pass": 0, "fail": 0, "skip": 0})
+
+    # ── TUI flow ──────────────────────────────────────────────────────────────
+    if test["is_tui"]:
+        fixture_url = ""
+        if test["fixture"]:
+            fixture_url = "file://" + str(Path(tmp_dir) / test["fixture"])
+        _print_tui_header(test, total, fixture_url)
+        exit_code, duration, timed_out = _run_passthrough(
+            resolved_cmd, tmp_dir, effective_timeout
+        )
+        analysis, _, _ = _auto_analyze(test, exit_code, "", tmp_dir, timed_out, global_timeout)
+        _print_result_passthrough(test, exit_code, duration, timed_out, analysis)
+        verdict, note = _wait_verdict()
+
+    # ── Passthrough flow ──────────────────────────────────────────────────────
+    elif test["passthrough"]:
+        _print_header(test, total)
+        print("Running...  (interactive — output direct to terminal)\n")
+        exit_code, duration, timed_out = _run_passthrough(
+            resolved_cmd, tmp_dir, effective_timeout
+        )
+        analysis, _, _ = _auto_analyze(test, exit_code, "", tmp_dir, timed_out, global_timeout)
+        _print_result_passthrough(test, exit_code, duration, timed_out, analysis)
+        verdict, note = _wait_verdict()
+
+    # ── Captured flow ─────────────────────────────────────────────────────────
+    else:
+        _print_header(test, total)
+        print(f"Running...  (timeout: {effective_timeout}s)")
+        exit_code, output, duration, timed_out = _run_captured(
+            resolved_cmd, tmp_dir, effective_timeout
+        )
+        analysis, output_path, file_count = _auto_analyze(
+            test, exit_code, output, tmp_dir, timed_out, global_timeout
+        )
+        _print_result_cli(
+            test, exit_code, duration, analysis, output_path, file_count, timed_out
+        )
+        verdict, note = _wait_verdict()
+
+    # ── Handle verdict ────────────────────────────────────────────────────────
+    if verdict == "quit":
+        return "quit"
+
+    if verdict == "skip":
+        counts[group]["skip"] += 1
+        _clear()
+        return "continue"
+
+    status = "PASS" if verdict == "pass" else "FAIL"
+    if verdict == "fail":
+        counts[group]["fail"] += 1
+        failed_tests.append(
+            f"TEST {test['id']}: {test['group']} {test['label']}"
+            + (f" — {note}" if note else "")
+        )
+    else:
+        counts[group]["pass"] += 1
+
+    output_path_for_report = None
+    file_count_for_report = None
+    if not test["is_tui"] and not test["passthrough"]:
+        # Re-derive for report (analysis already has it, but we need the raw values)
+        output_path_for_report = _find_output_path(tmp_dir)
+        if test["creates_files"]:
+            file_count_for_report = _count_output_files(tmp_dir)
+
+    cmd_str = " ".join(test["cmd"]).replace("__TMP__", "<tmp>").replace("__FIXTURE_URL__", "<fixture_url>")
+    reporter.write_entry(
+        id=test["id"],
+        group=test["group"],
+        cmd=cmd_str,
+        status=status,
+        exit_code=exit_code,
+        expected_exit=test["expected_exit"],
+        duration=duration,
+        output_path=output_path_for_report,
+        file_count=file_count_for_report,
+        analysis=analysis,
+        note=note,
+    )
+    _clear()
+    return "continue"
+
+
+# ── Main ──────────────────────────────────────────────────────────────────────
+
+def main() -> None:
+    from tests.acceptance.catalog import TESTS
+    from tests.acceptance.reporter import Reporter
+
+    parser = argparse.ArgumentParser(
+        description="Capcat human-in-the-loop acceptance test runner"
+    )
+    group_filter = parser.add_mutually_exclusive_group()
+    group_filter.add_argument("--group", metavar="NAME",
+        help="Run only tests in this group (e.g. fetch, add-source)")
+    group_filter.add_argument("--from", dest="from_id", type=int, metavar="N",
+        help="Resume from test #N")
+    group_filter.add_argument("--only", metavar="N,N,...",
+        help="Run only these test IDs (comma-separated)")
+    parser.add_argument("--timeout", type=int, metavar="SECONDS",
+        help="Override timeout for all tests")
+    args = parser.parse_args()
+
+    # Build active test list
+    tests = list(TESTS)
+    if args.group:
+        tests = [t for t in tests if t["group"] == args.group]
+        if not tests:
+            print(f"Error: no tests found for group '{args.group}'")
+            sys.exit(1)
+    elif args.from_id:
+        tests = [t for t in tests if t["id"] >= args.from_id]
+    elif args.only:
+        ids = {int(x) for x in args.only.split(",")}
+        tests = [t for t in tests if t["id"] in ids]
+
+    total = len(tests)
+    if total == 0:
+        print("No tests selected.")
+        sys.exit(0)
+
+    # Create results dir and session file
+    _RESULTS.mkdir(parents=True, exist_ok=True)
+    session_name = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M") + ".md"
+    session_path = _RESULTS / session_name
+    reporter = Reporter(session_path)
+
+    counts: dict[str, dict[str, int]] = {}
+    failed_tests: list[str] = []
+
+    _clear()
+    print(f"Capcat Acceptance Test Runner")
+    print(f"Session: {session_path}")
+    print(f"Tests to run: {total}")
+    print(f"\nPress [Enter] to begin...")
+    input()
+
+    for test in tests:
+        result = _run_one_test(
+            test, total, reporter, counts, failed_tests, args.timeout
+        )
+        if result == "quit":
+            break
+
+    reporter.finalize(counts, failed_tests)
+    print(f"\nSession ended. Report saved to:\nfile://{session_path.resolve()}")
+
+
+if __name__ == "__main__":
+    main()
