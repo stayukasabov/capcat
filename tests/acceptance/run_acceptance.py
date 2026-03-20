@@ -10,6 +10,10 @@ Usage:
 """
 from __future__ import annotations
 
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
 import argparse
 import datetime
 import os
@@ -34,6 +38,7 @@ else:
 
     def _getch() -> str:
         fd = sys.stdin.fileno()
+        termios.tcflush(fd, termios.TCIFLUSH)  # discard buffered input
         old = termios.tcgetattr(fd)
         try:
             tty.setraw(fd)
@@ -244,7 +249,7 @@ def _auto_analyze(
 # ── Screen helpers ────────────────────────────────────────────────────────────
 
 def _clear() -> None:
-    print("\033[2J\033[H", end="", flush=True)
+    print("\n" + "─" * 80 + "\n", flush=True)
 
 
 def _print_header(test: dict, total: int) -> None:
