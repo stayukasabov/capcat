@@ -505,7 +505,7 @@ def test_load_manifest_returns_none_when_file_absent(tmp_path):
     assert mirror._load_manifest() is None
 
 
-def test_load_manifest_returns_empty_dict_when_file_is_empty(tmp_path):
+def test_load_manifest_returns_empty_dict_when_file_contains_empty_json_object(tmp_path):
     manifest_path = tmp_path / ".capcat" / "source_hashes.json"
     manifest_path.parent.mkdir(parents=True)
     manifest_path.write_text("{}", encoding="utf-8")
@@ -519,7 +519,7 @@ def test_load_manifest_returns_empty_dict_silently_for_zero_byte_file(tmp_path, 
     manifest_path.parent.mkdir(parents=True)
     manifest_path.write_bytes(b"")  # zero-byte file
     mirror = SourceConfigMirror(project_root=tmp_path, tui_mode=False)
-    with caplog.at_level(logging.WARNING):
+    with caplog.at_level(logging.WARNING, logger="capcat"):
         result = mirror._load_manifest()
     assert result == {}
     # Must NOT log a warning for an empty file
@@ -532,7 +532,7 @@ def test_load_manifest_returns_empty_dict_and_warns_on_malformed_json(tmp_path, 
     manifest_path.parent.mkdir(parents=True)
     manifest_path.write_text("not json", encoding="utf-8")
     mirror = SourceConfigMirror(project_root=tmp_path, tui_mode=False)
-    with caplog.at_level(logging.WARNING):
+    with caplog.at_level(logging.WARNING, logger="capcat"):
         result = mirror._load_manifest()
     assert result == {}
     assert any(r.levelno >= logging.WARNING for r in caplog.records)
