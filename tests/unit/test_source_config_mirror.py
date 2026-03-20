@@ -77,3 +77,71 @@ def test_compute_hash_returns_sha256_hex(mirror):
     f.write_text("hello")
     expected = hashlib.sha256(b"hello").hexdigest()
     assert m._compute_hash(f) == expected
+
+
+@pytest.fixture
+def full_mirror(tmp_path, monkeypatch):
+    """Mirror with all three builtin domain dirs populated."""
+    project = tmp_path / "project"
+    (project / ".capcat").mkdir(parents=True)
+
+    builtin_root = tmp_path / "_builtin"
+    cfg_dir = builtin_root / "config_driven" / "configs"
+    cfg_dir.mkdir(parents=True)
+    custom_dir = builtin_root / "custom"
+    (custom_dir / "hn").mkdir(parents=True)
+    bundles_dir = builtin_root  # bundles are at builtin root
+
+    (cfg_dir / "bbc.yaml").write_text("name: bbc\n")
+    (cfg_dir / "skysports.yaml.disabled").write_text("name: skysports\n")
+    (custom_dir / "hn" / "config.yaml").write_text("name: hn\n")
+    (custom_dir / "hn" / "source.py").write_text("# hn source\n")
+    (bundles_dir / "bundles.yml").write_text("bundles: {}\n")
+
+    m = SourceConfigMirror(project, tui_mode=False)
+    monkeypatch.setattr(m, "_builtin_config_driven_dir", lambda: cfg_dir)
+    monkeypatch.setattr(m, "_builtin_custom_dir", lambda: custom_dir)
+    monkeypatch.setattr(m, "_builtin_bundles_dir", lambda: bundles_dir)
+    return m, project
+
+
+def test_first_mirror_copies_custom_dir(full_mirror):
+    m, project = full_mirror
+    m.run_first_mirror()
+    user_hn = project / "Config" / "sources" / "active" / "custom" / "hn"
+    assert (user_hn / "config.yaml").exists()
+    assert (user_hn / "source.py").exists()
+
+
+def test_first_mirror_custom_manifest_entries(full_mirror):
+    m, project = full_mirror
+    m.run_first_mirror()
+    manifest = json.loads((project / ".capcat" / "source_hashes.json").read_text())
+    assert "custom/hn/config.yaml" in manifest
+    assert "custom/hn/source.py" in manifest
+    entry = manifest["custom/hn/config.yaml"]
+    assert entry["builtin_hash"] == entry["user_hash"]
+
+
+def test_first_mirror_copies_bundles(full_mirror):
+    m, project = full_mirror
+    m.run_first_mirror()
+    user_bundles = project / "Config" / "sources" / "active" / "bundles"
+    assert (user_bundles / "bundles.yml").exists()
+
+
+def test_first_mirror_bundles_manifest_entry(full_mirror):
+    m, project = full_mirror
+    m.run_first_mirror()
+    manifest = json.loads((project / ".capcat" / "source_hashes.json").read_text())
+    assert "bundles/bundles.yml" in manifest
+
+
+def test_first_mirror_skips_disabled_files(full_mirror):
+    m, project = full_mirror
+    m.run_first_mirror()
+    cfg_dir = project / "Config" / "sources" / "active" / "config_driven" / "configs"
+    assert not (cfg_dir / "skysports.yaml.disabled").exists()
+    assert "config_driven/configs/skysports.yaml.disabled" not in json.loads(
+        (project / ".capcat" / "source_hashes.json").read_text()
+    )
