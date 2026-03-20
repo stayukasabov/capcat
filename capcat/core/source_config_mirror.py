@@ -73,8 +73,11 @@ class SourceConfigMirror:
         p = self._root / ".capcat" / "source_hashes.json"
         if not p.exists():
             return None
+        content = p.read_text(encoding="utf-8").strip()
+        if not content:
+            return {}
         try:
-            return json.loads(p.read_text(encoding="utf-8"))
+            return json.loads(content)
         except Exception as exc:
             get_logger(__name__).warning(
                 f"source_hashes.json is malformed — treating as empty: {exc}"
