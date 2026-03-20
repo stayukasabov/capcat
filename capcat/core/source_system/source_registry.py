@@ -473,9 +473,18 @@ class SourceRegistry:
 _global_registry: Optional[SourceRegistry] = None
 
 
-def get_source_registry() -> SourceRegistry:
-    """Get the global source registry instance."""
+def get_source_registry(project_root: Optional[Path] = None) -> SourceRegistry:
+    """Get the source registry.
+
+    When project_root is None, return the cached global singleton (backward-compatible).
+    When project_root is non-None, always construct and return a fresh instance
+    (singleton bypass — avoids stale-singleton bugs with user-overridden sources).
+    """
     global _global_registry
+    if project_root is not None:
+        registry = SourceRegistry(project_root=project_root)
+        registry.discover_sources()
+        return registry
     if _global_registry is None:
         _global_registry = SourceRegistry()
         _global_registry.discover_sources()
