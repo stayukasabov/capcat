@@ -145,3 +145,85 @@ def test_first_mirror_skips_disabled_files(full_mirror):
     assert "config_driven/configs/skysports.yaml.disabled" not in json.loads(
         (project / ".capcat" / "source_hashes.json").read_text()
     )
+
+
+def _make_mirrored_project(tmp_path, monkeypatch, builtin_files=None, user_files=None):
+    """Helper: project with existing mirror (some builtins already mirrored)."""
+    import hashlib
+    project = tmp_path / "project"
+    (project / ".capcat").mkdir(parents=True)
+
+    builtin_root = tmp_path / "_builtin"
+    cfg_dir = builtin_root / "config_driven" / "configs"
+    cfg_dir.mkdir(parents=True)
+    custom_dir = builtin_root / "custom"
+    bundles_dir = builtin_root
+
+    user_cfg = project / "Config" / "sources" / "active" / "config_driven" / "configs"
+    user_cfg.mkdir(parents=True)
+    (project / "Config" / "sources" / "active" / "custom").mkdir(parents=True)
+    (project / "Config" / "sources" / "active" / "bundles").mkdir(parents=True)
+
+    manifest = {}
+
+    for fname, content in (builtin_files or {}).items():
+        f = cfg_dir / fname
+        f.write_text(content)
+
+    for fname, content in (user_files or {}).items():
+        f = user_cfg / fname
+        f.write_text(content)
+        h = hashlib.sha256(content.encode()).hexdigest()
+        manifest[f"config_driven/configs/{fname}"] = {
+            "builtin_hash": h, "user_hash": h
+        }
+
+    (project / ".capcat" / "source_hashes.json").write_text(json.dumps(manifest))
+
+    m = SourceConfigMirror(project, tui_mode=False)
+    monkeypatch.setattr(m, "_builtin_config_driven_dir", lambda: cfg_dir)
+    monkeypatch.setattr(m, "_builtin_custom_dir", lambda: custom_dir)
+    monkeypatch.setattr(m, "_builtin_bundles_dir", lambda: bundles_dir)
+    return m, project, user_cfg
+
+
+def test_step1_copies_new_source_when_user_says_yes(tmp_path, monkeypatch):
+    m, project, user_cfg = _make_mirrored_project(
+        tmp_path, monkeypatch,
+        builtin_files={"bbc.yaml": "name: bbc\n", "guardian.yaml": "name: guardian\n"},
+        user_files={"bbc.yaml": "name: bbc\n"},  # bbc already mirrored, guardian is new
+    )
+    monkeypatch.setattr("builtins.input", lambda _: "y")
+
+    m.check_for_upgrades()
+
+    assert (user_cfg / "guardian.yaml").exists()
+    manifest = json.loads((project / ".capcat" / "source_hashes.json").read_text())
+    assert "config_driven/configs/guardian.yaml" in manifest
+
+
+def test_step1_does_not_copy_when_user_says_no(tmp_path, monkeypatch):
+    m, project, user_cfg = _make_mirrored_project(
+        tmp_path, monkeypatch,
+        builtin_files={"bbc.yaml": "name: bbc\n", "guardian.yaml": "name: guardian\n"},
+        user_files={"bbc.yaml": "name: bbc\n"},
+    )
+    monkeypatch.setattr("builtins.input", lambda _: "n")
+
+    m.check_for_upgrades()
+
+    assert not (user_cfg / "guardian.yaml").exists()
+
+
+def test_step1_no_prompt_when_no_new_items(tmp_path, monkeypatch):
+    m, project, user_cfg = _make_mirrored_project(
+        tmp_path, monkeypatch,
+        builtin_files={"bbc.yaml": "name: bbc\n"},
+        user_files={"bbc.yaml": "name: bbc\n"},
+    )
+    prompt_called = []
+    monkeypatch.setattr("builtins.input", lambda _: prompt_called.append(1) or "y")
+
+    m.check_for_upgrades()
+
+    assert not prompt_called
