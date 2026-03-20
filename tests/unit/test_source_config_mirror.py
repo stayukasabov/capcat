@@ -498,3 +498,39 @@ def test_resync_manifest_when_missing(tmp_path, monkeypatch):
     user_hash = hashlib.sha256(user_content.encode()).hexdigest()
     assert entry["builtin_hash"] == user_hash
     assert entry["user_hash"] == user_hash
+
+
+def test_unified_processor_calls_mirror_on_first_fetch(tmp_path, monkeypatch):
+    """UnifiedSourceProcessor._process_with_new_system calls run_first_mirror when not mirrored."""
+    from capcat.core.unified_source_processor import UnifiedSourceProcessor
+
+    (tmp_path / ".capcat").mkdir()
+    mirror_calls = []
+
+    class FakeMirror:
+        def __init__(self, project_root, tui_mode):
+            pass
+        def is_mirrored(self):
+            return False
+        def run_first_mirror(self):
+            mirror_calls.append("first_mirror")
+        def check_for_upgrades(self):
+            mirror_calls.append("check_upgrades")
+
+    monkeypatch.setattr(
+        "capcat.core.unified_source_processor.SourceConfigMirror", FakeMirror
+    )
+    monkeypatch.setattr(
+        "capcat.core.unified_source_processor.find_project_root", lambda: tmp_path
+    )
+
+    processor = UnifiedSourceProcessor(project_root=tmp_path)
+    # Set new_source_factory to None so _process_with_new_system raises at source creation
+    processor.new_source_factory = None
+
+    try:
+        processor._process_with_new_system("hn", 5, str(tmp_path))
+    except Exception:
+        pass  # We only care that mirror was called
+
+    assert "first_mirror" in mirror_calls
