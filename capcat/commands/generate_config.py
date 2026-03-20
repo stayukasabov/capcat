@@ -2,31 +2,24 @@
 from __future__ import annotations
 
 import argparse
-import subprocess
 import sys
-from pathlib import Path
 
 
 def generate_config(args: argparse.Namespace) -> None:
-    """Launch the interactive config generator script.
+    """Launch the interactive config generator.
 
     Args:
         args: Namespace with optional output path.
     """
-    script_path = (
-        Path(__file__).parent.parent.parent / "scripts" / "generate_source_config.py"
-    )
+    from capcat.scripts.generate_source_config import main as _generator_main  # noqa: PLC0415
 
-    if not script_path.exists():
-        print(
-            f"Error: Config generator script not found at {script_path}",
-            file=sys.stderr,
-        )
-        raise SystemExit(1)
-
-    cmd = [sys.executable, str(script_path)]
+    # Inject --output into sys.argv so the generator's argparse picks it up.
+    argv_backup = sys.argv[:]
+    sys.argv = [sys.argv[0]]
     if getattr(args, "output", None):
-        cmd.extend(["--output", args.output])
+        sys.argv.extend(["--output", str(args.output)])
 
-    result = subprocess.run(cmd, check=False)
-    raise SystemExit(result.returncode)
+    try:
+        _generator_main()
+    finally:
+        sys.argv = argv_backup
