@@ -461,3 +461,40 @@ def test_tui_mode_uses_questionary_confirm(tmp_path, monkeypatch):
     result = m._prompt("Test message?")
     assert questionary_calls
     assert result == "y"
+
+
+def test_resync_manifest_when_missing(tmp_path, monkeypatch):
+    """If mirror dirs exist but manifest absent, rebuild without overwriting files."""
+    project = tmp_path / "project"
+    (project / ".capcat").mkdir(parents=True)
+    builtin_root = tmp_path / "_builtin"
+    cfg_dir = builtin_root / "config_driven" / "configs"
+    cfg_dir.mkdir(parents=True)
+
+    user_cfg = project / "Config" / "sources" / "active" / "config_driven" / "configs"
+    user_cfg.mkdir(parents=True)
+    (project / "Config" / "sources" / "active" / "custom").mkdir(parents=True)
+    (project / "Config" / "sources" / "active" / "bundles").mkdir(parents=True)
+
+    user_content = "name: bbc\nmy-custom: true\n"
+    (cfg_dir / "bbc.yaml").write_text("name: bbc\n")   # builtin
+    (user_cfg / "bbc.yaml").write_text(user_content)    # user (modified)
+    # No manifest file
+
+    m = SourceConfigMirror(project, tui_mode=False)
+    monkeypatch.setattr(m, "_builtin_config_driven_dir", lambda: cfg_dir)
+    monkeypatch.setattr(m, "_builtin_custom_dir", lambda: builtin_root / "custom")
+    monkeypatch.setattr(m, "_builtin_bundles_dir", lambda: builtin_root)
+
+    m.check_for_upgrades()
+
+    # User file must be untouched
+    assert (user_cfg / "bbc.yaml").read_text() == user_content
+    # Manifest was rebuilt
+    manifest = json.loads((project / ".capcat" / "source_hashes.json").read_text())
+    assert "config_driven/configs/bbc.yaml" in manifest
+    entry = manifest["config_driven/configs/bbc.yaml"]
+    # Both hashes set to current user file hash (not builtin)
+    user_hash = hashlib.sha256(user_content.encode()).hexdigest()
+    assert entry["builtin_hash"] == user_hash
+    assert entry["user_hash"] == user_hash
