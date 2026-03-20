@@ -122,7 +122,7 @@ class AddSourceService:
 def create_add_source_service() -> AddSourceService:
     """Factory: creates AddSourceService with project_root when inside a capcat project."""
     try:
-        from capcat.core.config import find_project_root, NoProjectError
+        from capcat.core.config import find_project_root
         project_root = find_project_root()
         return AddSourceService(project_root=project_root)
     except Exception as exc:

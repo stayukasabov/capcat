@@ -125,7 +125,7 @@ class RemoveSourceService:
 def create_remove_source_service() -> RemoveSourceService:
     """Factory: creates RemoveSourceService with project_root when inside a capcat project."""
     try:
-        from capcat.core.config import find_project_root, NoProjectError
+        from capcat.core.config import find_project_root
         project_root = find_project_root()
         return RemoveSourceService(project_root=project_root)
     except Exception as exc:
