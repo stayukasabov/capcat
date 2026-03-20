@@ -294,7 +294,12 @@ def _cmd_bundle(args: list[str], log_file: str | None = None) -> None:
     log_file = lf or log_file
 
     from capcat.core.source_system.bundle_service import get_available_bundles
-    bundles = get_available_bundles()
+    from capcat.core.config import find_project_root, NoProjectError
+    try:
+        _project_root = find_project_root()
+    except NoProjectError:
+        _project_root = None
+    bundles = get_available_bundles(project_root=_project_root)
 
     def _expand_bundles(bundle_names):
         seen, result = set(), []
@@ -364,7 +369,12 @@ def _cmd_list(args: list[str]) -> None:
         return
 
     from capcat.core.source_system.source_registry import SourceRegistry
-    registry = SourceRegistry()
+    from capcat.core.config import find_project_root, NoProjectError
+    try:
+        _project_root = find_project_root()
+    except NoProjectError:
+        _project_root = None
+    registry = SourceRegistry(project_root=_project_root)
     registry.discover_sources()
 
     if what in ("sources", "all"):
@@ -376,7 +386,12 @@ def _cmd_list(args: list[str]) -> None:
 
     if what in ("bundles", "all"):
         from capcat.core.source_system.bundle_service import get_available_bundles
-        bundles = get_available_bundles()
+        from capcat.core.config import find_project_root, NoProjectError
+        try:
+            _project_root = find_project_root()
+        except NoProjectError:
+            _project_root = None
+        bundles = get_available_bundles(project_root=_project_root)
         print("\nAvailable bundles:")
         for bundle_id, bundle_data in sorted(bundles.items()):
             sources_list = bundle_data["sources"]
