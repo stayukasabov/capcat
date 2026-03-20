@@ -252,7 +252,144 @@ class SourceConfigMirror:
         return manifest
 
     def _step2_3_changed_builtins(self, manifest: dict) -> dict:
-        return manifest  # placeholder
+        from capcat.core.logging_config import get_logger
+        logger = get_logger(__name__)
+
+        override_candidates: list = []  # (key, user_path, new_builtin_hash)
+        keys_to_remove: list = []
+
+        for key, entry in list(manifest.items()):
+            stored_builtin_hash = entry.get("builtin_hash", "")
+            stored_user_hash = entry.get("user_hash", "")
+
+            if not stored_builtin_hash:
+                continue  # user-added source
+
+            builtin_file = self._builtin_file_for_key(key)
+            if builtin_file is None:
+                logger.debug(f"Builtin removed for {key} — leaving user file untouched")
+                continue
+
+            user_file = self._resolve_user_file(key)
+            if user_file is None:
+                logger.debug(f"User file absent for {key} — removing manifest entry")
+                keys_to_remove.append(key)
+                continue
+
+            current_builtin_hash = self._compute_hash(builtin_file)
+
+            if current_builtin_hash == stored_builtin_hash:
+                continue  # builtin unchanged
+
+            current_user_hash = self._compute_hash(user_file)
+
+            if current_user_hash != stored_user_hash:
+                continue  # user modified — skip silently
+
+            override_candidates.append((key, user_file, current_builtin_hash))
+
+        for key in keys_to_remove:
+            del manifest[key]
+
+        if not override_candidates:
+            return manifest
+
+        # Group by domain for prompt
+        src_keys = [k for k, _, _ in override_candidates if k.startswith("config_driven/")]
+        cust_keys = [k for k, _, _ in override_candidates if k.startswith("custom/")]
+        bun_keys = [k for k, _, _ in override_candidates if k.startswith("bundles/")]
+
+        src_names = [Path(k.removeprefix("config_driven/configs/")).stem for k in src_keys]
+        # Strip second extension for .yaml.disabled stems
+        src_names = [Path(n).stem if "." in n else n for n in src_names]
+        cust_display = [k.removeprefix("custom/") for k in cust_keys]
+        bun_display = [k.removeprefix("bundles/") for k in bun_keys]
+
+        total = len(override_candidates)
+        today_str = date.today().isoformat()
+        msg = (
+            f"Capcat: {total} item(s) have updates available:\n"
+            f"  Sources: {', '.join(src_names) if src_names else '(none)'}\n"
+            f"  Custom sources: {', '.join(cust_display) if cust_display else '(none)'}\n"
+            f"  Bundles: {', '.join(bun_display) if bun_display else '(none)'}\n"
+            f"Override with new defaults? Your files are unmodified.\n"
+            f"Backup will be created at Config/sources/backup_{today_str}/. [Y/n]"
+        )
+        answer = self._prompt(msg)
+        if answer.strip().lower() in ("", "y", "yes"):
+            try:
+                self._backup([(k, p) for k, p, _ in override_candidates])
+            except OSError as exc:
+                print(f"Capcat: backup failed ({exc}) — override aborted.")
+                return manifest
+
+            for key, user_file, new_builtin_hash in override_candidates:
+                builtin_file = self._builtin_file_for_key(key)
+                shutil.copy2(builtin_file, user_file)
+                manifest[key]["builtin_hash"] = new_builtin_hash
+                manifest[key]["user_hash"] = new_builtin_hash
+        else:
+            for key, _, new_builtin_hash in override_candidates:
+                manifest[key]["builtin_hash"] = new_builtin_hash
+
+        return manifest
+
+    def _backup(self, resolved_user_files: list) -> Path:
+        """Copy user files to timestamped backup dir. Raises OSError on failure."""
+        today = date.today().isoformat()
+        backup_base = self._root / "Config" / "sources"
+        backup_dir = backup_base / f"backup_{today}"
+        counter = 2
+        while backup_dir.exists():
+            backup_dir = backup_base / f"backup_{today}-{counter}"
+            counter += 1
+
+        backup_dir.mkdir(parents=True)
+        for key, user_path in resolved_user_files:
+            backup_name = key.replace("/", "-")
+            shutil.copy2(user_path, backup_dir / backup_name)
+        return backup_dir
+
+    def _resolve_user_file(self, key: str) -> Optional[Path]:
+        """Locate the actual user file for a manifest key. Returns None if absent."""
+        if key.startswith("config_driven/configs/"):
+            fname = key.removeprefix("config_driven/configs/")
+            # Get stem (strip .disabled if present, then strip extension)
+            p = Path(fname)
+            stem = p.stem
+            if stem.endswith(".yaml") or stem.endswith(".yml") or stem.endswith(".json"):
+                stem = Path(stem).stem
+            user_cfg = self._user_config_driven_dir()
+            for ext in (".yaml", ".yaml.disabled", ".yml", ".json"):
+                candidate = user_cfg / f"{stem}{ext}"
+                if candidate.exists():
+                    return candidate
+            return None
+        elif key.startswith("custom/"):
+            rel = key.split("/", 1)[1]
+            user_path = self._user_custom_dir() / rel
+            return user_path if user_path.exists() else None
+        elif key.startswith("bundles/"):
+            fname = key.removeprefix("bundles/")
+            user_path = self._user_bundles_dir() / fname
+            return user_path if user_path.exists() else None
+        return None
+
+    def _builtin_file_for_key(self, key: str) -> Optional[Path]:
+        """Return the builtin file Path for a manifest key, or None if not present."""
+        if key.startswith("config_driven/configs/"):
+            fname = key.removeprefix("config_driven/configs/")
+            p = self._builtin_config_driven_dir() / fname
+            return p if p.exists() else None
+        elif key.startswith("custom/"):
+            rel = key.removeprefix("custom/")
+            p = self._builtin_custom_dir() / rel
+            return p if p.exists() else None
+        elif key.startswith("bundles/"):
+            fname = key.removeprefix("bundles/")
+            p = self._builtin_bundles_dir() / fname
+            return p if p.exists() else None
+        return None
 
     def _resync_manifest(self) -> None:
         pass  # placeholder

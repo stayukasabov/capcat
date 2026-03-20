@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from datetime import date
 from pathlib import Path
 
 import pytest
@@ -227,3 +228,236 @@ def test_step1_no_prompt_when_no_new_items(tmp_path, monkeypatch):
     m.check_for_upgrades()
 
     assert not prompt_called
+
+
+def _setup_changed_builtin(tmp_path, monkeypatch, user_modified=False):
+    """Builtin bbc.yaml has changed since mirror. user_modified controls whether user also changed."""
+    project = tmp_path / "project"
+    (project / ".capcat").mkdir(parents=True)
+
+    builtin_root = tmp_path / "_builtin"
+    cfg_dir = builtin_root / "config_driven" / "configs"
+    cfg_dir.mkdir(parents=True)
+    custom_dir = builtin_root / "custom"
+    bundles_dir = builtin_root
+
+    user_cfg = project / "Config" / "sources" / "active" / "config_driven" / "configs"
+    user_cfg.mkdir(parents=True)
+    (project / "Config" / "sources" / "active" / "custom").mkdir(parents=True)
+    (project / "Config" / "sources" / "active" / "bundles").mkdir(parents=True)
+
+    original_content = "name: bbc\nversion: 1\n"
+    new_builtin_content = "name: bbc\nversion: 2\n"
+    user_content = "name: bbc\nversion: 99\n" if user_modified else original_content
+
+    orig_hash = hashlib.sha256(original_content.encode()).hexdigest()
+
+    (cfg_dir / "bbc.yaml").write_text(new_builtin_content)
+    (user_cfg / "bbc.yaml").write_text(user_content)
+
+    manifest = {
+        "config_driven/configs/bbc.yaml": {
+            "builtin_hash": orig_hash,
+            "user_hash": orig_hash,
+        }
+    }
+    (project / ".capcat" / "source_hashes.json").write_text(json.dumps(manifest))
+
+    m = SourceConfigMirror(project, tui_mode=False)
+    monkeypatch.setattr(m, "_builtin_config_driven_dir", lambda: cfg_dir)
+    monkeypatch.setattr(m, "_builtin_custom_dir", lambda: custom_dir)
+    monkeypatch.setattr(m, "_builtin_bundles_dir", lambda: bundles_dir)
+    monkeypatch.setattr("builtins.input", lambda _: "n")  # suppress step1 prompt
+    return m, project, user_cfg, cfg_dir
+
+
+def test_step2_skips_when_builtin_unchanged(tmp_path, monkeypatch):
+    """Builtin unchanged -> no override, file unchanged."""
+    project = tmp_path / "project"
+    (project / ".capcat").mkdir(parents=True)
+    builtin_root = tmp_path / "_builtin"
+    cfg_dir = builtin_root / "config_driven" / "configs"
+    cfg_dir.mkdir(parents=True)
+    user_cfg = project / "Config" / "sources" / "active" / "config_driven" / "configs"
+    user_cfg.mkdir(parents=True)
+    (project / "Config" / "sources" / "active" / "custom").mkdir(parents=True)
+    (project / "Config" / "sources" / "active" / "bundles").mkdir(parents=True)
+
+    content = "name: bbc\n"
+    h = hashlib.sha256(content.encode()).hexdigest()
+    (cfg_dir / "bbc.yaml").write_text(content)
+    (user_cfg / "bbc.yaml").write_text(content)
+    manifest = {"config_driven/configs/bbc.yaml": {"builtin_hash": h, "user_hash": h}}
+    (project / ".capcat" / "source_hashes.json").write_text(json.dumps(manifest))
+
+    m = SourceConfigMirror(project, tui_mode=False)
+    monkeypatch.setattr(m, "_builtin_config_driven_dir", lambda: cfg_dir)
+    monkeypatch.setattr(m, "_builtin_custom_dir", lambda: builtin_root / "custom")
+    monkeypatch.setattr(m, "_builtin_bundles_dir", lambda: builtin_root)
+    monkeypatch.setattr("builtins.input", lambda _: "n")
+
+    m.check_for_upgrades()
+
+    assert (user_cfg / "bbc.yaml").read_text() == content
+
+
+def test_step2_skips_when_user_modified(tmp_path, monkeypatch):
+    """Builtin changed but user also modified -> skip silently."""
+    m, project, user_cfg, cfg_dir = _setup_changed_builtin(
+        tmp_path, monkeypatch, user_modified=True
+    )
+    user_content_before = (user_cfg / "bbc.yaml").read_text()
+
+    m.check_for_upgrades()
+
+    assert (user_cfg / "bbc.yaml").read_text() == user_content_before
+
+
+def test_step3_overrides_and_backs_up_when_user_says_yes(tmp_path, monkeypatch):
+    """Builtin changed, user unmodified, user accepts -> backup created, file overridden."""
+    m, project, user_cfg, cfg_dir = _setup_changed_builtin(
+        tmp_path, monkeypatch, user_modified=False
+    )
+    new_builtin_content = (cfg_dir / "bbc.yaml").read_text()
+
+    call_count = [0]
+    def fake_input(prompt):
+        call_count[0] += 1
+        return "y"  # accept override
+
+    monkeypatch.setattr("builtins.input", fake_input)
+
+    m.check_for_upgrades()
+
+    # User file now has new builtin content
+    assert (user_cfg / "bbc.yaml").read_text() == new_builtin_content
+    # Backup dir exists
+    backup_dirs = list((project / "Config" / "sources").glob("backup_*"))
+    assert len(backup_dirs) == 1
+    # Backup contains flattened filename
+    assert (backup_dirs[0] / "config_driven-configs-bbc.yaml").exists()
+
+
+def test_step3_does_not_override_when_user_says_no(tmp_path, monkeypatch):
+    """Builtin changed, user unmodified, user declines -> file unchanged, builtin_hash updated."""
+    m, project, user_cfg, cfg_dir = _setup_changed_builtin(
+        tmp_path, monkeypatch, user_modified=False
+    )
+    original_user_content = (user_cfg / "bbc.yaml").read_text()
+    new_builtin_hash = hashlib.sha256((cfg_dir / "bbc.yaml").read_bytes()).hexdigest()
+
+    monkeypatch.setattr("builtins.input", lambda _: "n")
+
+    m.check_for_upgrades()
+
+    assert (user_cfg / "bbc.yaml").read_text() == original_user_content
+    manifest = json.loads((project / ".capcat" / "source_hashes.json").read_text())
+    assert manifest["config_driven/configs/bbc.yaml"]["builtin_hash"] == new_builtin_hash
+
+
+def test_backup_collision_uses_counter_suffix(tmp_path, monkeypatch):
+    """Second override on same day creates backup_YYYY-MM-DD-2."""
+    m, project, user_cfg, cfg_dir = _setup_changed_builtin(
+        tmp_path, monkeypatch, user_modified=False
+    )
+    today = date.today().isoformat()
+    (project / "Config" / "sources" / f"backup_{today}").mkdir(parents=True)
+
+    monkeypatch.setattr("builtins.input", lambda _: "y")
+    m.check_for_upgrades()
+
+    backup_dirs = list((project / "Config" / "sources").glob("backup_*-[0-9]*"))
+    assert len(backup_dirs) >= 1
+
+
+def test_user_deleted_file_removes_manifest_entry(tmp_path, monkeypatch):
+    """If user deleted their file, remove manifest entry -- do not re-copy."""
+    project = tmp_path / "project"
+    (project / ".capcat").mkdir(parents=True)
+    builtin_root = tmp_path / "_builtin"
+    cfg_dir = builtin_root / "config_driven" / "configs"
+    cfg_dir.mkdir(parents=True)
+    user_cfg = project / "Config" / "sources" / "active" / "config_driven" / "configs"
+    user_cfg.mkdir(parents=True)
+    (project / "Config" / "sources" / "active" / "custom").mkdir(parents=True)
+    (project / "Config" / "sources" / "active" / "bundles").mkdir(parents=True)
+
+    h = hashlib.sha256(b"name: bbc\n").hexdigest()
+    (cfg_dir / "bbc.yaml").write_text("name: bbc\n")
+    # user file does NOT exist
+    manifest = {"config_driven/configs/bbc.yaml": {"builtin_hash": h, "user_hash": h}}
+    (project / ".capcat" / "source_hashes.json").write_text(json.dumps(manifest))
+
+    m = SourceConfigMirror(project, tui_mode=False)
+    monkeypatch.setattr(m, "_builtin_config_driven_dir", lambda: cfg_dir)
+    monkeypatch.setattr(m, "_builtin_custom_dir", lambda: builtin_root / "custom")
+    monkeypatch.setattr(m, "_builtin_bundles_dir", lambda: builtin_root)
+    monkeypatch.setattr("builtins.input", lambda _: "n")
+
+    m.check_for_upgrades()
+
+    updated = json.loads((project / ".capcat" / "source_hashes.json").read_text())
+    assert "config_driven/configs/bbc.yaml" not in updated
+    assert not (user_cfg / "bbc.yaml").exists()
+
+
+def test_disabled_source_participates_in_upgrade_diff(tmp_path, monkeypatch):
+    """A source renamed to .yaml.disabled is found via _resolve_user_file's ordered lookup."""
+    project = tmp_path / "project"
+    (project / ".capcat").mkdir(parents=True)
+    builtin_root = tmp_path / "_builtin"
+    cfg_dir = builtin_root / "config_driven" / "configs"
+    cfg_dir.mkdir(parents=True)
+    user_cfg = project / "Config" / "sources" / "active" / "config_driven" / "configs"
+    user_cfg.mkdir(parents=True)
+    (project / "Config" / "sources" / "active" / "custom").mkdir(parents=True)
+    (project / "Config" / "sources" / "active" / "bundles").mkdir(parents=True)
+
+    original_content = "name: bbc\nversion: 1\n"
+    new_builtin_content = "name: bbc\nversion: 2\n"
+    orig_hash = hashlib.sha256(original_content.encode()).hexdigest()
+
+    (cfg_dir / "bbc.yaml").write_text(new_builtin_content)
+    # User has disabled their copy -- content unmodified
+    (user_cfg / "bbc.yaml.disabled").write_text(original_content)
+
+    manifest = {
+        "config_driven/configs/bbc.yaml": {
+            "builtin_hash": orig_hash,
+            "user_hash": orig_hash,
+        }
+    }
+    (project / ".capcat" / "source_hashes.json").write_text(json.dumps(manifest))
+
+    m = SourceConfigMirror(project, tui_mode=False)
+    monkeypatch.setattr(m, "_builtin_config_driven_dir", lambda: cfg_dir)
+    monkeypatch.setattr(m, "_builtin_custom_dir", lambda: builtin_root / "custom")
+    monkeypatch.setattr(m, "_builtin_bundles_dir", lambda: builtin_root)
+    monkeypatch.setattr("builtins.input", lambda _: "y")
+
+    m.check_for_upgrades()
+
+    # The .disabled file was found and overridden
+    assert (user_cfg / "bbc.yaml.disabled").exists()
+    assert (user_cfg / "bbc.yaml.disabled").read_text() == new_builtin_content
+
+
+def test_tui_mode_uses_questionary_confirm(tmp_path, monkeypatch):
+    """When tui_mode=True, _prompt uses questionary.confirm instead of print+input."""
+    m = SourceConfigMirror(tmp_path, tui_mode=True)
+
+    questionary_calls = []
+
+    class FakeConfirm:
+        def __init__(self, msg, default=True):
+            questionary_calls.append(msg)
+            self._result = True
+        def ask(self):
+            return self._result
+
+    import capcat.core.source_config_mirror as mirror_module
+    monkeypatch.setattr(mirror_module, "questionary", type("q", (), {"confirm": FakeConfirm})())
+
+    result = m._prompt("Test message?")
+    assert questionary_calls
+    assert result == "y"
