@@ -38,7 +38,7 @@ class SourceBackupManager:
             backup_base_dir: Base directory for backups (default: .capcat_backups)
         """
         if backup_base_dir is None:
-            import cli
+            import capcat.cli as cli
             app_root = Path(cli.__file__).parent
             backup_base_dir = app_root.parent / ".capcat_backups"
 
