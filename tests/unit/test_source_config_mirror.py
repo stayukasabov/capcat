@@ -138,6 +138,18 @@ def test_first_mirror_bundles_manifest_entry(full_mirror):
     assert "bundles/bundles.yml" in manifest
 
 
+def test_run_first_mirror_tolerates_malformed_manifest(tmp_path, monkeypatch):
+    manifest_path = tmp_path / ".capcat" / "source_hashes.json"
+    manifest_path.parent.mkdir(parents=True)
+    manifest_path.write_text("not json", encoding="utf-8")
+    mirror = SourceConfigMirror(project_root=tmp_path, tui_mode=False)
+    monkeypatch.setattr(mirror, "_mirror_config_driven", lambda m: None)
+    monkeypatch.setattr(mirror, "_mirror_custom", lambda m: None)
+    monkeypatch.setattr(mirror, "_mirror_bundles", lambda m: None)
+    monkeypatch.setattr(mirror, "_save_manifest", lambda m: None)
+    mirror.run_first_mirror()  # must not raise
+
+
 def test_first_mirror_skips_disabled_files(full_mirror):
     m, project = full_mirror
     m.run_first_mirror()
