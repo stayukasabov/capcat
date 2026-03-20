@@ -3,6 +3,8 @@ Service layer for the add-source command.
 Provides a clean interface for CLI integration while maintaining separation of concerns.
 """
 
+import hashlib
+import json
 from pathlib import Path
 from typing import Optional
 
@@ -25,21 +27,30 @@ class AddSourceService:
     Provides a clean, high-level interface for CLI integration.
     """
 
-    def __init__(self, base_path: Optional[Path] = None):
+    def __init__(self, base_path: Optional[Path] = None, project_root: Optional[Path] = None):
         """
-        Initialize the add-source service.
-
         Args:
-            base_path: Optional base path for the application (defaults to CLI's parent)
+            project_root: Project root (preferred). When provided, writes to
+                Config/sources/active/config_driven/configs/.
+            base_path: Legacy fallback (package root). Ignored when project_root is set.
         """
-        if base_path is None:
-            # capcat package root: capcat/core/source_system/ → up 3 levels → capcat/
-            base_path = Path(__file__).parent.parent.parent
+        if project_root is not None:
+            self._project_root = project_root
+            self._config_path = (
+                project_root / "Config" / "sources" / "active" / "config_driven" / "configs"
+            )
+            self._bundles_path = (
+                project_root / "Config" / "sources" / "active" / "bundles" / "bundles.yml"
+            )
+        else:
+            if base_path is None:
+                base_path = Path(__file__).parent.parent.parent
+            self._project_root = None
+            builtin = base_path / "sources" / "builtin"
+            self._config_path = builtin / "config_driven" / "configs"
+            self._bundles_path = builtin / "bundles.yml"
 
         self._base_path = base_path
-        builtin = base_path / "sources" / "builtin"
-        self._config_path = builtin / "config_driven" / "configs"
-        self._bundles_path = builtin / "bundles.yml"
         self._logger = get_logger(__name__)
 
     def add_source(self, url: str) -> None:
@@ -59,6 +70,39 @@ class AddSourceService:
 
         # Execute the command
         command.execute(url)
+        self._write_manifest_entry_after_add()
+
+    def _write_manifest_entry(self, filename: str) -> None:
+        """Write a manifest entry with builtin_hash='' for a user-added source."""
+        if self._project_root is None:
+            return
+        config_file = self._config_path / filename
+        if not config_file.exists():
+            return
+        user_hash = hashlib.sha256(config_file.read_bytes()).hexdigest()
+        key = f"config_driven/configs/{filename}"
+        manifest_path = self._project_root / ".capcat" / "source_hashes.json"
+        manifest_path.parent.mkdir(parents=True, exist_ok=True)
+        manifest = {}
+        if manifest_path.exists():
+            try:
+                manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            except Exception as exc:
+                self._logger.warning(f"Failed to read manifest, starting fresh: {exc}")
+        manifest[key] = {"builtin_hash": "", "user_hash": user_hash}
+        manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+
+    def _write_manifest_entry_after_add(self) -> None:
+        """Find the most recently written config file and create its manifest entry."""
+        if self._project_root is None or not self._config_path.exists():
+            return
+        files = sorted(
+            [f for f in self._config_path.iterdir() if f.suffix in {".yaml", ".yml", ".json"}],
+            key=lambda f: f.stat().st_mtime,
+            reverse=True,
+        )
+        if files:
+            self._write_manifest_entry(files[0].name)
 
     def _create_add_source_command(self) -> AddSourceCommand:
         """Create and configure the AddSourceCommand with all dependencies."""
@@ -76,10 +120,11 @@ class AddSourceService:
 
 
 def create_add_source_service() -> AddSourceService:
-    """
-    Factory function to create an AddSourceService instance.
-
-    Returns:
-        Configured AddSourceService instance
-    """
-    return AddSourceService()
+    """Factory: creates AddSourceService with project_root when inside a capcat project."""
+    try:
+        from capcat.core.config import find_project_root, NoProjectError
+        project_root = find_project_root()
+        return AddSourceService(project_root=project_root)
+    except Exception as exc:
+        get_logger(__name__).debug(f"No project root, using builtin path: {exc}")
+        return AddSourceService()
