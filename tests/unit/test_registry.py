@@ -147,3 +147,11 @@ def test_get_source_factory_returns_fresh_instance_with_project_root(tmp_path):
     f1 = get_source_factory()
     f2 = get_source_factory(project_root=tmp_path)
     assert f1 is not f2
+
+
+def test_get_source_factory_two_project_root_calls_return_different_instances(tmp_path):
+    from capcat.core.source_system.source_factory import get_source_factory
+
+    f1 = get_source_factory(project_root=tmp_path)
+    f2 = get_source_factory(project_root=tmp_path)
+    assert f1 is not f2
