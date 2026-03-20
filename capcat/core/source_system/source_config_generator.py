@@ -60,6 +60,7 @@ class SourceConfigGenerator:
 
         yaml_content = self.generate_yaml_content()
 
+        file_path.parent.mkdir(parents=True, exist_ok=True)
         with open(file_path, 'w') as f:
             f.write(yaml_content)
 
