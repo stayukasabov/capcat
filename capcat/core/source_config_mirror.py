@@ -69,7 +69,6 @@ class SourceConfigMirror:
         return hashlib.sha256(path.read_bytes()).hexdigest()
 
     def _load_manifest(self) -> Optional[dict]:
-        from capcat.core.logging_config import get_logger
         p = self._root / ".capcat" / "source_hashes.json"
         if not p.exists():
             return None
@@ -78,7 +77,8 @@ class SourceConfigMirror:
             return {}
         try:
             return json.loads(content)
-        except Exception as exc:
+        except json.JSONDecodeError as exc:
+            from capcat.core.logging_config import get_logger
             get_logger(__name__).warning(
                 f"source_hashes.json is malformed — treating as empty: {exc}"
             )
