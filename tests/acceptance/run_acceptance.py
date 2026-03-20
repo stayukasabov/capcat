@@ -53,6 +53,7 @@ else:
 _HERE = Path(__file__).parent
 _FIXTURES = _HERE / "fixtures"
 _RESULTS = _HERE / "results"
+_TMP = _HERE / "tmp"
 
 
 # ── Sentinel replacement ──────────────────────────────────────────────────────
@@ -364,7 +365,8 @@ def _run_one_test(
     global_timeout: int | None,
 ) -> str:
     """Execute one test. Returns 'quit' to signal session end, else 'continue'."""
-    tmp_dir = tempfile.mkdtemp(prefix=f"cap_t{test['id']}_")
+    _TMP.mkdir(parents=True, exist_ok=True)
+    tmp_dir = tempfile.mkdtemp(prefix=f"t{test['id']}_", dir=_TMP)
 
     # Pre-setup: copy fixture
     if test["fixture"]:
