@@ -30,6 +30,14 @@ try:
 except ImportError:
     NEW_SOURCE_SYSTEM_AVAILABLE = False
 
+try:
+    from capcat.core.source_config_mirror import SourceConfigMirror
+    from capcat.core.config import find_project_root, NoProjectError
+    from capcat.core.tui_context import is_tui_active
+    MIRROR_AVAILABLE = True
+except ImportError:
+    MIRROR_AVAILABLE = False
+
 
 class UnifiedSourceProcessor:
     """
@@ -40,14 +48,15 @@ class UnifiedSourceProcessor:
     # Class-level URL cache for cross-source deduplication
     _processed_urls = set()
 
-    def __init__(self):
+    def __init__(self, project_root: Optional[Path] = None):
         self.logger = get_logger(__name__)
         self.config = get_config()
+        self.project_root = project_root
         # Initialize new source system if available
         self.new_source_factory = None
         if NEW_SOURCE_SYSTEM_AVAILABLE:
             try:
-                self.new_source_factory = get_source_factory()
+                self.new_source_factory = get_source_factory(project_root=project_root)
             except Exception as e:
                 self.logger.debug(f"New source system not yet ready: {e}")
                 self.new_source_factory = None
@@ -137,6 +146,22 @@ class UnifiedSourceProcessor:
         generate_html: bool = False,
     ) -> None:
         """Process articles using the new source system."""
+        # Run source config mirror (first-run copy or upgrade diff)
+        if MIRROR_AVAILABLE:
+            try:
+                project_root = self.project_root
+                if project_root is None:
+                    project_root = find_project_root()
+                mirror = SourceConfigMirror(project_root, tui_mode=is_tui_active())
+                if not mirror.is_mirrored():
+                    mirror.run_first_mirror()
+                else:
+                    mirror.check_for_upgrades()
+            except NoProjectError:
+                pass  # Not in a project — skip mirror
+            except Exception as exc:
+                self.logger.warning(f"Source config mirror failed: {exc}")
+
         self.logger.debug(f"Using new source system for {source_name}")
 
         try:
@@ -426,9 +451,11 @@ class UnifiedSourceProcessor:
 _processor = None
 
 
-def get_unified_processor() -> UnifiedSourceProcessor:
+def get_unified_processor(project_root: Optional[Path] = None) -> UnifiedSourceProcessor:
     """Get global unified processor instance."""
     global _processor
+    if project_root is not None:
+        return UnifiedSourceProcessor(project_root=project_root)
     if _processor is None:
         _processor = UnifiedSourceProcessor()
     return _processor
@@ -443,6 +470,7 @@ def process_source_articles(
     download_files: bool = False,
     batch_mode: bool = False,
     generate_html: bool = False,
+    project_root: Optional[Path] = None,
 ) -> None:
     """
     Convenience function to process articles from any source.
@@ -455,8 +483,9 @@ def process_source_articles(
         verbose: Enable verbose logging
         download_files: Enable media file downloads
         batch_mode: Whether processing multiple sources (affects retry messages)
+        project_root: Optional project root override
     """
-    processor = get_unified_processor()
+    processor = get_unified_processor(project_root=project_root)
     processor.process_source_articles(
         source_name, count, output_dir, quiet, verbose, download_files, batch_mode,
         generate_html,
