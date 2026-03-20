@@ -71,7 +71,7 @@ capcat --version                    # print version
 
 ## Source Management
 
-On first fetch, Capcat mirrors all builtin source configs to `Config/sources/active/` in your
+On first use, Capcat mirrors all builtin source configs to `Config/sources/active/` in your
 project. Edit files there freely — they are never overwritten without your consent.
 
 ### Commands
