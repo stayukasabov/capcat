@@ -369,11 +369,13 @@ def _cmd_list(args: list[str]) -> None:
         return
 
     from capcat.core.source_system.source_registry import SourceRegistry
+    from capcat.core.source_system.bundle_service import get_available_bundles
     from capcat.core.config import find_project_root, NoProjectError
     try:
         _project_root = find_project_root()
     except NoProjectError:
         _project_root = None
+
     registry = SourceRegistry(project_root=_project_root)
     registry.discover_sources()
 
@@ -385,12 +387,6 @@ def _cmd_list(args: list[str]) -> None:
             print(f"  {sid:<20} {name}")
 
     if what in ("bundles", "all"):
-        from capcat.core.source_system.bundle_service import get_available_bundles
-        from capcat.core.config import find_project_root, NoProjectError
-        try:
-            _project_root = find_project_root()
-        except NoProjectError:
-            _project_root = None
         bundles = get_available_bundles(project_root=_project_root)
         print("\nAvailable bundles:")
         for bundle_id, bundle_data in sorted(bundles.items()):
