@@ -1,5 +1,5 @@
 Capcat Documentation Manifest
-Generated: 2026-03-19 21:52:02 UTC
+Generated: 2026-03-20 16:25:06 UTC
 Success rate: 2/2 tasks
 
 Generated Documentation:
@@ -85,6 +85,7 @@ Generated Documentation:
   - api/capcat/source_base.md
   - api/capcat/source_config.md
   - api/capcat/source_config_generator.md
+  - api/capcat/source_config_mirror.md
   - api/capcat/source_configs.md
   - api/capcat/source_factory.md
   - api/capcat/source_registry.md
@@ -283,6 +284,8 @@ Generated Documentation:
   - superpowers/plans/2026-03-18-obsidian-wikilinks.md
   - superpowers/plans/2026-03-19-graceful-shutdown.md
   - superpowers/plans/2026-03-19-htmlgen-refactor.md
+  - superpowers/plans/2026-03-20-userspace-source-mirror.md
+  - superpowers/plans/2026-03-20-v140-todo-fixes.md
   - superpowers/specs/2026-03-15-breadcrumb-phase1-folder-naming-design.md
   - superpowers/specs/2026-03-15-breadcrumb-phase2-html-rendering-design.md
   - superpowers/specs/2026-03-15-claude-md-context-engineering-design.md
@@ -292,7 +295,9 @@ Generated Documentation:
   - superpowers/specs/2026-03-18-obsidian-wikilinks-design.md
   - superpowers/specs/2026-03-19-graceful-shutdown-design.md
   - superpowers/specs/2026-03-19-htmlgen-refactor-design.md
+  - superpowers/specs/2026-03-20-userspace-source-mirror-design.md
+  - superpowers/specs/2026-03-20-v140-todo-fixes-design.md
   - troubleshooting.md
 
-Total files: 590
-Documentation size: 9.7 MB
+Total files: 595
+Documentation size: 9.8 MB

@@ -19,18 +19,20 @@ Provides high-level interface for CLI integration.
 ##### __init__
 
 ```python
-def __init__(self, base_path: Optional[Path] = None)
+def __init__(self, base_path: Optional[Path] = None, project_root: Optional[Path] = None)
 ```
 
 Initialize the remove-source service.
 
 Args:
     base_path: Optional base path for the application
+    project_root: Optional project root for userspace redirect
 
 **Parameters:**
 
 - `self`
 - `base_path` (Optional[Path]) *optional*
+- `project_root` (Optional[Path]) *optional*
 
 ##### remove_sources
 
@@ -63,6 +65,35 @@ Create and configure RemoveSourceCommand with dependencies.
 
 **Returns:** RemoveSourceCommand
 
+##### _remove_manifest_entry
+
+```python
+def _remove_manifest_entry(self, filename: str) -> None
+```
+
+Remove a manifest entry after successful source removal.
+
+**Parameters:**
+
+- `self`
+- `filename` (str)
+
+**Returns:** None
+
+##### _remove_manifest_entry_after_remove
+
+```python
+def _remove_manifest_entry_after_remove(self) -> None
+```
+
+Remove manifest entries for config files that no longer exist on disk.
+
+**Parameters:**
+
+- `self`
+
+**Returns:** None
+
 
 ## Functions
 
@@ -72,10 +103,7 @@ Create and configure RemoveSourceCommand with dependencies.
 def create_remove_source_service() -> RemoveSourceService
 ```
 
-Factory function to create RemoveSourceService.
-
-Returns:
-    Configured RemoveSourceService instance
+Factory: creates RemoveSourceService with project_root when inside a capcat project.
 
 **Returns:** RemoveSourceService
 

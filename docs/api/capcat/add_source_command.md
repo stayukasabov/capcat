@@ -401,13 +401,16 @@ Args:
 ##### execute
 
 ```python
-def execute(self, url: str) -> None
+def execute(self, url: str) -> Path
 ```
 
 Execute the add-source command.
 
 Args:
     url: RSS feed URL to add
+
+Returns:
+    Path to the written config file.
 
 Raises:
     CapcatError: If any step in the process fails
@@ -417,7 +420,7 @@ Raises:
 - `self`
 - `url` (str)
 
-**Returns:** None
+**Returns:** Path
 
 ##### _introspect_feed
 

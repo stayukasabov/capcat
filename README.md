@@ -7,7 +7,7 @@ Captures articles from 17+ curated sources as clean Markdown files with optional
 ## Installation
 
 ```bash
-pip install capcat
+pipx install capcat
 ```
 
 Requires Python 3.8+.

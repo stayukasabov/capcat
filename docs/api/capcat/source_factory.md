@@ -389,10 +389,18 @@ String representation of the factory.
 ### get_source_factory
 
 ```python
-def get_source_factory() -> SourceFactory
+def get_source_factory(project_root: Optional[Path] = None) -> SourceFactory
 ```
 
-Get the global source factory instance.
+Get the source factory.
+
+When project_root is None, return the cached global singleton (backward-compatible).
+When project_root is non-None, always construct and return a fresh instance
+with a registry scoped to that project root.
+
+**Parameters:**
+
+- `project_root` (Optional[Path]) *optional*
 
 **Returns:** SourceFactory
 

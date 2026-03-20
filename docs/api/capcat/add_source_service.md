@@ -19,18 +19,19 @@ Provides a clean, high-level interface for CLI integration.
 ##### __init__
 
 ```python
-def __init__(self, base_path: Optional[Path] = None)
+def __init__(self, base_path: Optional[Path] = None, project_root: Optional[Path] = None)
 ```
 
-Initialize the add-source service.
-
 Args:
-    base_path: Optional base path for the application (defaults to CLI's parent)
+    project_root: Project root (preferred). When provided, writes to
+        Config/sources/active/config_driven/configs/.
+    base_path: Legacy fallback (package root). Ignored when project_root is set.
 
 **Parameters:**
 
 - `self`
 - `base_path` (Optional[Path]) *optional*
+- `project_root` (Optional[Path]) *optional*
 
 ##### add_source
 
@@ -50,6 +51,21 @@ Raises:
 
 - `self`
 - `url` (str)
+
+**Returns:** None
+
+##### _write_manifest_entry
+
+```python
+def _write_manifest_entry(self, filename: str) -> None
+```
+
+Write a manifest entry with builtin_hash='' for a user-added source.
+
+**Parameters:**
+
+- `self`
+- `filename` (str)
 
 **Returns:** None
 
@@ -76,10 +92,7 @@ Create and configure the AddSourceCommand with all dependencies.
 def create_add_source_service() -> AddSourceService
 ```
 
-Factory function to create an AddSourceService instance.
-
-Returns:
-    Configured AddSourceService instance
+Factory: creates AddSourceService with project_root when inside a capcat project.
 
 **Returns:** AddSourceService
 

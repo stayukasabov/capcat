@@ -69,6 +69,7 @@ or refuse connection
 - [capcat.core.session_pool](../api/capcat/session_pool.md) - Global session pooling for optimal network performance across all sources
 - [capcat.core.shutdown](../api/capcat/shutdown.md) - Graceful shutdown handling for Capcat
 - [capcat.core.source_config](../api/capcat/source_config.md) - Source configuration for optimized URL detection in Capcat
+- [capcat.core.source_config_mirror](../api/capcat/source_config_mirror.md) - Mirror builtin source configs to userspace Config/sources/active/
 - [capcat.core.source_configs](../api/capcat/source_configs.md) - Modular source configuration system with backward compatibility
 - [capcat.core.source_system.__init__](../api/capcat/__init__.md)
 - [capcat.core.source_system.add_source_command](../api/capcat/add_source_command.md) - Professional implementation of the add-source command using clean architecture principles
@@ -340,8 +341,8 @@ Usage:
 
 ## Statistics
 
-- **Total Modules**: 236
-- **Total Classes**: 414
+- **Total Modules**: 237
+- **Total Classes**: 415
 - **Total Functions**: 514
 - **Public Functions**: 418
 - **Documentation Coverage**: 81.3%

@@ -201,5 +201,5 @@ def _handle_manage_bundles()
 
 Handle bundle management submenu.
 
-⚠️ **High complexity:** 11
+⚠️ **High complexity:** 12
 
