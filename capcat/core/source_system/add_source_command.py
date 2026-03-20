@@ -237,12 +237,15 @@ class AddSourceCommand:
         self._bundles_path = bundles_path
         self._logger = logger or get_logger(__name__)
 
-    def execute(self, url: str) -> None:
+    def execute(self, url: str) -> Path:
         """
         Execute the add-source command.
 
         Args:
             url: RSS feed URL to add
+
+        Returns:
+            Path to the written config file.
 
         Raises:
             CapcatError: If any step in the process fails
@@ -267,6 +270,7 @@ class AddSourceCommand:
 
             self._ui.show_success(f"Source '{metadata.source_id}' added successfully!")
             self._logger.info(f"Successfully added source: {metadata.source_id}")
+            return config_file
 
         except CapcatError:
             raise

@@ -69,8 +69,8 @@ class AddSourceService:
         command = self._create_add_source_command()
 
         # Execute the command
-        command.execute(url)
-        self._write_manifest_entry_after_add()
+        config_file = command.execute(url)
+        self._write_manifest_entry(config_file.name)
 
     def _write_manifest_entry(self, filename: str) -> None:
         """Write a manifest entry with builtin_hash='' for a user-added source."""
@@ -91,18 +91,6 @@ class AddSourceService:
                 self._logger.warning(f"Failed to read manifest, starting fresh: {exc}")
         manifest[key] = {"builtin_hash": "", "user_hash": user_hash}
         manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
-
-    def _write_manifest_entry_after_add(self) -> None:
-        """Find the most recently written config file and create its manifest entry."""
-        if self._project_root is None or not self._config_path.exists():
-            return
-        files = sorted(
-            [f for f in self._config_path.iterdir() if f.suffix in {".yaml", ".yml", ".json"}],
-            key=lambda f: f.stat().st_mtime,
-            reverse=True,
-        )
-        if files:
-            self._write_manifest_entry(files[0].name)
 
     def _create_add_source_command(self) -> AddSourceCommand:
         """Create and configure the AddSourceCommand with all dependencies."""

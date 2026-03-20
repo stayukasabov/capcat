@@ -43,27 +43,6 @@ def test_add_source_service_writes_manifest_entry(project, monkeypatch):
     assert len(manifest[key]["user_hash"]) == 64
 
 
-def test_write_manifest_entry_after_add_picks_newest_file(project):
-    """_write_manifest_entry_after_add writes manifest for the most recently touched file."""
-    import time
-    config_dir = project / "Config" / "sources" / "active" / "config_driven" / "configs"
-    config_dir.mkdir(parents=True)
-
-    older = config_dir / "older.yaml"
-    older.write_text("name: older\n")
-    time.sleep(0.05)
-    newer = config_dir / "newer.yaml"
-    newer.write_text("name: newer\n")
-
-    svc = AddSourceService(project_root=project)
-    svc._write_manifest_entry_after_add()
-
-    manifest_path = project / ".capcat" / "source_hashes.json"
-    manifest = json.loads(manifest_path.read_text())
-    assert "config_driven/configs/newer.yaml" in manifest
-    assert "config_driven/configs/older.yaml" not in manifest
-
-
 from capcat.core.source_system.remove_source_service import RemoveSourceService
 
 
@@ -111,3 +90,31 @@ def test_remove_manifest_entry_after_remove_cleans_stale_entries(project):
     updated = json.loads((project / ".capcat" / "source_hashes.json").read_text())
     assert "config_driven/configs/bbc.yaml" in updated    # present on disk → kept
     assert "config_driven/configs/hn.yaml" not in updated  # absent on disk → pruned
+
+
+def test_add_source_service_uses_execute_return_value_not_mtime(tmp_path):
+    """add_source() must pass the filename returned by execute() to _write_manifest_entry."""
+    from unittest.mock import MagicMock, patch
+    from capcat.core.source_system.add_source_service import AddSourceService
+
+    written_file = tmp_path / "Config" / "sources" / "active" / "config_driven" / "configs" / "mynewsource.yaml"
+    written_file.parent.mkdir(parents=True)
+    written_file.write_text("source_id: mynewsource\n", encoding="utf-8")
+
+    service = AddSourceService(project_root=tmp_path)
+    recorded_filenames = []
+
+    with patch.object(service, "_create_add_source_command") as mock_cmd_factory, \
+         patch.object(service, "_write_manifest_entry", side_effect=lambda fn: recorded_filenames.append(fn)):
+        mock_cmd = MagicMock()
+        mock_cmd.execute.return_value = written_file
+        mock_cmd_factory.return_value = mock_cmd
+        service.add_source("https://example.com/feed.rss")
+
+    assert recorded_filenames == ["mynewsource.yaml"]
+
+
+def test_write_manifest_entry_after_add_is_gone():
+    """_write_manifest_entry_after_add must not exist on AddSourceService."""
+    from capcat.core.source_system.add_source_service import AddSourceService
+    assert not hasattr(AddSourceService, "_write_manifest_entry_after_add")
