@@ -62,3 +62,52 @@ def test_write_manifest_entry_after_add_picks_newest_file(project):
     manifest = json.loads(manifest_path.read_text())
     assert "config_driven/configs/newer.yaml" in manifest
     assert "config_driven/configs/older.yaml" not in manifest
+
+
+from capcat.core.source_system.remove_source_service import RemoveSourceService
+
+
+def test_remove_source_service_uses_userspace_path(project):
+    """RemoveSourceService uses Config/sources/active/config_driven/configs/ as target."""
+    svc = RemoveSourceService(project_root=project)
+    expected = project / "Config" / "sources" / "active" / "config_driven" / "configs"
+    assert svc._config_path == expected
+
+
+def test_remove_source_service_removes_manifest_entry(project):
+    """Removing a source clears its manifest entry."""
+    import hashlib, json
+    config_dir = project / "Config" / "sources" / "active" / "config_driven" / "configs"
+    config_dir.mkdir(parents=True)
+    (config_dir / "bbc.yaml").write_text("name: bbc\n")
+
+    h = hashlib.sha256(b"name: bbc\n").hexdigest()
+    manifest = {"config_driven/configs/bbc.yaml": {"builtin_hash": h, "user_hash": h}}
+    (project / ".capcat" / "source_hashes.json").write_text(json.dumps(manifest))
+
+    svc = RemoveSourceService(project_root=project)
+    svc._remove_manifest_entry("bbc.yaml")
+
+    updated = json.loads((project / ".capcat" / "source_hashes.json").read_text())
+    assert "config_driven/configs/bbc.yaml" not in updated
+
+
+def test_remove_manifest_entry_after_remove_cleans_stale_entries(project):
+    """_remove_manifest_entry_after_remove removes entries for deleted config files."""
+    config_dir = project / "Config" / "sources" / "active" / "config_driven" / "configs"
+    config_dir.mkdir(parents=True)
+    (config_dir / "bbc.yaml").write_text("name: bbc\n")
+    # hn.yaml does NOT exist on disk — stale entry
+
+    manifest = {
+        "config_driven/configs/bbc.yaml": {"builtin_hash": "aa", "user_hash": "bb"},
+        "config_driven/configs/hn.yaml": {"builtin_hash": "cc", "user_hash": "dd"},
+    }
+    (project / ".capcat" / "source_hashes.json").write_text(json.dumps(manifest))
+
+    svc = RemoveSourceService(project_root=project)
+    svc._remove_manifest_entry_after_remove()
+
+    updated = json.loads((project / ".capcat" / "source_hashes.json").read_text())
+    assert "config_driven/configs/bbc.yaml" in updated    # present on disk → kept
+    assert "config_driven/configs/hn.yaml" not in updated  # absent on disk → pruned
