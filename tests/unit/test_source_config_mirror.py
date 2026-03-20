@@ -500,6 +500,59 @@ def test_resync_manifest_when_missing(tmp_path, monkeypatch):
     assert entry["user_hash"] == user_hash
 
 
+def test_load_manifest_returns_none_when_file_absent(tmp_path):
+    mirror = SourceConfigMirror(project_root=tmp_path, tui_mode=False)
+    assert mirror._load_manifest() is None
+
+
+def test_load_manifest_returns_empty_dict_when_file_is_empty(tmp_path):
+    manifest_path = tmp_path / ".capcat" / "source_hashes.json"
+    manifest_path.parent.mkdir(parents=True)
+    manifest_path.write_text("{}", encoding="utf-8")
+    mirror = SourceConfigMirror(project_root=tmp_path, tui_mode=False)
+    assert mirror._load_manifest() == {}
+
+
+def test_load_manifest_returns_empty_dict_and_warns_on_malformed_json(tmp_path, caplog):
+    import logging
+    manifest_path = tmp_path / ".capcat" / "source_hashes.json"
+    manifest_path.parent.mkdir(parents=True)
+    manifest_path.write_text("not json", encoding="utf-8")
+    mirror = SourceConfigMirror(project_root=tmp_path, tui_mode=False)
+    with caplog.at_level(logging.WARNING):
+        result = mirror._load_manifest()
+    assert result == {}
+    assert any(r.levelno >= logging.WARNING for r in caplog.records)
+
+
+def test_check_for_upgrades_calls_resync_only_when_manifest_absent(tmp_path, monkeypatch):
+    mirror = SourceConfigMirror(project_root=tmp_path, tui_mode=False)
+    resync_called = []
+    monkeypatch.setattr(mirror, "_resync_manifest", lambda: resync_called.append(True))
+    monkeypatch.setattr(mirror, "_step1_new_items", lambda m: m)
+    monkeypatch.setattr(mirror, "_step2_3_changed_builtins", lambda m: m)
+    monkeypatch.setattr(mirror, "_save_manifest", lambda m: None)
+    # No manifest file exists → _resync_manifest should be called
+    mirror.check_for_upgrades()
+    assert resync_called == [True]
+
+
+def test_check_for_upgrades_proceeds_to_step1_when_manifest_empty(tmp_path, monkeypatch):
+    manifest_path = tmp_path / ".capcat" / "source_hashes.json"
+    manifest_path.parent.mkdir(parents=True)
+    manifest_path.write_text("{}", encoding="utf-8")
+    mirror = SourceConfigMirror(project_root=tmp_path, tui_mode=False)
+    step1_called = []
+    resync_called = []
+    monkeypatch.setattr(mirror, "_resync_manifest", lambda: resync_called.append(True))
+    monkeypatch.setattr(mirror, "_step1_new_items", lambda m: step1_called.append(True) or m)
+    monkeypatch.setattr(mirror, "_step2_3_changed_builtins", lambda m: m)
+    monkeypatch.setattr(mirror, "_save_manifest", lambda m: None)
+    mirror.check_for_upgrades()
+    assert step1_called == [True]
+    assert resync_called == []
+
+
 def test_unified_processor_calls_mirror_on_first_fetch(tmp_path, monkeypatch):
     """UnifiedSourceProcessor._process_with_new_system calls run_first_mirror when not mirrored."""
     from capcat.core.unified_source_processor import UnifiedSourceProcessor

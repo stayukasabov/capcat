@@ -38,7 +38,7 @@ class SourceConfigMirror:
 
     def run_first_mirror(self) -> None:
         """Copy all three domains, write manifest, print message."""
-        manifest = self._load_manifest()
+        manifest = self._load_manifest() or {}
 
         self._mirror_config_driven(manifest)
         self._mirror_custom(manifest)
@@ -53,7 +53,7 @@ class SourceConfigMirror:
     def check_for_upgrades(self) -> None:
         """Diff all domains vs manifest. Prompt for new items and changed builtins."""
         manifest = self._load_manifest()
-        if not manifest:
+        if manifest is None:
             self._resync_manifest()
             return
 
@@ -68,13 +68,17 @@ class SourceConfigMirror:
     def _compute_hash(self, path: Path) -> str:
         return hashlib.sha256(path.read_bytes()).hexdigest()
 
-    def _load_manifest(self) -> dict:
+    def _load_manifest(self) -> Optional[dict]:
+        from capcat.core.logging_config import get_logger
         p = self._root / ".capcat" / "source_hashes.json"
         if not p.exists():
-            return {}
+            return None
         try:
             return json.loads(p.read_text(encoding="utf-8"))
-        except Exception:
+        except Exception as exc:
+            get_logger(__name__).warning(
+                f"source_hashes.json is malformed — treating as empty: {exc}"
+            )
             return {}
 
     def _save_manifest(self, manifest: dict) -> None:
