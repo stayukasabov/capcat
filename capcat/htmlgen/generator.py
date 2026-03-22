@@ -189,8 +189,32 @@ class ArticleHTMLGenerator:
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>$title</title>
     {embedded_styles}
+    <!-- Inline Theme Initialization - Prevents Flash of Wrong Theme -->
+    <script>
+      (function () {{
+        var hashMatch = window.location.hash.match(/theme=(light|dark)/);
+        var hashTheme = hashMatch ? hashMatch[1] : null;
+        var savedTheme = localStorage.getItem("capcat-theme");
+        var theme = hashTheme || savedTheme ||
+          (window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+        document.documentElement.setAttribute("data-theme", theme);
+        window.capcat_initial_theme = theme;
+        window.addEventListener("DOMContentLoaded", function () {{ injectThemeIntoLinks(theme); }});
+        function injectThemeIntoLinks(t) {{
+          document.querySelectorAll("a[href]").forEach(function (link) {{
+            var href = link.getAttribute("href");
+            if (!href || /^(https?:|\/\/|mailto:|javascript:|tel:)/.test(href)) return;
+            if (href.indexOf("#theme=") !== -1) href = href.replace(/(#|&)theme=(light|dark)/, "$$1theme=" + t);
+            else if (href.indexOf("#") !== -1) href = href + "&theme=" + t;
+            else href = href + "#theme=" + t;
+            link.setAttribute("href", href);
+          }});
+        }}
+        window.injectThemeIntoLinks = injectThemeIntoLinks;
+      }})();
+    </script>
 </head>
-<body data-theme="dark">
+<body>
     <div class="page-layout">
         <div class="header-section">
             <button class="theme-toggle" onclick="toggleTheme()" title="Switch between light and dark themes">
