@@ -595,6 +595,7 @@ class ArticleHTMLGenerator:
                 html_content, article_title
             )
             html_content = self._wrap_source_url_in_div(html_content)
+            html_content = self._classify_svg_elements(html_content)   # ← new step
 
             # Adjust relative paths if HTML is in subfolder
             if html_subfolder:
