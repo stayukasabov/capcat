@@ -1649,7 +1649,6 @@ class ArticleHTMLGenerator:
 
     def _extract_viewbox(self, el) -> "tuple[float, float] | None":
         """Extract (width, height) from a BeautifulSoup SVG/img element, or None."""
-        import re
         import base64
         import urllib.parse
 
