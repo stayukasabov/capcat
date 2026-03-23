@@ -1647,6 +1647,147 @@ class ArticleHTMLGenerator:
 
         return html_content
 
+    def _extract_viewbox(self, el) -> "tuple[float, float] | None":
+        """Extract (width, height) from a BeautifulSoup SVG/img element, or None."""
+        import re
+        import base64
+        import urllib.parse
+
+        # Inline <svg>: read viewBox attribute directly
+        if getattr(el, "name", "") == "svg":
+            vb_attr = el.get("viewBox") or el.get("viewbox", "")
+            m = re.search(r'[\d.]+\s+[\d.]+\s+([\d.]+)\s+([\d.]+)', vb_attr)
+            if m:
+                return float(m.group(1)), float(m.group(2))
+            w = el.get("width")
+            h = el.get("height")
+            if w and h:
+                try:
+                    return float(w), float(h)
+                except ValueError:
+                    pass
+            return None
+
+        # <img>: try data URI first
+        src = el.get("src", "")
+        if src.startswith("data:image/svg"):
+            comma = src.find(",")
+            if comma == -1:
+                return None
+            data_part = src[comma + 1:]
+
+            if ";base64," in src:
+                try:
+                    decoded = base64.b64decode(data_part).decode("utf-8", errors="replace")
+                except Exception:
+                    decoded = ""
+            else:
+                decoded = urllib.parse.unquote(data_part)
+
+            vb_match = re.search(
+                r'viewBox=["\']?\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)',
+                decoded
+            )
+            if vb_match:
+                return float(vb_match.group(3)), float(vb_match.group(4))
+
+        # Fall back to explicit width/height attrs on <img>
+        w_attr = el.get("width")
+        h_attr = el.get("height")
+        if w_attr and h_attr:
+            try:
+                return float(w_attr), float(h_attr)
+            except ValueError:
+                pass
+
+        return None
+
+    def _score_svg_element(self, el, soup) -> "tuple[int, int]":
+        """Return (icon_score, illustration_score) for a BeautifulSoup element."""
+        from bs4 import NavigableString
+
+        icon = 0
+        illus = 0
+
+        # --- Size/shape signals ---
+        vb = self._extract_viewbox(el)
+        if vb:
+            w, h = vb
+            if w == h:
+                icon += 3               # square
+            else:
+                illus += 4              # non-square
+            if w > 200 or h > 200:
+                illus += 4              # large
+            if w <= 64 and h <= 64:
+                icon += 3               # small
+
+        # --- src signal ---
+        src = el.get("src", "")
+        if src.startswith("data:image/svg"):
+            icon += 2
+
+        # --- Accessibility attributes (one combined check, max 2 pts) ---
+        if el.get("aria-label") or el.get("role") == "img":
+            icon += 2
+
+        # --- Parent context ---
+        parent = el.parent
+        if parent:
+            parent_name = getattr(parent, "name", "")
+            if parent_name in ("li", "button"):
+                icon += 2
+            elif parent_name == "a":
+                # Only award points if <a> is inside nav/footer/header/li
+                ancestors = {getattr(a, "name", "") for a in parent.parents}
+                if ancestors & {"nav", "footer", "header", "li"}:
+                    icon += 2
+
+            # --- Sole child of <p> between sibling <p> elements ---
+            if parent_name == "p":
+                meaningful = [
+                    s for s in parent.children
+                    if not (isinstance(s, NavigableString) and str(s).strip() == "")
+                ]
+                if len(meaningful) == 1 and parent.parent is not None:
+                    p_siblings = [
+                        s for s in parent.parent.children
+                        if hasattr(s, "name") and s.name == "p" and s is not parent
+                    ]
+                    if p_siblings:
+                        illus += 2
+
+                # Non-whitespace sibling text → inline icon context
+                text_siblings = [
+                    s for s in parent.children
+                    if isinstance(s, NavigableString) and str(s).strip()
+                ]
+                if text_siblings:
+                    icon += 1
+
+        return icon, illus
+
+    def _classify_svg_elements(self, html_content: str) -> str:
+        """Classify <img src="*.svg"> and inline <svg> elements as icons or
+        illustrations using weighted heuristics. Appends class 'capcat-icon'
+        to elements classified as icons. Uses html.parser (no extra deps).
+        """
+        from bs4 import BeautifulSoup
+
+        soup = BeautifulSoup(html_content, "html.parser")
+
+        for el in soup.find_all(["img", "svg"]):
+            src = el.get("src", "")
+            name = getattr(el, "name", "")
+            # Only process SVG-related elements
+            if name == "svg" or src.endswith(".svg") or src.startswith("data:image/svg"):
+                icon_score, illus_score = self._score_svg_element(el, soup)
+                if icon_score > illus_score:
+                    existing = el.get("class") or []
+                    el["class"] = existing + ["capcat-icon"]
+
+        return str(soup)
+
     def _adjust_paths_for_subfolder(self, html_content: str) -> str:
         """Adjust relative paths in HTML content when HTML files are in html/ subfolder."""
         import re
