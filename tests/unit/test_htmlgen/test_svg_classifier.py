@@ -121,3 +121,19 @@ def test_icon_inside_paragraph_gets_icon_class(gen):
     html = f'<p>Share on <img src="{src}" aria-label="Mastodon"/> social media.</p>'
     result = gen._classify_svg_elements(html)
     assert _has_icon_class(result), "Icon inside paragraph with sibling text should get capcat-icon"
+
+
+# ── Test 11: Inline <svg> directly inside <button> ───────────────────────────
+
+def test_inline_svg_in_button_gets_icon_class(gen):
+    html = '<button aria-label="Close"><svg viewBox="0 0 24 24"><path d="M0 0"/></svg></button>'
+    result = gen._classify_svg_elements(html)
+    assert _has_icon_class(result), "SVG directly inside <button> should get capcat-icon"
+
+
+# ── Test 12: Inline <svg> in <a> inside <li> (most common social icon shape) ─
+
+def test_inline_svg_in_anchor_inside_li_gets_icon_class(gen):
+    html = '<ul><li><a href="https://example.com"><svg viewBox="0 0 24 24"><path d="M0 0"/></svg></a></li></ul>'
+    result = gen._classify_svg_elements(html)
+    assert _has_icon_class(result), "SVG in <a> inside <li> should get capcat-icon"
