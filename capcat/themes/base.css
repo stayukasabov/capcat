@@ -716,6 +716,22 @@ p img {
   display: block;
 }
 
+/* SVG icons — inline small rendering, overrides block-image defaults */
+img.capcat-icon,
+svg.capcat-icon,
+p img.capcat-icon,
+p svg.capcat-icon {
+  width: 1.5em;
+  height: 1.5em;
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 0.25em;
+  border-radius: 0;
+  box-shadow: none;
+  max-width: unset;
+  clear: none;
+}
+
 /* Videos in paragraphs need proper spacing */
 p video,
 p embed,
