@@ -1757,13 +1757,13 @@ class ArticleHTMLGenerator:
                     if p_siblings:
                         illus += 2
 
-                # Non-whitespace sibling text → inline icon context
-                text_siblings = [
-                    s for s in parent.children
-                    if isinstance(s, NavigableString) and str(s).strip()
-                ]
-                if text_siblings:
-                    icon += 1
+            # Non-whitespace sibling text → inline icon context (any parent type)
+            text_siblings = [
+                s for s in parent.children
+                if isinstance(s, NavigableString) and str(s).strip()
+            ]
+            if text_siblings:
+                icon += 1
 
         return icon, illus
 
