@@ -1,6 +1,4 @@
-# Capcat — Content Preservation CLI
-
-A command-line tool designed to solve content preservation challenges with Ethical Scraping.
+# Capcat — A command-line tool designed to solve content preservation challenges with Ethical Scraping.
 
 Captures articles from 17+ curated sources as clean Markdown files with optional self-contained HTML output. Supports interactive TUI and batch automation.
 
