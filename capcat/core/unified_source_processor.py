@@ -395,7 +395,8 @@ class UnifiedSourceProcessor:
 
         try:
             success, article_path = source.fetch_article_content(
-                article, base_dir, progress_callback
+                article, base_dir, progress_callback,
+                download_files=download_files,
             )
 
             # Process comments if available and supported
