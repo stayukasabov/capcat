@@ -42,8 +42,27 @@ class SourceConfigGenerator:
             "publish_date_selectors": [],
         }
 
-        # Use sort_keys=False to maintain a more logical order
-        return yaml.dump(config_data, sort_keys=False, default_flow_style=False)
+        base_yaml = yaml.dump(config_data, sort_keys=False, default_flow_style=False)
+
+        image_processing_block = (
+            "\n"
+            "# Image downloading configuration — edit to tune for this source.\n"
+            "image_processing:\n"
+            "  allow_extensionless: true   # keep true for CDN URLs without .jpg extension\n"
+            "  max_images: 10              # maximum images to download per article\n"
+            "  # Uncomment to restrict which img tags are used:\n"
+            "  # selectors:\n"
+            "  #   - article img\n"
+            "  #   - .post-content img\n"
+            "  # Uncomment to skip logo/avatar/ad images:\n"
+            "  # skip_selectors:\n"
+            "  #   - .avatar img\n"
+            "  #   - .ad img\n"
+            "  # Uncomment to skip tiny icons (size in bytes):\n"
+            "  # min_image_size: 5000\n"
+        )
+
+        return base_yaml + image_processing_block
 
     def generate_and_save(self, base_path: str) -> str:
         """
