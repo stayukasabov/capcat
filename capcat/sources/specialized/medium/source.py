@@ -61,7 +61,8 @@ class MediumSource(BaseSource):
         )
 
     def fetch_article_content(
-        self, article: Article, output_dir: str, progress_callback=None
+        self, article: Article, output_dir: str, progress_callback=None,
+        download_files: bool = False,
     ) -> Tuple[bool, Optional[str]]:
         """
         Fetch article content from Medium with paywall detection.

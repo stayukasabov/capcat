@@ -112,7 +112,8 @@ class VimeoSource(BaseSource):
             return None
 
     def fetch_article_content(
-        self, article: Article, output_dir: str, progress_callback=None
+        self, article: Article, output_dir: str, progress_callback=None,
+        download_files: bool = False,
     ) -> Tuple[bool, Optional[str]]:
         """
         Create placeholder article with actual video title.

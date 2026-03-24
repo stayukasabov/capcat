@@ -2699,9 +2699,10 @@ class NewsSourceArticleFetcher(ArticleFetcher):
     """
 
     def __init__(
-        self, source_config: Dict[str, Any], session: requests.Session
+        self, source_config: Dict[str, Any], session: requests.Session,
+        download_files: bool = False,
     ):
-        super().__init__(session)
+        super().__init__(session, download_files=download_files)
         self.source_config = source_config
         self.logger = get_logger(
             f"{__name__.replace('core.', '')}.{source_config['name']}"

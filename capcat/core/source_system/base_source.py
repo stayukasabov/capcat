@@ -148,7 +148,8 @@ class BaseSource(ABC):
 
     @abstractmethod
     def fetch_article_content(
-        self, article: Article, output_dir: str, progress_callback=None
+        self, article: Article, output_dir: str, progress_callback=None,
+        download_files: bool = False,
     ) -> Tuple[bool, Optional[str]]:
         """
         Fetch and save article content.
@@ -157,6 +158,7 @@ class BaseSource(ABC):
             article: Article to fetch
             output_dir: Directory to save content
             progress_callback: Optional progress callback function
+            download_files: Whether to download media files (--media flag)
 
         Returns:
             Tuple of (success, article_path)
