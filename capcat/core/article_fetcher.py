@@ -2885,7 +2885,25 @@ class NewsSourceArticleFetcher(ArticleFetcher):
             if h1 and h1.get_text().strip():
                 page_title = h1.get_text().strip()
 
-        # Create individual folder for this article
+        # Report conversion progress
+        if progress_callback:
+            progress_callback(0.5, "converting")
+
+        # Convert HTML to Markdown — do this BEFORE creating the folder so
+        # a failed conversion doesn't leave an empty directory behind.
+        try:
+            markdown_content = html_to_markdown(content_html, url)
+        except Exception as e:
+            self.logger.debug(
+                f"Failed to convert HTML to Markdown for {url}: {e}"
+            )
+            return False, None, None
+
+        if not markdown_content:
+            self.logger.warning(f"Empty markdown for {url}")
+            return False, None, None
+
+        # Create individual folder for this article (only after we have content)
         safe_title = sanitize_filename(page_title)
 
         # Handle potential duplicate folder names by appending a counter
@@ -2909,50 +2927,6 @@ class NewsSourceArticleFetcher(ArticleFetcher):
         except Exception as e:
             self.logger.error(
                 f"Unexpected error creating directory {article_folder_path}: {e}"
-            )
-            return False, None, None
-
-        # MANDATORY: Create images folder for ALL articles (regardless of --media flag)
-        # This ensures compliance with media download requirements
-        images_folder = os.path.join(article_folder_path, "images")
-        try:
-            os.makedirs(images_folder, exist_ok=True)
-            self.logger.debug(
-                f"Created mandatory images folder: {images_folder}"
-            )
-        except Exception as e:
-            self.logger.debug(
-                f"Failed to create images directory {images_folder}: {e}"
-            )
-            # Continue processing - images folder creation failure shouldn't stop article processing
-
-        # Create a separate directory for raw HTML files
-        raw_html_dir = os.path.join(article_folder_path, "raw_html")
-        try:
-            os.makedirs(raw_html_dir, exist_ok=True)
-        except Exception as e:
-            self.logger.debug(f"Could not create raw HTML directory: {e}")
-            raw_html_dir = article_folder_path  # Fallback to article folder
-
-        # Save raw HTML immediately for future processing
-        try:
-            raw_html_path = os.path.join(raw_html_dir, "raw_content.html")
-            with open(raw_html_path, "w", encoding="utf-8") as f:
-                f.write(content_html)
-            self.logger.debug(f"Saved raw HTML to: {raw_html_path}")
-        except Exception as e:
-            self.logger.debug(f"Could not save raw HTML: {e}")
-
-        # Report conversion progress
-        if progress_callback:
-            progress_callback(0.5, "converting")
-
-        # Convert HTML to Markdown using only the extracted content
-        try:
-            markdown_content = html_to_markdown(content_html, url)
-        except Exception as e:
-            self.logger.debug(
-                f"Failed to convert HTML to Markdown for {url}: {e}"
             )
             return False, None, None
 
