@@ -36,6 +36,7 @@ class ImageProcessor:
         output_folder: str,
         page_title: str = "",
         media_enabled: bool = False,
+        article_url: str = "",
     ) -> Dict[str, str]:
         """
         Process images for an article using source-specific configuration.
@@ -80,7 +81,8 @@ class ImageProcessor:
             # Download images with per-image size checking
             min_image_size = img_config.get("min_image_size", 0)
             downloaded_images = self._download_images_with_checking(
-                image_urls, output_folder, media_enabled, min_image_size
+                image_urls, output_folder, media_enabled, min_image_size,
+                referer=article_url or base_url,
             )
 
             self.logger.info(f"Processed {len(downloaded_images)} images")
@@ -250,7 +252,7 @@ class ImageProcessor:
 
     def _download_images_with_checking(
         self, image_urls: List[str], output_folder: str, media_enabled: bool = False,
-        min_image_size: int = 0
+        min_image_size: int = 0, referer: str = "",
     ) -> Dict[str, str]:
         """Download images with simple per-image checking and optional size filtering."""
         images_dir = os.path.join(output_folder, "images")
@@ -264,11 +266,12 @@ class ImageProcessor:
                 # Download with optional size filtering
                 if min_image_size > 0:
                     filename = self._download_single_image_with_min_size(
-                        url, images_dir, image_counter, min_image_size
+                        url, images_dir, image_counter, min_image_size,
+                        referer=referer,
                     )
                 else:
                     filename = self._download_single_image_simple(
-                        url, images_dir, image_counter
+                        url, images_dir, image_counter, referer=referer,
                     )
 
                 if filename:
@@ -286,11 +289,12 @@ class ImageProcessor:
         return bool(source_config.get("image_processing", {}).get("selectors", []))
 
     def _download_single_image_simple(
-        self, url: str, images_dir: str, counter: int
+        self, url: str, images_dir: str, counter: int, referer: str = ""
     ) -> Optional[str]:
         """Download single image with simple error handling."""
         try:
-            response = self.session.get(url, timeout=30, stream=True)
+            headers = {"Referer": referer} if referer else {}
+            response = self.session.get(url, timeout=30, stream=True, headers=headers)
             response.raise_for_status()
 
             # Generate simple sequential filename
@@ -313,12 +317,14 @@ class ImageProcessor:
             return None
 
     def _download_single_image_with_min_size(
-        self, url: str, images_dir: str, counter: int, min_size: int
+        self, url: str, images_dir: str, counter: int, min_size: int,
+        referer: str = ""
     ) -> Optional[str]:
         """Download single image with minimum size filtering."""
         try:
+            headers = {"Referer": referer} if referer else {}
             # Check size via HEAD request first
-            head_response = self.session.head(url, timeout=10)
+            head_response = self.session.head(url, timeout=10, headers=headers)
             content_length = head_response.headers.get('content-length')
 
             if content_length:
@@ -330,7 +336,7 @@ class ImageProcessor:
                     return None
 
             # Proceed with download
-            response = self.session.get(url, timeout=30, stream=True)
+            response = self.session.get(url, timeout=30, stream=True, headers=headers)
             response.raise_for_status()
 
             # Generate simple sequential filename

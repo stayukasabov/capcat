@@ -3068,8 +3068,17 @@ class NewsSourceArticleFetcher(ArticleFetcher):
         if progress_callback:
             progress_callback(1.0, "complete")
 
-        # Clean up empty images folder if no images were downloaded
-        self._cleanup_empty_images_folder(article_folder_path)
+        # Keep images folder if the article HTML contained any <img> tags
+        # (even if downloads failed due to CDN protection).
+        # Only remove it if the page had no images at all.
+        images_folder = os.path.join(article_folder_path, "images")
+        html_has_images = bool(soup.find("img"))
+        if not html_has_images:
+            try:
+                if os.path.exists(images_folder) and not os.listdir(images_folder):
+                    os.rmdir(images_folder)
+            except Exception:
+                pass
 
         self.logger.info(f"Saved article: {page_title}")
         return True, filename, article_folder_path

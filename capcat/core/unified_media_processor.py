@@ -54,7 +54,8 @@ class UnifiedMediaProcessor:
             # Process images using modular ImageProcessor
             image_processor = get_image_processor(session)
             url_mapping = image_processor.process_article_images(
-                html_content, source_config, url, article_folder
+                html_content, source_config, url, article_folder,
+                article_url=url,
             )
 
             # Process image embedding based on content structure
