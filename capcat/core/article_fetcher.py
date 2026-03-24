@@ -1255,6 +1255,11 @@ class ArticleFetcher(ABC):
         import re
         from urllib.parse import urlparse
 
+        self.logger.info(
+            f"_download_pdf_links_from_markdown called, "
+            f"folder={article_folder_path}, "
+            f"content_len={len(markdown_content)}"
+        )
         # Match [text](url) where url looks like a PDF
         link_pattern = re.compile(r'\[([^\]]*)\]\((https?://[^)]+)\)')
 
@@ -1270,6 +1275,7 @@ class ArticleFetcher(ABC):
             if link_url in seen_urls or not is_pdf_url(link_url):
                 return match.group(0)
             seen_urls.add(link_url)
+            self.logger.info(f"PDF link found, attempting download: {link_url}")
             try:
                 from capcat.core.downloader import download_file
                 local_path = download_file(
@@ -1280,8 +1286,10 @@ class ArticleFetcher(ABC):
                     # — do NOT pass through os.path.relpath or it resolves against CWD
                     self.logger.info(f"Downloaded PDF: {link_url} → {local_path}")
                     return f"[{text}]({local_path})"
+                else:
+                    self.logger.warning(f"PDF download returned None for: {link_url}")
             except Exception as e:
-                self.logger.debug(f"PDF download failed for {link_url}: {e}")
+                self.logger.warning(f"PDF download failed for {link_url}: {type(e).__name__}: {e}")
             return match.group(0)
 
         return link_pattern.sub(replace_link, markdown_content)
