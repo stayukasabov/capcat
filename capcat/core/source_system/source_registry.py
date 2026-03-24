@@ -476,7 +476,8 @@ _global_registry: Optional[SourceRegistry] = None
 def get_source_registry(project_root: Optional[Path] = None) -> SourceRegistry:
     """Get the source registry.
 
-    When project_root is None, return the cached global singleton (backward-compatible).
+    When project_root is None, return the cached global singleton, auto-detecting
+    the project root so user sources in Config/sources/active/ are included.
     When project_root is non-None, always construct and return a fresh instance
     (singleton bypass — avoids stale-singleton bugs with user-overridden sources).
     """
@@ -486,7 +487,13 @@ def get_source_registry(project_root: Optional[Path] = None) -> SourceRegistry:
         registry.discover_sources()
         return registry
     if _global_registry is None:
-        _global_registry = SourceRegistry()
+        detected_root = None
+        try:
+            from capcat.core.config import find_project_root
+            detected_root = find_project_root()
+        except Exception:
+            pass
+        _global_registry = SourceRegistry(project_root=detected_root)
         _global_registry.discover_sources()
     return _global_registry
 
