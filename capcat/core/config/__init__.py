@@ -202,7 +202,7 @@ def get_news_dir(project_root: Path | None = None) -> Path:
     news = root / "News"
     if not news.exists():
         news.mkdir(parents=True)
-        print(f"Created output directory: {news}")
+        print(f"  Created output directory: {news}")
     return news
 
 
@@ -219,7 +219,7 @@ def get_capcats_dir(project_root: Path | None = None) -> Path:
     capcats = root / "Capcats"
     if not capcats.exists():
         capcats.mkdir(parents=True)
-        print(f"Created output directory: {capcats}")
+        print(f"  Created output directory: {capcats}")
     return capcats
 
 
