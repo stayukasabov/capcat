@@ -360,6 +360,19 @@ def download_file(
             filename = f"{base_name}_{counter}{ext}"
             counter += 1
 
+        # Known file extensions — arXiv IDs like "2603.20220" look like they have
+        # an extension but ".20220" is not a real one; treat those as "no extension"
+        _KNOWN_EXTENSIONS = {
+            ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx",
+            ".odt", ".ods", ".odp", ".rtf", ".txt",
+            ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".webp",
+            ".mp3", ".wav", ".ogg", ".flac", ".mp4", ".avi", ".mov", ".webm",
+        }
+        if ext and ext.lower() not in _KNOWN_EXTENSIONS:
+            # Unrecognised extension — treat filename as having no extension
+            base_name = filename
+            ext = ""
+
         # If the file has no extension, try to determine it from content type (already retrieved)
         if not ext and content_type:
             content_type_clean = content_type.split(";")[0].strip()
