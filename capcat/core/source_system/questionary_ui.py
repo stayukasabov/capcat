@@ -38,6 +38,29 @@ class QuestionaryUserInterface:
             import questionary
             self._questionary = questionary
 
+    def get_display_name(self, suggested: str) -> str:
+        """
+        Get display name from user with feed title as suggestion.
+
+        Args:
+            suggested: Feed title from RSS feed
+
+        Returns:
+            User-entered display name
+        """
+        name = self._questionary.text(
+            "  Display name:",
+            default=suggested,
+            style=custom_style,
+            qmark=""
+        ).ask()
+
+        if not name:
+            self.show_error("Display name cannot be empty.")
+            sys.exit(1)
+
+        return name
+
     def get_source_id(self, suggested: str) -> str:
         """
         Get source ID from user with suggestion.
@@ -190,6 +213,18 @@ class MockUserInterface:
         """
         self.responses = responses
         self.calls = []
+
+    def get_display_name(self, suggested: str) -> str:
+        """Record call and return the configured display_name response.
+
+        Args:
+            suggested: Feed title passed by the workflow.
+
+        Returns:
+            ``responses['display_name']`` if set, otherwise *suggested*.
+        """
+        self.calls.append(('get_display_name', suggested))
+        return self.responses.get('display_name', suggested)
 
     def get_source_id(self, suggested: str) -> str:
         """Record call and return the configured source_id response.

@@ -57,6 +57,17 @@ class UserInterface(Protocol):
     or any other mechanism that satisfies this contract.
     """
 
+    def get_display_name(self, suggested: str) -> str:
+        """Prompt the user to confirm or override the suggested display name.
+
+        Args:
+            suggested: Feed title extracted from the RSS feed.
+
+        Returns:
+            The confirmed or overridden display name string.
+        """
+        ...
+
     def get_source_id(self, suggested: str) -> str:
         """Prompt the user to confirm or override the suggested source ID.
 
@@ -292,13 +303,14 @@ class AddSourceCommand:
         suggested_id = self._generate_source_id_suggestion(introspector.feed_title)
 
         # Collect user input
+        display_name = self._ui.get_display_name(introspector.feed_title)
         source_id = self._ui.get_source_id(suggested_id)
         category = self._ui.select_category(self._category_provider.get_available_categories())
 
         # Create and validate metadata
         metadata = SourceMetadata(
             source_id=source_id,
-            display_name=introspector.feed_title,
+            display_name=display_name,
             base_url=introspector.base_url,
             rss_url=url,
             category=category
