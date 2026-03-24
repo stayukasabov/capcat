@@ -3051,8 +3051,6 @@ class NewsSourceArticleFetcher(ArticleFetcher):
 
             if not source_name:
                 # Fallback: Extract source name from URL domain for custom sources
-                from urllib.parse import urlparse
-
                 parsed_url = urlparse(url)
                 domain = parsed_url.netloc.lower()
                 if "futurism.com" in domain:
