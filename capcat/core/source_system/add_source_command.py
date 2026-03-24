@@ -486,12 +486,14 @@ class SubprocessSourceTester:
             count: Number of articles to attempt fetching. Defaults to 1.
 
         Returns:
-            ``True`` if the subprocess exits with code 0 within 30 seconds,
-            ``False`` on non-zero exit, timeout, or if the ``capcat``
-            wrapper is not found.
+            ``True`` if the subprocess exits with code 0 within the
+            computed timeout, ``False`` on non-zero exit, timeout, or if
+            the ``capcat`` wrapper is not found.
         """
         import subprocess
         import shutil
+        # Base timeout; extended when the source has a crawl-delay / rate_limit
+        timeout = self._compute_timeout(source_id)
         try:
             capcat_bin = shutil.which("capcat") or "capcat"
             command = [capcat_bin, "fetch", source_id, "--count", str(count)]
@@ -500,11 +502,40 @@ class SubprocessSourceTester:
                 capture_output=True,
                 text=True,
                 check=True,
-                timeout=30
+                timeout=timeout
             )
             return True
         except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError):
             return False
+
+    def _compute_timeout(self, source_id: str) -> int:
+        """Return a subprocess timeout (seconds) appropriate for the source.
+
+        Reads ``rate_limit`` from the source YAML if available; uses
+        ``max(60, rate_limit * 4)`` so that a 15 s crawl-delay (arXiv)
+        results in a 60 s timeout rather than the hard-coded 30 s.
+        """
+        try:
+            from pathlib import Path
+            import yaml  # type: ignore
+            # Search known config locations for a YAML matching this source_id
+            search_roots = [
+                Path(__file__).parent.parent.parent.parent
+                / "sources" / "active" / "config_driven" / "configs",
+                Path(__file__).parent.parent.parent.parent.parent
+                / "Config" / "sources" / "active" / "config_driven" / "configs",
+            ]
+            for root in search_roots:
+                for candidate in root.glob("*.yaml"):
+                    data = yaml.safe_load(candidate.read_text(encoding="utf-8")) or {}
+                    if data.get("source_id") == source_id:
+                        rate_limit = float(data.get("rate_limit", 0))
+                        if rate_limit > 0:
+                            return max(60, int(rate_limit * 4))
+                        return 60
+        except Exception:
+            pass
+        return 60
 
 
 class RegistryCategoryProvider:

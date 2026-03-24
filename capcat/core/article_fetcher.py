@@ -939,21 +939,6 @@ class ArticleFetcher(ABC):
             )
             return False, None, None
 
-        # MANDATORY: Create images folder for ALL articles (regardless of
-        # --media flag)
-        # This ensures compliance with media download requirements
-        images_folder = os.path.join(article_folder_path, "images")
-        try:
-            os.makedirs(images_folder, exist_ok=True)
-            self.logger.debug(
-                f"Created mandatory images folder: {images_folder}"
-            )
-        except Exception as e:
-            self.logger.debug(
-                f"Failed to create images directory {images_folder}: {e}"
-            )
-            # Continue processing - images folder creation failure shouldn't
-            # stop article processing
 
         # Create a separate directory for raw HTML files
         raw_html_dir = os.path.join(article_folder_path, "raw_html")
