@@ -317,11 +317,19 @@ class AddSourceCommand:
 
     def _handle_bundle_integration(self, source_id: str) -> None:
         """Step 4: Handle optional bundle integration."""
+        try:
+            bundles = self._bundle_manager.get_bundle_names()
+        except Exception:
+            bundles = []
+
+        if not bundles:
+            # No bundles exist yet — skip the prompt entirely
+            return
+
         if not self._ui.confirm_bundle_addition():
             return
 
         try:
-            bundles = self._bundle_manager.get_bundle_names()
             selected_bundle = self._ui.select_bundle(bundles)
 
             if selected_bundle:
@@ -471,8 +479,10 @@ class SubprocessSourceTester:
             wrapper is not found.
         """
         import subprocess
+        import shutil
         try:
-            command = ["./capcat", "fetch", source_id, "--count", str(count)]
+            capcat_bin = shutil.which("capcat") or "capcat"
+            command = [capcat_bin, "fetch", source_id, "--count", str(count)]
             result = subprocess.run(
                 command,
                 capture_output=True,
