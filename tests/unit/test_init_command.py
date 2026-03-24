@@ -18,10 +18,13 @@ def test_init_creates_config_dir(project_dir: Path):
     assert not (project_dir / "Config" / "capcat.yml").exists()
 
 
-def test_init_does_not_create_source_dirs(project_dir: Path):
+def test_init_creates_source_dirs(project_dir: Path):
     from capcat.commands.init import init_project
     init_project(project_dir)
-    assert not (project_dir / "Config" / "sources").exists()
+    sources_active = project_dir / "Config" / "sources" / "active"
+    assert (sources_active / "config_driven" / "configs").is_dir()
+    assert (sources_active / "custom").is_dir()
+    assert (sources_active / "bundles").is_dir()
 
 
 def test_init_creates_gitignore(project_dir: Path):

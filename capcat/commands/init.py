@@ -73,6 +73,12 @@ def init_project(root: Path, reinit: bool = False) -> None:
     themes_dir.mkdir(exist_ok=True)
     _copy_themes_to(themes_dir)
 
+    # Source config directories
+    sources_active = config_dir / "sources" / "active"
+    (sources_active / "config_driven" / "configs").mkdir(parents=True, exist_ok=True)
+    (sources_active / "custom").mkdir(parents=True, exist_ok=True)
+    (sources_active / "bundles").mkdir(parents=True, exist_ok=True)
+
     gitignore = root / ".gitignore"
     if gitignore.exists():
         existing = gitignore.read_text()

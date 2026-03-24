@@ -46,6 +46,7 @@ def main() -> None:
     """Main entry point.  Routes to TUI or CLI dispatch."""
     args = sys.argv[1:]
     if args and args[0] == "catch":
+        _auto_init("catch")
         from capcat.tui import run
         run()
     else:
