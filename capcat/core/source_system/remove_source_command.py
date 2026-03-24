@@ -228,6 +228,35 @@ class RemoveSourceCommand:
                     "Failed to remove source %s: %s", info.source_id, exc
                 )
 
+    def _remove_sources(self, sources_info: List["SourceRemovalInfo"]) -> None:
+        """Remove a list of sources (config + bundles) without UI interaction.
+
+        Used by EnhancedRemoveCommand after confirmation has been handled.
+
+        Args:
+            sources_info: Sources to remove.
+        """
+        for info in sources_info:
+            try:
+                self._config_remover.remove_config(info)
+                self._bundle_updater.remove_from_bundles(info.source_id)
+                self._logger.info("Removed source: %s", info.source_id)
+            except Exception as exc:  # noqa: BLE001
+                self._ui.show_error(
+                    f"Failed to remove {info.display_name}: {exc}"
+                )
+                self._logger.error(
+                    "Failed to remove source %s: %s", info.source_id, exc
+                )
+
+    def _refresh_registry(self) -> None:
+        """Reset the global source registry so it reflects removed sources."""
+        try:
+            from capcat.core.source_system.source_registry import reset_source_registry
+            reset_source_registry()
+        except Exception as exc:  # noqa: BLE001
+            self._logger.warning("Failed to refresh source registry: %s", exc)
+
 
 # ---------------------------------------------------------------------------
 # Registry-backed implementations

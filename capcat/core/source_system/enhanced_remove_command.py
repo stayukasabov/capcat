@@ -158,7 +158,7 @@ class EnhancedRemoveCommand:
     def _execute_enhanced_removal(self, options: RemovalOptions) -> None:
         """Execute standard interactive removal with enhancements."""
         # Get sources using base command's lister
-        available_sources = self._base_command._source_lister.get_available_sources()
+        available_sources = self._base_command._source_lister.list_sources()
 
         if not available_sources:
             self._ui.show_info("No sources available to remove.")
@@ -177,9 +177,9 @@ class EnhancedRemoveCommand:
         # Gather source info
         sources_info = []
         for source_id in selected_ids:
-            info = self._base_command._source_info_provider.get_source_info(source_id)
-            if info:
-                sources_info.append(info)
+            infos = self._base_command._source_info_provider.get_sources_info([source_id])
+            if infos:
+                sources_info.append(infos[0])
 
         # Show analytics for selected sources
         if options.show_analytics:
@@ -262,9 +262,9 @@ class EnhancedRemoveCommand:
         sources_info = []
         not_found = []
         for source_id in source_ids:
-            info = self._base_command._source_info_provider.get_source_info(source_id)
-            if info:
-                sources_info.append(info)
+            infos = self._base_command._source_info_provider.get_sources_info([source_id])
+            if infos:
+                sources_info.append(infos[0])
             else:
                 not_found.append(source_id)
 

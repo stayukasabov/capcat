@@ -42,9 +42,14 @@ class SourceAnalytics:
             analytics_file: Path to analytics data file
         """
         if analytics_file is None:
-            import cli
-            app_root = Path(cli.__file__).parent
-            analytics_file = app_root.parent / ".capcat_analytics" / "usage.json"
+            try:
+                from capcat.core.config import find_project_root
+                app_root = find_project_root()
+            except Exception:
+                # Fallback: use capcat package parent directory
+                import capcat as _capcat_pkg
+                app_root = Path(_capcat_pkg.__file__).parent.parent
+            analytics_file = app_root / ".capcat_analytics" / "usage.json"
 
         self._analytics_file = Path(analytics_file)
         self._analytics_file.parent.mkdir(parents=True, exist_ok=True)
