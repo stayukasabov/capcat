@@ -473,52 +473,75 @@ class SourceConfigGeneratorAdapter:
 
 
 class SubprocessSourceTester:
-    """Source tester using subprocess calls."""
+    """Lightweight RSS connectivity tester with live progress display."""
 
     def test_source(self, source_id: str, count: int = 1) -> bool:
-        """Run a test fetch via the ``./capcat fetch`` subprocess.
+        """Test a source by fetching its RSS feed and counting articles.
 
-        Invokes ``./capcat fetch <source_id> --count <count>`` and treats
-        a zero exit code as success.
+        Replaces the old subprocess approach: no full article download,
+        no output files created, no 60-second wait. Just an RSS HEAD +
+        GET + parse — typically completes in 2–5 seconds.
+
+        Shows the existing ProgressIndicator with live stage updates so
+        the user always knows what is happening.
 
         Args:
             source_id: The source identifier to test.
-            count: Number of articles to attempt fetching. Defaults to 1.
+            count: Unused (kept for interface compatibility).
 
         Returns:
-            ``True`` if the subprocess exits with code 0 within the
-            computed timeout, ``False`` on non-zero exit, timeout, or if
-            the ``capcat`` wrapper is not found.
+            ``True`` if the feed is reachable and contains at least one
+            entry, ``False`` otherwise.
         """
-        import subprocess
-        import shutil
-        # Base timeout; extended when the source has a crawl-delay / rate_limit
-        timeout = self._compute_timeout(source_id)
-        try:
-            capcat_bin = shutil.which("capcat") or "capcat"
-            command = [capcat_bin, "fetch", source_id, "--count", str(count)]
-            result = subprocess.run(
-                command,
-                capture_output=True,
-                text=True,
-                check=True,
-                timeout=timeout
-            )
-            return True
-        except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError):
+        from capcat.core.progress import ProgressIndicator
+        from capcat.core.logging_config import set_progress_active
+
+        rss_url = self._get_rss_url(source_id)
+        if not rss_url:
             return False
 
-    def _compute_timeout(self, source_id: str) -> int:
-        """Return a subprocess timeout (seconds) appropriate for the source.
+        progress = ProgressIndicator("testing source")
+        progress.start()
 
-        Reads ``rate_limit`` from the source YAML if available; uses
-        ``max(60, rate_limit * 4)`` so that a 15 s crawl-delay (arXiv)
-        results in a 60 s timeout rather than the hard-coded 30 s.
-        """
+        def _stop_silent():
+            """Stop spinner and clear line without printing a summary."""
+            if progress._spinner_thread:
+                progress._stop_event.set()
+                progress._spinner_thread.join(timeout=0.2)
+                progress._clear_line()
+            set_progress_active(False)
+            progress._show_cursor()
+
+        try:
+            progress.update(status_message="connecting to feed")
+            import requests
+            from capcat.core.config import get_config
+            ua = get_config().network.user_agent
+            resp = requests.get(rss_url, timeout=15,
+                                headers={"User-Agent": ua})
+            resp.raise_for_status()
+
+            progress.update(status_message="parsing feed")
+            import feedparser  # type: ignore
+            feed = feedparser.parse(resp.content)
+            article_count = len(feed.entries)
+
+            _stop_silent()
+
+            if article_count == 0:
+                return False
+
+            return True
+
+        except Exception:
+            _stop_silent()
+            return False
+
+    def _get_rss_url(self, source_id: str) -> Optional[str]:
+        """Return the rss_url from the saved YAML for *source_id*, or None."""
         try:
             from pathlib import Path
             import yaml  # type: ignore
-            # Search known config locations for a YAML matching this source_id
             search_roots = [
                 Path(__file__).parent.parent.parent.parent
                 / "sources" / "active" / "config_driven" / "configs",
@@ -529,13 +552,13 @@ class SubprocessSourceTester:
                 for candidate in root.glob("*.yaml"):
                     data = yaml.safe_load(candidate.read_text(encoding="utf-8")) or {}
                     if data.get("source_id") == source_id:
-                        rate_limit = float(data.get("rate_limit", 0))
-                        if rate_limit > 0:
-                            return max(60, int(rate_limit * 4))
-                        return 60
+                        return (
+                            data.get("rss_url")
+                            or data.get("discovery", {}).get("rss_url")
+                        )
         except Exception:
             pass
-        return 60
+        return None
 
 
 class RegistryCategoryProvider:
