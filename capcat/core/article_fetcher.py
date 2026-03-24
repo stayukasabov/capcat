@@ -1291,10 +1291,10 @@ class ArticleFetcher(ABC):
                     link_url, article_folder_path, "document", self.download_files
                 )
                 if local_path:
-                    # Use path relative to article folder for portability
-                    rel_path = os.path.relpath(local_path, article_folder_path)
-                    self.logger.info(f"Downloaded PDF: {link_url} → {rel_path}")
-                    return f"[{text}]({rel_path})"
+                    # download_file already returns a relative path ("files/name.pdf")
+                    # — do NOT pass through os.path.relpath or it resolves against CWD
+                    self.logger.info(f"Downloaded PDF: {link_url} → {local_path}")
+                    return f"[{text}]({local_path})"
             except Exception as e:
                 self.logger.debug(f"PDF download failed for {link_url}: {e}")
             return match.group(0)
