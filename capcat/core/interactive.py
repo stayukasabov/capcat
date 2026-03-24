@@ -688,25 +688,38 @@ def _show_completion_screen(generate_html: bool, success: bool) -> None:
 
 
 def _find_latest_index_html() -> str | None:
-    """Find the most recently modified index.html under the News output directory.
+    """Find the most recently modified HTML output file.
+
+    Checks both batch fetch index pages (News_*/index.html) and single
+    article pages (Capcats/*/*/html/article.html), returning whichever
+    was modified most recently.
 
     Returns:
-        Absolute path string to index.html, or None if not found.
+        Absolute path string to the HTML file, or None if not found.
     """
+    candidates: list[tuple[float, str]] = []
     try:
-        from capcat.core.config import get_news_dir
+        from capcat.core.config import get_news_dir, get_capcats_dir
+
+        # Batch fetches: News_*/index.html
         news_dir = get_news_dir()
-        date_dirs = sorted(
-            news_dir.glob("News_*"),
-            key=lambda p: p.stat().st_mtime,
-            reverse=True,
-        )
-        for date_dir in date_dirs:
+        for date_dir in news_dir.glob("News_*"):
             index = date_dir / "index.html"
             if index.exists():
-                return str(index.resolve())
+                candidates.append((index.stat().st_mtime, str(index.resolve())))
+
+        # Single articles: Capcats/source_date/article/html/article.html
+        capcats_dir = get_capcats_dir()
+        for article_html in capcats_dir.glob("*/*/html/article.html"):
+            candidates.append(
+                (article_html.stat().st_mtime, str(article_html.resolve()))
+            )
     except Exception:
         pass
+
+    if candidates:
+        candidates.sort(reverse=True)
+        return candidates[0][1]
     return None
 
 
