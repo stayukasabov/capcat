@@ -50,17 +50,7 @@ def position_menu_at_bottom(menu_lines=10):
         print('\033[2J', end='')
 
         # ASCII art logo
-        logo = """\033[38;5;202m
-
-       ____
-     / ____|                     _
-    | |     __ _ _ __   ___ __ _| |_
-    | |    / _  |  _ \ / __/ _  | __|
-    | |___| (_| | |_) | (_| (_| | |_
-     \_____\__,_|  __/ \___\__,_|\__|
-                | |
-                |_|\033[0m
-"""
+        logo = "\033[38;5;202m\n\n       ____\n     / ____|                     _\n    | |     __ _ _ __   ___ __ _| |_\n    | |    / _  |  _ \\ / __/ _  | __|\n    | |___| (_| | |_) | (_| (_| | |_\n     \\_____\\__,_|  __/ \\___\\__,_|\\__|\n                | |\n                |_|\033[0m\n"
 
         # Calculate padding needed to push menu to bottom
         # Reserve space for logo (8 lines) + menu lines plus some padding
@@ -330,21 +320,21 @@ def _handle_list_sources():
     choices.append(questionary.Separator("─" * 50))
     choices.append(questionary.Choice("Back to Source Management", "back"))
 
-    # Show interactive list
-    with suppress_logging():
-        selected = questionary.select(
-            "  Browse sources (select to view details):",
-            choices=choices,
-            style=custom_style,
-            qmark="",
-            pointer="▶",
-            instruction="\n   (Use arrow keys, Enter to view details)",
-        ).ask()
+    while True:
+        with suppress_logging():
+            selected = questionary.select(
+                "  Browse sources (select to view details):",
+                choices=choices,
+                style=custom_style,
+                qmark="",
+                pointer="▶",
+                instruction="\n   (Use arrow keys, Enter to view details)",
+            ).ask()
 
-    # If a source was selected (not back), show its details
-    if selected and selected != 'back':
+        if not selected or selected == 'back':
+            break
+
         _show_source_details(selected, registry)
-        _handle_list_sources()  # Return to listing
 
 
 def _show_source_details(source_id, registry):

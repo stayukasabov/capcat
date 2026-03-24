@@ -134,10 +134,10 @@ class EnhancedRemoveCommand:
 
         # Perform restore
         try:
-            import cli
-            app_root = Path(cli.__file__).parent
-            config_path = app_root / "sources" / "active" / "config_driven" / "configs"
-            bundles_path = app_root / "sources" / "active" / "bundles.yml"
+            from capcat.core.config import find_project_root
+            project_root = find_project_root()
+            config_path = project_root / "Config" / "sources" / "active" / "config_driven" / "configs"
+            bundles_path = project_root / "Config" / "sources" / "active" / "bundles" / "bundles.yml"
 
             restored = self._backup_manager.restore_backup(
                 backup_id, config_path, bundles_path
@@ -321,9 +321,9 @@ class EnhancedRemoveCommand:
             source_ids = [s.source_id for s in sources_info]
             config_paths = [s.config_path for s in sources_info]
 
-            import cli
-            app_root = Path(cli.__file__).parent
-            bundles_path = app_root / "sources" / "active" / "bundles.yml"
+            from capcat.core.config import find_project_root
+            project_root = find_project_root()
+            bundles_path = project_root / "Config" / "sources" / "active" / "bundles" / "bundles.yml"
 
             backup_metadata = self._backup_manager.create_backup(
                 source_ids, config_paths, bundles_path
@@ -448,9 +448,8 @@ class EnhancedRemoveCommand:
         output_dirs = []
 
         try:
-            import cli
-            app_root = Path(cli.__file__).parent
-            news_root = app_root.parent / "News"
+            from capcat.core.config import get_news_dir
+            news_root = get_news_dir()
 
             if not news_root.exists():
                 return []
@@ -467,8 +466,8 @@ class EnhancedRemoveCommand:
 
             self._logger.debug(f"Scanning for output directories with patterns: {patterns}")
 
-            # Scan all news_* directories
-            news_dirs_found = list(news_root.glob("news_*"))
+            # Scan all News_* directories
+            news_dirs_found = list(news_root.glob("News_*"))
             self._logger.debug(f"Found {len(news_dirs_found)} news_* directories in {news_root}")
 
             for news_dir in news_dirs_found:

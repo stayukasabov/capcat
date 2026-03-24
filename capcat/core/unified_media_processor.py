@@ -111,16 +111,26 @@ class UnifiedMediaProcessor:
     @staticmethod
     def _load_source_config(source_name: str) -> dict:
         """Load source configuration from YAML file."""
+        try:
+            from capcat.core.config import find_project_root
+            project_root = find_project_root()
+        except Exception:
+            project_root = None
+
+        def _resolve(relative: str) -> str:
+            if project_root:
+                return str(project_root / "Config" / relative)
+            return relative
+
         # Check custom sources first
-        config_path = (
+        config_path = _resolve(
             f"sources/active/custom/{source_name}/config.yaml"
         )
 
         if not os.path.exists(config_path):
             # Check config-driven sources
-            config_path = (
-                f"sources/active/config_driven/configs/"
-                f"{source_name}.yaml"
+            config_path = _resolve(
+                f"sources/active/config_driven/configs/{source_name}.yaml"
             )
 
         if not os.path.exists(config_path):
