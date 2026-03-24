@@ -541,21 +541,30 @@ class SubprocessSourceTester:
         """Return the rss_url from the saved YAML for *source_id*, or None."""
         try:
             from pathlib import Path
+            import itertools
             import yaml  # type: ignore
+            from capcat.core.config import find_project_root
             search_roots = [
+                find_project_root() / "Config" / "sources" / "active" / "config_driven" / "configs",
                 Path(__file__).parent.parent.parent.parent
                 / "sources" / "active" / "config_driven" / "configs",
-                Path(__file__).parent.parent.parent.parent.parent
-                / "Config" / "sources" / "active" / "config_driven" / "configs",
             ]
             for root in search_roots:
-                for candidate in root.glob("*.yaml"):
+                if not root.exists():
+                    continue
+                # Search both .yaml and .yml — generator saves as .yml
+                for candidate in itertools.chain(
+                    root.glob("*.yaml"), root.glob("*.yml")
+                ):
+                    # Match by filename stem (source_id field absent in
+                    # auto-generated YAMLs)
+                    if candidate.stem != source_id:
+                        continue
                     data = yaml.safe_load(candidate.read_text(encoding="utf-8")) or {}
-                    if data.get("source_id") == source_id:
-                        return (
-                            data.get("rss_url")
-                            or data.get("discovery", {}).get("rss_url")
-                        )
+                    return (
+                        data.get("rss_url")
+                        or data.get("discovery", {}).get("rss_url")
+                    )
         except Exception:
             pass
         return None
