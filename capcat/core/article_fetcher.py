@@ -2833,6 +2833,33 @@ class NewsSourceArticleFetcher(ArticleFetcher):
             self.logger.debug(f"Failed to parse HTML from {url}: {e}")
             return False, None, None
 
+        # Collect PDF links from the FULL page BEFORE cleanup.
+        # Sites like arXiv keep their PDF download link inside <aside>, which
+        # gets removed below — so we must harvest it here while it still exists.
+        _collected_pdf_links: list = []
+        _seen_pdf_hrefs: set = set()
+        for _a in soup.find_all("a", href=True):
+            _href = _a.get("href", "") or ""
+            if not _href or _href.startswith(
+                ("#", "javascript:", "mailto:", "data:")
+            ):
+                continue
+            if _href.startswith("//"):
+                _href = "https:" + _href
+            elif _href.startswith("/"):
+                _href = urljoin(url, _href)
+            elif not _href.startswith(("http://", "https://")):
+                continue
+            _path = urlparse(_href).path.lower()
+            _parts = _path.split("/")
+            if (
+                _path.endswith(".pdf")
+                or (len(_parts) > 1 and _parts[1] == "pdf")
+            ) and _href not in _seen_pdf_hrefs:
+                _seen_pdf_hrefs.add(_href)
+                _link_text = _a.get_text(strip=True) or "PDF"
+                _collected_pdf_links.append((_link_text, _href))
+
         # Remove script and style elements
         for script in soup(
             ["script", "style", "nav", "header", "footer", "aside"]
@@ -2964,39 +2991,27 @@ class NewsSourceArticleFetcher(ArticleFetcher):
         # Clean up any extra whitespace left behind
         markdown_content = re.sub(r"\n\s*\n\s*\n", "\n\n", markdown_content)
 
-        # Inject PDF links from the full page (content_selectors may exclude
-        # the download section — e.g. arXiv abstract pages keep the PDF link
-        # in a sidebar div that the article selector doesn't capture).
-        _pdf_injection = []
-        _seen_pdf_urls: set = set()
-        for _a in soup.find_all("a", href=True):
-            _href = _a.get("href", "")
-            if not _href or _href.startswith(
-                ("#", "javascript:", "mailto:", "data:")
-            ):
-                continue
-            if _href.startswith("//"):
-                _href = "https:" + _href
-            elif _href.startswith("/"):
-                _href = urljoin(url, _href)
-            elif not _href.startswith(("http://", "https://")):
-                continue
-            _path = urlparse(_href).path.lower()
-            _parts = _path.split("/")
-            # Match /something.pdf OR paths like /pdf/xxxx (arXiv style)
-            _is_pdf = _path.endswith(".pdf") or (
-                len(_parts) > 1 and _parts[1] == "pdf"
-            )
-            if _is_pdf and _href not in _seen_pdf_urls and _href not in markdown_content:
-                _seen_pdf_urls.add(_href)
-                _link_text = _a.get_text(strip=True) or "PDF"
-                _pdf_injection.append(f"[{_link_text}]({_href})")
+        # Inject pre-collected PDF links (harvested before <aside> was removed).
+        # Filter out any that are already present in the converted markdown.
+        _pdf_injection = [
+            f"[{text}]({href})"
+            for text, href in _collected_pdf_links
+            if href not in markdown_content
+        ]
         if _pdf_injection:
             markdown_content = "\n".join(_pdf_injection) + "\n\n" + markdown_content
-        # Download PDF links (both from content_selectors and injected above)
-        markdown_content = self._download_pdf_links_from_markdown(
-            markdown_content, article_folder_path
-        )
+
+        # Download PDF links (injected above + any in the converted content).
+        # Wrap in try/except so a failure here never leaves an empty folder.
+        try:
+            markdown_content = self._download_pdf_links_from_markdown(
+                markdown_content, article_folder_path
+            )
+        except Exception as e:
+            self.logger.warning(
+                f"PDF link processing failed for {url}: {e}; "
+                f"continuing without PDF downloads"
+            )
 
         # Save preliminary content immediately (before media processing)
         article_content = f"# {page_title}\n\n"
