@@ -42,6 +42,8 @@ class AddSourceService:
             self._bundles_path = (
                 project_root / "Config" / "sources" / "active" / "bundles" / "bundles.yml"
             )
+            self._config_path.mkdir(parents=True, exist_ok=True)
+            self._bundles_path.parent.mkdir(parents=True, exist_ok=True)
         else:
             if base_path is None:
                 base_path = Path(__file__).parent.parent.parent
