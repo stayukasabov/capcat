@@ -1637,43 +1637,37 @@ class ArticleFetcher(ABC):
                     for pattern in ["image", "img", "photo", "pic"]
                 ):
                     quick_filtered_links.append((link_type, url, alt_text))
-            elif link_type == "document" and self.download_files:
-                # Only process documents if --files flag is set
-                # Exclude HTML files - they should be processed as web pages,
-                # not downloaded as documents
-                if path_lower.endswith(
-                    (
-                        ".pdf",
-                        ".doc",
-                        ".docx",
-                        ".xls",
-                        ".xlsx",
-                        ".ppt",
-                        ".pptx",
-                        ".txt",
-                        ".rtf",
-                        ".odt",
-                        ".ods",
-                        ".odp",
-                    )
-                ):
-                    quick_filtered_links.append((link_type, url, alt_text))
-                # Include common document patterns but exclude HTML-related
-                # patterns
-                elif any(
-                    pattern in path_lower
-                    for pattern in [
-                        "document",
-                        "doc",
-                        "pdf",
-                        "download",
-                        "xls",
-                        "ppt",
-                    ]
-                ):
-                    # Make sure it's not an HTML file
+            elif link_type == "document":
+                # PDFs are always downloaded — they are article content.
+                # Other document types (doc, xls, etc.) require --media flag.
+                is_pdf = path_lower.endswith(".pdf") or "pdf" in path_lower
+                if is_pdf:
                     if not path_lower.endswith((".html", ".htm")):
                         quick_filtered_links.append((link_type, url, alt_text))
+                elif self.download_files:
+                    # Non-PDF documents only with --media flag
+                    if path_lower.endswith(
+                        (
+                            ".doc",
+                            ".docx",
+                            ".xls",
+                            ".xlsx",
+                            ".ppt",
+                            ".pptx",
+                            ".txt",
+                            ".rtf",
+                            ".odt",
+                            ".ods",
+                            ".odp",
+                        )
+                    ):
+                        quick_filtered_links.append((link_type, url, alt_text))
+                    elif any(
+                        pattern in path_lower
+                        for pattern in ["document", "doc", "download", "xls", "ppt"]
+                    ):
+                        if not path_lower.endswith((".html", ".htm")):
+                            quick_filtered_links.append((link_type, url, alt_text))
             elif link_type == "audio" and self.download_files:
                 # Only process audio if --files flag is set
                 if path_lower.endswith(

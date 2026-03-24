@@ -1,0 +1,69 @@
+# arXiv AI Papers Configuration
+source_id: "arxiv-ai"
+name: "arXiv AI"
+display_name: "arXiv AI"
+category: tech
+
+# URL configuration
+base_url: https://arxiv.org
+rss_url: http://export.arxiv.org/rss/cs.AI
+
+# Discovery method - use RSS
+discovery:
+  method: "rss"
+  rss_url: "http://export.arxiv.org/rss/cs.AI"
+  max_articles: 30
+
+# Article selectors (fallback only, RSS is primary)
+article_selectors:
+- .arxiv-result .title a
+- h3.title a
+
+# Content extraction selectors
+# arXiv abstract pages: /abs/XXXXXX
+content_selectors:
+- .abstract
+- blockquote.abstract
+- "#abs"
+- "#content"
+- main
+
+# Template configuration
+template:
+  variant: article-no-comments
+  navigation:
+    show_breadcrumb: true
+    show_source_link: true
+
+# Request configuration
+timeout: 30
+rate_limit: 15.0   # robots.txt requires 15s crawl-delay
+
+# Skip patterns - avoid non-abstract pages
+skip_patterns:
+- /find/
+- /search/
+- /user/
+- /help/
+- /stats/
+- /form/
+- /rss/
+- /list/
+- /year/
+- /archive/
+- "#comments"
+
+supports_comments: false
+
+# Image processing configuration
+image_processing:
+  allow_extensionless: true
+  max_images: 5
+  selectors:
+    - "figure img"
+    - ".figure img"
+    - "img.arxiv-img"
+
+# PDF download — the "View PDF" link on every abstract page
+# points to /pdf/XXXXXX (allowed by robots.txt)
+# Capcat will download it when --media flag is used.
