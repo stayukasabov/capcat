@@ -1196,6 +1196,12 @@ class ArticleFetcher(ABC):
                     "article at the source URL above.\n\n"
                 )
 
+        # Download any PDF links still present in markdown (universal — works
+        # for all sources regardless of HTML structure)
+        markdown_content = self._download_pdf_links_from_markdown(
+            markdown_content, article_folder_path
+        )
+
         # Report final saving progress
         if progress_callback:
             progress_callback(0.9, "saving article")
@@ -1250,6 +1256,50 @@ class ArticleFetcher(ABC):
     def _cleanup_empty_images_folder(self, article_folder_path: str) -> None:
         """Remove images folder if it exists but is empty."""
         self.media_processor.cleanup_empty_images_folder(article_folder_path)
+
+    def _download_pdf_links_from_markdown(
+        self, markdown_content: str, article_folder_path: str
+    ) -> str:
+        """
+        Scan markdown for PDF links and download them to files/ subfolder.
+
+        Universal — works for every source. Runs after HTML→markdown
+        conversion so it catches PDF links regardless of where they
+        appeared in the original HTML structure.
+        """
+        import re
+        from urllib.parse import urlparse
+
+        # Match [text](url) where url looks like a PDF
+        link_pattern = re.compile(r'\[([^\]]*)\]\((https?://[^)]+)\)')
+
+        seen_urls = set()
+        files_folder = os.path.join(article_folder_path, "files")
+
+        def is_pdf_url(u: str) -> bool:
+            path = urlparse(u).path.lower()
+            return path.endswith(".pdf") or "pdf" in path
+
+        def replace_link(match):
+            text, link_url = match.group(1), match.group(2)
+            if link_url in seen_urls or not is_pdf_url(link_url):
+                return match.group(0)
+            seen_urls.add(link_url)
+            try:
+                from capcat.core.downloader import download_file
+                local_path = download_file(
+                    link_url, article_folder_path, "document", self.download_files
+                )
+                if local_path:
+                    # Use path relative to article folder for portability
+                    rel_path = os.path.relpath(local_path, article_folder_path)
+                    self.logger.info(f"Downloaded PDF: {link_url} → {rel_path}")
+                    return f"[{text}]({rel_path})"
+            except Exception as e:
+                self.logger.debug(f"PDF download failed for {link_url}: {e}")
+            return match.group(0)
+
+        return link_pattern.sub(replace_link, markdown_content)
 
     def _parse_srcset(self, srcset: str) -> str:
         """Parse srcset attribute and return the highest resolution image URL."""
