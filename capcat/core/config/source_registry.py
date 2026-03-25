@@ -153,7 +153,6 @@ class SourceRegistry:
                 name="tech",
                 description="Technology news sources",
                 sources=["hn", "lb", "iq", "engadget"],
-                default_count=30,
             ),
             "news": BundleConfig(
                 name="news",
@@ -165,31 +164,26 @@ class SourceRegistry:
                     "euronews",
                     "straitstimes",
                 ],
-                default_count=25,
             ),
             "science": BundleConfig(
                 name="science",
                 description="Science and research sources",
                 sources=["nature", "scientificamerican", "mittechreview"],
-                default_count=20,
             ),
             "business": BundleConfig(
                 name="business",
                 description="Business and finance sources",
                 sources=["financialtimes"],
-                default_count=15,
             ),
             "aggregators": BundleConfig(
                 name="aggregators",
                 description="News aggregator sources",
                 sources=["gn", "newsmap", "upday"],
-                default_count=40,
             ),
             "all": BundleConfig(
                 name="all",
                 description="All available sources",
                 sources=[],  # Will be populated dynamically
-                default_count=10,
             ),
         }
 
