@@ -5,37 +5,45 @@ source_id: "mitnews"
 # Added: 2025-10-09
 # Type: Config-driven RSS-first source
 
+# Display name shown in the TUI and output folders.
 display_name: "MIT News AI"
+# The root URL of this source website.
 base_url: "https://news.mit.edu/topic/artificial-intelligence2"
+# How many articles to fetch from this source per run. Change if needed.
+article_count: 30
+# Topic category used for grouping in TUI and bundles.
 category: "ai"
+# HTTP request timeout in seconds.
 timeout: 10.0
+# Minimum delay between requests to avoid rate-limiting.
 rate_limit: 2.0
 
+# Discovery method configuration.
 discovery:
   method: "rss"
   rss_url: "https://news.mit.edu/rss/topic/artificial-intelligence2"
 
-# Article discovery selectors (fallback)
+# Article discovery selectors (fallback).
 article_selectors:
   - ".term-listing--news--item__title a"
   - ".news-article h2 a"
   - "article h3 a"
 
-# Content extraction selectors
+# CSS selectors to extract article content.
 content_selectors:
   - ".news-article--body"
   - "article .field--body"
   - ".node__content"
 
-# Skip patterns
+# URL patterns to skip during article discovery.
 skip_patterns:
   - "/search"
   - "/archive"
 
-# Comment support
+# Whether this source supports fetching article comments.
 supports_comments: false
 
-# Image processing
+# Image processing configuration.
 image_processing:
   selectors:
     - "article img"
@@ -68,7 +76,7 @@ image_processing:
     - pattern: '/files/styles/[^/]+/public/'
       replacement: '/files/'
 
-# Template configuration
+# Template configuration for HTML output.
 template:
   variant: "article-no-comments"
   navigation:
@@ -76,7 +84,7 @@ template:
     back_to_ai_text: "Back to AI"
     has_comments: false
 
-# Custom configuration
+# Custom configuration.
 custom_config:
   user_agent: "Mozilla/5.0 (compatible; Capcat/2.0; +Personal News Archiver)"
   headers:
