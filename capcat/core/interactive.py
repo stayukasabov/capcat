@@ -393,6 +393,7 @@ def _edit_source_count(source_id, config):
         input("\n  Press Enter to continue...")
         return
 
+    # Find userspace YAML path — config-driven sources
     yaml_file = (
         project_root
         / "Config"
@@ -415,8 +416,16 @@ def _edit_source_count(source_id, config):
             input("\n  Press Enter to continue...")
             return
 
+    # Try custom source path if not found
     if not yaml_file.exists():
-        print(f"  Config file not found after mirror attempt: {yaml_file}")
+        custom_yaml = (
+            project_root / "Config" / "sources" / "active" / "custom" / source_id / "config.yaml"
+        )
+        if custom_yaml.exists():
+            yaml_file = custom_yaml
+
+    if not yaml_file.exists():
+        print(f"  Config file not found for '{source_id}'. Checked config-driven and custom paths.")
         input("\n  Press Enter to continue...")
         return
 
