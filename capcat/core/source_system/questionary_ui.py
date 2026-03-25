@@ -119,6 +119,28 @@ class QuestionaryUserInterface:
 
         return category
 
+    def get_article_count(self) -> int:
+        """Ask how many articles to fetch per run."""
+        while True:
+            raw = self._questionary.text(
+                "  How many articles should this source fetch per run?",
+                default="30",
+                style=custom_style,
+                qmark="",
+            ).ask()
+            if raw is None:
+                return 30  # cancelled
+            raw = raw.strip()
+            if not raw:
+                return 30
+            try:
+                count = int(raw)
+                if count > 0:
+                    return count
+            except ValueError:
+                pass
+            print("  Please enter a positive number.")
+
     def confirm_bundle_addition(self) -> bool:
         """
         Ask user if they want to add source to a bundle.
@@ -204,14 +226,14 @@ class MockUserInterface:
     Provides predictable responses for automated testing.
     """
 
-    def __init__(self, responses: dict):
+    def __init__(self, responses: dict = None):
         """
         Initialize with predefined responses.
 
         Args:
             responses: Dictionary mapping method names to return values
         """
-        self.responses = responses
+        self.responses = responses if responses is not None else {}
         self.calls = []
 
     def get_display_name(self, suggested: str) -> str:
@@ -250,6 +272,10 @@ class MockUserInterface:
         """
         self.calls.append(('select_category', categories))
         return self.responses.get('category', categories[0] if categories else 'tech')
+
+    def get_article_count(self) -> int:
+        self.calls.append(('get_article_count',))
+        return self.responses.get('article_count', 30)
 
     def confirm_bundle_addition(self) -> bool:
         """Record call and return the configured confirm_bundle response.

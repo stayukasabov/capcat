@@ -32,6 +32,7 @@ class SourceConfigGenerator:
             "display_name": self.metadata["display_name"],
             "base_url": self.metadata["base_url"],
             "category": self.metadata["category"],
+            "article_count": self.metadata.get("article_count", 30),
             "discovery": {
                 "method": "rss",
                 "rss_url": self.metadata["rss_url"],

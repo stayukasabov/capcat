@@ -127,7 +127,6 @@ def _handle_manage_sources_flow():
                 "  Source Management - Select an option:",
                 choices=[
                     questionary.Choice("Add New Source from RSS Feed", "add_rss"),
-                    questionary.Choice("Generate Custom Source Config", "generate_config"),
                     questionary.Choice("Remove Existing Sources", "remove"),
                     questionary.Choice("List All Sources", "list_sources"),
                     questionary.Choice("Test a Source", "test_source"),
@@ -146,8 +145,6 @@ def _handle_manage_sources_flow():
 
         if action == 'add_rss':
             _handle_add_source_from_rss()
-        elif action == 'generate_config':
-            _handle_generate_config()
         elif action == 'remove':
             _handle_remove_source()
         elif action == 'list_sources':
