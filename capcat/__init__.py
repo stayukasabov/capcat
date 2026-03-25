@@ -1,4 +1,4 @@
 """Capcat — A command-line tool designed to solve content preservation challenges with Ethical Scraping."""
 
-__version__ = "1.4.28"
+__version__ = "1.5.0"
 __all__ = ["__version__"]
