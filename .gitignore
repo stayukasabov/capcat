@@ -200,3 +200,6 @@ skills-lock.json
 *.png
 *.jpg
 *.jpeg
+
+# Git worktrees
+.worktrees/
