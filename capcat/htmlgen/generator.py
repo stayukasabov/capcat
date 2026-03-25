@@ -684,6 +684,25 @@ class ArticleHTMLGenerator:
                     index_nav, comments_nav
                 )
 
+            # Build PDF link bar if local PDF files exist
+            article_folder = Path(markdown_path).parent
+            files_dir = article_folder / "files"
+            pdf_link_html = ""
+            if files_dir.is_dir():
+                pdf_prefix = "../files/" if html_subfolder else "files/"
+                pdfs = sorted(files_dir.glob("*.pdf"))
+                if pdfs:
+                    links = " &nbsp;·&nbsp; ".join(
+                        f'<a href="{pdf_prefix}{p.name}" target="_blank" '
+                        f'rel="noopener">{p.stem}</a>'
+                        for p in pdfs
+                    )
+                    pdf_link_html = (
+                        f'<div class="pdf-download-bar">'
+                        f'<span class="pdf-download-label">PDF</span> {links}'
+                        f'</div>'
+                    )
+
             # Prepare template context
             context = {
                 "page_title": f"Capcat - {article_title}",
@@ -694,6 +713,7 @@ class ArticleHTMLGenerator:
                 "index_filename": index_filename,
                 "top_navigation": navigation_html,
                 "bottom_navigation": navigation_html,
+                "pdf_link": pdf_link_html,
             }
 
             # Render template with dynamic CSS paths
