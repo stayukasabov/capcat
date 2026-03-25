@@ -39,6 +39,24 @@ except ImportError:
     MIRROR_AVAILABLE = False
 
 
+def _resolve_count(
+    cli_count: Optional[int],
+    source_config: "SourceConfig",
+) -> int:
+    """Resolve article count: CLI flag > source YAML > default 30.
+
+    Args:
+        cli_count: Value from --count flag, or None if not provided.
+        source_config: The source's SourceConfig (has article_count field).
+
+    Returns:
+        Number of articles to fetch.
+    """
+    if cli_count is not None:
+        return cli_count
+    return source_config.article_count  # already defaults to 30
+
+
 class UnifiedSourceProcessor:
     """
     Unified processor for all news sources.
@@ -103,7 +121,7 @@ class UnifiedSourceProcessor:
     def process_source_articles(
         self,
         source_name: str,
-        count: int,
+        count: Optional[int],
         output_dir: str,
         quiet: bool = False,
         verbose: bool = False,
@@ -137,7 +155,7 @@ class UnifiedSourceProcessor:
     def _process_with_new_system(
         self,
         source_name: str,
-        count: int,
+        count: Optional[int],
         output_dir: str,
         quiet: bool = False,
         verbose: bool = False,
@@ -176,15 +194,18 @@ class UnifiedSourceProcessor:
                     f"No configuration found for source '{source_name}'"
                 )
 
+            # Resolve per-source count (CLI overrides source YAML, which overrides 30)
+            resolved_count = _resolve_count(count, source_config)
+
             self.logger.info(
-                f"Fetching top {count} articles from {source_config.display_name}..."
+                f"Fetching top {resolved_count} articles from {source_config.display_name}..."
             )
 
             # UNIVERSAL RETRY-SKIP LOGIC: Applied to all sources
             # Attempts discovery 2 times, then skips if both fail
             try:
                 articles = source.discover_articles_with_retry_skip(
-                    count=count, max_retries=2, batch_mode=batch_mode
+                    count=resolved_count, max_retries=2, batch_mode=batch_mode
                 )
 
                 # None means source skipped after 2 failed attempts
@@ -464,7 +485,7 @@ def get_unified_processor(project_root: Optional[Path] = None) -> UnifiedSourceP
 
 def process_source_articles(
     source_name: str,
-    count: int,
+    count: Optional[int],
     output_dir: str,
     quiet: bool = False,
     verbose: bool = False,

@@ -1,25 +1,31 @@
 # InfoQ Configuration
 source_id: "iq"
 name: "InfoQ"
+# Display name shown in the TUI and output folders.
 display_name: "InfoQ"
+# Topic category used for grouping in TUI and bundles.
 category: techpro
 
-# URL configuration
+# The root URL of this source website.
 base_url: https://www.infoq.com/news/
+# RSS feed URL.
 rss_url: https://feed.infoq.com
 
-# Discovery method - use RSS for latest news articles only
+# How many articles to fetch from this source per run. Change if needed.
+article_count: 30
+
+# Discovery method - use RSS for latest news articles only.
 discovery:
   method: "rss"
   rss_url: "https://feed.infoq.com"
   max_articles: 30
 
-# Article selectors (fallback for non-RSS discovery)
+# Article selectors (fallback for non-RSS discovery).
 article_selectors:
 - h3 a[href*="/news/"]
 - .news-headline a
 
-# Content extraction
+# CSS selectors to extract article content.
 content_selectors:
 - .article__content
 - article.article
@@ -27,18 +33,19 @@ content_selectors:
 - .content
 - .article-body
 
-# Template configuration
+# Template configuration for HTML output.
 template:
   variant: article-no-comments
   navigation:
     show_breadcrumb: true
     show_source_link: true
 
-# Request configuration
+# HTTP request timeout in seconds.
 timeout: 15
+# Minimum delay between requests to avoid rate-limiting.
 rate_limit: 20.0
 
-# Skip patterns - URLs to avoid
+# URL patterns to skip during article discovery.
 skip_patterns:
 - /about
 - /contact
@@ -50,9 +57,10 @@ skip_patterns:
 - infoq.com/presentations
 - infoq.com/interviews
 
+# Whether this source supports fetching article comments.
 supports_comments: false
 
-# Image processing configuration
+# Image processing configuration.
 image_processing:
   selectors:
     - "article img"

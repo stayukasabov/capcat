@@ -22,6 +22,9 @@ import logging
 import contextlib
 import shutil
 
+from capcat.core.source_system.bundle_service import get_available_sources
+from capcat.core.source_system.source_registry import get_source_registry
+
 
 
 @contextlib.contextmanager
@@ -127,7 +130,6 @@ def _handle_manage_sources_flow():
                 "  Source Management - Select an option:",
                 choices=[
                     questionary.Choice("Add New Source from RSS Feed", "add_rss"),
-                    questionary.Choice("Generate Custom Source Config", "generate_config"),
                     questionary.Choice("Remove Existing Sources", "remove"),
                     questionary.Choice("List All Sources", "list_sources"),
                     questionary.Choice("Test a Source", "test_source"),
@@ -146,8 +148,6 @@ def _handle_manage_sources_flow():
 
         if action == 'add_rss':
             _handle_add_source_from_rss()
-        elif action == 'generate_config':
-            _handle_generate_config()
         elif action == 'remove':
             _handle_remove_source()
         elif action == 'list_sources':
@@ -278,50 +278,19 @@ def _handle_remove_source():
 
 
 def _handle_list_sources():
-    """Handle listing all available sources."""
-    from capcat.core.source_system.bundle_service import get_available_sources
-    from capcat.core.source_system.source_registry import get_source_registry
-
+    """Handle listing all available sources with interactive detail view."""
     sources = get_available_sources()
     registry = get_source_registry()
 
-    # Group by category
-    categories = {}
-    for source_id, display_name in sorted(sources.items()):
-        try:
-            config = registry.get_source_config(source_id)
-            category = config.category if config and hasattr(config, 'category') else 'other'
-        except:
-            category = 'other'
+    if not sources:
+        print("\n  No sources available.")
+        input("\n  Press Enter to continue...")
+        return
 
-        if category not in categories:
-            categories[category] = []
-
-        categories[category].append((source_id, display_name))
-
-    # Build formatted choices for questionary
-    choices = []
-
-    # Header with count
-    choices.append(questionary.Separator(f"\n  Available Sources ({len(sources)} total)"))
+    # Build sorted choice list with a Back option
+    sorted_choices = sorted(sources.items(), key=lambda kv: kv[1])
+    choices = [questionary.Choice(f"  {display_name}", sid) for sid, display_name in sorted_choices]
     choices.append(questionary.Separator())
-
-    # Display grouped sources
-    for category, source_list in sorted(categories.items()):
-        # Category header
-        choices.append(questionary.Separator(f"  {category.upper()}"))
-
-        # Sources in category
-        for source_id, display_name in source_list:
-            # Format: "source_id → Display Name"
-            formatted_name = f"  {source_id:15} → {display_name}"
-            choices.append(questionary.Choice(formatted_name, source_id))
-
-        # Blank line between categories
-        choices.append(questionary.Separator())
-
-    # Back option
-    choices.append(questionary.Separator("─" * 50))
     choices.append(questionary.Choice("Back to Source Management", "back"))
 
     while True:
@@ -337,53 +306,147 @@ def _handle_list_sources():
             ).ask()
 
         if not selected or selected == 'back':
-            break
+            return
 
-        _show_source_details(selected, registry)
+        config = registry.get_source_config(selected)
+        _show_source_detail(selected, config)
 
 
-def _show_source_details(source_id, registry):
-    """Display detailed information about a source."""
+def _show_source_detail(source_id, config):
+    """Display detailed information about a source and offer to edit article_count."""
     print("\n" + "─" * 70)
     print(f"\033[38;5;202m  Source Details\033[0m")
     print("─" * 70)
 
-    try:
-        config = registry.get_source_config(source_id)
+    if not config:
+        print(f"\n  Source '{source_id}' not found in registry.")
+        input("\n  Press Enter to continue...")
+        return
 
-        if not config:
-            print(f"\n  Source '{source_id}' not found in registry.")
+    # Display core information
+    print(f"\n  \033[1mID:\033[0m              {source_id}")
+    print(f"  \033[1mName:\033[0m            {getattr(config, 'display_name', 'N/A')}")
+    print(f"  \033[1mCategory:\033[0m        {getattr(config, 'category', 'N/A')}")
+    print(f"  \033[1marticle_count:\033[0m   {getattr(config, 'article_count', 'N/A')}")
+
+    if hasattr(config, 'base_url'):
+        print(f"  \033[1mBase URL:\033[0m        {config.base_url}")
+
+    if hasattr(config, 'discovery') and hasattr(config.discovery, 'method'):
+        print(f"  \033[1mDiscovery:\033[0m       {config.discovery.method}")
+        if config.discovery.method == 'rss' and hasattr(config.discovery, 'rss_urls'):
+            rss_urls = config.discovery.rss_urls
+            if hasattr(rss_urls, 'primary'):
+                print(f"  \033[1mRSS Feed:\033[0m        {rss_urls.primary}")
+
+    source_type = "Config-driven (YAML)" if hasattr(config, 'article_selectors') else "Custom (Python)"
+    print(f"  \033[1mType:\033[0m            {source_type}")
+
+    print("\n" + "─" * 70)
+
+    with suppress_logging():
+        action = questionary.select(
+            "  Options:",
+            choices=[
+                questionary.Choice("Edit article count", "edit"),
+                questionary.Choice("Back", "back"),
+            ],
+            style=custom_style,
+            qmark="",
+            pointer="▶",
+        ).ask()
+
+    if action == "edit":
+        _edit_source_count(source_id, config)
+
+
+def _edit_source_count(source_id, config):
+    """Prompt for a new article_count and write it to the userspace YAML."""
+    from capcat.core.config import find_project_root, NoProjectError
+
+    current_count = getattr(config, 'article_count', 30)
+
+    while True:
+        with suppress_logging():
+            raw = questionary.text(
+                f"  New article count (current: {current_count}):",
+                default=str(current_count),
+                style=custom_style,
+                qmark="",
+            ).ask()
+
+        if raw is None:
+            return
+
+        try:
+            new_count = int(raw.strip())
+            if new_count <= 0:
+                raise ValueError
+            break
+        except ValueError:
+            print("  Invalid value — must be a positive integer.")
+
+    try:
+        project_root = find_project_root()
+    except NoProjectError:
+        print("  Could not locate project root. Cannot write config.")
+        input("\n  Press Enter to continue...")
+        return
+
+    # Find userspace YAML path — config-driven sources
+    yaml_file = (
+        project_root
+        / "Config"
+        / "sources"
+        / "active"
+        / "config_driven"
+        / "configs"
+        / f"{source_id}.yaml"
+    )
+
+    if not yaml_file.exists():
+        try:
+            from capcat.core.source_config_mirror import SourceConfigMirror
+            mirror = SourceConfigMirror(project_root)
+            manifest = mirror._load_manifest()
+            mirror._mirror_config_driven(manifest)
+            mirror._save_manifest(manifest)
+        except Exception as e:
+            print(f"  Could not mirror source config: {e}")
             input("\n  Press Enter to continue...")
             return
 
-        # Display core information
-        print(f"\n  \033[1mID:\033[0m           {source_id}")
-        print(f"  \033[1mName:\033[0m         {getattr(config, 'display_name', 'N/A')}")
-        print(f"  \033[1mCategory:\033[0m     {getattr(config, 'category', 'N/A')}")
+    # Try custom source path if not found
+    if not yaml_file.exists():
+        custom_yaml = (
+            project_root / "Config" / "sources" / "active" / "custom" / source_id / "config.yaml"
+        )
+        if custom_yaml.exists():
+            yaml_file = custom_yaml
 
-        # Base URL
-        if hasattr(config, 'base_url'):
-            print(f"  \033[1mBase URL:\033[0m     {config.base_url}")
+    if not yaml_file.exists():
+        print(f"  Config file not found for '{source_id}'. Checked config-driven and custom paths.")
+        input("\n  Press Enter to continue...")
+        return
 
-        # Discovery method
-        if hasattr(config, 'discovery') and hasattr(config.discovery, 'method'):
-            print(f"  \033[1mDiscovery:\033[0m    {config.discovery.method}")
+    existing_text = yaml_file.read_text(encoding="utf-8")
+    lines = []
+    found = False
+    for line in existing_text.splitlines():
+        if line.strip().startswith("article_count:"):
+            lines.append(f"article_count: {new_count}  # Change the article count if needed")
+            found = True
+        else:
+            lines.append(line)
 
-            # RSS URLs if available
-            if config.discovery.method == 'rss' and hasattr(config.discovery, 'rss_urls'):
-                rss_urls = config.discovery.rss_urls
-                if hasattr(rss_urls, 'primary'):
-                    print(f"  \033[1mRSS Feed:\033[0m     {rss_urls.primary}")
+    if not found:
+        lines.append("")
+        lines.append("# How many articles to fetch from this source per run. Change if needed.")
+        lines.append(f"article_count: {new_count}")
 
-        # Source type (config-driven vs custom)
-        source_type = "Config-driven (YAML)" if hasattr(config, 'article_selectors') else "Custom (Python)"
-        print(f"  \033[1mType:\033[0m         {source_type}")
+    yaml_file.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
-        print("\n" + "─" * 70)
-
-    except Exception as e:
-        print(f"\n  Error loading source details: {e}")
-
+    print(f"\n  article_count updated to {new_count} for '{source_id}'.")
     input("\n  Press Enter to continue...")
 
 

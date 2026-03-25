@@ -143,7 +143,6 @@ class BundleConfig:
     name: str
     description: str
     sources: List[str]
-    default_count: int = 30
     parallel_processing: bool = True
     bundle_settings: Dict[str, Any] = field(default_factory=dict)
 
@@ -158,7 +157,6 @@ class BundleConfig:
             "name": self.name,
             "description": self.description,
             "sources": self.sources,
-            "default_count": self.default_count,
             "parallel_processing": self.parallel_processing,
             "bundle_settings": self.bundle_settings,
         }
@@ -170,7 +168,6 @@ class BundleConfig:
             name=data["name"],
             description=data["description"],
             sources=data["sources"],
-            default_count=data.get("default_count", 30),
             parallel_processing=data.get("parallel_processing", True),
             bundle_settings=data.get("bundle_settings", {}),
         )

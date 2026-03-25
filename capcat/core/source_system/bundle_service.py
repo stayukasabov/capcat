@@ -123,19 +123,11 @@ class BundleService:
                 self.ui.show_error(error)
             return
 
-        # Validate default count
-        count_result = self.validator.validate_default_count(bundle_data.default_count)
-        if not count_result.valid:
-            for error in count_result.errors:
-                self.ui.show_error(error)
-            return
-
         # Create bundle
         try:
             self.manager.create_bundle(
                 bundle_id=bundle_data.bundle_id,
                 description=bundle_data.description,
-                default_count=bundle_data.default_count
             )
 
             self.ui.show_success(
@@ -237,7 +229,6 @@ class BundleService:
         # Prompt for new values
         updates = self.ui.prompt_edit_bundle_metadata(
             bundle_info['description'],
-            bundle_info['default_count']
         )
 
         if not updates:
@@ -245,7 +236,7 @@ class BundleService:
             return
 
         # Check if anything changed
-        if updates['description'] is None and updates['default_count'] is None:
+        if updates['description'] is None:
             self.ui.show_info("No changes made")
             return
 
@@ -257,19 +248,11 @@ class BundleService:
                     self.ui.show_error(error)
                 return
 
-        if updates['default_count']:
-            count_result = self.validator.validate_default_count(updates['default_count'])
-            if not count_result.valid:
-                for error in count_result.errors:
-                    self.ui.show_error(error)
-                return
-
         # Update bundle
         try:
             self.manager.update_bundle_metadata(
                 bundle_id=bundle_id,
                 description=updates['description'],
-                default_count=updates['default_count']
             )
 
             self.ui.show_success(f"Bundle '{bundle_id}' updated successfully")
@@ -421,7 +404,7 @@ class BundleService:
 
         # Select source bundle
         source_bundles = [
-            {'bundle_id': bid, 'source_count': 0, 'description': '', 'default_count': 0}
+            {'bundle_id': bid, 'source_count': 0, 'description': ''}
             for bid in memberships
         ]
 

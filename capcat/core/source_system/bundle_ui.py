@@ -85,47 +85,26 @@ class BundleUI:
         if not description:
             return None
 
-        # Default count
-        default_count_str = questionary.text(
-            "  Default article count (default: 20):",
-            default="20",
-            style=self.style,
-            qmark="",
-        ).ask()
-
-        if not default_count_str:
-            return None
-
-        try:
-            default_count = int(default_count_str)
-        except ValueError:
-            self.show_error("Invalid number for default count")
-            return None
-
         return BundleData(
             bundle_id=bundle_id,
             description=description,
-            default_count=default_count
         )
 
     def prompt_edit_bundle_metadata(
         self,
         current_description: str,
-        current_default_count: int
     ) -> Optional[Dict[str, any]]:
         """
         Prompt user to edit bundle metadata.
 
         Args:
             current_description: Current description
-            current_default_count: Current default count
 
         Returns:
             Dictionary with updated values or None if cancelled
         """
         print("\n--- Edit Bundle Metadata ---")
-        print(f"  Current description: {current_description}")
-        print(f"  Current default count: {current_default_count}\n")
+        print(f"  Current description: {current_description}\n")
 
         # New description
         new_description = questionary.text(
@@ -138,26 +117,8 @@ class BundleUI:
         if new_description is None:
             return None
 
-        # New default count
-        new_count_str = questionary.text(
-            "  New default count (or press Enter to keep current):",
-            default=str(current_default_count),
-            style=self.style,
-            qmark="",
-        ).ask()
-
-        if new_count_str is None:
-            return None
-
-        try:
-            new_count = int(new_count_str)
-        except ValueError:
-            self.show_error("Invalid number for default count")
-            return None
-
         return {
             'description': new_description if new_description != current_description else None,
-            'default_count': new_count if new_count != current_default_count else None
         }
 
     def prompt_select_bundle(
@@ -307,7 +268,6 @@ class BundleUI:
 
         print(f"\n  \033[1mID:\033[0m             {bundle_info['bundle_id']}")
         print(f"  \033[1mDescription:\033[0m    {bundle_info['description']}")
-        print(f"  \033[1mDefault Count:\033[0m  {bundle_info['default_count']}")
         print(f"  \033[1mTotal Sources:\033[0m  {bundle_info['total_sources']}")
 
         if bundle_info.get('category_distribution'):
@@ -337,14 +297,13 @@ class BundleUI:
         if not bundles:
             print("\n  No bundles available")
         else:
-            print(f"\n  {'Bundle ID':<20} {'Sources':<10} {'Default Count':<15} Description")
+            print(f"\n  {'Bundle ID':<20} {'Sources':<10} Description")
             print("  " + "─" * 66)
 
             for bundle in bundles:
                 print(
                     f"  {bundle['bundle_id']:<20} "
                     f"{bundle['source_count']:<10} "
-                    f"{bundle['default_count']:<15} "
                     f"{bundle['description']}"
                 )
 

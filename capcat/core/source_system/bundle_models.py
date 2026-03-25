@@ -14,7 +14,6 @@ class BundleInfo:
     bundle_id: str
     description: str
     sources: List[str]
-    default_count: int
     total_sources: int
     category_distribution: Dict[str, int]
 
@@ -24,7 +23,6 @@ class BundleData:
     """Data for creating/updating a bundle."""
     bundle_id: str
     description: str
-    default_count: int = 20
     sources: List[str] = field(default_factory=list)
 
 

@@ -1,12 +1,22 @@
+# Display name shown in the TUI and output folders.
 display_name: The latest research from Google
+# The root URL of this source website.
 base_url: https://research.google/blog/
+# How many articles to fetch from this source per run. Change if needed.
+article_count: 30
+# Topic category used for grouping in TUI and bundles.
 category: ai
+# URL patterns used to identify article links for scraping.
 discovery:
   method: rss
   rss_url: https://research.google/blog/rss/
+# CSS selectors used to find article links on the listing page.
 article_selectors:
 - summary
+# CSS selectors used to extract the main article body.
 content_selectors:
 - summary
+# CSS selectors for extracting the author name.
 author_selectors: []
+# CSS selectors for extracting the publication date.
 publish_date_selectors: []
