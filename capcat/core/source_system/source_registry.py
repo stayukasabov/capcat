@@ -168,6 +168,7 @@ class SourceRegistry:
                             "supports_comments", False
                         ),
                         category=config.get("category", "general"),
+                        article_count=int(config.get("article_count", 30)),
                         custom_config=config,
                     )
 
@@ -244,6 +245,7 @@ class SourceRegistry:
             rate_limit=config_data.get("rate_limit", 1.0),
             supports_comments=config_data.get("supports_comments", False),
             category=config_data.get("category", "general"),
+            article_count=int(config_data.get("article_count", 30)),
             custom_config=config_data,
         )
 
