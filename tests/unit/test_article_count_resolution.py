@@ -64,3 +64,23 @@ class TestRegistryLoadsArticleCount:
         reg.discover_sources()
         cfg = reg.get_source_config("nosource")
         assert cfg.article_count == 30
+
+
+class TestCountResolution:
+    def test_explicit_cli_count_overrides_source(self):
+        """When CLI count is provided, it wins over source article_count."""
+        from capcat.core.unified_source_processor import _resolve_count
+        config = _config(article_count=10)
+        assert _resolve_count(cli_count=20, source_config=config) == 20
+
+    def test_none_cli_uses_source_count(self):
+        """When CLI count is None, source article_count is used."""
+        from capcat.core.unified_source_processor import _resolve_count
+        config = _config(article_count=15)
+        assert _resolve_count(cli_count=None, source_config=config) == 15
+
+    def test_none_cli_none_source_fallback(self):
+        """When both CLI and source count are absent, default 30 applies."""
+        from capcat.core.unified_source_processor import _resolve_count
+        config = _config()  # article_count defaults to 30
+        assert _resolve_count(cli_count=None, source_config=config) == 30
