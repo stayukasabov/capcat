@@ -21,6 +21,7 @@ class SourceMetadata:
     base_url: str
     rss_url: str
     category: str
+    article_count: int = 30
 
     def validate(self) -> None:
         """Validate source metadata."""
@@ -87,6 +88,14 @@ class UserInterface(Protocol):
 
         Returns:
             The selected category string.
+        """
+        ...
+
+    def get_article_count(self) -> int:
+        """Prompt user for articles per run. Default: 30.
+
+        Returns:
+            Positive integer article count.
         """
         ...
 
@@ -306,6 +315,7 @@ class AddSourceCommand:
         display_name = self._ui.get_display_name(introspector.feed_title)
         source_id = self._ui.get_source_id(suggested_id)
         category = self._ui.select_category(self._category_provider.get_available_categories())
+        article_count = self._ui.get_article_count()
 
         # Create and validate metadata
         metadata = SourceMetadata(
@@ -313,7 +323,8 @@ class AddSourceCommand:
             display_name=display_name,
             base_url=introspector.base_url,
             rss_url=url,
-            category=category
+            category=category,
+            article_count=article_count,
         )
 
         metadata.validate()
@@ -466,7 +477,8 @@ class SourceConfigGeneratorAdapter:
             "display_name": metadata.display_name,
             "base_url": metadata.base_url,
             "rss_url": metadata.rss_url,
-            "category": metadata.category
+            "category": metadata.category,
+            "article_count": metadata.article_count,
         }
         generator = self._generator_class(source_metadata)
         return Path(generator.generate_and_save(str(config_path)))
