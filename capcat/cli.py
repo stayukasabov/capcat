@@ -239,7 +239,7 @@ def _cmd_fetch(args: list[str], log_file: str | None = None) -> None:
     html, args = _pop_flag(args, "-H", "--html")
     update, args = _pop_flag(args, "-U", "--update")
     output, args = _pop_value(args, "-o", "--output", default=".")
-    count_str, args = _pop_value(args, "-c", "--count", default="30")
+    count_str, args = _pop_value(args, "-c", "--count", default=None)
     lf, args = _pop_value(args, "-L", "--log-file")
     log_file = lf or log_file
 
@@ -248,7 +248,7 @@ def _cmd_fetch(args: list[str], log_file: str | None = None) -> None:
         raise SystemExit(1)
 
     sources = [s.strip() for s in args[0].split(",")]
-    count = int(count_str)
+    count = int(count_str) if count_str is not None else None
 
     _setup_logging(verbose=verbose, quiet=quiet, log_file=log_file)
 
@@ -290,7 +290,7 @@ def _cmd_bundle(args: list[str], log_file: str | None = None) -> None:
     update, args = _pop_flag(args, "-U", "--update")
     all_bundles, args = _pop_flag(args, "-A", "--all")
     output, args = _pop_value(args, "-o", "--output", default=".")
-    count_str, args = _pop_value(args, "-c", "--count", default="30")
+    count_str, args = _pop_value(args, "-c", "--count", default=None)
     lf, args = _pop_value(args, "-L", "--log-file")
     log_file = lf or log_file
 
@@ -333,7 +333,7 @@ def _cmd_bundle(args: list[str], log_file: str | None = None) -> None:
                 raise SystemExit(1)
             sources = bundles[bundle_name]["sources"]
 
-    count = int(count_str)
+    count = int(count_str) if count_str is not None else None
 
     _setup_logging(verbose=verbose, quiet=quiet, log_file=log_file)
 
