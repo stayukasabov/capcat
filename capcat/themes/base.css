@@ -562,11 +562,7 @@ nav a,
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.45rem 1rem;
   margin: 0 0 1.25rem 0;
-  background: var(--code-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
   font-size: 0.85rem;
 }
 
@@ -576,16 +572,12 @@ nav a,
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--nav-button-text-color);
-  padding: 0.15rem 0.4rem;
-  border: 1px solid var(--nav-button-text-color);
-  border-radius: 3px;
   flex-shrink: 0;
 }
 
 .pdf-download-bar a {
   color: var(--link-color);
   text-decoration: none;
-  word-break: break-all;
 }
 
 .pdf-download-bar a:hover {
