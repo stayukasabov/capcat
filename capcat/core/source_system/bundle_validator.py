@@ -27,8 +27,6 @@ class BundleValidator:
     BUNDLE_ID_PATTERN = re.compile(r'^[a-z0-9_]+$')
     BUNDLE_ID_MAX_LENGTH = 30
     DESCRIPTION_MAX_LENGTH = 200
-    DEFAULT_COUNT_MIN = 1
-    DEFAULT_COUNT_MAX = 100
 
     def __init__(self, bundle_manager=None, source_registry=None):
         """
@@ -114,31 +112,6 @@ class BundleValidator:
         elif len(description) > self.DESCRIPTION_MAX_LENGTH:
             errors.append(
                 f"Description too long (max {self.DESCRIPTION_MAX_LENGTH} chars)"
-            )
-
-        return ValidationResult(
-            valid=len(errors) == 0,
-            errors=errors
-        )
-
-    def validate_default_count(self, count: int) -> ValidationResult:
-        """
-        Validate default article count.
-
-        Args:
-            count: Article count
-
-        Returns:
-            ValidationResult with errors if invalid
-        """
-        errors = []
-
-        if not isinstance(count, int):
-            errors.append("Default count must be an integer")
-        elif count < self.DEFAULT_COUNT_MIN or count > self.DEFAULT_COUNT_MAX:
-            errors.append(
-                f"Default count must be between "
-                f"{self.DEFAULT_COUNT_MIN} and {self.DEFAULT_COUNT_MAX}"
             )
 
         return ValidationResult(
