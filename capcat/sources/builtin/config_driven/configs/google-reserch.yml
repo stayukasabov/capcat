@@ -6,17 +6,17 @@ base_url: https://research.google/blog/
 article_count: 30
 # Topic category used for grouping in TUI and bundles.
 category: ai
-# Discovery method configuration.
+# URL patterns used to identify article links for scraping.
 discovery:
   method: rss
   rss_url: https://research.google/blog/rss/
-# CSS selectors to find article links.
+# CSS selectors used to find article links on the listing page.
 article_selectors:
 - summary
-# CSS selectors to extract article content.
+# CSS selectors used to extract the main article body.
 content_selectors:
 - summary
-# CSS selectors to extract author information (empty if not used).
+# CSS selectors for extracting the author name.
 author_selectors: []
-# CSS selectors to extract publish dates (empty if not used).
+# CSS selectors for extracting the publication date.
 publish_date_selectors: []
