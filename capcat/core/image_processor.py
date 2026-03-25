@@ -92,6 +92,14 @@ class ImageProcessor:
             self.logger.error(f"Image processing error: {e}")
             return {}
 
+    # URL path segments that indicate a UI/icon/navigation image
+    _UI_PATH_PATTERNS = (
+        "icon", "logo", "social", "avatar", "sprite",
+        "banner", "/ad/", "pixel", "tracker", "beacon",
+        "nav", "header", "footer", "menu", "button",
+        "share", "loading", "spinner", "1x1",
+    )
+
     def _extract_image_urls(
         self, html_content: str, img_config: dict, base_url: str
     ) -> List[str]:
@@ -143,6 +151,12 @@ class ImageProcessor:
                 if url_patterns and not self._matches_url_patterns(
                     full_url, url_patterns
                 ):
+                    continue
+
+                # Skip UI/icon/logo images based on URL path
+                parsed_path = urlparse(full_url).path.lower()
+                if any(p in parsed_path for p in self._UI_PATH_PATTERNS):
+                    self.logger.debug(f"Skipping UI path image: {full_url}")
                     continue
 
                 if self._is_valid_image_url(
