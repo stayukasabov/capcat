@@ -173,8 +173,11 @@ def _handle_add_source_from_rss():
 
     # Call the existing add_source function from cli
     try:
-        from capcat.commands.add_source import add_source; from capcat.core.source_system.bundle_service import get_available_sources
+        from capcat.commands.add_source import add_source
+        from capcat.core.source_system.bundle_service import get_available_sources
+        from capcat.core.source_system.source_registry import reset_source_registry
         add_source(url)
+        reset_source_registry()
 
         # Show updated source count
         sources = get_available_sources()
@@ -619,6 +622,16 @@ def _confirm_and_execute(action, selection, generate_html):
 
     if generate_html:
         args.append('--html')
+
+    with suppress_logging():
+        want_pdfs = questionary.confirm(
+            "  Download attached PDFs?",
+            default=True,
+            style=custom_style,
+            qmark="",
+        ).ask()
+    if want_pdfs:
+        args.append('--media')
 
     success = True
     try:
