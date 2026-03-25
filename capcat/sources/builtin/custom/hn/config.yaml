@@ -1,10 +1,28 @@
-base_url: https://news.ycombinator.com
-category: techpro
+# Display name shown in the TUI and output folders.
 display_name: Hacker News
+
+# The root URL of this source website.
+base_url: https://news.ycombinator.com
+
+# Topic category used for grouping in TUI and bundles.
+category: techpro
+
+# How many articles to fetch from this source per run. Change if needed.
+article_count: 30
+
+# Minimum delay between requests to avoid rate-limiting.
 rate_limit: 1.0
+
+# Whether this source supports fetching article comments.
 supports_comments: true
+
+# Whether this source has comments available.
 has_comments: true
+
+# Function to use for fetching comments.
 comments_function: fetch_comments
+
+# HTTP request timeout in seconds.
 timeout: 10
 
 # Template system configuration

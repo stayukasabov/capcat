@@ -82,7 +82,6 @@ class BundleManager:
         self,
         bundle_id: str,
         description: str,
-        default_count: int = 20,
         sources: list = None
     ) -> None:
         """
@@ -91,7 +90,6 @@ class BundleManager:
         Args:
             bundle_id: Unique bundle identifier (lowercase_with_underscores)
             description: Bundle description (1-200 chars)
-            default_count: Default article count (1-100, default 20)
             sources: Initial source list (optional, default [])
 
         Raises:
@@ -107,7 +105,6 @@ class BundleManager:
         bundles[bundle_id] = {
             'description': description,
             'sources': sources,
-            'default_count': default_count
         }
         self._save_data()
 
@@ -134,16 +131,14 @@ class BundleManager:
     def update_bundle_metadata(
         self,
         bundle_id: str,
-        description: str = None,
-        default_count: int = None
+        description: str = None
     ) -> None:
         """
-        Update bundle metadata (description and/or default_count).
+        Update bundle metadata (description).
 
         Args:
             bundle_id: Bundle to update
             description: New description (optional)
-            default_count: New default count (optional)
 
         Raises:
             ValueError: If bundle not found or no changes provided
@@ -152,14 +147,12 @@ class BundleManager:
         if bundle_id not in bundles:
             raise ValueError(f"Bundle '{bundle_id}' not found")
 
-        if description is None and default_count is None:
+        if description is None:
             raise ValueError("Must provide at least one field to update")
 
         bundle = bundles[bundle_id]
         if description is not None:
             bundle['description'] = description
-        if default_count is not None:
-            bundle['default_count'] = default_count
 
         self._save_data()
 
@@ -197,7 +190,6 @@ class BundleManager:
             'bundle_id': bundle_id,
             'description': bundle_data.get('description', ''),
             'sources': bundle_data.get('sources', []),
-            'default_count': bundle_data.get('default_count', 20),
             'total_sources': len(bundle_data.get('sources', [])),
             'category_distribution': categories
         }
@@ -215,7 +207,6 @@ class BundleManager:
                 'bundle_id': bundle_id,
                 'description': bundle_data.get('description', ''),
                 'source_count': len(bundle_data.get('sources', [])),
-                'default_count': bundle_data.get('default_count', 20)
             })
 
         return sorted(bundles_list, key=lambda x: x['bundle_id'])

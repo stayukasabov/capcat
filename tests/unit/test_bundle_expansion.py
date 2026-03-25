@@ -3,10 +3,10 @@ import pytest
 from unittest.mock import patch
 
 MOCK_BUNDLES = {
-    "techpro": {"sources": ["hn", "lb"], "default_count": 30},
-    "tech":    {"sources": ["ieee"],      "default_count": 30},
-    "news":    {"sources": ["bbc"],       "default_count": 25},
-    "all":     {"sources": [],            "default_count": 10},
+    "techpro": {"sources": ["hn", "lb"]},
+    "tech":    {"sources": ["ieee"]},
+    "news":    {"sources": ["bbc"]},
+    "all":     {"sources": []},
 }
 
 

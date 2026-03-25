@@ -36,6 +36,9 @@ class SourceConfig:
     has_comments: bool = False
     category: str = "general"
 
+    # How many articles to fetch per run. Overridden by CLI --count flag.
+    article_count: int = 30
+
     # Optional custom configuration
     custom_config: Dict[str, Any] = None
 
@@ -43,6 +46,10 @@ class SourceConfig:
         """Ensure custom_config is never None after construction."""
         if self.custom_config is None:
             self.custom_config = {}
+        if self.article_count <= 0:
+            raise ValueError(
+                f"article_count must be positive, got {self.article_count}"
+            )
 
     def to_dict(self) -> Dict[str, Any]:
         """
