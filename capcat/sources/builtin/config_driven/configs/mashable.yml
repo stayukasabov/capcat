@@ -1,12 +1,22 @@
+# Display name shown in the TUI and output folders.
 display_name: Mashable
+# The root URL of this source website.
 base_url: https://mashable.com
+# How many articles to fetch from this source per run. Change if needed.
+article_count: 30
+# Topic category used for grouping in TUI and bundles.
 category: tech
+# Discovery method configuration.
 discovery:
   method: rss
   rss_url: http://feeds.mashable.com/Mashable
+# CSS selectors to find article links.
 article_selectors:
 - summary
+# CSS selectors to extract article content.
 content_selectors:
 - summary
+# CSS selectors to extract author information (empty if not used).
 author_selectors: []
+# CSS selectors to extract publish dates (empty if not used).
 publish_date_selectors: []

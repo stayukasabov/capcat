@@ -1,26 +1,32 @@
 # IEEE Spectrum Configuration
 source_id: "ieee"
 name: "IEEE Spectrum"
+# Display name shown in the TUI and output folders.
 display_name: "IEEE Spectrum"
+# Topic category used for grouping in TUI and bundles.
 category: tech
 
-# URL configuration
+# The root URL of this source website.
 base_url: https://spectrum.ieee.org
+# RSS feed URL.
 rss_url: https://spectrum.ieee.org/feeds/feed.rss
 
-# Discovery method - use RSS
+# How many articles to fetch from this source per run. Change if needed.
+article_count: 30
+
+# Discovery method - use RSS.
 discovery:
   method: "rss"
   rss_url: "https://spectrum.ieee.org/feeds/feed.rss"
   max_articles: 30
 
-# Article selectors (fallback for HTML, not used when RSS is active)
+# Article selectors (fallback for HTML, not used when RSS is active).
 article_selectors:
 - article h1 a
 - .entry-title a
 - .post-title a
 
-# Content extraction selectors
+# CSS selectors to extract article content.
 content_selectors:
 - .entry-content
 - .post-content
@@ -28,18 +34,19 @@ content_selectors:
 - .article-content
 - article
 
-# Template configuration
+# Template configuration for HTML output.
 template:
   variant: article-no-comments
   navigation:
     show_breadcrumb: true
     show_source_link: true
 
-# Request configuration
+# HTTP request timeout in seconds.
 timeout: 30
+# Minimum delay between requests to avoid rate-limiting.
 rate_limit: 1.0
 
-# Skip patterns - URLs to avoid
+# URL patterns to skip during article discovery.
 skip_patterns:
 - /subscribe
 - /login
@@ -56,9 +63,10 @@ skip_patterns:
 - utoronto.ca
 - "#comments"
 
+# Whether this source supports fetching article comments.
 supports_comments: false
 
-# Image processing configuration
+# Image processing configuration.
 image_processing:
   selectors:
     - "article img"
