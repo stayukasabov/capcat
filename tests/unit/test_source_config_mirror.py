@@ -461,7 +461,7 @@ def test_tui_mode_uses_questionary_confirm(tmp_path, monkeypatch):
     questionary_calls = []
 
     class FakeConfirm:
-        def __init__(self, msg, default=True):
+        def __init__(self, msg, default=True, **kwargs):
             questionary_calls.append(msg)
             self._result = True
         def ask(self):

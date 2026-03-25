@@ -1,0 +1,30 @@
+source_id: "medium"
+name: "Medium"
+display_name: "Medium.com"
+base_url: "https://medium.com"
+category: "content"
+timeout: 30
+rate_limit: 1.0
+supports_comments: false
+
+url_patterns:
+  - "medium.com"
+  - "*.medium.com"
+
+content_selectors:
+  - "article"
+  - '[data-testid="storyContent"]'
+  - ".postArticle-content"
+  - ".section-content"
+  - "main"
+
+image_selectors:
+  - "figure img"
+  - ".medium-image"
+  - "img"
+
+skip_patterns:
+  - "/sign-in"
+  - "/membership"
+  - "/subscribe"
+  - "/upgrade"

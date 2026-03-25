@@ -32,7 +32,7 @@ def test_single_html_calls_process_directory_tree(tmp_path: Path) -> None:
     mock_manager.get_source_for_url.return_value = (mock_source, "substack")
 
     with patch(
-        "capcat.core.specialized_source_manager.get_specialized_source_manager",
+        "capcat.core.source_system.source_registry.get_source_registry",
         return_value=mock_manager,
     ):
         with patch(
@@ -67,7 +67,7 @@ def test_single_html_does_not_call_generate_html_file(tmp_path: Path) -> None:
     mock_manager.get_source_for_url.return_value = (mock_source, "substack")
 
     with patch(
-        "capcat.core.specialized_source_manager.get_specialized_source_manager",
+        "capcat.core.source_system.source_registry.get_source_registry",
         return_value=mock_manager,
     ):
         with patch(

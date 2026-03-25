@@ -6,6 +6,7 @@ Modular, DRY architecture with source-specific configurations.
 
 import os
 import re
+import struct
 from typing import Dict, List, Optional, Tuple
 from urllib.parse import urljoin, urlparse
 
@@ -99,6 +100,61 @@ class ImageProcessor:
         "nav", "header", "footer", "menu", "button",
         "share", "loading", "spinner", "1x1",
     )
+
+    # Images where both dimensions are at or below this threshold are
+    # treated as icons/trackers and discarded after download.
+    _MIN_PIXEL_DIMENSION = 64
+
+    @staticmethod
+    def _read_image_dimensions(filepath: str) -> Optional[Tuple[int, int]]:
+        """
+        Return (width, height) for PNG or JPEG files by reading header bytes.
+        Returns None if the format is unrecognised or parsing fails.
+        """
+        try:
+            with open(filepath, "rb") as f:
+                header = f.read(26)
+
+            # PNG: signature (8) + IHDR length (4) + "IHDR" (4) + w (4) + h (4)
+            if header[:8] == b"\x89PNG\r\n\x1a\n":
+                if len(header) >= 24:
+                    w, h = struct.unpack(">II", header[16:24])
+                    return w, h
+                return None
+
+            # JPEG: starts with FF D8
+            if header[:2] == b"\xff\xd8":
+                with open(filepath, "rb") as f:
+                    f.read(2)  # skip SOI
+                    while True:
+                        marker = f.read(2)
+                        if len(marker) < 2:
+                            break
+                        if marker[0] != 0xFF:
+                            break
+                        seg_len_bytes = f.read(2)
+                        if len(seg_len_bytes) < 2:
+                            break
+                        seg_len = struct.unpack(">H", seg_len_bytes)[0]
+                        # SOF markers: C0-C3, C5-C7, C9-CB, CD-CF
+                        if marker[1] in (
+                            0xC0, 0xC1, 0xC2, 0xC3,
+                            0xC5, 0xC6, 0xC7,
+                            0xC9, 0xCA, 0xCB,
+                            0xCD, 0xCE, 0xCF,
+                        ):
+                            sof = f.read(5)
+                            if len(sof) >= 5:
+                                h, w = struct.unpack(">HH", sof[1:5])
+                                return w, h
+                            break
+                        f.seek(seg_len - 2, 1)
+                return None
+
+        except Exception:
+            return None
+
+        return None
 
     def _extract_image_urls(
         self, html_content: str, img_config: dict, base_url: str
@@ -323,6 +379,18 @@ class ImageProcessor:
                 for chunk in response.iter_content(chunk_size=8192):
                     f.write(chunk)
 
+            # Reject tiny icons/trackers by pixel dimensions
+            dims = self._read_image_dimensions(filepath)
+            if dims is not None:
+                w, h = dims
+                if w <= self._MIN_PIXEL_DIMENSION and h <= self._MIN_PIXEL_DIMENSION:
+                    os.remove(filepath)
+                    self.logger.debug(
+                        f"Skipping {filename}: dimensions {w}×{h}px ≤ "
+                        f"{self._MIN_PIXEL_DIMENSION}px"
+                    )
+                    return None
+
             self.logger.debug(f"Downloaded {filename}")
             return filename
 
@@ -374,6 +442,18 @@ class ImageProcessor:
                     f"Removed {filename}: {downloaded_size} bytes < {min_size} bytes minimum"
                 )
                 return None
+
+            # Reject tiny icons/trackers by pixel dimensions
+            dims = self._read_image_dimensions(filepath)
+            if dims is not None:
+                w, h = dims
+                if w <= self._MIN_PIXEL_DIMENSION and h <= self._MIN_PIXEL_DIMENSION:
+                    os.remove(filepath)
+                    self.logger.debug(
+                        f"Skipping {filename}: dimensions {w}×{h}px ≤ "
+                        f"{self._MIN_PIXEL_DIMENSION}px"
+                    )
+                    return None
 
             self.logger.debug(f"Downloaded {filename} ({downloaded_size} bytes)")
             return filename

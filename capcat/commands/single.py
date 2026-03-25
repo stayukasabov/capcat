@@ -17,12 +17,10 @@ def _scrape_with_specialized_source(
     from datetime import datetime
 
     from capcat.core.logging_config import get_logger
-    from capcat.core.specialized_source_manager import get_specialized_source_manager
+    from capcat.core.source_system.source_registry import get_source_registry
 
     logger = get_logger(__name__)
-    specialized_manager = get_specialized_source_manager()
-
-    source_result = specialized_manager.get_source_for_url(url)
+    source_result = get_source_registry().get_source_for_url(url)
     if not source_result:
         logger.error(f"No specialized source available for URL: {url}")
         return False, None
@@ -110,12 +108,10 @@ def scrape_single_article(
     from capcat.core.logging_config import get_logger
     from capcat.core.source_config import detect_source
     from capcat.core.source_system.source_registry import get_source_registry
-    from capcat.core.specialized_source_manager import get_specialized_source_manager
 
     logger = get_logger(__name__)
 
-    specialized_manager = get_specialized_source_manager()
-    if specialized_manager.can_handle_url(url):
+    if get_source_registry().can_handle_url(url):
         logger.info(f"Attempting specialized source for URL: {url}")
         success, base_dir = _scrape_with_specialized_source(
             url, output_dir, verbose, files, generate_html

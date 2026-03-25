@@ -11,7 +11,7 @@ import os
 import sys
 from abc import ABC
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Type
+from typing import Dict, List, Optional, Tuple, Type
 
 import yaml
 
@@ -370,6 +370,28 @@ class SourceRegistry:
         # Cache the instance
         self._source_instances[cache_key] = instance
         return instance
+
+    def get_source_for_url(self, url: str) -> Optional[Tuple[BaseSource, str]]:
+        """
+        Return (source_instance, source_id) for the first registered custom
+        source whose can_handle_url() classmethod matches the given URL.
+
+        Returns None if no source claims the URL.
+        """
+        for source_id, source_class in self._sources.items():
+            if hasattr(source_class, "can_handle_url") and source_class.can_handle_url(url):
+                try:
+                    instance = self.get_source(source_id)
+                    return instance, source_id
+                except Exception as e:
+                    self.logger.debug(
+                        f"could not instantiate {source_id} for url routing: {e}"
+                    )
+        return None
+
+    def can_handle_url(self, url: str) -> bool:
+        """Return True if any registered custom source can handle the URL."""
+        return self.get_source_for_url(url) is not None
 
     def get_available_sources(self) -> List[str]:
         """Get list of available source names."""

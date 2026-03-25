@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Substack.com specialized source implementation with paywall detection.
+Medium.com specialized source implementation with paywall detection.
 Optimized for best formatting and guaranteed local image embedding.
 """
 
@@ -22,89 +22,53 @@ from capcat.core.source_system.base_source import (
 from capcat.core.unified_media_processor import UnifiedMediaProcessor
 
 
-class SubstackSource(BaseSource):
+class MediumSource(BaseSource):
     """
-    Substack.com specialized source with paywall detection and optimal formatting.
+    Medium.com specialized source with paywall detection and optimal formatting.
     """
 
     @property
     def source_type(self) -> str:
-        return "specialized"
+        return "custom"
 
     @classmethod
     def can_handle_url(cls, url: str) -> bool:
         """Check if this source can handle the given URL."""
-        substack_patterns = [
-            r"\.substack\.com",
-            r"substack\.com",
-            r"/p/[^/]+",  # Substack post URLs
-            r"/archive",  # Substack archive URLs
+        # More specific patterns to avoid conflicts with Substack
+        medium_patterns = [
+            r"medium\.com",
+            r"[^/]+\.medium\.com",
+            r"/@[^/]+",  # Medium profile URLs
         ]
+
+        # Only match Medium URLs, not Substack
+        if ".substack.com" in url.lower():
+            return False
+
         return any(
             re.search(pattern, url, re.IGNORECASE)
-            for pattern in substack_patterns
+            for pattern in medium_patterns
         )
 
     def discover_articles(self, count: int) -> List[Article]:
         """
-        Substack discovery through RSS feeds when available.
+        Medium doesn't have a reliable public feed, so this is not implemented.
+        Use single article mode with Medium URLs instead.
         """
-        try:
-            # Extract substack domain from base_url
-            if (
-                not hasattr(self.config, "base_url")
-                or not self.config.base_url
-            ):
-                raise ArticleDiscoveryError(
-                    "No base URL configured for Substack discovery",
-                    self.config.name,
-                )
-
-            # Try to get RSS feed
-            rss_url = f"{self.config.base_url.rstrip('/')}/feed"
-
-            self.logger.debug(f"Attempting RSS discovery from: {rss_url}")
-
-            response = self.session.get(rss_url, timeout=self.config.timeout)
-            response.raise_for_status()
-
-            articles = []
-            soup = BeautifulSoup(response.content, "html.parser")
-
-            items = soup.find_all("item")[:count]
-
-            for item in items:
-                title_elem = item.find("title")
-                link_elem = item.find("link")
-
-                if title_elem and link_elem:
-                    title = title_elem.get_text().strip()
-                    url = link_elem.get_text().strip()
-
-                    article = Article(title=title, url=url)
-                    articles.append(article)
-
-            self.logger.info(
-                f"Successfully discovered {len(articles)} Substack articles"
-            )
-            return articles
-
-        except Exception as e:
-            raise ArticleDiscoveryError(
-                f"Failed to discover Substack articles: {e}", self.config.name
-            )
+        raise ArticleDiscoveryError(
+            "Medium discovery not supported. Use single article mode with Medium URLs.",
+            self.config.name,
+        )
 
     def fetch_article_content(
         self, article: Article, output_dir: str, progress_callback=None,
         download_files: bool = False,
     ) -> Tuple[bool, Optional[str]]:
         """
-        Fetch article content from Substack with paywall detection.
+        Fetch article content from Medium with paywall detection.
         """
         try:
-            self.logger.debug(
-                f"Fetching Substack content for: {article.title}"
-            )
+            self.logger.debug(f"Fetching Medium content for: {article.title}")
 
             # Check for paywall type
             paywall_type = self._is_paywalled(article.url)
@@ -119,88 +83,88 @@ class SubstackSource(BaseSource):
                 )
             # paywall_type == 'none' - free content, proceed normally
 
-            # Use optimized Substack-specific configuration
+            # Use optimized Medium-specific configuration
             fetcher_config = {
                 "name": self.config.display_name,
                 "content_selectors": [
-                    ".post-content",
-                    ".available-content",
-                    '[class*="post-content"]',
-                    ".body",
                     "article",
-                    ".prose",
+                    '[data-testid="storyContent"]',
+                    ".postArticle-content",
+                    ".section-content",
+                    ".p-name",
                     "main",
-                    ".single-post",
+                    ".post-content",
                 ],
                 "title_selectors": [
-                    ".post-title",
-                    "h1.post-title",
-                    ".single-post-title",
+                    'h1[data-testid="storyTitle"]',
+                    ".p-name",
+                    ".postArticle-title",
                     "h1",
-                    ".entry-title",
+                    ".story-title",
                 ],
                 "author_selectors": [
+                    '[data-testid="authorName"]',
+                    ".p-author",
+                    ".postMetaInline-authorLockup a",
                     ".author-name",
-                    ".byline-names",
-                    ".author",
                     '[rel="author"]',
-                    ".post-author",
                 ],
                 "date_selectors": [
-                    ".post-date",
+                    '[data-testid="storyPublishDate"]',
+                    ".dt-published",
                     "time",
-                    ".published-date",
-                    ".post-meta time",
+                    ".post-date",
                 ],
                 "image_selectors": [
-                    ".post-content img",
-                    ".available-content img",
                     "figure img",
-                    'img[src*="substack"]',
+                    ".medium-image",
+                    'img[src*="medium.com"]',
+                    ".story-image img",
                     "img",
                 ],
                 "skip_patterns": [
-                    "/subscribe",
-                    "/account/login",
                     "/sign-in",
+                    "/membership",
+                    "/subscribe",
+                    "/upgrade",
                     "paywall",
-                    "subscriber-only",
+                    "premium-content",
                 ],
                 "paywall_indicators": [
                     "paywall",
-                    "subscriber-only",
-                    "paid-subscription",
+                    "member-only",
+                    "subscription-required",
                     "premium-content",
-                    "subscribe-to-continue",
-                    "login-to-continue",
+                    "upgrade-to-continue",
+                    "sign-in-to-continue",
                 ],
             }
 
             fetcher = NewsSourceArticleFetcher(fetcher_config, self.session)
 
             # Use direct fetching to avoid URL transformation issues
-            success, folder_path = self._fetch_substack_content_direct(
+            success, folder_path = self._fetch_medium_content_direct(
                 article, output_dir
             )
 
             if success:
-                # Post-process for Substack-specific optimizations
-                self._optimize_substack_content(folder_path)
+                # Post-process for Medium-specific optimizations
+                self._optimize_medium_content(folder_path)
                 return True, folder_path
             else:
                 return False, None
 
         except Exception as e:
             raise ContentFetchError(
-                f"Failed to fetch Substack content for {article.url}: {e}",
+                f"Failed to fetch Medium content for {article.url}: {e}",
                 self.config.name,
             )
 
-    def _fetch_substack_content_direct(
+    def _fetch_medium_content_direct(
         self, article: Article, output_dir: str
     ) -> Tuple[bool, Optional[str]]:
         """
-        Fetch Substack content directly without URL transformation.
+        Fetch Medium content directly without URL transformation.
         """
         try:
             response = self.session.get(article.url, timeout=30)
@@ -209,11 +173,11 @@ class SubstackSource(BaseSource):
 
             # Extract title
             title_selectors = [
-                ".post-title",
-                "h1.post-title",
-                ".single-post-title",
+                'h1[data-testid="storyTitle"]',
+                ".p-name",
+                ".postArticle-title",
                 "h1",
-                ".entry-title",
+                "title",
             ]
             title = article.title
             for selector in title_selectors:
@@ -224,7 +188,7 @@ class SubstackSource(BaseSource):
 
             # Create article folder and images subfolder
             safe_title = re.sub(
-                r'[<>:"/\\|?*]', "_", title or "Substack Article"
+                r'[<>:"/\\|?*]', "_", title or "Medium Article"
             )
             article_folder = os.path.join(output_dir, safe_title)
             os.makedirs(article_folder, exist_ok=True)
@@ -232,17 +196,13 @@ class SubstackSource(BaseSource):
             images_folder = os.path.join(article_folder, "images")
             os.makedirs(images_folder, exist_ok=True)
 
-            # Use unified media processor - following established architecture
-            # No custom image downloading - use the unified system
-
-            # Extract content
+            # Extract content first
             content_selectors = [
-                ".post-content",
-                ".available-content",
-                '[class*="post-content"]',
-                ".body",
                 "article",
-                ".prose",
+                '[data-testid="storyContent"]',
+                ".postArticle-content",
+                ".section-content",
+                ".p-name",
                 "main",
             ]
             content = ""
@@ -257,13 +217,24 @@ class SubstackSource(BaseSource):
                     )
                     break
 
+            # Use UnifiedMediaProcessor - following established architecture
+            processed_content = UnifiedMediaProcessor.process_article_media(
+                content=content,
+                html_content=response.text,
+                url=article.url,
+                article_folder=article_folder,
+                source_name="medium",
+                session=self.session,
+                page_title=title
+            )
+
             # Extract metadata
             author_selectors = [
+                '[data-testid="authorName"]',
+                ".p-author",
+                ".postMetaInline-authorLockup a",
                 ".author-name",
-                ".byline-names",
-                ".author",
                 '[rel="author"]',
-                ".post-author",
             ]
             author = ""
             for selector in author_selectors:
@@ -273,10 +244,10 @@ class SubstackSource(BaseSource):
                     break
 
             date_selectors = [
-                ".post-date",
+                '[data-testid="storyPublishDate"]',
+                ".dt-published",
                 "time",
-                ".published-date",
-                ".post-meta time",
+                ".post-date",
             ]
             date = ""
             for selector in date_selectors:
@@ -287,18 +258,7 @@ class SubstackSource(BaseSource):
                     )
                     break
 
-            # Apply unified media processing - following established architecture
-            processed_content = UnifiedMediaProcessor.process_article_media(
-                content=content,
-                html_content=response.text,
-                url=article.url,
-                article_folder=article_folder,
-                source_name="substack",
-                session=self.session,
-                page_title=title
-            )
-
-            # Save article content with processed media
+            # Save article content with processed media references
             article_file = os.path.join(article_folder, article_md_filename(title))
             with open(article_file, "w", encoding="utf-8") as f:
                 f.write(f"# {title}\n\n")
@@ -310,51 +270,58 @@ class SubstackSource(BaseSource):
                 f.write("---\n\n")
                 f.write(processed_content)
 
-            self.logger.info(f"Successfully fetched Substack content: {title}")
+            self.logger.info(f"Successfully fetched Medium content: {title}")
             return True, article_folder
 
         except Exception as e:
-            self.logger.error(
-                f"Failed to fetch Substack content directly: {e}"
-            )
+            self.logger.error(f"Failed to fetch Medium content directly: {e}")
             return False, None
+
+    # Custom image downloading methods removed - now using UnifiedMediaProcessor
 
     def _is_paywalled(self, url: str) -> str:
         """
-        Check if the Substack article is behind a paywall.
+        Check if the Medium article is behind a paywall.
         Returns: 'hard' for subscription required, 'soft' for overlay, 'none' for free
         """
         try:
+            # Quick HEAD request to check for paywall redirects
+            response = self.session.head(url, timeout=10, allow_redirects=True)
+
+            # Check for hard paywall redirects
+            if "sign-in" in response.url or "membership" in response.url:
+                return "hard"
+
+            # Get content to analyze paywall type
             response = self.session.get(url, timeout=15)
             response.raise_for_status()
-
             soup = BeautifulSoup(response.text, "html.parser")
 
             # Hard paywall indicators (content actually restricted)
             hard_paywall_indicators = [
-                "subscriber-only",
-                "paid subscribers only",
-                "subscriber exclusive",
+                "member-only",
+                "subscription required",
                 "premium content",
+                "member preview",
                 "subscribers only",
+                "paid subscribers",
             ]
 
             # Soft paywall indicators (overlay but content available)
             soft_paywall_indicators = [
-                "subscribe to continue",
-                "login to continue",
-                "upgrade to paid",
-                "become a paid subscriber",
+                "sign in to continue",
+                "become a member",
+                "unlock this story",
+                "upgrade to continue",
             ]
 
             content_lower = response.text.lower()
 
             # Check if full content is available first
             content_selectors = [
-                ".post-content",
-                ".available-content",
                 "article",
-                ".prose",
+                '[data-testid="storyContent"]',
+                ".postArticle-content",
             ]
             full_content_available = False
             content_length = 0
@@ -364,9 +331,7 @@ class SubstackSource(BaseSource):
                 if content_elem:
                     content_text = content_elem.get_text().strip()
                     content_length = len(content_text)
-                    if (
-                        content_length > 1000
-                    ):  # Substantial content (increased threshold)
+                    if content_length > 1000:  # Substantial content
                         full_content_available = True
                         break
 
@@ -378,10 +343,10 @@ class SubstackSource(BaseSource):
             if full_content_available:
                 # Only treat as hard paywall if content is actually truncated with paywall message
                 paywall_truncation_indicators = [
-                    "this post is for paid subscribers",
-                    "subscribe to read the full story",
-                    "become a paid subscriber to unlock",
-                    "upgrade to paid to continue reading",
+                    "this story is published in",
+                    "member-only story",
+                    "become a member to unlock",
+                    "sign up to unlock this story",
                 ]
 
                 for indicator in paywall_truncation_indicators:
@@ -425,21 +390,6 @@ class SubstackSource(BaseSource):
                         )
                         return "hard"
 
-            # Check for Substack-specific paywall classes
-            soup = BeautifulSoup(response.text, "html.parser")
-            paywall_selectors = [
-                ".paywall",
-                ".subscriber-only",
-                ".paid-content",
-                "[data-paywall]",
-                ".premium-content",
-            ]
-
-            for selector in paywall_selectors:
-                if soup.select_one(selector):
-                    self.logger.info(f"Paywall element detected: {selector}")
-                    return "hard"
-
             return "none"
 
         except Exception as e:
@@ -464,7 +414,7 @@ class SubstackSource(BaseSource):
 
             # Create article folder and images subfolder
             safe_title = re.sub(
-                r'[<>:"/\\|?*]', "_", article.title or "Substack Article"
+                r'[<>:"/\\|?*]', "_", article.title or "Medium Article"
             )
             article_folder = os.path.join(output_dir, safe_title)
             os.makedirs(article_folder, exist_ok=True)
@@ -472,26 +422,26 @@ class SubstackSource(BaseSource):
             images_folder = os.path.join(article_folder, "images")
             os.makedirs(images_folder, exist_ok=True)
 
-            # Create limited content using unified media processing
-            initial_content = self._create_paywall_content(
+            # Create limited content file
+            content = self._create_paywall_content(
                 article, preview_content, soup
             )
 
-            # Process media using UnifiedMediaProcessor for consistent architecture
-            content = UnifiedMediaProcessor.process_article_media(
-                content=initial_content,
-                html_content=str(soup),
+            # Use UnifiedMediaProcessor for paywall content images - following established architecture
+            processed_content = UnifiedMediaProcessor.process_article_media(
+                content=content,
+                html_content=response.text,
                 url=article.url,
-                article_path=article_folder,
-                media_config=self.media_downloader.config,
+                article_folder=article_folder,
+                source_name="medium",
                 session=self.session,
-                logger=self.logger,
+                page_title=article.title
             )
 
-            # Save content
+            # Save processed content with unified media references
             article_file = os.path.join(article_folder, article_md_filename(article.title))
             with open(article_file, "w", encoding="utf-8") as f:
-                f.write(content)
+                f.write(processed_content)
 
             self.logger.info(
                 f"Saved paywall-limited content for: {article.title}"
@@ -505,34 +455,25 @@ class SubstackSource(BaseSource):
     def _extract_preview_content(self, soup: BeautifulSoup) -> str:
         """Extract available preview content from paywalled article."""
         preview_selectors = [
-            ".available-content p",
-            ".post-content p",
-            ".body p",
-            ".prose p",
-            ".preview-content p",
+            ".postArticle-content p",
+            '[data-testid="storyContent"] p',
+            ".story-content p",
+            ".post-preview",
+            ".excerpt",
             "p",
         ]
 
         preview_text = []
         for selector in preview_selectors:
             elements = soup.select(selector)
-            for elem in elements[:4]:  # Limit to first 4 paragraphs
+            for elem in elements[:3]:  # Limit to first 3 paragraphs
                 text = elem.get_text().strip()
-                # Filter out navigation and subscription prompts
-                if (
-                    len(text) > 40
-                    and "subscribe" not in text.lower()
-                    and "paywall" not in text.lower()
-                    and "sign up" not in text.lower()
-                ):
+                if len(text) > 50:  # Only substantial paragraphs
                     preview_text.append(text)
             if preview_text:
                 break
 
         return "\n\n".join(preview_text)
-
-
-
 
     def _create_paywall_content(
         self,
@@ -546,21 +487,18 @@ class SubstackSource(BaseSource):
         title = article.title or self._extract_title(soup)
         author = self._extract_author(soup)
         date = self._extract_date(soup)
-        substack_name = self._extract_substack_name(article.url)
 
         content = f"# {title}\n\n"
 
-        if substack_name:
-            content += f"**Substack:** {substack_name}\n"
         if author:
             content += f"**Author:** {author}\n"
         if date:
             content += f"**Date:** {date}\n"
 
-        content += f"**Source:** [Substack Article]({article.url})\n\n"
+        content += f"**Source:** [Medium Article]({article.url})\n\n"
         content += "---\n\n"
         content += "**⚠️ PAYWALL NOTICE**\n\n"
-        content += "This article requires a paid subscription. Only preview content is available.\n\n"
+        content += "This article is behind a paywall. Only preview content is available.\n\n"
         content += "**Preview Content:**\n\n"
 
         if preview_content:
@@ -568,25 +506,20 @@ class SubstackSource(BaseSource):
         else:
             content += "*No preview content available.*\n\n"
 
-        # Images will be processed by UnifiedMediaProcessor
-
         content += f"**Read full article:** [{article.url}]({article.url})\n\n"
-
-        if substack_name:
-            subscribe_url = f"https://{substack_name}.substack.com/subscribe"
-            content += f"**Subscribe to {substack_name}:** [{subscribe_url}]({subscribe_url})\n\n"
-
         content += "---\n\n"
         content += "*Note: Capcat respects paywall restrictions and only archives publicly available content.*"
 
         return content
 
+    # Custom preview image downloading removed - now using UnifiedMediaProcessor
+
     def _extract_title(self, soup: BeautifulSoup) -> str:
-        """Extract title from Substack page."""
+        """Extract title from Medium page."""
         selectors = [
-            ".post-title",
-            "h1.post-title",
-            ".single-post-title",
+            'h1[data-testid="storyTitle"]',
+            ".p-name",
+            ".postArticle-title",
             "h1",
             "title",
         ]
@@ -596,16 +529,16 @@ class SubstackSource(BaseSource):
             if element:
                 return element.get_text().strip()
 
-        return "Substack Article"
+        return "Medium Article"
 
     def _extract_author(self, soup: BeautifulSoup) -> Optional[str]:
-        """Extract author from Substack page."""
+        """Extract author from Medium page."""
         selectors = [
+            '[data-testid="authorName"]',
+            ".p-author",
+            ".postMetaInline-authorLockup a",
             ".author-name",
-            ".byline-names",
-            ".author",
             '[rel="author"]',
-            ".post-author",
         ]
 
         for selector in selectors:
@@ -616,12 +549,12 @@ class SubstackSource(BaseSource):
         return None
 
     def _extract_date(self, soup: BeautifulSoup) -> Optional[str]:
-        """Extract publication date from Substack page."""
+        """Extract publication date from Medium page."""
         selectors = [
-            ".post-date",
+            '[data-testid="storyPublishDate"]',
+            ".dt-published",
             "time",
-            ".published-date",
-            ".post-meta time",
+            ".post-date",
         ]
 
         for selector in selectors:
@@ -636,16 +569,9 @@ class SubstackSource(BaseSource):
 
         return None
 
-    def _extract_substack_name(self, url: str) -> Optional[str]:
-        """Extract Substack publication name from URL."""
-        match = re.search(r"https?://([^.]+)\.substack\.com", url)
-        if match:
-            return match.group(1)
-        return None
-
-    def _optimize_substack_content(self, folder_path: str) -> None:
+    def _optimize_medium_content(self, folder_path: str) -> None:
         """
-        Apply Substack-specific content optimizations.
+        Apply Medium-specific content optimizations.
         """
         try:
             from pathlib import Path
@@ -656,59 +582,45 @@ class SubstackSource(BaseSource):
             with open(article_path, "r", encoding="utf-8") as f:
                 content = f.read()
 
-            # Substack-specific optimizations
-            optimized_content = self._apply_substack_formatting(content)
+            # Medium-specific optimizations
+            optimized_content = self._apply_medium_formatting(content)
 
             with open(article_path, "w", encoding="utf-8") as f:
                 f.write(optimized_content)
 
         except Exception as e:
-            self.logger.debug(f"Error optimizing Substack content: {e}")
+            self.logger.debug(f"Error optimizing Medium content: {e}")
 
-    def _apply_substack_formatting(self, content: str) -> str:
-        """Apply Substack-specific formatting improvements."""
+    def _apply_medium_formatting(self, content: str) -> str:
+        """Apply Medium-specific formatting improvements."""
 
-        # Fix Substack-specific formatting issues
+        # Fix Medium-specific formatting issues
         content = re.sub(
             r"\n{3,}", "\n\n", content
         )  # Remove excessive line breaks
+        content = re.sub(
+            r"^\*\*\*$", "---", content, flags=re.MULTILINE
+        )  # Fix dividers
 
-        # Improve blockquote formatting
+        # Improve quote formatting
         content = re.sub(r"^> (.+)", r"> *\1*", content, flags=re.MULTILINE)
 
-        # Clean up subscription callouts
-        content = re.sub(
-            r"\*\*Subscribe.*?\*\*\n*", "", content, flags=re.IGNORECASE
-        )
-
-        # Fix image captions
+        # Clean up image captions
         content = re.sub(
             r"!\[([^\]]*)\]\(([^)]+)\)\s*\n\s*\*([^*]+)\*",
             r"![\1](\2)\n*\3*",
             content,
         )
 
-        # Remove common Substack footer patterns
-        footer_patterns = [
-            r"Thanks for reading.*?Subscribe for free.*?\n",
-            r"Like this post\? Subscribe.*?\n",
-            r"Share.*?\n.*?Subscribe.*?\n",
-        ]
-
-        for pattern in footer_patterns:
-            content = re.sub(
-                pattern, "", content, flags=re.IGNORECASE | re.DOTALL
-            )
-
         return content
 
     def _validate_custom_config(self) -> List[str]:
-        """Validate Substack-specific configuration."""
+        """Validate Medium-specific configuration."""
         errors = []
-        # Add Substack-specific validation if needed
+        # Add Medium-specific validation if needed
         return errors
 
     def _should_skip_custom(self, url: str, title: str = "") -> bool:
-        """Custom skip logic for Substack URLs."""
-        skip_patterns = ["/subscribe", "/account/login", "/sign-in"]
+        """Custom skip logic for Medium URLs."""
+        skip_patterns = ["/sign-in", "/membership", "/subscribe", "/upgrade"]
         return any(pattern in url for pattern in skip_patterns)

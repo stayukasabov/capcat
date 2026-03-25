@@ -12,7 +12,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from capcat.core.source_system.base_source import Article, SourceConfig
-from capcat.sources.specialized.twitter.source import TwitterSource
+from capcat.sources.builtin.custom.twitter.source import TwitterSource
 
 
 @pytest.fixture

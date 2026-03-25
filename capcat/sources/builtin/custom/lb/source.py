@@ -20,7 +20,6 @@ from capcat.core.storage_manager import comments_md_filename
 from capcat.core.article_fetcher import NewsSourceArticleFetcher
 from capcat.core.network_resilience import (
     get_retry_executor,
-    URLFallbackExecutor,
 )
 from capcat.core.source_system.base_source import (
     Article,

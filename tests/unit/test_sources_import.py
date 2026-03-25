@@ -7,14 +7,14 @@ def test_builtin_sources_package_importable():
     assert capcat.sources.builtin is not None
 
 
-def test_specialized_sources_dict_populated():
-    """SPECIALIZED_SOURCES must be populated with real source entries."""
-    from capcat.sources.specialized import SPECIALIZED_SOURCES
-    assert len(SPECIALIZED_SOURCES) > 0, "SPECIALIZED_SOURCES is empty"
-    # Twitter/X and YouTube must be present
-    source_ids = list(SPECIALIZED_SOURCES.keys())
-    assert any("twitter" in sid or "x.com" in sid for sid in source_ids), \
-        f"No Twitter source found in {source_ids}"
+def test_url_routing_sources_discoverable():
+    """Twitter and YouTube sources must be discoverable via the registry."""
+    from capcat.core.source_system.source_registry import SourceRegistry
+    reg = SourceRegistry()
+    reg.discover_sources()
+    sources = reg.get_available_sources()
+    assert "twitter" in sources, f"twitter not in {sources}"
+    assert "youtube" in sources, f"youtube not in {sources}"
 
 
 def test_builtin_yaml_configs_present():

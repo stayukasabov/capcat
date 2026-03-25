@@ -14,7 +14,6 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import yaml
 import markdown
-from markdown.extensions import fenced_code, tables, toc
 
 
 from capcat.core.config import get_config, find_project_root, NoProjectError
