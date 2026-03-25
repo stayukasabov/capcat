@@ -1650,6 +1650,14 @@ class ArticleFetcher(ABC):
         # Track downloaded URLs to avoid duplicates
         download_cache = {}  # url -> (local_path, link_type)
 
+        # URL path segments that indicate a UI/icon/navigation image
+        _ui_path_patterns = (
+            "icon", "logo", "social", "avatar", "sprite",
+            "banner", "/ad/", "pixel", "tracker", "beacon",
+            "nav", "header", "footer", "menu", "button",
+            "share", "loading", "spinner", "1x1",
+        )
+
         # First pass: Quick filtering based on extensions
         quick_filtered_links = []
         for link_type, url, alt_text in all_links:
@@ -1672,6 +1680,10 @@ class ArticleFetcher(ABC):
                         ".ico",
                     )
                 ):
+                    # Skip if URL path looks like a UI/icon element
+                    if any(p in path_lower for p in _ui_path_patterns):
+                        self.logger.debug(f"Skipping UI path image: {url}")
+                        continue
                     quick_filtered_links.append((link_type, url, alt_text))
                 # Also include links that look like they might be images based
                 # on common patterns
@@ -1679,7 +1691,8 @@ class ArticleFetcher(ABC):
                     pattern in path_lower
                     for pattern in ["image", "img", "photo", "pic"]
                 ):
-                    quick_filtered_links.append((link_type, url, alt_text))
+                    if not any(p in path_lower for p in _ui_path_patterns):
+                        quick_filtered_links.append((link_type, url, alt_text))
             elif link_type == "document":
                 # PDFs are always downloaded — they are article content.
                 # Other document types (doc, xls, etc.) require --media flag.
