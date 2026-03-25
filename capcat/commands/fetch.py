@@ -51,7 +51,7 @@ def process_sources(
                 logger.info(f"Processing {source} articles...")
                 process_source_articles(
                     source_name=source,
-                    count=getattr(args, "count", 30),
+                    count=args.count,
                     output_dir=output_dir,
                     quiet=getattr(args, "quiet", False),
                     verbose=getattr(args, "verbose", False),
