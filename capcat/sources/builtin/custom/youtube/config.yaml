@@ -1,0 +1,18 @@
+source_id: "youtube"
+name: "YouTube"
+display_name: "YouTube"
+base_url: "https://youtube.com"
+category: "media"
+timeout: 15
+rate_limit: 1.0
+supports_comments: false
+
+url_patterns:
+  - "youtube.com"
+  - "youtu.be"
+  - "m.youtube.com"
+
+template:
+  title: "YouTube Video"
+  body: "Visit the original link."
+  source_label: "Source URL"

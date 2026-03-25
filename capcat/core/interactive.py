@@ -121,6 +121,7 @@ def start_interactive_mode():
 def _handle_manage_sources_flow():
     """Handles the logic for source management submenu."""
     while True:
+        position_menu_at_bottom(menu_lines=12)
         with suppress_logging():
             action = questionary.select(
                 "  Source Management - Select an option:",
@@ -324,6 +325,7 @@ def _handle_list_sources():
     choices.append(questionary.Choice("Back to Source Management", "back"))
 
     while True:
+        position_menu_at_bottom(menu_lines=15)
         with suppress_logging():
             selected = questionary.select(
                 "  Browse sources (select to view details):",
@@ -394,6 +396,7 @@ def _handle_test_source():
     source_choices.append(questionary.Separator())
     source_choices.append(questionary.Choice("Back", "back"))
 
+    position_menu_at_bottom(menu_lines=15)
     with suppress_logging():
         source_id = questionary.select(
             "  Select source to test:",

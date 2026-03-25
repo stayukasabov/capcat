@@ -25,7 +25,7 @@ class TwitterSource(BaseSource):
 
     @property
     def source_type(self) -> str:
-        return "specialized"
+        return "custom"
 
     @classmethod
     def can_handle_url(cls, url: str) -> bool:

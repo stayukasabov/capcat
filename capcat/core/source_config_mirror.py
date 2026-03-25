@@ -92,7 +92,7 @@ class SourceConfigMirror:
     def _prompt(self, message: str) -> str:
         """Display prompt; use questionary in TUI mode, print+input in CLI mode."""
         if self._tui_mode and questionary is not None:
-            result = questionary.confirm(message, default=True).ask()
+            result = questionary.confirm(message, default=True, qmark="").ask()
             return "y" if result else "n"
         print(message)
         return input("> ")

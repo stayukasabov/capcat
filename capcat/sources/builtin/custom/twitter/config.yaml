@@ -1,0 +1,17 @@
+source_id: "twitter"
+name: "Twitter/X.com"
+display_name: "X.com"
+base_url: "https://x.com"
+category: "social"
+timeout: 15
+rate_limit: 1.0
+supports_comments: false
+
+url_patterns:
+  - "twitter.com"
+  - "x.com"
+
+template:
+  title: "X.com post"
+  body: "Visit the original publication."
+  source_label: "Source URL"

@@ -12,7 +12,7 @@ from typing import Callable, Optional, Tuple
 import requests
 
 from capcat.core.logging_config import get_logger
-from capcat.core.specialized_source_manager import get_specialized_source_manager
+from capcat.core.source_system.source_registry import get_source_registry
 from capcat.core.source_config import detect_source
 from capcat.core.utils import sanitize_filename
 from capcat.core.storage_manager import find_article_md
@@ -34,8 +34,8 @@ class UnifiedArticleProcessor:
     """
 
     def __init__(self):
-        """Initialize processor with specialized source manager."""
-        self.specialized_manager = get_specialized_source_manager()
+        """Initialize processor with source registry."""
+        self._registry = get_source_registry()
         self.logger = get_logger(__name__)
 
     def process_article(
@@ -66,7 +66,7 @@ class UnifiedArticleProcessor:
         """
 
         # Step 1: Check specialized sources first
-        if self.specialized_manager.can_handle_url(url):
+        if self._registry.can_handle_url(url):
             self.logger.info(f"Specialized source detected for URL: {url}")
             return self._process_with_specialized_source(
                 url, title, base_folder, update_mode
@@ -107,7 +107,7 @@ class UnifiedArticleProcessor:
         Returns:
             Tuple of (success, article_title, article_folder_path)
         """
-        source_result = self.specialized_manager.get_source_for_url(url)
+        source_result = self._registry.get_source_for_url(url)
 
         if not source_result:
             self.logger.error(f"Specialized source detection failed for: {url}")

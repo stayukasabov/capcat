@@ -186,3 +186,17 @@ News/
 Capcats/
 Config/
 tests/acceptance/tmp/
+tests/acceptance/results/
+
+# Process / session artifacts — never commit
+Video/
+Testinga/
+DESIGN/
+SKILLS/
+.agents/
+skills-lock.json
+
+# Loose screenshot/asset files in root
+*.png
+*.jpg
+*.jpeg

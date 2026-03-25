@@ -51,7 +51,7 @@ class GracefulShutdown:
         global _shutdown_instance
         _shutdown_instance = None
 
-    def _signal_handler(self, signum: int, frame):
+    def _signal_handler(self, signum: int, _frame):
         """Handle shutdown signals — sets event only. No sys.exit, no sleep."""
         signal_names = {
             signal.SIGINT: "SIGINT (Ctrl+C)",
@@ -146,7 +146,7 @@ def setup_signal_handlers():
     """
     logger = get_logger(__name__)
 
-    def signal_handler(signum: int, frame):
+    def signal_handler(signum: int, _frame):
         signal_names = {
             signal.SIGINT: "SIGINT (Ctrl+C)",
             signal.SIGTERM: "SIGTERM",
@@ -163,7 +163,7 @@ def setup_signal_handlers():
     logger.debug("Signal handlers installed")
 
 
-def with_graceful_shutdown(cleanup_func: Optional[Callable] = None):
+def with_graceful_shutdown(_cleanup_func: Optional[Callable] = None):
     """
     Decorator to add graceful shutdown handling to functions.
 

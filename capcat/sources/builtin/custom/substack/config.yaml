@@ -1,0 +1,33 @@
+source_id: "substack"
+name: "Substack"
+display_name: "Substack.com"
+base_url: "https://substack.com"
+category: "content"
+timeout: 30
+rate_limit: 1.0
+supports_comments: false
+
+url_patterns:
+  - "*.substack.com"
+  - "substack.com"
+
+content_selectors:
+  - ".post-content"
+  - ".available-content"
+  - "article"
+  - ".prose"
+  - "main"
+
+image_selectors:
+  - ".post-content img"
+  - "figure img"
+  - "img"
+
+skip_patterns:
+  - "/subscribe"
+  - "/account/login"
+  - "/sign-in"
+
+rss:
+  enabled: true
+  feed_path: "/feed"

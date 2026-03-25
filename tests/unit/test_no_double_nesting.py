@@ -49,12 +49,12 @@ class TestNoIntermediateFolder:
         source_instance = _make_mock_specialized_source(tmp_path, content_name)
 
         with patch.object(
-            processor.specialized_manager,
+            processor._registry,
             "can_handle_url",
             return_value=True,
         ):
             with patch.object(
-                processor.specialized_manager,
+                processor._registry,
                 "get_source_for_url",
                 return_value=(source_instance, "youtube"),
             ):
@@ -85,12 +85,12 @@ class TestNoIntermediateFolder:
         source_instance = _make_mock_specialized_source(tmp_path, content_name)
 
         with patch.object(
-            processor.specialized_manager,
+            processor._registry,
             "can_handle_url",
             return_value=True,
         ):
             with patch.object(
-                processor.specialized_manager,
+                processor._registry,
                 "get_source_for_url",
                 return_value=(source_instance, "youtube"),
             ):
@@ -115,12 +115,12 @@ class TestNoIntermediateFolder:
         source_instance = _make_mock_specialized_source(tmp_path, content_name)
 
         with patch.object(
-            processor.specialized_manager,
+            processor._registry,
             "can_handle_url",
             return_value=True,
         ):
             with patch.object(
-                processor.specialized_manager,
+                processor._registry,
                 "get_source_for_url",
                 return_value=(source_instance, "youtube"),
             ):
@@ -151,12 +151,12 @@ class TestNoIntermediateFolder:
         source_instance = _make_mock_specialized_source(tmp_path)
 
         with patch.object(
-            processor.specialized_manager,
+            processor._registry,
             "can_handle_url",
             return_value=True,
         ):
             with patch.object(
-                processor.specialized_manager,
+                processor._registry,
                 "get_source_for_url",
                 return_value=(source_instance, "youtube"),
             ):
@@ -194,12 +194,12 @@ class TestUpdateModeBackwardCompat:
         with patch.object(processor, "_check_url_validity", return_value=True):
             with patch.object(processor, "_update_timestamp"):
                 with patch.object(
-                    processor.specialized_manager,
+                    processor._registry,
                     "can_handle_url",
                     return_value=True,
                 ):
                     with patch.object(
-                        processor.specialized_manager,
+                        processor._registry,
                         "get_source_for_url",
                         return_value=(source_instance, "youtube"),
                     ):

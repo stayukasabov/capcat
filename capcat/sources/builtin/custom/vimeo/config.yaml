@@ -1,0 +1,16 @@
+source_id: "vimeo"
+name: "Vimeo"
+display_name: "Vimeo"
+base_url: "https://vimeo.com"
+category: "media"
+timeout: 15
+rate_limit: 1.0
+supports_comments: false
+
+url_patterns:
+  - "vimeo.com"
+
+template:
+  title: "Vimeo Video"
+  body: "Visit the original link."
+  source_label: "Source URL"
