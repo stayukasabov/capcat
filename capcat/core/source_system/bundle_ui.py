@@ -47,6 +47,9 @@ class BundleUI:
             questionary.Choice("Back to Source Management", "back"),
         ]
 
+        from capcat.core.interactive import position_menu_at_bottom
+        position_menu_at_bottom(menu_lines=15)
+
         return questionary.select(
             "  Bundle Management - Select an option:",
             choices=choices,

@@ -72,7 +72,7 @@ def start_interactive_mode():
     first_run = True
     while True:
         # Position menu at bottom of terminal (main menu: ~10 lines)
-        position_menu_at_bottom(menu_lines=10)
+        position_menu_at_bottom(menu_lines=11)
 
         with suppress_logging():
             prompt_text = "  What would you like me to do?" if first_run else "  Select an option:"
@@ -89,7 +89,7 @@ def start_interactive_mode():
                 style=custom_style,
                 qmark="",
                 pointer="▶",
-                instruction="\n   (Use arrow keys to navigate)\n",
+                instruction="\n   (Use arrow keys to navigate)",
             ).ask()
 
         first_run = False
@@ -124,7 +124,7 @@ def start_interactive_mode():
 def _handle_manage_sources_flow():
     """Handles the logic for source management submenu."""
     while True:
-        position_menu_at_bottom(menu_lines=12)
+        position_menu_at_bottom(menu_lines=13)
         with suppress_logging():
             action = questionary.select(
                 "  Source Management - Select an option:",
@@ -140,7 +140,7 @@ def _handle_manage_sources_flow():
                 style=custom_style,
                 qmark="",
                 pointer="▶",
-                instruction="\n   (Use arrow keys to navigate)\n",
+                instruction="\n   (Use arrow keys to navigate)",
             ).ask()
 
         if not action or action == 'back':
@@ -294,7 +294,7 @@ def _handle_list_sources():
     choices.append(questionary.Choice("Back to Source Management", "back"))
 
     while True:
-        position_menu_at_bottom(menu_lines=15)
+        position_menu_at_bottom(menu_lines=16)
         with suppress_logging():
             selected = questionary.select(
                 "  Browse sources (select to view details):",
@@ -302,7 +302,7 @@ def _handle_list_sources():
                 style=custom_style,
                 qmark="",
                 pointer="▶",
-                instruction="\n   (Use arrow keys, Enter to view details)\n",
+                instruction="\n   (Use arrow keys, Enter to view details)",
             ).ask()
 
         if not selected or selected == 'back':
@@ -460,7 +460,7 @@ def _handle_test_source():
     source_choices.append(questionary.Separator())
     source_choices.append(questionary.Choice("Back", "back"))
 
-    position_menu_at_bottom(menu_lines=15)
+    position_menu_at_bottom(menu_lines=16)
     with suppress_logging():
         source_id = questionary.select(
             "  Select source to test:",
@@ -468,7 +468,7 @@ def _handle_test_source():
             style=custom_style,
             qmark="",
             pointer="▶",
-            instruction="\n   (Use arrow keys to navigate)\n",
+            instruction="\n   (Use arrow keys to navigate)",
         ).ask()
 
     if not source_id or source_id == 'back':
@@ -495,7 +495,7 @@ def _handle_test_source():
 def _handle_bundle_flow():
     """Handles the logic for the bundle selection flow."""
     # Position menu at bottom (bundle menu can be long)
-    position_menu_at_bottom(menu_lines=15)
+    position_menu_at_bottom(menu_lines=16)
 
     from capcat.core.source_system.bundle_service import get_available_bundles, get_available_sources
     from capcat.core.source_system.source_registry import get_source_registry
@@ -539,7 +539,7 @@ def _handle_bundle_flow():
             style=custom_style,
             qmark="",
             pointer="▶",
-            instruction="\n   (Use arrow keys to navigate)\n",
+            instruction="\n   (Use arrow keys to navigate)",
         ).ask()
 
     if bundle is None or bundle == 'back':
@@ -551,7 +551,7 @@ def _handle_bundle_flow():
 def _handle_fetch_flow():
     """Handles the logic for the fetch (multi-source) flow."""
     # Position menu at bottom (source list can be long)
-    position_menu_at_bottom(menu_lines=15)
+    position_menu_at_bottom(menu_lines=16)
 
     from capcat.core.source_system.bundle_service import get_available_sources
     sources = get_available_sources()
@@ -567,7 +567,7 @@ def _handle_fetch_flow():
             style=custom_style,
             qmark="",
             pointer="▶",
-            instruction="\n   (Use Space to select multiple sources, Enter to confirm)\n",
+            instruction="\n   (Use Space to select multiple sources, Enter to confirm)",
         ).ask()
 
     if selected_sources is None or 'back' in selected_sources:
@@ -579,7 +579,7 @@ def _handle_fetch_flow():
 def _handle_single_source_flow():
     """Handles the logic for the single source selection flow."""
     # Position menu at bottom (source list can be long)
-    position_menu_at_bottom(menu_lines=15)
+    position_menu_at_bottom(menu_lines=16)
 
     from capcat.core.source_system.bundle_service import get_available_sources
     sources = get_available_sources()
@@ -595,7 +595,7 @@ def _handle_single_source_flow():
             style=custom_style,
             qmark="",
             pointer="▶",
-            instruction="\n   (Use arrow keys to navigate)\n",
+            instruction="\n   (Use arrow keys to navigate)",
         ).ask()
 
     if source is None or source == 'back':
@@ -637,7 +637,7 @@ def _handle_single_url_flow():
 def _prompt_for_html(action, selection):
     """Prompts for HTML generation."""
     # Position menu at bottom (HTML prompt is short)
-    position_menu_at_bottom(menu_lines=9)
+    position_menu_at_bottom(menu_lines=8)
 
     with suppress_logging():
         response = questionary.select(
@@ -651,7 +651,7 @@ def _prompt_for_html(action, selection):
             style=custom_style,
             qmark="",
             pointer="▶",
-            instruction="\n   (Use arrow keys to navigate)\n",
+            instruction="\n   (Use arrow keys to navigate)",
         ).ask()
 
     if response is None or response == 'back':
@@ -724,7 +724,7 @@ def _show_completion_screen(generate_html: bool, success: bool) -> None:
         generate_html: Whether HTML generation was requested.
         success: Whether the command completed without errors.
     """
-    position_menu_at_bottom(menu_lines=11)
+    position_menu_at_bottom(menu_lines=10)
 
     status_label = "Done" if success else "Completed with errors"
     print(f"\n  {status_label}")
@@ -748,7 +748,7 @@ def _show_completion_screen(generate_html: bool, success: bool) -> None:
             style=custom_style,
             qmark="",
             pointer="▶",
-            instruction="\n   (Use arrow keys to navigate)\n",
+            instruction="\n   (Use arrow keys to navigate)",
         ).ask()
 
     if not choice or choice == "exit":
