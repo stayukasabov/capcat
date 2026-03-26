@@ -377,7 +377,7 @@ class ArticleFetcher(ABC):
             article_processor = get_article_processor()
 
             # Check if this URL should be handled by a specialized source
-            if article_processor.specialized_manager.can_handle_url(url):
+            if article_processor._registry.can_handle_url(url):
                 self.logger.info(f"Single article: Specialized source detected for {url}")
 
                 # Get global update mode setting
