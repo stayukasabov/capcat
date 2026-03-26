@@ -71,9 +71,6 @@ def start_interactive_mode():
     """Starts the interactive user interface."""
     first_run = True
     while True:
-        # Position menu at bottom of terminal (main menu: ~10 lines)
-        position_menu_at_bottom(menu_lines=11)
-
         with suppress_logging():
             prompt_text = "  What would you like me to do?" if first_run else "  Select an option:"
             action = questionary.select(
@@ -124,7 +121,6 @@ def start_interactive_mode():
 def _handle_manage_sources_flow():
     """Handles the logic for source management submenu."""
     while True:
-        position_menu_at_bottom(menu_lines=13)
         with suppress_logging():
             action = questionary.select(
                 "  Source Management - Select an option:",
@@ -294,7 +290,6 @@ def _handle_list_sources():
     choices.append(questionary.Choice("Back to Source Management", "back"))
 
     while True:
-        position_menu_at_bottom(menu_lines=16)
         with suppress_logging():
             selected = questionary.select(
                 "  Browse sources (select to view details):",
@@ -460,7 +455,6 @@ def _handle_test_source():
     source_choices.append(questionary.Separator())
     source_choices.append(questionary.Choice("Back", "back"))
 
-    position_menu_at_bottom(menu_lines=16)
     with suppress_logging():
         source_id = questionary.select(
             "  Select source to test:",
@@ -494,9 +488,6 @@ def _handle_test_source():
 
 def _handle_bundle_flow():
     """Handles the logic for the bundle selection flow."""
-    # Position menu at bottom (bundle menu can be long)
-    position_menu_at_bottom(menu_lines=16)
-
     from capcat.core.source_system.bundle_service import get_available_bundles, get_available_sources
     from capcat.core.source_system.source_registry import get_source_registry
 
@@ -550,9 +541,6 @@ def _handle_bundle_flow():
 
 def _handle_fetch_flow():
     """Handles the logic for the fetch (multi-source) flow."""
-    # Position menu at bottom (source list can be long)
-    position_menu_at_bottom(menu_lines=16)
-
     from capcat.core.source_system.bundle_service import get_available_sources
     sources = get_available_sources()
 
@@ -578,9 +566,6 @@ def _handle_fetch_flow():
 
 def _handle_single_source_flow():
     """Handles the logic for the single source selection flow."""
-    # Position menu at bottom (source list can be long)
-    position_menu_at_bottom(menu_lines=16)
-
     from capcat.core.source_system.bundle_service import get_available_sources
     sources = get_available_sources()
 
@@ -607,9 +592,6 @@ def _handle_single_source_flow():
 
 def _handle_single_url_flow():
     """Handles the logic for the single URL flow."""
-    # Position menu at bottom (URL input prompt)
-    position_menu_at_bottom(menu_lines=5)
-
     print("  (Use Ctrl+C to go to the Main Menu)")
     with suppress_logging():
         url = questionary.text(
@@ -636,9 +618,6 @@ def _handle_single_url_flow():
 
 def _prompt_for_html(action, selection):
     """Prompts for HTML generation."""
-    # Position menu at bottom (HTML prompt is short)
-    position_menu_at_bottom(menu_lines=8)
-
     with suppress_logging():
         response = questionary.select(
             "  Generate HTML for web browsing?",
@@ -724,8 +703,6 @@ def _show_completion_screen(generate_html: bool, success: bool) -> None:
         generate_html: Whether HTML generation was requested.
         success: Whether the command completed without errors.
     """
-    position_menu_at_bottom(menu_lines=10)
-
     status_label = "Done" if success else "Completed with errors"
     print(f"\n  {status_label}")
 
