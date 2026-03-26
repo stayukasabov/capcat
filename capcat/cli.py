@@ -42,6 +42,11 @@ def _print_help() -> None:
 # Entry point
 # ---------------------------------------------------------------------------
 
+def run_app(args: list) -> None:
+    """Programmatic entry point — run capcat with a pre-built argument list."""
+    _dispatch(args)
+
+
 def main() -> None:
     """Main entry point.  Routes to TUI or CLI dispatch."""
     args = sys.argv[1:]
