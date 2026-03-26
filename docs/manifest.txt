@@ -1,5 +1,5 @@
 Capcat Documentation Manifest
-Generated: 2026-03-26 10:17:49 UTC
+Generated: 2026-03-26 11:53:39 UTC
 Success rate: 2/2 tasks
 
 Generated Documentation:
@@ -394,7 +394,8 @@ Generated Documentation:
   - superpowers/specs/2026-03-20-v140-todo-fixes-design.md
   - superpowers/specs/2026-03-23-svg-icon-classification-design.md
   - superpowers/specs/2026-03-25-per-source-article-count-design.md
+  - superpowers/specs/2026-03-26-pdf-ancestor-filter-design.md
   - troubleshooting.md
 
-Total files: 694
+Total files: 695
 Documentation size: 10.4 MB
