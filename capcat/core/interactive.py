@@ -61,6 +61,7 @@ def start_interactive_mode():
     """Starts the interactive user interface."""
     first_run = True
     while True:
+        print_logo()
         with suppress_logging():
             prompt_text = "  What would you like me to do?" if first_run else "  Select an option:"
             action = questionary.select(
@@ -111,6 +112,7 @@ def start_interactive_mode():
 def _handle_manage_sources_flow():
     """Handles the logic for source management submenu."""
     while True:
+        print_logo()
         with suppress_logging():
             action = questionary.select(
                 "  Source Management - Select an option:",
@@ -280,6 +282,7 @@ def _handle_list_sources():
     choices.append(questionary.Choice("Back to Source Management", "back"))
 
     while True:
+        print_logo()
         with suppress_logging():
             selected = questionary.select(
                 "  Browse sources (select to view details):",
@@ -445,6 +448,7 @@ def _handle_test_source():
     source_choices.append(questionary.Separator())
     source_choices.append(questionary.Choice("Back", "back"))
 
+    print_logo()
     with suppress_logging():
         source_id = questionary.select(
             "  Select source to test:",
@@ -513,6 +517,7 @@ def _handle_bundle_flow():
     bundle_choices.append(questionary.Separator())
     bundle_choices.append(questionary.Choice("Back to Main Menu", "back"))
 
+    print_logo()
     with suppress_logging():
         bundle = questionary.select(
             "  Select a news bundle and hit Enter for activation.",
@@ -538,6 +543,7 @@ def _handle_fetch_flow():
     source_choices.append(questionary.Separator())
     source_choices.append(questionary.Choice("Back to Main Menu", "back"))
 
+    print_logo()
     with suppress_logging():
         selected_sources = questionary.checkbox(
             "  Select sources (Space to select, Enter to confirm):",
@@ -563,6 +569,7 @@ def _handle_single_source_flow():
     source_choices.append(questionary.Separator())
     source_choices.append(questionary.Choice("Back to Main Menu", "back"))
 
+    print_logo()
     with suppress_logging():
         source = questionary.select(
             "  Select a source and hit Enter for activation.",
@@ -582,6 +589,7 @@ def _handle_single_source_flow():
 
 def _handle_single_url_flow():
     """Handles the logic for the single URL flow."""
+    print_logo()
     print("  (Use Ctrl+C to go to the Main Menu)")
     with suppress_logging():
         url = questionary.text(
@@ -608,6 +616,7 @@ def _handle_single_url_flow():
 
 def _prompt_for_html(action, selection):
     """Prompts for HTML generation."""
+    print_logo()
     with suppress_logging():
         response = questionary.select(
             "  Generate HTML for web browsing?",
@@ -693,6 +702,7 @@ def _show_completion_screen(generate_html: bool, success: bool) -> None:
         generate_html: Whether HTML generation was requested.
         success: Whether the command completed without errors.
     """
+    print_logo()
     status_label = "Done" if success else "Completed with errors"
     print(f"\n  {status_label}")
 
