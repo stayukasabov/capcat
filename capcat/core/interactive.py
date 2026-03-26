@@ -756,7 +756,7 @@ def _show_completion_screen(generate_html: bool, success: bool) -> None:
     # choice == "menu": return, call stack unwinds to start_interactive_mode() while loop
 
 
-def _find_latest_index_html() -> str | None:
+def _find_latest_index_html() -> "str | None":
     """Find the most recently modified HTML output file.
 
     Checks both batch fetch index pages (News_*/index.html) and single
