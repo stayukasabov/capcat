@@ -2135,8 +2135,7 @@ class ArticleFetcher(ABC):
                 continue
 
         self.logger.info(
-            f"Fallback system downloaded {
-                len(downloaded_images)} additional images"
+            f"Fallback system downloaded {len(downloaded_images)} additional images"
         )
         return downloaded_images
 

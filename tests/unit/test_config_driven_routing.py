@@ -2,11 +2,6 @@
 Verify that config-driven sources (bbc, guardian, ieee) route through the new
 source system, not the legacy _process_article_generic path.
 """
-import importlib.util
-import pathlib
-import sys
-import traceback
-
 import pytest
 from capcat.core.unified_source_processor import UnifiedSourceProcessor
 from capcat.core.source_configs import is_source_configured
@@ -33,27 +28,11 @@ def test_ieee_in_new_system():
         "IEEE must be in new system"
 
 
-def test_hn_source_loads_directly():
-    """Diagnostic: load hn/source.py exactly as _load_custom_source does — surfaces the real error."""
-    import capcat
-    capcat_root = pathlib.Path(capcat.__file__).parent
-    source_file = capcat_root / "sources" / "builtin" / "custom" / "hn" / "source.py"
-    module_name = "sources.custom.hn.source"
-    spec = importlib.util.spec_from_file_location(module_name, source_file)
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[module_name] = module
-    try:
-        spec.loader.exec_module(module)
-    except Exception:
-        pytest.fail(f"hn/source.py failed to import:\n{traceback.format_exc()}")
-
-
 def test_hn_in_new_system():
     """HN must be routed through the new source system."""
     usp = UnifiedSourceProcessor()
-    if not usp._is_source_in_new_system("hn"):
-        available = sorted(usp.new_source_factory.get_available_sources()) if usp.new_source_factory else []
-        pytest.fail(f"HN must be in new system. Sources actually loaded: {available}")
+    assert usp._is_source_in_new_system("hn"), \
+        "HN must be in new system"
 
 
 
