@@ -82,8 +82,8 @@ design, not an oversight.
 
 ### `position_menu_at_bottom` removed
 
-The function definition is deleted from `interactive.py`. It has no remaining
-callers after v1.5.6.
+The function definition (currently at lines 41–68 of `interactive.py`) is deleted
+as part of this implementation. It has no remaining callers after v1.5.6.
 
 ## Constraints
 
