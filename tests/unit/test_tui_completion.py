@@ -54,8 +54,7 @@ def test_completion_screen_called_on_exception():
 def test_completion_screen_exit_choice_calls_sys_exit():
     """Choosing 'exit' in the completion screen must call sys.exit(0)."""
     with patch("questionary.select") as mock_q, \
-         patch("capcat.core.interactive._find_latest_index_html", return_value=None), \
-         patch("capcat.core.interactive.position_menu_at_bottom"):
+         patch("capcat.core.interactive._find_latest_index_html", return_value=None):
         mock_q.return_value.ask.return_value = "exit"
         from capcat.core.interactive import _show_completion_screen
         with pytest.raises(SystemExit) as exc:
@@ -66,8 +65,7 @@ def test_completion_screen_exit_choice_calls_sys_exit():
 def test_completion_screen_menu_choice_returns():
     """Choosing 'Back to Main Menu' must return normally (no sys.exit)."""
     with patch("questionary.select") as mock_q, \
-         patch("capcat.core.interactive._find_latest_index_html", return_value=None), \
-         patch("capcat.core.interactive.position_menu_at_bottom"):
+         patch("capcat.core.interactive._find_latest_index_html", return_value=None):
         mock_q.return_value.ask.return_value = "menu"
         from capcat.core.interactive import _show_completion_screen
         _show_completion_screen(False, True)  # must not raise
