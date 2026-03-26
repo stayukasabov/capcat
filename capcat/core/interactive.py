@@ -637,7 +637,7 @@ def _handle_single_url_flow():
 def _prompt_for_html(action, selection):
     """Prompts for HTML generation."""
     # Position menu at bottom (HTML prompt is short)
-    position_menu_at_bottom(menu_lines=8)
+    position_menu_at_bottom(menu_lines=9)
 
     with suppress_logging():
         response = questionary.select(
@@ -724,7 +724,7 @@ def _show_completion_screen(generate_html: bool, success: bool) -> None:
         generate_html: Whether HTML generation was requested.
         success: Whether the command completed without errors.
     """
-    position_menu_at_bottom(menu_lines=10)
+    position_menu_at_bottom(menu_lines=11)
 
     status_label = "Done" if success else "Completed with errors"
     print(f"\n  {status_label}")
