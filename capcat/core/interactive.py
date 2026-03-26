@@ -354,6 +354,7 @@ def _show_source_detail(source_id, config):
             style=custom_style,
             qmark="",
             pointer="▶",
+            instruction="\n",
         ).ask()
 
     if action == "edit":
