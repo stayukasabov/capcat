@@ -1,5 +1,5 @@
 Capcat Documentation Manifest
-Generated: 2026-03-26 12:36:02 UTC
+Generated: 2026-03-26 20:06:09 UTC
 Success rate: 2/2 tasks
 
 Generated Documentation:
@@ -350,6 +350,8 @@ Generated Documentation:
   - architecture/roadmap.md
   - architecture/system.md
   - css/UTILITY-CLASSES.md
+  - design/TUI/Add-an-empty-row.md
+  - design/TUI/Add-cancel-menu-option.md
   - developer/git-workflow.md
   - developer/guide.md
   - developer/release.md
@@ -399,5 +401,5 @@ Generated Documentation:
   - superpowers/specs/2026-03-26-tui-menu-bottom-blank-row-design.md
   - troubleshooting.md
 
-Total files: 697
-Documentation size: 10.4 MB
+Total files: 720
+Documentation size: 43.9 MB
