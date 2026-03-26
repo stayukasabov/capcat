@@ -266,13 +266,19 @@ class RegistrySourceLister(SourceLister):
     """Lists sources via SourceRegistry — reads the live registry at call time."""
 
     def list_sources(self) -> List[tuple]:
-        """Return ``[(source_id, display_name)]`` for every registered source."""
+        """Return ``[(source_id, display_name)]`` for every user-removable source.
+
+        Builtin sources (shipped with the application) are excluded — they
+        cannot be removed and would silently no-op if the removal were attempted.
+        """
         from capcat.core.source_system.source_registry import SourceRegistry
 
         registry = SourceRegistry()
         registry.discover_sources()
         result = []
         for sid in sorted(registry.get_available_sources()):
+            if registry.is_builtin_source(sid):
+                continue
             cfg = registry.get_source_config(sid)
             name = cfg.display_name if cfg else sid
             result.append((sid, name))

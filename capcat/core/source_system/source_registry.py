@@ -49,6 +49,7 @@ class SourceRegistry:
         self._sources: Dict[str, Type[BaseSource]] = {}
         self._configs: Dict[str, SourceConfig] = {}
         self._source_instances: Dict[str, BaseSource] = {}
+        self._builtin_source_ids: set = set()
         self.validation_engine = ValidationEngine()
 
         self._project_root = Path(project_root) if project_root else None
@@ -104,6 +105,7 @@ class SourceRegistry:
             self._sources.clear()
             self._configs.clear()
             self._source_instances.clear()
+            self._builtin_source_ids.clear()
 
             # 1. Discover builtin sources (from installed package)
             if self._builtin_path and self._builtin_path.exists():
@@ -112,6 +114,8 @@ class SourceRegistry:
                 self._discover_config_driven_sources()
                 self._discover_custom_sources()
                 self.sources_dir = saved_sources_dir
+                # Record every ID found from the builtin path
+                self._builtin_source_ids.update(self._configs.keys())
 
             # 2. Discover user sources (overrides builtins on conflict)
             if self._user_path and self._user_path.exists():
@@ -396,6 +400,15 @@ class SourceRegistry:
     def get_available_sources(self) -> List[str]:
         """Get list of available source names."""
         return list(self._configs.keys())
+
+    def is_builtin_source(self, source_id: str) -> bool:
+        """Return True if *source_id* was discovered from the builtin package path.
+
+        Builtin sources cannot be removed via the TUI — they are shipped with
+        the application.  User-added sources (or user overrides of builtins)
+        are not in this set and are safe to remove.
+        """
+        return source_id in self._builtin_source_ids
 
     def get_sources_by_category(self, category: str) -> List[str]:
         """Get sources by category."""

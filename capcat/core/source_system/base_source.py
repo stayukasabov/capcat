@@ -176,38 +176,24 @@ class BaseSource(ABC):
         pass
 
     def fetch_comments(
-        self, article: Article, output_dir: str, progress_callback=None
+        self,
+        comment_url: str,
+        article_title: str,
+        article_folder_path: str,
     ) -> bool:
         """
         Fetch and save article comments (if supported).
 
-        Args:
-            article: Article to fetch comments for
-            output_dir: Directory to save comments
-            progress_callback: Optional progress callback function
-
-        Returns:
-            True if comments were fetched successfully, False otherwise
-        """
-        if not self.config.supports_comments:
-            return False
-        return self._fetch_comments_impl(
-            article, output_dir, progress_callback
-        )
-
-    def _fetch_comments_impl(
-        self, article: Article, output_dir: str, progress_callback=None
-    ) -> bool:
-        """
-        Implementation of comment fetching (override in subclasses that support comments).
+        Override in sources that support comments. The default implementation
+        returns False (no comments fetched).
 
         Args:
-            article: Article to fetch comments for
-            output_dir: Directory to save comments
-            progress_callback: Optional progress callback function
+            comment_url: URL to the comments page for this article.
+            article_title: Title of the article (used for logging and filenames).
+            article_folder_path: Path to the article's output folder.
 
         Returns:
-            True if comments were fetched successfully, False otherwise
+            True if comments were saved, False otherwise.
         """
         return False
 
