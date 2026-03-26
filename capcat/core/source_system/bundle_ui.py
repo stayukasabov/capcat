@@ -47,6 +47,8 @@ class BundleUI:
             questionary.Choice("Back to Source Management", "back"),
         ]
 
+        from capcat.core.interactive import print_logo
+        print_logo()
         return questionary.select(
             "  Bundle Management - Select an option:",
             choices=choices,
@@ -152,6 +154,8 @@ class BundleUI:
             choices.append(questionary.Separator())
             choices.append(questionary.Choice("Cancel", "cancel"))
 
+        from capcat.core.interactive import print_logo
+        print_logo()
         selected = questionary.select(
             message,
             choices=choices,
@@ -224,6 +228,8 @@ class BundleUI:
                     checked=source_id in current_selections
                 ))
 
+        from capcat.core.interactive import print_logo
+        print_logo()
         selected = questionary.checkbox(
             message,
             choices=choices,
@@ -242,6 +248,8 @@ class BundleUI:
         Returns:
             'copy' or 'move' or None if cancelled
         """
+        from capcat.core.interactive import print_logo
+        print_logo()
         return questionary.select(
             "  Copy or Move?",
             choices=[
