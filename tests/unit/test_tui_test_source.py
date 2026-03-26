@@ -16,9 +16,8 @@ def test_handle_test_source_does_not_crash():
             "capcat.core.interactive.get_available_sources",
             return_value={"bbc": "BBC News"},
         ):
-            with patch("capcat.core.interactive.position_menu_at_bottom"):
-                from capcat.core.interactive import _handle_test_source
-                _handle_test_source()  # must not raise
+            from capcat.core.interactive import _handle_test_source
+            _handle_test_source()  # must not raise
 
 
 def test_handle_test_source_none_selection_does_not_crash():
@@ -32,9 +31,8 @@ def test_handle_test_source_none_selection_does_not_crash():
             "capcat.core.interactive.get_available_sources",
             return_value={"bbc": "BBC News"},
         ):
-            with patch("capcat.core.interactive.position_menu_at_bottom"):
-                from capcat.core.interactive import _handle_test_source
-                _handle_test_source()  # must not raise
+            from capcat.core.interactive import _handle_test_source
+            _handle_test_source()  # must not raise
 
 
 def test_handle_test_source_valid_source_does_not_crash():
@@ -53,7 +51,6 @@ def test_handle_test_source_valid_source_does_not_crash():
             "capcat.core.interactive.get_available_sources",
             return_value={"bbc": "BBC News"},
         ):
-            with patch("capcat.core.interactive.position_menu_at_bottom"):
-                with patch("builtins.input", return_value=""):
-                    from capcat.core.interactive import _handle_test_source
-                    _handle_test_source()  # must not raise (exception is caught internally)
+            with patch("builtins.input", return_value=""):
+                from capcat.core.interactive import _handle_test_source
+                _handle_test_source()  # must not raise (exception is caught internally)

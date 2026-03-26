@@ -6,7 +6,6 @@ Interactive mode for Capcat.
 import contextlib
 import logging
 import os
-import shutil
 import sys
 
 from prompt_toolkit.styles import Style
@@ -26,6 +25,26 @@ custom_style = Style([
 ])
 
 
+LOGO = (
+    "   █████████                                          █████   \n"
+    "  ███░░░░░███                                        ░░███    \n"
+    " ███     ░░░   ██████   ████████   ██████   ██████   ███████  \n"
+    "░███          ░░░░░███ ░░███░░███ ███░░███ ░░░░░███ ░░░███░   \n"
+    "░███           ███████  ░███ ░███░███ ░░░   ███████   ░███    \n"
+    "░░███     ███ ███░░███  ░███ ░███░███  ███ ███░░███   ░███ ███\n"
+    " ░░█████████ ░░████████ ░███████ ░░██████ ░░████████  ░░█████ \n"
+    "  ░░░░░░░░░   ░░░░░░░░  ░███░░░   ░░░░░░   ░░░░░░░░    ░░░░░  \n"
+    "                        ░███                                  \n"
+    "                        █████                                 \n"
+    "                       ░░░░░                                  "
+)
+
+
+def print_logo():
+    print('\033[2J\033[H', end='')
+    print('\033[38;5;202m' + LOGO + '\033[0m')
+    print()
+
 
 @contextlib.contextmanager
 def suppress_logging():
@@ -37,35 +56,6 @@ def suppress_logging():
         yield
     finally:
         logger.setLevel(original_level)
-
-def position_menu_at_bottom(menu_lines=10):
-    """
-    Position cursor for bottom-aligned menu display.
-
-    Args:
-        menu_lines: Number of lines the menu will occupy (default: 10)
-    """
-    try:
-        terminal_size = shutil.get_terminal_size()
-        terminal_height = terminal_size.lines
-
-        # Clear screen
-        print('\033[2J', end='')
-
-        # ASCII art logo
-        logo = "\033[38;5;202m\n\n       ____\n     / ____|                     _\n    | |     __ _ _ __   ___ __ _| |_\n    | |    / _  |  _ \\ / __/ _  | __|\n    | |___| (_| | |_) | (_| (_| | |_\n     \\_____\\__,_|  __/ \\___\\__,_|\\__|\n                | |\n                |_|\033[0m\n"
-
-        # Calculate padding needed to push menu to bottom
-        # Reserve space for logo (8 lines) + menu lines plus some padding
-        logo_lines = 8
-        padding_lines = max(0, terminal_height - menu_lines - logo_lines - 1)
-
-        # Move cursor to home, print logo, then add padding
-        print('\033[H' + logo + '\n' * padding_lines, end='')
-
-    except Exception:
-        # Fallback to standard clear if terminal size detection fails
-        print('\033[2J\033[H', end='')
 
 def start_interactive_mode():
     """Starts the interactive user interface."""
