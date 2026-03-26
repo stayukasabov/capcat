@@ -55,7 +55,7 @@ def print_logo():
 ### Call sites
 
 `print_logo()` is called immediately before every `questionary.select` /
-`questionary.checkbox` prompt. Eleven call sites:
+`questionary.checkbox` prompt. Fourteen call sites:
 
 | Function | File |
 |---|---|
@@ -70,6 +70,15 @@ def print_logo():
 | `_prompt_for_html` | `interactive.py` |
 | `_show_completion_screen` | `interactive.py` |
 | `show_bundle_menu` | `bundle_ui.py` |
+| `prompt_select_bundle` | `bundle_ui.py` |
+| `prompt_select_sources` | `bundle_ui.py` |
+| `prompt_copy_or_move` | `bundle_ui.py` |
+
+**Intentional exclusion:** `_show_source_detail` in `interactive.py` contains a
+`questionary.select` call but does NOT get `print_logo()`. This screen renders
+inline immediately after a block of printed source detail fields; clearing the
+screen would wipe the detail output the user just read. This exclusion is by
+design, not an oversight.
 
 ### `position_menu_at_bottom` removed
 
@@ -80,9 +89,7 @@ callers after v1.5.6.
 
 - No `pyfiglet` runtime dependency — string is hardcoded
 - No `menu_lines` math — not needed with inline render
-- `_show_source_detail` mini-menu: no `print_logo()` call — this screen renders
-  inline after a variable-length detail block; adding a clear+logo would wipe the
-  detail output the user just read
+- `_show_source_detail` mini-menu: intentionally excluded — see call sites table above
 - Visual-only change — no fetch, source, or bundle logic touched
 
 ## Testing
