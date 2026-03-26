@@ -89,7 +89,7 @@ def start_interactive_mode():
                 style=custom_style,
                 qmark="",
                 pointer="▶",
-                instruction="\n   (Use arrow keys to navigate)",
+                instruction="\n   (Use arrow keys to navigate)\n",
             ).ask()
 
         first_run = False
@@ -140,7 +140,7 @@ def _handle_manage_sources_flow():
                 style=custom_style,
                 qmark="",
                 pointer="▶",
-                instruction="\n   (Use arrow keys to navigate)",
+                instruction="\n   (Use arrow keys to navigate)\n",
             ).ask()
 
         if not action or action == 'back':
@@ -302,7 +302,7 @@ def _handle_list_sources():
                 style=custom_style,
                 qmark="",
                 pointer="▶",
-                instruction="\n   (Use arrow keys, Enter to view details)",
+                instruction="\n   (Use arrow keys, Enter to view details)\n",
             ).ask()
 
         if not selected or selected == 'back':
@@ -467,7 +467,7 @@ def _handle_test_source():
             style=custom_style,
             qmark="",
             pointer="▶",
-            instruction="\n   (Use arrow keys to navigate)",
+            instruction="\n   (Use arrow keys to navigate)\n",
         ).ask()
 
     if not source_id or source_id == 'back':
@@ -538,7 +538,7 @@ def _handle_bundle_flow():
             style=custom_style,
             qmark="",
             pointer="▶",
-            instruction="\n   (Use arrow keys to navigate)",
+            instruction="\n   (Use arrow keys to navigate)\n",
         ).ask()
 
     if bundle is None or bundle == 'back':
@@ -566,7 +566,7 @@ def _handle_fetch_flow():
             style=custom_style,
             qmark="",
             pointer="▶",
-            instruction="\n   (Use Space to select multiple sources, Enter to confirm)",
+            instruction="\n   (Use Space to select multiple sources, Enter to confirm)\n",
         ).ask()
 
     if selected_sources is None or 'back' in selected_sources:
@@ -594,7 +594,7 @@ def _handle_single_source_flow():
             style=custom_style,
             qmark="",
             pointer="▶",
-            instruction="\n   (Use arrow keys to navigate)",
+            instruction="\n   (Use arrow keys to navigate)\n",
         ).ask()
 
     if source is None or source == 'back':
@@ -650,7 +650,7 @@ def _prompt_for_html(action, selection):
             style=custom_style,
             qmark="",
             pointer="▶",
-            instruction="\n   (Use arrow keys to navigate)",
+            instruction="\n   (Use arrow keys to navigate)\n",
         ).ask()
 
     if response is None or response == 'back':
@@ -747,7 +747,7 @@ def _show_completion_screen(generate_html: bool, success: bool) -> None:
             style=custom_style,
             qmark="",
             pointer="▶",
-            instruction="\n   (Use arrow keys to navigate)",
+            instruction="\n   (Use arrow keys to navigate)\n",
         ).ask()
 
     if not choice or choice == "exit":
