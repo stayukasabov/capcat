@@ -263,7 +263,7 @@ class BundleUI:
             bundle_info: Bundle information dictionary
         """
         print("\n" + "─" * 70)
-        print(f"\033[38;5;202m  Bundle Details\033[0m")
+        print("\033[38;5;202m  Bundle Details\033[0m")
         print("─" * 70)
 
         print(f"\n  \033[1mID:\033[0m             {bundle_info['bundle_id']}")
@@ -271,12 +271,12 @@ class BundleUI:
         print(f"  \033[1mTotal Sources:\033[0m  {bundle_info['total_sources']}")
 
         if bundle_info.get('category_distribution'):
-            print(f"\n  \033[1mCategory Distribution:\033[0m")
+            print("\n  \033[1mCategory Distribution:\033[0m")
             for category, count in sorted(bundle_info['category_distribution'].items()):
                 print(f"    {category:15} {count} sources")
 
         if bundle_info.get('sources'):
-            print(f"\n  \033[1mSources:\033[0m")
+            print("\n  \033[1mSources:\033[0m")
             for source_id in sorted(bundle_info['sources']):
                 print(f"    • {source_id}")
 

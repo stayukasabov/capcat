@@ -12,7 +12,6 @@ import threading
 import time
 from abc import ABC, abstractmethod
 from concurrent.futures import TimeoutError as FutureTimeoutError
-from contextlib import contextmanager
 from typing import Any, Callable, Dict, List, Optional, Tuple
 from urllib.parse import urljoin, urlparse
 
@@ -32,7 +31,7 @@ from .formatter import html_to_markdown
 from .logging_config import get_logger
 from .rate_limiter import acquire_rate_limit
 from .retry import network_retry
-from .storage_manager import article_md_filename, comments_md_filename
+from .storage_manager import article_md_filename
 from .unified_media_processor import UnifiedMediaProcessor
 from .utils import sanitize_filename
 from .timeout_config import get_timeout_for_source, record_response_time
@@ -505,7 +504,7 @@ class ArticleFetcher(ABC):
 
                 # Create placeholder markdown with specific title
                 md_content = (
-                    f"## This is a placeholder for your downloaded file\n\n"
+                    "## This is a placeholder for your downloaded file\n\n"
                 )
                 md_content += f"**Source URL:** [{url}]({url})\n\n"
                 md_content += (
@@ -515,8 +514,8 @@ class ArticleFetcher(ABC):
                 )
                 md_content += "---\n\n"
                 md_content += (
-                    f"The PDF file has been downloaded and is available "
-                    f"in the files folder.\n\n"
+                    "The PDF file has been downloaded and is available "
+                    "in the files folder.\n\n"
                 )
 
                 # Create filename for article content
@@ -776,7 +775,7 @@ class ArticleFetcher(ABC):
             )
             if should_skip:
                 # Direct PDF URL skip → success (user choice) but no content
-                self.logger.info(f"✓ User skipped large PDF - stopping process")
+                self.logger.info("✓ User skipped large PDF - stopping process")
                 return True, None, None
 
         # Report initial progress
@@ -1792,7 +1791,6 @@ class ArticleFetcher(ABC):
         )
 
         # Second pass: Batch process with concurrency and smart retries
-        import time
         from concurrent.futures import ThreadPoolExecutor, as_completed
 
         config = get_config()
@@ -2549,7 +2547,7 @@ class ArticleFetcher(ABC):
             pdf_size_mb = len(pdf_content) / BYTES_TO_MB
 
             markdown_content = f"# {title}\n\n"
-            markdown_content += f"## This is a placeholder for your downloaded PDF file\n\n"
+            markdown_content += "## This is a placeholder for your downloaded PDF file\n\n"
             markdown_content += f"**Source URL:** [{url}]({url})\n\n"
             markdown_content += f"**Downloaded file:** [{original_filename}]({original_filename}) ({pdf_size_mb:.2f} MB)\n"
 
@@ -2666,37 +2664,37 @@ class ArticleFetcher(ABC):
 
             # Build error article content
             article_content = f"# {title}\n\n"
-            article_content += f"## Cannot Fetch Article\n\n"
+            article_content += "## Cannot Fetch Article\n\n"
             article_content += f"**Error:** {error_category}\n\n"
             article_content += f"**Source URL:** [{url}]({url})\n\n"
             article_content += "---\n\n"
-            article_content += f"### Error Details\n\n"
+            article_content += "### Error Details\n\n"
             article_content += f"```\n{error_details}\n```\n\n"
-            article_content += f"### Recommendation\n\n"
+            article_content += "### Recommendation\n\n"
             article_content += f"{recommendation}\n\n"
 
             if rss_feed_url:
-                article_content += f"### Alternative Access\n\n"
+                article_content += "### Alternative Access\n\n"
                 article_content += (
-                    f"An RSS/Atom feed was discovered for this "
-                    f"website:\n\n"
+                    "An RSS/Atom feed was discovered for this "
+                    "website:\n\n"
                 )
                 article_content += (
                     f"**Feed URL:** [{rss_feed_url}]({rss_feed_url})\n\n"
                 )
                 article_content += (
-                    f"Consider configuring this source to use the RSS feed "
-                    f"instead of direct HTTP access.\n\n"
+                    "Consider configuring this source to use the RSS feed "
+                    "instead of direct HTTP access.\n\n"
                 )
 
             article_content += "---\n\n"
             article_content += (
-                f"**Note:** This is an automatically generated error "
-                f"message. "
+                "**Note:** This is an automatically generated error "
+                "message. "
             )
             article_content += (
-                f"Visit the source URL above to read the original "
-                f"article.\n"
+                "Visit the source URL above to read the original "
+                "article.\n"
             )
 
             # Save error article
@@ -2901,7 +2899,7 @@ class NewsSourceArticleFetcher(ArticleFetcher):
         # Fallback to article body if no selectors worked
         if not content_html:
             self.logger.debug(
-                f"No content found with configured selectors, using fallback"
+                "No content found with configured selectors, using fallback"
             )
             article_body = (
                 soup.find("article")

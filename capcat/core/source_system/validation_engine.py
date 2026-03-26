@@ -6,7 +6,7 @@ Provides comprehensive validation rules and automated testing.
 
 import re
 import time
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Dict, List
 from urllib.parse import urlparse
 
 import requests
@@ -468,7 +468,7 @@ class ValidationEngine:
                 results.append(
                     ValidationResult(
                         False,
-                        f"Access forbidden (403). Site may block automated requests",
+                        "Access forbidden (403). Site may block automated requests",
                         "warning",
                         "network",
                     )

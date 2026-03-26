@@ -6,7 +6,6 @@ Provides source-specific timeouts and adaptive learning from response times.
 
 import statistics
 import threading
-import time
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 

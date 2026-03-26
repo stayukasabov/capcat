@@ -8,8 +8,6 @@ independently from the main article fetching logic.
 
 import os
 from pathlib import Path
-from typing import Optional, Tuple
-from urllib.parse import urlparse
 
 from .logging_config import get_logger
 from .utils import sanitize_filename

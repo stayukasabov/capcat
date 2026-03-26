@@ -7,7 +7,6 @@ from typing import List, Optional
 import sys
 from prompt_toolkit.styles import Style
 
-from capcat.core.source_system.add_source_command import UserInterface
 
 # Custom style matching Capcat catch menu
 custom_style = Style([

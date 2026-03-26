@@ -5,9 +5,7 @@ Enhanced command logging for CLI debugging and audit trail.
 
 import time
 import json
-import sys
 from typing import Dict, Any, List, Optional
-from pathlib import Path
 from capcat.core.logging_config import get_logger
 
 

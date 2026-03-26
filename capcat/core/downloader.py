@@ -13,7 +13,7 @@ import requests
 from .config import get_config
 from .exceptions import FileSystemError, NetworkError
 from .logging_config import get_logger
-from .retry import fast_media_retry, network_retry
+from .retry import fast_media_retry
 
 # Create a session for connection pooling
 config = get_config()

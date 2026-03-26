@@ -5,10 +5,9 @@ Handles the --update flag logic for checking existing content and prompting user
 """
 
 import os
-import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import List, Tuple
 
 from capcat.core.logging_config import get_logger
 from capcat.core.utils import sanitize_filename
@@ -241,8 +240,8 @@ class UpdateManager:
         try:
             response = (
                 input(
-                    f"\nYou don't have this article downloaded yet.\n"
-                    f"Do you want to download it? (Yes/No): "
+                    "\nYou don't have this article downloaded yet.\n"
+                    "Do you want to download it? (Yes/No): "
                 )
                 .strip()
                 .lower()
@@ -307,13 +306,13 @@ class UpdateManager:
             existing_str = ", ".join(existing_names)
             missing_str = ", ".join(missing_sources)
 
-            print(f"\nUpdate Status:")
+            print("\nUpdate Status:")
             print(f"✅ Existing: {existing_str}")
             print(f"❌ Missing: {missing_str}")
 
             response = (
                 input(
-                    f"\nDo you want to update existing sources and download missing ones? (Yes/No): "
+                    "\nDo you want to update existing sources and download missing ones? (Yes/No): "
                 )
                 .strip()
                 .lower()
@@ -366,7 +365,7 @@ class UpdateManager:
 
             response = (
                 input(
-                    f"\nDo you want to update existing and download missing sources? (Yes/No): "
+                    "\nDo you want to update existing and download missing sources? (Yes/No): "
                 )
                 .strip()
                 .lower()

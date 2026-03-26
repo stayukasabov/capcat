@@ -11,7 +11,10 @@ import os
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed, TimeoutError
 from pathlib import Path
-from typing import Callable, List, Optional, Tuple
+from typing import TYPE_CHECKING, Optional
+
+if TYPE_CHECKING:
+    from capcat.core.source_system.base_source import SourceConfig
 
 from capcat.core.config import get_config
 from capcat.core.exceptions import NetworkError

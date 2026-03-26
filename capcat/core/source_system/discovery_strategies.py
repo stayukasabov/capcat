@@ -229,7 +229,7 @@ class RSSDiscoveryStrategy(DiscoveryStrategy):
 
         # If still no feed items, raise error
         if not feed_items:
-            error_msg = f"Could not fetch RSS feed from any configured URL"
+            error_msg = "Could not fetch RSS feed from any configured URL"
             if last_exception:
                 error_msg += f". Last error: {last_exception}"
             raise ArticleDiscoveryError(error_msg, source_code)

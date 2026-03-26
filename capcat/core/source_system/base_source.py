@@ -368,7 +368,6 @@ class BaseSource(ABC):
             >>> if articles is None:
             ...     print("Source skipped after failures")
         """
-        import sys
         first_failure = True
 
         # Show immediate feedback so user knows something is happening

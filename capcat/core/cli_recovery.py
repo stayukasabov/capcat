@@ -4,7 +4,7 @@ CLI error recovery and user guidance system.
 """
 
 import sys
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional
 from capcat.core.cli_validation import CLIValidator
 
 
@@ -67,7 +67,7 @@ class CLIRecovery:
         corrected = self._auto_correct_command(original_command)
 
         if corrected and corrected != original_command:
-            print(f"\nSuggested correction:", file=sys.stderr)
+            print("\nSuggested correction:", file=sys.stderr)
             print(f"  {corrected}", file=sys.stderr)
 
         print("\nQuick reference for common flags:", file=sys.stderr)

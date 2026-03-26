@@ -18,9 +18,6 @@ from bs4 import BeautifulSoup
 from capcat.core.article_fetcher import get_global_update_mode
 from capcat.core.storage_manager import comments_md_filename
 from capcat.core.article_fetcher import NewsSourceArticleFetcher
-from capcat.core.network_resilience import (
-    get_retry_executor,
-)
 from capcat.core.source_system.base_source import (
     Article,
     ArticleDiscoveryError,
@@ -70,7 +67,7 @@ class LbSource(BaseSource):
 
         # All methods failed - raise exception for main retry logic
         raise ArticleDiscoveryError(
-            f"Failed to discover articles from all methods",
+            "Failed to discover articles from all methods",
             source_name=self.config.name
         )
 

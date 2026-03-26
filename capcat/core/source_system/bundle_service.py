@@ -3,7 +3,6 @@ Service layer for bundle management.
 Orchestrates BundleManager, BundleValidator, and BundleUI.
 """
 
-from typing import Optional
 from pathlib import Path
 
 from capcat.core.source_system.bundle_manager import BundleManager

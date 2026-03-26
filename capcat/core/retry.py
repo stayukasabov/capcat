@@ -7,10 +7,10 @@ Provides robust error recovery for network and other transient failures.
 import functools
 import random
 import time
-from typing import Any, Callable, Tuple, Type, Union
+from typing import Any, Callable, Tuple, Type
 
 from .config import get_config
-from .exceptions import NetworkError, CapcatError
+from .exceptions import NetworkError
 from .logging_config import get_logger
 
 

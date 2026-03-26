@@ -8,7 +8,6 @@ import os
 import re
 from typing import List, Optional, Tuple
 
-import requests
 from bs4 import BeautifulSoup
 
 from capcat.core.article_fetcher import NewsSourceArticleFetcher

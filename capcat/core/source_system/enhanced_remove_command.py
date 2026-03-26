@@ -20,12 +20,10 @@ from capcat.core.source_system.remove_source_command import (
 )
 from capcat.core.source_system.source_backup_manager import (
     SourceBackupManager,
-    BackupMetadata,
-    BackupStrategy
+    BackupMetadata
 )
 from capcat.core.source_system.source_analytics import (
     SourceAnalytics,
-    SourceUsageStats,
     AnalyticsReporter
 )
 
@@ -393,7 +391,7 @@ class EnhancedRemoveCommand:
 
         if output_directories:
             total_size = self._calculate_directory_size(output_directories)
-            self._ui.show_info(f"\n  Output archives:")
+            self._ui.show_info("\n  Output archives:")
             self._ui.show_info(f"    - Delete {len(output_directories)} directories ({self._format_size(total_size)})")
             for directory in output_directories[:5]:  # Show first 5
                 self._ui.show_info(f"      • {directory.name}")
@@ -567,7 +565,7 @@ class EnhancedRemoveCommand:
             return True
 
         # Show what was found
-        self._ui.show_info(f"\n--- Output Archives Found ---")
+        self._ui.show_info("\n--- Output Archives Found ---")
         self._ui.show_info(
             f"Found {len(directories)} output archive(s) totaling {self._format_size(total_size)}"
         )

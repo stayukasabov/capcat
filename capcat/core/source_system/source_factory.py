@@ -4,12 +4,10 @@ Source factory for creating and managing news source instances.
 Provides a high-level interface for source instantiation and management.
 """
 
-import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-import requests
 
 from ..logging_config import get_logger
 from ..session_pool import get_global_session

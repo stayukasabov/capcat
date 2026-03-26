@@ -8,7 +8,6 @@ import sys
 from prompt_toolkit.styles import Style
 
 from capcat.core.source_system.remove_source_command import (
-    RemovalUserInterface,
     SourceRemovalInfo
 )
 

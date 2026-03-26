@@ -6,7 +6,7 @@ Tracks source usage patterns for informed removal decisions.
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime
 import json
 
 from capcat.core.logging_config import get_logger
