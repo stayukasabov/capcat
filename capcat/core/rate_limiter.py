@@ -6,7 +6,7 @@ Implements token bucket algorithm for smooth request throttling.
 
 import threading
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, Optional
 
 from .logging_config import get_logger

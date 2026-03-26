@@ -5,12 +5,10 @@ Creates self-contained HTML files from markdown content with embedded CSS and Ja
 Follows minimalist design principles with dark/light theme support using SVG icon toggle.
 """
 
-import os
 import re
-from datetime import datetime
 from pathlib import Path
 from string import Template
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List
 
 import yaml
 import markdown
@@ -1361,7 +1359,7 @@ class ArticleHTMLGenerator:
     def _generate_global_index_navigation(self) -> str:
         """Generate global index navigation HTML."""
 
-        return f"""<div class="navigation-container">
+        return """<div class="navigation-container">
             <div class="index-nav">
                 <a href="../index.html" class="global-index-link" title="Return to main news archive index">
                     <span>Back to Global Index</span>
@@ -1559,7 +1557,6 @@ class ArticleHTMLGenerator:
     ) -> str:
         """Remove duplicate H1 title from article content if it matches header title."""
         import re
-        from html import escape
 
         # Clean the article title to match what might be in the content
         # Handle both the cleaned version and original version
@@ -1971,7 +1968,6 @@ class ArticleHTMLGenerator:
         Converts "InfoQ 11-09-2025" to "InfoQ 11 September 2025"
         Only affects the date portion, leaves source names unchanged.
         """
-        import datetime
 
         # Month names mapping
         months = {

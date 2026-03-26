@@ -4,12 +4,10 @@ Logging configuration for Capcat.
 Provides centralized logging setup with configurable levels and optional file output.
 """
 
-import json
 import logging
 import sys
-from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Optional
 
 
 # Global flag to suppress console logging during progress animations

@@ -4,7 +4,7 @@ Enhanced CLI validation and error handling for better user experience.
 """
 
 import sys
-from typing import List, Dict, Any, Optional
+from typing import List, Any, Optional
 from difflib import get_close_matches
 
 

@@ -4,7 +4,6 @@ Simple Template Renderer for Capcat
 Replaces {{placeholder}} variables with actual values from configuration.
 """
 
-import os
 import re
 from pathlib import Path
 from typing import Any, Dict

@@ -3,11 +3,9 @@ Professional implementation of the add-source command using clean architecture p
 Separates concerns through dependency injection and follows SOLID principles.
 """
 
-from abc import ABC, abstractmethod
-from typing import Dict, Any, List, Optional, Protocol
+from typing import Any, List, Optional, Protocol
 from dataclasses import dataclass
 from pathlib import Path
-import sys
 
 from capcat.core.exceptions import CapcatError, ValidationError
 from capcat.core.logging_config import get_logger

@@ -59,7 +59,7 @@ class EnhancedArgumentParser(argparse.ArgumentParser):
 
             suggestion = self.validator.suggest_correct_command(self._original_command)
             if suggestion:
-                print(f"\nDid you mean:", file=sys.stderr)
+                print("\nDid you mean:", file=sys.stderr)
                 print(f"  {suggestion}", file=sys.stderr)
 
         print("\nCommon flag formats:", file=sys.stderr)
@@ -69,7 +69,7 @@ class EnhancedArgumentParser(argparse.ArgumentParser):
 
     def _handle_parsing_error(self, args: List[str], error: SystemExit):
         """Handle parsing errors with enhanced messages."""
-        print(f"\n❌ Command parsing failed", file=sys.stderr)
+        print("\n❌ Command parsing failed", file=sys.stderr)
 
         # Check for flag issues
         issues = self.validator.detect_flag_typos(' '.join(args))
@@ -80,7 +80,7 @@ class EnhancedArgumentParser(argparse.ArgumentParser):
 
             suggestion = self.validator.suggest_correct_command(self._original_command)
             if suggestion:
-                print(f"\nSuggested fix:", file=sys.stderr)
+                print("\nSuggested fix:", file=sys.stderr)
                 print(f"  {suggestion}", file=sys.stderr)
 
     def error(self, message):
@@ -98,10 +98,10 @@ class EnhancedArgumentParser(argparse.ArgumentParser):
 
                     suggestion = self.validator.suggest_correct_command(self._original_command)
                     if suggestion:
-                        print(f"\nDid you mean:", file=sys.stderr)
+                        print("\nDid you mean:", file=sys.stderr)
                         print(f"  {suggestion}", file=sys.stderr)
 
-            print(f"\nUse 'capcat --help' or 'capcat <command> --help' for usage information", file=sys.stderr)
+            print("\nUse 'capcat --help' or 'capcat <command> --help' for usage information", file=sys.stderr)
             sys.exit(2)
         else:
             # Fall back to standard error handling

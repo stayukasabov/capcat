@@ -15,7 +15,6 @@ custom_style = Style([
     ('answer', 'fg:#d75f00'),            # Orange answer
     ('instruction', ''),                  # Instruction text
 ])
-import subprocess
 import sys
 import os
 import logging
@@ -315,7 +314,7 @@ def _handle_list_sources():
 def _show_source_detail(source_id, config):
     """Display detailed information about a source and offer to edit article_count."""
     print("\n" + "─" * 70)
-    print(f"\033[38;5;202m  Source Details\033[0m")
+    print("\033[38;5;202m  Source Details\033[0m")
     print("─" * 70)
 
     if not config:

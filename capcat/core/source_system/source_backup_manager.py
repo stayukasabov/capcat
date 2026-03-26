@@ -4,7 +4,7 @@ Enables undo capability and safe removal operations.
 """
 
 from pathlib import Path
-from typing import List, Optional, Dict, Any
+from typing import List, Optional
 from dataclasses import dataclass
 from datetime import datetime
 import json

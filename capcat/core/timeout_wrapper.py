@@ -6,7 +6,6 @@ Provides robust timeout handling for network operations that may hang.
 
 import queue
 import threading
-import time
 from typing import Any, Callable, Optional
 
 from .logging_config import get_logger

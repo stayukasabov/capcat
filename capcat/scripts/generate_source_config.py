@@ -323,7 +323,7 @@ def main():
         print("=" * 70)
         print(f"1. Review the config: cat {output_path}")
         print(f"2. Test the source: ./capcat fetch {config['source_id']} --count 5")
-        print(f"3. Add to bundles if needed: edit sources/active/bundles.yml")
+        print("3. Add to bundles if needed: edit sources/active/bundles.yml")
         print()
 
     except KeyboardInterrupt:

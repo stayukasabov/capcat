@@ -9,7 +9,7 @@ ArticleFetcher class to improve maintainability and testability.
 import os
 import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import List, Tuple, Optional, Dict, Any
+from typing import List, Tuple, Dict
 from urllib.parse import urljoin, urlparse
 
 import requests
@@ -462,7 +462,6 @@ class MediaProcessor:
             >>> print(result)
             ![image](images/img.jpg)
         """
-        import re
 
         escaped_url = re.escape(original_url)
         prefix = "!" if is_image else ""
@@ -662,7 +661,6 @@ class MediaProcessor:
             >>> print(result)
             [Photo](http://fail.com/img.jpg) *(image unavailable)*
         """
-        import re
 
         # Create fallback text
         if link_type == "image":
@@ -766,7 +764,6 @@ class MediaProcessor:
             >>> "![Image]" not in result
             True
         """
-        import re
 
         # Escape special regex characters in the image source
         escaped_src = re.escape(image_src)
