@@ -81,6 +81,27 @@ or any other mechanism that satisfies this contract.
 
 #### Methods
 
+##### get_display_name
+
+```python
+def get_display_name(self, suggested: str) -> str
+```
+
+Prompt the user to confirm or override the suggested display name.
+
+Args:
+    suggested: Feed title extracted from the RSS feed.
+
+Returns:
+    The confirmed or overridden display name string.
+
+**Parameters:**
+
+- `self`
+- `suggested` (str)
+
+**Returns:** str
+
 ##### get_source_id
 
 ```python
@@ -122,6 +143,23 @@ Returns:
 - `categories` (List[str])
 
 **Returns:** str
+
+##### get_article_count
+
+```python
+def get_article_count(self) -> int
+```
+
+Prompt user for articles per run. Default: 30.
+
+Returns:
+    Positive integer article count.
+
+**Parameters:**
+
+- `self`
+
+**Returns:** int
 
 ##### confirm_bundle_addition
 
@@ -683,7 +721,7 @@ Returns:
 
 ### SubprocessSourceTester
 
-Source tester using subprocess calls.
+Lightweight RSS connectivity tester with live progress display.
 
 #### Methods
 
@@ -693,19 +731,22 @@ Source tester using subprocess calls.
 def test_source(self, source_id: str, count: int = 1) -> bool
 ```
 
-Run a test fetch via the ``./capcat fetch`` subprocess.
+Test a source by fetching its RSS feed and counting articles.
 
-Invokes ``./capcat fetch <source_id> --count <count>`` and treats
-a zero exit code as success.
+Replaces the old subprocess approach: no full article download,
+no output files created, no 60-second wait. Just an RSS HEAD +
+GET + parse — typically completes in 2–5 seconds.
+
+Shows the existing ProgressIndicator with live stage updates so
+the user always knows what is happening.
 
 Args:
     source_id: The source identifier to test.
-    count: Number of articles to attempt fetching. Defaults to 1.
+    count: Unused (kept for interface compatibility).
 
 Returns:
-    ``True`` if the subprocess exits with code 0 within 30 seconds,
-    ``False`` on non-zero exit, timeout, or if the ``capcat``
-    wrapper is not found.
+    ``True`` if the feed is reachable and contains at least one
+    entry, ``False`` otherwise.
 
 **Parameters:**
 
@@ -714,6 +755,21 @@ Returns:
 - `count` (int) *optional*
 
 **Returns:** bool
+
+##### _get_rss_url
+
+```python
+def _get_rss_url(self, source_id: str) -> Optional[str]
+```
+
+Return the rss_url from the saved YAML for *source_id*, or None.
+
+**Parameters:**
+
+- `self`
+- `source_id` (str)
+
+**Returns:** Optional[str]
 
 
 ### RegistryCategoryProvider
@@ -745,4 +801,14 @@ Returns:
 
 **Returns:** List[str]
 
+
+## Functions
+
+### _stop_silent
+
+```python
+def _stop_silent()
+```
+
+Stop spinner and clear line without printing a summary.
 

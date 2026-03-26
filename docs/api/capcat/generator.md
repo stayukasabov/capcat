@@ -201,7 +201,7 @@ Returns:
 
 **Returns:** str
 
-⚠️ **High complexity:** 12
+⚠️ **High complexity:** 14
 
 ##### _get_display_name_without_date
 
@@ -536,6 +536,58 @@ Regex Pattern Explanation:
 
 Transform: <p><strong>Source URL:</strong> <a href="...">...</a></p>
         → <div class="source-url"><strong>Source URL:</strong> <a href="...">...</a></div>
+
+**Parameters:**
+
+- `self`
+- `html_content` (str)
+
+**Returns:** str
+
+##### _extract_viewbox
+
+```python
+def _extract_viewbox(self, el) -> 'tuple[float, float] | None'
+```
+
+Extract (width, height) from a BeautifulSoup SVG/img element, or None.
+
+**Parameters:**
+
+- `self`
+- `el`
+
+**Returns:** 'tuple[float, float] | None'
+
+⚠️ **High complexity:** 15
+
+##### _score_svg_element
+
+```python
+def _score_svg_element(self, el, soup) -> 'tuple[int, int]'
+```
+
+Return (icon_score, illustration_score) for a BeautifulSoup element.
+
+**Parameters:**
+
+- `self`
+- `el`
+- `soup`
+
+**Returns:** 'tuple[int, int]'
+
+⚠️ **High complexity:** 23
+
+##### _classify_svg_elements
+
+```python
+def _classify_svg_elements(self, html_content: str) -> str
+```
+
+Classify <img src="*.svg"> and inline <svg> elements as icons or
+illustrations using weighted heuristics. Appends class 'capcat-icon'
+to elements classified as icons. Uses html.parser (no extra deps).
 
 **Parameters:**
 

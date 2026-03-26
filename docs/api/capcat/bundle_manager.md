@@ -108,7 +108,7 @@ Returns:
 ##### create_bundle
 
 ```python
-def create_bundle(self, bundle_id: str, description: str, default_count: int = 20, sources: list = None) -> None
+def create_bundle(self, bundle_id: str, description: str, sources: list = None) -> None
 ```
 
 Create new bundle in bundles.yml.
@@ -116,7 +116,6 @@ Create new bundle in bundles.yml.
 Args:
     bundle_id: Unique bundle identifier (lowercase_with_underscores)
     description: Bundle description (1-200 chars)
-    default_count: Default article count (1-100, default 20)
     sources: Initial source list (optional, default [])
 
 Raises:
@@ -127,7 +126,6 @@ Raises:
 - `self`
 - `bundle_id` (str)
 - `description` (str)
-- `default_count` (int) *optional*
 - `sources` (list) *optional*
 
 **Returns:** None
@@ -156,15 +154,14 @@ Raises:
 ##### update_bundle_metadata
 
 ```python
-def update_bundle_metadata(self, bundle_id: str, description: str = None, default_count: int = None) -> None
+def update_bundle_metadata(self, bundle_id: str, description: str = None) -> None
 ```
 
-Update bundle metadata (description and/or default_count).
+Update bundle metadata (description).
 
 Args:
     bundle_id: Bundle to update
     description: New description (optional)
-    default_count: New default count (optional)
 
 Raises:
     ValueError: If bundle not found or no changes provided
@@ -174,7 +171,6 @@ Raises:
 - `self`
 - `bundle_id` (str)
 - `description` (str) *optional*
-- `default_count` (int) *optional*
 
 **Returns:** None
 

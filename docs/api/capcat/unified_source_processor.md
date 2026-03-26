@@ -121,7 +121,7 @@ Raises ValueError listing any sources that would fall through to the deleted leg
 ##### process_source_articles
 
 ```python
-def process_source_articles(self, source_name: str, count: int, output_dir: str, quiet: bool = False, verbose: bool = False, download_files: bool = False, batch_mode: bool = False, generate_html: bool = False) -> None
+def process_source_articles(self, source_name: str, count: Optional[int], output_dir: str, quiet: bool = False, verbose: bool = False, download_files: bool = False, batch_mode: bool = False, generate_html: bool = False) -> None
 ```
 
 Universal article processing function. All sources route through the new system.
@@ -139,7 +139,7 @@ Args:
 
 - `self`
 - `source_name` (str)
-- `count` (int)
+- `count` (Optional[int])
 - `output_dir` (str)
 - `quiet` (bool) *optional*
 - `verbose` (bool) *optional*
@@ -152,7 +152,7 @@ Args:
 ##### _process_with_new_system
 
 ```python
-def _process_with_new_system(self, source_name: str, count: int, output_dir: str, quiet: bool = False, verbose: bool = False, download_files: bool = False, batch_mode: bool = False, generate_html: bool = False) -> None
+def _process_with_new_system(self, source_name: str, count: Optional[int], output_dir: str, quiet: bool = False, verbose: bool = False, download_files: bool = False, batch_mode: bool = False, generate_html: bool = False) -> None
 ```
 
 Process articles using the new source system.
@@ -161,7 +161,7 @@ Process articles using the new source system.
 
 - `self`
 - `source_name` (str)
-- `count` (int)
+- `count` (Optional[int])
 - `output_dir` (str)
 - `quiet` (bool) *optional*
 - `verbose` (bool) *optional*
@@ -218,6 +218,28 @@ Process a single article using the new source system.
 
 ## Functions
 
+### _resolve_count
+
+```python
+def _resolve_count(cli_count: Optional[int], source_config: 'SourceConfig') -> int
+```
+
+Resolve article count: CLI flag > source YAML > default 30.
+
+Args:
+    cli_count: Value from --count flag, or None if not provided.
+    source_config: The source's SourceConfig (has article_count field).
+
+Returns:
+    Number of articles to fetch.
+
+**Parameters:**
+
+- `cli_count` (Optional[int])
+- `source_config` ('SourceConfig')
+
+**Returns:** int
+
 ### get_unified_processor
 
 ```python
@@ -235,7 +257,7 @@ Get global unified processor instance.
 ### process_source_articles
 
 ```python
-def process_source_articles(source_name: str, count: int, output_dir: str, quiet: bool = False, verbose: bool = False, download_files: bool = False, batch_mode: bool = False, generate_html: bool = False, project_root: Optional[Path] = None) -> None
+def process_source_articles(source_name: str, count: Optional[int], output_dir: str, quiet: bool = False, verbose: bool = False, download_files: bool = False, batch_mode: bool = False, generate_html: bool = False, project_root: Optional[Path] = None) -> None
 ```
 
 Convenience function to process articles from any source.
@@ -253,7 +275,7 @@ Args:
 **Parameters:**
 
 - `source_name` (str)
-- `count` (int)
+- `count` (Optional[int])
 - `output_dir` (str)
 - `quiet` (bool) *optional*
 - `verbose` (bool) *optional*

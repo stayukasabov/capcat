@@ -347,7 +347,7 @@ Fetch and process regular web page content.
 
 **Returns:** Tuple[bool, Optional[str], Optional[str]]
 
-⚠️ **High complexity:** 65
+⚠️ **High complexity:** 64
 
 ##### _cleanup_empty_images_folder
 
@@ -363,6 +363,26 @@ Remove images folder if it exists but is empty.
 - `article_folder_path` (str)
 
 **Returns:** None
+
+##### _download_pdf_links_from_markdown
+
+```python
+def _download_pdf_links_from_markdown(self, markdown_content: str, article_folder_path: str) -> str
+```
+
+Scan markdown for PDF links and download them to files/ subfolder.
+
+Universal — works for every source. Runs after HTML→markdown
+conversion so it catches PDF links regardless of where they
+appeared in the original HTML structure.
+
+**Parameters:**
+
+- `self`
+- `markdown_content` (str)
+- `article_folder_path` (str)
+
+**Returns:** str
 
 ##### _parse_srcset
 
@@ -434,7 +454,7 @@ processing.
 
 **Returns:** str
 
-⚠️ **High complexity:** 90
+⚠️ **High complexity:** 95
 
 ##### _fallback_image_detection
 
@@ -739,7 +759,7 @@ Configurable article fetcher that works with any news source.
 ##### __init__
 
 ```python
-def __init__(self, source_config: Dict[str, Any], session: requests.Session)
+def __init__(self, source_config: Dict[str, Any], session: requests.Session, download_files: bool = False)
 ```
 
 **Parameters:**
@@ -747,6 +767,7 @@ def __init__(self, source_config: Dict[str, Any], session: requests.Session)
 - `self`
 - `source_config` (Dict[str, Any])
 - `session` (requests.Session)
+- `download_files` (bool) *optional*
 
 ##### should_skip_url
 
@@ -781,7 +802,7 @@ Override to extract content using configured selectors.
 - `base_folder` (str)
 - `progress_callback` *optional*
 
-⚠️ **High complexity:** 67
+⚠️ **High complexity:** 83
 
 ##### _cleanup_empty_images_folder
 
@@ -929,6 +950,28 @@ def replacement_func(match)
 ```
 
 Create replacement text with fallback for empty groups.
+
+**Parameters:**
+
+- `match`
+
+### is_pdf_url
+
+```python
+def is_pdf_url(u: str) -> bool
+```
+
+**Parameters:**
+
+- `u` (str)
+
+**Returns:** bool
+
+### replace_link
+
+```python
+def replace_link(match)
+```
 
 **Parameters:**
 

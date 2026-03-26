@@ -72,7 +72,7 @@ Raises:
 ##### fetch_article_content
 
 ```python
-def fetch_article_content(self, article: Article, output_dir: str, progress_callback = None) -> Tuple[bool, Optional[str]]
+def fetch_article_content(self, article: Article, output_dir: str, progress_callback = None, download_files: bool = False) -> Tuple[bool, Optional[str]]
 ```
 
 Fetch article content using configured content selectors.
@@ -94,6 +94,7 @@ Raises:
 - `article` (Article)
 - `output_dir` (str)
 - `progress_callback` *optional*
+- `download_files` (bool) *optional*
 
 **Returns:** Tuple[bool, Optional[str]]
 

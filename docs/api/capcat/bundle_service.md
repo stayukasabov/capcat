@@ -48,8 +48,6 @@ Execute bundle creation workflow.
 
 **Returns:** None
 
-⚠️ **High complexity:** 11
-
 ##### execute_delete_bundle
 
 ```python
@@ -78,7 +76,7 @@ Execute bundle editing workflow.
 
 **Returns:** None
 
-⚠️ **High complexity:** 15
+⚠️ **High complexity:** 11
 
 ##### execute_add_sources
 

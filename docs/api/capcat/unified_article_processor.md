@@ -33,7 +33,7 @@ Processing Order:
 def __init__(self)
 ```
 
-Initialize processor with specialized source manager.
+Initialize processor with source registry.
 
 **Parameters:**
 

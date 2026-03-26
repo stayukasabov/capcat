@@ -32,6 +32,27 @@ Args:
 - `self`
 - `questionary_module` *optional*
 
+##### get_display_name
+
+```python
+def get_display_name(self, suggested: str) -> str
+```
+
+Get display name from user with feed title as suggestion.
+
+Args:
+    suggested: Feed title from RSS feed
+
+Returns:
+    User-entered display name
+
+**Parameters:**
+
+- `self`
+- `suggested` (str)
+
+**Returns:** str
+
 ##### get_source_id
 
 ```python
@@ -79,6 +100,20 @@ Raises:
 - `categories` (List[str])
 
 **Returns:** str
+
+##### get_article_count
+
+```python
+def get_article_count(self) -> int
+```
+
+Ask how many articles to fetch per run.
+
+**Parameters:**
+
+- `self`
+
+**Returns:** int
 
 ##### confirm_bundle_addition
 
@@ -200,7 +235,7 @@ Provides predictable responses for automated testing.
 ##### __init__
 
 ```python
-def __init__(self, responses: dict)
+def __init__(self, responses: dict = None)
 ```
 
 Initialize with predefined responses.
@@ -211,7 +246,28 @@ Args:
 **Parameters:**
 
 - `self`
-- `responses` (dict)
+- `responses` (dict) *optional*
+
+##### get_display_name
+
+```python
+def get_display_name(self, suggested: str) -> str
+```
+
+Record call and return the configured display_name response.
+
+Args:
+    suggested: Feed title passed by the workflow.
+
+Returns:
+    ``responses['display_name']`` if set, otherwise *suggested*.
+
+**Parameters:**
+
+- `self`
+- `suggested` (str)
+
+**Returns:** str
 
 ##### get_source_id
 
@@ -255,6 +311,18 @@ Returns:
 - `categories` (List[str])
 
 **Returns:** str
+
+##### get_article_count
+
+```python
+def get_article_count(self) -> int
+```
+
+**Parameters:**
+
+- `self`
+
+**Returns:** int
 
 ##### confirm_bundle_addition
 

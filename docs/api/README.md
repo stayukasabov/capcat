@@ -4,9 +4,10 @@ This is the complete API reference for Capcat.
 
 ## Packages
 
-- [Video](./Video/README.md)
+- [Config](./Config/README.md)
 - [__Version__](./__version__/README.md)
 - [Add_Jekyll_Frontmatter](./add_jekyll_frontmatter/README.md)
+- [Build](./build/README.md)
 - [Build_Site](./build_site/README.md)
 - [Capcat](./capcat/README.md)
 - [Capcat_Legacy](./capcat_legacy/README.md)

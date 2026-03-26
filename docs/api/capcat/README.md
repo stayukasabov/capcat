@@ -69,11 +69,13 @@ for performance optimization and self-contained HTML generation
 - [`capcat.core.unified_media_processor`](./unified_media_processor.md) - Unified Media Processor Integration Layer
 - [`capcat.core.template_renderer`](./template_renderer.md) - Simple Template Renderer for Capcat
 Replaces {{placeholder}} variables with actual values from configuration
-- [`capcat.core.specialized_source_manager`](./specialized_source_manager.md) - Specialized Source Manager for automatic URL-based source activation
 - [`capcat.htmlgen.__init__`](./__init__.md) - HTML generation module for Capcat
 - [`capcat.htmlgen.factory`](./factory.md) - Factory for creating ArticleHTMLGenerator instances
 - [`capcat.htmlgen.generator`](./generator.md) - HTML Generator for Capcat - Static Site Generation
 Creates self-contained HTML files from markdown content with embedded CSS and JavaScript
+- [`capcat.scripts.generate_source_config`](./generate_source_config.md) - Interactive script to generate comprehensive YAML configuration files
+for config-driven sources in Capcat
+- [`capcat.scripts.__init__`](./__init__.md)
 - [`capcat.sources.__init__`](./__init__.md)
 - [`capcat.commands.fetch`](./fetch.md) - Batch fetch command — processes multiple sources via the unified processor
 - [`capcat.commands.add_source`](./add_source.md) - Add-source command — interactive RSS source addition
@@ -82,19 +84,15 @@ Creates self-contained HTML files from markdown content with embedded CSS and Ja
 - [`capcat.commands.generate_config`](./generate_config.md) - Generate-config command — launches the interactive source config generator
 - [`capcat.commands.__init__`](./__init__.md)
 - [`capcat.commands.init`](./init.md) - Implementation of capcat init command
-- [`capcat.sources.specialized.__init__`](./__init__.md) - Specialized source implementations for platforms like Medium and Substack
 - [`capcat.sources.builtin.__init__`](./__init__.md)
 - [`capcat.sources.base.__init__`](./__init__.md) - Base classes and interfaces for the source system
+- [`capcat.sources.builtin.custom.twitter.source`](./source.md) - Twitter/X
 - [`capcat.sources.builtin.custom.lb.source`](./source.md) - Lobsters source implementation for the new source system
+- [`capcat.sources.builtin.custom.substack.source`](./source.md) - Substack
+- [`capcat.sources.builtin.custom.vimeo.source`](./source.md) - Vimeo specialized source implementation
+- [`capcat.sources.builtin.custom.medium.source`](./source.md) - Medium
+- [`capcat.sources.builtin.custom.youtube.source`](./source.md) - YouTube specialized source implementation
 - [`capcat.sources.builtin.custom.hn.source`](./source.md) - Hacker News source implementation for the new source system
-- [`capcat.sources.specialized.twitter.__init__`](./__init__.md) - Twitter/X
-- [`capcat.sources.specialized.twitter.source`](./source.md) - Twitter/X
-- [`capcat.sources.specialized.substack.source`](./source.md) - Substack
-- [`capcat.sources.specialized.vimeo.__init__`](./__init__.md) - Vimeo specialized source
-- [`capcat.sources.specialized.vimeo.source`](./source.md) - Vimeo specialized source implementation
-- [`capcat.sources.specialized.medium.source`](./source.md) - Medium
-- [`capcat.sources.specialized.youtube.__init__`](./__init__.md) - YouTube specialized source
-- [`capcat.sources.specialized.youtube.source`](./source.md) - YouTube specialized source implementation
 - [`capcat.core.config.__init__`](./__init__.md) - Configuration management package for Capcat
 - [`capcat.core.config.source_registry`](./source_registry.md) - Source Registry for managing all available news sources and their configurations
 - [`capcat.core.config.source_base`](./source_base.md) - Base configuration classes for news sources
