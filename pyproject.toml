@@ -70,7 +70,7 @@ capcat = [
 ]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["tests/unit"]
 
 [tool.coverage.run]
 source = ["capcat"]
