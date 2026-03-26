@@ -23,19 +23,19 @@ import logging
 
 # Import core modules with error handling
 try:
-    import requests
+    import requests  # noqa: F401
     HAS_REQUESTS = True
 except ImportError:
     HAS_REQUESTS = False
 
 try:
-    import yaml
+    import yaml  # noqa: F401
     HAS_YAML = True
 except ImportError:
     HAS_YAML = False
 
 try:
-    from bs4 import BeautifulSoup
+    from bs4 import BeautifulSoup  # noqa: F401
     HAS_BS4 = True
 except ImportError:
     HAS_BS4 = False

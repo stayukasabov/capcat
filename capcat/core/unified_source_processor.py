@@ -26,7 +26,7 @@ from capcat.core.utils import create_batch_output_directory
 
 # Import new source system for hybrid architecture
 try:
-    from capcat.core.source_system.base_source import Article, SourceError
+    from capcat.core.source_system.base_source import SourceError
     from capcat.core.source_system.source_factory import get_source_factory
 
     NEW_SOURCE_SYSTEM_AVAILABLE = True

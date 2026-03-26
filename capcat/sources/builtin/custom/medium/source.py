@@ -10,7 +10,6 @@ from typing import List, Optional, Tuple
 
 from bs4 import BeautifulSoup
 
-from capcat.core.article_fetcher import NewsSourceArticleFetcher
 from capcat.core.storage_manager import article_md_filename, find_article_md
 from capcat.core.source_system.base_source import (
     Article,
@@ -81,65 +80,6 @@ class MediumSource(BaseSource):
                     "Soft paywall detected - fetching full content"
                 )
             # paywall_type == 'none' - free content, proceed normally
-
-            # Use optimized Medium-specific configuration
-            fetcher_config = {
-                "name": self.config.display_name,
-                "content_selectors": [
-                    "article",
-                    '[data-testid="storyContent"]',
-                    ".postArticle-content",
-                    ".section-content",
-                    ".p-name",
-                    "main",
-                    ".post-content",
-                ],
-                "title_selectors": [
-                    'h1[data-testid="storyTitle"]',
-                    ".p-name",
-                    ".postArticle-title",
-                    "h1",
-                    ".story-title",
-                ],
-                "author_selectors": [
-                    '[data-testid="authorName"]',
-                    ".p-author",
-                    ".postMetaInline-authorLockup a",
-                    ".author-name",
-                    '[rel="author"]',
-                ],
-                "date_selectors": [
-                    '[data-testid="storyPublishDate"]',
-                    ".dt-published",
-                    "time",
-                    ".post-date",
-                ],
-                "image_selectors": [
-                    "figure img",
-                    ".medium-image",
-                    'img[src*="medium.com"]',
-                    ".story-image img",
-                    "img",
-                ],
-                "skip_patterns": [
-                    "/sign-in",
-                    "/membership",
-                    "/subscribe",
-                    "/upgrade",
-                    "paywall",
-                    "premium-content",
-                ],
-                "paywall_indicators": [
-                    "paywall",
-                    "member-only",
-                    "subscription-required",
-                    "premium-content",
-                    "upgrade-to-continue",
-                    "sign-in-to-continue",
-                ],
-            }
-
-            fetcher = NewsSourceArticleFetcher(fetcher_config, self.session)
 
             # Use direct fetching to avoid URL transformation issues
             success, folder_path = self._fetch_medium_content_direct(

@@ -42,7 +42,7 @@ def _create_smart_link(text: str, url: str) -> str:
                     domain = parts[2]  # Just the domain part
                     # Create a link with readable text but full URL functionality
                     return f"[{domain} (full URL)]({url})"
-            except:
+            except Exception:
                 pass
 
         # Fallback: use first part of URL as display text
@@ -238,7 +238,7 @@ def _parse_srcset(srcset: str) -> str:
             elif descriptor.endswith("x"):
                 # Handle pixel density descriptors (e.g., "2x")
                 try:
-                    density = float(descriptor[:-1])
+                    float(descriptor[:-1])
                     # Treat higher density as preference when no width-based entries
                     if not best_url or max_width == 0:
                         best_url = url

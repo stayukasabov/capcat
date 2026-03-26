@@ -662,11 +662,7 @@ class MediaProcessor:
             [Photo](http://fail.com/img.jpg) *(image unavailable)*
         """
 
-        # Create fallback text
         if link_type == "image":
-            # For images, convert to regular link with note
-            fallback = f"[{alt_text}]({url}) *({link_type} unavailable)*"
-
             # Remove image syntax variations
             escaped_url = re.escape(url)
             patterns = [

@@ -440,7 +440,7 @@ class BundleService:
 
         # Move/copy source
         try:
-            result = self.manager.move_source_between_bundles(
+            self.manager.move_source_between_bundles(
                 source_id,
                 from_bundle,
                 to_bundle,
