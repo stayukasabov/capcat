@@ -118,7 +118,8 @@ except ImportError:
         return FallbackConfig()
 
     load_config = get_config
-    save_config = lambda x, _="yaml": True
+    def save_config(x, _="yaml"):
+        return True
 
     class FetchNewsConfig:
         """Stub for FetchNewsConfig when the main config module is unavailable."""

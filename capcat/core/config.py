@@ -324,7 +324,7 @@ class ConfigManager:
             value = os.getenv(env_var)
             if value is not None:
                 try:
-                    if type_func == bool:
+                    if type_func is bool:
                         # Handle boolean environment variables
                         converted_value = value.lower() in (
                             "true",

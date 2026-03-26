@@ -84,14 +84,12 @@ class HTMLPostProcessor:
     def _process_article_files(self, root_path: Path, incremental: bool = True) -> None:
         """Process article.md and comments.md files with intelligent caching."""
         from capcat.core.progress import get_batch_progress
-        import time
 
         # Collect article directories that need processing.
         # Also check root_path itself: when single command passes the article
         # folder directly (e.g. Capcats/Substack_DD-MM-YYYY/Article_Title/),
         # rglob("**/*/") only finds subdirectories, missing article.md at root.
         article_dirs = []
-        current_time = time.time()
 
         candidates = [root_path] + list(root_path.rglob("**/*/"))
         for article_dir in candidates:

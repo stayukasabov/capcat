@@ -132,7 +132,6 @@ class SourceBackupManager:
             raise CapcatError(f"Backup not found: {backup_id}")
 
         try:
-            metadata = self._load_metadata(backup_dir)
             restored_sources = []
 
             # Restore config files

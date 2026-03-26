@@ -3,8 +3,17 @@
 Interactive mode for Capcat.
 """
 
+import contextlib
+import logging
+import os
+import shutil
+import sys
+
 from prompt_toolkit.styles import Style
 import questionary
+
+from capcat.core.source_system.bundle_service import get_available_sources
+from capcat.core.source_system.source_registry import get_source_registry
 
 # Custom style for questionary
 custom_style = Style([
@@ -15,14 +24,6 @@ custom_style = Style([
     ('answer', 'fg:#d75f00'),            # Orange answer
     ('instruction', ''),                  # Instruction text
 ])
-import sys
-import os
-import logging
-import contextlib
-import shutil
-
-from capcat.core.source_system.bundle_service import get_available_sources
-from capcat.core.source_system.source_registry import get_source_registry
 
 
 

@@ -1018,7 +1018,6 @@ class ArticleFetcher(ABC):
             img_count = len(soup.find_all("img"))
             video_count = len(soup.find_all("video"))
             audio_count = len(soup.find_all("audio"))
-            link_count = len(soup.find_all("a", href=True))
 
             # Create descriptive progress message based on content complexity
             media_desc_parts = []
@@ -1263,7 +1262,6 @@ class ArticleFetcher(ABC):
         link_pattern = re.compile(r'\[([^\]]*)\]\((https?://[^)]+)\)')
 
         seen_urls = set()
-        files_folder = os.path.join(article_folder_path, "files")
 
         def is_pdf_url(u: str) -> bool:
             path = urlparse(u).path.lower()

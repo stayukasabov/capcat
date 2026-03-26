@@ -10,7 +10,6 @@ from typing import List, Optional, Tuple
 
 from bs4 import BeautifulSoup
 
-from capcat.core.article_fetcher import NewsSourceArticleFetcher
 from capcat.core.storage_manager import article_md_filename, find_article_md
 from capcat.core.source_system.base_source import (
     Article,
@@ -117,65 +116,6 @@ class SubstackSource(BaseSource):
                     "Soft paywall detected - fetching full content"
                 )
             # paywall_type == 'none' - free content, proceed normally
-
-            # Use optimized Substack-specific configuration
-            fetcher_config = {
-                "name": self.config.display_name,
-                "content_selectors": [
-                    ".post-content",
-                    ".available-content",
-                    '[class*="post-content"]',
-                    ".body",
-                    "article",
-                    ".prose",
-                    "main",
-                    ".single-post",
-                ],
-                "title_selectors": [
-                    ".post-title",
-                    "h1.post-title",
-                    ".single-post-title",
-                    "h1",
-                    ".entry-title",
-                ],
-                "author_selectors": [
-                    ".author-name",
-                    ".byline-names",
-                    ".author",
-                    '[rel="author"]',
-                    ".post-author",
-                ],
-                "date_selectors": [
-                    ".post-date",
-                    "time",
-                    ".published-date",
-                    ".post-meta time",
-                ],
-                "image_selectors": [
-                    ".post-content img",
-                    ".available-content img",
-                    "figure img",
-                    'img[src*="substack"]',
-                    "img",
-                ],
-                "skip_patterns": [
-                    "/subscribe",
-                    "/account/login",
-                    "/sign-in",
-                    "paywall",
-                    "subscriber-only",
-                ],
-                "paywall_indicators": [
-                    "paywall",
-                    "subscriber-only",
-                    "paid-subscription",
-                    "premium-content",
-                    "subscribe-to-continue",
-                    "login-to-continue",
-                ],
-            }
-
-            fetcher = NewsSourceArticleFetcher(fetcher_config, self.session)
 
             # Use direct fetching to avoid URL transformation issues
             success, folder_path = self._fetch_substack_content_direct(
