@@ -1,5 +1,5 @@
 Capcat Documentation Manifest
-Generated: 2026-03-26 20:32:00 UTC
+Generated: 2026-03-26 23:54:22 UTC
 Success rate: 2/2 tasks
 
 Generated Documentation:
@@ -383,6 +383,7 @@ Generated Documentation:
   - superpowers/plans/2026-03-23-svg-icon-classification.md
   - superpowers/plans/2026-03-26-per-source-article-count.md
   - superpowers/plans/2026-03-26-tui-menu-bottom-blank-row.md
+  - superpowers/plans/2026-03-27-tui-logo-dos-rebel.md
   - superpowers/specs/2026-03-15-breadcrumb-phase1-folder-naming-design.md
   - superpowers/specs/2026-03-15-breadcrumb-phase2-html-rendering-design.md
   - superpowers/specs/2026-03-15-claude-md-context-engineering-design.md
@@ -398,8 +399,9 @@ Generated Documentation:
   - superpowers/specs/2026-03-23-svg-icon-classification-design.md
   - superpowers/specs/2026-03-25-per-source-article-count-design.md
   - superpowers/specs/2026-03-26-pdf-ancestor-filter-design.md
+  - superpowers/specs/2026-03-26-tui-logo-dos-rebel-design.md
   - superpowers/specs/2026-03-26-tui-menu-bottom-blank-row-design.md
   - troubleshooting.md
 
-Total files: 720
+Total files: 722
 Documentation size: 43.9 MB
