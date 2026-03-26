@@ -37,6 +37,35 @@ from .utils import sanitize_filename
 from .timeout_config import get_timeout_for_source, record_response_time
 from .timeout_wrapper import safe_network_operation
 
+
+def _collect_pdf_links_from_soup(soup: "BeautifulSoup", base_url: str) -> list:
+    """Return (link_text, href) pairs for PDF links found outside header/footer."""
+    collected: list = []
+    seen: set = set()
+    for _a in soup.find_all("a", href=True):
+        if _a.find_parent(["header", "footer"]):
+            continue
+        _href = _a.get("href", "") or ""
+        if not _href or _href.startswith(
+            ("#", "javascript:", "mailto:", "data:")
+        ):
+            continue
+        if _href.startswith("//"):
+            _href = "https:" + _href
+        elif _href.startswith("/"):
+            _href = urljoin(base_url, _href)
+        elif not _href.startswith(("http://", "https://")):
+            continue
+        _path = urlparse(_href).path.lower()
+        _parts = _path.split("/")
+        if (
+            _path.endswith(".pdf")
+            or (len(_parts) > 1 and _parts[1] == "pdf")
+        ) and _href not in seen:
+            seen.add(_href)
+            collected.append((_a.get_text(strip=True) or "PDF", _href))
+    return collected
+
 # Global update mode flag that can be accessed by all ArticleFetcher instances
 _GLOBAL_UPDATE_MODE = False
 
@@ -2844,29 +2873,8 @@ class NewsSourceArticleFetcher(ArticleFetcher):
         # Collect PDF links from the FULL page BEFORE cleanup.
         # Sites like arXiv keep their PDF download link inside <aside>, which
         # gets removed below — so we must harvest it here while it still exists.
-        _collected_pdf_links: list = []
-        _seen_pdf_hrefs: set = set()
-        for _a in soup.find_all("a", href=True):
-            _href = _a.get("href", "") or ""
-            if not _href or _href.startswith(
-                ("#", "javascript:", "mailto:", "data:")
-            ):
-                continue
-            if _href.startswith("//"):
-                _href = "https:" + _href
-            elif _href.startswith("/"):
-                _href = urljoin(url, _href)
-            elif not _href.startswith(("http://", "https://")):
-                continue
-            _path = urlparse(_href).path.lower()
-            _parts = _path.split("/")
-            if (
-                _path.endswith(".pdf")
-                or (len(_parts) > 1 and _parts[1] == "pdf")
-            ) and _href not in _seen_pdf_hrefs:
-                _seen_pdf_hrefs.add(_href)
-                _link_text = _a.get_text(strip=True) or "PDF"
-                _collected_pdf_links.append((_link_text, _href))
+        # header/footer links are excluded to avoid corporate footer PDFs.
+        _collected_pdf_links = _collect_pdf_links_from_soup(soup, url)
 
         # Remove script and style elements
         for script in soup(
