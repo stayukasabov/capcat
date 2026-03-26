@@ -57,7 +57,7 @@ Restore original signal handlers.
 ##### _signal_handler
 
 ```python
-def _signal_handler(self, signum: int, frame)
+def _signal_handler(self, signum: int, _frame)
 ```
 
 Handle shutdown signals — sets event only. No sys.exit, no sleep.
@@ -66,7 +66,7 @@ Handle shutdown signals — sets event only. No sys.exit, no sleep.
 
 - `self`
 - `signum` (int)
-- `frame`
+- `_frame`
 
 ##### should_shutdown
 
@@ -210,7 +210,7 @@ This is a simple version that just logs and exits.
 ### with_graceful_shutdown
 
 ```python
-def with_graceful_shutdown(cleanup_func: Optional[Callable] = None)
+def with_graceful_shutdown(_cleanup_func: Optional[Callable] = None)
 ```
 
 Decorator to add graceful shutdown handling to functions.
@@ -220,18 +220,18 @@ Args:
 
 **Parameters:**
 
-- `cleanup_func` (Optional[Callable]) *optional*
+- `_cleanup_func` (Optional[Callable]) *optional*
 
 ### signal_handler
 
 ```python
-def signal_handler(signum: int, frame)
+def signal_handler(signum: int, _frame)
 ```
 
 **Parameters:**
 
 - `signum` (int)
-- `frame`
+- `_frame`
 
 ### decorator
 

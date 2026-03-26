@@ -5,9 +5,147 @@ Complete reference of all modules, classes, and functions in Capcat.
 ## Modules by Package
 
 
-### Video
+### Config
 
-- [Video.scripts.analyze_audio](../api/Video/analyze_audio.md)
+- [Config.sources.active.custom.hn.source](../api/Config/source.md) - Hacker News source implementation for the new source system
+- [Config.sources.active.custom.lb.source](../api/Config/source.md) - Lobsters source implementation for the new source system
+- [Config.sources.active.custom.medium.source](../api/Config/source.md) - Medium
+- [Config.sources.active.custom.substack.source](../api/Config/source.md) - Substack
+- [Config.sources.active.custom.twitter.source](../api/Config/source.md) - Twitter/X
+- [Config.sources.active.custom.vimeo.source](../api/Config/source.md) - Vimeo specialized source implementation
+- [Config.sources.active.custom.youtube.source](../api/Config/source.md) - YouTube specialized source implementation
+
+### Build
+
+- [build.lib.capcat.__init__](../api/build/__init__.md) - Capcat — A command-line tool designed to solve content preservation challenges with Ethical Scraping
+- [build.lib.capcat.__main__](../api/build/__main__.md)
+- [build.lib.capcat.cli](../api/build/cli.md) - CLI entry point for Capcat
+- [build.lib.capcat.commands.__init__](../api/build/__init__.md)
+- [build.lib.capcat.commands.add_source](../api/build/add_source.md) - Add-source command — interactive RSS source addition
+- [build.lib.capcat.commands.fetch](../api/build/fetch.md) - Batch fetch command — processes multiple sources via the unified processor
+- [build.lib.capcat.commands.generate_config](../api/build/generate_config.md) - Generate-config command — launches the interactive source config generator
+- [build.lib.capcat.commands.init](../api/build/init.md) - Implementation of capcat init command
+- [build.lib.capcat.commands.remove_source](../api/build/remove_source.md) - Remove-source command — interactive source removal with backup/undo support
+- [build.lib.capcat.commands.single](../api/build/single.md) - Single article fetch command
+- [build.lib.capcat.core.__init__](../api/build/__init__.md)
+- [build.lib.capcat.core.article_fetcher](../api/build/article_fetcher.md) - Shared article fetching functionality for Capcat sources
+- [build.lib.capcat.core.circuit_breaker](../api/build/circuit_breaker.md) - Circuit Breaker pattern implementation for Capcat
+- [build.lib.capcat.core.cli_recovery](../api/build/cli_recovery.md) - CLI error recovery and user guidance system
+- [build.lib.capcat.core.cli_validation](../api/build/cli_validation.md) - Enhanced CLI validation and error handling for better user experience
+- [build.lib.capcat.core.command_logging](../api/build/command_logging.md) - Enhanced command logging for CLI debugging and audit trail
+- [build.lib.capcat.core.config](../api/build/config.md) - Configuration management for Capcat
+- [build.lib.capcat.core.config.__init__](../api/build/__init__.md) - Configuration management package for Capcat
+- [build.lib.capcat.core.config.source_base](../api/build/source_base.md) - Base configuration classes for news sources
+- [build.lib.capcat.core.config.source_registry](../api/build/source_registry.md) - Source Registry for managing all available news sources and their configurations
+- [build.lib.capcat.core.constants](../api/build/constants.md) - Application-wide constants for Capcat
+- [build.lib.capcat.core.conversion_executor](../api/build/conversion_executor.md) - Shared executor pool for HTML-to-Markdown conversion to prevent nested ThreadPoolExecutor deadlock
+- [build.lib.capcat.core.design_system_compiler](../api/build/design_system_compiler.md) - Design System Compiler for Capcat HTML Generation
+
+Compiles CSS custom properties from the design system into hardcoded values
+for performance optimization and self-contained HTML generation
+- [build.lib.capcat.core.downloader](../api/build/downloader.md) - Media downloader for Capcat
+- [build.lib.capcat.core.enhanced_argparse](../api/build/enhanced_argparse.md) - Enhanced ArgumentParser with better error messages and validation
+- [build.lib.capcat.core.error_handling](../api/build/error_handling.md) - Comprehensive error handling and recovery system for Capcat
+- [build.lib.capcat.core.ethical_scraping](../api/build/ethical_scraping.md) - Ethical scraping utilities for Capcat
+- [build.lib.capcat.core.exceptions](../api/build/exceptions.md) - Custom exceptions for Capcat application
+- [build.lib.capcat.core.formatter](../api/build/formatter.md) - HTML to Markdown converter for Capcat
+- [build.lib.capcat.core.html_post_processor](../api/build/html_post_processor.md) - HTML Post-Processor for Capcat Archives
+Handles post-processing HTML generation after article scraping is complete
+- [build.lib.capcat.core.image_processor](../api/build/image_processor.md) - Global Image Processor for Capcat
+- [build.lib.capcat.core.interactive](../api/build/interactive.md) - Interactive mode for Capcat
+- [build.lib.capcat.core.logging_config](../api/build/logging_config.md) - Logging configuration for Capcat
+- [build.lib.capcat.core.media_config](../api/build/media_config.md) - Media Configuration Manager for different news sources
+- [build.lib.capcat.core.media_executor](../api/build/media_executor.md) - Shared executor pool for media processing to prevent nested ThreadPoolExecutor deadlock
+- [build.lib.capcat.core.media_processor](../api/build/media_processor.md) - Media processing component for Capcat
+- [build.lib.capcat.core.network_resilience](../api/build/network_resilience.md) - Network Resilience Patterns for Source Processing
+
+Clean architecture implementation applying SOLID principles:
+- Single Responsibility: Each class has one clear purpose
+- Open/Closed: Extensible via strategy pattern
+- Liskov Substitution: RetryStrategy implementations interchangeable
+- Interface Segregation: Small, focused interfaces
+- Dependency Inversion: Depend on abstractions not concretions
+- [build.lib.capcat.core.progress](../api/build/progress.md) - Progress indicators and status reporting for Capcat
+- [build.lib.capcat.core.rate_limiter](../api/build/rate_limiter.md) - Rate limiting system for Capcat to prevent overwhelming source servers
+- [build.lib.capcat.core.retry](../api/build/retry.md) - Retry mechanisms with exponential backoff for Capcat
+- [build.lib.capcat.core.retry_skip](../api/build/retry_skip.md) - Retry-and-Skip Logic for Network Resilience
+
+Implements intelligent retry-and-skip mechanism for sources that timeout
+or refuse connection
+- [build.lib.capcat.core.session_pool](../api/build/session_pool.md) - Global session pooling for optimal network performance across all sources
+- [build.lib.capcat.core.shutdown](../api/build/shutdown.md) - Graceful shutdown handling for Capcat
+- [build.lib.capcat.core.source_config](../api/build/source_config.md) - Source configuration for optimized URL detection in Capcat
+- [build.lib.capcat.core.source_config_mirror](../api/build/source_config_mirror.md) - Mirror builtin source configs to userspace Config/sources/active/
+- [build.lib.capcat.core.source_configs](../api/build/source_configs.md) - Modular source configuration system with backward compatibility
+- [build.lib.capcat.core.source_system.__init__](../api/build/__init__.md)
+- [build.lib.capcat.core.source_system.add_source_command](../api/build/add_source_command.md) - Professional implementation of the add-source command using clean architecture principles
+- [build.lib.capcat.core.source_system.add_source_service](../api/build/add_source_service.md) - Service layer for the add-source command
+- [build.lib.capcat.core.source_system.base_source](../api/build/base_source.md) - Abstract base class for all news sources
+- [build.lib.capcat.core.source_system.bundle_manager](../api/build/bundle_manager.md)
+- [build.lib.capcat.core.source_system.bundle_models](../api/build/bundle_models.md) - Data models for bundle management
+- [build.lib.capcat.core.source_system.bundle_service](../api/build/bundle_service.md) - Service layer for bundle management
+- [build.lib.capcat.core.source_system.bundle_ui](../api/build/bundle_ui.md) - User interface components for bundle management
+- [build.lib.capcat.core.source_system.bundle_validator](../api/build/bundle_validator.md) - Bundle validation logic
+- [build.lib.capcat.core.source_system.config_driven_source](../api/build/config_driven_source.md) - Config-driven source implementation
+- [build.lib.capcat.core.source_system.discovery_strategies](../api/build/discovery_strategies.md) - Discovery strategy implementations for article discovery
+- [build.lib.capcat.core.source_system.enhanced_remove_command](../api/build/enhanced_remove_command.md) - Enhanced remove-source command with advanced features:
+- Dry-run mode
+- Automatic backups
+- Usage analytics
+- Batch removal from file
+- Undo/restore functionality
+- [build.lib.capcat.core.source_system.feed_discovery](../api/build/feed_discovery.md) - RSS/Atom feed discovery utilities
+- [build.lib.capcat.core.source_system.feed_parser](../api/build/feed_parser.md) - Feed parser abstraction for RSS and Atom feeds
+- [build.lib.capcat.core.source_system.performance_monitor](../api/build/performance_monitor.md) - Source performance monitoring system for the hybrid architecture
+- [build.lib.capcat.core.source_system.questionary_ui](../api/build/questionary_ui.md) - User interface implementation using questionary for interactive prompts
+- [build.lib.capcat.core.source_system.removal_ui](../api/build/removal_ui.md) - User interface implementation for remove-source command
+- [build.lib.capcat.core.source_system.remove_source_command](../api/build/remove_source_command.md) - Base classes and implementations for the remove-source command
+- [build.lib.capcat.core.source_system.remove_source_service](../api/build/remove_source_service.md) - Service layer for remove-source command
+- [build.lib.capcat.core.source_system.rss_feed_introspector](../api/build/rss_feed_introspector.md)
+- [build.lib.capcat.core.source_system.source_analytics](../api/build/source_analytics.md) - Source usage analytics and statistics
+- [build.lib.capcat.core.source_system.source_backup_manager](../api/build/source_backup_manager.md) - Backup and restore functionality for source configurations
+- [build.lib.capcat.core.source_system.source_config](../api/build/source_config.md) - Source configuration system for specialized sources
+- [build.lib.capcat.core.source_system.source_config_generator](../api/build/source_config_generator.md)
+- [build.lib.capcat.core.source_system.source_factory](../api/build/source_factory.md) - Source factory for creating and managing news source instances
+- [build.lib.capcat.core.source_system.source_registry](../api/build/source_registry.md) - Source registry for automatic discovery and management of news sources
+- [build.lib.capcat.core.source_system.validation_engine](../api/build/validation_engine.md) - Enhanced configuration validation engine for the source system
+- [build.lib.capcat.core.specialized_source_manager](../api/build/specialized_source_manager.md) - Specialized Source Manager for automatic URL-based source activation
+- [build.lib.capcat.core.storage_manager](../api/build/storage_manager.md) - Storage management component for Capcat
+- [build.lib.capcat.core.streamlined_comment_processor](../api/build/streamlined_comment_processor.md) - Streamlined comment processor for optimizing nested structure handling and reducing conversion time
+- [build.lib.capcat.core.template_renderer](../api/build/template_renderer.md) - Simple Template Renderer for Capcat
+Replaces {{placeholder}} variables with actual values from configuration
+- [build.lib.capcat.core.theme_utils](../api/build/theme_utils.md) - Theme utilities for hash-based theme persistence
+- [build.lib.capcat.core.timeout_config](../api/build/timeout_config.md) - Adaptive timeout configuration for Capcat
+- [build.lib.capcat.core.timeout_wrapper](../api/build/timeout_wrapper.md) - Timeout wrapper utilities for preventing hanging operations
+- [build.lib.capcat.core.tui_context](../api/build/tui_context.md) - TUI context flag
+- [build.lib.capcat.core.unified_article_processor](../api/build/unified_article_processor.md) - Unified Article Processor - Universal entry point for all article processing
+- [build.lib.capcat.core.unified_media_processor](../api/build/unified_media_processor.md) - Unified Media Processor Integration Layer
+- [build.lib.capcat.core.unified_source_processor](../api/build/unified_source_processor.md) - Unified Source Processor for Capcat
+- [build.lib.capcat.core.update_manager](../api/build/update_manager.md) - Update Manager for Capcat
+- [build.lib.capcat.core.url_utils](../api/build/url_utils.md) - URL validation and normalization utilities for Capcat
+- [build.lib.capcat.core.utils](../api/build/utils.md) - Core utilities for the Capcat application
+- [build.lib.capcat.htmlgen.__init__](../api/build/__init__.md) - HTML generation module for Capcat
+- [build.lib.capcat.htmlgen.factory](../api/build/factory.md) - Factory for creating ArticleHTMLGenerator instances
+- [build.lib.capcat.htmlgen.generator](../api/build/generator.md) - HTML Generator for Capcat - Static Site Generation
+Creates self-contained HTML files from markdown content with embedded CSS and JavaScript
+- [build.lib.capcat.scripts.__init__](../api/build/__init__.md)
+- [build.lib.capcat.scripts.generate_source_config](../api/build/generate_source_config.md) - Interactive script to generate comprehensive YAML configuration files
+for config-driven sources in Capcat
+- [build.lib.capcat.sources.__init__](../api/build/__init__.md)
+- [build.lib.capcat.sources.base.__init__](../api/build/__init__.md) - Base classes and interfaces for the source system
+- [build.lib.capcat.sources.builtin.__init__](../api/build/__init__.md)
+- [build.lib.capcat.sources.builtin.custom.hn.source](../api/build/source.md) - Hacker News source implementation for the new source system
+- [build.lib.capcat.sources.builtin.custom.lb.source](../api/build/source.md) - Lobsters source implementation for the new source system
+- [build.lib.capcat.sources.specialized.__init__](../api/build/__init__.md) - Specialized source implementations for platforms like Medium and Substack
+- [build.lib.capcat.sources.specialized.medium.source](../api/build/source.md) - Medium
+- [build.lib.capcat.sources.specialized.substack.source](../api/build/source.md) - Substack
+- [build.lib.capcat.sources.specialized.twitter.__init__](../api/build/__init__.md) - Twitter/X
+- [build.lib.capcat.sources.specialized.twitter.source](../api/build/source.md) - Twitter/X
+- [build.lib.capcat.sources.specialized.vimeo.__init__](../api/build/__init__.md) - Vimeo specialized source
+- [build.lib.capcat.sources.specialized.vimeo.source](../api/build/source.md) - Vimeo specialized source implementation
+- [build.lib.capcat.sources.specialized.youtube.__init__](../api/build/__init__.md) - YouTube specialized source
+- [build.lib.capcat.sources.specialized.youtube.source](../api/build/source.md) - YouTube specialized source implementation
+- [build.lib.capcat.tui](../api/build/tui.md) - TUI entry point — delegates to core interactive module
 
 ### Capcat
 
@@ -103,7 +241,6 @@ or refuse connection
 - [capcat.core.source_system.source_factory](../api/capcat/source_factory.md) - Source factory for creating and managing news source instances
 - [capcat.core.source_system.source_registry](../api/capcat/source_registry.md) - Source registry for automatic discovery and management of news sources
 - [capcat.core.source_system.validation_engine](../api/capcat/validation_engine.md) - Enhanced configuration validation engine for the source system
-- [capcat.core.specialized_source_manager](../api/capcat/specialized_source_manager.md) - Specialized Source Manager for automatic URL-based source activation
 - [capcat.core.storage_manager](../api/capcat/storage_manager.md) - Storage management component for Capcat
 - [capcat.core.streamlined_comment_processor](../api/capcat/streamlined_comment_processor.md) - Streamlined comment processor for optimizing nested structure handling and reducing conversion time
 - [capcat.core.template_renderer](../api/capcat/template_renderer.md) - Simple Template Renderer for Capcat
@@ -122,20 +259,19 @@ Replaces {{placeholder}} variables with actual values from configuration
 - [capcat.htmlgen.factory](../api/capcat/factory.md) - Factory for creating ArticleHTMLGenerator instances
 - [capcat.htmlgen.generator](../api/capcat/generator.md) - HTML Generator for Capcat - Static Site Generation
 Creates self-contained HTML files from markdown content with embedded CSS and JavaScript
+- [capcat.scripts.__init__](../api/capcat/__init__.md)
+- [capcat.scripts.generate_source_config](../api/capcat/generate_source_config.md) - Interactive script to generate comprehensive YAML configuration files
+for config-driven sources in Capcat
 - [capcat.sources.__init__](../api/capcat/__init__.md)
 - [capcat.sources.base.__init__](../api/capcat/__init__.md) - Base classes and interfaces for the source system
 - [capcat.sources.builtin.__init__](../api/capcat/__init__.md)
 - [capcat.sources.builtin.custom.hn.source](../api/capcat/source.md) - Hacker News source implementation for the new source system
 - [capcat.sources.builtin.custom.lb.source](../api/capcat/source.md) - Lobsters source implementation for the new source system
-- [capcat.sources.specialized.__init__](../api/capcat/__init__.md) - Specialized source implementations for platforms like Medium and Substack
-- [capcat.sources.specialized.medium.source](../api/capcat/source.md) - Medium
-- [capcat.sources.specialized.substack.source](../api/capcat/source.md) - Substack
-- [capcat.sources.specialized.twitter.__init__](../api/capcat/__init__.md) - Twitter/X
-- [capcat.sources.specialized.twitter.source](../api/capcat/source.md) - Twitter/X
-- [capcat.sources.specialized.vimeo.__init__](../api/capcat/__init__.md) - Vimeo specialized source
-- [capcat.sources.specialized.vimeo.source](../api/capcat/source.md) - Vimeo specialized source implementation
-- [capcat.sources.specialized.youtube.__init__](../api/capcat/__init__.md) - YouTube specialized source
-- [capcat.sources.specialized.youtube.source](../api/capcat/source.md) - YouTube specialized source implementation
+- [capcat.sources.builtin.custom.medium.source](../api/capcat/source.md) - Medium
+- [capcat.sources.builtin.custom.substack.source](../api/capcat/source.md) - Substack
+- [capcat.sources.builtin.custom.twitter.source](../api/capcat/source.md) - Twitter/X
+- [capcat.sources.builtin.custom.vimeo.source](../api/capcat/source.md) - Vimeo specialized source implementation
+- [capcat.sources.builtin.custom.youtube.source](../api/capcat/source.md) - YouTube specialized source implementation
 - [capcat.tui](../api/capcat/tui.md) - TUI entry point — delegates to core interactive module
 
 ### Core
@@ -341,9 +477,9 @@ Usage:
 
 ## Statistics
 
-- **Total Modules**: 237
-- **Total Classes**: 415
-- **Total Functions**: 514
-- **Public Functions**: 418
-- **Documentation Coverage**: 81.3%
+- **Total Modules**: 347
+- **Total Classes**: 614
+- **Total Functions**: 750
+- **Public Functions**: 594
+- **Documentation Coverage**: 79.2%
 

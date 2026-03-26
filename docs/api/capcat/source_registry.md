@@ -156,6 +156,39 @@ Raises:
 
 **Returns:** BaseSource
 
+##### get_source_for_url
+
+```python
+def get_source_for_url(self, url: str) -> Optional[Tuple[BaseSource, str]]
+```
+
+Return (source_instance, source_id) for the first registered custom
+source whose can_handle_url() classmethod matches the given URL.
+
+Returns None if no source claims the URL.
+
+**Parameters:**
+
+- `self`
+- `url` (str)
+
+**Returns:** Optional[Tuple[BaseSource, str]]
+
+##### can_handle_url
+
+```python
+def can_handle_url(self, url: str) -> bool
+```
+
+Return True if any registered custom source can handle the URL.
+
+**Parameters:**
+
+- `self`
+- `url` (str)
+
+**Returns:** bool
+
 ##### get_available_sources
 
 ```python
@@ -169,6 +202,25 @@ Get list of available source names.
 - `self`
 
 **Returns:** List[str]
+
+##### is_builtin_source
+
+```python
+def is_builtin_source(self, source_id: str) -> bool
+```
+
+Return True if *source_id* was discovered from the builtin package path.
+
+Builtin sources cannot be removed via the TUI — they are shipped with
+the application.  User-added sources (or user overrides of builtins)
+are not in this set and are safe to remove.
+
+**Parameters:**
+
+- `self`
+- `source_id` (str)
+
+**Returns:** bool
 
 ##### get_sources_by_category
 
@@ -310,7 +362,8 @@ def get_source_registry(project_root: Optional[Path] = None) -> SourceRegistry
 
 Get the source registry.
 
-When project_root is None, return the cached global singleton (backward-compatible).
+When project_root is None, return the cached global singleton, auto-detecting
+the project root so user sources in Config/sources/active/ are included.
 When project_root is non-None, always construct and return a fresh instance
 (singleton bypass — avoids stale-singleton bugs with user-overridden sources).
 

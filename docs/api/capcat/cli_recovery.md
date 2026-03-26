@@ -106,7 +106,7 @@ Automatically correct common command mistakes.
 ##### suggest_alternative_commands
 
 ```python
-def suggest_alternative_commands(self, failed_command: str, command_type: str) -> List[str]
+def suggest_alternative_commands(self, _failed_command: str, command_type: str) -> List[str]
 ```
 
 Suggest alternative commands when the current one fails.
@@ -121,7 +121,7 @@ Returns:
 **Parameters:**
 
 - `self`
-- `failed_command` (str)
+- `_failed_command` (str)
 - `command_type` (str)
 
 **Returns:** List[str]
@@ -129,7 +129,7 @@ Returns:
 ##### provide_contextual_help
 
 ```python
-def provide_contextual_help(self, command_type: str, error_context: Dict)
+def provide_contextual_help(self, command_type: str, _error_context: Dict)
 ```
 
 Provide contextual help based on the specific error and command type.
@@ -142,7 +142,7 @@ Args:
 
 - `self`
 - `command_type` (str)
-- `error_context` (Dict)
+- `_error_context` (Dict)
 
 
 ## Functions

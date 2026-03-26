@@ -78,3 +78,17 @@ Load source configuration from YAML file.
 **Returns:** dict
 
 
+## Functions
+
+### _resolve
+
+```python
+def _resolve(relative: str) -> str
+```
+
+**Parameters:**
+
+- `relative` (str)
+
+**Returns:** str
+

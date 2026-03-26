@@ -1,10 +1,12 @@
 Capcat Documentation Manifest
-Generated: 2026-03-20 16:25:06 UTC
+Generated: 2026-03-26 10:17:49 UTC
 Success rate: 2/2 tasks
 
 Generated Documentation:
   - ACCESSIBILITY-REMEDIATION-PLAN.md
   - README.md
+  - api/Config/README.md
+  - api/Config/source.md
   - api/README.md
   - api/Video/README.md
   - api/Video/analyze_audio.md
@@ -12,6 +14,93 @@ Generated Documentation:
   - api/__version__/__version__.md
   - api/add_jekyll_frontmatter/README.md
   - api/add_jekyll_frontmatter/add_jekyll_frontmatter.md
+  - api/build/README.md
+  - api/build/__init__.md
+  - api/build/__main__.md
+  - api/build/add_source.md
+  - api/build/add_source_command.md
+  - api/build/add_source_service.md
+  - api/build/article_fetcher.md
+  - api/build/base_source.md
+  - api/build/bundle_manager.md
+  - api/build/bundle_models.md
+  - api/build/bundle_service.md
+  - api/build/bundle_ui.md
+  - api/build/bundle_validator.md
+  - api/build/circuit_breaker.md
+  - api/build/cli.md
+  - api/build/cli_recovery.md
+  - api/build/cli_validation.md
+  - api/build/command_logging.md
+  - api/build/config.md
+  - api/build/config_driven_source.md
+  - api/build/constants.md
+  - api/build/conversion_executor.md
+  - api/build/design_system_compiler.md
+  - api/build/discovery_strategies.md
+  - api/build/downloader.md
+  - api/build/enhanced_argparse.md
+  - api/build/enhanced_remove_command.md
+  - api/build/error_handling.md
+  - api/build/ethical_scraping.md
+  - api/build/exceptions.md
+  - api/build/factory.md
+  - api/build/feed_discovery.md
+  - api/build/feed_parser.md
+  - api/build/fetch.md
+  - api/build/formatter.md
+  - api/build/generate_config.md
+  - api/build/generate_source_config.md
+  - api/build/generator.md
+  - api/build/html_post_processor.md
+  - api/build/image_processor.md
+  - api/build/init.md
+  - api/build/interactive.md
+  - api/build/logging_config.md
+  - api/build/media_config.md
+  - api/build/media_executor.md
+  - api/build/media_processor.md
+  - api/build/network_resilience.md
+  - api/build/performance_monitor.md
+  - api/build/progress.md
+  - api/build/questionary_ui.md
+  - api/build/rate_limiter.md
+  - api/build/removal_ui.md
+  - api/build/remove_source.md
+  - api/build/remove_source_command.md
+  - api/build/remove_source_service.md
+  - api/build/retry.md
+  - api/build/retry_skip.md
+  - api/build/rss_feed_introspector.md
+  - api/build/session_pool.md
+  - api/build/shutdown.md
+  - api/build/single.md
+  - api/build/source.md
+  - api/build/source_analytics.md
+  - api/build/source_backup_manager.md
+  - api/build/source_base.md
+  - api/build/source_config.md
+  - api/build/source_config_generator.md
+  - api/build/source_config_mirror.md
+  - api/build/source_configs.md
+  - api/build/source_factory.md
+  - api/build/source_registry.md
+  - api/build/specialized_source_manager.md
+  - api/build/storage_manager.md
+  - api/build/streamlined_comment_processor.md
+  - api/build/template_renderer.md
+  - api/build/theme_utils.md
+  - api/build/timeout_config.md
+  - api/build/timeout_wrapper.md
+  - api/build/tui.md
+  - api/build/tui_context.md
+  - api/build/unified_article_processor.md
+  - api/build/unified_media_processor.md
+  - api/build/unified_source_processor.md
+  - api/build/update_manager.md
+  - api/build/url_utils.md
+  - api/build/utils.md
+  - api/build/validation_engine.md
   - api/build_site/README.md
   - api/build_site/build_site.md
   - api/capcat/README.md
@@ -53,6 +142,7 @@ Generated Documentation:
   - api/capcat/fetch.md
   - api/capcat/formatter.md
   - api/capcat/generate_config.md
+  - api/capcat/generate_source_config.md
   - api/capcat/generator.md
   - api/capcat/html_generator.md
   - api/capcat/html_post_processor.md
@@ -273,6 +363,7 @@ Generated Documentation:
   - index.md
   - reference/modules.md
   - reference/quick-reference.md
+  - rss-feed-candidates.md
   - superpowers/plans/2026-03-15-breadcrumb-phase1-folder-naming.md
   - superpowers/plans/2026-03-15-breadcrumb-phase2-html-rendering.md
   - superpowers/plans/2026-03-15-claude-md-context-engineering.md
@@ -284,8 +375,11 @@ Generated Documentation:
   - superpowers/plans/2026-03-18-obsidian-wikilinks.md
   - superpowers/plans/2026-03-19-graceful-shutdown.md
   - superpowers/plans/2026-03-19-htmlgen-refactor.md
+  - superpowers/plans/2026-03-20-acceptance-test-runner.md
   - superpowers/plans/2026-03-20-userspace-source-mirror.md
   - superpowers/plans/2026-03-20-v140-todo-fixes.md
+  - superpowers/plans/2026-03-23-svg-icon-classification.md
+  - superpowers/plans/2026-03-26-per-source-article-count.md
   - superpowers/specs/2026-03-15-breadcrumb-phase1-folder-naming-design.md
   - superpowers/specs/2026-03-15-breadcrumb-phase2-html-rendering-design.md
   - superpowers/specs/2026-03-15-claude-md-context-engineering-design.md
@@ -295,9 +389,12 @@ Generated Documentation:
   - superpowers/specs/2026-03-18-obsidian-wikilinks-design.md
   - superpowers/specs/2026-03-19-graceful-shutdown-design.md
   - superpowers/specs/2026-03-19-htmlgen-refactor-design.md
+  - superpowers/specs/2026-03-20-acceptance-test-runner-design.md
   - superpowers/specs/2026-03-20-userspace-source-mirror-design.md
   - superpowers/specs/2026-03-20-v140-todo-fixes-design.md
+  - superpowers/specs/2026-03-23-svg-icon-classification-design.md
+  - superpowers/specs/2026-03-25-per-source-article-count-design.md
   - troubleshooting.md
 
-Total files: 595
-Documentation size: 9.8 MB
+Total files: 694
+Documentation size: 10.4 MB

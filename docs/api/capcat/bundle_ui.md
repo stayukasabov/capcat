@@ -62,14 +62,13 @@ Returns:
 ##### prompt_edit_bundle_metadata
 
 ```python
-def prompt_edit_bundle_metadata(self, current_description: str, current_default_count: int) -> Optional[Dict[str, any]]
+def prompt_edit_bundle_metadata(self, current_description: str) -> Optional[Dict[str, any]]
 ```
 
 Prompt user to edit bundle metadata.
 
 Args:
     current_description: Current description
-    current_default_count: Current default count
 
 Returns:
     Dictionary with updated values or None if cancelled
@@ -78,7 +77,6 @@ Returns:
 
 - `self`
 - `current_description` (str)
-- `current_default_count` (int)
 
 **Returns:** Optional[Dict[str, any]]
 

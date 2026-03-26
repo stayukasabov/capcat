@@ -21,14 +21,6 @@ Validates bundle IDs, descriptions, source IDs, and integrity.
 
 **Value:** `200`
 
-### DEFAULT_COUNT_MIN
-
-**Value:** `1`
-
-### DEFAULT_COUNT_MAX
-
-**Value:** `100`
-
 ## Classes
 
 ### ValidationResult
@@ -130,27 +122,6 @@ Returns:
 
 - `self`
 - `description` (str)
-
-**Returns:** ValidationResult
-
-##### validate_default_count
-
-```python
-def validate_default_count(self, count: int) -> ValidationResult
-```
-
-Validate default article count.
-
-Args:
-    count: Article count
-
-Returns:
-    ValidationResult with errors if invalid
-
-**Parameters:**
-
-- `self`
-- `count` (int)
 
 **Returns:** ValidationResult
 

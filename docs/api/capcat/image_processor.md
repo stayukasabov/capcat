@@ -7,6 +7,16 @@
 Global Image Processor for Capcat.
 Modular, DRY architecture with source-specific configurations.
 
+## Constants
+
+### _UI_PATH_PATTERNS
+
+**Value:** `('icon', 'logo', 'social', 'avatar', 'sprite', 'banner', '/ad/', 'pixel', 'tracker', 'beacon', 'nav', 'header', 'footer', 'menu', 'button', 'share', 'loading', 'spinner', '1x1')`
+
+### _MIN_PIXEL_DIMENSION
+
+**Value:** `64`
+
 ## Classes
 
 ### ImageProcessor
@@ -30,7 +40,7 @@ def __init__(self, session: Optional[requests.Session] = None)
 ##### process_article_images
 
 ```python
-def process_article_images(self, html_content: str, source_config: dict, base_url: str, output_folder: str, page_title: str = '', media_enabled: bool = False) -> Dict[str, str]
+def process_article_images(self, html_content: str, source_config: dict, base_url: str, output_folder: str, page_title: str = '', media_enabled: bool = False, article_url: str = '') -> Dict[str, str]
 ```
 
 Process images for an article using source-specific configuration.
@@ -56,8 +66,26 @@ Returns:
 - `output_folder` (str)
 - `page_title` (str) *optional*
 - `media_enabled` (bool) *optional*
+- `article_url` (str) *optional*
 
 **Returns:** Dict[str, str]
+
+##### _read_image_dimensions
+
+```python
+def _read_image_dimensions(filepath: str) -> Optional[Tuple[int, int]]
+```
+
+Return (width, height) for PNG or JPEG files by reading header bytes.
+Returns None if the format is unrecognised or parsing fails.
+
+**Parameters:**
+
+- `filepath` (str)
+
+**Returns:** Optional[Tuple[int, int]]
+
+⚠️ **High complexity:** 11
 
 ##### _extract_image_urls
 
@@ -76,7 +104,7 @@ Extract image URLs using source-specific selectors.
 
 **Returns:** List[str]
 
-⚠️ **High complexity:** 15
+⚠️ **High complexity:** 16
 
 ##### _should_skip_image
 
@@ -147,7 +175,7 @@ Download images with size limits and return URL to filename mapping.
 ##### _download_images_with_checking
 
 ```python
-def _download_images_with_checking(self, image_urls: List[str], output_folder: str, media_enabled: bool = False, min_image_size: int = 0) -> Dict[str, str]
+def _download_images_with_checking(self, image_urls: List[str], output_folder: str, media_enabled: bool = False, min_image_size: int = 0, referer: str = '') -> Dict[str, str]
 ```
 
 Download images with simple per-image checking and optional size filtering.
@@ -159,6 +187,7 @@ Download images with simple per-image checking and optional size filtering.
 - `output_folder` (str)
 - `media_enabled` (bool) *optional*
 - `min_image_size` (int) *optional*
+- `referer` (str) *optional*
 
 **Returns:** Dict[str, str]
 
@@ -180,7 +209,7 @@ Check if source has explicit configuration (not a generic/discovered source).
 ##### _download_single_image_simple
 
 ```python
-def _download_single_image_simple(self, url: str, images_dir: str, counter: int) -> Optional[str]
+def _download_single_image_simple(self, url: str, images_dir: str, counter: int, referer: str = '') -> Optional[str]
 ```
 
 Download single image with simple error handling.
@@ -191,13 +220,14 @@ Download single image with simple error handling.
 - `url` (str)
 - `images_dir` (str)
 - `counter` (int)
+- `referer` (str) *optional*
 
 **Returns:** Optional[str]
 
 ##### _download_single_image_with_min_size
 
 ```python
-def _download_single_image_with_min_size(self, url: str, images_dir: str, counter: int, min_size: int) -> Optional[str]
+def _download_single_image_with_min_size(self, url: str, images_dir: str, counter: int, min_size: int, referer: str = '') -> Optional[str]
 ```
 
 Download single image with minimum size filtering.
@@ -209,6 +239,7 @@ Download single image with minimum size filtering.
 - `images_dir` (str)
 - `counter` (int)
 - `min_size` (int)
+- `referer` (str) *optional*
 
 **Returns:** Optional[str]
 

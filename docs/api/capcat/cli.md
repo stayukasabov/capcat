@@ -22,6 +22,20 @@ Print the top-level usage text to stdout and return.
 
 **Returns:** None
 
+### run_app
+
+```python
+def run_app(args: list) -> None
+```
+
+Programmatic entry point — run capcat with a pre-built argument list.
+
+**Parameters:**
+
+- `args` (list)
+
+**Returns:** None
+
 ### main
 
 ```python

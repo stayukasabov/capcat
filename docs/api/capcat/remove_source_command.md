@@ -307,6 +307,40 @@ Run the full interactive removal workflow.
 
 **Returns:** None
 
+##### _remove_sources
+
+```python
+def _remove_sources(self, sources_info: List['SourceRemovalInfo']) -> None
+```
+
+Remove a list of sources (config + bundles) without UI interaction.
+
+Used by EnhancedRemoveCommand after confirmation has been handled.
+
+Args:
+    sources_info: Sources to remove.
+
+**Parameters:**
+
+- `self`
+- `sources_info` (List['SourceRemovalInfo'])
+
+**Returns:** None
+
+##### _refresh_registry
+
+```python
+def _refresh_registry(self) -> None
+```
+
+Reset the global source registry so it reflects removed sources.
+
+**Parameters:**
+
+- `self`
+
+**Returns:** None
+
 
 ### RegistrySourceLister
 
@@ -322,7 +356,10 @@ Lists sources via SourceRegistry — reads the live registry at call time.
 def list_sources(self) -> List[tuple]
 ```
 
-Return ``[(source_id, display_name)]`` for every registered source.
+Return ``[(source_id, display_name)]`` for every user-removable source.
+
+Builtin sources (shipped with the application) are excluded — they
+cannot be removed and would silently no-op if the removal were attempted.
 
 **Parameters:**
 

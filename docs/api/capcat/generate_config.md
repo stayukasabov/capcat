@@ -14,7 +14,7 @@ Generate-config command — launches the interactive source config generator.
 def generate_config(args: argparse.Namespace) -> None
 ```
 
-Launch the interactive config generator script.
+Launch the interactive config generator.
 
 Args:
     args: Namespace with optional output path.

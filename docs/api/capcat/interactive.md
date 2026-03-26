@@ -77,20 +77,35 @@ Handle removing existing sources.
 def _handle_list_sources()
 ```
 
-Handle listing all available sources.
+Handle listing all available sources with interactive detail view.
 
-### _show_source_details
+### _show_source_detail
 
 ```python
-def _show_source_details(source_id, registry)
+def _show_source_detail(source_id, config)
 ```
 
-Display detailed information about a source.
+Display detailed information about a source and offer to edit article_count.
 
 **Parameters:**
 
 - `source_id`
-- `registry`
+- `config`
+
+### _edit_source_count
+
+```python
+def _edit_source_count(source_id, config)
+```
+
+Prompt for a new article_count and write it to the userspace YAML.
+
+**Parameters:**
+
+- `source_id`
+- `config`
+
+⚠️ **High complexity:** 14
 
 ### _handle_test_source
 
@@ -159,7 +174,7 @@ Prints a summary and executes the command by calling run_app directly.
 - `selection`
 - `generate_html`
 
-⚠️ **High complexity:** 11
+⚠️ **High complexity:** 12
 
 ### _show_completion_screen
 
@@ -183,15 +198,19 @@ Args:
 ### _find_latest_index_html
 
 ```python
-def _find_latest_index_html() -> str | None
+def _find_latest_index_html() -> 'str | None'
 ```
 
-Find the most recently modified index.html under the News output directory.
+Find the most recently modified HTML output file.
+
+Checks both batch fetch index pages (News_*/index.html) and single
+article pages (Capcats/*/*/html/article.html), returning whichever
+was modified most recently.
 
 Returns:
-    Absolute path string to index.html, or None if not found.
+    Absolute path string to the HTML file, or None if not found.
 
-**Returns:** str | None
+**Returns:** 'str | None'
 
 ### _handle_manage_bundles
 

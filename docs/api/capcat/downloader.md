@@ -7,6 +7,12 @@
 Media downloader for Capcat.
 Handles downloading of images, documents, audio, and video files.
 
+## Constants
+
+### _KNOWN_EXTENSIONS
+
+**Value:** `{'.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.odt', '.ods', '.odp', '.rtf', '.txt', '.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.webp', '.mp3', '.wav', '.ogg', '.flac', '.mp4', '.avi', '.mov', '.webm'}`
+
 ## Functions
 
 ### is_document_url
@@ -88,5 +94,5 @@ Args:
 
 **Returns:** Optional[str]
 
-⚠️ **High complexity:** 68
+⚠️ **High complexity:** 70
 
