@@ -802,7 +802,7 @@ Override to extract content using configured selectors.
 - `base_folder` (str)
 - `progress_callback` *optional*
 
-⚠️ **High complexity:** 83
+⚠️ **High complexity:** 71
 
 ##### _cleanup_empty_images_folder
 
@@ -859,6 +859,23 @@ Determine if an image should be skipped based on UI element patterns.
 
 
 ## Functions
+
+### _collect_pdf_links_from_soup
+
+```python
+def _collect_pdf_links_from_soup(soup: 'BeautifulSoup', base_url: str) -> list
+```
+
+Return (link_text, href) pairs for PDF links found outside header/footer.
+
+**Parameters:**
+
+- `soup` ('BeautifulSoup')
+- `base_url` (str)
+
+**Returns:** list
+
+⚠️ **High complexity:** 14
 
 ### _listen_for_esc
 
