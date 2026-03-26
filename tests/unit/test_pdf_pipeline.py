@@ -3,6 +3,42 @@ Tests for PDF pipeline: html generator pdf_link inclusion and TUI --media flag.
 """
 from unittest.mock import MagicMock, patch
 
+from bs4 import BeautifulSoup
+
+from capcat.core.article_fetcher import _collect_pdf_links_from_soup
+
+
+# ---------------------------------------------------------------------------
+# Pass 1 PDF link collection — ancestor filter
+# ---------------------------------------------------------------------------
+
+class TestCollectPdfLinksAncestorFilter:
+    def test_footer_pdf_excluded(self):
+        html = '<html><footer><a href="https://example.com/Tax_strategy.pdf">Tax</a></footer></html>'
+        soup = BeautifulSoup(html, "html.parser")
+        links = _collect_pdf_links_from_soup(soup, "https://example.com/article")
+        assert links == []
+
+    def test_header_pdf_excluded(self):
+        html = '<html><header><a href="https://example.com/report.pdf">Report</a></header></html>'
+        soup = BeautifulSoup(html, "html.parser")
+        links = _collect_pdf_links_from_soup(soup, "https://example.com/article")
+        assert links == []
+
+    def test_aside_pdf_collected(self):
+        html = '<html><aside><a href="https://arxiv.org/pdf/1234">PDF</a></aside></html>'
+        soup = BeautifulSoup(html, "html.parser")
+        links = _collect_pdf_links_from_soup(soup, "https://arxiv.org/abs/1234")
+        assert len(links) == 1
+        assert links[0][1] == "https://arxiv.org/pdf/1234"
+
+    def test_article_pdf_collected(self):
+        html = '<html><article><a href="https://example.com/paper.pdf">Paper</a></article></html>'
+        soup = BeautifulSoup(html, "html.parser")
+        links = _collect_pdf_links_from_soup(soup, "https://example.com/article")
+        assert len(links) == 1
+        assert links[0][1] == "https://example.com/paper.pdf"
+
 
 # ---------------------------------------------------------------------------
 # Helpers
