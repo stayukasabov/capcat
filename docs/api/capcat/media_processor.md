@@ -353,6 +353,8 @@ Example:
 
 **Returns:** str
 
+⚠️ **High complexity:** 14
+
 ##### remove_image_from_markdown
 
 ```python
