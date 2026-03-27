@@ -4,6 +4,8 @@ Tracks whether the process is currently running inside the interactive TUI.
 Used to suppress prompts and per-article warnings that would corrupt
 questionary's terminal state when called via _dispatch inside the TUI.
 """
+from __future__ import annotations
+
 import threading
 from collections import Counter
 from typing import TYPE_CHECKING
