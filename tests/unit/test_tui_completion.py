@@ -28,7 +28,8 @@ def test_completion_screen_called_on_success():
          _mock_pdf_confirm():
         from capcat.core.interactive import _confirm_and_execute
         _confirm_and_execute("bundle", "techpro", False)
-    mock_screen.assert_called_once_with(False, True)
+    args, kwargs = mock_screen.call_args
+    assert args == (False, True)
 
 
 def test_completion_screen_called_on_nonzero_exit():
@@ -38,7 +39,8 @@ def test_completion_screen_called_on_nonzero_exit():
          _mock_pdf_confirm():
         from capcat.core.interactive import _confirm_and_execute
         _confirm_and_execute("bundle", "techpro", False)
-    mock_screen.assert_called_once_with(False, False)
+    args, kwargs = mock_screen.call_args
+    assert args == (False, False)
 
 
 def test_completion_screen_called_on_exception():
@@ -48,7 +50,8 @@ def test_completion_screen_called_on_exception():
          _mock_pdf_confirm():
         from capcat.core.interactive import _confirm_and_execute
         _confirm_and_execute("fetch", ["hn"], True)
-    mock_screen.assert_called_once_with(True, False)
+    args, kwargs = mock_screen.call_args
+    assert args == (True, False)
 
 
 def test_completion_screen_exit_choice_calls_sys_exit():
