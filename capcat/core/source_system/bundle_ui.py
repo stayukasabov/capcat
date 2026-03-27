@@ -48,7 +48,7 @@ class BundleUI:
         ]
 
         from capcat.core.interactive import print_logo
-        print_logo()
+        print_logo(menu_lines=14)
         return questionary.select(
             "  Bundle Management - Select an option:",
             choices=choices,
@@ -155,7 +155,7 @@ class BundleUI:
             choices.append(questionary.Choice("Cancel", "cancel"))
 
         from capcat.core.interactive import print_logo
-        print_logo()
+        print_logo(menu_lines=len(choices) + 3)
         selected = questionary.select(
             message,
             choices=choices,
@@ -229,7 +229,7 @@ class BundleUI:
                 ))
 
         from capcat.core.interactive import print_logo
-        print_logo()
+        print_logo(menu_lines=len(choices) + 3)
         selected = questionary.checkbox(
             message,
             choices=choices,
@@ -249,7 +249,7 @@ class BundleUI:
             'copy' or 'move' or None if cancelled
         """
         from capcat.core.interactive import print_logo
-        print_logo()
+        print_logo(menu_lines=7)
         return questionary.select(
             "  Copy or Move?",
             choices=[
