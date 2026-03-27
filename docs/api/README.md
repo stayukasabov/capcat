@@ -17,6 +17,7 @@ This is the complete API reference for Capcat.
 - [Convert_Docs_To_Html](./convert_docs_to_html/README.md)
 - [Convert_To_Markdown](./convert_to_markdown/README.md)
 - [Core](./core/README.md)
+- [Debug](./debug/README.md)
 - [Delete_H4_Colon](./delete_h4_colon/README.md)
 - [Htmlgen](./htmlgen/README.md)
 - [Legacy](./legacy/README.md)

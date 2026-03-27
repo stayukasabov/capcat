@@ -802,7 +802,7 @@ Override to extract content using configured selectors.
 - `base_folder` (str)
 - `progress_callback` *optional*
 
-⚠️ **High complexity:** 71
+⚠️ **High complexity:** 77
 
 ##### _cleanup_empty_images_folder
 

@@ -1,11 +1,12 @@
 Capcat Documentation Manifest
-Generated: 2026-03-27 02:07:28 UTC
+Generated: 2026-03-27 02:30:56 UTC
 Success rate: 2/2 tasks
 
 Generated Documentation:
   - ACCESSIBILITY-REMEDIATION-PLAN.md
   - README.md
   - api/Config/README.md
+  - api/Config/custom-lb-source.md
   - api/Config/source.md
   - api/README.md
   - api/Video/README.md
@@ -281,6 +282,13 @@ Generated Documentation:
   - api/core/url_utils.md
   - api/core/utils.md
   - api/core/validation_engine.md
+  - api/debug/README.md
+  - api/debug/content-extraction-debugger.md
+  - api/debug/fix-sources.md
+  - api/debug/log-analyzer.md
+  - api/debug/quick-troubleshoot.md
+  - api/debug/simple-troubleshoot.md
+  - api/debug/source-tester.md
   - api/delete_h4_colon/README.md
   - api/delete_h4_colon/delete_h4_colon.md
   - api/fix_ascii_formatting/README.md
@@ -403,5 +411,5 @@ Generated Documentation:
   - superpowers/specs/2026-03-26-tui-menu-bottom-blank-row-design.md
   - troubleshooting.md
 
-Total files: 722
+Total files: 731
 Documentation size: 43.9 MB
