@@ -6,6 +6,10 @@ questionary's terminal state when called via _dispatch inside the TUI.
 """
 import threading
 from collections import Counter
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from capcat.core.unified_source_processor import FetchResult
 
 _tui_active: bool = False
 _tui_results_lock = threading.Lock()
