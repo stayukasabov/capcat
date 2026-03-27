@@ -206,27 +206,68 @@ def html_to_markdown(html_content: str, base_url: str = None) -> str:
 
 
 def _parse_srcset(srcset: str) -> str:
-    """Parse srcset attribute and return the highest resolution image URL."""
+    """Parse srcset attribute and return the highest resolution image URL.
+
+    Skips data: URI entries (lazy-load SVG placeholders used by WordPress/Avada
+    and similar CMS platforms). Returns '' if no real URL is found.
+
+    data: URIs may contain commas (e.g. the encoded SVG payload after the MIME
+    type), so we re-join comma-split fragments that belong to the same data: URI
+    before evaluating each entry.
+    """
     if not srcset:
         return ""
 
-    # srcset format: "url1 width1, url2 width2, url3 width3"
-    # Example: "image-480.jpg 480w, image-800.jpg 800w, image-1200.jpg 1200w"
-    entries = [entry.strip() for entry in srcset.split(",")]
+    raw_parts = srcset.split(",")
+
+    # Merge fragments that are continuations of a data: URI.  A data: URI starts
+    # with "data:" and the part immediately after the first comma is the payload,
+    # which may itself contain encoded commas.  We detect continuation fragments
+    # as parts that do not start a new srcset entry (i.e. they do not match the
+    # pattern "<url> <descriptor>" and the preceding entry started with "data:").
+    entries = []
+    i = 0
+    while i < len(raw_parts):
+        part = raw_parts[i].strip()
+        if part.startswith("data:"):
+            # Consume continuation fragments until we hit one that looks like a
+            # new srcset entry (starts with http/https//) or we run out.
+            merged = part
+            j = i + 1
+            while j < len(raw_parts):
+                next_part = raw_parts[j].strip()
+                # A new srcset entry either starts with a scheme or absolute path,
+                # or its rsplit(" ",1) descriptor is a valid "Nw"/"Nx" token.
+                candidate_parts = next_part.rsplit(" ", 1)
+                if len(candidate_parts) == 2:
+                    desc = candidate_parts[1].strip()
+                    if (desc.endswith("w") or desc.endswith("x")) and (
+                        desc[:-1].isdigit() or _is_float(desc[:-1])
+                    ):
+                        # Looks like a genuine new srcset entry
+                        break
+                if next_part.startswith(("http://", "https://", "//")):
+                    break
+                merged += "," + raw_parts[j]
+                j += 1
+            entries.append(merged.strip())
+            i = j
+        else:
+            entries.append(part)
+            i += 1
 
     best_url = ""
     max_width = 0
 
     for entry in entries:
-        parts = entry.rsplit(
-            " ", 1
-        )  # Split from right to separate URL from descriptor
+        parts = entry.rsplit(" ", 1)
         if len(parts) == 2:
             url, descriptor = parts
             url = url.strip()
+            if url.startswith("data:"):
+                continue
             descriptor = descriptor.strip()
 
-            # Extract width from descriptor (e.g., "800w" -> 800)
             if descriptor.endswith("w"):
                 try:
                     width = int(descriptor[:-1])
@@ -236,20 +277,29 @@ def _parse_srcset(srcset: str) -> str:
                 except ValueError:
                     continue
             elif descriptor.endswith("x"):
-                # Handle pixel density descriptors (e.g., "2x")
                 try:
                     float(descriptor[:-1])
-                    # Treat higher density as preference when no width-based entries
                     if not best_url or max_width == 0:
                         best_url = url
                 except ValueError:
                     continue
         elif len(parts) == 1:
-            # No descriptor, just URL - use as fallback
+            url = parts[0].strip()
+            if url.startswith("data:"):
+                continue
             if not best_url:
-                best_url = parts[0].strip()
+                best_url = url
 
     return best_url
+
+
+def _is_float(s: str) -> bool:
+    """Return True if s can be parsed as a float."""
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
 
 
 def _process_images(soup):
@@ -262,7 +312,9 @@ def _process_images(soup):
 
         src = img.get("src", "")
 
-        # Check for srcset attribute for responsive images (prioritize highest resolution)
+        # Check for srcset attribute for responsive images (prioritize highest resolution).
+        # _parse_srcset skips data: URI placeholders, so src is preserved when srcset
+        # is a lazy-load placeholder.
         srcset = img.get("srcset", "")
         if srcset:
             best_src = _parse_srcset(srcset)
@@ -270,10 +322,14 @@ def _process_images(soup):
                 src = best_src
 
         if not src:
-            # Try data-src for lazy-loaded images
+            # data-srcset holds real responsive URLs on lazy-load sites where
+            # srcset is poisoned with a data: placeholder.
+            data_srcset = img.get("data-srcset", "")
+            if data_srcset:
+                src = _parse_srcset(data_srcset)
+        if not src:
             src = img.get("data-src", "")
         if not src:
-            # Try data-lazy for lazy-loaded images
             src = img.get("data-lazy", "")
 
         alt = img.get("alt", "image")

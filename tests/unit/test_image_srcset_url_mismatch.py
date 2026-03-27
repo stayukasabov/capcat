@@ -52,6 +52,68 @@ def _get_extracted_urls(html: str, base_url: str) -> list:
     return processor._extract_image_urls(html, img_config, base_url)
 
 
+# Lazy-load HTML: srcset is SVG placeholder, src has real URL, data-srcset has responsive URLs
+WORDPRESS_LAZYLOAD_HTML = """
+<html><body>
+<article>
+  <figure>
+    <img
+      src="https://example.com/uploads/image.jpg"
+      srcset="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%3E%3C%2Fsvg%3E"
+      data-srcset="https://example.com/uploads/image-200w.jpg 200w, https://example.com/uploads/image-800w.jpg 800w"
+      class="lazyload"
+      alt="Sand grains"
+    />
+  </figure>
+</article>
+</body></html>
+"""
+
+# HTML where src is empty, srcset is placeholder — only data-srcset has real URLs
+DATA_SRCSET_ONLY_HTML = """
+<html><body>
+<img
+  src=""
+  srcset="data:image/svg+xml,placeholder"
+  data-srcset="https://example.com/small.jpg 200w, https://example.com/large.jpg 800w"
+  alt="test"
+/>
+</body></html>
+"""
+
+
+def test_parse_srcset_skips_data_uri_placeholder():
+    """_parse_srcset must return '' when all srcset entries are data: URIs."""
+    from capcat.core.formatter import _parse_srcset
+    placeholder = "data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%3E%3C%2Fsvg%3E"
+    assert _parse_srcset(placeholder) == ""
+
+
+def test_formatter_uses_src_when_srcset_is_data_placeholder():
+    """When srcset is a lazy-load SVG placeholder, _process_images must use src."""
+    url = _get_markdown_img_url(WORDPRESS_LAZYLOAD_HTML)
+    assert url == "https://example.com/uploads/image.jpg", (
+        f"Expected real src URL, got: {url}"
+    )
+
+
+def test_formatter_falls_back_to_data_srcset_when_src_empty():
+    """When src is empty and srcset is placeholder, use highest-res from data-srcset."""
+    url = _get_markdown_img_url(DATA_SRCSET_ONLY_HTML)
+    assert url == "https://example.com/large.jpg", (
+        f"Expected highest-res data-srcset URL, got: {url}"
+    )
+
+
+def test_extractor_uses_src_when_srcset_is_data_placeholder():
+    """_extract_image_urls must use src, not data:, when srcset is a placeholder."""
+    urls = _get_extracted_urls(WORDPRESS_LAZYLOAD_HTML, "https://example.com/")
+    assert "https://example.com/uploads/image.jpg" in urls
+    assert not any("data:" in u for u in urls), (
+        f"data: URI leaked into extracted URLs: {urls}"
+    )
+
+
 def test_formatter_uses_srcset_highest_resolution():
     """_process_images must pick the highest-res srcset URL for the markdown."""
     url = _get_markdown_img_url(WORDPRESS_HTML)
