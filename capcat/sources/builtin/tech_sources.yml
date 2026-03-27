@@ -17,36 +17,12 @@ sources:
     base_url: "https://www.infoq.com"
     timeout: 10
 
-  gizmodo:
-    name: "Gizmodo"
-    category: "tech"
-    base_url: "https://gizmodo.com"
-    timeout: 10
-
-  lesswrong:
-    name: "LessWrong"
-    category: "tech"
-    base_url: "https://www.lesswrong.com"
-    timeout: 15
-
   ieee:
     name: "IEEE Spectrum"
     category: "tech"
     base_url: "https://spectrum.ieee.org"
     rss_url: "https://spectrum.ieee.org/rss"
     timeout: 30
-
-  googleai:
-    name: "Google AI Blog"
-    category: "ai"
-    base_url: "https://blog.research.google/"
-    timeout: 10
-
-  openai:
-    name: "OpenAI Blog"
-    category: "ai"
-    base_url: "https://openai.com"
-    timeout: 10
 
   mitnews:
     name: "MIT News AI"
