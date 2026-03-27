@@ -2873,6 +2873,26 @@ class NewsSourceArticleFetcher(ArticleFetcher):
             self.logger.debug(f"Failed to parse HTML from {url}: {e}")
             return False, None, None
 
+        # Detect JavaScript-only SPA shells before attempting extraction.
+        # These pages have a nearly empty body with a root mount point — all
+        # content is rendered client-side and cannot be extracted without a
+        # headless browser.
+        body = soup.find("body")
+        if body:
+            body_text = body.get_text(strip=True)
+            spa_root = (
+                body.find(id="root")
+                or body.find(id="app")
+                or body.find(id="__next")
+                or body.find(attrs={"data-reactroot": True})
+            )
+            if spa_root and len(body_text) < 100:
+                self.logger.warning(
+                    f"JavaScript-rendered page at {url} - content requires "
+                    f"browser execution and cannot be extracted"
+                )
+                return False, None, None
+
         # Collect PDF links from the FULL page BEFORE cleanup.
         # Sites like arXiv keep their PDF download link inside <aside>, which
         # gets removed below — so we must harvest it here while it still exists.
