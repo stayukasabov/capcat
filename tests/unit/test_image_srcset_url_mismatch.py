@@ -146,3 +146,19 @@ def test_extractor_and_formatter_agree_on_url():
         f"Markdown URL '{markdown_url}' not found in extracted URLs {extracted_urls}. "
         "String replacement will silently fail — local image path never substituted."
     )
+
+
+def test_media_processor_parse_srcset_skips_data_uri():
+    """MediaProcessor.parse_srcset must return '' for data: placeholder srcsets."""
+    from capcat.core.media_processor import MediaProcessor
+    processor = MediaProcessor.__new__(MediaProcessor)
+    placeholder = "data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%3E%3C%2Fsvg%3E"
+    assert processor.parse_srcset(placeholder) == ""
+
+
+def test_media_processor_parse_srcset_returns_highest_res_real_url():
+    """MediaProcessor.parse_srcset must still return the highest-res real URL."""
+    from capcat.core.media_processor import MediaProcessor
+    processor = MediaProcessor.__new__(MediaProcessor)
+    srcset = "https://example.com/small.jpg 200w, https://example.com/large.jpg 1200w"
+    assert processor.parse_srcset(srcset) == "https://example.com/large.jpg"
