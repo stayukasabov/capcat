@@ -9,7 +9,7 @@ from collections import Counter
 
 _tui_active: bool = False
 _tui_results_lock = threading.Lock()
-_tui_results: list[tuple[bool, "str | None"]] = []
+_tui_results: list[tuple[bool, str | None]] = []
 
 
 def set_tui_active(active: bool) -> None:
@@ -29,8 +29,8 @@ def reset_fetch_results() -> None:
         _tui_results.clear()
 
 
-def record_fetch_result(success: bool, reason: "str | None") -> None:
-    """Record one article outcome. Thread-safe. No-op outside TUI."""
+def record_fetch_result(success: bool, reason: str | None) -> None:
+    """Record one article outcome. Thread-safe."""
     with _tui_results_lock:
         _tui_results.append((success, reason))
 
