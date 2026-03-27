@@ -82,13 +82,34 @@ def _parse_srcset(srcset: str) -> str
 
 Parse srcset attribute and return the highest resolution image URL.
 
+Skips data: URI entries (lazy-load SVG placeholders used by WordPress/Avada
+and similar CMS platforms). Returns '' if no real URL is found.
+
+data: URIs may contain commas (e.g. the encoded SVG payload after the MIME
+type), so we re-join comma-split fragments that belong to the same data: URI
+before evaluating each entry.
+
 **Parameters:**
 
 - `srcset` (str)
 
 **Returns:** str
 
-⚠️ **High complexity:** 13
+⚠️ **High complexity:** 24
+
+### _is_float
+
+```python
+def _is_float(s: str) -> bool
+```
+
+Return True if s can be parsed as a float.
+
+**Parameters:**
+
+- `s` (str)
+
+**Returns:** bool
 
 ### _process_images
 
@@ -102,7 +123,7 @@ Process img tags to ensure proper Markdown syntax, filtering out broken images.
 
 - `soup`
 
-⚠️ **High complexity:** 13
+⚠️ **High complexity:** 15
 
 ### _is_broken_image_url
 
