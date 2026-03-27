@@ -138,3 +138,49 @@ def test_cli_mode_does_not_record():
     fr = get_fetch_result()
     assert fr.saved == 0
     assert fr.skipped == []
+
+
+from unittest.mock import patch
+from capcat.core.unified_source_processor import FetchResult
+
+
+def _run_show_completion(generate_html, success, fetch_result=None):
+    """Run _show_completion_screen with menu choice patched to 'menu'."""
+    with patch("questionary.select") as mock_q, \
+         patch("capcat.core.interactive._find_latest_index_html", return_value=None), \
+         patch("builtins.print") as mock_print:
+        mock_q.return_value.ask.return_value = "menu"
+        from capcat.core.interactive import _show_completion_screen
+        _show_completion_screen(generate_html, success, fetch_result=fetch_result)
+    return [str(c) for c in mock_print.call_args_list]
+
+
+def test_completion_no_summary_when_no_fetch_result():
+    """No summary line when fetch_result is None."""
+    lines = _run_show_completion(False, True, fetch_result=None)
+    assert not any("saved" in l for l in lines)
+
+
+def test_completion_summary_saved_only():
+    """'47 saved' shown when nothing skipped."""
+    fr = FetchResult(saved=47, skipped=[])
+    lines = _run_show_completion(False, True, fetch_result=fr)
+    assert any("47 saved" in l for l in lines)
+    assert not any("skipped" in l for l in lines)
+
+
+def test_completion_summary_with_skipped():
+    """'47 saved, 3 skipped (2 blocked, 1 JS-rendered)' shown when skipped > 0."""
+    fr = FetchResult(saved=47, skipped=[("blocked", 2), ("JS-rendered", 1)])
+    lines = _run_show_completion(False, True, fetch_result=fr)
+    combined = " ".join(lines)
+    assert "47 saved" in combined
+    assert "3 skipped" in combined
+    assert "blocked" in combined
+
+
+def test_completion_no_summary_when_zero_zero():
+    """No summary when saved=0 and skipped=0 (source returned no articles)."""
+    fr = FetchResult(saved=0, skipped=[])
+    lines = _run_show_completion(False, True, fetch_result=fr)
+    assert not any("saved" in l for l in lines)
