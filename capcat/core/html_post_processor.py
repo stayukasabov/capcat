@@ -634,7 +634,9 @@ class HTMLPostProcessor:
 
         try:
             self.logger.info(f"HTML archive available at: {index_url}")
-            print(f"\nHTML archive: {index_url}")
+            from capcat.core.tui_context import is_tui_active
+            if not is_tui_active():
+                print(f"\nHTML archive: {index_url}")
 
             return True
 
