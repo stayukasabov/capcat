@@ -196,10 +196,10 @@
 
 <h4>Purpose</h4> Quick source addition via YAML configuration
 
-<h4>Location</h4> <code>sources/active/config_driven/configs/*.yaml</code>
+<h4>Location</h4> <code>Config/sources/active/config_driven/configs/*.yaml</code>
 
 <h4>Example</h4>
-<pre><code># sources/active/config_driven/configs/iq.yaml
+<pre><code># Config/sources/active/config_driven/configs/iq.yaml
 display_name: &quot;InfoQ&quot;
 base_url: &quot;https://www.infoq.com/news/&quot;
 category: tech
@@ -254,10 +254,10 @@ timeout: 30
 
 <h4>Purpose</h4> Full control for complex scraping scenarios
 
-<h4>Location</h4> <code>sources/active/custom/&lt;source_name&gt;/source.py</code>
+<h4>Location</h4> <code>Config/sources/active/custom/&lt;source_name&gt;/source.py</code>
 
 <h4>Example Structure</h4>
-<pre><code># sources/active/custom/hn/source.py
+<pre><code># Config/sources/active/custom/hn/source.py
 from core.source_system.base_source import BaseSource, Article
 
 class HackerNewsSource(BaseSource):
@@ -441,16 +441,16 @@ class HackerNewsSource(BaseSource):
     Generate output folder structure
 
     Batch mode:
-        ../News/news_DD-MM-YYYY/Source_DD-MM-YYYY/NN_Title/
+        News/news_DD-MM-YYYY/Source_DD-MM-YYYY/NN_Title/
 
     Single mode:
-        ../Capcats/cc_DD-MM-YYYY-Title/
+        Capcats/cc_DD-MM-YYYY-Title/
     &quot;&quot;&quot;
     date_str = datetime.now().strftime(&#x27;%d-%m-%Y&#x27;)
 
     if batch_mode:
         # Batch: organized by date and source
-        base_dir = f&quot;../News/news_{date_str}&quot;
+        base_dir = f&quot;News/news_{date_str}&quot;
         source_dir = f&quot;{article.source}_{date_str}&quot;
         article_dir = f&quot;{article.number:02d}_{slugify(article.title)}&quot;
 
@@ -539,20 +539,20 @@ class HackerNewsSource(BaseSource):
         Auto-discover sources from filesystem
 
         Process:
-        1. Scan sources/active/config_driven/configs/*.yaml
-        2. Scan sources/active/custom/*/source.py
+        1. Scan Config/sources/active/config_driven/configs/*.yaml
+        2. Scan Config/sources/active/custom/*/source.py
         3. Validate each source
         4. Register in internal registry
         &quot;&quot;&quot;
         # Discover config-driven sources
-        config_dir = Path(&quot;sources/active/config_driven/configs&quot;)
+        config_dir = Path(&quot;Config/sources/active/config_driven/configs&quot;)
         for yaml_file in config_dir.glob(&quot;*.yaml&quot;):
             config = self._load_config(yaml_file)
             if self._validate_config(config):
                 self._register_source(config)
 
         # Discover custom sources
-        custom_dir = Path(&quot;sources/active/custom&quot;)
+        custom_dir = Path(&quot;Config/sources/active/custom&quot;)
         for source_dir in custom_dir.iterdir():
             if (source_dir / &quot;source.py&quot;).exists():
                 config = self._load_custom_config(source_dir)
@@ -1007,7 +1007,7 @@ def fetch_source_config(source_id):
 
     Avoids: Re-reading YAML files multiple times
     &quot;&quot;&quot;
-    config_path = Path(f&quot;sources/active/config_driven/configs/{source_id}.yaml&quot;)
+    config_path = Path(f&quot;Config/sources/active/config_driven/configs/{source_id}.yaml&quot;)
     with open(config_path) as f:
         return yaml.safe_load(f)
 </code></pre>
@@ -1070,9 +1070,9 @@ class TestArticleFetching:
 <pre><code># Test complete user workflows
 
 def test_bundle_command():
-    &quot;&quot;&quot;Test: ./capcat bundle tech --count 10&quot;&quot;&quot;
+    &quot;&quot;&quot;Test: capcat bundle tech --count 10&quot;&quot;&quot;
     result = subprocess.run(
-        [&quot;./capcat&quot;, &quot;bundle&quot;, &quot;tech&quot;, &quot;--count&quot;, &quot;10&quot;],
+        [&quot;capcat&quot;, &quot;bundle&quot;, &quot;tech&quot;, &quot;--count&quot;, &quot;10&quot;],
         capture_output=True,
         text=True
     )

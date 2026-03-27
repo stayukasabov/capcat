@@ -589,7 +589,7 @@ capcat config --set user_agent=&quot;MyBot/1.0&quot;
 
 <h4>What It Creates:</h4>
 <ul>
-<li>YAML config file in: sources/active/config_driven/configs/</li>
+<li>YAML config file in: Config/sources/active/config_driven/configs/</li>
 <li>Filename: <code>&lt;source-id&gt;.yaml</code></li>
 <li>Bundle entry (if selected)</li>
 </ul>
@@ -788,7 +788,7 @@ capcat generate-config -o /path/to/config.yaml
 </code></pre>
 <p>Specify output file path.</p>
 
-<h4>Default:</h4> sources/active/config_driven/configs/&lt;source-id&gt;.yaml
+<h4>Default:</h4> Config/sources/active/config_driven/configs/&lt;source-id&gt;.yaml
 
 <h4>Output Format:</h4>
 <pre><code># Generated configuration
@@ -835,13 +835,13 @@ capcat generate-config --output ~/configs/newsource.yaml
 
 <h4>Next Steps After Generation:</h4>
 <pre><code># Review generated config
-cat sources/active/config_driven/configs/newsource.yaml
+cat Config/sources/active/config_driven/configs/newsource.yaml
 
 # Test source
 capcat fetch newsource --count 5
 
 # Add to bundle (manual edit)
-vim sources/active/bundles.yml
+vim Config/sources/active/bundles/bundles.yml
 </code></pre>
 
 <h3>catch - Interactive Mode</h3>

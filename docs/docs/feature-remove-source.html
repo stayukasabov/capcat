@@ -85,11 +85,11 @@
 
 <h2>Overview</h2>
 
-<p>The <code>./capcat remove-source</code> command provides an interactive interface for removing existing RSS sources from the Capcat system. It follows the same clean architecture and user interface patterns as the add-source feature.</p>
+<p>The <code>capcat remove-source</code> command provides an interactive interface for removing existing RSS sources from the Capcat system. It follows the same clean architecture and user interface patterns as the add-source feature.</p>
 
 <h2>Usage</h2>
 
-<pre><code>./capcat remove-source
+<pre><code>capcat remove-source
 </code></pre>
 
 <p>No arguments required - the command is fully interactive.</p>
@@ -139,7 +139,7 @@
 <p>The command performs the following actions <h4>immediately</h4> in this order:</p>
 
 <ol>
-<li><h4>Configuration File Removal</h4> Deletes the YAML file from <code>sources/active/config_driven/configs/</code></li>
+<li><h4>Configuration File Removal</h4> Deletes the YAML file from <code>Config/sources/active/config_driven/configs/</code></li>
 <ul>
 <li>Physical file removed from filesystem</li>
 </ol>
@@ -322,7 +322,7 @@
 <h2>Examples</h2>
 
 <h3>Remove Single Source</h3>
-<div class="ascii-art">$ ./capcat remove-source
+<div class="ascii-art">$ capcat remove-source
 
   Select sources to remove (use &lt;space&gt; to select):
 ▶ ◉ InfoQ (iq)
@@ -340,7 +340,7 @@
 </div>
 
 <h3>Remove Multiple Sources</h3>
-<div class="ascii-art">$ ./capcat remove-source
+<div class="ascii-art">$ capcat remove-source
 
   Select sources to remove (use &lt;space&gt; to select):
 ▶ ◉ Hacker News (hn)
@@ -364,7 +364,7 @@
 </div>
 
 <h3>Cancel Operation</h3>
-<div class="ascii-art">$ ./capcat remove-source
+<div class="ascii-art">$ capcat remove-source
 
   Select sources to remove (use &lt;space&gt; to select):
 ▶ ◉ Hacker News (hn)
@@ -477,11 +477,11 @@ def reset_source_registry():
 </ul>
 
 <h4>Immediate Effect:</h4>
-<pre><code>$ ./capcat remove-source
+<pre><code>$ capcat remove-source
 # Select and confirm removal of &#x27;hn&#x27;
 [OK] Successfully removed 1 source(s).
 
-$ ./capcat list sources
+$ capcat list sources
 # &#x27;hn&#x27; is GONE - no restart needed
 </code></pre>
 

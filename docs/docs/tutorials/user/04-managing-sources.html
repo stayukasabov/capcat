@@ -250,7 +250,7 @@ Confirm removal? Yes
 <p>Common fixes:</p>
 <pre><code># RSS feed might have changed
 # Edit config
-vim sources/active/config_driven/configs/sourcename.yaml
+vim Config/sources/active/config_driven/configs/sourcename.yaml
 
 # Update feed_url if RSS moved
 # Save and test again
@@ -271,7 +271,7 @@ capcat fetch sourcename --count 3
 
 <p>Include source in bundle:</p>
 
-<pre><code>vim sources/active/bundles.yml
+<pre><code>vim Config/sources/active/bundles/bundles.yml
 </code></pre>
 
 <p>Add to existing bundle:</p>
@@ -324,7 +324,7 @@ https://example.com/feed/
 
 <h3>Config-Driven Sources</h3>
 
-<p>Location: <code>sources/active/config_driven/configs/</code></p>
+<p>Location: <code>Config/sources/active/config_driven/configs/</code></p>
 
 <p>Simple YAML:</p>
 <pre><code>display_name: &quot;Example News&quot;
@@ -342,7 +342,7 @@ content_selectors:
 
 <h3>Custom Sources</h3>
 
-<p>Location: <code>sources/active/custom/sourcename/</code></p>
+<p>Location: <code>Config/sources/active/custom/sourcename/</code></p>
 
 <p>Contains:</p>
 <ul>
@@ -386,7 +386,7 @@ capcat fetch nature --count 3
 <p>If source changes their website:</p>
 
 <pre><code># Edit config
-vim sources/active/config_driven/configs/sourcename.yaml
+vim Config/sources/active/config_driven/configs/sourcename.yaml
 
 # Update selectors or URLs
 # Test
@@ -430,12 +430,12 @@ capcat fetch sourcename --count 3
 capcat list sources
 
 # Verify file exists
-ls sources/active/config_driven/configs/sourcename.yaml
+ls Config/sources/active/config_driven/configs/sourcename.yaml
 </code></pre>
 
 <h4>Feed URL changed:</h4>
 <pre><code># Update config
-vim sources/active/config_driven/configs/sourcename.yaml
+vim Config/sources/active/config_driven/configs/sourcename.yaml
 # Change rss_url
 # Test
 capcat fetch sourcename --count 3

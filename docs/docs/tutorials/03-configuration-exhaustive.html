@@ -687,7 +687,7 @@ for source_id in category_sources:
 
 <h4>Manual Editing:</h4>
 <pre><code># Edit bundles file
-vim sources/active/bundles.yml
+vim Config/sources/active/bundles/bundles.yml
 
 # Add new bundle
 custom:
@@ -710,10 +710,10 @@ custom:
 
 <h3>Config-Driven Sources</h3>
 
-<p>Location: sources/active/config_driven/configs/*.yaml</p>
+<p>Location: Config/sources/active/config_driven/configs/*.yaml</p>
 
 <h4>Minimal Configuration:</h4>
-<pre><code># sources/active/config_driven/configs/example.yaml
+<pre><code># Config/sources/active/config_driven/configs/example.yaml
 display_name: &quot;Example News&quot;
 base_url: &quot;https://example.com/&quot;
 category: &quot;tech&quot;
@@ -807,10 +807,10 @@ template:
 
 <h3>Custom Sources</h3>
 
-<p>Location: sources/active/custom/&lt;source-name&gt;/config.yaml</p>
+<p>Location: Config/sources/active/custom/&lt;source-name&gt;/config.yaml</p>
 
 <h4>Configuration:</h4>
-<pre><code># sources/active/custom/hn/config.yaml
+<pre><code># Config/sources/active/custom/hn/config.yaml
 display_name: &quot;Hacker News&quot;
 base_url: &quot;https://news.ycombinator.com/&quot;
 category: &quot;tech&quot;

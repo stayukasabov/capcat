@@ -173,7 +173,7 @@ allowed, reason = manager.can_fetch(url)
               requests
             </li>
             <li>
-              <code>sources/active/custom/lb/source.py:61,460</code> - Lobsters
+              <code>Config/sources/active/custom/lb/source.py:61,460</code> - Lobsters
               custom headers
             </li>
           </ul>
@@ -385,7 +385,7 @@ response = manager.request_with_backoff(
           <h3>Rate Limit Configuration</h3>
 
           <h4>File:</h4>
-          <code>sources/active/config_driven/configs/iq.yaml</code>
+          <code>Config/sources/active/config_driven/configs/iq.yaml</code>
 
           <pre><code># Request configuration
 timeout: 15
@@ -405,7 +405,7 @@ class NetworkConfig:
           <h3>RSS Discovery Configuration</h3>
 
           <h4>File:</h4>
-          <code>sources/active/config_driven/configs/iq.yaml</code>
+          <code>Config/sources/active/config_driven/configs/iq.yaml</code>
 
           <pre><code># Discovery method - use RSS for latest news articles only
 discovery:
@@ -419,10 +419,10 @@ discovery:
           <h3>Manual Testing</h3>
 
           <pre><code># Test InfoQ RSS implementation
-./capcat fetch iq --count 5
+capcat fetch iq --count 5
 
 # Test with verbose logging
-./capcat -L compliance.log fetch iq --count 5
+capcat -L compliance.log fetch iq --count 5
 
 # View logs
 tail -f compliance.log
@@ -514,7 +514,7 @@ for source_id in sources:
             <li>Review this documentation</li>
             <li>Check <code>ETHICAL_COMPLIANCE_REPORT.md</code></li>
             <li>
-              Review source-specific configs in <code>sources/active/</code>
+              Review source-specific configs in <code>Config/sources/active/</code>
             </li>
           </ol>
 

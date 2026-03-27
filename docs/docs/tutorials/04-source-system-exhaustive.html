@@ -629,8 +629,8 @@ else:
 <h4>Behavior:</h4>
 <ol>
 <li>Clear existing source data</li>
-<li>Discover config-driven sources from <code>sources/active/config_driven/configs/</code></li>
-<li>Discover custom sources from <code>sources/active/custom/</code></li>
+<li>Discover config-driven sources from <code>Config/sources/active/config_driven/configs/</code></li>
+<li>Discover custom sources from <code>Config/sources/active/custom/</code></li>
 <li>Return dictionary of all discovered sources</li>
 </ol>
 
@@ -638,7 +638,7 @@ else:
 
 <h4>Config-Driven Discovery:</h4>
 <ol>
-<li>Scan <code>sources/active/config_driven/configs/</code> for <code>.yaml</code>, <code>.yml</code>, <code>.json</code> files</li>
+<li>Scan <code>Config/sources/active/config_driven/configs/</code> for <code>.yaml</code>, <code>.yml</code>, <code>.json</code> files</li>
 <li>Load each configuration file</li>
 <li>Create SourceConfig from file data</li>
 <li>Validate configuration</li>
@@ -647,7 +647,7 @@ else:
 
 <h4>Custom Discovery:</h4>
 <ol>
-<li>Scan <code>sources/active/custom/</code> for directories</li>
+<li>Scan <code>Config/sources/active/custom/</code> for directories</li>
 <li>Look for <code>source.py</code> in each directory</li>
 <li>Look for <code>config.yaml</code> (or <code>.yml</code>, <code>.json</code>) in each directory</li>
 <li>Load configuration</li>

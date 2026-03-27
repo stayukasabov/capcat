@@ -91,7 +91,7 @@
 
 <p>Launch the interactive menu:</p>
 
-<pre><code>./capcat catch
+<pre><code>capcat catch
 </code></pre>
 
 <p>From the main menu, select <h4>&quot;Manage Sources (add/remove/configure)&quot;</h4> to access the source management submenu.</p>
@@ -156,7 +156,7 @@ Test fetch? Yes
 </ul>
 
 <h4>Output:</h4>
-<p>A complete YAML file saved to <code>sources/active/config_driven/configs/</code></p>
+<p>A complete YAML file saved to <code>Config/sources/active/config_driven/configs/</code></p>
 
 <h3>3. Remove Existing Sources</h3>
 
@@ -244,7 +244,7 @@ Total: 15 sources
 
 <h3>Add a New Tech Blog</h3>
 
-<pre><code>./capcat catch
+<pre><code>capcat catch
 &gt; Manage Sources (add/remove/configure)
 &gt; Add New Source from RSS Feed
 
@@ -261,7 +261,7 @@ Test fetch? Yes
 
 <h3>Remove Outdated Sources</h3>
 
-<pre><code>./capcat catch
+<pre><code>capcat catch
 &gt; Manage Sources (add/remove/configure)
 &gt; Remove Existing Sources
 
@@ -277,7 +277,7 @@ Confirm removal? Yes
 
 <h3>Create Complex Custom Source</h3>
 
-<pre><code>./capcat catch
+<pre><code>capcat catch
 &gt; Manage Sources (add/remove/configure)
 &gt; Generate Custom Source Config
 
@@ -292,12 +292,12 @@ Confirm removal? Yes
 - Rate limit: 5 seconds
 ...
 
-Configuration saved to: sources/active/config_driven/configs/newsite.yaml
+Configuration saved to: Config/sources/active/config_driven/configs/newsite.yaml
 
 Next steps:
-1. Review: cat sources/active/config_driven/configs/newsite.yaml
-2. Test: ./capcat fetch newsite --count 5
-3. Add to bundle: edit sources/active/bundles.yml
+1. Review: cat Config/sources/active/config_driven/configs/newsite.yaml
+2. Test: capcat fetch newsite --count 5
+3. Add to bundle: edit Config/sources/active/bundles/bundles.yml
 </code></pre>
 
 <h2>CLI Equivalents</h2>
@@ -305,11 +305,11 @@ Next steps:
 <p>All menu functions have CLI equivalents:</p>
 
 <ul>
-<li><h4>Add New Source from RSS</h4> → <code>./capcat add-source --url <url></code></li>
-<li><h4>Generate Custom Config</h4> → <code>./capcat generate-config</code></li>
-<li><h4>Remove Sources</h4> → <code>./capcat remove-source</code></li>
-<li><h4>List All Sources</h4> → <code>./capcat list sources</code></li>
-<li><h4>Test a Source</h4> → <code>./capcat fetch <source-id> --count 3</code></li>
+<li><h4>Add New Source from RSS</h4> → <code>capcat add-source --url <url></code></li>
+<li><h4>Generate Custom Config</h4> → <code>capcat generate-config</code></li>
+<li><h4>Remove Sources</h4> → <code>capcat remove-source</code></li>
+<li><h4>List All Sources</h4> → <code>capcat list sources</code></li>
+<li><h4>Test a Source</h4> → <code>capcat fetch <source-id> --count 3</code></li>
 </ul>
 
 <h2>Integration with Existing Workflows</h2>
@@ -327,7 +327,7 @@ Next steps:
 <ol>
 <li><h4>Check usage</h4> Analytics shown during removal</li>
 <li><h4>Backup created</h4> Automatic safety net</li>
-<li><h4>Can undo</h4> Use <code>./capcat remove-source --undo</code></li>
+<li><h4>Can undo</h4> Use <code>capcat remove-source --undo</code></li>
 </ol>
 
 <h2>Tips</h2>
@@ -394,10 +394,10 @@ Next steps:
 
 <p>Use CLI for batch operations:</p>
 <pre><code># Add multiple sources from file
-./capcat add-source --batch sources.txt
+capcat add-source --batch sources.txt
 
 # Remove multiple sources
-./capcat remove-source --batch remove-list.txt
+capcat remove-source --batch remove-list.txt
 </code></pre>
 
 <h3>Backup Management</h3>
@@ -407,23 +407,23 @@ Next steps:
 ls -la .capcat-backups/
 
 # Restore specific backup
-./capcat remove-source --undo backup_20251019_143022
+capcat remove-source --undo backup_20251019_143022
 
 # Restore last backup
-./capcat remove-source --undo
+capcat remove-source --undo
 </code></pre>
 
 <h3>Custom Configurations</h3>
 
 <p>Edit configs manually:</p>
 <pre><code># Open config in editor
-vim sources/active/config_driven/configs/newsource.yaml
+vim Config/sources/active/config_driven/configs/newsource.yaml
 
 # Validate syntax
 python3 -c &quot;import yaml; yaml.safe_load(open(&#x27;newsource.yaml&#x27;))&quot;
 
 # Test changes
-./capcat fetch newsource --count 3
+capcat fetch newsource --count 3
 </code></pre>
 
 <h2>See Also</h2>

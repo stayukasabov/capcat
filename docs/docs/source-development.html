@@ -122,7 +122,7 @@
 
 <h3>1. Create Configuration File</h3>
 
-<pre><code># sources/active/config_driven/configs/newsource.yaml
+<pre><code># Config/sources/active/config_driven/configs/newsource.yaml
 display_name: &quot;News Source&quot;
 base_url: &quot;https://newsource.com/&quot;
 category: &quot;general&quot;  # tech, science, business, general
@@ -190,7 +190,7 @@ custom_config:
 python -c &quot;from core.source_system.source_registry import get_source_registry; print(&#x27;newsource&#x27; in get_source_registry().get_available_sources())&quot;
 
 # Test source functionality
-./capcat fetch newsource --count 3
+capcat fetch newsource --count 3
 </code></pre>
 
 <h3>3. Validation</h3>
@@ -257,13 +257,13 @@ template:
 <h4>Use When</h4> Complex scraping logic, API integration, comment systems, or anti-bot protection handling required.
 
 <h3>1. Create Source Structure</h3>
-<pre><code>mkdir -p sources/active/custom/newsource
-touch sources/active/custom/newsource/source.py
-touch sources/active/custom/newsource/config.yaml
+<pre><code>mkdir -p Config/sources/active/custom/newsource
+touch Config/sources/active/custom/newsource/source.py
+touch Config/sources/active/custom/newsource/config.yaml
 </code></pre>
 
 <h3>2. Basic Configuration</h3>
-<pre><code># sources/active/custom/newsource/config.yaml
+<pre><code># Config/sources/active/custom/newsource/config.yaml
 display_name: &quot;News Source&quot;
 base_url: &quot;https://newsource.com/&quot;
 category: &quot;general&quot;
@@ -273,7 +273,7 @@ supports_comments: true  # If implementing comment system
 </code></pre>
 
 <h3>3. Source Implementation</h3>
-<pre><code># sources/active/custom/newsource/source.py
+<pre><code># Config/sources/active/custom/newsource/source.py
 from typing import List, Dict, Optional
 from core.source_system.base_source import BaseSource, SourceConfig
 from core.logging_config import get_logger
@@ -517,10 +517,10 @@ if __name__ == &#x27;__main__&#x27;:
 
 <h3>2. Integration Test</h3>
 <pre><code># Test with actual command
-./capcat fetch newsource --count 3
+capcat fetch newsource --count 3
 
 # Verify output structure
-ls &quot;../News/news_$(date +%d-%m-%Y)/NewsSource_$(date +%d-%m-%Y)/&quot;
+ls &quot;News/news_$(date +%d-%m-%Y)/NewsSource_$(date +%d-%m-%Y)/&quot;
 </code></pre>
 
 <h3>3. Performance Test</h3>

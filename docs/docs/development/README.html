@@ -176,7 +176,7 @@
 <pre><code># Follow setup in 02-team-onboarding.md
 git clone &lt;repo&gt;
 ./scripts/fix_dependencies.sh
-./capcat list sources  # Verify installation
+capcat list sources  # Verify installation
 </code></pre>
 
 <h4>Day 2: Architecture</h4> (4-6 hours)
@@ -376,7 +376,7 @@ git clone &lt;repo&gt;
 
 <h4>Add Config Source</h4> (30 min):
 <pre><code># Create YAML config
-cat &gt; sources/active/config_driven/configs/source.yaml &lt;&lt;EOF
+cat &gt; Config/sources/active/config_driven/configs/source.yaml &lt;&lt;EOF
 display_name: &quot;Source Name&quot;
 base_url: &quot;https://example.com/&quot;
 category: tech
@@ -385,13 +385,13 @@ content_selectors: [&quot;.article-body&quot;]
 EOF
 
 # Test
-./capcat fetch source --count 5
+capcat fetch source --count 5
 </code></pre>
 
 <h4>Add Custom Source</h4> (4 hrs):
 <pre><code># Create structure
-mkdir -p sources/active/custom/source
-cd sources/active/custom/source
+mkdir -p Config/sources/active/custom/source
+cd Config/sources/active/custom/source
 
 # Create source.py (implement BaseSource)
 # Create config.yaml
@@ -742,7 +742,7 @@ if not API_KEY:
 ./scripts/fix_dependencies.sh
 
 # Run Capcat
-./capcat fetch hn --count 10
+capcat fetch hn --count 10
 
 # Tests
 pytest
@@ -756,7 +756,7 @@ flake8 core/ sources/
 python3 scripts/run_docs.py
 
 # Debug mode
-./capcat --debug fetch hn --count 1
+capcat --debug fetch hn --count 1
 </code></pre>
 
 

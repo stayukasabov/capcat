@@ -136,13 +136,47 @@ capcat list sources
 capcat list bundles
 </code></pre>
 
+<h2>Project Setup</h2>
+
+<p>Capcat uses a project directory to store your config, sources, and output. The first command you run automatically initializes the current directory as a capcat project. You can also initialize explicitly:</p>
+
+<pre><code>mkdir my-news
+cd my-news
+capcat init
+</code></pre>
+
+<p>This creates:</p>
+
+<div class="ascii-art">my-news/
+├── .capcat/                         # Internal state (git-ignored)
+│   ├── state.json
+│   ├── cache/
+│   └── registry/
+├── Config/                          # User-owned config (git if you like)
+│   ├── themes/                      # Article HTML themes
+│   │   ├── base.css
+│   │   ├── design-system.css
+│   │   └── Space-Grotesk/
+│   └── sources/
+│       └── active/
+│           ├── config_driven/configs/   # YAML-configured sources
+│           ├── custom/                  # Python-implemented sources
+│           └── bundles/bundles.yml      # Bundle definitions
+├── News/                            # Batch output (git-ignored)
+└── Capcats/                         # Single-article output (git-ignored)
+</div>
+
+<p><strong>Auto-init:</strong> Running any capcat command (<code>capcat catch</code>, <code>capcat fetch</code>, etc.) in an uninitialised directory automatically runs <code>capcat init</code> silently.</p>
+
+<p><strong>Theme upgrades:</strong> When the capcat package updates, themes are automatically refreshed in <code>Config/themes/</code> on next use (with a confirmation prompt in CLI mode).</p>
+
 <h2>Basic Usage</h2>
 
 <h3>Interactive Mode (Recommended for New Users)</h3>
 
 <p>Launch the interactive menu for guided workflows:</p>
 
-<pre><code>./capcat catch
+<pre><code>capcat catch
 </code></pre>
 
 <h4>Main Menu Options:</h4>
@@ -170,7 +204,7 @@ capcat list bundles
 
 <h4>Fetch a News Bundle:</h4>
 <ol>
-<li><code>./capcat catch</code></li>
+<li><code>capcat catch</code></li>
 <li>Select &quot;Catch articles from a bundle&quot;</li>
 <li>Choose bundle (tech, news, science, etc.)</li>
 <li>Select HTML generation option</li>
@@ -179,7 +213,7 @@ capcat list bundles
 
 <h4>Add a New Source:</h4>
 <ol>
-<li><code>./capcat catch</code></li>
+<li><code>capcat catch</code></li>
 <li>Select &quot;Manage Sources&quot;</li>
 <li>Select &quot;Add New Source from RSS Feed&quot;</li>
 <li>Enter RSS feed URL</li>
@@ -188,7 +222,7 @@ capcat list bundles
 
 <h4>Test a Source:</h4>
 <ol>
-<li><code>./capcat catch</code></li>
+<li><code>capcat catch</code></li>
 <li>Select &quot;Manage Sources&quot;</li>
 <li>Select &quot;Test a Source&quot;</li>
 <li>Choose source to test</li>
@@ -201,45 +235,45 @@ capcat list bundles
 
 <h3>Single Article Download</h3>
 <pre><code># Download a single article
-./capcat single https://example.com/article
+capcat single https://example.com/article
 
 # With media files
-./capcat single https://bbc.com/news/technology --media
+capcat single https://bbc.com/news/technology --media
 </code></pre>
 
 <h3>Batch Downloads</h3>
 <pre><code># Tech news bundle (Hacker News + Lobsters + InfoQ)
-./capcat bundle tech --count 10
+capcat bundle tech --count 10
 
 # General news bundle (BBC + CNN + Reuters)
-./capcat bundle news --count 15 --media
+capcat bundle news --count 15 --media
 
 # Specific sources
-./capcat fetch hn,bbc --count 20
+capcat fetch hn,bbc --count 20
 </code></pre>
 
 <h3>Discovery Commands</h3>
 <pre><code># List all available sources
-./capcat list sources
+capcat list sources
 
 # List predefined bundles
-./capcat list bundles
+capcat list bundles
 </code></pre>
 
 <h3>File Logging</h3>
 <pre><code># Save detailed logs to file (includes all debug information)
-./capcat -L capcat.log bundle tech --count 10
+capcat -L capcat.log bundle tech --count 10
 
 # Verbose console output + file logging
-./capcat -V -L debug.log fetch hn --count 15
+capcat -V -L debug.log fetch hn --count 15
 
 # Timestamped log files
-./capcat -L logs/news-$(date +%Y%m%d-%H%M%S).log bundle news --count 10
+capcat -L logs/news-$(date +%Y%m%d-%H%M%S).log bundle news --count 10
 </code></pre>
 
 <h2>Output Structure</h2>
 
-<div class="ascii-art">../News/news_DD-MM-YYYY/           # Batch downloads
+<div class="ascii-art">News/news_DD-MM-YYYY/           # Batch downloads
 ├── Hacker-News_DD-MM-YYYY/
 │   └── 01_Article_Title/
 │       ├── article.md
@@ -250,7 +284,7 @@ capcat list bundles
         ├── article.md
         └── images/
 
-../Capcats/                      # Single articles
+Capcats/                      # Single articles
 └── cc_DD-MM-YYYY-Article-Title/
     ├── article.md
     └── images/
@@ -260,20 +294,20 @@ capcat list bundles
 
 <h3>1. Config-Driven Sources (Simple)</h3>
 <pre><code># These sources use YAML configuration (no coding required)
-./capcat fetch iq,euronews,straitstimes --count 5
+capcat fetch iq,euronews,straitstimes --count 5
 </code></pre>
 
 <h3>2. Custom Sources (Complex)</h3>
 <pre><code># These sources have custom Python implementations
-./capcat fetch hn,bbc,techcrunch --count 5
+capcat fetch hn,bbc,techcrunch --count 5
 </code></pre>
 
 <h3>3. Media Handling</h3>
 <pre><code># Images only (default)
-./capcat bundle tech --count 5
+capcat bundle tech --count 5
 
 # All media types (images + videos + documents)
-./capcat bundle tech --count 5 --media
+capcat bundle tech --count 5 --media
 </code></pre>
 
 <h2>Verification</h2>
@@ -283,7 +317,7 @@ capcat list bundles
 python test_comprehensive_sources.py
 
 # Quick individual test
-./capcat fetch hn --count 3
+capcat fetch hn --count 3
 </code></pre>
 
 <h3>Expected Results</h3>
@@ -299,7 +333,7 @@ python test_comprehensive_sources.py
 <li><h4>Paywall Exclusion</h4> Sources with paywalls or subscription requirements are excluded</li>
 <li><h4>Recently Removed</h4> Wired, The Verge (moved to paywall model)</li>
 <li><h4>Bot Protection</h4> Sources with aggressive anti-bot measures are avoided</li>
-<li><h4>Use <code>./capcat list sources</code></h4> to see current available sources</li>
+<li><h4>Use <code>capcat list sources</code></h4> to see current available sources</li>
 </ul>
 
 <h3>Intelligent Protection System</h3>
@@ -322,10 +356,10 @@ python test_comprehensive_sources.py
 
 <h4>Media Flag Behavior</h4>
 <pre><code># Without --media flag: Standard protection limits apply
-./capcat single https://example.com/article
+capcat single https://example.com/article
 
 # With --media flag: Bypass limits for legitimate sites (up to 500MB)
-./capcat single https://example.com/article --media
+capcat single https://example.com/article --media
 
 # Note: --media flag ignored for blocked aggregator sites
 </code></pre>
@@ -352,7 +386,7 @@ python test_comprehensive_sources.py
 <h3>Entry Points</h3>
 
 <pre><code># Primary method (recommended)
-./capcat command args
+capcat command args
 
 # Alternative method (direct Python)
 python3 run_capcat.py command args
@@ -368,12 +402,12 @@ source venv/bin/activate &amp;&amp; python capcat.py command args
 python3 run_capcat.py list sources
 
 # Check wrapper system health
-./capcat --help
+capcat --help
 </code></pre>
 
 <h3>2. Module Not Found</h3>
 <pre><code># Let wrapper handle dependencies automatically
-./capcat list sources
+capcat list sources
 
 # Or manually activate environment (advanced users)
 source venv/bin/activate
@@ -382,7 +416,7 @@ source venv/bin/activate
 <h3>3. Virtual Environment Issues</h3>
 <pre><code># Remove and recreate (wrapper will rebuild)
 rm -rf venv
-./capcat list sources
+capcat list sources
 </code></pre>
 
 <h3>4. Network Errors</h3>

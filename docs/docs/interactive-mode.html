@@ -89,12 +89,12 @@
 
 <p>Launch interactive mode:</p>
 
-<pre><code>./capcat catch
+<pre><code>capcat catch
 </code></pre>
 
 <h2>Main Menu</h2>
 
-<p>When you launch <code>./capcat catch</code>, you see:</p>
+<p>When you launch <code>capcat catch</code>, you see:</p>
 
 <pre><code>  What would you like me to do?
 
@@ -112,7 +112,7 @@
 <ul>
 <li>Arrow keys: Move between options</li>
 <li>Enter: Select option</li>
-<li>Ctrl+C: Exit at any time</li>
+<li>Ctrl+C: Exit immediately (terminates the process with exit code 130)</li>
 </ul>
 
 <h2>Main Menu Options</h2>
@@ -262,10 +262,10 @@
 <div class="ascii-art">  Source Management - Select an option:
 
   &gt; Add New Source from RSS Feed
-    Generate Custom Source Config
     Remove Existing Sources
     List All Sources
     Test a Source
+    Manage Bundles
     ────────────────
     Back to Main Menu
 
@@ -303,7 +303,7 @@ Test fetch? Yes
 
 <h4>What It Creates:</h4>
 <ul>
-<li>YAML config in <code>sources/active/config_driven/configs/</code></li>
+<li>YAML config in <code>Config/sources/active/config_driven/configs/</code></li>
 <li>Registry entry (automatic on next run)</li>
 <li>Bundle entry (if selected)</li>
 </ul>
@@ -337,18 +337,18 @@ Test fetch? Yes
 </ul>
 
 <h4>Output Location:</h4>
-<pre><code>sources/active/config_driven/configs/sourceid.yaml
+<pre><code>Config/sources/active/config_driven/configs/sourceid.yaml
 </code></pre>
 
 <h4>Next Steps:</h4>
 <pre><code># Review configuration
-cat sources/active/config_driven/configs/newsource.yaml
+cat Config/sources/active/config_driven/configs/newsource.yaml
 
 # Test source
-./capcat fetch newsource --count 5
+capcat fetch newsource --count 5
 
 # Add to bundle (edit bundles.yml)
-vim sources/active/bundles.yml
+vim Config/sources/active/bundles/bundles.yml
 </code></pre>
 
 <h3>Remove Existing Sources</h3>
@@ -375,7 +375,7 @@ vim sources/active/bundles.yml
 
 <h4>What Gets Removed:</h4>
 <ul>
-<li>Config files (<code>sources/active/config_driven/configs/</code> or <code>sources/active/custom/</code>)</li>
+<li>Config files (<code>Config/sources/active/config_driven/configs/</code> or <code>Config/sources/active/custom/</code>)</li>
 <li>Bundle definitions (from <code>bundles.yml</code>)</li>
 <li>Registry cache</li>
 </ul>
@@ -389,7 +389,7 @@ vim sources/active/bundles.yml
 </div>
 
 <h4>Undo Last Removal:</h4>
-<pre><code>./capcat remove-source --undo
+<pre><code>capcat remove-source --undo
 </code></pre>
 
 <h3>List All Sources</h3>
@@ -543,15 +543,15 @@ Executing command...
 <p>All interactive operations have CLI equivalents:</p>
 
 <ul>
-<li><h4>Bundle</h4> → <code>./capcat bundle tech --count 30</code></li>
-<li><h4>List of sources</h4> → <code>./capcat fetch hn,bbc --count 30</code></li>
-<li><h4>Single source</h4> → <code>./capcat fetch hn --count 30</code></li>
-<li><h4>Single URL</h4> → <code>./capcat single https://example.com/article</code></li>
-<li><h4>Add RSS source</h4> → <code>./capcat add-source --url <url></code></li>
-<li><h4>Generate config</h4> → <code>./capcat generate-config</code></li>
-<li><h4>Remove sources</h4> → <code>./capcat remove-source</code></li>
-<li><h4>List sources</h4> → <code>./capcat list sources</code></li>
-<li><h4>Test source</h4> → <code>./capcat fetch <source> --count 3</code></li>
+<li><h4>Bundle</h4> → <code>capcat bundle tech --count 30</code></li>
+<li><h4>List of sources</h4> → <code>capcat fetch hn,bbc --count 30</code></li>
+<li><h4>Single source</h4> → <code>capcat fetch hn --count 30</code></li>
+<li><h4>Single URL</h4> → <code>capcat single https://example.com/article</code></li>
+<li><h4>Add RSS source</h4> → <code>capcat add-source --url <url></code></li>
+<li><h4>Generate config</h4> → <code>capcat generate-config</code></li>
+<li><h4>Remove sources</h4> → <code>capcat remove-source</code></li>
+<li><h4>List sources</h4> → <code>capcat list sources</code></li>
+<li><h4>Test source</h4> → <code>capcat fetch <source> --count 3</code></li>
 </ul>
 
 <h4>CLI Advantages:</h4>
@@ -633,7 +633,7 @@ Press Enter to continue...
 <ul>
 <li>Arrow keys: Navigate options</li>
 <li>Enter: Confirm selection</li>
-<li>Ctrl+C: Cancel/go back</li>
+<li>Ctrl+C: Exit immediately (terminates the process, exit code 130)</li>
 <li>Space: Toggle checkbox (multi-select)</li>
 </ul>
 
@@ -642,7 +642,7 @@ Press Enter to continue...
 <li>Tab: Autocomplete (if available)</li>
 <li>Backspace: Delete character</li>
 <li>Ctrl+U: Clear line</li>
-<li>Ctrl+C: Cancel input</li>
+<li>Ctrl+C: Exits immediately</li>
 </ul>
 
 <h2>Best Practices</h2>
@@ -679,7 +679,7 @@ Press Enter to continue...
 <h3>Menu Not Appearing</h3>
 
 <pre><code># Check wrapper system
-./capcat --help
+capcat --help
 
 # Try Python wrapper directly
 python3 run_capcat.py catch
@@ -710,7 +710,7 @@ python -c &quot;import questionary&quot;
 
 <h4>For existing sources:</h4>
 <ol>
-<li>Run <code>./capcat list sources</code></li>
+<li>Run <code>capcat list sources</code></li>
 <li>Check if source was removed</li>
 <li>Verify source directory structure</li>
 <li>Review registry discovery logs</li>
@@ -729,10 +729,10 @@ python -c &quot;import questionary&quot;
 
 <h4>Debugging:</h4>
 <pre><code># Detailed logging
-./capcat -V fetch sourceid --count 3
+capcat -V fetch sourceid --count 3
 
 # Check configuration
-cat sources/active/config_driven/configs/sourceid.yaml
+cat Config/sources/active/config_driven/configs/sourceid.yaml
 
 # Manual test
 curl -I https://source-url.com
@@ -743,29 +743,29 @@ curl -I https://source-url.com
 <h3>Development Workflow</h3>
 
 <pre><code># 1. Add new source interactively
-./capcat catch
+capcat catch
   &gt; Manage Sources
   &gt; Add New Source from RSS Feed
 
 # 2. Test thoroughly
-./capcat catch
+capcat catch
   &gt; Manage Sources
   &gt; Test a Source
 
 # 3. Use in production
-./capcat bundle tech --count 50
+capcat bundle tech --count 50
 </code></pre>
 
 <h3>Content Curation Workflow</h3>
 
 <pre><code># Morning routine
-./capcat catch
+capcat catch
   &gt; Catch articles from a bundle
   &gt; tech
   &gt; Yes (HTML)
 
 # Ad-hoc interesting article
-./capcat catch
+capcat catch
   &gt; Catch a single article by URL
   &gt; [paste URL]
 </code></pre>
@@ -773,17 +773,17 @@ curl -I https://source-url.com
 <h3>Maintenance Workflow</h3>
 
 <pre><code># Weekly audit
-./capcat catch
+capcat catch
   &gt; Manage Sources
   &gt; List All Sources
 
 # Remove outdated
-./capcat catch
+capcat catch
   &gt; Manage Sources
   &gt; Remove Existing Sources
 
 # Verify remaining
-./capcat catch
+capcat catch
   &gt; Manage Sources
   &gt; Test a Source
 </code></pre>

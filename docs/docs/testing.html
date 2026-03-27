@@ -136,36 +136,36 @@ python -c &quot;from core.source_system.source_registry import get_source_regist
 <p>Test each source individually with diagnosis file creation:</p>
 
 <pre><code># Test each source with output capture
-./capcat fetch hn --count 10 2&gt;&amp;1 | tee test-diagnose-hn.txt
-./capcat fetch lb --count 10 2&gt;&amp;1 | tee test-diagnose-lb.txt
-./capcat fetch iq --count 10 2&gt;&amp;1 | tee test-diagnose-iq.txt
-./capcat fetch bbc --count 10 2&gt;&amp;1 | tee test-diagnose-bbc.txt
-./capcat fetch cnn --count 10 2&gt;&amp;1 | tee test-diagnose-cnn.txt
-./capcat fetch techcrunch --count 10 2&gt;&amp;1 | tee test-diagnose-techcrunch.txt
-./capcat fetch theverge --count 10 2&gt;&amp;1 | tee test-diagnose-theverge.txt
-./capcat fetch wired --count 10 2&gt;&amp;1 | tee test-diagnose-wired.txt
-./capcat fetch nature --count 10 2&gt;&amp;1 | tee test-diagnose-nature.txt
-./capcat fetch scientificamerican --count 10 2&gt;&amp;1 | tee test-diagnose-scientificamerican.txt
-./capcat fetch mittechreview --count 10 2&gt;&amp;1 | tee test-diagnose-mittechreview.txt
-./capcat fetch gizmodo --count 10 2&gt;&amp;1 | tee test-diagnose-gizmodo.txt
-./capcat fetch upi --count 10 2&gt;&amp;1 | tee test-diagnose-upi.txt
-./capcat fetch tass --count 10 2&gt;&amp;1 | tee test-diagnose-tass.txt
-./capcat fetch straitstimes --count 10 2&gt;&amp;1 | tee test-diagnose-straitstimes.txt
-./capcat fetch euronews --count 10 2&gt;&amp;1 | tee test-diagnose-euronews.txt
-./capcat fetch axios --count 10 2&gt;&amp;1 | tee test-diagnose-axios.txt
-./capcat fetch yahoo --count 10 2&gt;&amp;1 | tee test-diagnose-yahoo.txt
-./capcat fetch xinhua --count 10 2&gt;&amp;1 | tee test-diagnose-xinhua.txt
-./capcat fetch test_source --count 10 2&gt;&amp;1 | tee test-diagnose-test_source.txt
+capcat fetch hn --count 10 2&gt;&amp;1 | tee test-diagnose-hn.txt
+capcat fetch lb --count 10 2&gt;&amp;1 | tee test-diagnose-lb.txt
+capcat fetch iq --count 10 2&gt;&amp;1 | tee test-diagnose-iq.txt
+capcat fetch bbc --count 10 2&gt;&amp;1 | tee test-diagnose-bbc.txt
+capcat fetch cnn --count 10 2&gt;&amp;1 | tee test-diagnose-cnn.txt
+capcat fetch techcrunch --count 10 2&gt;&amp;1 | tee test-diagnose-techcrunch.txt
+capcat fetch theverge --count 10 2&gt;&amp;1 | tee test-diagnose-theverge.txt
+capcat fetch wired --count 10 2&gt;&amp;1 | tee test-diagnose-wired.txt
+capcat fetch nature --count 10 2&gt;&amp;1 | tee test-diagnose-nature.txt
+capcat fetch scientificamerican --count 10 2&gt;&amp;1 | tee test-diagnose-scientificamerican.txt
+capcat fetch mittechreview --count 10 2&gt;&amp;1 | tee test-diagnose-mittechreview.txt
+capcat fetch gizmodo --count 10 2&gt;&amp;1 | tee test-diagnose-gizmodo.txt
+capcat fetch upi --count 10 2&gt;&amp;1 | tee test-diagnose-upi.txt
+capcat fetch tass --count 10 2&gt;&amp;1 | tee test-diagnose-tass.txt
+capcat fetch straitstimes --count 10 2&gt;&amp;1 | tee test-diagnose-straitstimes.txt
+capcat fetch euronews --count 10 2&gt;&amp;1 | tee test-diagnose-euronews.txt
+capcat fetch axios --count 10 2&gt;&amp;1 | tee test-diagnose-axios.txt
+capcat fetch yahoo --count 10 2&gt;&amp;1 | tee test-diagnose-yahoo.txt
+capcat fetch xinhua --count 10 2&gt;&amp;1 | tee test-diagnose-xinhua.txt
+capcat fetch test_source --count 10 2&gt;&amp;1 | tee test-diagnose-test_source.txt
 </code></pre>
 
 <h3>3. Media Filtering Verification</h3>
 <p>After each test, verify media filtering works correctly:</p>
 
 <pre><code># Count non-image media files (should be 0 without --media flag)
-find &quot;../News/news_*&quot; -name &quot;*.pdf&quot; -o -name &quot;*.mp4&quot; -o -name &quot;*.mp3&quot; | wc -l
+find &quot;News/news_*&quot; -name &quot;*.pdf&quot; -o -name &quot;*.mp4&quot; -o -name &quot;*.mp3&quot; | wc -l
 
 # Count image files (should be &gt; 0)
-find &quot;../News/news_*&quot; -name &quot;*.jpg&quot; -o -name &quot;*.png&quot; | wc -l
+find &quot;News/news_*&quot; -name &quot;*.jpg&quot; -o -name &quot;*.png&quot; | wc -l
 </code></pre>
 
 <h3>4. Test-Diagnose File Creation</h3>
@@ -176,7 +176,7 @@ find &quot;../News/news_*&quot; -name &quot;*.jpg&quot; -o -name &quot;*.png&quo
 
 **Date**: YYYY-MM-DD HH:MM
 **Test Type**: SOURCE_TEST
-**Command**: ./capcat fetch [source] --count 10
+**Command**: capcat fetch [source] --count 10
 **Status**: [SUCCESS/FAILURE/PARTIAL/ERROR]
 
 ## Results Summary

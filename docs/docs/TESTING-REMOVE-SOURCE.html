@@ -92,13 +92,13 @@ source venv/bin/activate
 
 <h3>1. Create Test Sources</h3>
 <pre><code># Add a test source
-./capcat add-source --url https://feeds.arstechnica.com/arstechnica/index
+capcat add-source --url https://feeds.arstechnica.com/arstechnica/index
 
 # Follow prompts to add source ID: test_source1
 </code></pre>
 
 <h3>2. Test Dry-Run</h3>
-<pre><code>./capcat remove-source --dry-run
+<pre><code>capcat remove-source --dry-run
 
 # Expected:
 # - Shows analytics (if you&#x27;ve used sources)
@@ -109,7 +109,7 @@ source venv/bin/activate
 </code></pre>
 
 <h3>3. Test Actual Removal</h3>
-<pre><code>./capcat remove-source
+<pre><code>capcat remove-source
 
 # Expected:
 # - Shows analytics
@@ -121,14 +121,14 @@ source venv/bin/activate
 </code></pre>
 
 <h3>4. Verify Removal</h3>
-<pre><code>./capcat list sources
+<pre><code>capcat list sources
 
 # Expected:
 # - test_source1 NOT in list
 </code></pre>
 
 <h3>5. Test Undo</h3>
-<pre><code>./capcat remove-source --undo
+<pre><code>capcat remove-source --undo
 
 # Expected:
 # - Shows list of backups
@@ -138,7 +138,7 @@ source venv/bin/activate
 </code></pre>
 
 <h3>6. Verify Restore</h3>
-<pre><code>./capcat list sources
+<pre><code>capcat list sources
 
 # Expected:
 # - test_source1 IS in list
@@ -177,7 +177,7 @@ test2
 EOF
 
 # 2. Preview batch
-./capcat remove-source --batch remove_batch.txt --dry-run
+capcat remove-source --batch remove_batch.txt --dry-run
 
 # Expected:
 # - Shows 2 sources (test1, test2)
@@ -185,7 +185,7 @@ EOF
 # - No actual removal
 
 # 3. Execute batch
-./capcat remove-source --batch remove_batch.txt
+capcat remove-source --batch remove_batch.txt
 
 # Expected:
 # - Shows summary for test1, test2
@@ -194,7 +194,7 @@ EOF
 # - Both sources removed
 
 # 4. Verify
-./capcat list sources | grep test
+capcat list sources | grep test
 
 # Expected:
 # - Only test3 appears
@@ -203,13 +203,13 @@ EOF
 <h3>Test 2: Analytics Integration</h3>
 
 <pre><code># 1. Add test source
-./capcat add-source --url https://feeds.example.com/test
+capcat add-source --url https://feeds.example.com/test
 
 # 2. Fetch from it several times to generate analytics
-./capcat fetch test_analytics --count 5
+capcat fetch test_analytics --count 5
 
 # 3. Check analytics before removal
-./capcat remove-source
+capcat remove-source
 
 # Expected:
 # - Analytics summary shows test_analytics usage
@@ -247,7 +247,7 @@ cat ../.capcat_backups/removal_*/metadata.json
 echo &quot;test1&quot; &gt; force_test.txt
 
 # 2. Execute with force
-./capcat remove-source --batch force_test.txt --force
+capcat remove-source --batch force_test.txt --force
 
 # Expected:
 # - No confirmation prompts
@@ -261,7 +261,7 @@ echo &quot;test1&quot; &gt; force_test.txt
 BEFORE=$(ls ../.capcat_backups/ | wc -l)
 
 # 2. Remove without backup
-./capcat remove-source --no-backup
+capcat remove-source --no-backup
 
 # Expected:
 # - Normal removal process
@@ -275,13 +275,13 @@ AFTER=$(ls ../.capcat_backups/ | wc -l)
 <h3>Test 6: Multiple Undo/Restore</h3>
 
 <pre><code># 1. Remove source A
-./capcat remove-source  # Remove source A
+capcat remove-source  # Remove source A
 
 # 2. Remove source B
-./capcat remove-source  # Remove source B
+capcat remove-source  # Remove source B
 
 # 3. List backups
-./capcat remove-source --undo
+capcat remove-source --undo
 # Cancel to just see list
 
 # Expected:
@@ -290,7 +290,7 @@ AFTER=$(ls ../.capcat_backups/ | wc -l)
 # - Each with timestamp and sources
 
 # 4. Restore specific backup
-./capcat remove-source --undo removal_YYYYMMDD_HHMMSS
+capcat remove-source --undo removal_YYYYMMDD_HHMMSS
 
 # Expected:
 # - Restores only that specific backup&#x27;s sources
@@ -473,14 +473,14 @@ echo &quot;Adding test sources...&quot;
 
 # 3. Test dry-run
 echo &quot;Testing dry-run...&quot;
-./capcat remove-source --dry-run --no-analytics &lt;&lt; EOF
+capcat remove-source --dry-run --no-analytics &lt;&lt; EOF
 test1
 n
 EOF
 
 # 4. Test actual removal
 echo &quot;Testing removal with backup...&quot;
-./capcat remove-source &lt;&lt; EOF
+capcat remove-source &lt;&lt; EOF
 test1
 y
 EOF
@@ -496,13 +496,13 @@ fi
 
 # 6. Test undo
 echo &quot;Testing undo...&quot;
-./capcat remove-source --undo &lt;&lt; EOF
+capcat remove-source --undo &lt;&lt; EOF
 y
 EOF
 
 # 7. Verify restore
 echo &quot;Verifying restore...&quot;
-./capcat list sources | grep test1 &amp;&amp; echo &quot;PASS: Source restored&quot; || echo &quot;FAIL: Source not found&quot;
+capcat list sources | grep test1 &amp;&amp; echo &quot;PASS: Source restored&quot; || echo &quot;FAIL: Source not found&quot;
 
 echo &quot;=== All integration tests passed ===&quot;
 </code></pre>
@@ -510,7 +510,7 @@ echo &quot;=== All integration tests passed ===&quot;
 <h2>Edge Cases to Test</h2>
 
 <h3>1. Empty Selections</h3>
-<pre><code>./capcat remove-source
+<pre><code>capcat remove-source
 
 # Select nothing
 # Expected: &quot;No sources selected for removal&quot;
@@ -518,7 +518,7 @@ echo &quot;=== All integration tests passed ===&quot;
 
 <h3>2. Non-Existent Source in Batch</h3>
 <pre><code>echo &quot;nonexistent_source&quot; &gt; bad_batch.txt
-./capcat remove-source --batch bad_batch.txt
+capcat remove-source --batch bad_batch.txt
 
 # Expected:
 # &quot;Sources not found: nonexistent_source&quot;
@@ -530,7 +530,7 @@ echo &quot;=== All integration tests passed ===&quot;
 echo &quot;bad data&quot; &gt; ../.capcat_backups/removal_test/metadata.json
 
 # Try to restore
-./capcat remove-source --undo removal_test
+capcat remove-source --undo removal_test
 
 # Expected:
 # Error message about corrupted backup
@@ -538,10 +538,10 @@ echo &quot;bad data&quot; &gt; ../.capcat_backups/removal_test/metadata.json
 
 <h3>4. Concurrent Operations</h3>
 <pre><code># Terminal 1
-./capcat remove-source
+capcat remove-source
 
 # Terminal 2 (while Terminal 1 is waiting for input)
-./capcat remove-source
+capcat remove-source
 
 # Expected:
 # Both should work independently
@@ -558,7 +558,7 @@ echo &quot;bad data&quot; &gt; ../.capcat_backups/removal_test/metadata.json
 <h3>Large Batch Removal</h3>
 <pre><code># Create 100 test sources (scripted)
 # Remove all via batch
-time ./capcat remove-source --batch large_batch.txt --force
+time capcat remove-source --batch large_batch.txt --force
 
 # Expected:
 # - Completes in &lt; 5 seconds
@@ -568,7 +568,7 @@ time ./capcat remove-source --batch large_batch.txt --force
 <h3>Analytics with Many Records</h3>
 <pre><code># Simulate 1000 fetch records
 # Check analytics query performance
-time ./capcat remove-source --dry-run
+time capcat remove-source --dry-run
 
 # Expected:
 # - Analytics load &lt; 1 second
@@ -660,10 +660,10 @@ chmod 755 ../.capcat_backups/
 
 <h3>Test Fails: &quot;No backups found&quot;</h3>
 <pre><code># Create a backup first
-./capcat remove-source  # Remove something
+capcat remove-source  # Remove something
 
 # Then test undo
-./capcat remove-source --undo
+capcat remove-source --undo
 </code></pre>
 
 <h2>Continuous Testing</h2>

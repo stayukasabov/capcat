@@ -103,7 +103,7 @@
 <p>Preview exactly what will be removed without making any changes.</p>
 
 <h4>Usage:</h4>
-<pre><code>./capcat remove-source --dry-run
+<pre><code>capcat remove-source --dry-run
 </code></pre>
 
 <h4>Output:</h4>
@@ -140,12 +140,12 @@ To execute, run without --dry-run flag.
 <p>Every removal creates a timestamped backup for safety.</p>
 
 <h4>Default Behavior:</h4>
-<pre><code>./capcat remove-source
+<pre><code>capcat remove-source
 # Automatic backup created
 </code></pre>
 
 <h4>Skip Backup</h4> (not recommended):
-<pre><code>./capcat remove-source --no-backup
+<pre><code>capcat remove-source --no-backup
 </code></pre>
 
 <h4>Backup Structure:</h4>
@@ -218,7 +218,7 @@ BBC News (bbc)
 </ul>
 
 <h4>Skip Analytics:</h4>
-<pre><code>./capcat remove-source --no-analytics
+<pre><code>capcat remove-source --no-analytics
 </code></pre>
 
 <h4>Analytics File Location:</h4>
@@ -241,7 +241,7 @@ EOF
 </code></pre>
 
 <h4>Execute Batch Removal:</h4>
-<pre><code>./capcat remove-source --batch sources_to_remove.txt
+<pre><code>capcat remove-source --batch sources_to_remove.txt
 </code></pre>
 
 <h4>Output:</h4>
@@ -263,11 +263,11 @@ Backup: removal_20250118_143500
 </code></pre>
 
 <h4>Batch + Dry-Run:</h4>
-<pre><code>./capcat remove-source --batch sources.txt --dry-run
+<pre><code>capcat remove-source --batch sources.txt --dry-run
 </code></pre>
 
 <h4>Force Mode</h4> (skip confirmations):
-<pre><code>./capcat remove-source --batch sources.txt --force
+<pre><code>capcat remove-source --batch sources.txt --force
 </code></pre>
 
 <h3>5. Undo/Restore Functionality</h3>
@@ -275,11 +275,11 @@ Backup: removal_20250118_143500
 <p>Restore previously removed sources from backups.</p>
 
 <h4>Undo Last Removal:</h4>
-<pre><code>./capcat remove-source --undo
+<pre><code>capcat remove-source --undo
 </code></pre>
 
 <h4>Undo Specific Backup:</h4>
-<pre><code>./capcat remove-source --undo removal_20250118_143022
+<pre><code>capcat remove-source --undo removal_20250118_143022
 </code></pre>
 
 <h4>Interactive Selection:</h4>
@@ -323,49 +323,49 @@ Restore cancelled.
 
 <h3>Basic Commands</h3>
 <pre><code># Interactive removal
-./capcat remove-source
+capcat remove-source
 
 # Preview changes
-./capcat remove-source --dry-run
+capcat remove-source --dry-run
 
 # Remove without backup
-./capcat remove-source --no-backup
+capcat remove-source --no-backup
 
 # Remove without analytics
-./capcat remove-source --no-analytics
+capcat remove-source --no-analytics
 
 # Force (skip confirmations)
-./capcat remove-source --force
+capcat remove-source --force
 </code></pre>
 
 <h3>Batch Operations</h3>
 <pre><code># Batch removal
-./capcat remove-source --batch sources.txt
+capcat remove-source --batch sources.txt
 
 # Batch with dry-run
-./capcat remove-source --batch sources.txt --dry-run
+capcat remove-source --batch sources.txt --dry-run
 
 # Batch with force
-./capcat remove-source --batch sources.txt --force
+capcat remove-source --batch sources.txt --force
 </code></pre>
 
 <h3>Undo Operations</h3>
 <pre><code># Undo last removal
-./capcat remove-source --undo
+capcat remove-source --undo
 
 # Undo specific backup
-./capcat remove-source --undo removal_20250118_143022
+capcat remove-source --undo removal_20250118_143022
 </code></pre>
 
 <h3>Combined Flags</h3>
 <pre><code># Dry-run without analytics
-./capcat remove-source --dry-run --no-analytics
+capcat remove-source --dry-run --no-analytics
 
 # Batch removal without backup (not recommended)
-./capcat remove-source --batch sources.txt --no-backup
+capcat remove-source --batch sources.txt --no-backup
 
 # Force batch removal
-./capcat remove-source --batch sources.txt --force
+capcat remove-source --batch sources.txt --force
 </code></pre>
 
 <h2>Use Cases</h2>
@@ -373,14 +373,14 @@ Restore cancelled.
 <h3>Scenario 1: Clean Up Unused Sources</h3>
 
 <pre><code># Check what&#x27;s unused (dry-run)
-./capcat remove-source --dry-run
+capcat remove-source --dry-run
 
 # Analytics will show:
 # - Unused sources (never used or 30+ days)
 # - Low performers (poor success rates)
 
 # Selectively remove based on data
-./capcat remove-source
+capcat remove-source
 </code></pre>
 
 <h3>Scenario 2: Bulk Cleanup</h3>
@@ -391,21 +391,21 @@ old_source2
 old_source3&quot; &gt; cleanup.txt
 
 # Preview the cleanup
-./capcat remove-source --batch cleanup.txt --dry-run
+capcat remove-source --batch cleanup.txt --dry-run
 
 # Execute cleanup
-./capcat remove-source --batch cleanup.txt
+capcat remove-source --batch cleanup.txt
 </code></pre>
 
 <h3>Scenario 3: Safe Experimentation</h3>
 
 <pre><code># Remove a source (backup created automatically)
-./capcat remove-source
+capcat remove-source
 
 # Try the system without it
 
 # Changed your mind? Undo it!
-./capcat remove-source --undo
+capcat remove-source --undo
 </code></pre>
 
 <h3>Scenario 4: Production Migration</h3>
@@ -418,13 +418,13 @@ legacy_source3
 EOF
 
 # Preview impact
-./capcat remove-source --batch migrate.txt --dry-run
+capcat remove-source --batch migrate.txt --dry-run
 
 # Check analytics for usage patterns
 # Shows which sources are still active
 
 # Execute with force for automation
-./capcat remove-source --batch migrate.txt --force
+capcat remove-source --batch migrate.txt --force
 </code></pre>
 
 <h2>File Locations</h2>
@@ -450,7 +450,7 @@ EOF
 <h2>Best Practices</h2>
 
 <h3>Always Use Dry-Run First</h3>
-<pre><code>./capcat remove-source --dry-run
+<pre><code>capcat remove-source --dry-run
 </code></pre>
 <p>Verify selections before executing.</p>
 
@@ -478,16 +478,16 @@ EOF
 <h3>Test Restore Procedure</h3>
 <p>Periodically verify undo functionality works:</p>
 <pre><code># Remove a test source
-./capcat remove-source  # Remove test_source
+capcat remove-source  # Remove test_source
 
 # Verify it&#x27;s gone
-./capcat list sources
+capcat list sources
 
 # Restore it
-./capcat remove-source --undo
+capcat remove-source --undo
 
 # Verify it&#x27;s back
-./capcat list sources
+capcat list sources
 </code></pre>
 
 <h2>Troubleshooting</h2>
@@ -506,7 +506,7 @@ EOF
 
 <h3>Batch File Errors</h3>
 <h4>Problem:</h4> Sources not found in batch file
-<h4>Solution:</h4> Verify source IDs are correct with <code>./capcat list sources</code>
+<h4>Solution:</h4> Verify source IDs are correct with <code>capcat list sources</code>
 
 <h2>Performance Considerations</h2>
 
