@@ -36,6 +36,7 @@ from .unified_media_processor import UnifiedMediaProcessor
 from .utils import sanitize_filename
 from .timeout_config import get_timeout_for_source, record_response_time
 from .timeout_wrapper import safe_network_operation
+from .tui_context import is_tui_active, record_fetch_result
 
 
 def _collect_pdf_links_from_soup(soup: "BeautifulSoup", base_url: str) -> list:
@@ -2827,40 +2828,88 @@ class NewsSourceArticleFetcher(ArticleFetcher):
             # Ensure UTF-8 encoding to prevent Unicode corruption
             response.encoding = 'utf-8'
         except requests.exceptions.Timeout:
-            self.logger.warning(f"Timeout fetching article content from {url}")
+            if is_tui_active():
+                self.logger.debug(f"Timeout fetching article content from {url}")
+                record_fetch_result(False, "timeout")
+            else:
+                self.logger.warning(f"Timeout fetching article content from {url}")
             return False, None, None
         except requests.exceptions.HTTPError as e:
             if e.response.status_code == 403:
-                self.logger.warning(
-                    f"Access forbidden for article {url} - anti-bot protection detected"
-                )
+                if is_tui_active():
+                    self.logger.debug(
+                        f"Access forbidden for article {url} - anti-bot protection detected"
+                    )
+                    record_fetch_result(False, "blocked")
+                else:
+                    self.logger.warning(
+                        f"Access forbidden for article {url} - anti-bot protection detected"
+                    )
             elif e.response.status_code == 404:
-                self.logger.warning(
-                    f"Article not found at {url} - may have been deleted"
-                )
+                if is_tui_active():
+                    self.logger.debug(
+                        f"Article not found at {url} - may have been deleted"
+                    )
+                    record_fetch_result(False, "not found")
+                else:
+                    self.logger.warning(
+                        f"Article not found at {url} - may have been deleted"
+                    )
             elif e.response.status_code == 429:
-                self.logger.warning(
-                    f"Rate limited accessing {url} - try reducing request frequency"
-                )
+                if is_tui_active():
+                    self.logger.debug(
+                        f"Rate limited accessing {url} - try reducing request frequency"
+                    )
+                    record_fetch_result(False, "error")
+                else:
+                    self.logger.warning(
+                        f"Rate limited accessing {url} - try reducing request frequency"
+                    )
             elif e.response.status_code >= 500:
-                self.logger.warning(
-                    f"Server error ({e.response.status_code}) fetching {url} - temporary issue"
-                )
+                if is_tui_active():
+                    self.logger.debug(
+                        f"Server error ({e.response.status_code}) fetching {url} - temporary issue"
+                    )
+                    record_fetch_result(False, "error")
+                else:
+                    self.logger.warning(
+                        f"Server error ({e.response.status_code}) fetching {url} - temporary issue"
+                    )
             else:
-                self.logger.warning(
-                    f"HTTP error {e.response.status_code} fetching {url}"
-                )
+                if is_tui_active():
+                    self.logger.debug(
+                        f"HTTP error {e.response.status_code} fetching {url}"
+                    )
+                    record_fetch_result(False, "error")
+                else:
+                    self.logger.warning(
+                        f"HTTP error {e.response.status_code} fetching {url}"
+                    )
             return False, None, None
         except requests.exceptions.ConnectionError:
-            self.logger.warning(
-                f"Connection error fetching {url} - network may be unavailable"
-            )
+            if is_tui_active():
+                self.logger.debug(
+                    f"Connection error fetching {url} - network may be unavailable"
+                )
+                record_fetch_result(False, "error")
+            else:
+                self.logger.warning(
+                    f"Connection error fetching {url} - network may be unavailable"
+                )
             return False, None, None
         except requests.exceptions.RequestException as e:
-            self.logger.warning(f"Request error fetching {url}: {e}")
+            if is_tui_active():
+                self.logger.debug(f"Request error fetching {url}: {e}")
+                record_fetch_result(False, "error")
+            else:
+                self.logger.warning(f"Request error fetching {url}: {e}")
             return False, None, None
         except Exception as e:
-            self.logger.error(f"Unexpected error fetching {url}: {e}")
+            if is_tui_active():
+                self.logger.debug(f"Unexpected error fetching {url}: {e}")
+                record_fetch_result(False, "error")
+            else:
+                self.logger.error(f"Unexpected error fetching {url}: {e}")
             return False, None, None
 
         # Report parsing progress
@@ -2871,6 +2920,8 @@ class NewsSourceArticleFetcher(ArticleFetcher):
             soup = BeautifulSoup(response.text, "html.parser")
         except Exception as e:
             self.logger.debug(f"Failed to parse HTML from {url}: {e}")
+            if is_tui_active():
+                record_fetch_result(False, "error")
             return False, None, None
 
         # Detect JavaScript-only SPA shells before attempting extraction.
@@ -2887,10 +2938,17 @@ class NewsSourceArticleFetcher(ArticleFetcher):
                 or body.find(attrs={"data-reactroot": True})
             )
             if spa_root and len(body_text) < 100:
-                self.logger.warning(
-                    f"JavaScript-rendered page at {url} - content requires "
-                    f"browser execution and cannot be extracted"
-                )
+                if is_tui_active():
+                    self.logger.debug(
+                        f"JavaScript-rendered page at {url} - content requires "
+                        f"browser execution and cannot be extracted"
+                    )
+                    record_fetch_result(False, "JS-rendered")
+                else:
+                    self.logger.warning(
+                        f"JavaScript-rendered page at {url} - content requires "
+                        f"browser execution and cannot be extracted"
+                    )
                 return False, None, None
 
         # Collect PDF links from the FULL page BEFORE cleanup.
@@ -2963,10 +3021,16 @@ class NewsSourceArticleFetcher(ArticleFetcher):
             self.logger.debug(
                 f"Failed to convert HTML to Markdown for {url}: {e}"
             )
+            if is_tui_active():
+                record_fetch_result(False, "error")
             return False, None, None
 
         if not markdown_content:
-            self.logger.warning(f"Empty markdown for {url}")
+            if is_tui_active():
+                self.logger.debug(f"Empty markdown for {url}")
+                record_fetch_result(False, "no content")
+            else:
+                self.logger.warning(f"Empty markdown for {url}")
             return False, None, None
 
         # Create individual folder for this article (only after we have content)
@@ -2984,16 +3048,22 @@ class NewsSourceArticleFetcher(ArticleFetcher):
             self.logger.error(
                 f"Permission denied creating directory {article_folder_path} - check folder permissions"
             )
+            if is_tui_active():
+                record_fetch_result(False, "error")
             return False, None, None
         except OSError as e:
             self.logger.error(
                 f"OS error creating directory {article_folder_path}: {e}"
             )
+            if is_tui_active():
+                record_fetch_result(False, "error")
             return False, None, None
         except Exception as e:
             self.logger.error(
                 f"Unexpected error creating directory {article_folder_path}: {e}"
             )
+            if is_tui_active():
+                record_fetch_result(False, "error")
             return False, None, None
 
         # Remove duplicate title if it appears at the beginning of the content
@@ -3067,19 +3137,27 @@ class NewsSourceArticleFetcher(ArticleFetcher):
             self.logger.error(
                 f"Permission denied writing article file {filename} - check folder permissions"
             )
+            if is_tui_active():
+                record_fetch_result(False, "error")
             return False, None, None
         except OSError as e:
             self.logger.error(f"OS error writing article file {filename}: {e}")
+            if is_tui_active():
+                record_fetch_result(False, "error")
             return False, None, None
         except UnicodeEncodeError as e:
             self.logger.error(
                 f"Unicode encoding error writing article {filename}: {e}"
             )
+            if is_tui_active():
+                record_fetch_result(False, "error")
             return False, None, None
         except Exception as e:
             self.logger.error(
                 f"Unexpected error writing article file {filename}: {e}"
             )
+            if is_tui_active():
+                record_fetch_result(False, "error")
             return False, None, None
 
         # Process and download embedded media using unified system
@@ -3179,6 +3257,8 @@ class NewsSourceArticleFetcher(ArticleFetcher):
                 pass
 
         self.logger.info(f"Saved article: {page_title}")
+        if is_tui_active():
+            record_fetch_result(True, None)
         return True, filename, article_folder_path
 
     def _cleanup_empty_images_folder(self, article_folder_path: str) -> None:

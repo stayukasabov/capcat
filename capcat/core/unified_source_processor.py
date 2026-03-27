@@ -11,6 +11,7 @@ import os
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed, TimeoutError
 from pathlib import Path
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
@@ -40,6 +41,12 @@ try:
     MIRROR_AVAILABLE = True
 except ImportError:
     MIRROR_AVAILABLE = False
+
+
+@dataclass
+class FetchResult:
+    saved: int
+    skipped: list[tuple[str, int]] = field(default_factory=list)
 
 
 def _resolve_count(
