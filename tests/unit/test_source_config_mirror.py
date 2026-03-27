@@ -201,32 +201,65 @@ def _make_mirrored_project(tmp_path, monkeypatch, builtin_files=None, user_files
     return m, project, user_cfg
 
 
-def test_step1_copies_new_source_when_user_says_yes(tmp_path, monkeypatch):
-    m, project, user_cfg = _make_mirrored_project(
-        tmp_path, monkeypatch,
-        builtin_files={"bbc.yaml": "name: bbc\n", "guardian.yaml": "name: guardian\n"},
-        user_files={"bbc.yaml": "name: bbc\n"},  # bbc already mirrored, guardian is new
+def test_step1_silently_copies_new_items(tmp_path, monkeypatch):
+    """New builtin items are copied without any prompt."""
+    builtin_cfg = tmp_path / "capcat" / "sources" / "builtin" / "config_driven" / "configs"
+    builtin_cfg.mkdir(parents=True)
+    (builtin_cfg / "newsite.yaml").write_text("name: newsite")
+
+    user_cfg = tmp_path / "Config" / "sources" / "active" / "config_driven" / "configs"
+    user_cfg.mkdir(parents=True)
+
+    manifest_dir = tmp_path / ".capcat"
+    manifest_dir.mkdir()
+    (manifest_dir / "source_hashes.json").write_text("{}")
+
+    prompt_calls = []
+
+    mirror = SourceConfigMirror(tmp_path, tui_mode=False)
+    monkeypatch.setattr(mirror, "_builtin_config_driven_dir", lambda: builtin_cfg)
+    monkeypatch.setattr(mirror, "_user_config_driven_dir", lambda: user_cfg)
+    monkeypatch.setattr(mirror, "_builtin_custom_dir", lambda: tmp_path / "no_custom")
+    monkeypatch.setattr(mirror, "_user_custom_dir", lambda: tmp_path / "no_custom_user")
+    monkeypatch.setattr(mirror, "_builtin_bundles_dir", lambda: tmp_path / "no_bundles")
+    monkeypatch.setattr(mirror, "_user_bundles_dir", lambda: tmp_path / "no_bundles_user")
+    monkeypatch.setattr(mirror, "_prompt", lambda msg: prompt_calls.append(msg) or "n")
+
+    mirror.check_for_upgrades()
+
+    assert prompt_calls == [], "No prompt must be shown for new items"
+    assert (user_cfg / "newsite.yaml").exists(), "New item must be silently copied"
+
+
+def test_step1_no_new_items_no_prompt_no_copy(tmp_path, monkeypatch):
+    """When there are no new items, nothing happens."""
+    builtin_cfg = tmp_path / "builtin_cfg"
+    builtin_cfg.mkdir()
+    user_cfg = tmp_path / "user_cfg"
+    user_cfg.mkdir()
+    (user_cfg / "existing.yaml").write_text("name: existing")
+
+    manifest_dir = tmp_path / ".capcat"
+    manifest_dir.mkdir()
+    import hashlib, json
+    h = hashlib.sha256((user_cfg / "existing.yaml").read_bytes()).hexdigest()
+    (manifest_dir / "source_hashes.json").write_text(
+        json.dumps({"config_driven/configs/existing.yaml": {"builtin_hash": h, "user_hash": h}})
     )
-    monkeypatch.setattr("builtins.input", lambda _: "y")
 
-    m.check_for_upgrades()
+    prompt_calls = []
+    mirror = SourceConfigMirror(tmp_path, tui_mode=False)
+    monkeypatch.setattr(mirror, "_builtin_config_driven_dir", lambda: builtin_cfg)
+    monkeypatch.setattr(mirror, "_user_config_driven_dir", lambda: user_cfg)
+    monkeypatch.setattr(mirror, "_builtin_custom_dir", lambda: tmp_path / "no_custom")
+    monkeypatch.setattr(mirror, "_user_custom_dir", lambda: tmp_path / "no_custom_user")
+    monkeypatch.setattr(mirror, "_builtin_bundles_dir", lambda: tmp_path / "no_bundles")
+    monkeypatch.setattr(mirror, "_user_bundles_dir", lambda: tmp_path / "no_bundles_user")
+    monkeypatch.setattr(mirror, "_prompt", lambda msg: prompt_calls.append(msg) or "n")
 
-    assert (user_cfg / "guardian.yaml").exists()
-    manifest = json.loads((project / ".capcat" / "source_hashes.json").read_text())
-    assert "config_driven/configs/guardian.yaml" in manifest
+    mirror.check_for_upgrades()
 
-
-def test_step1_does_not_copy_when_user_says_no(tmp_path, monkeypatch):
-    m, project, user_cfg = _make_mirrored_project(
-        tmp_path, monkeypatch,
-        builtin_files={"bbc.yaml": "name: bbc\n", "guardian.yaml": "name: guardian\n"},
-        user_files={"bbc.yaml": "name: bbc\n"},
-    )
-    monkeypatch.setattr("builtins.input", lambda _: "n")
-
-    m.check_for_upgrades()
-
-    assert not (user_cfg / "guardian.yaml").exists()
+    assert prompt_calls == []
 
 
 def test_step1_no_prompt_when_no_new_items(tmp_path, monkeypatch):
