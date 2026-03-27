@@ -8,7 +8,7 @@ import os
 import re
 import struct
 from typing import Dict, List, Optional, Tuple
-from urllib.parse import urljoin, urlparse
+from urllib.parse import unquote, urljoin, urlparse
 
 import requests
 from bs4 import BeautifulSoup
@@ -268,10 +268,18 @@ class ImageProcessor:
         if allow_extensionless:
             return True
 
-        return any(
-            path.endswith(ext)
-            for ext in [".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg"]
-        )
+        _EXTS = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg"]
+
+        # Fast path: extension at end of path (most common case)
+        if any(path.endswith(ext) for ext in _EXTS):
+            return True
+
+        # CDN proxy URLs encode the original image URL in the path or query
+        # string with no extension visible in the path component.
+        # e.g. /_next/image?url=https%3A%2F%2F...photo.jpg&w=1456&q=75
+        # e.g. substackcdn.com/image/fetch/.../https%3A%2F%2F...image.jpeg
+        decoded = unquote(url).lower()
+        return any(ext in decoded for ext in _EXTS)
 
     def _download_images(
         self, image_urls: List[str], output_folder: str, max_total_size_mb: int = 20,
