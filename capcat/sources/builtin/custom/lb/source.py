@@ -387,7 +387,7 @@ class LbSource(BaseSource):
                     self.logger.info(f"Successfully fetched content for: {article.title}")
                     return True, folder_path
                 else:
-                    self.logger.warning(f"Content fetch failed for: {article.title}")
+                    self.logger.debug(f"Content fetch failed for: {article.title}")
                     return False, None
 
             except requests.exceptions.Timeout as e:
