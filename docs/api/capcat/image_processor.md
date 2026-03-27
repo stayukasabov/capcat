@@ -17,6 +17,10 @@ Modular, DRY architecture with source-specific configurations.
 
 **Value:** `64`
 
+### _EXTS
+
+**Value:** `['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg']`
+
 ## Classes
 
 ### ImageProcessor
