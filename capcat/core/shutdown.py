@@ -4,6 +4,7 @@ Graceful shutdown handling for Capcat.
 Handles signal interrupts and cleanup operations.
 """
 
+import os
 import signal
 import sys
 import threading
@@ -52,13 +53,16 @@ class GracefulShutdown:
         _shutdown_instance = None
 
     def _signal_handler(self, signum: int, _frame):
-        """Handle shutdown signals — sets event only. No sys.exit, no sleep."""
-        signal_names = {
-            signal.SIGINT: "SIGINT (Ctrl+C)",
-            signal.SIGTERM: "SIGTERM",
-        }
-        signal_name = signal_names.get(signum, f"Signal {signum}")
-        self.logger.info(f"Received {signal_name}, initiating graceful shutdown...")
+        """Handle shutdown signals.
+
+        SIGINT (Ctrl+C) exits immediately via os._exit so that blocking
+        socket calls do not delay termination.
+        SIGTERM sets the event for cooperative shutdown.
+        """
+        if signum == signal.SIGINT:
+            os._exit(130)
+            return  # unreachable in production; allows mocking in tests
+        self.logger.info("Received SIGTERM, initiating graceful shutdown...")
         self.shutdown_event.set()
 
     def should_shutdown(self) -> bool:
