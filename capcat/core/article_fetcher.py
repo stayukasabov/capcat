@@ -2920,6 +2920,8 @@ class NewsSourceArticleFetcher(ArticleFetcher):
             soup = BeautifulSoup(response.text, "html.parser")
         except Exception as e:
             self.logger.debug(f"Failed to parse HTML from {url}: {e}")
+            if is_tui_active():
+                record_fetch_result(False, "error")
             return False, None, None
 
         # Detect JavaScript-only SPA shells before attempting extraction.
@@ -3019,6 +3021,8 @@ class NewsSourceArticleFetcher(ArticleFetcher):
             self.logger.debug(
                 f"Failed to convert HTML to Markdown for {url}: {e}"
             )
+            if is_tui_active():
+                record_fetch_result(False, "error")
             return False, None, None
 
         if not markdown_content:
