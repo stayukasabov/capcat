@@ -161,3 +161,60 @@ class TestReadImageDimensions:
 
 def test_min_pixel_dimension_is_64():
     assert ImageProcessor._MIN_PIXEL_DIMENSION == 64
+
+
+# ---------------------------------------------------------------------------
+# _is_valid_image_url — CDN proxy URL handling
+# ---------------------------------------------------------------------------
+
+class TestIsValidImageUrl:
+    """_is_valid_image_url must accept CDN proxy URLs where the image extension
+    is embedded inside an encoded path segment, not at the end of the path."""
+
+    def _proc(self):
+        return ImageProcessor.__new__(ImageProcessor)
+
+    def test_plain_jpeg_url(self):
+        url = "https://example.com/images/photo.jpeg"
+        assert self._proc()._is_valid_image_url(url) is True
+
+    def test_plain_png_url(self):
+        assert self._proc()._is_valid_image_url("https://example.com/img.png") is True
+
+    def test_non_image_url_rejected(self):
+        assert self._proc()._is_valid_image_url("https://example.com/page.html") is False
+
+    def test_substack_cdn_jpeg(self):
+        """substackcdn.com/image/fetch/... proxy URL with .jpeg in encoded segment."""
+        url = (
+            "https://substackcdn.com/image/fetch/"
+            "$s_!r41H!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/"
+            "https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F"
+            "d037a2b3-283d-4ef2-92da-b1b95e22e446_1080x683.jpeg"
+        )
+        assert self._proc()._is_valid_image_url(url) is True
+
+    def test_substack_cdn_png(self):
+        url = (
+            "https://substackcdn.com/image/fetch/w_1456/"
+            "https%3A%2F%2Fexample.s3.amazonaws.com%2Fimage.png"
+        )
+        assert self._proc()._is_valid_image_url(url) is True
+
+    def test_generic_proxy_encoded_jpg(self):
+        """Any CDN proxy that URL-encodes the original image URL in the path."""
+        url = "https://cdn.example.com/proxy/https%3A%2F%2Forigin.com%2Fphoto.jpg"
+        assert self._proc()._is_valid_image_url(url) is True
+
+    def test_encoded_non_image_still_rejected(self):
+        """Encoded URL that resolves to a non-image is still rejected."""
+        url = "https://cdn.example.com/proxy/https%3A%2F%2Forigin.com%2Fpage.html"
+        assert self._proc()._is_valid_image_url(url) is False
+
+    def test_nextjs_image_proxy(self):
+        """/_next/image?url=...jpg has no extension in path — must still pass."""
+        url = (
+            "https://www.whyisthisinteresting.com/_next/image"
+            "?url=https%3A%2F%2Fimages.example.com%2Fphoto.jpg&w=1456&q=75"
+        )
+        assert self._proc()._is_valid_image_url(url) is True
