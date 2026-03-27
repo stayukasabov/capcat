@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 from datetime import date
 from pathlib import Path
 
@@ -576,6 +577,18 @@ def test_check_for_upgrades_proceeds_to_step1_when_manifest_empty(tmp_path, monk
     mirror.check_for_upgrades()
     assert step1_called == [True]
     assert resync_called == []
+
+
+def test_resync_manifest_never_emits_warning(tmp_path, caplog):
+    """_resync_manifest must never emit WARNING — always DEBUG."""
+    mirror = SourceConfigMirror(tmp_path, tui_mode=False)
+    with caplog.at_level(logging.DEBUG):
+        mirror._resync_manifest()
+    warning_records = [
+        r for r in caplog.records
+        if r.levelno >= logging.WARNING and "source_hashes" in r.message
+    ]
+    assert warning_records == []
 
 
 def test_unified_processor_calls_mirror_on_first_fetch(tmp_path, monkeypatch):

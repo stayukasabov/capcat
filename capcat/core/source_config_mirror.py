@@ -402,13 +402,8 @@ class SourceConfigMirror:
         """Rebuild manifest from current user files when source_hashes.json is missing.
         Never overwrites user files."""
         from capcat.core.logging_config import get_logger
-        from capcat.core.tui_context import is_tui_active
         logger = get_logger(__name__)
-        msg = "Capcat: source_hashes.json missing — rebuilt from current state."
-        if is_tui_active():
-            logger.debug(msg)
-        else:
-            logger.warning(msg)
+        logger.debug("Capcat: source_hashes.json missing — rebuilt from current state.")
 
         manifest = {}
 
