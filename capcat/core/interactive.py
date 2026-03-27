@@ -650,6 +650,7 @@ def _prompt_for_html(action, selection):
 
 def _confirm_and_execute(action, selection, generate_html):
     """Prints a summary and executes the command by calling run_app directly."""
+    from capcat.core.tui_context import is_tui_active, reset_fetch_results, get_fetch_result
     summary = f"Action: {action}\n"
     if action == 'bundle':
         summary += f"Bundle: {selection}\n"
@@ -688,6 +689,9 @@ def _confirm_and_execute(action, selection, generate_html):
     if want_pdfs:
         args.append('--media')
 
+    if is_tui_active():
+        reset_fetch_results()
+
     success = True
     try:
         print("Executing command...")
@@ -702,19 +706,33 @@ def _confirm_and_execute(action, selection, generate_html):
         print(f"\nError: {e}")
         success = False
 
-    _show_completion_screen(generate_html, success)
+    fetch_result = get_fetch_result() if is_tui_active() else None
+    _show_completion_screen(generate_html, success, fetch_result=fetch_result)
 
 
-def _show_completion_screen(generate_html: bool, success: bool) -> None:
+def _show_completion_screen(generate_html: bool, success: bool, fetch_result=None) -> None:
     """Show post-execution screen with status, HTML link, and navigation choices.
 
     Args:
         generate_html: Whether HTML generation was requested.
         success: Whether the command completed without errors.
+        fetch_result: Optional FetchResult with saved/skipped counts (TUI only).
     """
     print_logo()
     status_label = "Done" if success else "Completed with errors"
     print(f"\n  {status_label}")
+
+    if fetch_result is not None:
+        saved = fetch_result.saved
+        total_skipped = sum(n for _, n in fetch_result.skipped)
+        if saved > 0 or total_skipped > 0:
+            if total_skipped == 0:
+                print(f"\n  {saved} saved")
+            else:
+                parts = ", ".join(
+                    f"{n} {r}" for r, n in fetch_result.skipped
+                )
+                print(f"\n  {saved} saved, {total_skipped} skipped ({parts})")
 
     if generate_html:
         html_path = _find_latest_index_html()
