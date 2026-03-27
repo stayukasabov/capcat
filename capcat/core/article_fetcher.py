@@ -716,17 +716,31 @@ class ArticleFetcher(ABC):
             return False
         except requests.exceptions.RequestException as e:
             # Network error during HEAD request
-            self.logger.warning(
-                f"Network error checking PDF size for {url}: {e}. "
-                f"Proceeding with download."
-            )
+            from capcat.core.tui_context import is_tui_active
+            if is_tui_active():
+                self.logger.debug(
+                    f"Network error checking PDF size for {url}: {e}. "
+                    f"Proceeding with download."
+                )
+            else:
+                self.logger.warning(
+                    f"Network error checking PDF size for {url}: {e}. "
+                    f"Proceeding with download."
+                )
             return False
         except Exception as e:
             # Unexpected errors
-            self.logger.warning(
-                f"Unexpected error checking PDF size for {url}: {e}. "
-                f"Proceeding with download."
-            )
+            from capcat.core.tui_context import is_tui_active
+            if is_tui_active():
+                self.logger.debug(
+                    f"Unexpected error checking PDF size for {url}: {e}. "
+                    f"Proceeding with download."
+                )
+            else:
+                self.logger.warning(
+                    f"Unexpected error checking PDF size for {url}: {e}. "
+                    f"Proceeding with download."
+                )
             return False
 
     def _prompt_user_skip(
@@ -746,6 +760,11 @@ class ArticleFetcher(ABC):
         Returns:
             True if ESC pressed (skip), False on timeout (proceed)
         """
+        from capcat.core.tui_context import is_tui_active, record_fetch_result
+        if is_tui_active():
+            record_fetch_result(False, "large PDF")
+            return True
+
         esc_pressed = threading.Event()
         listener = threading.Thread(
             target=_listen_for_esc, args=(esc_pressed,), daemon=True
@@ -1317,9 +1336,19 @@ class ArticleFetcher(ABC):
                     self.logger.info(f"Downloaded PDF: {link_url} → {local_path}")
                     return f"[{text}]({local_path})"
                 else:
-                    self.logger.warning(f"PDF download returned None for: {link_url}")
+                    from capcat.core.tui_context import is_tui_active, record_fetch_result
+                    if is_tui_active():
+                        self.logger.debug(f"PDF download returned None for: {link_url}")
+                        record_fetch_result(False, "error")
+                    else:
+                        self.logger.warning(f"PDF download returned None for: {link_url}")
             except Exception as e:
-                self.logger.warning(f"PDF download failed for {link_url}: {type(e).__name__}: {e}")
+                from capcat.core.tui_context import is_tui_active, record_fetch_result
+                if is_tui_active():
+                    self.logger.debug(f"PDF download failed for {link_url}: {type(e).__name__}: {e}")
+                    record_fetch_result(False, "error")
+                else:
+                    self.logger.warning(f"PDF download failed for {link_url}: {type(e).__name__}: {e}")
             return match.group(0)
 
         return link_pattern.sub(replace_link, markdown_content)
