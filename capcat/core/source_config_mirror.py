@@ -178,12 +178,11 @@ class SourceConfigMirror:
     # ------------------------------------------------------------------
 
     def _step1_new_items(self, manifest: dict) -> dict:
-        """Detect and optionally copy items present in builtins but absent from user mirror."""
-        new_cfg: list = []   # (builtin_file, user_file, key)
-        new_custom: list = []  # (builtin_dir, user_dir)
-        new_bundles: list = []  # (builtin_file, user_file, key)
+        """Detect and silently copy items present in builtins but absent from user mirror."""
+        new_cfg: list = []
+        new_custom: list = []
+        new_bundles: list = []
 
-        # config_driven: source_ids in builtin but absent in user mirror
         builtin_cfg = self._builtin_config_driven_dir()
         user_cfg = self._user_config_driven_dir()
         if builtin_cfg.exists():
@@ -196,7 +195,6 @@ class SourceConfigMirror:
                 if key not in manifest and not (user_cfg / f.name).exists():
                     new_cfg.append((f, user_cfg / f.name, key))
 
-        # custom: subdirs in builtin absent from user mirror
         builtin_custom = self._builtin_custom_dir()
         user_custom = self._user_custom_dir()
         if builtin_custom.exists():
@@ -204,7 +202,6 @@ class SourceConfigMirror:
                 if d.is_dir() and not (user_custom / d.name).exists():
                     new_custom.append((d, user_custom / d.name))
 
-        # bundles: *.yml at builtin root absent from user bundles dir
         builtin_bundles = self._builtin_bundles_dir()
         user_bundles = self._user_bundles_dir()
         if builtin_bundles.exists():
@@ -217,44 +214,30 @@ class SourceConfigMirror:
         if not new_cfg and not new_custom and not new_bundles:
             return manifest
 
-        # Build prompt
-        source_names = [str(f.name) for f, _, _ in new_cfg]
-        custom_names = [d.name for d, _ in new_custom]
-        bundle_names = [str(f.name) for f, _, _ in new_bundles]
-        total = len(source_names) + len(custom_names) + len(bundle_names)
+        user_cfg.mkdir(parents=True, exist_ok=True)
+        user_custom.mkdir(parents=True, exist_ok=True)
+        user_bundles.mkdir(parents=True, exist_ok=True)
 
-        msg_lines = [f"Capcat: {total} new item(s) available:"]
-        msg_lines.append(f"  Sources: {', '.join(source_names) if source_names else '(none)'}")
-        msg_lines.append(f"  Custom sources: {', '.join(custom_names) if custom_names else '(none)'}")
-        msg_lines.append(f"  Bundles: {', '.join(bundle_names) if bundle_names else '(none)'}")
-        msg_lines.append("Add to your configuration? [Y/n]")
+        for builtin_f, user_f, key in new_cfg:
+            shutil.copy2(builtin_f, user_f)
+            h = self._compute_hash(builtin_f)
+            manifest[key] = {"builtin_hash": h, "user_hash": h}
 
-        answer = self._prompt("\n".join(msg_lines))
-        if answer.strip().lower() in ("", "y", "yes"):
-            user_cfg.mkdir(parents=True, exist_ok=True)
-            user_custom.mkdir(parents=True, exist_ok=True)
-            user_bundles.mkdir(parents=True, exist_ok=True)
+        for builtin_d, user_d in new_custom:
+            shutil.copytree(builtin_d, user_d)
+            for f in user_d.rglob("*"):
+                if f.is_file():
+                    rel = f.relative_to(user_d)
+                    builtin_f = builtin_d / rel
+                    if builtin_f.exists():
+                        h = self._compute_hash(builtin_f)
+                        key = f"custom/{builtin_d.name}/{rel}"
+                        manifest[key] = {"builtin_hash": h, "user_hash": h}
 
-            for builtin_f, user_f, key in new_cfg:
-                shutil.copy2(builtin_f, user_f)
-                h = self._compute_hash(builtin_f)
-                manifest[key] = {"builtin_hash": h, "user_hash": h}
-
-            for builtin_d, user_d in new_custom:
-                shutil.copytree(builtin_d, user_d)
-                for f in user_d.rglob("*"):
-                    if f.is_file():
-                        rel = f.relative_to(user_d)
-                        builtin_f = builtin_d / rel
-                        if builtin_f.exists():
-                            h = self._compute_hash(builtin_f)
-                            key = f"custom/{builtin_d.name}/{rel}"
-                            manifest[key] = {"builtin_hash": h, "user_hash": h}
-
-            for builtin_f, user_f, key in new_bundles:
-                shutil.copy2(builtin_f, user_f)
-                h = self._compute_hash(builtin_f)
-                manifest[key] = {"builtin_hash": h, "user_hash": h}
+        for builtin_f, user_f, key in new_bundles:
+            shutil.copy2(builtin_f, user_f)
+            h = self._compute_hash(builtin_f)
+            manifest[key] = {"builtin_hash": h, "user_hash": h}
 
         return manifest
 
