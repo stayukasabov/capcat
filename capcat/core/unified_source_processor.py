@@ -43,7 +43,6 @@ except ImportError:
     MIRROR_AVAILABLE = False
 
 
-
 @dataclass
 class FetchResult:
     saved: int
