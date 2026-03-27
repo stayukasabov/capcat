@@ -1282,6 +1282,9 @@ class ArticleFetcher(ABC):
         import re
         from urllib.parse import urlparse
 
+        if not self.download_files:
+            return markdown_content
+
         self.logger.info(
             f"_download_pdf_links_from_markdown called, "
             f"folder={article_folder_path}, "
