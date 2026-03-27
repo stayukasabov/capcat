@@ -705,6 +705,10 @@ class MediaProcessor:
         if not srcset:
             return ""
 
+        # Reject pure data: URI placeholders before any comma-splitting
+        if srcset.strip().startswith("data:"):
+            return ""
+
         # Split by comma and parse each source
         sources = []
         for source in srcset.split(","):
@@ -712,6 +716,8 @@ class MediaProcessor:
             if " " in source:
                 url, descriptor = source.rsplit(" ", 1)
                 url = url.strip()
+                if url.startswith("data:"):
+                    continue
                 descriptor = descriptor.strip()
 
                 # Extract width from descriptor (e.g., "1536w" -> 1536)
@@ -735,9 +741,13 @@ class MediaProcessor:
             sources.sort(key=lambda x: x[0], reverse=True)  # Sort by width descending
             return sources[0][1]
 
-        # Fallback: return first URL from srcset
-        first_source = srcset.split(",")[0].strip()
-        return first_source.split(" ")[0] if " " in first_source else first_source
+        # Fallback: return first non-data: URL from srcset
+        for raw in srcset.split(","):
+            raw = raw.strip()
+            first_url = raw.split(" ")[0] if " " in raw else raw
+            if first_url and not first_url.startswith("data:"):
+                return first_url
+        return ""
 
     def remove_image_from_markdown(
         self, markdown_content: str, image_src: str
