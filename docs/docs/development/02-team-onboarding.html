@@ -134,7 +134,7 @@ pip install -r requirements-dev.txt  # Development tools
 <h3>Step 3: Verify Installation</h3>
 
 <pre><code># Test basic functionality
-./capcat list sources
+capcat list sources
 
 # Run test suite
 pytest
@@ -211,15 +211,15 @@ black --check .
 <h3>Exercise 1: Run Capcat (10 minutes)</h3>
 
 <pre><code># Basic fetch command
-./capcat fetch hn --count 5
+capcat fetch hn --count 5
 
 # Check output
-cd ../News/news_$(date +%d-%m-%Y)/
+cd News/news_$(date +%d-%m-%Y)/
 ls -la
 cat HackerNews_*/01_*/article.md
 
 # Try interactive mode
-./capcat catch
+capcat catch
 </code></pre>
 
 <h4>Learning Goals</h4>
@@ -243,7 +243,7 @@ print(f&quot;DEBUG: Command: {args.command}&quot;)
 print(f&quot;DEBUG: Found {len(sources)} sources&quot;)
 
 # Run and observe output
-./capcat fetch hn --count 1 2&gt;&amp;1 | grep DEBUG
+capcat fetch hn --count 1 2&gt;&amp;1 | grep DEBUG
 </code></pre>
 
 <h4>Learning Goals</h4>
@@ -258,10 +258,10 @@ print(f&quot;DEBUG: Found {len(sources)} sources&quot;)
 <p>Pick one source and understand it completely:</p>
 
 <pre><code># Choose a simple config-driven source
-cat sources/active/config_driven/configs/iq.yaml
+cat Config/sources/active/config_driven/configs/iq.yaml
 
 # Or a complex custom source
-cat sources/active/custom/hn/source.py
+cat Config/sources/active/custom/hn/source.py
 </code></pre>
 
 <h4>Learning Goals</h4>
@@ -317,7 +317,7 @@ git push origin feature/your-name-onboarding
 
 <p>Create a new simple source (estimated time: 30 minutes):</p>
 
-<pre><code># sources/active/config_driven/configs/testsource.yaml
+<pre><code># Config/sources/active/config_driven/configs/testsource.yaml
 display_name: &quot;Test Source&quot;
 base_url: &quot;https://example.com/news/&quot;
 category: test
@@ -335,10 +335,10 @@ max_articles: 20
 
 <p>Test your source:</p>
 <pre><code># Verify it&#x27;s discovered
-./capcat list sources | grep testsource
+capcat list sources | grep testsource
 
 # Test fetching
-./capcat fetch testsource --count 5
+capcat fetch testsource --count 5
 </code></pre>
 
 <h3>Task 3: Improve Error Message</h3>
@@ -641,7 +641,7 @@ Blockers: Need review on PR #456
 <h4>Time Estimate</h4> 15-30 minutes
 
 <pre><code># Step 1: Create YAML config
-cat &gt; sources/active/config_driven/configs/newsource.yaml &lt;&lt;&#x27;EOF&#x27;
+cat &gt; Config/sources/active/config_driven/configs/newsource.yaml &lt;&lt;&#x27;EOF&#x27;
 display_name: &quot;New Source&quot;
 base_url: &quot;https://newsource.com/articles/&quot;
 category: tech
@@ -663,19 +663,19 @@ timeout: 30
 EOF
 
 # Step 2: Test discovery
-./capcat list sources | grep newsource
+capcat list sources | grep newsource
 
 # Step 3: Test fetching
-./capcat fetch newsource --count 5 --debug
+capcat fetch newsource --count 5 --debug
 
 # Step 4: Verify output
-ls -la ../News/news_$(date +%d-%m-%Y)/NewsSource_*/
+ls -la News/news_$(date +%d-%m-%Y)/NewsSource_*/
 
 # Step 5: Add to bundle (optional)
-echo &quot;    - newsource&quot; &gt;&gt; sources/active/bundles.yml
+echo &quot;    - newsource&quot; &gt;&gt; Config/sources/active/bundles/bundles.yml
 
 # Step 6: Commit
-git add sources/active/config_driven/configs/newsource.yaml
+git add Config/sources/active/config_driven/configs/newsource.yaml
 git commit -m &quot;feat: add NewsSource config-driven source&quot;
 </code></pre>
 
@@ -684,8 +684,8 @@ git commit -m &quot;feat: add NewsSource config-driven source&quot;
 <h4>Time Estimate</h4> 2-4 hours
 
 <pre><code># Step 1: Create source directory structure
-mkdir -p sources/active/custom/newsource
-cd sources/active/custom/newsource
+mkdir -p Config/sources/active/custom/newsource
+cd Config/sources/active/custom/newsource
 
 # Step 2: Create source.py
 cat &gt; source.py &lt;&lt;&#x27;EOF&#x27;
@@ -733,7 +733,7 @@ touch __init__.py
 
 # Step 5: Test source
 cd ../../../../  # Back to project root
-./capcat fetch newsource --count 5
+capcat fetch newsource --count 5
 
 # Step 6: Write tests
 cat &gt; tests/test_newsource.py &lt;&lt;&#x27;EOF&#x27;
@@ -754,7 +754,7 @@ EOF
 pytest tests/test_newsource.py
 
 # Step 8: Commit
-git add sources/active/custom/newsource/
+git add Config/sources/active/custom/newsource/
 git add tests/test_newsource.py
 git commit -m &quot;feat: add custom NewsSource implementation&quot;
 </code></pre>
@@ -764,7 +764,7 @@ git commit -m &quot;feat: add custom NewsSource implementation&quot;
 <h4>Workflow</h4>
 
 <pre><code># Step 1: Reproduce the bug
-./capcat fetch hn --count 10  # Error occurs
+capcat fetch hn --count 10  # Error occurs
 
 # Step 2: Write failing test
 cat &gt; tests/test_bugfix.py &lt;&lt;&#x27;EOF&#x27;
@@ -787,7 +787,7 @@ pytest tests/test_bugfix.py  # PASSES
 pytest
 
 # Step 7: Manual verification
-./capcat fetch hn --count 10  # No error
+capcat fetch hn --count 10  # No error
 
 # Step 8: Commit
 git add [changed files]
@@ -906,17 +906,17 @@ pytest -s tests/test_file.py::test_function
 <h3>Issue: Import Errors in Sources</h3>
 
 <pre><code># Problem: Source not discovered by registry
-./capcat list sources  # Source not in list
+capcat list sources  # Source not in list
 
 # Solution 1: Check file structure
-ls -la sources/active/custom/yoursource/
+ls -la Config/sources/active/custom/yoursource/
 # Must have: __init__.py, source.py, config.yaml
 
 # Solution 2: Validate config
-python3 -c &quot;import yaml; yaml.safe_load(open(&#x27;sources/active/custom/yoursource/config.yaml&#x27;))&quot;
+python3 -c &quot;import yaml; yaml.safe_load(open(&#x27;Config/sources/active/custom/yoursource/config.yaml&#x27;))&quot;
 
 # Solution 3: Check Python syntax
-python3 -m py_compile sources/active/custom/yoursource/source.py
+python3 -m py_compile Config/sources/active/custom/yoursource/source.py
 </code></pre>
 
 <h3>Debugging Techniques</h3>
@@ -933,7 +933,7 @@ def problematic_function():
     return result
 
 # Run with debug flag
-./capcat --debug fetch hn --count 1
+capcat --debug fetch hn --count 1
 </code></pre>
 
 <h3>Technique 2: Use Python Debugger</h3>

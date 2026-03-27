@@ -148,13 +148,13 @@
     G3 -->|Yes| F
 
     F -->|Yes| H[Verify Installation]
-    H --> I[./capcat list sources]
+    H --> I[capcat list sources]
     I --> J{Works?}
 
     J -->|No| G
     J -->|Yes| K[First Fetch]
 
-    K --> L[./capcat fetch hn --count 5]
+    K --> L[capcat fetch hn --count 5]
     L --> M{Success?}
 
     M -->|No| G

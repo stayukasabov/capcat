@@ -217,7 +217,7 @@
 
 <div class="mermaid">graph LR
     subgraph Source Discovery
-        A[sources/active/] --> B[config_driven/]
+        A[Config/sources/active/] --> B[config_driven/]
         A --> C[custom/]
     end
 
@@ -305,7 +305,7 @@
     participant MP as Media Processor
     participant FW as File Writer
 
-    U->>M: ./capcat fetch hn --count 10
+    U->>M: capcat fetch hn --count 10
     M->>R: get_source('hn')
     R->>R: Lookup source config
     R->>F: create_source(config)
@@ -509,7 +509,7 @@
     F --> G[Used by Application]
 
     G --> G1[count: 30]
-    G --> G2[output_dir: ../News/]
+    G --> G2[output_dir: News/]
     G --> G3[media: false]
     G --> G4[html: false]
 

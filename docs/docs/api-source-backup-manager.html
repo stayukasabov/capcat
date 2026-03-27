@@ -182,10 +182,10 @@ manager = SourceBackupManager(Path(&quot;/custom/backup/path&quot;))
 <pre><code>metadata = manager.create_backup(
     source_ids=[&quot;hn&quot;, &quot;bbc&quot;],
     config_paths=[
-        Path(&quot;sources/active/config_driven/configs/hn.yml&quot;),
-        Path(&quot;sources/active/config_driven/configs/bbc.yml&quot;)
+        Path(&quot;Config/sources/active/config_driven/configs/hn.yml&quot;),
+        Path(&quot;Config/sources/active/config_driven/configs/bbc.yml&quot;)
     ],
-    bundles_path=Path(&quot;sources/active/bundles.yml&quot;)
+    bundles_path=Path(&quot;Config/sources/active/bundles/bundles.yml&quot;)
 )
 
 print(f&quot;Backup created: {metadata.backup_id}&quot;)
@@ -224,8 +224,8 @@ print(f&quot;Backup created: {metadata.backup_id}&quot;)
 <h4>Example:</h4>
 <pre><code>restored = manager.restore_backup(
     backup_id=&quot;removal_20250118_143027_123456&quot;,
-    config_base_path=Path(&quot;sources/active/config_driven/configs&quot;),
-    bundles_path=Path(&quot;sources/active/bundles.yml&quot;)
+    config_base_path=Path(&quot;Config/sources/active/config_driven/configs&quot;),
+    bundles_path=Path(&quot;Config/sources/active/bundles/bundles.yml&quot;)
 )
 
 print(f&quot;Restored sources: {&#x27;, &#x27;.join(restored)}&quot;)
@@ -380,10 +380,10 @@ manager = SourceBackupManager()
 metadata = manager.create_backup(
     source_ids=[&quot;hn&quot;, &quot;bbc&quot;],
     config_paths=[
-        Path(&quot;sources/active/config_driven/configs/hn.yml&quot;),
-        Path(&quot;sources/active/config_driven/configs/bbc.yml&quot;)
+        Path(&quot;Config/sources/active/config_driven/configs/hn.yml&quot;),
+        Path(&quot;Config/sources/active/config_driven/configs/bbc.yml&quot;)
     ],
-    bundles_path=Path(&quot;sources/active/bundles.yml&quot;)
+    bundles_path=Path(&quot;Config/sources/active/bundles/bundles.yml&quot;)
 )
 
 print(f&quot;Backup created: {metadata.backup_id}&quot;)
@@ -393,8 +393,8 @@ print(f&quot;Backup created: {metadata.backup_id}&quot;)
 # Restore if needed
 restored_sources = manager.restore_backup(
     backup_id=metadata.backup_id,
-    config_base_path=Path(&quot;sources/active/config_driven/configs&quot;),
-    bundles_path=Path(&quot;sources/active/bundles.yml&quot;)
+    config_base_path=Path(&quot;Config/sources/active/config_driven/configs&quot;),
+    bundles_path=Path(&quot;Config/sources/active/bundles/bundles.yml&quot;)
 )
 
 print(f&quot;Restored: {restored_sources}&quot;)

@@ -124,7 +124,7 @@
 <p>The new wrapper system handles all dependency management automatically:</p>
 
 <pre><code># Simply run capcat - dependencies are installed automatically
-./capcat list sources
+capcat list sources
 
 # Or use the Python wrapper directly
 python3 run_capcat.py list sources
@@ -226,7 +226,7 @@ exec python3 &quot;${SCRIPT_DIR}/run_capcat.py&quot; &quot;$@&quot;
 
 <h4>Solution</h4>
 <pre><code># Let wrapper handle it automatically
-./capcat list sources
+capcat list sources
 
 # Or install manually
 source venv/bin/activate &amp;&amp; pip install -r requirements.txt
@@ -279,7 +279,7 @@ pip list
 pip install --upgrade package_name
 
 # Recreate environment if necessary
-rm -rf venv &amp;&amp; ./capcat list sources
+rm -rf venv &amp;&amp; capcat list sources
 </code></pre>
 
 <h3>System vs Virtual Environment</h3>

@@ -83,7 +83,7 @@
 <div class="nav-breadcrumb"><a href="index.html">Documentation Home</a></div>
 <h1>Feature Documentation: Automated Source Addition</h1>
 
-<p>This document provides an overview of the <code>./capcat add-source</code> command, a feature designed to automate the process of adding new RSS-based news sources to the Capcat system.</p>
+<p>This document provides an overview of the <code>capcat add-source</code> command, a feature designed to automate the process of adding new RSS-based news sources to the Capcat system.</p>
 
 <h2>1. Purpose</h2>
 
@@ -94,11 +94,11 @@
 <p>The command is invoked with a single URL pointing to a valid RSS or Atom feed.</p>
 
 <h4>Syntax:</h4>
-<pre><code>./capcat add-source --url &lt;RSS_FEED_URL&gt;
+<pre><code>capcat add-source --url &lt;RSS_FEED_URL&gt;
 </code></pre>
 
 <h4>Example:</h4>
-<pre><code>./capcat add-source --url https://www.theverge.com/rss/index.xml
+<pre><code>capcat add-source --url https://www.theverge.com/rss/index.xml
 </code></pre>
 
 <h2>3. The Interactive Process</h2>
@@ -116,11 +116,11 @@
 
 <p>Based on the user&#x27;s input, the command performs the following actions automatically:</p>
 
-<em>   <h4>Configuration File Generation:</h4> A new YAML file named <code>&lt;source_id&gt;.yml</code> is created in <code>sources/active/config_driven/configs/</code>. This file contains all the necessary metadata to define the new source, including its name, URL, category, and discovery method (which is set to <code>rss</code>).
+<em>   <h4>Configuration File Generation:</h4> A new YAML file named <code>&lt;source_id&gt;.yml</code> is created in <code>Config/sources/active/config_driven/configs/</code>. This file contains all the necessary metadata to define the new source, including its name, URL, category, and discovery method (which is set to <code>rss</code>).
 
-</em>   <h4>Bundle Modification:</h4> If a bundle was selected, the <code>sources/active/bundles.yml</code> file is safely updated to include the new <code>source_id</code> under the chosen bundle, preserving all existing comments and formatting.
+</em>   <h4>Bundle Modification:</h4> If a bundle was selected, the <code>Config/sources/active/bundles/bundles.yml</code> file is safely updated to include the new <code>source_id</code> under the chosen bundle, preserving all existing comments and formatting.
 
-<em>   <h4>Validation:</h4> The command executes the equivalent of <code>./capcat fetch &lt;source_id&gt; --count 1</code> to ensure the source is immediately functional. The success or failure of this test is reported directly to the user.
+<em>   <h4>Validation:</h4> The command executes the equivalent of <code>capcat fetch &lt;source_id&gt; --count 1</code> to ensure the source is immediately functional. The success or failure of this test is reported directly to the user.
 
 <h2>5. Core Components</h2>
 

@@ -119,7 +119,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 
 # Verify installation
-./capcat list sources
+capcat list sources
 </code></pre>
 
 <h3>Docker (Alternative)</h3>
@@ -131,19 +131,19 @@ docker run -v $(pwd)/output:/app/output capcat bundle tech --count 10
 <h2> Quick Start</h2>
 
 <pre><code># Fetch 10 tech articles
-./capcat bundle tech --count 10
+capcat bundle tech --count 10
 
 # Fetch from specific sources
-./capcat fetch hn,bbc --count 15 --media
+capcat fetch hn,bbc --count 15 --media
 
 # Single article processing
-./capcat single https://example.com/article
+capcat single https://example.com/article
 
 # List available sources
-./capcat list sources
+capcat list sources
 
 # Show bundles
-./capcat list bundles
+capcat list bundles
 </code></pre>
 
 <h2> Usage</h2>
@@ -151,7 +151,7 @@ docker run -v $(pwd)/output:/app/output capcat bundle tech --count 10
 <h3>Command Line Interface</h3>
 
 <pre><code># Basic usage
-./capcat &lt;command&gt; [options]
+capcat &lt;command&gt; [options]
 
 # Commands
 list sources           # Show all available sources
@@ -204,18 +204,18 @@ single &lt;url&gt;          # Process single article
 
 <h3>Predefined Bundles</h3>
 
-<pre><code>./capcat bundle tech          # ieee + mashable
-./capcat bundle techpro       # hn + lb + iq
-./capcat bundle news          # bbc + guardian
-./capcat bundle science       # nature + scientificamerican
-./capcat bundle ai            # mitnews
-./capcat bundle sports        # bbcsport
+<pre><code>capcat bundle tech          # ieee + mashable
+capcat bundle techpro       # hn + lb + iq
+capcat bundle news          # bbc + guardian
+capcat bundle science       # nature + scientificamerican
+capcat bundle ai            # mitnews
+capcat bundle sports        # bbcsport
 </code></pre>
 
 <h2> Output Structure</h2>
 
 <h3>Batch Processing</h3>
-<div class="ascii-art">../News/news_DD-MM-YYYY/
+<div class="ascii-art">News/news_DD-MM-YYYY/
 ├── Source_DD-MM-YYYY/
 │   └── NN_Article_Title/
 │       ├── article.md
@@ -225,7 +225,7 @@ single &lt;url&gt;          # Process single article
 </div>
 
 <h3>Single Articles</h3>
-<div class="ascii-art">../Capcats/cc_DD-MM-YYYY-Title/
+<div class="ascii-art">Capcats/cc_DD-MM-YYYY-Title/
 ├── article.md
 ├── images/
 └── files/
@@ -234,7 +234,7 @@ single &lt;url&gt;          # Process single article
 <h2> Configuration</h2>
 
 <h3>Command Line (Highest Priority)</h3>
-<pre><code>./capcat fetch hn --count 20 --media
+<pre><code>capcat fetch hn --count 20 --media
 </code></pre>
 
 <h3>Environment Variables</h3>
@@ -256,7 +256,7 @@ sources:
 <h3>Adding a New Source</h3>
 
 <h3>Config-Driven (15-30 minutes)</h3>
-<pre><code># sources/active/config_driven/configs/newsource.yaml
+<pre><code># Config/sources/active/config_driven/configs/newsource.yaml
 display_name: &quot;New Source&quot;
 base_url: &quot;https://newsource.com/&quot;
 category: tech
@@ -265,7 +265,7 @@ content_selectors: [&quot;.article-content&quot;]
 </code></pre>
 
 <h3>Custom Implementation (2-4 hours)</h3>
-<pre><code># sources/active/custom/newsource/source.py
+<pre><code># Config/sources/active/custom/newsource/source.py
 from core.source_system.base_source import BaseSource
 
 class NewSource(BaseSource):
@@ -276,13 +276,13 @@ class NewSource(BaseSource):
 
 <h3>Verification</h3>
 <pre><code># Verify all sources work
-./capcat list sources
+capcat list sources
 
 # Verify specific source
-./capcat fetch newsource --count 5
+capcat fetch newsource --count 5
 
 # Verify bundle
-./capcat bundle tech --count 10
+capcat bundle tech --count 10
 </code></pre>
 
 <h2> Architecture</h2>
@@ -313,7 +313,7 @@ class NewSource(BaseSource):
 
 <h3>Module Not Found</h3>
 <pre><code># Use wrapper (handles venv automatically)
-./capcat list sources
+capcat list sources
 
 # Or activate manually
 source venv/bin/activate
@@ -331,7 +331,7 @@ source venv/bin/activate
 export CAPCAT_MAX_WORKERS=4
 
 # Enable progress tracking
-./capcat fetch hn --count 10 --debug
+capcat fetch hn --count 10 --debug
 </code></pre>
 
 <h2> Documentation</h2>

@@ -179,19 +179,19 @@ export CAPCAT_LOGGING_USE_COLORS=false
 <p>Command-line arguments override all other configuration sources:</p>
 
 <pre><code># Override worker count
-./capcat bundle tech --count 10 --workers 12
+capcat bundle tech --count 10 --workers 12
 
 # Override media downloading
-./capcat fetch hn,bbc --count 15 --media
+capcat fetch hn,bbc --count 15 --media
 
 # Override output path
-./capcat single https://example.com/article --output /custom/path
+capcat single https://example.com/article --output /custom/path
 
 # Enable file logging (all commands)
-./capcat --log-file capcat.log bundle tech --count 10
+capcat --log-file capcat.log bundle tech --count 10
 
 # Verbose console + file logging
-./capcat -V -L debug.log fetch hn --count 15
+capcat -V -L debug.log fetch hn --count 15
 </code></pre>
 
 <h2>Configuration Sections</h2>
@@ -269,13 +269,13 @@ export CAPCAT_LOGGING_USE_COLORS=false
 <p>File logging is controlled via CLI flags, not configuration files:</p>
 
 <pre><code># Enable file logging with --log-file or -L flag
-./capcat --log-file capcat.log bundle tech --count 10
+capcat --log-file capcat.log bundle tech --count 10
 
 # Verbose console + file logging
-./capcat -V -L debug.log fetch hn --count 15
+capcat -V -L debug.log fetch hn --count 15
 
 # Timestamped log files
-./capcat -L logs/news-$(date +%Y%m%d-%H%M%S).log bundle news --count 10
+capcat -L logs/news-$(date +%Y%m%d-%H%M%S).log bundle news --count 10
 </code></pre>
 
 <h4>Log Output Formats:</h4>
@@ -309,10 +309,10 @@ export CAPCAT_LOGGING_USE_COLORS=false
 
 <h3>Config-Driven Sources</h3>
 
-<p>Simple sources use YAML configuration files in <code>sources/active/config_driven/configs/</code>.</p>
+<p>Simple sources use YAML configuration files in <code>Config/sources/active/config_driven/configs/</code>.</p>
 
 <h3>Basic Configuration</h3>
-<pre><code># sources/active/config_driven/configs/example.yaml
+<pre><code># Config/sources/active/config_driven/configs/example.yaml
 display_name: &quot;Example News&quot;
 base_url: &quot;https://example.com/news/&quot;
 category: &quot;general&quot;          # tech, science, business, general
@@ -382,7 +382,7 @@ custom_config:
 <p>Complex sources use Python implementations with YAML configuration.</p>
 
 <h3>Configuration File</h3>
-<pre><code># sources/active/custom/example/config.yaml
+<pre><code># Config/sources/active/custom/example/config.yaml
 display_name: &quot;Example Custom&quot;
 base_url: &quot;https://example.com/&quot;
 category: &quot;tech&quot;
@@ -412,7 +412,7 @@ custom_config:
 </code></pre>
 
 <h3>Python Implementation</h3>
-<pre><code># sources/active/custom/example/source.py
+<pre><code># Config/sources/active/custom/example/source.py
 class ExampleSource(BaseSource):
     def __init__(self, config: SourceConfig, session=None):
         super().__init__(config, session)
@@ -632,7 +632,7 @@ output:
 <h3>Loading Custom Configuration</h3>
 <pre><code># Specify configuration file
 export CAPCAT_CONFIG_FILE=&quot;config/production.yml&quot;
-./capcat bundle tech --count 10
+capcat bundle tech --count 10
 
 # Multiple configuration files (merged in order)
 export CAPCAT_CONFIG_FILES=&quot;config/base.yml,config/production.yml&quot;

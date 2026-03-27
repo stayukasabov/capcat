@@ -129,6 +129,44 @@
 └─────────────────────────────────────────────────────────────┘
 </div>
 
+<h2>Project Directory Structure</h2>
+
+<p>Capcat uses a project-rooted layout. Run <code>capcat init</code> (or any capcat command) in the directory you want to use as the project root. The structure created:</p>
+
+<div class="ascii-art">project-root/
+├── .capcat/                              # Internal state — do not edit
+│   ├── state.json                        # Source hashes, run history
+│   ├── cache/                            # Temporary cache
+│   └── registry/                         # Source registry cache
+├── Config/                               # User-owned configuration
+│   ├── themes/                           # HTML article themes (copied from package)
+│   │   ├── base.css
+│   │   ├── design-system.css
+│   │   └── Space-Grotesk/               # Font files
+│   └── sources/
+│       └── active/
+│           ├── config_driven/
+│           │   └── configs/             # YAML source configs (user-added sources)
+│           ├── custom/                  # Python-implemented sources
+│           └── bundles/
+│               └── bundles.yml          # Bundle definitions
+├── News/                                 # Batch output (auto-created, git-ignored)
+│   └── news_DD-MM-YYYY/
+│       └── Source-Name_DD-MM-YYYY/
+│           └── 01_Article-Title/
+│               ├── article.md
+│               ├── article.html
+│               ├── comments.md
+│               └── images/
+└── Capcats/                              # Single-article output (auto-created, git-ignored)
+    └── cc_DD-MM-YYYY-Article-Title/
+        ├── article.md
+        ├── article.html
+        └── images/
+</div>
+
+<p><strong>Built-in sources</strong> (bundled with the package) live inside the installed package at <code>capcat/sources/builtin/</code> — they are read-only and not in your project directory. User-added sources go in <code>Config/sources/active/</code>.</p>
+
 <h2>Hybrid Source Types</h2>
 
 <h3>Config-Driven Sources (Simple)</h3>
@@ -136,7 +174,7 @@
 <h4>Count</h4> 5 sources
 <h4>Examples</h4> InfoQ, Straits Times, Gizmodo, IEEE, Scientific American
 
-<pre><code># Example: sources/active/config_driven/configs/iq.yaml
+<pre><code># Example: Config/sources/active/config_driven/configs/iq.yaml
 display_name: &quot;InfoQ&quot;
 base_url: &quot;https://www.infoq.com/news/&quot;
 category: tech
@@ -161,7 +199,7 @@ content_selectors:
 <h4>Count</h4> 6 sources
 <h4>Examples</h4> Hacker News, BBC, CNN, Nature, Lobsters, LessWrong
 
-<pre><code># Example: sources/active/custom/hn/source.py
+<pre><code># Example: Config/sources/active/custom/hn/source.py
 class HackerNewsSource(BaseSource):
     def get_articles(self, count=30):
         # Custom logic for Hacker News API integration
@@ -194,7 +232,7 @@ source = registry.get_source(&#x27;hn&#x27;, session=global_session)
 
 <h4>Features</h4>
 <ul>
-<li>Auto-discovery from <code>sources/active/</code></li>
+<li>Auto-discovery from <code>Config/sources/active/</code></li>
 <li>Validation during discovery</li>
 <li>Source type management (config vs custom)</li>
 <li>Instance caching for performance</li>
@@ -746,7 +784,7 @@ python test_performance_monitor.py    # Tests monitoring system
 
 <h3>Adding New Config-Driven Sources</h3>
 <pre><code># 1. Create YAML configuration
-# sources/active/config_driven/configs/newsource.yaml
+# Config/sources/active/config_driven/configs/newsource.yaml
 display_name: &quot;New Source&quot;
 base_url: &quot;https://newsource.com/&quot;
 article_selectors: [&quot;.headline a&quot;]
@@ -757,7 +795,7 @@ content_selectors: [&quot;.article-content&quot;]
 
 <h3>Adding New Custom Sources</h3>
 <div class="ascii-art"># 1. Create source directory and files
-# sources/active/custom/newsource/
+# Config/sources/active/custom/newsource/
 # ├── source.py          # BaseSource implementation
 # └── config.yaml        # Source configuration
 
