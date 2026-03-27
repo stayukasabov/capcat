@@ -54,7 +54,7 @@ Handles post-processing HTML generation after article scraping is complete
 - [`capcat.core.exceptions`](./exceptions.md) - Custom exceptions for Capcat application
 - [`capcat.core.update_manager`](./update_manager.md) - Update Manager for Capcat
 - [`capcat.core.cli_recovery`](./cli_recovery.md) - CLI error recovery and user guidance system
-- [`capcat.core.tui_context`](./tui_context.md) - TUI context flag
+- [`capcat.core.tui_context`](./tui_context.md) - TUI context flag and per-fetch result accumulation
 - [`capcat.core.progress`](./progress.md) - Progress indicators and status reporting for Capcat
 - [`capcat.core.media_processor`](./media_processor.md) - Media processing component for Capcat
 - [`capcat.core.source_config`](./source_config.md) - Source configuration for optimized URL detection in Capcat

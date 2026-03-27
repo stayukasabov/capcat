@@ -179,12 +179,12 @@ Prints a summary and executes the command by calling run_app directly.
 - `selection`
 - `generate_html`
 
-⚠️ **High complexity:** 12
+⚠️ **High complexity:** 13
 
 ### _show_completion_screen
 
 ```python
-def _show_completion_screen(generate_html: bool, success: bool) -> None
+def _show_completion_screen(generate_html: bool, success: bool, fetch_result = None) -> None
 ```
 
 Show post-execution screen with status, HTML link, and navigation choices.
@@ -192,11 +192,13 @@ Show post-execution screen with status, HTML link, and navigation choices.
 Args:
     generate_html: Whether HTML generation was requested.
     success: Whether the command completed without errors.
+    fetch_result: Optional FetchResult with saved/skipped counts (TUI only).
 
 **Parameters:**
 
 - `generate_html` (bool)
 - `success` (bool)
+- `fetch_result` *optional*
 
 **Returns:** None
 

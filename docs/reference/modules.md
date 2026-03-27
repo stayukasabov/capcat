@@ -249,7 +249,7 @@ Replaces {{placeholder}} variables with actual values from configuration
 - [capcat.core.theme_utils](../api/capcat/theme_utils.md) - Theme utilities for hash-based theme persistence
 - [capcat.core.timeout_config](../api/capcat/timeout_config.md) - Adaptive timeout configuration for Capcat
 - [capcat.core.timeout_wrapper](../api/capcat/timeout_wrapper.md) - Timeout wrapper utilities for preventing hanging operations
-- [capcat.core.tui_context](../api/capcat/tui_context.md) - TUI context flag
+- [capcat.core.tui_context](../api/capcat/tui_context.md) - TUI context flag and per-fetch result accumulation
 - [capcat.core.unified_article_processor](../api/capcat/unified_article_processor.md) - Unified Article Processor - Universal entry point for all article processing
 - [capcat.core.unified_media_processor](../api/capcat/unified_media_processor.md) - Unified Media Processor Integration Layer
 - [capcat.core.unified_source_processor](../api/capcat/unified_source_processor.md) - Unified Source Processor for Capcat
@@ -493,8 +493,8 @@ Usage:
 ## Statistics
 
 - **Total Modules**: 354
-- **Total Classes**: 620
-- **Total Functions**: 758
-- **Public Functions**: 601
-- **Documentation Coverage**: 79.3%
+- **Total Classes**: 621
+- **Total Functions**: 761
+- **Public Functions**: 604
+- **Documentation Coverage**: 79.4%
 
