@@ -9,8 +9,55 @@ network calls.
 from __future__ import annotations
 
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
+
+from capcat.core.html_post_processor import HTMLPostProcessor
+from capcat.core.logging_config import get_logger
+from capcat.core.tui_context import set_tui_active
+
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+def _make_processor():
+    proc = HTMLPostProcessor.__new__(HTMLPostProcessor)
+    proc.logger = get_logger("test")
+    return proc
+
+
+# ---------------------------------------------------------------------------
+# launch_browser regression tests (Bug #2: HTML archive path printed twice)
+# ---------------------------------------------------------------------------
+
+def test_launch_browser_suppresses_print_in_tui(capsys):
+    """In TUI mode launch_browser must not print — TUI completion screen shows it."""
+    proc = _make_processor()
+    set_tui_active(True)
+    try:
+        result = proc.launch_browser("file:///tmp/index.html")
+        captured = capsys.readouterr()
+        assert result is True
+        assert "HTML archive" not in captured.out
+    finally:
+        set_tui_active(False)
+
+
+def test_launch_browser_prints_in_cli_mode(capsys):
+    """In CLI mode launch_browser must print the archive path."""
+    proc = _make_processor()
+    result = proc.launch_browser("file:///tmp/index.html")
+    captured = capsys.readouterr()
+    assert result is True
+    assert "HTML archive" in captured.out
+
+
+def test_launch_browser_returns_false_on_empty_url():
+    proc = _make_processor()
+    assert proc.launch_browser("") is False
+    assert proc.launch_browser(None) is False
 
 
 # ---------------------------------------------------------------------------
