@@ -1,10 +1,12 @@
 """Tests for FetchResult construction and summary rendering."""
-import pytest
+import requests
+from unittest.mock import patch, MagicMock
 from capcat.core.unified_source_processor import FetchResult
 from capcat.core.tui_context import (
     reset_fetch_results,
     record_fetch_result,
     get_fetch_result,
+    set_tui_active,
 )
 
 
@@ -64,11 +66,6 @@ def test_reset_clears_previous():
     assert fr.saved == 0
 
 
-import requests
-from unittest.mock import patch, MagicMock
-from capcat.core.tui_context import reset_fetch_results, get_fetch_result, set_tui_active
-
-
 def _make_fetcher():
     """Create a minimal NewsSourceArticleFetcher for testing."""
     from capcat.core.article_fetcher import NewsSourceArticleFetcher
@@ -88,11 +85,8 @@ def test_tui_suppresses_timeout_warning():
     set_tui_active(True)
     reset_fetch_results()
     try:
-        with patch.object(fetcher, "_fetch_url_with_retry",
-                          side_effect=requests.exceptions.Timeout()):
-            with patch.object(fetcher, "_check_pdf_size_and_prompt", return_value=False):
-                fetcher.session.get = MagicMock(side_effect=requests.exceptions.Timeout())
-                result = fetcher._fetch_web_content("T", "http://x.com/a", 0, "/tmp")
+        fetcher.session.get = MagicMock(side_effect=requests.exceptions.Timeout())
+        result = fetcher._fetch_web_content("T", "http://x.com/a", 0, "/tmp")
         fr = get_fetch_result()
         assert fr.skipped == [("timeout", 1)]
         assert result == (False, None, None)
@@ -108,8 +102,7 @@ def test_tui_suppresses_403_warning():
     try:
         http_err = requests.exceptions.HTTPError(response=MagicMock(status_code=403))
         fetcher.session.get = MagicMock(side_effect=http_err)
-        with patch.object(fetcher, "_fetch_url_with_retry", side_effect=http_err):
-            result = fetcher._fetch_web_content("T", "http://x.com/a", 0, "/tmp")
+        result = fetcher._fetch_web_content("T", "http://x.com/a", 0, "/tmp")
         fr = get_fetch_result()
         assert dict(fr.skipped)["blocked"] == 1
         assert result == (False, None, None)
@@ -138,13 +131,10 @@ def test_tui_records_spa_as_js_rendered():
 
 def test_cli_mode_does_not_record():
     """Outside TUI mode, a failed fetch does NOT record anything."""
-    # Ensure TUI is inactive (default)
     reset_fetch_results()
     fetcher = _make_fetcher()
-    # Trigger a timeout failure without TUI active
     fetcher.session.get = MagicMock(side_effect=requests.exceptions.Timeout())
     fetcher._fetch_web_content("T", "http://x.com/a", 0, "/tmp")
     fr = get_fetch_result()
-    # Nothing should be recorded — guard is conditional on is_tui_active()
     assert fr.saved == 0
     assert fr.skipped == []
