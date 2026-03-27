@@ -130,6 +130,14 @@ def test_extractor_uses_srcset_highest_resolution():
     )
 
 
+def test_extractor_falls_back_to_data_srcset_when_src_empty():
+    """_extract_image_urls must use data-srcset when src is empty and srcset is placeholder."""
+    urls = _get_extracted_urls(DATA_SRCSET_ONLY_HTML, "https://example.com/")
+    assert "https://example.com/large.jpg" in urls, (
+        f"Expected highest-res data-srcset URL in extracted list, got: {urls}"
+    )
+
+
 def test_extractor_and_formatter_agree_on_url():
     """The URL embedded in markdown and the URL downloaded must be identical."""
     markdown_url = _get_markdown_img_url(WORDPRESS_HTML)
