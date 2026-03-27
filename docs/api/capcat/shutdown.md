@@ -60,7 +60,11 @@ Restore original signal handlers.
 def _signal_handler(self, signum: int, _frame)
 ```
 
-Handle shutdown signals — sets event only. No sys.exit, no sleep.
+Handle shutdown signals.
+
+SIGINT (Ctrl+C) exits immediately via os._exit so that blocking
+socket calls do not delay termination.
+SIGTERM sets the event for cooperative shutdown.
 
 **Parameters:**
 
