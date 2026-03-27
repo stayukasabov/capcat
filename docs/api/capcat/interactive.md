@@ -12,13 +12,21 @@ Interactive mode for Capcat.
 
 **Value:** `'\n\n       ____\n     / ____|                     _\n    | |     __ _ _ __   ___ __ _| |_\n    | |    / _  |  _ \\ / __/ _  | __|\n    | |___| (_| | |_) | (_| (_| | |_\n     \\_____\\__,_|  __/ \\___\\__,_\\__|\n                | |\n                |_|'`
 
+### _LOGO_ROWS
+
+**Value:** `10`
+
 ## Functions
 
 ### print_logo
 
 ```python
-def print_logo()
+def print_logo(menu_lines = 0)
 ```
+
+**Parameters:**
+
+- `menu_lines` *optional*
 
 ### suppress_logging
 
