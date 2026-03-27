@@ -30,6 +30,9 @@ Follows DRY principle while maintaining source-specific optimizations.
 
 ## Classes
 
+### FetchResult
+
+
 ### UnifiedSourceProcessor
 
 Unified processor for all news sources.
