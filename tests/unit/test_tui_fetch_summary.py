@@ -140,10 +140,6 @@ def test_cli_mode_does_not_record():
     assert fr.skipped == []
 
 
-from unittest.mock import patch
-from capcat.core.unified_source_processor import FetchResult
-
-
 def _run_show_completion(generate_html, success, fetch_result=None):
     """Run _show_completion_screen with menu choice patched to 'menu'."""
     with patch("questionary.select") as mock_q, \
