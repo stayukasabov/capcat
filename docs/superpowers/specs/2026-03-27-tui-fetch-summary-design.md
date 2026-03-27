@@ -81,14 +81,14 @@ No change. `tui_mode` defaults to `False`. All per-article warnings continue to 
 - Extend the return tuple to `(bool, title, folder_path, reason)` — simple, explicit
 - Use a side-channel list passed by reference — avoids changing call signatures across the codebase
 
-**Decision: extend the return tuple to 4 elements.** The new signature is `(bool, title, folder_path, reason)` where `reason: str | None` — `None` on success, one of the reason strings above on failure.
+**Decision: thread-safe side-channel via `tui_context.py`.** The spec originally proposed extending the return tuple to 4 elements, but tracing the actual call chain revealed the reason would need to propagate through `base_source.py` (abstract interface) and all 7+ concrete source implementations (hn, lb, youtube, medium, vimeo, substack, twitter, config_driven_source). That is 15+ files for a change that could break the source interface.
 
-There is exactly one external call site: `config_driven_source.py:144` in `ConfigDrivenSource` (the method that fetches a single article). Both `_fetch_web_content` and this call site need updating. The internal recursive calls within `article_fetcher.py` (lines 470, 476) are forwarding calls within the same class and also need the 4-element unpack updated.
+Instead: `NewsSourceArticleFetcher._fetch_web_content` calls `record_fetch_result(success, reason)` from `tui_context` at every terminal return point (no-op outside TUI). `tui_context.py` gains three functions: `reset_fetch_results()`, `record_fetch_result(success, reason)`, and `get_fetch_result() -> FetchResult`. No return signatures change anywhere. The `(bool, title, folder_path)` 3-tuple return stays unchanged — `tests/test_pdf_skip_prompt.py:271` does not need updating.
 
 ## Constraints
 
 - No new dependencies
 - CLI behavior unchanged
-- `tests/unit/` must pass. `tests/test_pdf_skip_prompt.py:271` unpacks `_fetch_web_content` as a 3-element tuple and must be updated to a 4-element unpack (add `_reason` to the unpack). No other existing tests touch `_fetch_web_content` directly. New unit tests for `FetchResult` construction and summary rendering are expected.
+- `tests/unit/` must pass. No existing test modifies `_fetch_web_content`'s return signature (the 3-tuple return is unchanged). New unit tests for `FetchResult` construction, `tui_context` accumulation, and summary rendering are expected.
 - Summary line only appears in TUI mode
 - If `saved == 0` and `skipped == 0` (e.g. source returned no articles), no summary line is shown
