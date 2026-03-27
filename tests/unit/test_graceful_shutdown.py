@@ -8,14 +8,20 @@ import pytest
 from capcat.core.shutdown import GracefulShutdown, get_shutdown
 
 
-def test_signal_handler_sets_event_only():
-    """_signal_handler sets shutdown_event and does NOT call sys.exit or time.sleep."""
+def test_sigint_calls_os_exit_immediately():
+    """SIGINT must call os._exit(130) immediately — not set the event."""
     gs = GracefulShutdown()
-    with patch("sys.exit") as mock_exit, patch("time.sleep") as mock_sleep:
+    with patch("capcat.core.shutdown.os") as mock_os:
         gs._signal_handler(signal.SIGINT, None)
-    assert gs.should_shutdown(), "shutdown_event must be set after signal"
-    mock_exit.assert_not_called()
-    mock_sleep.assert_not_called()
+        mock_os._exit.assert_called_once_with(130)
+    assert not gs.should_shutdown(), "shutdown_event must NOT be set for SIGINT"
+
+
+def test_sigterm_sets_event_gracefully():
+    """SIGTERM must set shutdown_event for cooperative shutdown."""
+    gs = GracefulShutdown()
+    gs._signal_handler(signal.SIGTERM, None)
+    assert gs.should_shutdown(), "shutdown_event must be set after SIGTERM"
 
 
 def test_signal_handler_no_cleanup_func_parameter():
