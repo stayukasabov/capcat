@@ -14,6 +14,7 @@ Complete reference of all modules, classes, and functions in Capcat.
 - [Config.sources.active.custom.twitter.source](../api/Config/source.md) - Twitter/X
 - [Config.sources.active.custom.vimeo.source](../api/Config/source.md) - Vimeo specialized source implementation
 - [Config.sources.active.custom.youtube.source](../api/Config/source.md) - YouTube specialized source implementation
+- [Config.sources.backup_2026-03-27.custom-lb-source](../api/Config/custom-lb-source.md) - Lobsters source implementation for the new source system
 
 ### Build
 
@@ -375,6 +376,20 @@ Replaces {{placeholder}} variables with actual values from configuration
 - [core.url_utils](../api/core/url_utils.md) - URL validation and normalization utilities for Capcat
 - [core.utils](../api/core/utils.md) - Core utilities for the Capcat application
 
+### Debug
+
+- [debug.content-extraction-debugger](../api/debug/content-extraction-debugger.md) - Content Extraction Debugging Tool for Capcat
+Helps diagnose why articles return empty markdown or fail to fetch
+- [debug.fix-sources](../api/debug/fix-sources.md) - Source Fix Tool
+Automatically suggests and applies fixes for problematic sources
+- [debug.log-analyzer](../api/debug/log-analyzer.md) - Capcat Log Analyzer
+Analyzes Capcat logs to identify patterns in failures and warnings
+- [debug.quick-troubleshoot](../api/debug/quick-troubleshoot.md) - Quick Troubleshoot Script
+Immediately diagnose the three failing URLs from the error messages
+- [debug.simple-troubleshoot](../api/debug/simple-troubleshoot.md) - Simple troubleshoot script without emojis per CLAUDE
+- [debug.source-tester](../api/debug/source-tester.md) - Source Configuration Tester
+Tests Capcat source configurations and suggests fixes
+
 ### Htmlgen
 
 - [htmlgen.__init__](../api/htmlgen/__init__.md) - Compartmentalized HTML Generation System for Capcat
@@ -477,9 +492,9 @@ Usage:
 
 ## Statistics
 
-- **Total Modules**: 347
-- **Total Classes**: 614
-- **Total Functions**: 751
-- **Public Functions**: 594
-- **Documentation Coverage**: 79.1%
+- **Total Modules**: 354
+- **Total Classes**: 620
+- **Total Functions**: 758
+- **Public Functions**: 601
+- **Documentation Coverage**: 79.3%
 
