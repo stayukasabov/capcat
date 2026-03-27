@@ -6,6 +6,7 @@ Interactive mode for Capcat.
 import contextlib
 import logging
 import os
+import shutil
 import sys
 
 from prompt_toolkit.styles import Style
@@ -38,11 +39,21 @@ LOGO = (
 )
 
 
-def print_logo():
+_LOGO_ROWS = 10  # rows consumed by print(LOGO): 2 blank + 8 art + print's \n
+
+
+def print_logo(menu_lines=0):
     print('\033[2J\033[H', end='')
     print('\033[38;5;202m' + LOGO + '\033[0m')
-    print()
-    print()
+    if menu_lines > 0:
+        try:
+            terminal_height = shutil.get_terminal_size().lines
+            padding = max(1, terminal_height - menu_lines - _LOGO_ROWS)
+        except Exception:
+            padding = 2
+    else:
+        padding = 2
+    print('\n' * (padding - 1))
 
 
 @contextlib.contextmanager
@@ -60,7 +71,7 @@ def start_interactive_mode():
     """Starts the interactive user interface."""
     first_run = True
     while True:
-        print_logo()
+        print_logo(menu_lines=9)
         with suppress_logging():
             prompt_text = "  What would you like me to do?" if first_run else "  Select an option:"
             action = questionary.select(
@@ -111,7 +122,7 @@ def start_interactive_mode():
 def _handle_manage_sources_flow():
     """Handles the logic for source management submenu."""
     while True:
-        print_logo()
+        print_logo(menu_lines=10)
         with suppress_logging():
             action = questionary.select(
                 "  Source Management - Select an option:",
@@ -281,7 +292,7 @@ def _handle_list_sources():
     choices.append(questionary.Choice("Back to Source Management", "back"))
 
     while True:
-        print_logo()
+        print_logo(menu_lines=len(choices) + 3)
         with suppress_logging():
             selected = questionary.select(
                 "  Browse sources (select to view details):",
@@ -447,7 +458,7 @@ def _handle_test_source():
     source_choices.append(questionary.Separator())
     source_choices.append(questionary.Choice("Back", "back"))
 
-    print_logo()
+    print_logo(menu_lines=len(source_choices) + 3)
     with suppress_logging():
         source_id = questionary.select(
             "  Select source to test:",
@@ -516,7 +527,7 @@ def _handle_bundle_flow():
     bundle_choices.append(questionary.Separator())
     bundle_choices.append(questionary.Choice("Back to Main Menu", "back"))
 
-    print_logo()
+    print_logo(menu_lines=len(bundle_choices) + 3)
     with suppress_logging():
         bundle = questionary.select(
             "  Select a news bundle and hit Enter for activation.",
@@ -542,7 +553,7 @@ def _handle_fetch_flow():
     source_choices.append(questionary.Separator())
     source_choices.append(questionary.Choice("Back to Main Menu", "back"))
 
-    print_logo()
+    print_logo(menu_lines=len(source_choices) + 3)
     with suppress_logging():
         selected_sources = questionary.checkbox(
             "  Select sources (Space to select, Enter to confirm):",
@@ -568,7 +579,7 @@ def _handle_single_source_flow():
     source_choices.append(questionary.Separator())
     source_choices.append(questionary.Choice("Back to Main Menu", "back"))
 
-    print_logo()
+    print_logo(menu_lines=len(source_choices) + 3)
     with suppress_logging():
         source = questionary.select(
             "  Select a source and hit Enter for activation.",
@@ -588,7 +599,7 @@ def _handle_single_source_flow():
 
 def _handle_single_url_flow():
     """Handles the logic for the single URL flow."""
-    print_logo()
+    print_logo(menu_lines=4)
     print("  (Use Ctrl+C to go to the Main Menu)")
     with suppress_logging():
         url = questionary.text(
@@ -615,7 +626,7 @@ def _handle_single_url_flow():
 
 def _prompt_for_html(action, selection):
     """Prompts for HTML generation."""
-    print_logo()
+    print_logo(menu_lines=8)
     with suppress_logging():
         response = questionary.select(
             "  Generate HTML for web browsing?",
