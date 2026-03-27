@@ -353,11 +353,11 @@ capcat fetch nature --count 5 --output ~/Science --log-file science.log
 
 <h4>Predefined Bundles:</h4>
 <ul>
-<li><code>tech</code> - Technology news (ieee, mashable, gizmodo)</li>
+<li><code>tech</code> - Technology news (ieee, mashable)</li>
 <li><code>techpro</code> - Advanced tech news (hn, lb, iq)</li>
 <li><code>news</code> - General news (bbc, guardian)</li>
 <li><code>science</code> - Science news (nature, scientificamerican)</li>
-<li><code>ai</code> - AI/ML news (mitnews, googleai, openai)</li>
+<li><code>ai</code> - AI/ML news (mitnews, google-reserch)</li>
 <li><code>sports</code> - Sports news (bbcsport)</li>
 <li><code>all</code> - All available sources</li>
 </ul>
@@ -452,7 +452,6 @@ capcat bundle --all --log-file bundles-$(date +%Y%m%d).log
 TECH:
   - ieee           IEEE Spectrum
   - mashable       Mashable
-  - gizmodo        Gizmodo
 
 TECHPRO:
   - hn             Hacker News
@@ -483,7 +482,7 @@ Total: 11 sources
 <pre><code>--- Available Bundles ---
 
 tech - Technology News
-  Sources: ieee, mashable, gizmodo
+  Sources: ieee, mashable
 
 techpro - Advanced Technology
   Sources: hn, lb, iq

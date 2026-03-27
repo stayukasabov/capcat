@@ -199,7 +199,7 @@ capcat fetch iq --count 20
 <pre><code>--- Available Bundles ---
 
 tech - Consumer Technology
-  Sources: ieee, mashable, gizmodo
+  Sources: ieee, mashable
 
 techpro - Professional Developer
   Sources: hn, lb, iq
@@ -313,7 +313,7 @@ Total: 6 bundles
   sources:
     - ieee
     - mashable
-    - gizmodo
+    - iq
     - newsource  # Add here
 </code></pre>
 
@@ -325,7 +325,7 @@ Total: 6 bundles
   sources:
     - ieee
     - mashable
-    # gizmodo removed
+    # iq removed
 </code></pre>
 
 <h3>Move Source Between Bundles</h3>
@@ -343,7 +343,7 @@ news:
   sources:
     - bbc
     - guardian
-    - gizmodo  # Moved here
+    - iq  # Moved here
 </code></pre>
 
 <h2>Bundle Auto-Discovery</h2>
@@ -358,8 +358,8 @@ news:
 
 <p>And sources with <code>category: tech</code>:</p>
 <ul>
-<li>gizmodo (category: tech)</li>
-<li>futurism (category: tech)</li>
+<li>mashable (category: tech)</li>
+<li>hn (category: tech)</li>
 </ul>
 
 <p>These are auto-included without editing bundles.yml.</p>
