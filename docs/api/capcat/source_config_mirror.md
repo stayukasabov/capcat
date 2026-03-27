@@ -246,7 +246,7 @@ def _mirror_bundles(self, manifest: dict) -> None
 def _step1_new_items(self, manifest: dict) -> dict
 ```
 
-Detect and optionally copy items present in builtins but absent from user mirror.
+Detect and silently copy items present in builtins but absent from user mirror.
 
 **Parameters:**
 
@@ -255,7 +255,7 @@ Detect and optionally copy items present in builtins but absent from user mirror
 
 **Returns:** dict
 
-⚠️ **High complexity:** 27
+⚠️ **High complexity:** 26
 
 ##### _step2_3_changed_builtins
 

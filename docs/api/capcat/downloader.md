@@ -94,5 +94,5 @@ Args:
 
 **Returns:** Optional[str]
 
-⚠️ **High complexity:** 70
+⚠️ **High complexity:** 73
 
