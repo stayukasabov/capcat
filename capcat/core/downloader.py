@@ -238,6 +238,13 @@ def download_file(
                     response.close()
                     return None
 
+        except requests.exceptions.HTTPError as e:
+            if e.response is not None and 400 <= e.response.status_code < 500:
+                logger.debug(
+                    f"Client error {e.response.status_code} downloading {file_url}, skipping"
+                )
+                return None
+            raise NetworkError(file_url, e)
         except requests.exceptions.RequestException as e:
             logger.debug(
                 f"Could not download {file_type} from {file_url}: {e}"
