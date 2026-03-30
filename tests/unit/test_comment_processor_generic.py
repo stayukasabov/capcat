@@ -192,3 +192,29 @@ def test_html_indentation_by_level():
     assert 'margin-left' not in result0
     assert 'margin-left: 24px' in result1
     assert 'margin-left: 48px' in result2
+
+
+def test_markdown_level_zero_has_no_prefix():
+    """Level-0 comments have no blockquote prefix."""
+    processor = StreamlinedCommentProcessor()
+    comments = [{"id": "c1", "user": "Anonymous", "user_link": "#", "text": "Top level comment", "level": 0}]
+    result = processor.generate_inline_comments_markdown(comments, "Title", "https://example.com")
+    assert "Top level comment" in result
+    lines_with_text = [l for l in result.splitlines() if "Top level comment" in l]
+    assert all(not l.startswith(">") for l in lines_with_text)
+
+
+def test_markdown_level_one_has_blockquote_prefix():
+    """Level-1 comments use '> ' prefix."""
+    processor = StreamlinedCommentProcessor()
+    comments = [{"id": "c2", "user": "Anonymous", "user_link": "#", "text": "Reply comment", "level": 1}]
+    result = processor.generate_inline_comments_markdown(comments, "Title", "https://example.com")
+    assert "> Reply comment" in result
+
+
+def test_markdown_level_two_has_double_blockquote():
+    """Level-2 comments use '> > ' prefix."""
+    processor = StreamlinedCommentProcessor()
+    comments = [{"id": "c3", "user": "Anonymous", "user_link": "#", "text": "Nested reply", "level": 2}]
+    result = processor.generate_inline_comments_markdown(comments, "Title", "https://example.com")
+    assert "> > Nested reply" in result

@@ -199,10 +199,19 @@ class StreamlinedCommentProcessor:
 
         # Inline comments - flattened display
         for i, comment in enumerate(comments, 1):
-            md_content += f"**{comment['user']}** "
-            md_content += f"([profile]({comment['user_link']}))\n\n"
-            md_content += f"{comment['text']}\n\n"
-            md_content += "---\n\n"
+            level = comment.get('level', 0)
+            prefix = "> " * level  # e.g. "" / "> " / "> > "
+
+            md_content += f"{prefix}**{comment['user']}** "
+            md_content += f"{prefix}([profile]({comment['user_link']}))\n\n"
+
+            # Prefix each paragraph of the comment text
+            for paragraph in comment['text'].split('\n\n'):
+                paragraph = paragraph.strip()
+                if paragraph:
+                    md_content += f"{prefix}{paragraph}\n\n"
+
+            md_content += f"{prefix}---\n\n"
 
         md_content += f"\n{wikilink}\n"
         return md_content
