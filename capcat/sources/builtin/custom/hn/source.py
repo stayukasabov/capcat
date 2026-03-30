@@ -20,10 +20,22 @@ from capcat.core.source_system.base_source import (
     ContentFetchError,
 )
 
+def _hn_depth(elem) -> int:
+    """Extract comment depth from HN's td.ind img width attribute (40px per level)."""
+    img = elem.select_one("td.ind img")
+    if img and img.get("width") is not None:
+        try:
+            return int(img["width"]) // 40
+        except (ValueError, TypeError):
+            return 0
+    return 0
+
+
 _HN_SELECTORS = {
     "comment_selector": ".comment-tree .athing",
     "user_selector": ".hnuser",
     "comment_text_selector": ".comment",
+    "depth_fn": _hn_depth,
 }
 
 
