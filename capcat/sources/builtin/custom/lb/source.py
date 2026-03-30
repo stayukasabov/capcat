@@ -25,10 +25,16 @@ from capcat.core.source_system.base_source import (
     ContentFetchError,
 )
 
+def _lb_depth(elem) -> int:
+    """Extract comment depth by counting ancestor elements with class 'comment'."""
+    return len(elem.find_parents(class_="comment"))
+
+
 _LB_SELECTORS = {
     "comment_selector": ".comment",
     "user_selector": ".user",
     "comment_text_selector": ".comment_text",
+    "depth_fn": _lb_depth,
 }
 
 

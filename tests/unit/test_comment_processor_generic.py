@@ -263,3 +263,37 @@ def test_hn_selectors_depth_fn_extracts_levels():
     assert comments[0]["level"] == 0, "Top-level comment should be level 0"
     assert comments[1]["level"] == 1, "First reply should be level 1"
     assert comments[2]["level"] == 2, "Nested reply should be level 2"
+
+
+_LB_HTML_THREADED = """
+<ul class="comments">
+  <li class="comment" id="c1">
+    <a class="user" href="/u/alice">alice</a>
+    <div class="comment_text"><p>Top level</p></div>
+    <ul class="comments">
+      <li class="comment" id="c2">
+        <a class="user" href="/u/bob">bob</a>
+        <div class="comment_text"><p>First reply</p></div>
+        <ul class="comments">
+          <li class="comment" id="c3">
+            <a class="user" href="/u/carol">carol</a>
+            <div class="comment_text"><p>Nested reply</p></div>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+"""
+
+
+def test_lb_selectors_depth_fn_extracts_levels():
+    """_LB_SELECTORS depth_fn counts ancestor .comment elements for depth."""
+    from capcat.sources.builtin.custom.lb.source import _LB_SELECTORS
+    soup = BeautifulSoup(_LB_HTML_THREADED, "html.parser")
+    processor = StreamlinedCommentProcessor()
+    comments = processor.process_comments_flattened(soup, **_LB_SELECTORS)
+    assert len(comments) == 3
+    assert comments[0]["level"] == 0, "Top-level comment should be level 0"
+    assert comments[1]["level"] == 1, "First reply should be level 1"
+    assert comments[2]["level"] == 2, "Nested reply should be level 2"
