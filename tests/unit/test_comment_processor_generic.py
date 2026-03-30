@@ -205,11 +205,14 @@ def test_markdown_level_zero_has_no_prefix():
 
 
 def test_markdown_level_one_has_blockquote_prefix():
-    """Level-1 comments use '> ' prefix."""
+    """Level-1 comments use '> ' prefix on all lines including header."""
     processor = StreamlinedCommentProcessor()
     comments = [{"id": "c2", "user": "Anonymous", "user_link": "#", "text": "Reply comment", "level": 1}]
     result = processor.generate_inline_comments_markdown(comments, "Title", "https://example.com")
     assert "> Reply comment" in result
+    # Header line must have exactly one prefix, not two
+    assert "> **Anonymous** ([profile]" in result
+    assert "> **Anonymous** > " not in result
 
 
 def test_markdown_level_two_has_double_blockquote():
