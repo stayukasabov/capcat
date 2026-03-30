@@ -35,41 +35,40 @@ class StreamlinedCommentProcessor:
         soup: BeautifulSoup,
         comment_selector: str,
         user_selector: str = ".hnuser",
-        comment_text_selector: str = ".comment"
+        comment_text_selector: str = ".comment",
+        depth_fn=None,
     ) -> List[Dict[str, Any]]:
         """
-        Process comments with flattened structure - no nested hierarchy processing.
+        Process comments preserving nesting depth.
 
         Args:
             soup: BeautifulSoup object of the comments page
             comment_selector: CSS selector for comment elements
             user_selector: CSS selector for user information
             comment_text_selector: CSS selector for comment text
+            depth_fn: Optional callable(element) -> int returning nesting depth.
+                      If None, all comments get level=0.
 
         Returns:
-            List of flattened comment dictionaries
+            List of comment dicts with 'level' field reflecting nesting depth.
         """
         comments = []
         comment_elements = soup.select(comment_selector)
-
-        # Immediate limit to prevent excessive processing
         comment_elements = comment_elements[:self.max_comments]
 
-        logger.debug(f"Processing {len(comment_elements)} comments (flattened mode)")
+        logger.debug(f"Processing {len(comment_elements)} comments")
 
         for idx, comment_elem in enumerate(comment_elements):
             try:
-                # Fast extraction without nested processing
                 comment_data = self._extract_comment_data_fast(
                     comment_elem,
                     user_selector,
                     comment_text_selector,
-                    idx
+                    idx,
+                    depth_fn=depth_fn,
                 )
-
                 if comment_data and comment_data["text"]:
                     comments.append(comment_data)
-
             except Exception as e:
                 logger.debug(f"Skipping problematic comment {idx}: {e}")
                 continue
@@ -82,39 +81,42 @@ class StreamlinedCommentProcessor:
         comment_elem,
         user_selector: str,
         comment_text_selector: str,
-        index: int
+        index: int,
+        depth_fn=None,
     ) -> Optional[Dict[str, Any]]:
         """
         Fast comment data extraction without deep processing.
         """
-        # Get comment ID with fallback
         comment_id = comment_elem.get("id", f"comment_{index}")
 
-        # Extract user info quickly
         user_elem = comment_elem.select_one(user_selector)
-        user_name = "Anonymous"  # Privacy compliance - always anonymize
-        user_link = "#"  # Preserve link structure but anonymize
+        user_name = "Anonymous"
+        user_link = "#"
 
         if user_elem:
             original_name = user_elem.get_text().strip()
             if original_name:
-                # Create anonymized profile link for legal compliance
                 user_link = f"https://news.ycombinator.com/user?id={original_name}"
 
-        # Extract comment text with minimal processing
         comment_text_elem = comment_elem.select_one(comment_text_selector)
         if not comment_text_elem:
             return None
 
-        # Streamlined text processing
         comment_text = self._process_comment_text_streamlined(comment_text_elem)
+
+        depth = 0
+        if depth_fn is not None:
+            try:
+                depth = int(depth_fn(comment_elem))
+            except (ValueError, TypeError):
+                depth = 0
 
         return {
             "id": comment_id,
             "user": user_name,
             "user_link": user_link,
             "text": comment_text,
-            "level": 0  # Flattened - no nesting levels
+            "level": depth,
         }
 
     def _process_comment_text_streamlined(self, comment_elem) -> str:

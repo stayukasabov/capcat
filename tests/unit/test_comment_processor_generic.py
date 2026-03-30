@@ -94,3 +94,65 @@ def test_generate_inline_comments_html_uses_comment_list():
     )
     assert isinstance(result, str)
     assert "My Article" in result
+
+
+def test_processor_without_depth_fn_defaults_level_to_zero():
+    """Without depth_fn, all comments get level=0 (backward compat). Uses local test fixture, not source selectors."""
+    soup = BeautifulSoup(_HN_HTML, "html.parser")
+    processor = StreamlinedCommentProcessor()
+    comments = processor.process_comments_flattened(soup, **_HN_SELECTORS)
+    assert all(c["level"] == 0 for c in comments)
+
+
+def test_depth_fn_sets_correct_level():
+    """depth_fn return value is stored in comment['level']."""
+    _HN_HTML_DEEP = """
+    <table class="comment-tree">
+      <tr class="athing comtr" id="c1">
+        <td><table><tr>
+          <td class="ind"><img src="s.gif" height="1" width="0"></td>
+          <td class="default">
+            <span class="comhead"><span class="hnuser">alice</span></span>
+            <div class="comment"><span class="c00">Top level</span></div>
+          </td>
+        </tr></table></td>
+      </tr>
+      <tr class="athing comtr" id="c2">
+        <td><table><tr>
+          <td class="ind"><img src="s.gif" height="1" width="40"></td>
+          <td class="default">
+            <span class="comhead"><span class="hnuser">bob</span></span>
+            <div class="comment"><span class="c00">Reply</span></div>
+          </td>
+        </tr></table></td>
+      </tr>
+      <tr class="athing comtr" id="c3">
+        <td><table><tr>
+          <td class="ind"><img src="s.gif" height="1" width="80"></td>
+          <td class="default">
+            <span class="comhead"><span class="hnuser">carol</span></span>
+            <div class="comment"><span class="c00">Reply to reply</span></div>
+          </td>
+        </tr></table></td>
+      </tr>
+    </table>
+    """
+
+    def hn_depth(elem):
+        img = elem.select_one("td.ind img")
+        if img and img.get("width") is not None:
+            try:
+                return int(img["width"]) // 40
+            except (ValueError, TypeError):
+                return 0
+        return 0
+
+    soup = BeautifulSoup(_HN_HTML_DEEP, "html.parser")
+    processor = StreamlinedCommentProcessor()
+    selectors = dict(_HN_SELECTORS)
+    selectors["depth_fn"] = hn_depth
+    comments = processor.process_comments_flattened(soup, **selectors)
+    assert len(comments) == 3
+    assert comments[0]["level"] == 0
+    assert comments[1]["level"] == 1
+    assert comments[2]["level"] == 2
