@@ -243,8 +243,14 @@ class StreamlinedCommentProcessor:
             paragraphs = [p.strip() for p in escaped_text.split('\n\n') if p.strip()]
             formatted_text = ''.join(f"<p>{p}</p>" for p in paragraphs) if paragraphs else f"<p>{escaped_text}</p>"
 
+            level = comment.get('level', 0)
+            if level > 0:
+                indent_style = f'style="margin-left: {level * 24}px; border-left: 2px solid #e0e0e0; padding-left: 8px;"'
+            else:
+                indent_style = ''
+
             html_content += f"""
-            <div class="comment" id="comment-{i}">
+            <div class="comment" id="comment-{i}" {indent_style}>
                 <h3 class="comment-header">
                     <strong>{comment['user']}</strong>
                     <a href="{comment['user_link']}" target="_blank" rel="noopener noreferrer" class="profile-link">(profile)</a>
