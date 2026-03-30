@@ -15,6 +15,8 @@ Complete reference of all modules, classes, and functions in Capcat.
 - [Config.sources.active.custom.vimeo.source](../api/Config/source.md) - Vimeo specialized source implementation
 - [Config.sources.active.custom.youtube.source](../api/Config/source.md) - YouTube specialized source implementation
 - [Config.sources.backup_2026-03-27.custom-lb-source](../api/Config/custom-lb-source.md) - Lobsters source implementation for the new source system
+- [Config.sources.backup_2026-03-30-2.custom-lb-source](../api/Config/custom-lb-source.md) - Lobsters source implementation for the new source system
+- [Config.sources.backup_2026-03-30.custom-hn-source](../api/Config/custom-hn-source.md) - Hacker News source implementation for the new source system
 
 ### Build
 
@@ -492,9 +494,9 @@ Usage:
 
 ## Statistics
 
-- **Total Modules**: 354
-- **Total Classes**: 621
-- **Total Functions**: 762
+- **Total Modules**: 356
+- **Total Classes**: 623
+- **Total Functions**: 766
 - **Public Functions**: 604
-- **Documentation Coverage**: 79.3%
+- **Documentation Coverage**: 78.9%
 

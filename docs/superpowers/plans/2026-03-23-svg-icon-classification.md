@@ -14,11 +14,30 @@
 
 ## File Structure
 
-| File | Change |
-|---|---|
-| `capcat/htmlgen/generator.py` | Add `_classify_svg_elements()` method + call it in the chain at line ~597 only (`generate_article_html_from_template`) |
-| `capcat/themes/base.css` | Add `.capcat-icon` CSS rule after line 717 |
-| `tests/unit/test_htmlgen/test_svg_classifier.py` | New test file — 10 test cases |
+<div class="table-container">
+<table class="centered-table">
+  <thead>
+    <tr>
+      <th>File</th>
+      <th>Change</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>capcat/htmlgen/generator.py</code></td>
+      <td>Add <code>_classify_svg_elements()</code> method + call it in the chain at line ~597 only (<code>generate_article_html_from_template</code>)</td>
+    </tr>
+    <tr>
+      <td><code>capcat/themes/base.css</code></td>
+      <td>Add <code>.capcat-icon</code> CSS rule after line 717</td>
+    </tr>
+    <tr>
+      <td><code>tests/unit/test_htmlgen/test_svg_classifier.py</code></td>
+      <td>New test file — 10 test cases</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 ---
 

@@ -49,17 +49,64 @@ instruction="\n   (Use arrow keys to navigate)\n"
 
 Affected call sites (all in `interactive.py`):
 
-| Approx. line | Prompt type | Function |
-|---|---|---|
-| 92 | select | `start_interactive_mode` |
-| 143 | select | `_handle_manage_sources_flow` |
-| 305 | select | `_handle_list_sources` |
-| 470 | select | `_handle_test_source` |
-| 541 | select | `_handle_manage_bundles` (bundle select) |
-| 569 | **checkbox** | `_handle_fetch_flow` (source assign) |
-| 597 | select | `_handle_single_source_flow` |
-| 653 | select | `_prompt_for_html` |
-| 750 | select | `_show_completion_screen` |
+<div class="table-container">
+<table class="centered-table">
+  <thead>
+    <tr>
+      <th>Approx. line</th>
+      <th>Prompt type</th>
+      <th>Function</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>92</td>
+      <td>select</td>
+      <td><code>start_interactive_mode</code></td>
+    </tr>
+    <tr>
+      <td>143</td>
+      <td>select</td>
+      <td><code>_handle_manage_sources_flow</code></td>
+    </tr>
+    <tr>
+      <td>305</td>
+      <td>select</td>
+      <td><code>_handle_list_sources</code></td>
+    </tr>
+    <tr>
+      <td>470</td>
+      <td>select</td>
+      <td><code>_handle_test_source</code></td>
+    </tr>
+    <tr>
+      <td>541</td>
+      <td>select</td>
+      <td><code>_handle_manage_bundles</code> (bundle select)</td>
+    </tr>
+    <tr>
+      <td>569</td>
+      <td>**checkbox**</td>
+      <td><code>_handle_fetch_flow</code> (source assign)</td>
+    </tr>
+    <tr>
+      <td>597</td>
+      <td>select</td>
+      <td><code>_handle_single_source_flow</code></td>
+    </tr>
+    <tr>
+      <td>653</td>
+      <td>select</td>
+      <td><code>_prompt_for_html</code></td>
+    </tr>
+    <tr>
+      <td>750</td>
+      <td>select</td>
+      <td><code>_show_completion_screen</code></td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 Note: line 569 is a `questionary.checkbox` call. It is included because the same
 `instruction=` mechanism applies to checkbox prompts and the same blank-row rule
@@ -86,10 +133,32 @@ consistent with the visual rule, even without bottom-positioning.
 Adding a trailing `\n` increases questionary's rendered height by 1 line. Most
 screens have sufficient headroom. The two tight screens that need adjustment:
 
-| Function | Current | New | Reason |
-|---|---|---|---|
-| `_prompt_for_html` | `menu_lines=8` | `menu_lines=9` | Currently 1 spare row; +1 rendering consumes it |
-| `_show_completion_screen` | `menu_lines=10` | `menu_lines=11` | Extra `print()` calls already consume most headroom |
+<div class="table-container">
+<table class="centered-table">
+  <thead>
+    <tr>
+      <th>Function</th>
+      <th>Current</th>
+      <th>New</th>
+      <th>Reason</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>_prompt_for_html</code></td>
+      <td><code>menu_lines=8</code></td>
+      <td><code>menu_lines=9</code></td>
+      <td>Currently 1 spare row; +1 rendering consumes it</td>
+    </tr>
+    <tr>
+      <td><code>_show_completion_screen</code></td>
+      <td><code>menu_lines=10</code></td>
+      <td><code>menu_lines=11</code></td>
+      <td>Extra <code>print()</code> calls already consume most headroom</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 `_handle_manage_sources_flow` (`menu_lines=12`) currently has 2 spare rows with its
 7-item menu (rendered height ~10). After adding the trailing `\n` it has 1 spare row.

@@ -646,32 +646,122 @@ mkdir -p ~/capcat/docs/reference
 
 ## Source IDs
 
-| ID | Display Name | Category |
-|----|-------------|----------|
-| hn | Hacker News | techpro |
-| lb | Lobsters | techpro |
-| iq | InfoQ | techpro |
-| ieee | IEEE Spectrum | tech |
-| mashable | Mashable | tech |
-| bbc | BBC News | news |
-| guardian | The Guardian | news |
-| bbcsport | BBC Sport | sports |
-| nature | Nature | science |
-| scientificamerican | Scientific American | science |
-| mitnews | MIT News AI | ai |
-| google-reserch | The latest research from Google | ai |
+<div class="table-container">
+<table class="centered-table">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Display Name</th>
+      <th>Category</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>hn</td>
+      <td>Hacker News</td>
+      <td>techpro</td>
+    </tr>
+    <tr>
+      <td>lb</td>
+      <td>Lobsters</td>
+      <td>techpro</td>
+    </tr>
+    <tr>
+      <td>iq</td>
+      <td>InfoQ</td>
+      <td>techpro</td>
+    </tr>
+    <tr>
+      <td>ieee</td>
+      <td>IEEE Spectrum</td>
+      <td>tech</td>
+    </tr>
+    <tr>
+      <td>mashable</td>
+      <td>Mashable</td>
+      <td>tech</td>
+    </tr>
+    <tr>
+      <td>bbc</td>
+      <td>BBC News</td>
+      <td>news</td>
+    </tr>
+    <tr>
+      <td>guardian</td>
+      <td>The Guardian</td>
+      <td>news</td>
+    </tr>
+    <tr>
+      <td>bbcsport</td>
+      <td>BBC Sport</td>
+      <td>sports</td>
+    </tr>
+    <tr>
+      <td>nature</td>
+      <td>Nature</td>
+      <td>science</td>
+    </tr>
+    <tr>
+      <td>scientificamerican</td>
+      <td>Scientific American</td>
+      <td>science</td>
+    </tr>
+    <tr>
+      <td>mitnews</td>
+      <td>MIT News AI</td>
+      <td>ai</td>
+    </tr>
+    <tr>
+      <td>google-reserch</td>
+      <td>The latest research from Google</td>
+      <td>ai</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 ## Bundles
 
-| Bundle | Sources |
-|--------|---------|
-| techpro | hn, lb, iq |
-| tech | ieee, mashable |
-| news | bbc, guardian |
-| science | nature, scientificamerican |
-| ai | mitnews, google-reserch |
-| sports | bbcsport |
-| all | dynamic — expands techpro, tech, news, science, ai in order |
+<div class="table-container">
+<table class="centered-table">
+  <thead>
+    <tr>
+      <th>Bundle</th>
+      <th>Sources</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>techpro</td>
+      <td>hn, lb, iq</td>
+    </tr>
+    <tr>
+      <td>tech</td>
+      <td>ieee, mashable</td>
+    </tr>
+    <tr>
+      <td>news</td>
+      <td>bbc, guardian</td>
+    </tr>
+    <tr>
+      <td>science</td>
+      <td>nature, scientificamerican</td>
+    </tr>
+    <tr>
+      <td>ai</td>
+      <td>mitnews, google-reserch</td>
+    </tr>
+    <tr>
+      <td>sports</td>
+      <td>bbcsport</td>
+    </tr>
+    <tr>
+      <td>all</td>
+      <td>dynamic — expands techpro, tech, news, science, ai in order</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 ## Output Paths
 
@@ -1112,16 +1202,50 @@ Before starting any task, read ALL files whose trigger conditions match.
 When multiple triggers match, load all matching files.
 `plan-execution.md` always loads first when executing a plan.
 
-| Task type | Read before starting |
-|-----------|----------------------|
-| Any git operation | `context-engineering/git.md` |
-| Writing or running tests | `context-engineering/testing.md` |
-| Adding/modifying sources | `context-engineering/sources.md` |
-| PyPI release / version bump | `context-engineering/release.md` |
-| Bug investigation | `context-engineering/debugging.md` |
-| Architecture / structural change | `context-engineering/architecture.md` |
-| CLI design / new commands | `context-engineering/cli.md` |
-| Plan execution | `context-engineering/plan-execution.md` |
+<div class="table-container">
+<table class="centered-table">
+  <thead>
+    <tr>
+      <th>Task type</th>
+      <th>Read before starting</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Any git operation</td>
+      <td><code>context-engineering/git.md</code></td>
+    </tr>
+    <tr>
+      <td>Writing or running tests</td>
+      <td><code>context-engineering/testing.md</code></td>
+    </tr>
+    <tr>
+      <td>Adding/modifying sources</td>
+      <td><code>context-engineering/sources.md</code></td>
+    </tr>
+    <tr>
+      <td>PyPI release / version bump</td>
+      <td><code>context-engineering/release.md</code></td>
+    </tr>
+    <tr>
+      <td>Bug investigation</td>
+      <td><code>context-engineering/debugging.md</code></td>
+    </tr>
+    <tr>
+      <td>Architecture / structural change</td>
+      <td><code>context-engineering/architecture.md</code></td>
+    </tr>
+    <tr>
+      <td>CLI design / new commands</td>
+      <td><code>context-engineering/cli.md</code></td>
+    </tr>
+    <tr>
+      <td>Plan execution</td>
+      <td><code>context-engineering/plan-execution.md</code></td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 ## Meta-Rule: New Domains
 

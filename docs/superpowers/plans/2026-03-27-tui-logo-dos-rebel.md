@@ -12,11 +12,30 @@
 
 ## File Map
 
-| Action | File |
-|---|---|
-| Modify | `capcat/core/interactive.py` |
-| Modify | `capcat/core/source_system/bundle_ui.py` |
-| Test (must pass) | `tests/unit/` (full suite) |
+<div class="table-container">
+<table class="centered-table">
+  <thead>
+    <tr>
+      <th>Action</th>
+      <th>File</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Modify</td>
+      <td><code>capcat/core/interactive.py</code></td>
+    </tr>
+    <tr>
+      <td>Modify</td>
+      <td><code>capcat/core/source_system/bundle_ui.py</code></td>
+    </tr>
+    <tr>
+      <td>Test (must pass)</td>
+      <td><code>tests/unit/</code> (full suite)</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 ---
 

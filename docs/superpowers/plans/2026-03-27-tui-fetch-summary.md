@@ -12,14 +12,42 @@
 
 ## File Structure
 
-| File | Change |
-|------|--------|
-| `capcat/core/unified_source_processor.py` | Add `FetchResult` dataclass |
-| `capcat/core/tui_context.py` | Add thread-safe accumulation functions |
-| `capcat/core/article_fetcher.py` | Suppress warnings + record results in `NewsSourceArticleFetcher._fetch_web_content` |
-| `capcat/core/interactive.py` | Wire accumulation in `_confirm_and_execute`; render summary in `_show_completion_screen` |
-| `tests/unit/test_tui_completion.py` | Update 3 call-arg assertions to match new `fetch_result` param |
-| `tests/unit/test_tui_fetch_summary.py` | New — tests for `FetchResult` and summary rendering |
+<div class="table-container">
+<table class="centered-table">
+  <thead>
+    <tr>
+      <th>File</th>
+      <th>Change</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>capcat/core/unified_source_processor.py</code></td>
+      <td>Add <code>FetchResult</code> dataclass</td>
+    </tr>
+    <tr>
+      <td><code>capcat/core/tui_context.py</code></td>
+      <td>Add thread-safe accumulation functions</td>
+    </tr>
+    <tr>
+      <td><code>capcat/core/article_fetcher.py</code></td>
+      <td>Suppress warnings + record results in <code>NewsSourceArticleFetcher._fetch_web_content</code></td>
+    </tr>
+    <tr>
+      <td><code>capcat/core/interactive.py</code></td>
+      <td>Wire accumulation in <code>_confirm_and_execute</code>; render summary in <code>_show_completion_screen</code></td>
+    </tr>
+    <tr>
+      <td><code>tests/unit/test_tui_completion.py</code></td>
+      <td>Update 3 call-arg assertions to match new <code>fetch_result</code> param</td>
+    </tr>
+    <tr>
+      <td><code>tests/unit/test_tui_fetch_summary.py</code></td>
+      <td>New — tests for <code>FetchResult</code> and summary rendering</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 ---
 

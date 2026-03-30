@@ -33,16 +33,50 @@ Contains only:
 
 ### Trigger Table
 
-| Task type | Read before starting |
-|-----------|----------------------|
-| Any git operation | `context-engineering/git.md` |
-| Writing or running tests | `context-engineering/testing.md` |
-| Adding/modifying sources | `context-engineering/sources.md` |
-| PyPI release / version bump | `context-engineering/release.md` |
-| Bug investigation | `context-engineering/debugging.md` |
-| Architecture / structural change | `context-engineering/architecture.md` |
-| CLI design / new commands | `context-engineering/cli.md` |
-| Plan execution | `context-engineering/plan-execution.md` (load first, then domain files) |
+<div class="table-container">
+<table class="centered-table">
+  <thead>
+    <tr>
+      <th>Task type</th>
+      <th>Read before starting</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Any git operation</td>
+      <td><code>context-engineering/git.md</code></td>
+    </tr>
+    <tr>
+      <td>Writing or running tests</td>
+      <td><code>context-engineering/testing.md</code></td>
+    </tr>
+    <tr>
+      <td>Adding/modifying sources</td>
+      <td><code>context-engineering/sources.md</code></td>
+    </tr>
+    <tr>
+      <td>PyPI release / version bump</td>
+      <td><code>context-engineering/release.md</code></td>
+    </tr>
+    <tr>
+      <td>Bug investigation</td>
+      <td><code>context-engineering/debugging.md</code></td>
+    </tr>
+    <tr>
+      <td>Architecture / structural change</td>
+      <td><code>context-engineering/architecture.md</code></td>
+    </tr>
+    <tr>
+      <td>CLI design / new commands</td>
+      <td><code>context-engineering/cli.md</code></td>
+    </tr>
+    <tr>
+      <td>Plan execution</td>
+      <td><code>context-engineering/plan-execution.md</code> (load first, then domain files)</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 **Precedence rule:** When multiple triggers match, load ALL matching files.
 `plan-execution.md` always loads first when plan execution is in scope.

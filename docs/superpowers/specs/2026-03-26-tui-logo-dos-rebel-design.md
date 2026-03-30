@@ -57,22 +57,74 @@ def print_logo():
 `print_logo()` is called immediately before every `questionary.select` /
 `questionary.checkbox` prompt. Fourteen call sites:
 
-| Function | File |
-|---|---|
-| `start_interactive_mode` | `interactive.py` |
-| `_handle_manage_sources_flow` | `interactive.py` |
-| `_handle_list_sources` (loop) | `interactive.py` |
-| `_handle_test_source` | `interactive.py` |
-| `_handle_bundle_flow` | `interactive.py` |
-| `_handle_fetch_flow` | `interactive.py` |
-| `_handle_single_source_flow` | `interactive.py` |
-| `_handle_single_url_flow` | `interactive.py` |
-| `_prompt_for_html` | `interactive.py` |
-| `_show_completion_screen` | `interactive.py` |
-| `show_bundle_menu` | `bundle_ui.py` |
-| `prompt_select_bundle` | `bundle_ui.py` |
-| `prompt_select_sources` | `bundle_ui.py` |
-| `prompt_copy_or_move` | `bundle_ui.py` |
+<div class="table-container">
+<table class="centered-table">
+  <thead>
+    <tr>
+      <th>Function</th>
+      <th>File</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>start_interactive_mode</code></td>
+      <td><code>interactive.py</code></td>
+    </tr>
+    <tr>
+      <td><code>_handle_manage_sources_flow</code></td>
+      <td><code>interactive.py</code></td>
+    </tr>
+    <tr>
+      <td><code>_handle_list_sources</code> (loop)</td>
+      <td><code>interactive.py</code></td>
+    </tr>
+    <tr>
+      <td><code>_handle_test_source</code></td>
+      <td><code>interactive.py</code></td>
+    </tr>
+    <tr>
+      <td><code>_handle_bundle_flow</code></td>
+      <td><code>interactive.py</code></td>
+    </tr>
+    <tr>
+      <td><code>_handle_fetch_flow</code></td>
+      <td><code>interactive.py</code></td>
+    </tr>
+    <tr>
+      <td><code>_handle_single_source_flow</code></td>
+      <td><code>interactive.py</code></td>
+    </tr>
+    <tr>
+      <td><code>_handle_single_url_flow</code></td>
+      <td><code>interactive.py</code></td>
+    </tr>
+    <tr>
+      <td><code>_prompt_for_html</code></td>
+      <td><code>interactive.py</code></td>
+    </tr>
+    <tr>
+      <td><code>_show_completion_screen</code></td>
+      <td><code>interactive.py</code></td>
+    </tr>
+    <tr>
+      <td><code>show_bundle_menu</code></td>
+      <td><code>bundle_ui.py</code></td>
+    </tr>
+    <tr>
+      <td><code>prompt_select_bundle</code></td>
+      <td><code>bundle_ui.py</code></td>
+    </tr>
+    <tr>
+      <td><code>prompt_select_sources</code></td>
+      <td><code>bundle_ui.py</code></td>
+    </tr>
+    <tr>
+      <td><code>prompt_copy_or_move</code></td>
+      <td><code>bundle_ui.py</code></td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 **Intentional exclusion:** `_show_source_detail` in `interactive.py` contains a
 `questionary.select` call but does NOT get `print_logo()`. This screen renders

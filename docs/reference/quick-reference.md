@@ -2,32 +2,122 @@
 
 ## Source IDs
 
-| ID | Name | Category |
-|----|------|----------|
-| `hn` | Hacker News | tech |
-| `lb` | Lobsters | tech |
-| `iq` | InfoQ | tech |
-| `ieee` | IEEE Spectrum | tech |
-| `mashable` | Mashable | tech |
-| `bbc` | BBC News | news |
-| `guardian` | The Guardian | news |
-| `bbcsport` | BBC Sport | sports |
-| `nature` | Nature | science |
-| `scientificamerican` | Scientific American | science |
-| `mitnews` | MIT News AI | ai |
-| `google-reserch` | Google Research | ai |
+<div class="table-container">
+<table class="centered-table">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Category</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>hn</code></td>
+      <td>Hacker News</td>
+      <td>tech</td>
+    </tr>
+    <tr>
+      <td><code>lb</code></td>
+      <td>Lobsters</td>
+      <td>tech</td>
+    </tr>
+    <tr>
+      <td><code>iq</code></td>
+      <td>InfoQ</td>
+      <td>tech</td>
+    </tr>
+    <tr>
+      <td><code>ieee</code></td>
+      <td>IEEE Spectrum</td>
+      <td>tech</td>
+    </tr>
+    <tr>
+      <td><code>mashable</code></td>
+      <td>Mashable</td>
+      <td>tech</td>
+    </tr>
+    <tr>
+      <td><code>bbc</code></td>
+      <td>BBC News</td>
+      <td>news</td>
+    </tr>
+    <tr>
+      <td><code>guardian</code></td>
+      <td>The Guardian</td>
+      <td>news</td>
+    </tr>
+    <tr>
+      <td><code>bbcsport</code></td>
+      <td>BBC Sport</td>
+      <td>sports</td>
+    </tr>
+    <tr>
+      <td><code>nature</code></td>
+      <td>Nature</td>
+      <td>science</td>
+    </tr>
+    <tr>
+      <td><code>scientificamerican</code></td>
+      <td>Scientific American</td>
+      <td>science</td>
+    </tr>
+    <tr>
+      <td><code>mitnews</code></td>
+      <td>MIT News AI</td>
+      <td>ai</td>
+    </tr>
+    <tr>
+      <td><code>google-reserch</code></td>
+      <td>Google Research</td>
+      <td>ai</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 ## Bundle Names and Sources
 
-| Bundle | Source IDs |
-|--------|------------|
-| `techpro` | hn, lb, iq |
-| `tech` | ieee, mashable |
-| `news` | bbc, guardian |
-| `science` | nature, scientificamerican |
-| `ai` | mitnews, google-reserch |
-| `sports` | bbcsport |
-| `all` | (expands to all sources from all non-empty bundles) |
+<div class="table-container">
+<table class="centered-table">
+  <thead>
+    <tr>
+      <th>Bundle</th>
+      <th>Source IDs</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>techpro</code></td>
+      <td>hn, lb, iq</td>
+    </tr>
+    <tr>
+      <td><code>tech</code></td>
+      <td>ieee, mashable</td>
+    </tr>
+    <tr>
+      <td><code>news</code></td>
+      <td>bbc, guardian</td>
+    </tr>
+    <tr>
+      <td><code>science</code></td>
+      <td>nature, scientificamerican</td>
+    </tr>
+    <tr>
+      <td><code>ai</code></td>
+      <td>mitnews, google-reserch</td>
+    </tr>
+    <tr>
+      <td><code>sports</code></td>
+      <td>bbcsport</td>
+    </tr>
+    <tr>
+      <td><code>all</code></td>
+      <td>(expands to all sources from all non-empty bundles)</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 ## Output Path Patterns
 
@@ -60,14 +150,46 @@ capcat --version                    # print version
 
 ## Flags
 
-| Flag | Short | Description |
-|------|-------|-------------|
-| `--count N` | `-c N` | Max articles per source |
-| `--html` | | Generate HTML index |
-| `--media` | | Download video/audio/docs |
-| `--log FILE` | `-L FILE` | Write log to file |
-| `--version` | | Print version and exit |
-| `--help` | `-h` | Print usage and exit |
+<div class="table-container">
+<table class="centered-table">
+  <thead>
+    <tr>
+      <th>Flag</th>
+      <th>Short</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>--count N</code></td>
+      <td><code>-c N</code></td>
+      <td>Max articles per source</td>
+    </tr>
+    <tr>
+      <td><code>--html</code></td>
+      <td>Generate HTML index</td>
+    </tr>
+    <tr>
+      <td><code>--media</code></td>
+      <td>Download video/audio/docs</td>
+    </tr>
+    <tr>
+      <td><code>--log FILE</code></td>
+      <td><code>-L FILE</code></td>
+      <td>Write log to file</td>
+    </tr>
+    <tr>
+      <td><code>--version</code></td>
+      <td>Print version and exit</td>
+    </tr>
+    <tr>
+      <td><code>--help</code></td>
+      <td><code>-h</code></td>
+      <td>Print usage and exit</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 ## Source Management
 
@@ -76,18 +198,62 @@ project. Edit files there freely — they are never overwritten without your con
 
 ### Commands
 
-| Command | Description |
-|---------|-------------|
-| `capcat add-source <url>` | Add a new RSS source (saved to `Config/sources/active/config_driven/configs/`) |
-| `capcat remove-source <id>` | Remove a source from `Config/sources/active/` |
-| `capcat list sources` | Show all registered sources |
-| `capcat list bundles` | Show all available bundles |
+<div class="table-container">
+<table class="centered-table">
+  <thead>
+    <tr>
+      <th>Command</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>capcat add-source <url></code></td>
+      <td>Add a new RSS source (saved to <code>Config/sources/active/config_driven/configs/</code>)</td>
+    </tr>
+    <tr>
+      <td><code>capcat remove-source <id></code></td>
+      <td>Remove a source from <code>Config/sources/active/</code></td>
+    </tr>
+    <tr>
+      <td><code>capcat list sources</code></td>
+      <td>Show all registered sources</td>
+    </tr>
+    <tr>
+      <td><code>capcat list bundles</code></td>
+      <td>Show all available bundles</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 ### Paths
 
-| Path | Purpose |
-|------|---------|
-| `Config/sources/active/config_driven/configs/` | Per-source YAML/JSON config files |
-| `Config/sources/active/custom/` | Custom source directories (with `source.py`) |
-| `Config/sources/active/bundles/bundles.yml` | Bundle definitions |
-| `.capcat/source_hashes.json` | Tracks builtin-synced vs user-added sources |
+<div class="table-container">
+<table class="centered-table">
+  <thead>
+    <tr>
+      <th>Path</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>Config/sources/active/config_driven/configs/</code></td>
+      <td>Per-source YAML/JSON config files</td>
+    </tr>
+    <tr>
+      <td><code>Config/sources/active/custom/</code></td>
+      <td>Custom source directories (with <code>source.py</code>)</td>
+    </tr>
+    <tr>
+      <td><code>Config/sources/active/bundles/bundles.yml</code></td>
+      <td>Bundle definitions</td>
+    </tr>
+    <tr>
+      <td><code>.capcat/source_hashes.json</code></td>
+      <td>Tracks builtin-synced vs user-added sources</td>
+    </tr>
+  </tbody>
+</table>
+</div>

@@ -28,38 +28,116 @@ Each `<img src="*.svg">` and inline `<svg>` element is scored on two counters: `
 
 ### Icon signals
 
-| Signal | Points |
-|---|---|
-| `viewBox` is square (width == height) | 3 |
-| Both `viewBox` dimensions ≤ 64 | 3 |
-| `src` starts with `data:image/svg` | 2 |
-| `aria-label` or `role="img"` attribute present | 2 |
-| Direct parent is `<li>`, `<button>` | 2 |
-| Direct parent is `<a>` that is itself a descendant of `<li>`, `<nav>`, `<footer>`, or `<header>` | 2 |
-| Element has non-whitespace-only sibling text nodes in its parent | 1 |
+<div class="table-container">
+<table class="centered-table">
+  <thead>
+    <tr>
+      <th>Signal</th>
+      <th>Points</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>viewBox</code> is square (width == height)</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <td>Both <code>viewBox</code> dimensions ≤ 64</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <td><code>src</code> starts with <code>data:image/svg</code></td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td><code>aria-label</code> or <code>role="img"</code> attribute present</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td>Direct parent is <code><li></code>, <code><button></code></td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td>Direct parent is <code><a></code> that is itself a descendant of <code><li></code>, <code><nav></code>, <code><footer></code>, or <code><header></code></td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td>Element has non-whitespace-only sibling text nodes in its parent</td>
+      <td>1</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 Note: The `<a>` parent signal is deliberately narrowed to navigation/footer contexts. In practice, `<a href="..."><img></a>` lightbox wrappers in article body content are already stripped by `_remove_image_anchor_wrappers()` earlier in the transformation chain (before `_classify_svg_elements()` runs), so the `<a>` parent signal only fires for inline `<svg>` elements inside navigation links, not for `<img>` elements.
 
 ### Illustration signals
 
-| Signal | Points |
-|---|---|
-| `viewBox` is non-square | 4 |
-| Either `viewBox` dimension > 200 | 4 |
-| Element is sole child of a `<p>` that is surrounded by other `<p>` sibling elements | 2 |
+<div class="table-container">
+<table class="centered-table">
+  <thead>
+    <tr>
+      <th>Signal</th>
+      <th>Points</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>viewBox</code> is non-square</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>Either <code>viewBox</code> dimension > 200</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>Element is sole child of a <code><p></code> that is surrounded by other <code><p></code> sibling elements</td>
+      <td>2</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 ### Score walk-through for primary problem case
 
 A typical social share icon: `<img src="data:image/svg+xml;charset=utf-8,..." aria-label="Mastodon" role="img">` inside `<li>`, with `viewBox="0 0 512 512"`.
 
-| Signal | Points to |
-|---|---|
-| Square viewBox (512 == 512) | icon +3 |
-| Dims ≤ 64? No (512 > 64) | — |
-| `data:image/svg` src | icon +2 |
-| `aria-label` or `role="img"` present (one check, max 2 pts) | icon +2 |
-| Parent is `<li>` | icon +2 |
-| Dim > 200 (512 > 200) | illustration +4 |
+<div class="table-container">
+<table class="centered-table">
+  <thead>
+    <tr>
+      <th>Signal</th>
+      <th>Points to</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Square viewBox (512 == 512)</td>
+      <td>icon +3</td>
+    </tr>
+    <tr>
+      <td>Dims ≤ 64? No (512 > 64)</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td><code>data:image/svg</code> src</td>
+      <td>icon +2</td>
+    </tr>
+    <tr>
+      <td><code>aria-label</code> or <code>role="img"</code> present (one check, max 2 pts)</td>
+      <td>icon +2</td>
+    </tr>
+    <tr>
+      <td>Parent is <code><li></code></td>
+      <td>icon +2</td>
+    </tr>
+    <tr>
+      <td>Dim > 200 (512 > 200)</td>
+      <td>illustration +4</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 **Result: icon 9 vs illustration 4 → classified as icon.** ✓
 
@@ -167,15 +245,66 @@ Tests instantiate `HtmlGenerator` and call `_classify_svg_elements()` directly w
 
 ### Cases to cover
 
-| # | Case | Expected |
-|---|---|---|
-| 1 | `<img src="data:image/svg+xml;charset=utf-8,..." aria-label="Mastodon" role="img">` in `<li>`, viewBox `0 0 512 512` | `capcat-icon` |
-| 2 | `<img src="data:image/svg+xml;base64,...">`  square 512×512 viewBox, in `<li>` | `capcat-icon` |
-| 3 | Inline `<svg viewBox="0 0 24 24">` inside `<a>` inside `<nav>` | `capcat-icon` |
-| 4 | `<img src="diagram.svg">` with wide non-square viewBox `0 0 800 400` | no class |
-| 5 | `<img src="illustration.svg">` as sole child of `<p>` between other `<p>` elements | no class |
-| 6 | `<img>` with no size info at all | no class (fallback) |
-| 7 | Square 512×512 `<img>` with no aria-label, no list context, standalone in `<p>` | no class (illustration wins on dim > 200) |
-| 8 | Bare `<img src="diagram.svg">` square 400×400, no accessibility attrs, no list context — simulates post-`_remove_image_anchor_wrappers` state | no class (illustration wins: dim > 200, no countering icon signals) |
-| 9 | Icon already has a `class` attribute — `capcat-icon` must be appended, not replace | existing class preserved |
-| 10 | Icon inside `<p>` (verifies specificity fix — rendered inline, not block) | `capcat-icon` and `display:inline-block` wins |
+<div class="table-container">
+<table class="centered-table">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Case</th>
+      <th>Expected</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td><code><img src="data:image/svg+xml;charset=utf-8,..." aria-label="Mastodon" role="img"></code> in <code><li></code>, viewBox <code>0 0 512 512</code></td>
+      <td><code>capcat-icon</code></td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td><code><img src="data:image/svg+xml;base64,..."></code>  square 512×512 viewBox, in <code><li></code></td>
+      <td><code>capcat-icon</code></td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>Inline <code><svg viewBox="0 0 24 24"></code> inside <code><a></code> inside <code><nav></code></td>
+      <td><code>capcat-icon</code></td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td><code><img src="diagram.svg"></code> with wide non-square viewBox <code>0 0 800 400</code></td>
+      <td>no class</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td><code><img src="illustration.svg"></code> as sole child of <code><p></code> between other <code><p></code> elements</td>
+      <td>no class</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td><code><img></code> with no size info at all</td>
+      <td>no class (fallback)</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>Square 512×512 <code><img></code> with no aria-label, no list context, standalone in <code><p></code></td>
+      <td>no class (illustration wins on dim > 200)</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>Bare <code><img src="diagram.svg"></code> square 400×400, no accessibility attrs, no list context — simulates post-<code>_remove_image_anchor_wrappers</code> state</td>
+      <td>no class (illustration wins: dim > 200, no countering icon signals)</td>
+    </tr>
+    <tr>
+      <td>9</td>
+      <td>Icon already has a <code>class</code> attribute — <code>capcat-icon</code> must be appended, not replace</td>
+      <td>existing class preserved</td>
+    </tr>
+    <tr>
+      <td>10</td>
+      <td>Icon inside <code><p></code> (verifies specificity fix — rendered inline, not block)</td>
+      <td><code>capcat-icon</code> and <code>display:inline-block</code> wins</td>
+    </tr>
+  </tbody>
+</table>
+</div>

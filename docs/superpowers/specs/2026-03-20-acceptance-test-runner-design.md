@@ -205,21 +205,84 @@ RESULT
 
 Tests are grouped and run in order. Each entry in `catalog.py` is a dict with:
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | int | Sequential 1-based test number |
-| `group` | str | One of the 10 group names (see below) |
-| `label` | str | Short human-readable description |
-| `cmd` | list[str] | Full argv list starting with `"capcat"` |
-| `expected_exit` | int or None | 0, 1, or None (None = do not check exit code in auto-analysis) |
-| `expected_in_output` | list[str] | Strings checked case-sensitively in combined stdout+stderr (empty list = no check) |
-| `creates_files` | bool | If True, runner counts non-hidden items in tmp dir after run |
-| `needs_init` | bool | True = silent init before test; mutually exclusive with `pre_init` |
-| `pre_init` | bool | True = silent init before test AND test cmd is an `init` variant; mutually exclusive with `needs_init` |
-| `is_tui` | bool | If True, uses manual TUI launch flow (no output capture, no string/file auto-checks) |
-| `passthrough` | bool | If True, subprocess stdout/stderr passed through to terminal (no capture); auto-analysis limited to exit code check only (no string checks, no file count check). Must always pair with `expected_in_output: []` and `creates_files: False`. Used for interactive non-TUI commands (remove-source, generate-config). |
-| `timeout` | int | Seconds; default 30, TUI tests use 120 |
-| `fixture` | str or None | Filename from `fixtures/` to copy into tmp dir before running |
+<div class="table-container">
+<table class="centered-table">
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>id</code></td>
+      <td>int</td>
+      <td>Sequential 1-based test number</td>
+    </tr>
+    <tr>
+      <td><code>group</code></td>
+      <td>str</td>
+      <td>One of the 10 group names (see below)</td>
+    </tr>
+    <tr>
+      <td><code>label</code></td>
+      <td>str</td>
+      <td>Short human-readable description</td>
+    </tr>
+    <tr>
+      <td><code>cmd</code></td>
+      <td>list[str]</td>
+      <td>Full argv list starting with <code>"capcat"</code></td>
+    </tr>
+    <tr>
+      <td><code>expected_exit</code></td>
+      <td>int or None</td>
+      <td>0, 1, or None (None = do not check exit code in auto-analysis)</td>
+    </tr>
+    <tr>
+      <td><code>expected_in_output</code></td>
+      <td>list[str]</td>
+      <td>Strings checked case-sensitively in combined stdout+stderr (empty list = no check)</td>
+    </tr>
+    <tr>
+      <td><code>creates_files</code></td>
+      <td>bool</td>
+      <td>If True, runner counts non-hidden items in tmp dir after run</td>
+    </tr>
+    <tr>
+      <td><code>needs_init</code></td>
+      <td>bool</td>
+      <td>True = silent init before test; mutually exclusive with <code>pre_init</code></td>
+    </tr>
+    <tr>
+      <td><code>pre_init</code></td>
+      <td>bool</td>
+      <td>True = silent init before test AND test cmd is an <code>init</code> variant; mutually exclusive with <code>needs_init</code></td>
+    </tr>
+    <tr>
+      <td><code>is_tui</code></td>
+      <td>bool</td>
+      <td>If True, uses manual TUI launch flow (no output capture, no string/file auto-checks)</td>
+    </tr>
+    <tr>
+      <td><code>passthrough</code></td>
+      <td>bool</td>
+      <td>If True, subprocess stdout/stderr passed through to terminal (no capture); auto-analysis limited to exit code check only (no string checks, no file count check). Must always pair with <code>expected_in_output: []</code> and <code>creates_files: False</code>. Used for interactive non-TUI commands (remove-source, generate-config).</td>
+    </tr>
+    <tr>
+      <td><code>timeout</code></td>
+      <td>int</td>
+      <td>Seconds; default 30, TUI tests use 120</td>
+    </tr>
+    <tr>
+      <td><code>fixture</code></td>
+      <td>str or None</td>
+      <td>Filename from <code>fixtures/</code> to copy into tmp dir before running</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 Valid `--group` names for the runner CLI: `global`, `init`, `single`, `fetch`,
 `bundle`, `list`, `add-source`, `remove-source`, `generate-config`, `tui`.
@@ -229,15 +292,70 @@ Hyphens are preserved exactly as shown. `--group add-source` is valid.
 
 ### global (7 tests)
 
-| # | Label | Command | expected_exit | needs_init |
-|---|-------|---------|---------------|------------|
-| 1 | No args prints help | `capcat` | 0 | False |
-| 2 | --help flag | `capcat --help` | 0 | False |
-| 3 | -h flag | `capcat -h` | 0 | False |
-| 4 | --version prints version | `capcat --version` | 0 | False |
-| 5 | -L logs to file | `capcat -L <tmp>/capcat.log fetch hn --count 1` | 0 | True |
-| 6 | -L missing filename | `capcat -L` | 1 | False |
-| 7 | Unknown command | `capcat unknowncmd_xyz` | 1 | False |
+<div class="table-container">
+<table class="centered-table">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Label</th>
+      <th>Command</th>
+      <th>expected_exit</th>
+      <th>needs_init</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>No args prints help</td>
+      <td><code>capcat</code></td>
+      <td>0</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>--help flag</td>
+      <td><code>capcat --help</code></td>
+      <td>0</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>-h flag</td>
+      <td><code>capcat -h</code></td>
+      <td>0</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>--version prints version</td>
+      <td><code>capcat --version</code></td>
+      <td>0</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>-L logs to file</td>
+      <td><code>capcat -L <tmp>/capcat.log fetch hn --count 1</code></td>
+      <td>0</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>-L missing filename</td>
+      <td><code>capcat -L</code></td>
+      <td>1</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>Unknown command</td>
+      <td><code>capcat unknowncmd_xyz</code></td>
+      <td>1</td>
+      <td>False</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 Test 5: the log file path is `<tmp>/capcat.log` where `<tmp>` is the test's
 own tmp dir. After the command completes the runner checks that this file
@@ -247,11 +365,46 @@ exists and is non-empty and reports it in the RESULT block.
 
 ### init (3 tests)
 
-| # | Label | Command | expected_exit | needs_init | pre_init |
-|---|-------|---------|---------------|------------|----------|
-| 8 | Fresh init | `capcat init` | 0 | False | False |
-| 9 | Already init'd exits 1 | `capcat init` | 1 | False | True |
-| 10 | --reinit on existing | `capcat init --reinit` | 0 | False | True |
+<div class="table-container">
+<table class="centered-table">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Label</th>
+      <th>Command</th>
+      <th>expected_exit</th>
+      <th>needs_init</th>
+      <th>pre_init</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>8</td>
+      <td>Fresh init</td>
+      <td><code>capcat init</code></td>
+      <td>0</td>
+      <td>False</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <td>9</td>
+      <td>Already init'd exits 1</td>
+      <td><code>capcat init</code></td>
+      <td>1</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>10</td>
+      <td>--reinit on existing</td>
+      <td><code>capcat init --reinit</code></td>
+      <td>0</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 Tests 9 and 10: `pre_init: True` means the runner runs `capcat init` silently
 in the tmp dir before executing the test command.
@@ -264,17 +417,74 @@ All single tests use `needs_init: True`. The URL `https://example.com` is a
 real URL — the test may succeed or fail depending on whether example.com is
 reachable and what content is returned. The user judges the result.
 
-| # | Label | Command | expected_exit |
-|---|-------|---------|---------------|
-| 11 | No URL prints usage | `capcat single` | None |
-| 12 | --help | `capcat single --help` | 0 |
-| 13 | Basic single URL | `capcat single https://example.com` | 0 |
-| 14 | single + --html | `capcat single https://example.com --html` | 0 |
-| 15 | single + --media | `capcat single https://example.com --media` | 0 |
-| 16 | single + --update | `capcat single https://example.com --update` | 0 |
-| 17 | single + --output | `capcat single https://example.com --output <tmp>/out` | 0 |
-| 18 | single + -V verbose | `capcat single https://example.com -V` | 0 |
-| 19 | single + -q quiet | `capcat single https://example.com -q` | 0 |
+<div class="table-container">
+<table class="centered-table">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Label</th>
+      <th>Command</th>
+      <th>expected_exit</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>11</td>
+      <td>No URL prints usage</td>
+      <td><code>capcat single</code></td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <td>12</td>
+      <td>--help</td>
+      <td><code>capcat single --help</code></td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>13</td>
+      <td>Basic single URL</td>
+      <td><code>capcat single https://example.com</code></td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>14</td>
+      <td>single + --html</td>
+      <td><code>capcat single https://example.com --html</code></td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>15</td>
+      <td>single + --media</td>
+      <td><code>capcat single https://example.com --media</code></td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>16</td>
+      <td>single + --update</td>
+      <td><code>capcat single https://example.com --update</code></td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>17</td>
+      <td>single + --output</td>
+      <td><code>capcat single https://example.com --output <tmp>/out</code></td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>18</td>
+      <td>single + -V verbose</td>
+      <td><code>capcat single https://example.com -V</code></td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>19</td>
+      <td>single + -q quiet</td>
+      <td><code>capcat single https://example.com -q</code></td>
+      <td>0</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 Test 17: `--output` value is `<tmp>/out` — a subdirectory of the test's tmp dir.
 
@@ -284,21 +494,98 @@ Test 17: `--output` value is `<tmp>/out` — a subdirectory of the test's tmp di
 
 All fetch tests use `needs_init: True`, `creates_files: True`.
 
-| # | Label | Command | expected_exit |
-|---|-------|---------|---------------|
-| 20 | No source prints usage | `capcat fetch` | None |
-| 21 | --help | `capcat fetch --help` | 0 |
-| 22 | Single source: hn | `capcat fetch hn --count 3` | 0 |
-| 23 | Single source: bbc | `capcat fetch bbc --count 3` | 0 |
-| 24 | Single source: lb | `capcat fetch lb --count 3` | 0 |
-| 25 | Multi source: hn,bbc | `capcat fetch hn,bbc --count 3` | 0 |
-| 26 | Three sources | `capcat fetch hn,bbc,lb --count 3` | 0 |
-| 27 | fetch + --html | `capcat fetch hn --count 3 --html` | 0 |
-| 28 | fetch + --media | `capcat fetch hn --count 3 --media` | 0 |
-| 29 | fetch + --update | `capcat fetch hn --count 3 --update` | 0 |
-| 30 | fetch + --output | `capcat fetch hn --count 3 --output <tmp>/out` | 0 |
-| 31 | fetch + -V | `capcat fetch hn --count 3 -V` | 0 |
-| 32 | fetch + -q | `capcat fetch hn --count 3 -q` | 0 |
+<div class="table-container">
+<table class="centered-table">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Label</th>
+      <th>Command</th>
+      <th>expected_exit</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>20</td>
+      <td>No source prints usage</td>
+      <td><code>capcat fetch</code></td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <td>21</td>
+      <td>--help</td>
+      <td><code>capcat fetch --help</code></td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>22</td>
+      <td>Single source: hn</td>
+      <td><code>capcat fetch hn --count 3</code></td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>23</td>
+      <td>Single source: bbc</td>
+      <td><code>capcat fetch bbc --count 3</code></td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>24</td>
+      <td>Single source: lb</td>
+      <td><code>capcat fetch lb --count 3</code></td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>25</td>
+      <td>Multi source: hn,bbc</td>
+      <td><code>capcat fetch hn,bbc --count 3</code></td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>26</td>
+      <td>Three sources</td>
+      <td><code>capcat fetch hn,bbc,lb --count 3</code></td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>27</td>
+      <td>fetch + --html</td>
+      <td><code>capcat fetch hn --count 3 --html</code></td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>28</td>
+      <td>fetch + --media</td>
+      <td><code>capcat fetch hn --count 3 --media</code></td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>29</td>
+      <td>fetch + --update</td>
+      <td><code>capcat fetch hn --count 3 --update</code></td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>30</td>
+      <td>fetch + --output</td>
+      <td><code>capcat fetch hn --count 3 --output <tmp>/out</code></td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>31</td>
+      <td>fetch + -V</td>
+      <td><code>capcat fetch hn --count 3 -V</code></td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>32</td>
+      <td>fetch + -q</td>
+      <td><code>capcat fetch hn --count 3 -q</code></td>
+      <td>0</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 Tests 20–21: `creates_files: False` (no fetch happens).
 
@@ -308,22 +595,104 @@ Tests 20–21: `creates_files: False` (no fetch happens).
 
 All bundle tests use `needs_init: True`. Tests 35–45 use `creates_files: True`.
 
-| # | Label | Command | expected_exit |
-|---|-------|---------|---------------|
-| 33 | No name prints usage | `capcat bundle` | None |
-| 34 | --help | `capcat bundle --help` | 0 |
-| 35 | Bundle: tech | `capcat bundle tech --count 3` | 0 |
-| 36 | Bundle: techpro | `capcat bundle techpro --count 3` | 0 |
-| 37 | Bundle: news | `capcat bundle news --count 3` | 0 |
-| 38 | Bundle: science | `capcat bundle science --count 3` | 0 |
-| 39 | Bundle: ai | `capcat bundle ai --count 3` | 0 |
-| 40 | Bundle: sports | `capcat bundle sports --count 3` | 0 |
-| 41 | Bundle: all keyword | `capcat bundle all --count 2` | 0 |
-| 42 | Bundle: --all flag | `capcat bundle --all --count 2` | 0 |
-| 43 | bundle + --html | `capcat bundle tech --count 3 --html` | 0 |
-| 44 | bundle + --output | `capcat bundle tech --count 3 --output <tmp>/out` | 0 |
-| 45 | bundle + -V | `capcat bundle tech --count 3 -V` | 0 |
-| 46 | Unknown bundle exits 1 | `capcat bundle unknown_bundle_xyz` | 1 |
+<div class="table-container">
+<table class="centered-table">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Label</th>
+      <th>Command</th>
+      <th>expected_exit</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>33</td>
+      <td>No name prints usage</td>
+      <td><code>capcat bundle</code></td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <td>34</td>
+      <td>--help</td>
+      <td><code>capcat bundle --help</code></td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>35</td>
+      <td>Bundle: tech</td>
+      <td><code>capcat bundle tech --count 3</code></td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>36</td>
+      <td>Bundle: techpro</td>
+      <td><code>capcat bundle techpro --count 3</code></td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>37</td>
+      <td>Bundle: news</td>
+      <td><code>capcat bundle news --count 3</code></td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>38</td>
+      <td>Bundle: science</td>
+      <td><code>capcat bundle science --count 3</code></td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>39</td>
+      <td>Bundle: ai</td>
+      <td><code>capcat bundle ai --count 3</code></td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>40</td>
+      <td>Bundle: sports</td>
+      <td><code>capcat bundle sports --count 3</code></td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>41</td>
+      <td>Bundle: all keyword</td>
+      <td><code>capcat bundle all --count 2</code></td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>42</td>
+      <td>Bundle: --all flag</td>
+      <td><code>capcat bundle --all --count 2</code></td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>43</td>
+      <td>bundle + --html</td>
+      <td><code>capcat bundle tech --count 3 --html</code></td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>44</td>
+      <td>bundle + --output</td>
+      <td><code>capcat bundle tech --count 3 --output <tmp>/out</code></td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>45</td>
+      <td>bundle + -V</td>
+      <td><code>capcat bundle tech --count 3 -V</code></td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>46</td>
+      <td>Unknown bundle exits 1</td>
+      <td><code>capcat bundle unknown_bundle_xyz</code></td>
+      <td>1</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 ---
 
@@ -331,13 +700,56 @@ All bundle tests use `needs_init: True`. Tests 35–45 use `creates_files: True`
 
 All list tests use `needs_init: True`, `creates_files: False`.
 
-| # | Label | Command | expected_exit | expected_in_output |
-|---|-------|---------|---------------|--------------------|
-| 47 | list (no subcommand) | `capcat list` | 0 | `["Available sources", "Available bundles"]` |
-| 48 | list sources | `capcat list sources` | 0 | `["Available sources"]` |
-| 49 | list bundles | `capcat list bundles` | 0 | `["Available bundles"]` |
-| 50 | list all | `capcat list all` | 0 | `["Available sources", "Available bundles"]` |
-| 51 | list --help | `capcat list --help` | 0 | `["Usage"]` |
+<div class="table-container">
+<table class="centered-table">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Label</th>
+      <th>Command</th>
+      <th>expected_exit</th>
+      <th>expected_in_output</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>47</td>
+      <td>list (no subcommand)</td>
+      <td><code>capcat list</code></td>
+      <td>0</td>
+      <td><code>["Available sources", "Available bundles"]</code></td>
+    </tr>
+    <tr>
+      <td>48</td>
+      <td>list sources</td>
+      <td><code>capcat list sources</code></td>
+      <td>0</td>
+      <td><code>["Available sources"]</code></td>
+    </tr>
+    <tr>
+      <td>49</td>
+      <td>list bundles</td>
+      <td><code>capcat list bundles</code></td>
+      <td>0</td>
+      <td><code>["Available bundles"]</code></td>
+    </tr>
+    <tr>
+      <td>50</td>
+      <td>list all</td>
+      <td><code>capcat list all</code></td>
+      <td>0</td>
+      <td><code>["Available sources", "Available bundles"]</code></td>
+    </tr>
+    <tr>
+      <td>51</td>
+      <td>list --help</td>
+      <td><code>capcat list --help</code></td>
+      <td>0</td>
+      <td><code>["Usage"]</code></td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 ---
 
@@ -345,12 +757,54 @@ All list tests use `needs_init: True`, `creates_files: False`.
 
 All add-source tests use `needs_init: True`.
 
-| # | Label | Command | expected_exit | fixture | notes |
-|---|-------|---------|---------------|---------|-------|
-| 52 | No --url exits 1 | `capcat add-source` | 1 | — | — |
-| 53 | --help | `capcat add-source --help` | 0 | — | — |
-| 54 | Valid feed (fixture) | `capcat add-source --url file://<fixture_path>` | 0 | `mock_feed.xml` | see below |
-| 55 | Invalid URL | `capcat add-source --url http://localhost:19999/no-such-feed` | 1 | — | — |
+<div class="table-container">
+<table class="centered-table">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Label</th>
+      <th>Command</th>
+      <th>expected_exit</th>
+      <th>fixture</th>
+      <th>notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>52</td>
+      <td>No --url exits 1</td>
+      <td><code>capcat add-source</code></td>
+      <td>1</td>
+      <td>—</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td>53</td>
+      <td>--help</td>
+      <td><code>capcat add-source --help</code></td>
+      <td>0</td>
+      <td>—</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td>54</td>
+      <td>Valid feed (fixture)</td>
+      <td><code>capcat add-source --url file://<fixture_path></code></td>
+      <td>0</td>
+      <td><code>mock_feed.xml</code></td>
+      <td>see below</td>
+    </tr>
+    <tr>
+      <td>55</td>
+      <td>Invalid URL</td>
+      <td><code>capcat add-source --url http://localhost:19999/no-such-feed</code></td>
+      <td>1</td>
+      <td>—</td>
+      <td>—</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 **Test 54 fixture setup:**
 The runner copies `fixtures/mock_feed.xml` into the test's tmp dir before
@@ -380,16 +834,68 @@ at spec-write time. Therefore `expected_exit` for tests 57–63 is set to `None`
 (do not check in auto-analysis). The user observes the result and judges.
 Test 56 (`--help`) has `expected_exit: 0` because help flags always exit 0.
 
-| # | Label | Command | expected_exit |
-|---|-------|---------|---------------|
-| 56 | --help | `capcat remove-source --help` | 0 |
-| 57 | Interactive (manual) | `capcat remove-source` | None |
-| 58 | --dry-run | `capcat remove-source --dry-run` | None |
-| 59 | --force | `capcat remove-source --force` | None |
-| 60 | --no-backup | `capcat remove-source --no-backup` | None |
-| 61 | --no-analytics | `capcat remove-source --no-analytics` | None |
-| 62 | --batch (fixture) | `capcat remove-source --batch <tmp>/batch_ids.txt` | None |
-| 63 | --undo latest | `capcat remove-source --undo` | None |
+<div class="table-container">
+<table class="centered-table">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Label</th>
+      <th>Command</th>
+      <th>expected_exit</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>56</td>
+      <td>--help</td>
+      <td><code>capcat remove-source --help</code></td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>57</td>
+      <td>Interactive (manual)</td>
+      <td><code>capcat remove-source</code></td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <td>58</td>
+      <td>--dry-run</td>
+      <td><code>capcat remove-source --dry-run</code></td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <td>59</td>
+      <td>--force</td>
+      <td><code>capcat remove-source --force</code></td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <td>60</td>
+      <td>--no-backup</td>
+      <td><code>capcat remove-source --no-backup</code></td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <td>61</td>
+      <td>--no-analytics</td>
+      <td><code>capcat remove-source --no-analytics</code></td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <td>62</td>
+      <td>--batch (fixture)</td>
+      <td><code>capcat remove-source --batch <tmp>/batch_ids.txt</code></td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <td>63</td>
+      <td>--undo latest</td>
+      <td><code>capcat remove-source --undo</code></td>
+      <td>None</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 **Test 62 fixture setup:**
 The runner copies `fixtures/batch_ids.txt` into the test's tmp dir.
@@ -412,11 +918,38 @@ User interacts if needed, then gives verdict.
 All generate-config tests use `needs_init: True`, `passthrough: True`,
 `creates_files: False`, `expected_in_output: []`.
 
-| # | Label | Command | expected_exit |
-|---|-------|---------|---------------|
-| 64 | --help | `capcat generate-config --help` | 0 |
-| 65 | Interactive | `capcat generate-config` | None |
-| 66 | --output file | `capcat generate-config --output <tmp>/myconfig.yaml` | None |
+<div class="table-container">
+<table class="centered-table">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Label</th>
+      <th>Command</th>
+      <th>expected_exit</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>64</td>
+      <td>--help</td>
+      <td><code>capcat generate-config --help</code></td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>65</td>
+      <td>Interactive</td>
+      <td><code>capcat generate-config</code></td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <td>66</td>
+      <td>--output file</td>
+      <td><code>capcat generate-config --output <tmp>/myconfig.yaml</code></td>
+      <td>None</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 Tests 64–66 are interactive (questionary-driven). Subprocess passes through to
 terminal. Auto-analysis limited to exit code check. User interacts and judges verdict.
@@ -446,16 +979,68 @@ The `__FIXTURE_URL__` sentinel is not used for TUI test 74 (since the URL is
 displayed to the user rather than injected into the subprocess argv). The
 `fixture` field is `"mock_feed.xml"` — the runner copies it and prints the URL.
 
-| # | Label | Steps | fixture |
-|---|-------|-------|---------|
-| 67 | Main Menu → Exit | Select "Exit" | — |
-| 68 | bundle → techpro → No HTML → Back → Exit | Follow steps | — |
-| 69 | bundle → tech → Yes HTML → Exit | Follow steps | — |
-| 70 | fetch multi-select hn+bbc → No HTML → Back → Exit | Space-select two sources | — |
-| 71 | single source → hn → No HTML → Back → Exit | Follow steps | — |
-| 72 | single URL → type URL → No HTML → Back → Exit | Type `https://example.com` | — |
-| 73 | Manage Sources → List → browse → back → Exit | Follow steps | — |
-| 74 | Manage Sources → Add RSS → type URL → back → Exit | Type fixture URL shown before launch | `mock_feed.xml` |
+<div class="table-container">
+<table class="centered-table">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Label</th>
+      <th>Steps</th>
+      <th>fixture</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>67</td>
+      <td>Main Menu → Exit</td>
+      <td>Select "Exit"</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td>68</td>
+      <td>bundle → techpro → No HTML → Back → Exit</td>
+      <td>Follow steps</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td>69</td>
+      <td>bundle → tech → Yes HTML → Exit</td>
+      <td>Follow steps</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td>70</td>
+      <td>fetch multi-select hn+bbc → No HTML → Back → Exit</td>
+      <td>Space-select two sources</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td>71</td>
+      <td>single source → hn → No HTML → Back → Exit</td>
+      <td>Follow steps</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td>72</td>
+      <td>single URL → type URL → No HTML → Back → Exit</td>
+      <td>Type <code>https://example.com</code></td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td>73</td>
+      <td>Manage Sources → List → browse → back → Exit</td>
+      <td>Follow steps</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td>74</td>
+      <td>Manage Sources → Add RSS → type URL → back → Exit</td>
+      <td>Type fixture URL shown before launch</td>
+      <td><code>mock_feed.xml</code></td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 ---
 
@@ -464,14 +1049,49 @@ displayed to the user rather than injected into the subprocess argv). The
 Performed automatically and printed in RESULT block. All checks are
 informational — the user decides the verdict.
 
-| Check | Trigger | Pass condition |
-|-------|---------|----------------|
-| Exit code match | when `expected_exit` is not None | `actual_exit == expected_exit` (case: None → skip check, print "exit check skipped") |
-| Expected strings | if `expected_in_output` non-empty | all strings found in combined stdout+stderr, **case-sensitive** exact substring match |
-| Error string scan | when `expected_exit == 0` | none of `Traceback`, `Error:`, `CRITICAL` appear in output |
-| Output file count | if `creates_files: True` | count of top-level entries in tmp dir that are not named `.capcat` or `Config`. If neither of those dirs exists, count all top-level entries. |
-| Log file exists | if `-L <path>` in cmd | file at that path exists and `os.path.getsize() > 0` |
-| Timeout flag | always | process completed within `timeout` seconds |
+<div class="table-container">
+<table class="centered-table">
+  <thead>
+    <tr>
+      <th>Check</th>
+      <th>Trigger</th>
+      <th>Pass condition</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Exit code match</td>
+      <td>when <code>expected_exit</code> is not None</td>
+      <td><code>actual_exit == expected_exit</code> (case: None → skip check, print "exit check skipped")</td>
+    </tr>
+    <tr>
+      <td>Expected strings</td>
+      <td>if <code>expected_in_output</code> non-empty</td>
+      <td>all strings found in combined stdout+stderr, **case-sensitive** exact substring match</td>
+    </tr>
+    <tr>
+      <td>Error string scan</td>
+      <td>when <code>expected_exit == 0</code></td>
+      <td>none of <code>Traceback</code>, <code>Error:</code>, <code>CRITICAL</code> appear in output</td>
+    </tr>
+    <tr>
+      <td>Output file count</td>
+      <td>if <code>creates_files: True</code></td>
+      <td>count of top-level entries in tmp dir that are not named <code>.capcat</code> or <code>Config</code>. If neither of those dirs exists, count all top-level entries.</td>
+    </tr>
+    <tr>
+      <td>Log file exists</td>
+      <td>if <code>-L <path></code> in cmd</td>
+      <td>file at that path exists and <code>os.path.getsize() > 0</code></td>
+    </tr>
+    <tr>
+      <td>Timeout flag</td>
+      <td>always</td>
+      <td>process completed within <code>timeout</code> seconds</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 For TUI tests (`is_tui: True`) only the exit code check and timeout check apply —
 no string or file checks (no captured output).
@@ -513,18 +1133,80 @@ The session file is written in two phases:
 
 **Passed**: 61  **Failed**: 3  **Skipped**: 10  **Total run**: 64
 
-| Group           | Pass | Fail | Skip |
-|-----------------|------|------|------|
-| global          | 7    | 0    | 0    |
-| init            | 3    | 0    | 0    |
-| single          | 8    | 1    | 0    |
-| fetch           | 10   | 2    | 1    |
-| bundle          | 14   | 0    | 0    |
-| list            | 5    | 0    | 0    |
-| add-source      | 3    | 0    | 1    |
-| remove-source   | 5    | 0    | 3    |
-| generate-config | 3    | 0    | 0    |
-| tui             | 3    | 0    | 5    |
+<div class="table-container">
+<table class="centered-table">
+  <thead>
+    <tr>
+      <th>Group</th>
+      <th>Pass</th>
+      <th>Fail</th>
+      <th>Skip</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>global</td>
+      <td>7</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>init</td>
+      <td>3</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>single</td>
+      <td>8</td>
+      <td>1</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>fetch</td>
+      <td>10</td>
+      <td>2</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td>bundle</td>
+      <td>14</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>list</td>
+      <td>5</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>add-source</td>
+      <td>3</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td>remove-source</td>
+      <td>5</td>
+      <td>0</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <td>generate-config</td>
+      <td>3</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>tui</td>
+      <td>3</td>
+      <td>0</td>
+      <td>5</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 ### Failed Tests
 - TEST 18: single -V — [user note]

@@ -12,11 +12,30 @@
 
 ## File Map
 
-| Action | File |
-|---|---|
-| Modify | `capcat/core/interactive.py` |
-| Test (existing, must pass) | `tests/unit/test_tui_completion.py` |
-| Test (existing, must pass) | `tests/unit/test_tui_*.py` |
+<div class="table-container">
+<table class="centered-table">
+  <thead>
+    <tr>
+      <th>Action</th>
+      <th>File</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Modify</td>
+      <td><code>capcat/core/interactive.py</code></td>
+    </tr>
+    <tr>
+      <td>Test (existing, must pass)</td>
+      <td><code>tests/unit/test_tui_completion.py</code></td>
+    </tr>
+    <tr>
+      <td>Test (existing, must pass)</td>
+      <td><code>tests/unit/test_tui_*.py</code></td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 No new files created.
 

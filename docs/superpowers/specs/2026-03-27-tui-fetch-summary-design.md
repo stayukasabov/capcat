@@ -11,12 +11,34 @@ Capcat emits a WARNING log per failed article during fetch (JS-rendered pages, 4
 
 ## Scope
 
-| Action | File |
-|---|---|
-| Modify | `capcat/core/article_fetcher.py` |
-| Modify | `capcat/core/unified_source_processor.py` |
-| Modify | `capcat/core/interactive.py` |
-| Test (must pass) | `tests/unit/` |
+<div class="table-container">
+<table class="centered-table">
+  <thead>
+    <tr>
+      <th>Action</th>
+      <th>File</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Modify</td>
+      <td><code>capcat/core/article_fetcher.py</code></td>
+    </tr>
+    <tr>
+      <td>Modify</td>
+      <td><code>capcat/core/unified_source_processor.py</code></td>
+    </tr>
+    <tr>
+      <td>Modify</td>
+      <td><code>capcat/core/interactive.py</code></td>
+    </tr>
+    <tr>
+      <td>Test (must pass)</td>
+      <td><code>tests/unit/</code></td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 ## Design
 

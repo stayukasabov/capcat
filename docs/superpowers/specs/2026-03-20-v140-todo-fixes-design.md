@@ -19,11 +19,33 @@ Change `AddSourceCommand.execute()` to return the `Path` of the config file it w
 
 ### Contract change
 
-| | Before | After |
-|---|---|---|
-| `AddSourceCommand.execute(url: str)` | `-> None` | `-> Path` (path of written config file) |
-| `AddSourceService.add_source(url: str)` | calls `_write_manifest_entry_after_add()` | captures `execute()` return value, calls `_write_manifest_entry(path.name)` |
-| `AddSourceService._write_manifest_entry_after_add()` | exists | deleted |
+<div class="table-container">
+<table class="centered-table">
+  <thead>
+    <tr>
+      <th>Before</th>
+      <th>After</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>AddSourceCommand.execute(url: str)</code></td>
+      <td><code>-> None</code></td>
+      <td><code>-> Path</code> (path of written config file)</td>
+    </tr>
+    <tr>
+      <td><code>AddSourceService.add_source(url: str)</code></td>
+      <td>calls <code>_write_manifest_entry_after_add()</code></td>
+      <td>captures <code>execute()</code> return value, calls <code>_write_manifest_entry(path.name)</code></td>
+    </tr>
+    <tr>
+      <td><code>AddSourceService._write_manifest_entry_after_add()</code></td>
+      <td>exists</td>
+      <td>deleted</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 ### Tests
 - Update existing tests in `tests/unit/test_add_remove_source_mirror.py` to assert `execute()` return value is used
@@ -117,12 +139,34 @@ A user reading `quick-reference.md` can understand where their source configs li
 ### Fix
 Add a **Source Management → Commands** subsection to `quick-reference.md` with a command table:
 
-| Command | Description |
-|---------|-------------|
-| `capcat add-source <url>` | Add a new RSS source (written to `Config/sources/active/config_driven/configs/`) |
-| `capcat remove-source <id>` | Remove a source from `Config/sources/active/` |
-| `capcat list sources` | Show all registered sources |
-| `capcat list bundles` | Show all available bundles |
+<div class="table-container">
+<table class="centered-table">
+  <thead>
+    <tr>
+      <th>Command</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>capcat add-source <url></code></td>
+      <td>Add a new RSS source (written to <code>Config/sources/active/config_driven/configs/</code>)</td>
+    </tr>
+    <tr>
+      <td><code>capcat remove-source <id></code></td>
+      <td>Remove a source from <code>Config/sources/active/</code></td>
+    </tr>
+    <tr>
+      <td><code>capcat list sources</code></td>
+      <td>Show all registered sources</td>
+    </tr>
+    <tr>
+      <td><code>capcat list bundles</code></td>
+      <td>Show all available bundles</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 ### Acceptance criterion
 A user reading `quick-reference.md` can find and use `add-source` and `remove-source` without consulting source code.
