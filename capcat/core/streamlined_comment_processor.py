@@ -6,7 +6,7 @@ Designed to flatten complex comment hierarchies and provide inline comment displ
 
 import re
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Callable
 from bs4 import BeautifulSoup
 import logging
 
@@ -17,8 +17,7 @@ logger = logging.getLogger(__name__)
 
 class StreamlinedCommentProcessor:
     """
-    High-performance comment processor that flattens nested structures
-    and optimizes conversion time by eliminating complex tree traversal.
+    Comment processor that extracts comments with optional nesting depth preservation.
     """
 
     def __init__(self, max_comments: int = 100, max_links_per_comment: int = 5):
@@ -36,7 +35,7 @@ class StreamlinedCommentProcessor:
         comment_selector: str,
         user_selector: str = ".hnuser",
         comment_text_selector: str = ".comment",
-        depth_fn=None,
+        depth_fn: Optional[Callable[[Any], int]] = None,
     ) -> List[Dict[str, Any]]:
         """
         Process comments preserving nesting depth.
@@ -82,7 +81,7 @@ class StreamlinedCommentProcessor:
         user_selector: str,
         comment_text_selector: str,
         index: int,
-        depth_fn=None,
+        depth_fn: Optional[Callable[[Any], int]] = None,
     ) -> Optional[Dict[str, Any]]:
         """
         Fast comment data extraction without deep processing.
