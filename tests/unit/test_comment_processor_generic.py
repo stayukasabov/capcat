@@ -218,3 +218,48 @@ def test_markdown_level_two_has_double_blockquote():
     comments = [{"id": "c3", "user": "Anonymous", "user_link": "#", "text": "Nested reply", "level": 2}]
     result = processor.generate_inline_comments_markdown(comments, "Title", "https://example.com")
     assert "> > Nested reply" in result
+
+
+_HN_HTML_THREADED = """
+<table class="comment-tree">
+  <tr class="athing comtr" id="c1">
+    <td><table><tr>
+      <td class="ind"><img src="s.gif" height="1" width="0"></td>
+      <td class="default">
+        <span class="comhead"><span class="hnuser">alice</span></span>
+        <div class="comment"><span class="c00">Top level</span></div>
+      </td>
+    </tr></table></td>
+  </tr>
+  <tr class="athing comtr" id="c2">
+    <td><table><tr>
+      <td class="ind"><img src="s.gif" height="1" width="40"></td>
+      <td class="default">
+        <span class="comhead"><span class="hnuser">bob</span></span>
+        <div class="comment"><span class="c00">First reply</span></div>
+      </td>
+    </tr></table></td>
+  </tr>
+  <tr class="athing comtr" id="c3">
+    <td><table><tr>
+      <td class="ind"><img src="s.gif" height="1" width="80"></td>
+      <td class="default">
+        <span class="comhead"><span class="hnuser">carol</span></span>
+        <div class="comment"><span class="c00">Nested reply</span></div>
+      </td>
+    </tr></table></td>
+  </tr>
+</table>
+"""
+
+
+def test_hn_selectors_depth_fn_extracts_levels():
+    """_HN_SELECTORS depth_fn reads td.ind img width to determine comment depth."""
+    from capcat.sources.builtin.custom.hn.source import _HN_SELECTORS
+    soup = BeautifulSoup(_HN_HTML_THREADED, "html.parser")
+    processor = StreamlinedCommentProcessor()
+    comments = processor.process_comments_flattened(soup, **_HN_SELECTORS)
+    assert len(comments) == 3
+    assert comments[0]["level"] == 0, "Top-level comment should be level 0"
+    assert comments[1]["level"] == 1, "First reply should be level 1"
+    assert comments[2]["level"] == 2, "Nested reply should be level 2"
