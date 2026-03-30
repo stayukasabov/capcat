@@ -156,3 +156,17 @@ def test_depth_fn_sets_correct_level():
     assert comments[0]["level"] == 0
     assert comments[1]["level"] == 1
     assert comments[2]["level"] == 2
+
+
+def test_depth_fn_raising_falls_back_to_zero():
+    """If depth_fn raises ValueError or TypeError, level defaults to 0."""
+    def bad_depth_fn(elem):
+        raise ValueError("broken")
+
+    soup = BeautifulSoup(_HN_HTML, "html.parser")
+    processor = StreamlinedCommentProcessor()
+    selectors = dict(_HN_SELECTORS)
+    selectors["depth_fn"] = bad_depth_fn
+    comments = processor.process_comments_flattened(soup, **selectors)
+    assert len(comments) >= 1
+    assert all(c["level"] == 0 for c in comments)
