@@ -269,29 +269,36 @@ def test_hn_selectors_depth_fn_extracts_levels():
 
 
 _LB_HTML_THREADED = """
-<ul class="comments">
-  <li class="comment" id="c1">
-    <a class="user" href="/u/alice">alice</a>
-    <div class="comment_text"><p>Top level</p></div>
-    <ul class="comments">
-      <li class="comment" id="c2">
-        <a class="user" href="/u/bob">bob</a>
-        <div class="comment_text"><p>First reply</p></div>
-        <ul class="comments">
-          <li class="comment" id="c3">
-            <a class="user" href="/u/carol">carol</a>
-            <div class="comment_text"><p>Nested reply</p></div>
+<ol class="comments comments1">
+  <li class="comments_subtree">
+    <ol class="comments">
+      <li class="comments_subtree">
+        <div class="comment" id="c_c1">
+          <div class="comment_text"><p>Top level</p></div>
+        </div>
+        <ol class="comments">
+          <li class="comments_subtree">
+            <div class="comment" id="c_c2">
+              <div class="comment_text"><p>First reply</p></div>
+            </div>
+            <ol class="comments">
+              <li class="comments_subtree">
+                <div class="comment" id="c_c3">
+                  <div class="comment_text"><p>Nested reply</p></div>
+                </div>
+              </li>
+            </ol>
           </li>
-        </ul>
+        </ol>
       </li>
-    </ul>
+    </ol>
   </li>
-</ul>
+</ol>
 """
 
 
 def test_lb_selectors_depth_fn_extracts_levels():
-    """_LB_SELECTORS depth_fn counts ancestor .comment elements for depth."""
+    """_LB_SELECTORS depth_fn counts ancestor comments_subtree elements for depth."""
     from capcat.sources.builtin.custom.lb.source import _LB_SELECTORS
     soup = BeautifulSoup(_LB_HTML_THREADED, "html.parser")
     processor = StreamlinedCommentProcessor()
