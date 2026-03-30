@@ -1077,9 +1077,26 @@ function initCodeCopy() {
 
 ## Revision History
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 1.0 | 2026-01-27 | TDD Orchestrator | Initial comprehensive remediation plan |
+<div class="table-container">
+<table class="centered-table">
+  <thead>
+    <tr>
+      <th>Version</th>
+      <th>Date</th>
+      <th>Author</th>
+      <th>Changes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1.0</td>
+      <td>2026-01-27</td>
+      <td>TDD Orchestrator</td>
+      <td>Initial comprehensive remediation plan</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 ---
 

@@ -11,7 +11,7 @@ Enhanced with comment functionality from V1 implementation.
 
 ### _HN_SELECTORS
 
-**Value:** `{'comment_selector': '.comment-tree .athing', 'user_selector': '.hnuser', 'comment_text_selector': '.comment'}`
+**Value:** `{'comment_selector': '.comment-tree .athing', 'user_selector': '.hnuser', 'comment_text_selector': '.comment', 'depth_fn': _hn_depth}`
 
 ## Classes
 
@@ -131,4 +131,20 @@ Returns:
 
 ⚠️ **High complexity:** 15
 
+
+## Functions
+
+### _hn_depth
+
+```python
+def _hn_depth(elem) -> int
+```
+
+Extract comment depth from HN's td.ind img width attribute (40px per level).
+
+**Parameters:**
+
+- `elem`
+
+**Returns:** int
 

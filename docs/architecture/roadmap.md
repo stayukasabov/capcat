@@ -36,15 +36,46 @@ Planned refactors that are documented but not yet scheduled. Each entry captures
 
 ### Files
 
-| File | Action |
-|------|--------|
-| `capcat/htmlgen/base/base_generator.py` | Connect to `TemplateRenderer` + `DesignSystemCompiler`; complete directory index |
-| `capcat/htmlgen/hn/generator.py` | Review and complete |
-| `capcat/htmlgen/lb/generator.py` | Review and complete |
-| `capcat/htmlgen/lesswrong/generator.py` | Review — LessWrong has no fetch path; keep renderer only |
-| `capcat/core/html_post_processor.py` | Switch from `HTMLGenerator` to `HTMLGeneratorFactory` |
-| `capcat/core/article_fetcher.py` | Switch from `HTMLGenerator` to `HTMLGeneratorFactory` |
-| `capcat/core/html_generator.py` | Delete after switchover |
+<div class="table-container">
+<table class="centered-table">
+  <thead>
+    <tr>
+      <th>File</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>capcat/htmlgen/base/base_generator.py</code></td>
+      <td>Connect to <code>TemplateRenderer</code> + <code>DesignSystemCompiler</code>; complete directory index</td>
+    </tr>
+    <tr>
+      <td><code>capcat/htmlgen/hn/generator.py</code></td>
+      <td>Review and complete</td>
+    </tr>
+    <tr>
+      <td><code>capcat/htmlgen/lb/generator.py</code></td>
+      <td>Review and complete</td>
+    </tr>
+    <tr>
+      <td><code>capcat/htmlgen/lesswrong/generator.py</code></td>
+      <td>Review — LessWrong has no fetch path; keep renderer only</td>
+    </tr>
+    <tr>
+      <td><code>capcat/core/html_post_processor.py</code></td>
+      <td>Switch from <code>HTMLGenerator</code> to <code>HTMLGeneratorFactory</code></td>
+    </tr>
+    <tr>
+      <td><code>capcat/core/article_fetcher.py</code></td>
+      <td>Switch from <code>HTMLGenerator</code> to <code>HTMLGeneratorFactory</code></td>
+    </tr>
+    <tr>
+      <td><code>capcat/core/html_generator.py</code></td>
+      <td>Delete after switchover</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 ### Before Starting
 
