@@ -614,6 +614,14 @@ li {
   line-height: var(--line-height-body);
 }
 
+/* Blockquote — comment thread nesting via Markdown > syntax */
+blockquote {
+  margin: 0.25rem 0 0.25rem 12px;
+  padding-left: 10px;
+  border-left: 2px solid var(--border-color);
+  color: inherit;
+}
+
 /* Comment Tree Structure */
 .comment-thread {
   border-left: 2px solid var(--border-color);
