@@ -26,8 +26,13 @@ from capcat.core.source_system.base_source import (
 )
 
 def _lb_depth(elem) -> int:
-    """Extract comment depth by counting ancestor elements with class 'comment'."""
-    return len(elem.find_parents(class_="comment"))
+    """Extract comment depth from Lobsters comment tree structure.
+
+    Lobsters wraps each comment in <li class="comments_subtree">. Top-level
+    comments have two such ancestors (one for themselves, one for the thread
+    root), so depth = ancestor count - 2, minimum 0.
+    """
+    return max(0, len(elem.find_parents(class_="comments_subtree")) - 2)
 
 
 _LB_SELECTORS = {
