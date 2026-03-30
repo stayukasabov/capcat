@@ -170,3 +170,25 @@ def test_depth_fn_raising_falls_back_to_zero():
     comments = processor.process_comments_flattened(soup, **selectors)
     assert len(comments) >= 1
     assert all(c["level"] == 0 for c in comments)
+
+
+def test_html_indentation_by_level():
+    """Level-0 has no margin-left; level-1 has 24px; level-2 has 48px."""
+    processor = StreamlinedCommentProcessor()
+
+    result0 = processor.generate_inline_comments_html(
+        [{"id": "c1", "user": "Anonymous", "user_link": "#", "text": "Top", "level": 0}],
+        "Title", "https://example.com"
+    )
+    result1 = processor.generate_inline_comments_html(
+        [{"id": "c2", "user": "Anonymous", "user_link": "#", "text": "Reply", "level": 1}],
+        "Title", "https://example.com"
+    )
+    result2 = processor.generate_inline_comments_html(
+        [{"id": "c3", "user": "Anonymous", "user_link": "#", "text": "Nested", "level": 2}],
+        "Title", "https://example.com"
+    )
+
+    assert 'margin-left' not in result0
+    assert 'margin-left: 24px' in result1
+    assert 'margin-left: 48px' in result2
