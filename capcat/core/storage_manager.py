@@ -90,6 +90,37 @@ def inject_comments_wikilink(article_folder_path: str, comments_stem: str) -> bo
         return False
 
 
+def inject_frontmatter(md_path: str, metadata: dict) -> bool:
+    """Prepend YAML frontmatter to a markdown file.
+
+    Idempotent: if the file already starts with '---', returns True without
+    modifying. Omits any key whose value is None. Returns False on any error
+    without raising.
+    """
+    import yaml
+
+    try:
+        path = Path(md_path)
+        if not path.is_file():
+            _logger.warning(f"inject_frontmatter: file not found: {md_path}")
+            return False
+
+        content = path.read_text(encoding="utf-8")
+        if content.startswith("---"):
+            _logger.debug(f"Frontmatter already present: {md_path}")
+            return True
+
+        clean = {k: v for k, v in metadata.items() if v is not None}
+        fm = yaml.dump(clean, default_flow_style=False, allow_unicode=True,
+                       sort_keys=False)
+        path.write_text(f"---\n{fm}---\n\n{content}", encoding="utf-8")
+        return True
+
+    except Exception as e:
+        _logger.warning(f"inject_frontmatter failed for {md_path}: {e}")
+        return False
+
+
 class StorageManager:
     """
     Manages all file system operations for article storage.

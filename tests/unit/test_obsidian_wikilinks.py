@@ -134,3 +134,92 @@ def test_injection_called_when_fetch_comments_returns_true(tmp_path):
 
     content = article_path.read_text(encoding="utf-8")
     assert "→ [[My-Article-Comments|Comments]]" in content
+
+
+# ---------------------------------------------------------------------------
+# inject_frontmatter tests
+# ---------------------------------------------------------------------------
+
+from capcat.core.storage_manager import inject_frontmatter
+import yaml as _yaml
+
+
+def test_frontmatter_prepended_to_plain_article(tmp_path):
+    """inject_frontmatter prepends --- block before existing content."""
+    md = tmp_path / "My-Article.md"
+    md.write_text("# My Article\n\nBody.\n", encoding="utf-8")
+    inject_frontmatter(str(md), {"title": "My Article", "url": "https://example.com"})
+    content = md.read_text(encoding="utf-8")
+    assert content.startswith("---\n")
+    assert "title:" in content
+    assert "# My Article" in content
+
+
+def test_frontmatter_is_valid_yaml(tmp_path):
+    """The block between the --- delimiters parses as valid YAML."""
+    md = tmp_path / "My-Article.md"
+    md.write_text("# My Article\n\nBody.\n", encoding="utf-8")
+    inject_frontmatter(
+        str(md),
+        {
+            "title": "My Article: A Test",
+            "url": "https://example.com/article",
+            "source": "Hacker News",
+            "source_code": "hn",
+            "category": "tech",
+            "captured": "2026-03-31",
+            "tags": ["hn", "tech"],
+        },
+    )
+    content = md.read_text(encoding="utf-8")
+    lines = content.splitlines()
+    end = lines.index("---", 1)
+    parsed = _yaml.safe_load("\n".join(lines[1:end]))
+    assert parsed["title"] == "My Article: A Test"
+    assert parsed["source_code"] == "hn"
+    assert "hn" in parsed["tags"]
+
+
+def test_frontmatter_omits_none_date(tmp_path):
+    """When date is None it must not appear in the frontmatter."""
+    md = tmp_path / "My-Article.md"
+    md.write_text("# My Article\n\nBody.\n", encoding="utf-8")
+    inject_frontmatter(str(md), {"title": "My Article", "url": "https://x.com", "date": None})
+    content = md.read_text(encoding="utf-8")
+    assert "date:" not in content
+
+
+def test_frontmatter_idempotent(tmp_path):
+    """Calling inject_frontmatter twice does not double the --- block."""
+    md = tmp_path / "My-Article.md"
+    md.write_text("# My Article\n\nBody.\n", encoding="utf-8")
+    meta = {"title": "My Article", "url": "https://x.com"}
+    inject_frontmatter(str(md), meta)
+    inject_frontmatter(str(md), meta)
+    content = md.read_text(encoding="utf-8")
+    # Exactly two lines that are solely '---'
+    fence_lines = [l for l in content.splitlines() if l == "---"]
+    assert len(fence_lines) == 2
+
+
+def test_frontmatter_above_wikilink(tmp_path):
+    """Frontmatter is the first block even when wikilink was injected first."""
+    from capcat.core.storage_manager import inject_comments_wikilink
+    _make_article(tmp_path, "My-Article", "# My Article\n\nBody.\n")
+    inject_comments_wikilink(str(tmp_path), "My-Article-Comments")
+    article_md = tmp_path / "My-Article.md"
+    inject_frontmatter(str(article_md), {"title": "My Article", "url": "https://x.com"})
+    lines = article_md.read_text(encoding="utf-8").splitlines()
+    # Line 0 must be the opening fence
+    assert lines[0] == "---"
+    # Wikilink must appear somewhere after the closing fence
+    content = article_md.read_text(encoding="utf-8")
+    closing = content.index("---\n\n")
+    wikilink_pos = content.index("→ [[My-Article-Comments|Comments]]")
+    assert wikilink_pos > closing
+
+
+def test_frontmatter_returns_false_if_file_missing(tmp_path):
+    """Returns False gracefully when the target file does not exist."""
+    result = inject_frontmatter(str(tmp_path / "nonexistent.md"), {"title": "x"})
+    assert result is False
