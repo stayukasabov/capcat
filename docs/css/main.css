@@ -1140,8 +1140,8 @@ transition: background 1s ease, box-shadow 0.3s ease;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: var(--space-xxl);
-    padding: var(--space-xxl);
+    gap: clamp(var(--space-xs), 3vh, var(--space-xxl));
+    padding: clamp(var(--space-md), 4vh, var(--space-xxl));
     z-index: var(--z-modal);
 
     /* Fade animation */
@@ -1180,7 +1180,7 @@ transition: background 1s ease, box-shadow 0.3s ease;
     font-size: 1.5rem;
     font-weight: var(--font-weight-medium);
     display: block;
-    padding: var(--space-lg) var(--space-md);
+    padding: clamp(var(--space-xs), 2vh, var(--space-lg)) var(--space-md);
     width: 100%;
   }
 
