@@ -186,3 +186,22 @@ def test_parse_srcset_cdn_url_with_commas_in_path():
         f"URL was corrupted by comma-splitting: {result}"
     )
     assert "w_1456" in result, "Should select highest-width entry"
+
+
+def test_media_processor_parse_srcset_cdn_url_with_commas_in_path():
+    """MediaProcessor.parse_srcset must handle CDN URLs with commas in transformation params."""
+    from capcat.core.media_processor import MediaProcessor
+    processor = MediaProcessor.__new__(MediaProcessor)
+    substack_srcset = (
+        "https://substackcdn.com/image/fetch/$s_X,w_424,c_limit,f_auto,"
+        "fl_progressive:steep/https%3A%2F%2Fexample.com%2Fimg.png 424w, "
+        "https://substackcdn.com/image/fetch/$s_X,w_848,c_limit,f_auto,"
+        "fl_progressive:steep/https%3A%2F%2Fexample.com%2Fimg.png 848w, "
+        "https://substackcdn.com/image/fetch/$s_X,w_1456,c_limit,f_auto,"
+        "fl_progressive:steep/https%3A%2F%2Fexample.com%2Fimg.png 1456w"
+    )
+    result = processor.parse_srcset(substack_srcset)
+    assert result.startswith("https://substackcdn.com/"), (
+        f"URL was corrupted by comma-splitting: {result}"
+    )
+    assert "w_1456" in result, "Should select highest-width entry"
