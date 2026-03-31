@@ -362,6 +362,7 @@ transition: background 1s ease, box-shadow 0.3s ease;
 .hero-content {
   max-width: var(--measure-wide);
   margin: 0 auto;
+  padding-top: var(--space-xl);
 }
 
 .hero h1 {
