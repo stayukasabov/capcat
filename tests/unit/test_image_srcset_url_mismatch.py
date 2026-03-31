@@ -162,3 +162,27 @@ def test_media_processor_parse_srcset_returns_highest_res_real_url():
     processor = MediaProcessor.__new__(MediaProcessor)
     srcset = "https://example.com/small.jpg 200w, https://example.com/large.jpg 1200w"
     assert processor.parse_srcset(srcset) == "https://example.com/large.jpg"
+
+
+def test_parse_srcset_cdn_url_with_commas_in_path():
+    """_parse_srcset must handle CDN URLs that contain commas in transformation params.
+
+    Substack (and Cloudinary) CDN URLs embed comma-separated parameters in the
+    path, e.g. /image/fetch/w_1456,c_limit,f_auto,...  Splitting naively on ','
+    corrupts the URL so urljoin produces a wrong relative path.
+    """
+    from capcat.core.formatter import _parse_srcset
+
+    substack_srcset = (
+        "https://substackcdn.com/image/fetch/$s_X,w_424,c_limit,f_auto,"
+        "fl_progressive:steep/https%3A%2F%2Fexample.com%2Fimg_2174x1124.png 424w, "
+        "https://substackcdn.com/image/fetch/$s_X,w_848,c_limit,f_auto,"
+        "fl_progressive:steep/https%3A%2F%2Fexample.com%2Fimg_2174x1124.png 848w, "
+        "https://substackcdn.com/image/fetch/$s_X,w_1456,c_limit,f_auto,"
+        "fl_progressive:steep/https%3A%2F%2Fexample.com%2Fimg_2174x1124.png 1456w"
+    )
+    result = _parse_srcset(substack_srcset)
+    assert result.startswith("https://substackcdn.com/"), (
+        f"URL was corrupted by comma-splitting: {result}"
+    )
+    assert "w_1456" in result, "Should select highest-width entry"
