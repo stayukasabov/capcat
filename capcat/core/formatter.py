@@ -220,41 +220,36 @@ def _parse_srcset(srcset: str) -> str:
 
     raw_parts = srcset.split(",")
 
-    # Merge fragments that are continuations of a data: URI.  A data: URI starts
-    # with "data:" and the part immediately after the first comma is the payload,
-    # which may itself contain encoded commas.  We detect continuation fragments
-    # as parts that do not start a new srcset entry (i.e. they do not match the
-    # pattern "<url> <descriptor>" and the preceding entry started with "data:").
-    entries = []
-    i = 0
-    while i < len(raw_parts):
-        part = raw_parts[i].strip()
-        if part.startswith("data:"):
-            # Consume continuation fragments until we hit one that looks like a
-            # new srcset entry (starts with http/https//) or we run out.
-            merged = part
-            j = i + 1
-            while j < len(raw_parts):
-                next_part = raw_parts[j].strip()
-                # A new srcset entry either starts with a scheme or absolute path,
-                # or its rsplit(" ",1) descriptor is a valid "Nw"/"Nx" token.
-                candidate_parts = next_part.rsplit(" ", 1)
-                if len(candidate_parts) == 2:
-                    desc = candidate_parts[1].strip()
-                    if (desc.endswith("w") or desc.endswith("x")) and (
-                        desc[:-1].isdigit() or _is_float(desc[:-1])
-                    ):
-                        # Looks like a genuine new srcset entry
-                        break
-                if next_part.startswith(("http://", "https://", "//")):
-                    break
-                merged += "," + raw_parts[j]
-                j += 1
-            entries.append(merged.strip())
-            i = j
+    # Merge comma-split fragments that are continuations of the same URL entry.
+    # Two cases require merging:
+    #
+    # 1. data: URIs — the MIME payload itself contains commas.
+    # 2. CDN proxy URLs (e.g. Substack, Cloudinary) — transformation parameters
+    #    are comma-separated within the path, e.g.:
+    #    "https://cdn.example.com/image/fetch/w_1456,c_limit,f_auto/..."
+    #
+    # Detection: a fragment is a continuation of the previous entry when:
+    #   - it does NOT start a new URL (http://, https://, //, data:), AND
+    #   - the previous accumulated entry does NOT yet end with a valid srcset
+    #     descriptor (Nw or Nx), meaning the entry is still mid-URL.
+    def _ends_with_descriptor(s: str) -> bool:
+        tokens = s.rsplit(" ", 1)
+        if len(tokens) != 2:
+            return False
+        desc = tokens[1].strip()
+        return (desc.endswith("w") and desc[:-1].isdigit()) or (
+            desc.endswith("x") and _is_float(desc[:-1])
+        )
+
+    entries: list = []
+    for part in raw_parts:
+        stripped = part.strip()
+        starts_new = stripped.startswith(("http://", "https://", "//", "data:"))
+        if not entries or starts_new or _ends_with_descriptor(entries[-1]):
+            entries.append(stripped)
         else:
-            entries.append(part)
-            i += 1
+            # Comma was inside the URL — re-attach preserving original spacing
+            entries[-1] += "," + part
 
     best_url = ""
     max_width = 0
