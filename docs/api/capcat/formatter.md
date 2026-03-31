@@ -95,7 +95,7 @@ before evaluating each entry.
 
 **Returns:** str
 
-⚠️ **High complexity:** 24
+⚠️ **High complexity:** 23
 
 ### _is_float
 
@@ -254,4 +254,16 @@ Enhanced cleanup for InfoQ and other sources.
 - `soup`
 
 ⚠️ **High complexity:** 90
+
+### _ends_with_descriptor
+
+```python
+def _ends_with_descriptor(s: str) -> bool
+```
+
+**Parameters:**
+
+- `s` (str)
+
+**Returns:** bool
 
