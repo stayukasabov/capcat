@@ -395,20 +395,16 @@ transition: background 1s ease, box-shadow 0.3s ease;
 }
 
 .hero-demo {
-  background-color: #ffffff;
   border-radius: var(--radius-lg);
-  padding: var(--space-lg);
   box-shadow: var(--shadow-lg);
   max-width: var(--measure-optimal);
   margin: 0 auto;
+  overflow: hidden;
 }
 
-.code-demo {
-  text-align: left;
-  background-color: var(--imprint);
-  color: var(--paper);
-  margin: 0;
-  font-size: 0.85rem;
+.hero-demo__player {
+  aspect-ratio: 16 / 9;
+  width: 100%;
 }
 
 /* ====================================
@@ -1224,13 +1220,6 @@ transition: background 1s ease, box-shadow 0.3s ease;
     gap: var(--space-sm);
   }
 
-  .hero-demo {
-    padding: var(--space-md);
-  }
-
-  .code-demo {
-    font-size: 0.75rem;
-  }
 
   /* Sections */
   .section {

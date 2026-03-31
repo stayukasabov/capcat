@@ -517,3 +517,11 @@ window.addEventListener("load", () => {
     });
   }
 });
+
+// YouTube player
+if (document.querySelector('[data-plyr-provider="youtube"]')) {
+    new Plyr('[data-plyr-provider="youtube"]', {
+        controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'],
+        youtube: { noCookie: true, rel: 0, showinfo: 0, modestbranding: 1 }
+    });
+}

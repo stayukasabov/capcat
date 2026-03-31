@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="css/design-system.css" />
     <link rel="stylesheet" href="css/main.css" />
     <link rel="icon" type="image/x-icon" href="icons/Capcat.ico" />
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
   </head>
   <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
@@ -100,17 +101,11 @@
               >Ethical Scraping</a
             >.
           </p>
-          <span id="demo-heading" class="visually-hidden">Example command-line usage</span>
           <div class="hero-demo">
-            <pre class="code-demo" role="region" aria-labelledby="demo-heading"><code class="language-bash">$ ./capcat bundle tech --count 30
-
-Fetching from 3 sources in bundle 'tech'
-◯ STARTING HACKER NEWS (30 ITEMS)
-◯ STARTING LOBSTERS (30 ITEMS)
-◯ STARTING IEEE SPECTRUM (30 ITEMS)
-
-✓ 90 articles saved successfully
-Saved to: ../News/news_2025-11-24/</code></pre>
+            <div class="hero-demo__player"
+                 data-plyr-provider="youtube"
+                 data-plyr-embed-id="dQw4w9WgXcQ">
+            </div>
           </div>
         </div>
       </div>
@@ -536,6 +531,7 @@ Saved to: ../News/news_2025-11-24/</code></pre>
     </button>
     <script src="js/jquery-3.6.0.min.js"></script>
     <script src="js/gsap.min.js"></script>
+    <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
     <script src="js/main.js"></script>
   </body>
 </html>
