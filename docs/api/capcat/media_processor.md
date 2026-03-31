@@ -353,7 +353,7 @@ Example:
 
 **Returns:** str
 
-⚠️ **High complexity:** 14
+⚠️ **High complexity:** 25
 
 ##### remove_image_from_markdown
 
@@ -445,6 +445,18 @@ Create replacement text with fallback for empty groups.
 **Parameters:**
 
 - `match`
+
+### _ends_with_descriptor
+
+```python
+def _ends_with_descriptor(s: str) -> bool
+```
+
+**Parameters:**
+
+- `s` (str)
+
+**Returns:** bool
 
 ### replace_if_image_link
 
