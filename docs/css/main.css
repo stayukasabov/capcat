@@ -407,6 +407,11 @@ transition: background 1s ease, box-shadow 0.3s ease;
   width: 100%;
 }
 
+/* Override Plyr accent colour with brand orange */
+:root {
+  --plyr-color-main: var(--accent-primary);
+}
+
 /* ====================================
    PROBLEM GRID
    ================================== */
