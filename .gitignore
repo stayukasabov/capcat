@@ -203,3 +203,6 @@ skills-lock.json
 
 # Git worktrees
 .worktrees/
+
+# Internal manuals (not for public docs)
+Manuals/
