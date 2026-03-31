@@ -709,45 +709,69 @@ class MediaProcessor:
         if srcset.strip().startswith("data:"):
             return ""
 
-        # Split by comma and parse each source
-        sources = []
-        for source in srcset.split(","):
-            source = source.strip()
-            if " " in source:
-                url, descriptor = source.rsplit(" ", 1)
+        def _ends_with_descriptor(s: str) -> bool:
+            tokens = s.rsplit(" ", 1)
+            if len(tokens) != 2:
+                return False
+            desc = tokens[1].strip()
+            if desc.endswith("w") and desc[:-1].isdigit():
+                return True
+            if desc.endswith("x"):
+                try:
+                    float(desc[:-1])
+                    return True
+                except ValueError:
+                    pass
+            return False
+
+        # Merge comma-split fragments that are continuations of the same URL.
+        # A fragment is a continuation when it does not start a new URL scheme
+        # AND the previous accumulated entry has not yet ended with a descriptor.
+        raw_parts = srcset.split(",")
+        entries: list = []
+        for part in raw_parts:
+            stripped = part.strip()
+            starts_new = stripped.startswith(("http://", "https://", "//", "data:"))
+            if not entries or starts_new or _ends_with_descriptor(entries[-1]):
+                entries.append(stripped)
+            else:
+                entries[-1] += "," + part
+
+        best_url = ""
+        max_width = 0
+
+        for entry in entries:
+            parts = entry.rsplit(" ", 1)
+            if len(parts) == 2:
+                url, descriptor = parts
                 url = url.strip()
                 if url.startswith("data:"):
                     continue
                 descriptor = descriptor.strip()
 
-                # Extract width from descriptor (e.g., "1536w" -> 1536)
                 if descriptor.endswith("w"):
                     try:
                         width = int(descriptor[:-1])
-                        sources.append((width, url))
+                        if width > max_width:
+                            max_width = width
+                            best_url = url
                     except ValueError:
                         continue
-                # Handle pixel density (e.g., "2x" -> 2)
                 elif descriptor.endswith("x"):
                     try:
-                        density = float(descriptor[:-1])
-                        # Convert density to pseudo-width for comparison
-                        sources.append((int(density * 1000), url))
+                        float(descriptor[:-1])
+                        if not best_url or max_width == 0:
+                            best_url = url
                     except ValueError:
                         continue
+            elif len(parts) == 1:
+                url = parts[0].strip()
+                if url.startswith("data:"):
+                    continue
+                if not best_url:
+                    best_url = url
 
-        # Return the URL with the highest width, or first URL if no width descriptors
-        if sources:
-            sources.sort(key=lambda x: x[0], reverse=True)  # Sort by width descending
-            return sources[0][1]
-
-        # Fallback: return first non-data: URL from srcset
-        for raw in srcset.split(","):
-            raw = raw.strip()
-            first_url = raw.split(" ")[0] if " " in raw else raw
-            if first_url and not first_url.startswith("data:"):
-                return first_url
-        return ""
+        return best_url
 
     def remove_image_from_markdown(
         self, markdown_content: str, image_src: str
