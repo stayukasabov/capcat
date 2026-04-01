@@ -223,3 +223,141 @@ def test_frontmatter_returns_false_if_file_missing(tmp_path):
     """Returns False gracefully when the target file does not exist."""
     result = inject_frontmatter(str(tmp_path / "nonexistent.md"), {"title": "x"})
     assert result is False
+
+
+# ---------------------------------------------------------------------------
+# Frontmatter wiring integration tests
+# ---------------------------------------------------------------------------
+
+def test_article_gets_frontmatter_after_processing(tmp_path):
+    """After _process_single_article_new_system, article.md has YAML frontmatter."""
+    from unittest.mock import MagicMock
+    from capcat.core.unified_source_processor import UnifiedSourceProcessor
+    import yaml as _yaml
+
+    _make_article(tmp_path, "My-Article", "# My Article\n\nBody.\n")
+
+    source = MagicMock()
+    source.fetch_article_content.return_value = (True, str(tmp_path))
+    source.config.has_comments = False
+    source.config.name = "hn"
+    source.config.display_name = "Hacker News"
+    source.config.category = "tech"
+
+    article = MagicMock()
+    article.title = "My Article"
+    article.url = "https://example.com/article"
+    article.comment_url = None
+    article.published_date = "2026-03-28"
+    article.tags = []
+
+    usp = UnifiedSourceProcessor()
+    usp._process_single_article_new_system(source, article, str(tmp_path), download_files=False)
+
+    content = (tmp_path / "My-Article.md").read_text(encoding="utf-8")
+    assert content.startswith("---\n")
+    lines = content.splitlines()
+    end = lines.index("---", 1)
+    fm = _yaml.safe_load("\n".join(lines[1:end]))
+    assert fm["source_code"] == "hn"
+    assert fm["category"] == "tech"
+    assert fm["title"] == "My Article"
+    assert fm["url"] == "https://example.com/article"
+    assert "captured" in fm
+
+
+def test_article_frontmatter_omits_none_date(tmp_path):
+    """When published_date is None, 'date' key is absent from frontmatter."""
+    from unittest.mock import MagicMock
+    from capcat.core.unified_source_processor import UnifiedSourceProcessor
+
+    _make_article(tmp_path, "My-Article", "# My Article\n\nBody.\n")
+
+    source = MagicMock()
+    source.fetch_article_content.return_value = (True, str(tmp_path))
+    source.config.has_comments = False
+    source.config.name = "lb"
+    source.config.display_name = "Lobsters"
+    source.config.category = "tech"
+
+    article = MagicMock()
+    article.title = "My Article"
+    article.url = "https://lobste.rs/s/abc"
+    article.comment_url = None
+    article.published_date = None
+    article.tags = []
+
+    usp = UnifiedSourceProcessor()
+    usp._process_single_article_new_system(source, article, str(tmp_path), download_files=False)
+
+    content = (tmp_path / "My-Article.md").read_text(encoding="utf-8")
+    assert "date:" not in content
+
+
+def test_comments_get_frontmatter_after_processing(tmp_path):
+    """Comments.md gets YAML frontmatter with comments tag and source_code."""
+    from unittest.mock import MagicMock
+    from capcat.core.unified_source_processor import UnifiedSourceProcessor
+    import yaml as _yaml
+
+    _make_article(tmp_path, "My-Article", "# My Article\n\nBody.\n")
+    _write_comments_file(tmp_path, "My-Article")
+
+    source = MagicMock()
+    source.fetch_article_content.return_value = (True, str(tmp_path))
+    source.config.has_comments = True
+    source.config.name = "hn"
+    source.config.display_name = "Hacker News"
+    source.config.category = "tech"
+    source.fetch_comments.return_value = True
+
+    article = MagicMock()
+    article.title = "My Article"
+    article.url = "https://news.ycombinator.com/item?id=123"
+    article.comment_url = "https://news.ycombinator.com/item?id=123"
+    article.published_date = None
+    article.tags = []
+
+    usp = UnifiedSourceProcessor()
+    usp._process_single_article_new_system(source, article, str(tmp_path), download_files=False)
+
+    content = (tmp_path / "My-Article-Comments.md").read_text(encoding="utf-8")
+    assert content.startswith("---\n")
+    lines = content.splitlines()
+    end = lines.index("---", 1)
+    fm = _yaml.safe_load("\n".join(lines[1:end]))
+    assert "comments" in fm["tags"]
+    assert fm["source_code"] == "hn"
+
+
+def test_frontmatter_above_wikilink_in_integration(tmp_path):
+    """After full processing, frontmatter is above the wikilink in article.md."""
+    from unittest.mock import MagicMock
+    from capcat.core.unified_source_processor import UnifiedSourceProcessor
+
+    _make_article(tmp_path, "My-Article", "# My Article\n\nBody.\n")
+    _write_comments_file(tmp_path, "My-Article")
+
+    source = MagicMock()
+    source.fetch_article_content.return_value = (True, str(tmp_path))
+    source.config.has_comments = True
+    source.config.name = "hn"
+    source.config.display_name = "Hacker News"
+    source.config.category = "tech"
+    source.fetch_comments.return_value = True
+
+    article = MagicMock()
+    article.title = "My Article"
+    article.url = "https://example.com"
+    article.comment_url = "https://example.com/comments"
+    article.published_date = None
+    article.tags = []
+
+    usp = UnifiedSourceProcessor()
+    usp._process_single_article_new_system(source, article, str(tmp_path), download_files=False)
+
+    content = (tmp_path / "My-Article.md").read_text(encoding="utf-8")
+    assert content.startswith("---\n")
+    closing_fence = content.index("---\n\n")
+    wikilink_pos = content.find("→ [[")
+    assert wikilink_pos > closing_fence, "Wikilink must appear after closing --- fence"
