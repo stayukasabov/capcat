@@ -165,6 +165,7 @@ for config-driven sources in Capcat
 - [capcat.commands.single](../api/capcat/single.md) - Single article fetch command
 - [capcat.core.__init__](../api/capcat/__init__.md)
 - [capcat.core.article_fetcher](../api/capcat/article_fetcher.md) - Shared article fetching functionality for Capcat sources
+- [capcat.core.async_pdf_manager](../api/capcat/async_pdf_manager.md) - Asynchronous PDF download manager to prevent thread pool exhaustion
 - [capcat.core.circuit_breaker](../api/capcat/circuit_breaker.md) - Circuit Breaker pattern implementation for Capcat
 - [capcat.core.cli_recovery](../api/capcat/cli_recovery.md) - CLI error recovery and user guidance system
 - [capcat.core.cli_validation](../api/capcat/cli_validation.md) - Enhanced CLI validation and error handling for better user experience
@@ -413,6 +414,8 @@ handling, and comprehensive validation
 
 - [__version__](../api/root/__version__.md) - Capcat version information
 - [add_jekyll_frontmatter](../api/root/add_jekyll_frontmatter.md) - Add Jekyll front matter to all HTML files so Jekyll processes them
+- [analyze_hn_pdf_patterns](../api/root/analyze_hn_pdf_patterns.md) - Analyze HN articles to understand PDF link patterns without downloading
+- [analyze_hn_pdfs_simple](../api/root/analyze_hn_pdfs_simple.md) - Simple analysis of PDF links in HN articles using direct API approach
 - [build_site](../api/root/build_site.md) - Build script: Replace Jekyll includes with actual HTML content
 - [capcat_legacy](../api/root/capcat_legacy.md) - Capcat - News Article Archiving System
 
@@ -422,6 +425,7 @@ A free and open-source tool to make people's lives easier
 - [cli](../api/root/cli.md) - Professional CLI interface for Capcat using subcommand architecture
 - [convert_docs_to_html](../api/root/convert_docs_to_html.md) - Convert Markdown documentation to clean HTML with minimal styling
 - [convert_to_markdown](../api/root/convert_to_markdown.md)
+- [debug_pdf_stalling](../api/root/debug_pdf_stalling.md) - Diagnostic script to analyze PDF download stalling in HN source
 - [delete_h4_colon](../api/root/delete_h4_colon.md) - Delete colon after </h4> tags
 - [quick_cli_fix](../api/root/quick_cli_fix.md) - Quick CLI validation fix to catch common flag mistakes
 - [run_capcat](../api/root/run_capcat.md) - Capcat - News Article Archiving System (Enhanced Python Wrapper)
@@ -495,9 +499,9 @@ Usage:
 
 ## Statistics
 
-- **Total Modules**: 357
-- **Total Classes**: 624
-- **Total Functions**: 772
-- **Public Functions**: 605
-- **Documentation Coverage**: 78.4%
+- **Total Modules**: 361
+- **Total Classes**: 626
+- **Total Functions**: 793
+- **Public Functions**: 626
+- **Documentation Coverage**: 78.9%
 
