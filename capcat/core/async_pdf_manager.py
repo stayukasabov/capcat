@@ -8,8 +8,7 @@ import os
 import re
 import threading
 import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor
 from queue import Queue
 from typing import Dict, List, Optional, Set, Tuple
 from urllib.parse import urlparse
@@ -180,7 +179,7 @@ class AsyncPDFManager:
                 try:
                     # Get download task with timeout
                     download_info = self.download_queue.get(timeout=1.0)
-                except:
+                except Exception:
                     continue  # Timeout or shutdown
 
                 if self.shutdown_event.is_set():
@@ -188,7 +187,7 @@ class AsyncPDFManager:
 
                 # Submit download to thread pool
                 if self.executor:
-                    future = self.executor.submit(self._download_pdf, download_info)
+                    self.executor.submit(self._download_pdf, download_info)
 
         except Exception as e:
             self.logger.error(f"PDF download worker loop error: {e}")
