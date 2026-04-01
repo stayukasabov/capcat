@@ -161,7 +161,7 @@ Args:
 def get_available_sources() -> dict
 ```
 
-Get available sources from the source registry.
+Get available sources from the source registry, excluding hidden sources.
 
 **Returns:** dict
 
