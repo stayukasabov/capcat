@@ -1394,18 +1394,15 @@ class ArticleFetcher(ABC):
             from pathlib import Path
             import threading
 
-            # Find the article's markdown file
-            article_md = find_article_md(Path(article_folder_path))
-            if not article_md:
-                return
-
             # Schedule background update
             def update_pdf_links():
-                import time
-                # Give a brief delay for any immediate downloads
-                time.sleep(2)
-
                 pdf_manager = get_pdf_manager()
+                queued_urls = pdf_manager.get_queued_urls_for_folder(article_folder_path)
+                if queued_urls:
+                    pdf_manager.wait_for_downloads(queued_urls, timeout=120)
+                article_md = find_article_md(Path(article_folder_path))
+                if not article_md:
+                    return
                 pdf_manager.update_article_with_completed_downloads(str(article_md))
 
             # Run in background thread to avoid blocking
