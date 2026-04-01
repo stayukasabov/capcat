@@ -689,7 +689,7 @@ class ArticleHTMLGenerator:
                 pdf_prefix = "../files/" if html_subfolder else "files/"
                 pdfs = sorted(files_dir.glob("*.pdf"))
                 if pdfs:
-                    links = " &nbsp;·&nbsp; ".join(
+                    links = " ".join(
                         f'<a href="{pdf_prefix}{p.name}" target="_blank" '
                         f'rel="noopener">{p.stem}</a>'
                         for p in pdfs
