@@ -228,7 +228,7 @@ are not in this set and are safe to remove.
 def get_sources_by_category(self, category: str) -> List[str]
 ```
 
-Get sources by category.
+Get non-hidden sources by category.
 
 **Parameters:**
 
