@@ -69,6 +69,7 @@ for performance optimization and self-contained HTML generation
 - [`capcat.core.unified_media_processor`](./unified_media_processor.md) - Unified Media Processor Integration Layer
 - [`capcat.core.template_renderer`](./template_renderer.md) - Simple Template Renderer for Capcat
 Replaces {{placeholder}} variables with actual values from configuration
+- [`capcat.core.async_pdf_manager`](./async_pdf_manager.md) - Asynchronous PDF download manager to prevent thread pool exhaustion
 - [`capcat.htmlgen.__init__`](./__init__.md) - HTML generation module for Capcat
 - [`capcat.htmlgen.factory`](./factory.md) - Factory for creating ArticleHTMLGenerator instances
 - [`capcat.htmlgen.generator`](./generator.md) - HTML Generator for Capcat - Static Site Generation

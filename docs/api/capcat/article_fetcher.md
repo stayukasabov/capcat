@@ -347,7 +347,7 @@ Fetch and process regular web page content.
 
 **Returns:** Tuple[bool, Optional[str], Optional[str]]
 
-⚠️ **High complexity:** 64
+⚠️ **High complexity:** 65
 
 ##### _cleanup_empty_images_folder
 
@@ -370,11 +370,11 @@ Remove images folder if it exists but is empty.
 def _download_pdf_links_from_markdown(self, markdown_content: str, article_folder_path: str) -> str
 ```
 
-Scan markdown for PDF links and download them to files/ subfolder.
+Scan markdown for PDF links and queue them for async download.
 
-Universal — works for every source. Runs after HTML→markdown
-conversion so it catches PDF links regardless of where they
-appeared in the original HTML structure.
+This prevents thread pool exhaustion by not blocking article processing
+threads on slow PDF downloads. PDFs are downloaded asynchronously
+in the background.
 
 **Parameters:**
 
@@ -383,6 +383,39 @@ appeared in the original HTML structure.
 - `article_folder_path` (str)
 
 **Returns:** str
+
+##### _download_pdf_links_from_markdown_sync
+
+```python
+def _download_pdf_links_from_markdown_sync(self, markdown_content: str, article_folder_path: str) -> str
+```
+
+Original synchronous PDF download implementation (kept as fallback).
+This causes thread pool exhaustion but is kept for compatibility.
+
+**Parameters:**
+
+- `self`
+- `markdown_content` (str)
+- `article_folder_path` (str)
+
+**Returns:** str
+
+##### _schedule_pdf_link_updates
+
+```python
+def _schedule_pdf_link_updates(self, article_folder_path: str) -> None
+```
+
+Schedule async PDF link updates for the article's markdown file.
+This runs in background after the article is saved to update PDF placeholders.
+
+**Parameters:**
+
+- `self`
+- `article_folder_path` (str)
+
+**Returns:** None
 
 ##### _parse_srcset
 
@@ -1013,6 +1046,12 @@ def process_single_media(link_info)
 **Parameters:**
 
 - `link_info`
+
+### update_pdf_links
+
+```python
+def update_pdf_links()
+```
 
 ### download_progress
 

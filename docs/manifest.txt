@@ -1,5 +1,5 @@
 Capcat Documentation Manifest
-Generated: 2026-04-01 05:16:02 UTC
+Generated: 2026-04-01 09:03:22 UTC
 Success rate: 2/2 tasks
 
 Generated Documentation:
@@ -16,6 +16,10 @@ Generated Documentation:
   - api/__version__/__version__.md
   - api/add_jekyll_frontmatter/README.md
   - api/add_jekyll_frontmatter/add_jekyll_frontmatter.md
+  - api/analyze_hn_pdf_patterns/README.md
+  - api/analyze_hn_pdf_patterns/analyze_hn_pdf_patterns.md
+  - api/analyze_hn_pdfs_simple/README.md
+  - api/analyze_hn_pdfs_simple/analyze_hn_pdfs_simple.md
   - api/build/README.md
   - api/build/__init__.md
   - api/build/__main__.md
@@ -112,6 +116,7 @@ Generated Documentation:
   - api/capcat/add_source_command.md
   - api/capcat/add_source_service.md
   - api/capcat/article_fetcher.md
+  - api/capcat/async_pdf_manager.md
   - api/capcat/base_generator.md
   - api/capcat/base_source.md
   - api/capcat/bundle_manager.md
@@ -290,6 +295,8 @@ Generated Documentation:
   - api/debug/quick-troubleshoot.md
   - api/debug/simple-troubleshoot.md
   - api/debug/source-tester.md
+  - api/debug_pdf_stalling/README.md
+  - api/debug_pdf_stalling/debug_pdf_stalling.md
   - api/delete_h4_colon/README.md
   - api/delete_h4_colon/delete_h4_colon.md
   - api/fix_ascii_formatting/README.md
@@ -421,5 +428,5 @@ Generated Documentation:
   - superpowers/specs/2026-03-31-obsidian-frontmatter-prd.md
   - troubleshooting.md
 
-Total files: 741
+Total files: 751
 Documentation size: 44.1 MB
