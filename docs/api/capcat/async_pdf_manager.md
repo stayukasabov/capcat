@@ -72,6 +72,21 @@ Returns updated markdown with placeholder links and count of PDFs queued.
 
 **Returns:** Tuple[str, int]
 
+##### get_queued_urls_for_folder
+
+```python
+def get_queued_urls_for_folder(self, folder_path: str) -> List[str]
+```
+
+Return and remove the queued PDF URLs for a given article folder.
+
+**Parameters:**
+
+- `self`
+- `folder_path` (str)
+
+**Returns:** List[str]
+
 ##### update_article_with_completed_downloads
 
 ```python
