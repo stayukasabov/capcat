@@ -197,3 +197,22 @@ Module-level function, not a StorageManager method.
 
 **Returns:** bool
 
+### inject_frontmatter
+
+```python
+def inject_frontmatter(md_path: str, metadata: dict) -> bool
+```
+
+Prepend YAML frontmatter to a markdown file.
+
+Idempotent: if the file already starts with '---', returns True without
+modifying. Omits any key whose value is None. Returns False on any error
+without raising.
+
+**Parameters:**
+
+- `md_path` (str)
+- `metadata` (dict)
+
+**Returns:** bool
+

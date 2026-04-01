@@ -216,7 +216,7 @@ Process a single article using the new source system.
 
 **Returns:** bool
 
-⚠️ **High complexity:** 16
+⚠️ **High complexity:** 20
 
 
 ## Functions
@@ -242,6 +242,36 @@ Returns:
 - `source_config` ('SourceConfig')
 
 **Returns:** int
+
+### _build_article_metadata
+
+```python
+def _build_article_metadata(article, source) -> dict
+```
+
+Build frontmatter metadata dict for an article.
+
+**Parameters:**
+
+- `article`
+- `source`
+
+**Returns:** dict
+
+### _build_comments_metadata
+
+```python
+def _build_comments_metadata(article, source) -> dict
+```
+
+Build frontmatter metadata dict for a comments file.
+
+**Parameters:**
+
+- `article`
+- `source`
+
+**Returns:** dict
 
 ### get_unified_processor
 
