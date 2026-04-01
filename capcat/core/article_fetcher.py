@@ -1283,6 +1283,11 @@ class ArticleFetcher(ABC):
         self._cleanup_empty_images_folder(article_folder_path)
 
         self.logger.info(f"Successfully saved article: {page_title}")
+
+        # Schedule async PDF link updates for this article
+        if self.download_files:
+            self._schedule_pdf_link_updates(article_folder_path)
+
         return True, page_title, article_folder_path
 
     def _cleanup_empty_images_folder(self, article_folder_path: str) -> None:
@@ -1293,26 +1298,53 @@ class ArticleFetcher(ABC):
         self, markdown_content: str, article_folder_path: str
     ) -> str:
         """
-        Scan markdown for PDF links and download them to files/ subfolder.
+        Scan markdown for PDF links and queue them for async download.
 
-        Universal — works for every source. Runs after HTML→markdown
-        conversion so it catches PDF links regardless of where they
-        appeared in the original HTML structure.
+        This prevents thread pool exhaustion by not blocking article processing
+        threads on slow PDF downloads. PDFs are downloaded asynchronously
+        in the background.
+        """
+        if not self.download_files:
+            return markdown_content
+
+        # Use async PDF manager to prevent thread blocking
+        try:
+            from .async_pdf_manager import get_pdf_manager
+            pdf_manager = get_pdf_manager()
+
+            updated_content, pdf_count = pdf_manager.extract_and_queue_pdf_links(
+                markdown_content, article_folder_path
+            )
+
+            if pdf_count > 0:
+                self.logger.info(f"Queued {pdf_count} PDF downloads for async processing")
+
+            return updated_content
+
+        except ImportError:
+            # Fallback to synchronous downloads if async manager not available
+            self.logger.warning("Async PDF manager not available, falling back to synchronous downloads")
+            return self._download_pdf_links_from_markdown_sync(markdown_content, article_folder_path)
+        except Exception as e:
+            self.logger.warning(f"Error with async PDF manager: {e}, falling back to synchronous downloads")
+            return self._download_pdf_links_from_markdown_sync(markdown_content, article_folder_path)
+
+    def _download_pdf_links_from_markdown_sync(
+        self, markdown_content: str, article_folder_path: str
+    ) -> str:
+        """
+        Original synchronous PDF download implementation (kept as fallback).
+        This causes thread pool exhaustion but is kept for compatibility.
         """
         import re
         from urllib.parse import urlparse
 
-        if not self.download_files:
-            return markdown_content
-
-        self.logger.info(
-            f"_download_pdf_links_from_markdown called, "
-            f"folder={article_folder_path}, "
-            f"content_len={len(markdown_content)}"
+        self.logger.warning(
+            "Using synchronous PDF downloads - this may cause thread pool exhaustion!"
         )
+
         # Match [text](url) where url looks like a PDF
         link_pattern = re.compile(r'\[([^\]]*)\]\((https?://[^)]+)\)')
-
         seen_urls = set()
 
         def is_pdf_url(u: str) -> bool:
@@ -1331,8 +1363,6 @@ class ArticleFetcher(ABC):
                     link_url, article_folder_path, "document", self.download_files
                 )
                 if local_path:
-                    # download_file already returns a relative path ("files/name.pdf")
-                    # — do NOT pass through os.path.relpath or it resolves against CWD
                     self.logger.info(f"Downloaded PDF: {link_url} → {local_path}")
                     return f"[{text}]({local_path})"
                 else:
@@ -1352,6 +1382,38 @@ class ArticleFetcher(ABC):
             return match.group(0)
 
         return link_pattern.sub(replace_link, markdown_content)
+
+    def _schedule_pdf_link_updates(self, article_folder_path: str) -> None:
+        """
+        Schedule async PDF link updates for the article's markdown file.
+        This runs in background after the article is saved to update PDF placeholders.
+        """
+        try:
+            from .async_pdf_manager import get_pdf_manager
+            from .storage_manager import find_article_md
+            from pathlib import Path
+            import threading
+
+            # Find the article's markdown file
+            article_md = find_article_md(Path(article_folder_path))
+            if not article_md:
+                return
+
+            # Schedule background update
+            def update_pdf_links():
+                import time
+                # Give a brief delay for any immediate downloads
+                time.sleep(2)
+
+                pdf_manager = get_pdf_manager()
+                pdf_manager.update_article_with_completed_downloads(str(article_md))
+
+            # Run in background thread to avoid blocking
+            update_thread = threading.Thread(target=update_pdf_links, daemon=True)
+            update_thread.start()
+
+        except Exception as e:
+            self.logger.debug(f"Could not schedule PDF link updates: {e}")
 
     def _parse_srcset(self, srcset: str) -> str:
         """Parse srcset attribute and return the highest resolution image URL."""
