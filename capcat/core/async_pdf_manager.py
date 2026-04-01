@@ -42,6 +42,7 @@ class AsyncPDFManager:
         self.worker_thread: Optional[threading.Thread] = None
 
         self._lock = threading.Lock()
+        self._queued_by_folder: Dict[str, List[str]] = {}
 
     def start(self):
         """Start the background PDF download service."""
@@ -122,8 +123,15 @@ class AsyncPDFManager:
 
         if queued_count > 0:
             self.logger.info(f"Queued {queued_count} PDF downloads for background processing")
+            with self._lock:
+                self._queued_by_folder[article_folder_path] = list(seen_urls)
 
         return updated_content, queued_count
+
+    def get_queued_urls_for_folder(self, folder_path: str) -> List[str]:
+        """Return and remove the queued PDF URLs for a given article folder."""
+        with self._lock:
+            return self._queued_by_folder.pop(folder_path, [])
 
     def update_article_with_completed_downloads(self, markdown_file_path: str):
         """
