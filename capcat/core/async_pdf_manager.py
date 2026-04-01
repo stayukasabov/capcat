@@ -210,16 +210,16 @@ class AsyncPDFManager:
             if local_path:
                 with self._lock:
                     self.completed_downloads[url] = local_path
-                self.logger.info(f"Completed PDF download: {url} -> {local_path}")
+                self.logger.debug(f"Completed PDF download: {url} -> {local_path}")
             else:
                 with self._lock:
                     self.failed_downloads.add(url)
-                self.logger.warning(f"Failed PDF download: {url}")
+                self.logger.debug(f"Failed PDF download: {url}")
 
         except Exception as e:
             with self._lock:
                 self.failed_downloads.add(url)
-            self.logger.warning(f"Exception during PDF download {url}: {e}")
+            self.logger.debug(f"PDF download failed {url}: {e}")
 
         finally:
             # Signal completion
