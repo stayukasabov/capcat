@@ -414,8 +414,6 @@ handling, and comprehensive validation
 
 - [__version__](../api/root/__version__.md) - Capcat version information
 - [add_jekyll_frontmatter](../api/root/add_jekyll_frontmatter.md) - Add Jekyll front matter to all HTML files so Jekyll processes them
-- [analyze_hn_pdf_patterns](../api/root/analyze_hn_pdf_patterns.md) - Analyze HN articles to understand PDF link patterns without downloading
-- [analyze_hn_pdfs_simple](../api/root/analyze_hn_pdfs_simple.md) - Simple analysis of PDF links in HN articles using direct API approach
 - [build_site](../api/root/build_site.md) - Build script: Replace Jekyll includes with actual HTML content
 - [capcat_legacy](../api/root/capcat_legacy.md) - Capcat - News Article Archiving System
 
@@ -425,7 +423,6 @@ A free and open-source tool to make people's lives easier
 - [cli](../api/root/cli.md) - Professional CLI interface for Capcat using subcommand architecture
 - [convert_docs_to_html](../api/root/convert_docs_to_html.md) - Convert Markdown documentation to clean HTML with minimal styling
 - [convert_to_markdown](../api/root/convert_to_markdown.md)
-- [debug_pdf_stalling](../api/root/debug_pdf_stalling.md) - Diagnostic script to analyze PDF download stalling in HN source
 - [delete_h4_colon](../api/root/delete_h4_colon.md) - Delete colon after </h4> tags
 - [quick_cli_fix](../api/root/quick_cli_fix.md) - Quick CLI validation fix to catch common flag mistakes
 - [run_capcat](../api/root/run_capcat.md) - Capcat - News Article Archiving System (Enhanced Python Wrapper)
@@ -499,9 +496,9 @@ Usage:
 
 ## Statistics
 
-- **Total Modules**: 361
-- **Total Classes**: 626
-- **Total Functions**: 793
-- **Public Functions**: 626
-- **Documentation Coverage**: 78.9%
+- **Total Modules**: 358
+- **Total Classes**: 625
+- **Total Functions**: 778
+- **Public Functions**: 611
+- **Documentation Coverage**: 78.5%
 
