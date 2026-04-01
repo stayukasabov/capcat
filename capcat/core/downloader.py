@@ -170,6 +170,12 @@ def download_file(
         else:  # document types like PDF, DOC, etc.
             files_folder = os.path.join(folder_path, "files")
 
+        # For document downloads, send Accept header so content-negotiating
+        # servers (e.g. ArXiv) return the actual file instead of an HTML page.
+        request_headers = {}
+        if file_type == "document":
+            request_headers["Accept"] = "application/pdf, application/octet-stream, */*"
+
         # Make a single HEAD request to check size and content-type
         response = None
         content_length = None
@@ -178,7 +184,9 @@ def download_file(
         head_response = None
         try:
             head_response = session.head(
-                file_url, timeout=config.network.head_request_timeout
+                file_url,
+                timeout=config.network.head_request_timeout,
+                headers=request_headers,
             )
             head_response.raise_for_status()
             content_length = head_response.headers.get("content-length")
@@ -226,6 +234,7 @@ def download_file(
                 file_url,
                 timeout=config.network.media_download_timeout,
                 stream=True,
+                headers=request_headers,
             )
             response.raise_for_status()
 
