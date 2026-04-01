@@ -157,7 +157,10 @@ class AsyncPDFManager:
                 for url, local_path in self.completed_downloads.items():
                     if os.path.basename(urlparse(url).path) == filename:
                         updated = True
-                        return f"[{text}]({local_path})"
+                        relative = os.path.relpath(
+                            local_path, os.path.dirname(markdown_file_path)
+                        )
+                        return f"[{text}]({relative})"
 
                 # If not completed yet, check if it failed
                 for failed_url in self.failed_downloads:
