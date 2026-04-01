@@ -8,7 +8,6 @@ B2 — updated links use absolute paths instead of relative
 import os
 import threading
 import time
-from unittest.mock import patch
 
 from capcat.core.async_pdf_manager import AsyncPDFManager
 
