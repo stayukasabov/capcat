@@ -56,12 +56,12 @@ def get_available_bundles(project_root: Path = None) -> dict:
 
 
 def get_available_sources() -> dict:
-    """Get available sources from the source registry."""
+    """Get available sources from the source registry, excluding hidden sources."""
     registry = _get_source_registry()
     return {
         sid: cfg.display_name
         for sid in registry.get_available_sources()
-        if (cfg := registry.get_source_config(sid))
+        if (cfg := registry.get_source_config(sid)) and not cfg.hidden
     }
 
 
