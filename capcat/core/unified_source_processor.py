@@ -10,6 +10,7 @@ Follows DRY principle while maintaining source-specific optimizations.
 import os
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed, TimeoutError
+from datetime import date as _date
 from pathlib import Path
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Optional
@@ -22,7 +23,7 @@ from capcat.core.exceptions import NetworkError
 from capcat.core.logging_config import get_logger
 from capcat.core.progress import get_batch_progress
 from capcat.core.shutdown import get_shutdown
-from capcat.core.storage_manager import find_comments_md, inject_comments_wikilink
+from capcat.core.storage_manager import find_article_md, find_comments_md, inject_comments_wikilink, inject_frontmatter
 from capcat.core.utils import create_batch_output_directory
 
 # Import new source system for hybrid architecture
@@ -65,6 +66,33 @@ def _resolve_count(
     if cli_count is not None:
         return cli_count
     return source_config.article_count  # already defaults to 30
+
+
+def _build_article_metadata(article, source) -> dict:
+    """Build frontmatter metadata dict for an article."""
+    tags = list(dict.fromkeys([source.config.name, source.config.category]))
+    return {
+        "title": article.title,
+        "url": article.url,
+        "source": source.config.display_name,
+        "source_code": source.config.name,
+        "category": source.config.category,
+        "date": article.published_date or None,
+        "captured": str(_date.today()),
+        "tags": tags,
+    }
+
+
+def _build_comments_metadata(article, source) -> dict:
+    """Build frontmatter metadata dict for a comments file."""
+    tags = list(dict.fromkeys(["comments", source.config.name]))
+    return {
+        "title": f"Comments: {article.title}",
+        "article_url": article.url,
+        "source_code": source.config.name,
+        "captured": str(_date.today()),
+        "tags": tags,
+    }
 
 
 class UnifiedSourceProcessor:
@@ -429,6 +457,7 @@ class UnifiedSourceProcessor:
                 article, base_dir, progress_callback,
                 download_files=download_files,
             )
+            comments_written = False
 
             # Process comments if available and supported
             if (
@@ -469,6 +498,22 @@ class UnifiedSourceProcessor:
                     except Exception as comment_error:
                         self.logger.warning(
                             f"Failed to fetch comments for '{article.title}': {comment_error}"
+                        )
+
+            # Inject YAML frontmatter — article always, comments if written
+            if success:
+                article_md = find_article_md(Path(article_path))
+                if article_md:
+                    inject_frontmatter(
+                        str(article_md),
+                        _build_article_metadata(article, source),
+                    )
+                if comments_written:
+                    comments_md = find_comments_md(Path(article_path))
+                    if comments_md:
+                        inject_frontmatter(
+                            str(comments_md),
+                            _build_comments_metadata(article, source),
                         )
 
             return success
