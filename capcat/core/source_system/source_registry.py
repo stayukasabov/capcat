@@ -171,6 +171,7 @@ class SourceRegistry:
                         ),
                         category=config.get("category", "general"),
                         article_count=int(config.get("article_count", 30)),
+                        hidden=config.get("hidden", False),
                         custom_config=config,
                     )
 
@@ -248,6 +249,7 @@ class SourceRegistry:
             supports_comments=config_data.get("supports_comments", False),
             category=config_data.get("category", "general"),
             article_count=int(config_data.get("article_count", 30)),
+            hidden=config_data.get("hidden", False),
             custom_config=config_data,
         )
 
@@ -411,11 +413,11 @@ class SourceRegistry:
         return source_id in self._builtin_source_ids
 
     def get_sources_by_category(self, category: str) -> List[str]:
-        """Get sources by category."""
+        """Get non-hidden sources by category."""
         return [
             name
             for name, config in self._configs.items()
-            if config.category == category
+            if config.category == category and not config.hidden
         ]
 
     def get_source_config(self, source_name: str) -> Optional[SourceConfig]:

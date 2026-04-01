@@ -39,6 +39,10 @@ class SourceConfig:
     # How many articles to fetch per run. Overridden by CLI --count flag.
     article_count: int = 30
 
+    # Hidden sources are used internally (e.g. URL pattern matching) but not
+    # shown in TUI source lists or bundle descriptions.
+    hidden: bool = False
+
     # Optional custom configuration
     custom_config: Dict[str, Any] = None
 
