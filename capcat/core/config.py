@@ -175,6 +175,14 @@ class FetchNewsConfig:
 class ConfigManager:
     """Manages configuration loading and merging from multiple sources."""
 
+    _section_to_class = {
+        "network": NetworkConfig,
+        "processing": ProcessingConfig,
+        "ui": UIConfig,
+        "logging": LoggingConfig,
+        "pdf": PdfConfig,
+    }
+
     def __init__(self):
         """Initialize the configuration manager.
 
@@ -183,6 +191,32 @@ class ConfigManager:
         self.logger = get_logger(__name__)
         self._config = FetchNewsConfig()
         self._config_loaded = False
+
+    def _load_settings_file(self, path: Path) -> None:
+        """Load a Global-settings.yaml file and merge into current config.
+
+        Silently ignores missing files, sources/bundles keys, and unknown keys.
+        """
+        if not path.exists():
+            return
+        try:
+            import yaml
+            data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        except Exception as e:
+            self.logger.warning(f"Failed to read settings file {path}: {e}")
+            return
+
+        # sources/bundles belong to capcat.yml, not settings files
+        data.pop("sources", None)
+        data.pop("bundles", None)
+
+        # Filter each section to known fields before merging
+        for section_name, section_data in list(data.items()):
+            cls = self._section_to_class.get(section_name)
+            if cls and isinstance(section_data, dict):
+                data[section_name] = _filter_fields(cls, section_data)
+
+        self._merge_config_data(data)
 
     def load_config(
         self, config_file: Optional[str] = None, load_env: bool = True
@@ -203,6 +237,12 @@ class ConfigManager:
 
         # Start with defaults
         self._config = FetchNewsConfig()
+
+        # Load Global-settings.yaml from user-level then vault-level (unconditional)
+        user_settings = Path.home() / ".config" / "capcat" / "Global-settings.yaml"
+        vault_settings = Path("Config") / "Global-settings.yaml"
+        self._load_settings_file(user_settings)
+        self._load_settings_file(vault_settings)
 
         # Load from config file if specified
         if config_file:

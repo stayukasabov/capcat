@@ -60,6 +60,7 @@ try:
     ProcessingConfig = _impl.ProcessingConfig
     UIConfig = _impl.UIConfig
     _filter_fields = _impl._filter_fields
+    ConfigManager = _impl.ConfigManager
     get_config = _impl.get_config
     load_config = _impl.load_config
     save_config = _impl.save_config
@@ -174,6 +175,7 @@ __all__ = [
     "LoggingConfig",
     "PdfConfig",
     "_filter_fields",
+    "ConfigManager",
     # Project-model path resolution
     "NoProjectError",
     "find_project_root",
