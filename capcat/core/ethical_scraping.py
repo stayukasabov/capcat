@@ -9,6 +9,7 @@ Implements best practices:
 4. Path validation against robots.txt
 """
 
+import threading
 import time
 from dataclasses import dataclass
 from datetime import datetime, timedelta
@@ -50,6 +51,7 @@ class EthicalScrapingManager:
         self.robots_cache: Dict[str, RobotsTxtCache] = {}
         self.cache_ttl = timedelta(minutes=15)
         self.last_request_time: Dict[str, float] = {}
+        self._lock = threading.Lock()
 
     def get_robots_txt(
         self, base_url: str, timeout: int = 10
@@ -162,7 +164,11 @@ class EthicalScrapingManager:
         self, domain: str, crawl_delay: float, min_delay: float = 1.0
     ):
         """
-        Enforce rate limiting with crawl delay.
+        Enforce rate limiting with crawl delay — thread-safe via slot reservation.
+
+        The lock is held only while reading/updating last_request_time (microseconds).
+        Sleep happens outside the lock so other domains are not blocked.
+        Each thread reserves its firing slot so the next thread queues correctly.
 
         Args:
             domain: Domain being accessed
@@ -170,15 +176,20 @@ class EthicalScrapingManager:
             min_delay: Minimum delay even if robots.txt doesn't specify
         """
         effective_delay = max(crawl_delay, min_delay)
+        sleep_time = 0.0
 
-        if domain in self.last_request_time:
-            elapsed = time.time() - self.last_request_time[domain]
+        with self._lock:
+            now = time.time()
+            last = self.last_request_time.get(domain, 0.0)
+            elapsed = now - last
             remaining = effective_delay - elapsed
-
             if remaining > 0:
-                time.sleep(remaining)
+                sleep_time = remaining
+            # Reserve the slot: record when this thread will actually fire
+            self.last_request_time[domain] = now + sleep_time
 
-        self.last_request_time[domain] = time.time()
+        if sleep_time > 0:
+            time.sleep(sleep_time)
 
     def request_with_backoff(
         self,
