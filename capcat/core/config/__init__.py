@@ -63,7 +63,7 @@ try:
     get_config = _impl.get_config
     load_config = _impl.load_config
     save_config = _impl.save_config
-except Exception:
+except (ImportError, FileNotFoundError):
     # Fallback if the original config module isn't available
     def get_config():
         """Fallback get_config function."""
@@ -148,6 +148,12 @@ except Exception:
 
     class LoggingConfig:
         """Stub for LoggingConfig when the main config module is unavailable."""
+
+    class UIConfig:
+        """Stub for UIConfig when the main config module is unavailable."""
+
+    class PdfConfig:
+        """Stub for PdfConfig when the main config module is unavailable."""
 
 
 __all__ = [

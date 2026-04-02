@@ -1,6 +1,4 @@
 """Tests for PdfConfig dataclass and from_dict() completeness."""
-import dataclasses
-import pytest
 from capcat.core.config import (
     FetchNewsConfig,
     PdfConfig,
