@@ -18,7 +18,6 @@ from urllib.parse import urljoin, urlparse
 import requests
 from bs4 import BeautifulSoup
 
-from capcat.core.constants import CONVERSION_TIMEOUT_SECONDS
 from capcat.core.conversion_executor import get_conversion_executor
 from .config import get_config
 from .downloader import (
@@ -127,7 +126,7 @@ def get_global_update_mode() -> bool:
 def convert_html_with_timeout(
     html_content: str,
     url: str,
-    timeout: int = CONVERSION_TIMEOUT_SECONDS
+    timeout: int = None,
 ) -> str:
     """Convert HTML to markdown with thread-safe timeout protection.
 
@@ -155,6 +154,10 @@ def convert_html_with_timeout(
         This function is thread-safe and can be called concurrently
         from multiple threads without race conditions.
     """
+    if timeout is None:
+        from capcat.core.config import get_config
+        timeout = get_config().processing.conversion_timeout
+
     logger = get_logger("convert_html_with_timeout")
 
     # Handle empty or invalid content
