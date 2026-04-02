@@ -6,7 +6,7 @@ Handles settings from config files, environment variables, and CLI overrides.
 
 import json
 import os
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, fields
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -105,6 +105,20 @@ class LoggingConfig:
 
 
 @dataclass
+class PdfConfig:
+    """PDF download configuration settings."""
+
+    max_pdf_size_bytes: int = 20_971_520  # 20MB
+    max_pdf_per_article: int = 10
+
+
+def _filter_fields(cls, data: dict) -> dict:
+    """Return only keys that are known fields on the dataclass cls."""
+    known = {f.name for f in fields(cls)}
+    return {k: v for k, v in data.items() if k in known}
+
+
+@dataclass
 class FetchNewsConfig:
     """Main configuration class containing all settings."""
 
@@ -112,11 +126,12 @@ class FetchNewsConfig:
     processing: ProcessingConfig = None
     logging: LoggingConfig = None
     ui: UIConfig = None
+    pdf: PdfConfig = None
 
     def __post_init__(self):
         """Initialize sub-configs if not provided.
 
-        Creates default instances for network, processing, logging, and UI
+        Creates default instances for network, processing, logging, UI, and PDF
         configurations when not explicitly specified.
         """
         if self.network is None:
@@ -127,6 +142,8 @@ class FetchNewsConfig:
             self.logging = LoggingConfig()
         if self.ui is None:
             self.ui = UIConfig()
+        if self.pdf is None:
+            self.pdf = PdfConfig()
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert configuration to dictionary.
@@ -141,19 +158,17 @@ class FetchNewsConfig:
         """Create configuration from dictionary.
 
         Args:
-            data: Dictionary with network, processing, logging sections
+            data: Dictionary with network, processing, logging, ui, pdf sections
 
         Returns:
             New FetchNewsConfig instance
         """
-        network_data = data.get("network", {})
-        processing_data = data.get("processing", {})
-        logging_data = data.get("logging", {})
-
         return cls(
-            network=NetworkConfig(**network_data),
-            processing=ProcessingConfig(**processing_data),
-            logging=LoggingConfig(**logging_data),
+            network=NetworkConfig(**_filter_fields(NetworkConfig, data.get("network", {}))),
+            processing=ProcessingConfig(**_filter_fields(ProcessingConfig, data.get("processing", {}))),
+            logging=LoggingConfig(**_filter_fields(LoggingConfig, data.get("logging", {}))),
+            ui=UIConfig(**_filter_fields(UIConfig, data.get("ui", {}))),
+            pdf=PdfConfig(**_filter_fields(PdfConfig, data.get("pdf", {}))),
         )
 
 
