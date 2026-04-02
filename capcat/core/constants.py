@@ -6,24 +6,13 @@ Centralizes magic numbers and configuration values for maintainability.
 All constants follow SCREAMING_SNAKE_CASE convention.
 """
 
-# Content Processing
-CONVERSION_TIMEOUT_SECONDS = 30  # HTML to Markdown conversion timeout
-DEFAULT_ARTICLE_COUNT = 30  # Default articles to fetch per source
-
 # Network Configuration
 DEFAULT_CONNECT_TIMEOUT = 10  # Seconds
 DEFAULT_READ_TIMEOUT = 8  # Seconds
 MAX_RETRIES = 3  # Maximum retry attempts
 RETRY_DELAY_SECONDS = 2.0  # Base delay between retries
 
-# Media Processing
-DEFAULT_MAX_IMAGES = 20  # Normal processing limit
-MEDIA_FLAG_MAX_IMAGES = 1000  # With --media flag limit
-MIN_IMAGE_DIMENSIONS = 150  # Minimum pixels width/height
-MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024  # 5MB per image
-
 # File System
-MAX_FILENAME_LENGTH = 255  # Characters
 SAFE_FILENAME_CHARS = (
     "abcdefghijklmnopqrstuvwxyz"
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -31,8 +20,6 @@ SAFE_FILENAME_CHARS = (
 )
 
 # Ethical Scraping
-DEFAULT_CRAWL_DELAY = 1.0  # Seconds between requests
-ROBOTS_CACHE_TTL_MINUTES = 15  # robots.txt cache time-to-live
 MAX_LINK_DENSITY_PERCENT = 15  # Aggregator detection threshold
 MAX_EXTERNAL_DOMAINS = 10  # Aggregator detection threshold
 

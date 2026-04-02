@@ -160,3 +160,49 @@ class TestLoadSettingsFile:
         assert cfg.pdf.max_pdf_size_bytes == 1_000_000
         # user value preserved for max_pdf_per_article
         assert cfg.pdf.max_pdf_per_article == 5
+
+
+class TestNewConfigFields:
+    def test_processing_new_fields_defaults(self):
+        from capcat.core.config import ProcessingConfig
+        cfg = ProcessingConfig()
+        assert cfg.article_count == 30
+        assert cfg.max_images == 20
+        assert cfg.max_images_media_mode == 1000
+        assert cfg.min_image_dimensions == 150
+        assert cfg.max_image_size_bytes == 5_242_880
+        assert cfg.conversion_timeout == 30
+
+    def test_network_new_fields_defaults(self):
+        from capcat.core.config import NetworkConfig
+        cfg = NetworkConfig()
+        assert cfg.crawl_delay == 1.0
+        assert cfg.robots_cache_ttl_minutes == 15
+
+    def test_processing_fields_loadable_from_yaml(self, tmp_path):
+        from capcat.core.config import ConfigManager, FetchNewsConfig
+        yaml_content = (
+            "processing:\n"
+            "  article_count: 50\n"
+            "  max_images: 10\n"
+            "  conversion_timeout: 60\n"
+        )
+        path = tmp_path / "Global-settings.yaml"
+        path.write_text(yaml_content)
+        mgr = ConfigManager()
+        mgr._config = FetchNewsConfig()
+        mgr._load_settings_file(path)
+        assert mgr._config.processing.article_count == 50
+        assert mgr._config.processing.max_images == 10
+        assert mgr._config.processing.conversion_timeout == 60
+
+    def test_network_fields_loadable_from_yaml(self, tmp_path):
+        from capcat.core.config import ConfigManager, FetchNewsConfig
+        yaml_content = "network:\n  crawl_delay: 2.5\n  robots_cache_ttl_minutes: 30\n"
+        path = tmp_path / "Global-settings.yaml"
+        path.write_text(yaml_content)
+        mgr = ConfigManager()
+        mgr._config = FetchNewsConfig()
+        mgr._load_settings_file(path)
+        assert mgr._config.network.crawl_delay == 2.5
+        assert mgr._config.network.robots_cache_ttl_minutes == 30

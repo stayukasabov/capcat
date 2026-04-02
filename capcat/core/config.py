@@ -37,6 +37,9 @@ class NetworkConfig:
     max_retries: int = 3
     retry_delay: float = 1.0
 
+    crawl_delay: float = 1.0
+    robots_cache_ttl_minutes: int = 15
+
 
 @dataclass
 class ProcessingConfig:
@@ -44,6 +47,16 @@ class ProcessingConfig:
 
     # Concurrency settings
     max_workers: int = 8
+
+    # Article fetching
+    article_count: int = 30
+    conversion_timeout: int = 30
+
+    # Image limits (sourced from constants.py)
+    max_images: int = 20
+    max_images_media_mode: int = 1000
+    min_image_dimensions: int = 150
+    max_image_size_bytes: int = 5_242_880  # 5MB
 
     # File handling
     max_filename_length: int = 100
