@@ -183,29 +183,3 @@ def test_completion_no_summary_when_zero_zero():
     assert not any("saved" in l for l in lines)
 
 
-def test_tui_prompt_user_skip_auto_skips_without_printing(capsys):
-    """In TUI mode _prompt_user_skip must return True immediately without printing."""
-    fetcher = _make_fetcher()
-    set_tui_active(True)
-    reset_fetch_results()
-    try:
-        result = fetcher._prompt_user_skip("Big Study.pdf", 12.5, is_direct_pdf=False)
-        captured = capsys.readouterr()
-        assert result is True
-        assert "Large PDF" not in captured.out
-        assert "seconds" not in captured.out
-        fr = get_fetch_result()
-        assert dict(fr.skipped).get("large PDF", 0) == 1
-    finally:
-        set_tui_active(False)
-
-
-def test_cli_prompt_user_skip_prints_countdown(capsys):
-    """In CLI mode _prompt_user_skip prints the countdown (timeout → proceed)."""
-    fetcher = _make_fetcher()
-    with patch("capcat.core.article_fetcher.SKIP_PROMPT_TIMEOUT_SECONDS", 1):
-        result = fetcher._prompt_user_skip("Big Study.pdf", 12.5, is_direct_pdf=False)
-    captured = capsys.readouterr()
-    # Timeout reached → proceed (False), countdown was printed
-    assert result is False
-    assert "Large PDF" in captured.out

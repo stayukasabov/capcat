@@ -75,3 +75,11 @@ class TestCountCap:
             mgr.stop()
 
         assert count == 2  # capped at max_pdf_per_article=2
+
+
+class TestArticleFetcherWiring:
+    def test_check_pdf_size_and_prompt_removed(self):
+        """After fix: the old interactive prompt method must not exist."""
+        from capcat.core.article_fetcher import ArticleFetcher
+        assert not hasattr(ArticleFetcher, "_check_pdf_size_and_prompt"), \
+            "_check_pdf_size_and_prompt was not removed"
