@@ -92,3 +92,24 @@ Set `processing.article_count: 3` in `Global-settings.yaml`. Run `capcat fetch h
 | `__pycache__` in update list | Yes — B4 confirmed |
 | Blocked (403/anti-bot) | 2 articles |
 | JS-only pages | 1 article |
+
+---
+
+## B7 — `create_comments_file: false` ignored — comments always written
+
+**Severity:** Medium — config setting has no effect; vault always accumulates comments files even when disabled
+
+**Symptom:**
+Setting `create_comments_file: false` in `Global-settings.yaml` has no effect. Comments files are written for every article that has a `comment_url`.
+
+**Root cause:**
+`unified_source_processor.py:487-492` — the `if` guard that triggers `fetch_comments` checks for `article.comment_url` but never checks `self.config.processing.create_comments_file`. The config field is defined in `ProcessingConfig` and loaded correctly but is never read at the point where comments fetching is decided.
+
+**Affected files:**
+- `capcat/core/unified_source_processor.py:487-492` — missing `self.config.processing.create_comments_file` guard
+
+**Fix:**
+Added `and self.config.processing.create_comments_file` to the comments block guard. Fixed in v1.9.11.
+
+**How to reproduce:**
+Set `create_comments_file: false` in `Global-settings.yaml`. Run `capcat fetch hn -q`. Observe `*-Comments.md` files in output.

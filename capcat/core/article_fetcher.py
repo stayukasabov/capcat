@@ -1602,11 +1602,14 @@ class ArticleFetcher(ABC):
 
         # First pass: Quick filtering based on extensions
         quick_filtered_links = []
+        _download_images = get_config().processing.download_images
         for link_type, url, alt_text in all_links:
             parsed_url = urlparse(url)
             path_lower = parsed_url.path.lower()
 
             # Quick extension-based filtering
+            if link_type == "image" and not _download_images:
+                continue
             if link_type == "image":
                 if path_lower.endswith(
                     (
