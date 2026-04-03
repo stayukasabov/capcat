@@ -213,6 +213,8 @@ def _merge_config_data(self, data: Dict[str, Any])
 Merge configuration data into current config.
 
 Updates existing config object with values from data dict.
+The 'sources' list from capcat.yml is parsed into source_overrides.
+The 'bundles' key is silently ignored (not a settings concern).
 Warns about unknown sections or keys.
 
 Args:
@@ -222,6 +224,8 @@ Args:
 
 - `self`
 - `data` (Dict[str, Any])
+
+⚠️ **High complexity:** 12
 
 ##### get_config
 
