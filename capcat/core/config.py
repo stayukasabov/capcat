@@ -282,6 +282,8 @@ class ConfigManager:
         """
         # Look for config files in order of preference
         config_locations = [
+            "Config/capcat.yml",
+            "Config/capcat.yaml",
             "capcat.yml",
             "capcat.yaml",
             "capcat.json",
