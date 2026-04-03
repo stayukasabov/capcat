@@ -487,6 +487,7 @@ class UnifiedSourceProcessor:
             # Process comments if available and supported
             if (
                 success
+                and self.config.processing.create_comments_file
                 and hasattr(article, "comment_url")
                 and article.comment_url
             ):
