@@ -31,13 +31,11 @@ class TestSourceConfigArticleCount:
 class TestResolveCount:
     def _resolve(self, cli_count, source_count, global_count):
         from capcat.core.unified_source_processor import _resolve_count
-        from unittest.mock import MagicMock
+        from capcat.core.config import FetchNewsConfig, ProcessingConfig
 
-        source_config = MagicMock()
-        source_config.article_count = source_count
-
-        config = MagicMock()
-        config.processing.article_count = global_count
+        source_config = _cfg(article_count=source_count)
+        config = FetchNewsConfig()
+        config.processing = ProcessingConfig(article_count=global_count)
 
         return _resolve_count(cli_count, source_config, config)
 
