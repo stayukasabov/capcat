@@ -303,9 +303,16 @@ class AsyncPDFManager:
 _global_pdf_manager: Optional[AsyncPDFManager] = None
 
 def initialize_pdf_manager(pdf_config: "PdfConfig") -> AsyncPDFManager:
-    """Create and cache the global AsyncPDFManager with the given config."""
+    """Return the running global AsyncPDFManager, creating and starting it if needed.
+
+    Idempotent: subsequent calls with any config return the already-running instance.
+    The manager is started on first creation; callers must not call .start() themselves.
+    """
     global _global_pdf_manager
+    if _global_pdf_manager is not None and _global_pdf_manager.worker_thread is not None:
+        return _global_pdf_manager
     _global_pdf_manager = AsyncPDFManager(pdf_config=pdf_config)
+    _global_pdf_manager.start()
     return _global_pdf_manager
 
 

@@ -181,3 +181,45 @@ class TestAbsolutePathInUpdatedMarkdown:
             )
         finally:
             manager.stop()
+
+
+class TestInitializePdfManager:
+    """B3 — initialize_pdf_manager never starts the worker.
+    B4 — initialize_pdf_manager recreates the manager per-fetcher."""
+
+    def teardown_method(self):
+        """Reset global state between tests."""
+        from capcat.core.async_pdf_manager import shutdown_pdf_manager
+        shutdown_pdf_manager()
+
+    def test_initialize_pdf_manager_starts_worker(self):
+        """Worker thread must be alive immediately after initialize_pdf_manager."""
+        from capcat.core.async_pdf_manager import initialize_pdf_manager
+        from capcat.core.config import PdfConfig
+
+        manager = initialize_pdf_manager(PdfConfig())
+        try:
+            assert manager.worker_thread is not None, (
+                "worker_thread must not be None after initialize_pdf_manager"
+            )
+            assert manager.worker_thread.is_alive(), (
+                "Worker thread must be alive after initialize_pdf_manager"
+            )
+        finally:
+            manager.stop()
+
+    def test_initialize_pdf_manager_is_idempotent(self):
+        """Calling initialize_pdf_manager twice returns the same running instance."""
+        from capcat.core.async_pdf_manager import initialize_pdf_manager
+        from capcat.core.config import PdfConfig
+
+        m1 = initialize_pdf_manager(PdfConfig())
+        m2 = initialize_pdf_manager(PdfConfig())
+        try:
+            assert m1 is m2, (
+                "Second call must return the same instance, not create a new one"
+            )
+            assert m2.worker_thread is not None
+            assert m2.worker_thread.is_alive()
+        finally:
+            m1.stop()
