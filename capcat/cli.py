@@ -738,6 +738,13 @@ def _auto_init(command: str) -> None:
     except AlreadyInitializedError:
         pass
 
+    # Ensure vault-level Global-settings.yaml exists before any command runs.
+    # Config files must be present before downloads start so users can tune
+    # settings without having to manually run `capcat settings`.
+    vault_settings = Path("Config") / "Global-settings.yaml"
+    if not vault_settings.exists() and Path("Config").is_dir():
+        vault_settings.write_text(GLOBAL_SETTINGS_TEMPLATE, encoding="utf-8")
+
     # Check if package themes have been updated since last init
     try:
         from capcat.core.config import find_project_root, check_theme_upgrade, NoProjectError
