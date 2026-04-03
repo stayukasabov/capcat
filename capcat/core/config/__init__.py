@@ -27,6 +27,8 @@ Example usage:
 
 from __future__ import annotations
 
+import importlib.util
+import sys
 from pathlib import Path
 
 from .source_base import BundleConfig, SourceConfig, SourceConfigLoader
@@ -36,18 +38,33 @@ from .source_registry import (
     reset_source_registry,
 )
 
-# Import original config functions for backward compatibility
+# Import original config functions for backward compatibility.
+# capcat.core.config is this package, so we cannot use a relative import to
+# reach capcat/core/config.py (it would resolve circularly back to this
+# __init__).  Load the .py file explicitly via importlib instead.
+_CONFIG_PY = Path(__file__).parent.parent / "config.py"
+_config_impl_name = "capcat.core._config_impl"
+
 try:
-    from ..config import (
-        FetchNewsConfig,
-        LoggingConfig,
-        NetworkConfig,
-        ProcessingConfig,
-        get_config,
-        load_config,
-        save_config,
-    )
-except ImportError:
+    if _CONFIG_PY.exists() and _config_impl_name not in sys.modules:
+        _spec = importlib.util.spec_from_file_location(_config_impl_name, str(_CONFIG_PY))
+        _mod = importlib.util.module_from_spec(_spec)
+        sys.modules[_config_impl_name] = _mod
+        _spec.loader.exec_module(_mod)
+
+    _impl = sys.modules[_config_impl_name]
+    FetchNewsConfig = _impl.FetchNewsConfig
+    LoggingConfig = _impl.LoggingConfig
+    NetworkConfig = _impl.NetworkConfig
+    PdfConfig = _impl.PdfConfig
+    ProcessingConfig = _impl.ProcessingConfig
+    UIConfig = _impl.UIConfig
+    _filter_fields = _impl._filter_fields
+    ConfigManager = _impl.ConfigManager
+    get_config = _impl.get_config
+    load_config = _impl.load_config
+    save_config = _impl.save_config
+except (ImportError, FileNotFoundError):
     # Fallback if the original config module isn't available
     def get_config():
         """Fallback get_config function."""
@@ -133,6 +150,12 @@ except ImportError:
     class LoggingConfig:
         """Stub for LoggingConfig when the main config module is unavailable."""
 
+    class UIConfig:
+        """Stub for UIConfig when the main config module is unavailable."""
+
+    class PdfConfig:
+        """Stub for PdfConfig when the main config module is unavailable."""
+
 
 __all__ = [
     # New configuration system
@@ -150,6 +173,9 @@ __all__ = [
     "NetworkConfig",
     "ProcessingConfig",
     "LoggingConfig",
+    "PdfConfig",
+    "_filter_fields",
+    "ConfigManager",
     # Project-model path resolution
     "NoProjectError",
     "find_project_root",

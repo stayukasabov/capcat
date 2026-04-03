@@ -52,6 +52,12 @@ class EthicalScrapingManager:
         self.cache_ttl = timedelta(minutes=15)
         self.last_request_time: Dict[str, float] = {}
         self._lock = threading.Lock()
+        self.crawl_delay: float = 1.0
+
+    def configure(self, crawl_delay: float, robots_cache_ttl_minutes: int) -> None:
+        """Update rate-limiting parameters on the singleton after config is loaded."""
+        self.crawl_delay = crawl_delay
+        self.cache_ttl = timedelta(minutes=robots_cache_ttl_minutes)
 
     def get_robots_txt(
         self, base_url: str, timeout: int = 10
@@ -175,7 +181,7 @@ class EthicalScrapingManager:
             crawl_delay: Required crawl delay from robots.txt
             min_delay: Minimum delay even if robots.txt doesn't specify
         """
-        effective_delay = max(crawl_delay, min_delay)
+        effective_delay = max(crawl_delay, min_delay, self.crawl_delay)
         sleep_time = 0.0
 
         with self._lock:

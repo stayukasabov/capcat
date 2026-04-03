@@ -37,7 +37,8 @@ class SourceConfig:
     category: str = "general"
 
     # How many articles to fetch per run. Overridden by CLI --count flag.
-    article_count: int = 30
+    # None means fall back to config.processing.article_count global default.
+    article_count: Optional[int] = None
 
     # Hidden sources are used internally (e.g. URL pattern matching) but not
     # shown in TUI source lists or bundle descriptions.
@@ -50,7 +51,7 @@ class SourceConfig:
         """Ensure custom_config is never None after construction."""
         if self.custom_config is None:
             self.custom_config = {}
-        if self.article_count <= 0:
+        if self.article_count is not None and self.article_count <= 0:
             raise ValueError(
                 f"article_count must be positive, got {self.article_count}"
             )
