@@ -56,6 +56,8 @@ class TestInitUserTemplate:
     def test_init_writes_user_level_template_on_first_init(self, tmp_path, monkeypatch):
         user_cfg = tmp_path / ".config" / "capcat"
         monkeypatch.setenv("HOME", str(tmp_path))
+        monkeypatch.chdir(tmp_path)
+        (tmp_path / "Config").mkdir()
 
         with patch("capcat.commands.init.init_project"), \
              patch("capcat.cli._auto_init"):
@@ -66,11 +68,27 @@ class TestInitUserTemplate:
         assert out.exists()
         assert "max_pdf_size_bytes" in out.read_text()
 
+    def test_init_writes_vault_level_template_on_first_init(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("HOME", str(tmp_path))
+        monkeypatch.chdir(tmp_path)
+        (tmp_path / "Config").mkdir()
+
+        with patch("capcat.commands.init.init_project"), \
+             patch("capcat.cli._auto_init"):
+            from capcat.cli import _cmd_init
+            _cmd_init([])
+
+        out = tmp_path / "Config" / "Global-settings.yaml"
+        assert out.exists()
+        assert "max_pdf_size_bytes" in out.read_text()
+
     def test_init_does_not_overwrite_existing_user_template(self, tmp_path, monkeypatch):
         user_cfg = tmp_path / ".config" / "capcat"
         user_cfg.mkdir(parents=True)
         (user_cfg / "Global-settings.yaml").write_text("custom content")
         monkeypatch.setenv("HOME", str(tmp_path))
+        monkeypatch.chdir(tmp_path)
+        (tmp_path / "Config").mkdir()
 
         with patch("capcat.commands.init.init_project"), \
              patch("capcat.cli._auto_init"):
@@ -79,9 +97,24 @@ class TestInitUserTemplate:
 
         assert (user_cfg / "Global-settings.yaml").read_text() == "custom content"
 
+    def test_init_does_not_overwrite_existing_vault_template(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("HOME", str(tmp_path))
+        monkeypatch.chdir(tmp_path)
+        (tmp_path / "Config").mkdir()
+        (tmp_path / "Config" / "Global-settings.yaml").write_text("vault custom")
+
+        with patch("capcat.commands.init.init_project"), \
+             patch("capcat.cli._auto_init"):
+            from capcat.cli import _cmd_init
+            _cmd_init([])
+
+        assert (tmp_path / "Config" / "Global-settings.yaml").read_text() == "vault custom"
+
     def test_reinit_skips_user_template(self, tmp_path, monkeypatch):
         user_cfg = tmp_path / ".config" / "capcat"
         monkeypatch.setenv("HOME", str(tmp_path))
+        monkeypatch.chdir(tmp_path)
+        (tmp_path / "Config").mkdir()
 
         with patch("capcat.commands.init.init_project"), \
              patch("capcat.cli._auto_init"):
@@ -89,3 +122,4 @@ class TestInitUserTemplate:
             _cmd_init(["--reinit"])
 
         assert not (user_cfg / "Global-settings.yaml").exists()
+        assert not (tmp_path / "Config" / "Global-settings.yaml").exists()
