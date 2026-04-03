@@ -372,6 +372,7 @@ def test_step3_overrides_and_backs_up_when_user_says_yes(tmp_path, monkeypatch):
         return "y"  # accept override
 
     monkeypatch.setattr("builtins.input", fake_input)
+    monkeypatch.setattr("sys.stdin", type("_Tty", (), {"isatty": staticmethod(lambda: True)})())
 
     m.check_for_upgrades()
 
@@ -410,6 +411,7 @@ def test_backup_collision_uses_counter_suffix(tmp_path, monkeypatch):
     (project / "Config" / "sources" / f"backup_{today}").mkdir(parents=True)
 
     monkeypatch.setattr("builtins.input", lambda _: "y")
+    monkeypatch.setattr("sys.stdin", type("_Tty", (), {"isatty": staticmethod(lambda: True)})())
     m.check_for_upgrades()
 
     backup_dirs = list((project / "Config" / "sources").glob("backup_*-[0-9]*"))
@@ -480,6 +482,7 @@ def test_disabled_source_participates_in_upgrade_diff(tmp_path, monkeypatch):
     monkeypatch.setattr(m, "_builtin_custom_dir", lambda: builtin_root / "custom")
     monkeypatch.setattr(m, "_builtin_bundles_dir", lambda: builtin_root)
     monkeypatch.setattr("builtins.input", lambda _: "y")
+    monkeypatch.setattr("sys.stdin", type("_Tty", (), {"isatty": staticmethod(lambda: True)})())
 
     m.check_for_upgrades()
 
