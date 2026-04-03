@@ -694,7 +694,7 @@ def _cmd_settings(args: list[str]) -> None:
     force = "--force" in args
     out = Path("Config") / "Global-settings.yaml"
     if out.exists() and not force:
-        print(f"Config/Global-settings.yaml already exists. Use --force to overwrite.")
+        print("Config/Global-settings.yaml already exists. Use --force to overwrite.")
         return
     out.write_text(GLOBAL_SETTINGS_TEMPLATE, encoding="utf-8")
     print(f"Written: {out.resolve()}")
