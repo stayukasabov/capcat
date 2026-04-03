@@ -121,6 +121,47 @@ def inject_frontmatter(md_path: str, metadata: dict) -> bool:
         return False
 
 
+def update_frontmatter_pdfs(md_path: str, pdf_paths: list) -> bool:
+    """Add or replace the 'pdfs' key in an existing YAML frontmatter block.
+
+    Reads current frontmatter, sets pdfs to pdf_paths, writes back.
+    No-ops (returns True) when pdf_paths is empty.
+    Returns False if no frontmatter exists or on any error.
+    """
+    import yaml
+
+    if not pdf_paths:
+        return True
+
+    try:
+        path = Path(md_path)
+        if not path.is_file():
+            return False
+
+        content = path.read_text(encoding="utf-8")
+        if not content.startswith("---"):
+            return False
+
+        end = content.find("\n---", 3)
+        if end == -1:
+            return False
+
+        fm_text = content[3:end]
+        body = content[end + 4:]
+
+        metadata = yaml.safe_load(fm_text) or {}
+        metadata["pdfs"] = pdf_paths
+
+        fm_out = yaml.dump(metadata, default_flow_style=False, allow_unicode=True,
+                           sort_keys=False)
+        path.write_text(f"---\n{fm_out}---{body}", encoding="utf-8")
+        return True
+
+    except Exception as e:
+        _logger.warning(f"update_frontmatter_pdfs failed for {md_path}: {e}")
+        return False
+
+
 class StorageManager:
     """
     Manages all file system operations for article storage.
