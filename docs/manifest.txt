@@ -1,5 +1,5 @@
 Capcat Documentation Manifest
-Generated: 2026-04-03 08:31:59 UTC
+Generated: 2026-04-03 09:47:46 UTC
 Success rate: 2/2 tasks
 
 Generated Documentation:
@@ -382,6 +382,7 @@ Generated Documentation:
   - reference/modules.md
   - reference/quick-reference.md
   - rss-feed-candidates.md
+  - superpowers/2026-04-03-toolchain-proposal.md
   - superpowers/plans/2026-03-15-breadcrumb-phase1-folder-naming.md
   - superpowers/plans/2026-03-15-breadcrumb-phase2-html-rendering.md
   - superpowers/plans/2026-03-15-claude-md-context-engineering.md
@@ -411,6 +412,7 @@ Generated Documentation:
   - superpowers/plans/2026-04-01-pdf-bug-fixes.md
   - superpowers/plans/2026-04-01-rate-limit-thread-safety.md
   - superpowers/plans/2026-04-02-global-settings-yaml.md
+  - superpowers/plans/2026-04-03-fix-async-pdf-manager-never-starts.md
   - superpowers/specs/2026-03-15-breadcrumb-phase1-folder-naming-design.md
   - superpowers/specs/2026-03-15-breadcrumb-phase2-html-rendering-design.md
   - superpowers/specs/2026-03-15-claude-md-context-engineering-design.md
@@ -434,5 +436,5 @@ Generated Documentation:
   - superpowers/specs/2026-04-02-user-config-yaml-inventory.md
   - troubleshooting.md
 
-Total files: 757
-Documentation size: 44.2 MB
+Total files: 759
+Documentation size: 44.3 MB
