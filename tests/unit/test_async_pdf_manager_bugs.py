@@ -223,3 +223,67 @@ class TestInitializePdfManager:
             assert m2.worker_thread.is_alive()
         finally:
             m1.stop()
+
+
+class TestWaitUntilIdle:
+    """B5 — no drain mechanism before shutdown; pending downloads are abandoned."""
+
+    def test_wait_until_idle_returns_when_queue_empty(self):
+        """wait_until_idle must return True when queue is empty and no active downloads."""
+        manager = AsyncPDFManager(max_workers=1)
+        manager.start()
+        try:
+            result = manager.wait_until_idle(timeout=2.0)
+            assert result is True, "Must return True when already idle"
+        finally:
+            manager.stop()
+
+    def test_wait_until_idle_waits_for_active_downloads(self, tmp_path):
+        """wait_until_idle must block until active_downloads clears."""
+        import threading, time
+
+        manager = AsyncPDFManager(max_workers=1)
+        manager.start()
+        try:
+            # Simulate an active download event
+            event = threading.Event()
+            pdf_url = "https://example.com/slow.pdf"
+            with manager._lock:
+                manager.active_downloads[pdf_url] = event
+
+            # Complete it after a short delay
+            def complete():
+                time.sleep(0.2)
+                with manager._lock:
+                    if pdf_url in manager.active_downloads:
+                        manager.active_downloads[pdf_url].set()
+                        del manager.active_downloads[pdf_url]
+
+            t = threading.Thread(target=complete)
+            t.start()
+
+            result = manager.wait_until_idle(timeout=3.0)
+            t.join()
+
+            assert result is True, "Must return True once downloads complete"
+        finally:
+            manager.stop()
+
+    def test_wait_until_idle_returns_false_on_timeout(self):
+        """wait_until_idle must return False when timeout expires with pending downloads."""
+        import threading
+
+        manager = AsyncPDFManager(max_workers=1)
+        manager.start()
+        try:
+            # Simulate a download that never completes
+            event = threading.Event()
+            with manager._lock:
+                manager.active_downloads["https://example.com/stuck.pdf"] = event
+
+            result = manager.wait_until_idle(timeout=0.1)
+            assert result is False, "Must return False when timeout expires"
+        finally:
+            with manager._lock:
+                manager.active_downloads.clear()
+            manager.stop()

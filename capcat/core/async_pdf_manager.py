@@ -287,6 +287,25 @@ class AsyncPDFManager:
 
         return True
 
+    def wait_until_idle(self, timeout: float = 60.0) -> bool:
+        """
+        Block until the download queue is empty and no downloads are active.
+
+        Returns True if idle before timeout, False if timeout expired.
+        Used after all articles are processed to drain pending PDF downloads
+        before the batch command returns.
+        """
+        import time as _time
+        deadline = _time.monotonic() + timeout
+        while _time.monotonic() < deadline:
+            with self._lock:
+                queue_empty = self.download_queue.empty()
+                no_active = len(self.active_downloads) == 0
+            if queue_empty and no_active:
+                return True
+            _time.sleep(0.1)
+        return False
+
     def get_status(self) -> Dict:
         """Get current status of the PDF download manager."""
         with self._lock:
