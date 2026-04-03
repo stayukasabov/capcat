@@ -279,6 +279,12 @@ def check_theme_upgrade(project_root: "Path") -> None:
     if is_tui_active():
         return
 
+    # Skip prompt in non-interactive contexts (background, piped stdin, -q mode).
+    # Let the next interactive run handle the upgrade dialogue.
+    import sys
+    if not sys.stdin.isatty():
+        return
+
     try:
         answer = input(
             f"\nCapcat themes updated (v{__version__}). "

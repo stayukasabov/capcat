@@ -68,6 +68,7 @@ def test_upgrade_prompts_on_version_mismatch(tmp_path, monkeypatch):
     (themes / ".capcat-version").write_text("0.0.1\n")
     called = []
     monkeypatch.setattr("builtins.input", lambda _: (called.append(True), "n")[1])
+    monkeypatch.setattr("sys.stdin", type("_Tty", (), {"isatty": staticmethod(lambda: True)})())
     check_theme_upgrade(tmp_path)
     assert called
 
@@ -78,6 +79,7 @@ def test_upgrade_prompts_when_marker_absent(tmp_path, monkeypatch):
     themes.mkdir(parents=True)
     called = []
     monkeypatch.setattr("builtins.input", lambda _: (called.append(True), "n")[1])
+    monkeypatch.setattr("sys.stdin", type("_Tty", (), {"isatty": staticmethod(lambda: True)})())
     check_theme_upgrade(tmp_path)
     assert called
 
@@ -94,6 +96,7 @@ def test_upgrade_y_recopies_files(tmp_path, monkeypatch):
     css = tmp_path / "Config" / "themes" / "base.css"
     css.write_text("/* old */")
     monkeypatch.setattr("builtins.input", lambda _: "y")
+    monkeypatch.setattr("sys.stdin", type("_Tty", (), {"isatty": staticmethod(lambda: True)})())
     check_theme_upgrade(tmp_path)
     assert "/* old */" not in css.read_text()
 
@@ -105,6 +108,7 @@ def test_upgrade_n_preserves_user_files(tmp_path, monkeypatch):
     css = tmp_path / "Config" / "themes" / "base.css"
     css.write_text("/* custom */")
     monkeypatch.setattr("builtins.input", lambda _: "n")
+    monkeypatch.setattr("sys.stdin", type("_Tty", (), {"isatty": staticmethod(lambda: True)})())
     check_theme_upgrade(tmp_path)
     assert css.read_text() == "/* custom */"
 
@@ -115,6 +119,7 @@ def test_upgrade_n_updates_version_marker(tmp_path, monkeypatch):
     init_project(tmp_path)
     (tmp_path / "Config" / "themes" / ".capcat-version").write_text("0.0.1\n")
     monkeypatch.setattr("builtins.input", lambda _: "n")
+    monkeypatch.setattr("sys.stdin", type("_Tty", (), {"isatty": staticmethod(lambda: True)})())
     check_theme_upgrade(tmp_path)
     marker = tmp_path / "Config" / "themes" / ".capcat-version"
     assert marker.read_text().strip() == __version__
