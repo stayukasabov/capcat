@@ -295,6 +295,21 @@ class UnifiedSourceProcessor:
                 source, articles, base_dir, download_files, quiet, verbose
             )
 
+            # Drain pending PDF downloads before returning.
+            try:
+                from capcat.core.async_pdf_manager import get_pdf_manager, shutdown_pdf_manager
+                pdf_mgr = get_pdf_manager()
+                if pdf_mgr.worker_thread is not None and pdf_mgr.worker_thread.is_alive():
+                    drained = pdf_mgr.wait_until_idle(timeout=120.0)
+                    if not drained:
+                        self.logger.warning(
+                            "PDF download drain timed out after 120s — "
+                            "some PDFs may not have completed"
+                        )
+                shutdown_pdf_manager()
+            except Exception as _pdf_exc:
+                self.logger.warning(f"PDF manager shutdown error: {_pdf_exc}")
+
             if generate_html:
                 from capcat.core.html_post_processor import launch_web_view
                 from pathlib import Path

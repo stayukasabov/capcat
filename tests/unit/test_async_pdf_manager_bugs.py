@@ -287,3 +287,44 @@ class TestWaitUntilIdle:
             with manager._lock:
                 manager.active_downloads.clear()
             manager.stop()
+
+
+class TestBatchShutdownDrain:
+    """B5 end-to-end — PDF manager must be drained and reset after each source batch."""
+
+    def teardown_method(self):
+        from capcat.core.async_pdf_manager import shutdown_pdf_manager
+        shutdown_pdf_manager()
+
+    def test_shutdown_pdf_manager_stops_worker(self):
+        """shutdown_pdf_manager must stop the worker thread."""
+        from capcat.core.async_pdf_manager import initialize_pdf_manager, shutdown_pdf_manager
+        from capcat.core.config import PdfConfig
+
+        manager = initialize_pdf_manager(PdfConfig())
+        assert manager.worker_thread is not None
+        assert manager.worker_thread.is_alive()
+
+        shutdown_pdf_manager()
+
+        # After shutdown, global state is cleared
+        from capcat.core import async_pdf_manager as _mod
+        assert _mod._global_pdf_manager is None, (
+            "Global manager must be None after shutdown_pdf_manager"
+        )
+
+    def test_second_batch_gets_fresh_manager(self):
+        """After shutdown, initialize_pdf_manager creates a fresh running manager."""
+        from capcat.core.async_pdf_manager import initialize_pdf_manager, shutdown_pdf_manager
+        from capcat.core.config import PdfConfig
+
+        m1 = initialize_pdf_manager(PdfConfig())
+        shutdown_pdf_manager()
+
+        m2 = initialize_pdf_manager(PdfConfig())
+        try:
+            assert m1 is not m2, "Fresh manager must be created after shutdown"
+            assert m2.worker_thread is not None
+            assert m2.worker_thread.is_alive()
+        finally:
+            shutdown_pdf_manager()
