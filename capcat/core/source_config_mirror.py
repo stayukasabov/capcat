@@ -4,6 +4,7 @@ from __future__ import annotations
 import hashlib
 import json
 import shutil
+import sys
 from datetime import date
 from pathlib import Path
 from typing import Optional
@@ -18,6 +19,7 @@ class SourceConfigMirror:
     """Copy and track builtin source configs in userspace."""
 
     _CONFIG_DRIVEN_EXTS = {".yaml", ".yml", ".json"}
+    _SKIP_DIRS = {"__pycache__"}
 
     def __init__(self, project_root: Path, tui_mode: bool) -> None:
         self._root = project_root
@@ -90,10 +92,15 @@ class SourceConfigMirror:
         p.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
 
     def _prompt(self, message: str) -> str:
-        """Display prompt; use questionary in TUI mode, print+input in CLI mode."""
+        """Display prompt; use questionary in TUI mode, print+input in CLI mode.
+
+        Returns 'n' silently when stdin is not a tty (non-interactive/background run).
+        """
         if self._tui_mode and questionary is not None:
             result = questionary.confirm(message, default=True, qmark="").ask()
             return "y" if result else "n"
+        if not sys.stdin.isatty():
+            return "n"
         print(message)
         return input("> ")
 
@@ -151,7 +158,7 @@ class SourceConfigMirror:
                 shutil.rmtree(dest_source)
             shutil.copytree(source_dir, dest_source)
             for f in dest_source.rglob("*"):
-                if f.is_file():
+                if f.is_file() and not self._SKIP_DIRS.intersection(f.parts):
                     rel = f.relative_to(dest_source)
                     builtin_f = source_dir / rel
                     if builtin_f.exists():
@@ -226,7 +233,7 @@ class SourceConfigMirror:
         for builtin_d, user_d in new_custom:
             shutil.copytree(builtin_d, user_d)
             for f in user_d.rglob("*"):
-                if f.is_file():
+                if f.is_file() and not self._SKIP_DIRS.intersection(f.parts):
                     rel = f.relative_to(user_d)
                     builtin_f = builtin_d / rel
                     if builtin_f.exists():
@@ -408,7 +415,7 @@ class SourceConfigMirror:
             for source_dir in user_custom.iterdir():
                 if source_dir.is_dir():
                     for f in source_dir.rglob("*"):
-                        if f.is_file():
+                        if f.is_file() and not self._SKIP_DIRS.intersection(f.parts):
                             rel = f.relative_to(source_dir)
                             h = self._compute_hash(f)
                             key = f"custom/{source_dir.name}/{rel}"
