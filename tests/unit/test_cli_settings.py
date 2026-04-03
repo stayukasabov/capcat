@@ -123,3 +123,36 @@ class TestInitUserTemplate:
 
         assert not (user_cfg / "Global-settings.yaml").exists()
         assert not (tmp_path / "Config" / "Global-settings.yaml").exists()
+
+
+class TestAutoInitSettingsCreation:
+    """_auto_init must create Config/Global-settings.yaml if missing so
+    config files exist before any download command runs."""
+
+    def test_auto_init_creates_vault_settings_when_missing(self, tmp_path, monkeypatch):
+        monkeypatch.chdir(tmp_path)
+        (tmp_path / "Config").mkdir()
+
+        from capcat.commands.init import AlreadyInitializedError
+        with patch("capcat.commands.init.init_project", side_effect=AlreadyInitializedError), \
+             patch("capcat.core.config.find_project_root", side_effect=Exception):
+            from capcat.cli import _auto_init
+            _auto_init("fetch")
+
+        out = tmp_path / "Config" / "Global-settings.yaml"
+        assert out.exists()
+        assert "max_pdf_size_bytes" in out.read_text()
+
+    def test_auto_init_does_not_overwrite_existing_vault_settings(self, tmp_path, monkeypatch):
+        monkeypatch.chdir(tmp_path)
+        (tmp_path / "Config").mkdir()
+        existing = tmp_path / "Config" / "Global-settings.yaml"
+        existing.write_text("user customized content")
+
+        from capcat.commands.init import AlreadyInitializedError
+        with patch("capcat.commands.init.init_project", side_effect=AlreadyInitializedError), \
+             patch("capcat.core.config.find_project_root", side_effect=Exception):
+            from capcat.cli import _auto_init
+            _auto_init("fetch")
+
+        assert existing.read_text() == "user customized content"
