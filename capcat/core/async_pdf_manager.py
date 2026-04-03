@@ -156,7 +156,7 @@ class AsyncPDFManager:
     def update_article_with_completed_downloads(self, markdown_file_path: str):
         """
         Update an article's markdown file with completed PDF downloads.
-        This is called after the article is saved to update PDF links.
+        Replaces placeholder links in the body and adds paths to frontmatter.
         """
         if not os.path.exists(markdown_file_path):
             return
@@ -167,6 +167,7 @@ class AsyncPDFManager:
 
             # Find placeholder links and update with actual downloads
             updated = False
+            completed_paths = []
             link_pattern = re.compile(r'\[([^\]]*)\]\(files/downloading_([^)]+)\)')
 
             def replace_placeholder(match):
@@ -180,12 +181,12 @@ class AsyncPDFManager:
                         relative = os.path.relpath(
                             local_path, os.path.dirname(markdown_file_path)
                         )
+                        completed_paths.append(relative)
                         return f"[{text}]({relative})"
 
                 # If not completed yet, check if it failed
                 for failed_url in self.failed_downloads:
                     if os.path.basename(urlparse(failed_url).path) == filename:
-                        # Restore original URL since download failed
                         updated = True
                         return f"[{text}]({failed_url})"
 
@@ -197,6 +198,13 @@ class AsyncPDFManager:
                 with open(markdown_file_path, 'w', encoding='utf-8') as f:
                     f.write(updated_content)
                 self.logger.debug(f"Updated PDF links in {markdown_file_path}")
+
+                if completed_paths:
+                    try:
+                        from .storage_manager import update_frontmatter_pdfs
+                        update_frontmatter_pdfs(markdown_file_path, completed_paths)
+                    except Exception as fm_exc:
+                        self.logger.debug(f"Frontmatter PDF update skipped: {fm_exc}")
 
         except Exception as e:
             self.logger.warning(f"Failed to update PDF links in {markdown_file_path}: {e}")
