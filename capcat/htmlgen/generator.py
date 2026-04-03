@@ -1493,6 +1493,12 @@ class ArticleHTMLGenerator:
 
     def _clean_markdown_content(self, content: str) -> str:
         """Clean up problematic content in markdown that could interfere with templates."""
+        # Strip YAML frontmatter block before any other processing
+        if content.startswith("---"):
+            end = content.find("\n---", 3)
+            if end != -1:
+                content = content[end + 4:].lstrip("\n")
+
         # Remove {{ message }} tags that appear in GitHub and other sites
         content = re.sub(r"\{\{\s*message\s*\}\}", "", content)
 
