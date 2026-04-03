@@ -1,5 +1,5 @@
 Capcat Documentation Manifest
-Generated: 2026-04-03 20:30:04 UTC
+Generated: 2026-04-03 21:27:34 UTC
 Success rate: 2/2 tasks
 
 Generated Documentation:
@@ -366,6 +366,7 @@ Generated Documentation:
   - architecture/roadmap.md
   - architecture/system.md
   - bugs/acceptance-test-bugs-2026-04-03.md
+  - bugs/acceptance-test-bugs-2026-04-04.md
   - css/UTILITY-CLASSES.md
   - design/TUI/Add-an-empty-row.md
   - design/TUI/Add-cancel-menu-option.md
@@ -439,5 +440,5 @@ Generated Documentation:
   - superpowers/specs/2026-04-02-user-config-yaml-inventory.md
   - troubleshooting.md
 
-Total files: 763
+Total files: 764
 Documentation size: 44.3 MB
