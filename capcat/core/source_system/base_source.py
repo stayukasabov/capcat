@@ -363,7 +363,7 @@ class BaseSource(ABC):
 
         # Show immediate feedback so user knows something is happening
         if max_retries > 1:
-            print(f"Capcat Info: Connecting to {self.config.display_name}...", flush=True)
+            self.logger.info(f"Connecting to {self.config.display_name}...")
 
         for attempt in range(1, max_retries + 1):
             try:
