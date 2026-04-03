@@ -140,6 +140,7 @@ class FetchNewsConfig:
     logging: LoggingConfig = None
     ui: UIConfig = None
     pdf: PdfConfig = None
+    source_overrides: dict = None
 
     def __post_init__(self):
         """Initialize sub-configs if not provided.
@@ -157,6 +158,8 @@ class FetchNewsConfig:
             self.ui = UIConfig()
         if self.pdf is None:
             self.pdf = PdfConfig()
+        if self.source_overrides is None:
+            self.source_overrides = {}
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert configuration to dictionary.
@@ -420,12 +423,31 @@ class ConfigManager:
         """Merge configuration data into current config.
 
         Updates existing config object with values from data dict.
+        The 'sources' list from capcat.yml is parsed into source_overrides.
+        The 'bundles' key is silently ignored (not a settings concern).
         Warns about unknown sections or keys.
 
         Args:
             data: Dictionary with section.key structure
         """
+        # Parse capcat.yml sources list into source_overrides dict.
+        # Each entry like {name: hn, article_count: 5} becomes
+        # source_overrides["hn"] = {"article_count": 5}.
+        sources_list = data.get("sources")
+        if isinstance(sources_list, list):
+            for entry in sources_list:
+                if isinstance(entry, dict) and "name" in entry:
+                    name = entry["name"]
+                    overrides = {k: v for k, v in entry.items() if k != "name"}
+                    if overrides:
+                        self._config.source_overrides[name] = overrides
+                        self.logger.debug(
+                            f"Vault source override: {name} = {overrides}"
+                        )
+
         for section_name, section_data in data.items():
+            if section_name in ("sources", "bundles"):
+                continue
             if hasattr(self._config, section_name) and isinstance(
                 section_data, dict
             ):
