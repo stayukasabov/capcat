@@ -183,6 +183,45 @@ class TestAbsolutePathInUpdatedMarkdown:
             manager.stop()
 
 
+class TestFrontmatterPdfUpdate:
+    """After download completes, article frontmatter must get a pdfs: list."""
+
+    def test_frontmatter_updated_with_completed_pdf_paths(self, tmp_path):
+        """
+        update_article_with_completed_downloads must write relative PDF paths
+        into the article's YAML frontmatter under the 'pdfs' key.
+        """
+        manager = AsyncPDFManager(max_workers=1)
+        manager.start()
+
+        try:
+            article_folder = tmp_path / "article"
+            article_folder.mkdir()
+            files_dir = article_folder / "files"
+            files_dir.mkdir()
+
+            pdf_url = "https://example.com/paper.pdf"
+            local_pdf = files_dir / "paper.pdf"
+            local_pdf.write_bytes(b"%PDF")
+
+            with manager._lock:
+                manager.completed_downloads[pdf_url] = str(local_pdf)
+
+            md_path = article_folder / "Article.md"
+            md_path.write_text(
+                "---\ntitle: Test\nsource: hn\n---\n\n"
+                "[Paper](files/downloading_paper.pdf)\n"
+            )
+
+            manager.update_article_with_completed_downloads(str(md_path))
+
+            content = md_path.read_text()
+            assert "pdfs:" in content, "frontmatter must contain pdfs key"
+            assert "files/paper.pdf" in content, "relative path must be in pdfs list"
+        finally:
+            manager.stop()
+
+
 class TestInitializePdfManager:
     """B3 — initialize_pdf_manager never starts the worker.
     B4 — initialize_pdf_manager recreates the manager per-fetcher."""
