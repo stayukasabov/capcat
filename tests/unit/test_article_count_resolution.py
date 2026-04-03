@@ -72,23 +72,26 @@ class TestCountResolution:
     def test_explicit_cli_count_overrides_source(self):
         """When CLI count is provided, it wins over source article_count."""
         from capcat.core.unified_source_processor import _resolve_count
-        config = _config(article_count=10)
-        mock_cfg = MagicMock()
-        mock_cfg.processing.article_count = 30
-        assert _resolve_count(cli_count=20, source_config=config, config=mock_cfg) == 20
+        from capcat.core.config import FetchNewsConfig, ProcessingConfig
+        source_config = _config(article_count=10)
+        cfg = FetchNewsConfig()
+        cfg.processing = ProcessingConfig(article_count=30)
+        assert _resolve_count(cli_count=20, source_config=source_config, config=cfg) == 20
 
     def test_none_cli_uses_source_count(self):
-        """When CLI count is None, source article_count is used."""
+        """When CLI count is None and no vault override, source article_count is used."""
         from capcat.core.unified_source_processor import _resolve_count
-        config = _config(article_count=15)
-        mock_cfg = MagicMock()
-        mock_cfg.processing.article_count = 30
-        assert _resolve_count(cli_count=None, source_config=config, config=mock_cfg) == 15
+        from capcat.core.config import FetchNewsConfig, ProcessingConfig
+        source_config = _config(article_count=15)
+        cfg = FetchNewsConfig()
+        cfg.processing = ProcessingConfig(article_count=30)
+        assert _resolve_count(cli_count=None, source_config=source_config, config=cfg) == 15
 
     def test_none_cli_none_source_falls_back_to_global(self):
         """When both CLI and source count are absent, global config default applies."""
         from capcat.core.unified_source_processor import _resolve_count
-        config = _config()  # article_count defaults to None
-        mock_cfg = MagicMock()
-        mock_cfg.processing.article_count = 42
-        assert _resolve_count(cli_count=None, source_config=config, config=mock_cfg) == 42
+        from capcat.core.config import FetchNewsConfig, ProcessingConfig
+        source_config = _config()  # article_count defaults to None
+        cfg = FetchNewsConfig()
+        cfg.processing = ProcessingConfig(article_count=42)
+        assert _resolve_count(cli_count=None, source_config=source_config, config=cfg) == 42
