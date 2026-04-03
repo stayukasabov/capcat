@@ -6,7 +6,7 @@ Handles settings from config files, environment variables, and CLI overrides.
 
 import json
 import os
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, fields
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -37,6 +37,9 @@ class NetworkConfig:
     max_retries: int = 3
     retry_delay: float = 1.0
 
+    crawl_delay: float = 1.0
+    robots_cache_ttl_minutes: int = 15
+
 
 @dataclass
 class ProcessingConfig:
@@ -44,6 +47,16 @@ class ProcessingConfig:
 
     # Concurrency settings
     max_workers: int = 8
+
+    # Article fetching
+    article_count: int = 30
+    conversion_timeout: int = 30
+
+    # Image limits (sourced from constants.py)
+    max_images: int = 20
+    max_images_media_mode: int = 1000
+    min_image_dimensions: int = 150
+    max_image_size_bytes: int = 5_242_880  # 5MB
 
     # File handling
     max_filename_length: int = 100
@@ -105,6 +118,20 @@ class LoggingConfig:
 
 
 @dataclass
+class PdfConfig:
+    """PDF download configuration settings."""
+
+    max_pdf_size_bytes: int = 20_971_520  # 20MB
+    max_pdf_per_article: int = 10
+
+
+def _filter_fields(cls, data: dict) -> dict:
+    """Return only keys that are known fields on the dataclass cls."""
+    known = {f.name for f in fields(cls)}
+    return {k: v for k, v in data.items() if k in known}
+
+
+@dataclass
 class FetchNewsConfig:
     """Main configuration class containing all settings."""
 
@@ -112,11 +139,12 @@ class FetchNewsConfig:
     processing: ProcessingConfig = None
     logging: LoggingConfig = None
     ui: UIConfig = None
+    pdf: PdfConfig = None
 
     def __post_init__(self):
         """Initialize sub-configs if not provided.
 
-        Creates default instances for network, processing, logging, and UI
+        Creates default instances for network, processing, logging, UI, and PDF
         configurations when not explicitly specified.
         """
         if self.network is None:
@@ -127,6 +155,8 @@ class FetchNewsConfig:
             self.logging = LoggingConfig()
         if self.ui is None:
             self.ui = UIConfig()
+        if self.pdf is None:
+            self.pdf = PdfConfig()
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert configuration to dictionary.
@@ -141,24 +171,30 @@ class FetchNewsConfig:
         """Create configuration from dictionary.
 
         Args:
-            data: Dictionary with network, processing, logging sections
+            data: Dictionary with network, processing, logging, ui, pdf sections
 
         Returns:
             New FetchNewsConfig instance
         """
-        network_data = data.get("network", {})
-        processing_data = data.get("processing", {})
-        logging_data = data.get("logging", {})
-
         return cls(
-            network=NetworkConfig(**network_data),
-            processing=ProcessingConfig(**processing_data),
-            logging=LoggingConfig(**logging_data),
+            network=NetworkConfig(**_filter_fields(NetworkConfig, data.get("network", {}))),
+            processing=ProcessingConfig(**_filter_fields(ProcessingConfig, data.get("processing", {}))),
+            logging=LoggingConfig(**_filter_fields(LoggingConfig, data.get("logging", {}))),
+            ui=UIConfig(**_filter_fields(UIConfig, data.get("ui", {}))),
+            pdf=PdfConfig(**_filter_fields(PdfConfig, data.get("pdf", {}))),
         )
 
 
 class ConfigManager:
     """Manages configuration loading and merging from multiple sources."""
+
+    _section_to_class = {
+        "network": NetworkConfig,
+        "processing": ProcessingConfig,
+        "ui": UIConfig,
+        "logging": LoggingConfig,
+        "pdf": PdfConfig,
+    }
 
     def __init__(self):
         """Initialize the configuration manager.
@@ -168,6 +204,32 @@ class ConfigManager:
         self.logger = get_logger(__name__)
         self._config = FetchNewsConfig()
         self._config_loaded = False
+
+    def _load_settings_file(self, path: Path) -> None:
+        """Load a Global-settings.yaml file and merge into current config.
+
+        Silently ignores missing files, sources/bundles keys, and unknown keys.
+        """
+        if not path.exists():
+            return
+        try:
+            import yaml
+            data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        except Exception as e:
+            self.logger.warning(f"Failed to read settings file {path}: {e}")
+            return
+
+        # sources/bundles belong to capcat.yml, not settings files
+        data.pop("sources", None)
+        data.pop("bundles", None)
+
+        # Filter each section to known fields before merging
+        for section_name, section_data in list(data.items()):
+            cls = self._section_to_class.get(section_name)
+            if cls and isinstance(section_data, dict):
+                data[section_name] = _filter_fields(cls, section_data)
+
+        self._merge_config_data(data)
 
     def load_config(
         self, config_file: Optional[str] = None, load_env: bool = True
@@ -188,6 +250,12 @@ class ConfigManager:
 
         # Start with defaults
         self._config = FetchNewsConfig()
+
+        # Load Global-settings.yaml from user-level then vault-level (unconditional)
+        user_settings = Path.home() / ".config" / "capcat" / "Global-settings.yaml"
+        vault_settings = Path("Config") / "Global-settings.yaml"
+        self._load_settings_file(user_settings)
+        self._load_settings_file(vault_settings)
 
         # Load from config file if specified
         if config_file:

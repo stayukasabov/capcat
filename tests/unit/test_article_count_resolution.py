@@ -1,4 +1,5 @@
 """Tests for per-source article_count field and count resolution."""
+from unittest.mock import MagicMock
 from capcat.core.source_system.base_source import SourceConfig
 
 
@@ -11,8 +12,8 @@ def _config(**kwargs) -> SourceConfig:
 
 
 class TestSourceConfigArticleCount:
-    def test_default_is_30(self):
-        assert _config().article_count == 30
+    def test_default_is_none(self):
+        assert _config().article_count is None
 
     def test_explicit_value_stored(self):
         assert _config(article_count=15).article_count == 15
@@ -49,7 +50,8 @@ class TestRegistryLoadsArticleCount:
         assert cfg is not None
         assert cfg.article_count == 15
 
-    def test_registry_defaults_to_30_when_field_absent(self, tmp_path):
+    def test_registry_defaults_to_none_when_field_absent(self, tmp_path):
+        """When article_count is absent from YAML, SourceConfig.article_count is None."""
         import yaml
         cfg_dir = tmp_path / "config_driven" / "configs"
         cfg_dir.mkdir(parents=True)
@@ -63,7 +65,7 @@ class TestRegistryLoadsArticleCount:
         reg = SourceRegistry(sources_dir=str(tmp_path))
         reg.discover_sources()
         cfg = reg.get_source_config("nosource")
-        assert cfg.article_count == 30
+        assert cfg.article_count is None
 
 
 class TestCountResolution:
@@ -71,16 +73,22 @@ class TestCountResolution:
         """When CLI count is provided, it wins over source article_count."""
         from capcat.core.unified_source_processor import _resolve_count
         config = _config(article_count=10)
-        assert _resolve_count(cli_count=20, source_config=config) == 20
+        mock_cfg = MagicMock()
+        mock_cfg.processing.article_count = 30
+        assert _resolve_count(cli_count=20, source_config=config, config=mock_cfg) == 20
 
     def test_none_cli_uses_source_count(self):
         """When CLI count is None, source article_count is used."""
         from capcat.core.unified_source_processor import _resolve_count
         config = _config(article_count=15)
-        assert _resolve_count(cli_count=None, source_config=config) == 15
+        mock_cfg = MagicMock()
+        mock_cfg.processing.article_count = 30
+        assert _resolve_count(cli_count=None, source_config=config, config=mock_cfg) == 15
 
-    def test_none_cli_none_source_fallback(self):
-        """When both CLI and source count are absent, default 30 applies."""
+    def test_none_cli_none_source_falls_back_to_global(self):
+        """When both CLI and source count are absent, global config default applies."""
         from capcat.core.unified_source_processor import _resolve_count
-        config = _config()  # article_count defaults to 30
-        assert _resolve_count(cli_count=None, source_config=config) == 30
+        config = _config()  # article_count defaults to None
+        mock_cfg = MagicMock()
+        mock_cfg.processing.article_count = 42
+        assert _resolve_count(cli_count=None, source_config=config, config=mock_cfg) == 42

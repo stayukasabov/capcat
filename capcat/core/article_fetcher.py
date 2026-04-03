@@ -18,9 +18,13 @@ from urllib.parse import urljoin, urlparse
 import requests
 from bs4 import BeautifulSoup
 
-from capcat.core.constants import CONVERSION_TIMEOUT_SECONDS
 from capcat.core.conversion_executor import get_conversion_executor
 from .config import get_config
+from .async_pdf_manager import (
+    get_pdf_manager,
+    initialize_pdf_manager,
+    pdf_exceeds_size_limit,
+)
 from .downloader import (
     download_file,
     is_audio_url,
@@ -70,47 +74,7 @@ def _collect_pdf_links_from_soup(soup: "BeautifulSoup", base_url: str) -> list:
 # Global update mode flag that can be accessed by all ArticleFetcher instances
 _GLOBAL_UPDATE_MODE = False
 
-# PDF download skip feature constants
-LARGE_PDF_THRESHOLD_MB = 5
-SKIP_PROMPT_TIMEOUT_SECONDS = 20
 BYTES_TO_MB = 1024 * 1024
-
-
-def _listen_for_esc(stop_event: threading.Event) -> None:
-    """
-    Background thread target: set stop_event when ESC is pressed.
-
-    Uses termios to put stdin in raw mode so individual keypresses are
-    readable without waiting for Enter. Exits silently if stdin is not
-    a tty (piped input, CI, etc.).
-
-    Args:
-        stop_event: Event to set when ESC (0x1b) is detected.
-    """
-    if not sys.stdin.isatty():
-        return
-    try:
-        import termios
-        import tty
-    except ImportError:
-        return
-
-    fd = sys.stdin.fileno()
-    old = termios.tcgetattr(fd)
-    try:
-        tty.setraw(fd)
-        while not stop_event.is_set():
-            ch = sys.stdin.read(1)
-            if ch == '\x1b':  # ESC
-                stop_event.set()
-                break
-    except Exception:
-        pass
-    finally:
-        try:
-            termios.tcsetattr(fd, termios.TCSADRAIN, old)
-        except Exception:
-            pass
 
 
 def set_global_update_mode(update_mode: bool):
@@ -127,7 +91,7 @@ def get_global_update_mode() -> bool:
 def convert_html_with_timeout(
     html_content: str,
     url: str,
-    timeout: int = CONVERSION_TIMEOUT_SECONDS
+    timeout: int = None,
 ) -> str:
     """Convert HTML to markdown with thread-safe timeout protection.
 
@@ -155,6 +119,10 @@ def convert_html_with_timeout(
         This function is thread-safe and can be called concurrently
         from multiple threads without race conditions.
     """
+    if timeout is None:
+        from capcat.core.config import get_config
+        timeout = get_config().processing.conversion_timeout
+
     logger = get_logger("convert_html_with_timeout")
 
     # Handle empty or invalid content
@@ -214,6 +182,15 @@ class ArticleFetcher(ABC):
         # Initialize MediaProcessor for delegating media operations
         from .media_processor import MediaProcessor
         self.media_processor = MediaProcessor(session, download_files)
+
+        # Wire PDF manager and ethical scraping from config
+        config = get_config()
+        initialize_pdf_manager(config.pdf)
+        from capcat.core.ethical_scraping import get_ethical_manager
+        get_ethical_manager().configure(
+            config.network.crawl_delay,
+            config.network.robots_cache_ttl_minutes,
+        )
 
     def set_download_files(self, download_files: bool):
         """Dynamically set the download_files flag."""
@@ -663,148 +640,6 @@ class ArticleFetcher(ABC):
             self.logger.error(f"Failed to create skip placeholder: {e}")
             return False, None, None
 
-    def _check_pdf_size_and_prompt(
-        self,
-        url: str,
-        title: str,
-        is_direct_pdf: bool = False
-    ) -> bool:
-        """
-        Check PDF file size and prompt user to skip if large.
-
-        Args:
-            url: PDF file URL
-            title: Article title
-            is_direct_pdf: True if URL itself is a PDF (not discovered in content)
-
-        Returns:
-            True if user wants to skip, False to proceed
-        """
-        config = get_config()
-
-        try:
-            # Make HEAD request to get Content-Length
-            response = self.session.head(
-                url,
-                timeout=config.network.connect_timeout,
-                allow_redirects=True
-            )
-
-            # Check if Content-Length header exists
-            if 'Content-Length' not in response.headers:
-                self.logger.debug(
-                    f"No Content-Length header for {url}, proceeding with download"
-                )
-                return False
-
-            # Get file size in MB
-            size_bytes = int(response.headers['Content-Length'])
-            size_mb = size_bytes / BYTES_TO_MB
-
-            # If file is smaller than threshold, proceed without prompt
-            if size_mb < LARGE_PDF_THRESHOLD_MB:
-                return False
-
-            # File is large, prompt user with context
-            return self._prompt_user_skip(title, size_mb, is_direct_pdf=is_direct_pdf)
-
-        except (ValueError, KeyError) as e:
-            # Invalid Content-Length header value
-            self.logger.debug(
-                f"Invalid Content-Length for {url}: {e}. Proceeding with download."
-            )
-            return False
-        except requests.exceptions.RequestException as e:
-            # Network error during HEAD request
-            from capcat.core.tui_context import is_tui_active
-            if is_tui_active():
-                self.logger.debug(
-                    f"Network error checking PDF size for {url}: {e}. "
-                    f"Proceeding with download."
-                )
-            else:
-                self.logger.warning(
-                    f"Network error checking PDF size for {url}: {e}. "
-                    f"Proceeding with download."
-                )
-            return False
-        except Exception as e:
-            # Unexpected errors
-            from capcat.core.tui_context import is_tui_active
-            if is_tui_active():
-                self.logger.debug(
-                    f"Unexpected error checking PDF size for {url}: {e}. "
-                    f"Proceeding with download."
-                )
-            else:
-                self.logger.warning(
-                    f"Unexpected error checking PDF size for {url}: {e}. "
-                    f"Proceeding with download."
-                )
-            return False
-
-    def _prompt_user_skip(
-        self,
-        title: str,
-        size_mb: float,
-        is_direct_pdf: bool = False
-    ) -> bool:
-        """
-        Prompt user to skip large PDF download with ESC key.
-
-        Args:
-            title: Article title
-            size_mb: File size in megabytes
-            is_direct_pdf: True if URL itself is a PDF (not discovered in content)
-
-        Returns:
-            True if ESC pressed (skip), False on timeout (proceed)
-        """
-        from capcat.core.tui_context import is_tui_active, record_fetch_result
-        if is_tui_active():
-            record_fetch_result(False, "large PDF")
-            return True
-
-        esc_pressed = threading.Event()
-        listener = threading.Thread(
-            target=_listen_for_esc, args=(esc_pressed,), daemon=True
-        )
-        listener.start()
-
-        # Context-aware message
-        context_msg = "operation will stop" if is_direct_pdf else "bundle will continue"
-
-        # Display prompt with countdown
-        print(
-            f"\n{'=' * 60}\n"
-            f"Large PDF detected ({size_mb:.1f} MB): {title}\n"
-            f"Press ESC within {SKIP_PROMPT_TIMEOUT_SECONDS} seconds to skip ({context_msg})\n"
-            f"{'=' * 60}",
-            flush=True
-        )
-
-        try:
-            # Countdown loop
-            for remaining in range(SKIP_PROMPT_TIMEOUT_SECONDS, 0, -1):
-                if esc_pressed.is_set():
-                    if is_direct_pdf:
-                        print("\n✓ Skipped - stopping process...", flush=True)
-                    else:
-                        print("\n✓ Skipped - continuing with next article...", flush=True)
-                    return True
-
-                # Show countdown
-                sys.stdout.write(f"\r{remaining} seconds remaining... ")
-                sys.stdout.flush()
-                time.sleep(1)
-
-            # Timeout reached - proceed with download
-            print("\n✓ Starting download...", flush=True)
-            return False
-
-        finally:
-            esc_pressed.set()  # signal thread to exit
-
     def _fetch_web_content(
         self,
         title: str,
@@ -816,15 +651,11 @@ class ArticleFetcher(ABC):
         """Fetch and process regular web page content."""
         config = get_config()
 
-        # Check for PDF files and prompt user for large files
+        # Check for PDF files and skip if too large
         is_direct_pdf_url = url.lower().endswith('.pdf')
         if is_direct_pdf_url:
-            should_skip = self._check_pdf_size_and_prompt(
-                url, title, is_direct_pdf=True
-            )
-            if should_skip:
-                # Direct PDF URL skip → success (user choice) but no content
-                self.logger.info("✓ User skipped large PDF - stopping process")
+            if pdf_exceeds_size_limit(url, self.session, get_config().pdf.max_pdf_size_bytes):
+                self.logger.info("Skipping oversized PDF: %s", url)
                 return True, None, None
 
         # Report initial progress
@@ -1309,7 +1140,6 @@ class ArticleFetcher(ABC):
 
         # Use async PDF manager to prevent thread blocking
         try:
-            from .async_pdf_manager import get_pdf_manager
             pdf_manager = get_pdf_manager()
 
             updated_content, pdf_count = pdf_manager.extract_and_queue_pdf_links(
@@ -1389,7 +1219,6 @@ class ArticleFetcher(ABC):
         This runs in background after the article is saved to update PDF placeholders.
         """
         try:
-            from .async_pdf_manager import get_pdf_manager
             from .storage_manager import find_article_md
             from pathlib import Path
             import threading

@@ -18,6 +18,8 @@ Complete reference of all modules, classes, and functions in Capcat.
 - [Config.sources.backup_2026-03-30-2.custom-lb-source](../api/Config/custom-lb-source.md) - Lobsters source implementation for the new source system
 - [Config.sources.backup_2026-03-30-4.custom-lb-source](../api/Config/custom-lb-source.md) - Lobsters source implementation for the new source system
 - [Config.sources.backup_2026-03-30.custom-hn-source](../api/Config/custom-hn-source.md) - Hacker News source implementation for the new source system
+- [Config.sources.backup_2026-04-02-2.custom-lb-source](../api/Config/custom-lb-source.md) - Lobsters source implementation for the new source system
+- [Config.sources.backup_2026-04-02.custom-hn-source](../api/Config/custom-hn-source.md) - Hacker News source implementation for the new source system
 
 ### Build
 
@@ -496,9 +498,9 @@ Usage:
 
 ## Statistics
 
-- **Total Modules**: 358
-- **Total Classes**: 625
-- **Total Functions**: 778
+- **Total Modules**: 360
+- **Total Classes**: 627
+- **Total Functions**: 780
 - **Public Functions**: 611
-- **Documentation Coverage**: 78.5%
+- **Documentation Coverage**: 78.3%
 

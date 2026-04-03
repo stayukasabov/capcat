@@ -13,7 +13,22 @@ from queue import Queue
 from typing import Dict, List, Optional, Set, Tuple
 from urllib.parse import urlparse
 
+import requests
+
 from .logging_config import get_logger
+from .config import PdfConfig
+
+
+def pdf_exceeds_size_limit(url: str, session, max_bytes: int) -> bool:
+    """Return True if HEAD response reports Content-Length > max_bytes."""
+    try:
+        head = session.head(url, timeout=10, allow_redirects=True)
+        content_length = head.headers.get("Content-Length")
+        if content_length and int(content_length) > max_bytes:
+            return True
+    except Exception:
+        pass
+    return False
 
 
 class AsyncPDFManager:
@@ -26,8 +41,10 @@ class AsyncPDFManager:
     3. Updates markdown files once downloads complete
     """
 
-    def __init__(self, max_workers: int = 4):
+    def __init__(self, max_workers: int = 4, pdf_config: PdfConfig = None):
         self.max_workers = max_workers
+        self.pdf_config = pdf_config if pdf_config is not None else PdfConfig()
+        self._check_session = requests.Session()
         self.logger = get_logger(self.__class__.__name__)
 
         # Background download management
@@ -97,6 +114,9 @@ class AsyncPDFManager:
                 return match.group(0)  # Keep original
 
             seen_urls.add(link_url)
+
+            if queued_count >= self.pdf_config.max_pdf_per_article:
+                return match.group(0)  # Cap reached, keep original link unchanged
 
             # Queue for background download
             download_info = {
@@ -213,6 +233,12 @@ class AsyncPDFManager:
         try:
             self.logger.debug(f"Starting PDF download: {url}")
 
+            if pdf_exceeds_size_limit(url, self._check_session, self.pdf_config.max_pdf_size_bytes):
+                self.logger.warning("Skipping PDF (too large): %s", url)
+                with self._lock:
+                    self.failed_downloads.add(url)
+                return
+
             # Import here to avoid circular imports
             from .downloader import download_file
 
@@ -276,12 +302,18 @@ class AsyncPDFManager:
 # Global instance for article fetchers to use
 _global_pdf_manager: Optional[AsyncPDFManager] = None
 
+def initialize_pdf_manager(pdf_config: "PdfConfig") -> AsyncPDFManager:
+    """Create and cache the global AsyncPDFManager with the given config."""
+    global _global_pdf_manager
+    _global_pdf_manager = AsyncPDFManager(pdf_config=pdf_config)
+    return _global_pdf_manager
+
+
 def get_pdf_manager() -> AsyncPDFManager:
     """Get the global async PDF manager instance."""
     global _global_pdf_manager
     if _global_pdf_manager is None:
-        _global_pdf_manager = AsyncPDFManager(max_workers=4)
-        _global_pdf_manager.start()
+        _global_pdf_manager = AsyncPDFManager()
     return _global_pdf_manager
 
 def shutdown_pdf_manager():

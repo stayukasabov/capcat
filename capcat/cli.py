@@ -6,6 +6,212 @@ startup stays fast and circular-import-safe.
 """
 from __future__ import annotations
 import sys
+from pathlib import Path
+
+
+GLOBAL_SETTINGS_TEMPLATE = """\
+# Global Settings — Capcat
+# Edit this file to tune behavior for this vault.
+# All fields are optional. Defaults are shown in comments.
+# Restart capcat after editing.
+
+# ─── PDF Downloads ──────────────────────────────────────
+pdf:
+  # Skip PDF files larger than this size in bytes.
+  # Default: 20971520 (20MB). Examples: 10485760 = 10MB, 52428800 = 50MB
+  max_pdf_size_bytes: 20971520
+
+  # Maximum number of PDFs queued per article.
+  # Default: 10
+  max_pdf_per_article: 10
+
+# ─── Network ────────────────────────────────────────────
+network:
+  # TCP connection timeout in seconds. Increase for slow servers.
+  # Default: 10
+  connect_timeout: 10
+
+  # HTTP response body read timeout in seconds.
+  # Default: 30
+  read_timeout: 30
+
+  # Image and PDF download timeout in seconds.
+  # Default: 60
+  media_download_timeout: 60
+
+  # HEAD request timeout for link checking in seconds.
+  # Default: 10
+  head_request_timeout: 10
+
+  # Retry attempts on network failure.
+  # Default: 3
+  max_retries: 3
+
+  # Base delay between retries in seconds.
+  # Default: 1.0
+  retry_delay: 1.0
+
+  # Minimum seconds between requests to the same domain.
+  # Default: 1.0
+  crawl_delay: 1.0
+
+  # How long to cache robots.txt responses in minutes.
+  # Default: 15
+  robots_cache_ttl_minutes: 15
+
+  # HTTP User-Agent header sent with all requests.
+  # Default: "Capcat/2.0 (Personal news archiver)"
+  user_agent: "Capcat/2.0 (Personal news archiver)"
+
+  # HTTP connection pool size.
+  # Default: 20
+  pool_connections: 20
+
+  # Maximum concurrent connections.
+  # Default: 20
+  pool_maxsize: 20
+
+# ─── Processing ─────────────────────────────────────────
+processing:
+  # Default articles fetched per source per run.
+  # Per-source article_count in each source's config.yaml overrides this.
+  # Default: 30
+  article_count: 30
+
+  # Concurrent article fetcher workers.
+  # Default: 8
+  max_workers: 8
+
+  # HTML to Markdown conversion timeout in seconds.
+  # Default: 30
+  conversion_timeout: 30
+
+  # Maximum images downloaded per article (normal mode).
+  # Default: 20
+  max_images: 20
+
+  # Maximum images downloaded per article when --media flag is active.
+  # Default: 1000
+  max_images_media_mode: 1000
+
+  # Skip images smaller than this in pixels (width and height).
+  # Default: 150
+  min_image_dimensions: 150
+
+  # Skip images larger than this in bytes.
+  # Default: 5242880 (5MB). Example: 1048576 = 1MB
+  max_image_size_bytes: 5242880
+
+  # Maximum characters in vault filenames.
+  # Default: 100
+  max_filename_length: 100
+
+  # Download and embed images locally.
+  # Default: true
+  download_images: true
+
+  # Download video files.
+  # Default: false
+  download_videos: false
+
+  # Download audio files.
+  # Default: false
+  download_audio: false
+
+  # Download generic document files.
+  # Default: false
+  download_documents: false
+
+  # Fetch and save comments alongside articles.
+  # Default: true
+  create_comments_file: true
+
+  # Strip <script> tags from HTML before conversion.
+  # Default: true
+  remove_script_tags: true
+
+  # Strip <style> tags from HTML before conversion.
+  # Default: true
+  remove_style_tags: true
+
+  # Strip <nav> tags from HTML before conversion.
+  # Default: true
+  remove_nav_tags: true
+
+  # Preserve line breaks in markdown output.
+  # Default: true
+  markdown_line_breaks: true
+
+# ─── UI ─────────────────────────────────────────────────
+ui:
+  # Spinner style for article progress.
+  # Options: dots, wave, loading, pulse, bounce, modern
+  # Default: dots
+  progress_spinner_style: dots
+
+  # Spinner style for batch operations.
+  # Options: activity, progress, pulse, wave, dots, scan
+  # Default: activity
+  batch_spinner_style: activity
+
+  # Progress bar width in characters.
+  # Default: 25
+  progress_bar_width: 25
+
+  # Show animated progress indicators.
+  # Default: true
+  show_progress_animations: true
+
+  # Use emoji in output.
+  # Default: true
+  use_emojis: true
+
+  # Use colors in terminal output.
+  # Default: true
+  use_colors: true
+
+  # Show per-article detail during fetch.
+  # Default: false
+  show_detailed_progress: false
+
+# ─── Logging ────────────────────────────────────────────
+logging:
+  # Log level for all output. Options: DEBUG, INFO, WARNING, ERROR
+  # Default: INFO
+  default_level: INFO
+
+  # Log level for terminal output.
+  # Default: INFO
+  console_level: INFO
+
+  # Log level written to log file.
+  # Default: DEBUG
+  file_level: DEBUG
+
+  # Maximum log file size before rotation in bytes.
+  # Default: 10485760 (10MB)
+  max_log_file_size: 10485760
+
+  # Number of rotated log files to keep.
+  # Default: 5
+  log_file_backup_count: 5
+
+  # Include timestamps in log output.
+  # Default: true
+  include_timestamps: true
+
+  # Include module names in log output.
+  # Default: true
+  include_module_names: true
+
+  # Auto-create log directory if it does not exist.
+  # Default: true
+  auto_create_log_dir: true
+
+  # Colorize log output.
+  # Default: true
+  use_colors: true
+"""
 
 
 # ---------------------------------------------------------------------------
@@ -26,6 +232,7 @@ def _print_help() -> None:
         "  add-source       Add a new source\n"
         "  remove-source    Remove a source\n"
         "  generate-config  Generate a YAML config\n"
+        "  settings         Write Global-settings.yaml template to Config/\n"
         "\nOptions:\n"
         "  -L <file>        Log output to file\n"
         "  -V, --verbose    Verbose output\n"
@@ -112,6 +319,8 @@ def _dispatch(args: list[str]) -> None:
         _cmd_remove_source(rest)
     elif command == "generate-config":
         _cmd_generate_config(rest)
+    elif command == "settings":
+        _cmd_settings(rest)
     else:
         print(f"capcat: unknown command '{command}'. Run 'capcat --help'.")
         raise SystemExit(1)
@@ -170,6 +379,14 @@ def _cmd_init(args: list[str]) -> None:
     reinit = "--reinit" in args
     try:
         init_project(Path.cwd(), reinit=reinit)
+        if not reinit:
+            user_settings = Path.home() / ".config" / "capcat" / "Global-settings.yaml"
+            if not user_settings.exists():
+                user_settings.parent.mkdir(parents=True, exist_ok=True)
+                user_settings.write_text(GLOBAL_SETTINGS_TEMPLATE, encoding="utf-8")
+            vault_settings = Path("Config") / "Global-settings.yaml"
+            if not vault_settings.exists():
+                vault_settings.write_text(GLOBAL_SETTINGS_TEMPLATE, encoding="utf-8")
         print("Capcat project initialized.")
         print("  Config/   -- your themes")
         print("  .capcat/  -- internal state (don't edit)")
@@ -466,6 +683,21 @@ def _cmd_remove_source(args: list[str]) -> None:
 
     from capcat.commands.remove_source import remove_source
     remove_source(ns)
+
+
+# ---------------------------------------------------------------------------
+# settings
+# ---------------------------------------------------------------------------
+
+def _cmd_settings(args: list[str]) -> None:
+    """Write Global-settings.yaml template to Config/ directory."""
+    force = "--force" in args
+    out = Path("Config") / "Global-settings.yaml"
+    if out.exists() and not force:
+        print(f"Config/Global-settings.yaml already exists. Use --force to overwrite.")
+        return
+    out.write_text(GLOBAL_SETTINGS_TEMPLATE, encoding="utf-8")
+    print(f"Written: {out.resolve()}")
 
 
 # ---------------------------------------------------------------------------

@@ -53,19 +53,25 @@ class FetchResult:
 def _resolve_count(
     cli_count: Optional[int],
     source_config: "SourceConfig",
+    config=None,
 ) -> int:
-    """Resolve article count: CLI flag > source YAML > default 30.
+    """Resolve article count: CLI flag > source YAML > global config default.
 
     Args:
         cli_count: Value from --count flag, or None if not provided.
         source_config: The source's SourceConfig (has article_count field).
+        config: FetchNewsConfig instance (used for global default fallback).
 
     Returns:
         Number of articles to fetch.
     """
     if cli_count is not None:
         return cli_count
-    return source_config.article_count  # already defaults to 30
+    if source_config.article_count is not None:
+        return source_config.article_count
+    if config is not None:
+        return config.processing.article_count
+    return get_config().processing.article_count
 
 
 def _build_article_metadata(article, source) -> dict:
@@ -232,8 +238,8 @@ class UnifiedSourceProcessor:
                     f"No configuration found for source '{source_name}'"
                 )
 
-            # Resolve per-source count (CLI overrides source YAML, which overrides 30)
-            resolved_count = _resolve_count(count, source_config)
+            # Resolve per-source count (CLI > source YAML > global config)
+            resolved_count = _resolve_count(count, source_config, get_config())
 
             self.logger.info(
                 f"Fetching top {resolved_count} articles from {source_config.display_name}..."
