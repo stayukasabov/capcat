@@ -1133,9 +1133,6 @@ class ArticleFetcher(ABC):
         threads on slow PDF downloads. PDFs are downloaded asynchronously
         in the background.
         """
-        if not self.download_files:
-            return markdown_content
-
         # Use async PDF manager to prevent thread blocking
         try:
             pdf_manager = get_pdf_manager()
