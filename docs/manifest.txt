@@ -1,5 +1,5 @@
 Capcat Documentation Manifest
-Generated: 2026-04-01 09:55:23 UTC
+Generated: 2026-04-03 02:59:07 UTC
 Success rate: 2/2 tasks
 
 Generated Documentation:
@@ -408,6 +408,9 @@ Generated Documentation:
   - superpowers/plans/2026-03-31-obsidian-frontmatter.md
   - superpowers/plans/2026-03-31-youtube-player-hero.md
   - superpowers/plans/2026-04-01-arxiv-pdf-accept-header.md
+  - superpowers/plans/2026-04-01-pdf-bug-fixes.md
+  - superpowers/plans/2026-04-01-rate-limit-thread-safety.md
+  - superpowers/plans/2026-04-02-global-settings-yaml.md
   - superpowers/specs/2026-03-15-breadcrumb-phase1-folder-naming-design.md
   - superpowers/specs/2026-03-15-breadcrumb-phase2-html-rendering-design.md
   - superpowers/specs/2026-03-15-claude-md-context-engineering-design.md
@@ -427,7 +430,9 @@ Generated Documentation:
   - superpowers/specs/2026-03-26-tui-menu-bottom-blank-row-design.md
   - superpowers/specs/2026-03-27-tui-fetch-summary-design.md
   - superpowers/specs/2026-03-31-obsidian-frontmatter-prd.md
+  - superpowers/specs/2026-04-02-global-settings-yaml-design.md
+  - superpowers/specs/2026-04-02-user-config-yaml-inventory.md
   - troubleshooting.md
 
-Total files: 752
-Documentation size: 44.1 MB
+Total files: 757
+Documentation size: 44.2 MB

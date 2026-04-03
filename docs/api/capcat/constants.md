@@ -11,14 +11,6 @@ All constants follow SCREAMING_SNAKE_CASE convention.
 
 ## Constants
 
-### CONVERSION_TIMEOUT_SECONDS
-
-**Value:** `30`
-
-### DEFAULT_ARTICLE_COUNT
-
-**Value:** `30`
-
 ### DEFAULT_CONNECT_TIMEOUT
 
 **Value:** `10`
@@ -35,37 +27,9 @@ All constants follow SCREAMING_SNAKE_CASE convention.
 
 **Value:** `2.0`
 
-### DEFAULT_MAX_IMAGES
-
-**Value:** `20`
-
-### MEDIA_FLAG_MAX_IMAGES
-
-**Value:** `1000`
-
-### MIN_IMAGE_DIMENSIONS
-
-**Value:** `150`
-
-### MAX_IMAGE_SIZE_BYTES
-
-**Value:** `5 * 1024 * 1024`
-
-### MAX_FILENAME_LENGTH
-
-**Value:** `255`
-
 ### SAFE_FILENAME_CHARS
 
 **Value:** `'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.'`
-
-### DEFAULT_CRAWL_DELAY
-
-**Value:** `1.0`
-
-### ROBOTS_CACHE_TTL_MINUTES
-
-**Value:** `15`
 
 ### MAX_LINK_DENSITY_PERCENT
 

@@ -47,6 +47,22 @@ Args:
 - `self`
 - `user_agent` (str) *optional*
 
+##### configure
+
+```python
+def configure(self, crawl_delay: float, robots_cache_ttl_minutes: int) -> None
+```
+
+Update rate-limiting parameters on the singleton after config is loaded.
+
+**Parameters:**
+
+- `self`
+- `crawl_delay` (float)
+- `robots_cache_ttl_minutes` (int)
+
+**Returns:** None
+
 ##### get_robots_txt
 
 ```python

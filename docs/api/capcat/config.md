@@ -29,6 +29,11 @@ User interface and experience configuration settings.
 Logging-related configuration settings.
 
 
+### PdfConfig
+
+PDF download configuration settings.
+
+
 ### FetchNewsConfig
 
 Main configuration class containing all settings.
@@ -43,7 +48,7 @@ def __post_init__(self)
 
 Initialize sub-configs if not provided.
 
-Creates default instances for network, processing, logging, and UI
+Creates default instances for network, processing, logging, UI, and PDF
 configurations when not explicitly specified.
 
 **Parameters:**
@@ -76,7 +81,7 @@ def from_dict(cls, data: Dict[str, Any]) -> 'FetchNewsConfig'
 Create configuration from dictionary.
 
 Args:
-    data: Dictionary with network, processing, logging sections
+    data: Dictionary with network, processing, logging, ui, pdf sections
 
 Returns:
     New FetchNewsConfig instance
@@ -108,6 +113,23 @@ Creates default configuration and sets load status to false.
 **Parameters:**
 
 - `self`
+
+##### _load_settings_file
+
+```python
+def _load_settings_file(self, path: Path) -> None
+```
+
+Load a Global-settings.yaml file and merge into current config.
+
+Silently ignores missing files, sources/bundles keys, and unknown keys.
+
+**Parameters:**
+
+- `self`
+- `path` (Path)
+
+**Returns:** None
 
 ##### load_config
 
@@ -243,6 +265,21 @@ Returns:
 
 
 ## Functions
+
+### _filter_fields
+
+```python
+def _filter_fields(cls, data: dict) -> dict
+```
+
+Return only keys that are known fields on the dataclass cls.
+
+**Parameters:**
+
+- `cls`
+- `data` (dict)
+
+**Returns:** dict
 
 ### get_config
 
