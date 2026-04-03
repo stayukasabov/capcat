@@ -9,6 +9,7 @@ import os
 import requests
 import yaml
 
+from .config import get_config
 from .image_processor import get_image_processor
 from .logging_config import get_logger
 
@@ -46,6 +47,9 @@ class UnifiedMediaProcessor:
         logger = get_logger(__name__)
 
         try:
+            if not get_config().processing.download_images:
+                return content
+
             # Load source configuration
             source_config = UnifiedMediaProcessor._load_source_config(
                 source_name
