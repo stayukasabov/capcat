@@ -113,3 +113,45 @@ Added `and self.config.processing.create_comments_file` to the comments block gu
 
 **How to reproduce:**
 Set `create_comments_file: false` in `Global-settings.yaml`. Run `capcat fetch hn -q`. Observe `*-Comments.md` files in output.
+
+---
+
+## B8 — `download_images: false` ignored — images always downloaded
+
+**Severity:** Medium — cannot disable image downloads via config
+
+**Symptom:**
+Setting `download_images: false` in `Global-settings.yaml` has no effect. Images are downloaded for all articles.
+
+**Root cause:**
+Two separate code paths both ignored the flag:
+1. `article_fetcher.py:_process_embedded_media_efficiently` — no check on `get_config().processing.download_images` before adding image links to `quick_filtered_links`
+2. `unified_media_processor.py:process_article_media` — no check before calling `image_processor.process_article_images`
+
+**Fix:**
+Added `_download_images = get_config().processing.download_images` guard before the filtering loop in `article_fetcher.py`, and early return in `unified_media_processor.py`. Fixed in v1.9.12.
+
+---
+
+## B9-B14 — Multiple processing/UI/logging config keys are dead code
+
+**Severity:** Medium — documented, user-configurable settings have no effect
+
+**Dead config keys (defined in ProcessingConfig, UIConfig, or LoggingConfig but never read by the code that should act on them):**
+
+| Key | Type | Expected effect | Actual state |
+|-----|------|-----------------|--------------|
+| `min_image_dimensions` | `processing` | Skip images below N pixels | Never read; `_MIN_PIXEL_DIMENSION` (hardcoded 150px) used instead |
+| `max_image_size_bytes` | `processing` | Skip images larger than N bytes | Never read anywhere |
+| `markdown_line_breaks` | `processing` | Control trailing `\` in markdown | Never read anywhere |
+| `remove_script_tags` | `processing` | Strip `<script>` from HTML | Only referenced in fallback config stub |
+| `remove_style_tags` | `processing` | Strip `<style>` from HTML | Only referenced in fallback config stub |
+| `remove_nav_tags` | `processing` | Strip `<nav>` from HTML | Only referenced in fallback config stub |
+| `batch_spinner_style` | `ui` | Changes batch spinner animation | Never read anywhere |
+| `progress_bar_width` | `ui` | Changes progress bar width | Never read anywhere |
+| `show_detailed_progress` | `ui` | Per-article progress detail | Never read anywhere |
+| `include_timestamps` | `logging` | Timestamps in log output | Never read; logger always includes them |
+| `include_module_names` | `logging` | Module names in log output | Never read anywhere |
+| `console_level` | `logging` | Terminal log verbosity | Never read; only DEBUG/INFO/ERROR affected by --verbose/-q flags |
+| `use_emojis` | `ui` | Emoji in terminal output | Never read; `use_colors` read instead from `logging.use_colors` |
+| `use_colors` | `ui` | ANSI colors in output | Hardcoded to True in progress.py; `logging.use_colors` read by logging setup |
