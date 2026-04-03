@@ -216,3 +216,22 @@ without raising.
 
 **Returns:** bool
 
+### update_frontmatter_pdfs
+
+```python
+def update_frontmatter_pdfs(md_path: str, pdf_paths: list) -> bool
+```
+
+Add or replace the 'pdfs' key in an existing YAML frontmatter block.
+
+Reads current frontmatter, sets pdfs to pdf_paths, writes back.
+No-ops (returns True) when pdf_paths is empty.
+Returns False if no frontmatter exists or on any error.
+
+**Parameters:**
+
+- `md_path` (str)
+- `pdf_paths` (list)
+
+**Returns:** bool
+

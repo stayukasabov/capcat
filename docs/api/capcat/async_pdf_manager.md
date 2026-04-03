@@ -95,7 +95,7 @@ def update_article_with_completed_downloads(self, markdown_file_path: str)
 ```
 
 Update an article's markdown file with completed PDF downloads.
-This is called after the article is saved to update PDF links.
+Replaces placeholder links in the body and adds paths to frontmatter.
 
 **Parameters:**
 
