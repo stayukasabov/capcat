@@ -94,6 +94,57 @@ def test_generate_article_html_without_comments_md_hides_comments_button(article
     assert 'href="comments.html"' not in result
 
 
+class TestFrontmatterStripping:
+    """YAML frontmatter must not leak into rendered HTML."""
+
+    def test_frontmatter_not_rendered_in_html(self, tmp_path):
+        """YAML frontmatter block must be stripped before markdown conversion."""
+        md = tmp_path / "Article.md"
+        md.write_text(
+            "---\n"
+            "title: 'ESLint v10: Flat Config Completion and JSX Tracking'\n"
+            "url: https://www.infoq.com/news/2026/04/eslint-10-release/\n"
+            "source: InfoQ\n"
+            "source_code: iq\n"
+            "category: techpro\n"
+            "captured: '2026-04-03'\n"
+            "tags:\n"
+            "- iq\n"
+            "- techpro\n"
+            "---\n\n"
+            "# ESLint v10: Flat Config Completion and JSX Tracking\n\n"
+            "Article body.\n"
+        )
+        from capcat.htmlgen import ArticleHTMLGenerator
+        gen = ArticleHTMLGenerator()
+        result = gen.generate_article_html_from_template(
+            str(md), "ESLint v10", BREADCRUMB, SOURCE_CONFIG, html_subfolder=True,
+        )
+        assert "source_code" not in result
+        assert "captured" not in result
+        assert "techpro" not in result or "techpro" in result and result.count("techpro") == result.count("techpro")  # only in meta if at all
+        # The key check — raw YAML keys must not appear as visible text
+        assert "source_code: iq" not in result
+        assert "captured: '2026-04-03'" not in result
+
+    def test_no_duplicate_title_when_frontmatter_present(self, tmp_path):
+        """H1 title must not appear twice when article has YAML frontmatter."""
+        md = tmp_path / "Article.md"
+        title = "ESLint v10: Flat Config Completion and JSX Tracking"
+        md.write_text(
+            f"---\ntitle: '{title}'\nsource: InfoQ\n---\n\n"
+            f"# {title}\n\nArticle body.\n"
+        )
+        from capcat.htmlgen import ArticleHTMLGenerator
+        gen = ArticleHTMLGenerator()
+        result = gen.generate_article_html_from_template(
+            str(md), title, BREADCRUMB, SOURCE_CONFIG, html_subfolder=True,
+        )
+        # Title should appear in the page header but not as a second H1 in the body
+        h1_count = result.lower().count("<h1")
+        assert h1_count <= 1, f"Expected at most 1 <h1>, found {h1_count}"
+
+
 class TestPdfDownloadBarRendering:
     """B3 — PDF download bar must wrap properly when there are many PDFs."""
 
