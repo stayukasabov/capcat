@@ -213,7 +213,10 @@ def download_file(
                         )
                         return None
                 else:
-                    max_size_mb = 20  # 20MB limit for all other cases
+                    if file_type in ("pdf", "document"):
+                        max_size_mb = config.pdf.max_pdf_size_bytes / (1024 * 1024)
+                    else:
+                        max_size_mb = 20
                     if size_mb > max_size_mb:
                         logger.info(
                             f"Skipping {file_type} download: {file_url} is {size_mb:.1f}MB (exceeds {max_size_mb}MB limit)"
