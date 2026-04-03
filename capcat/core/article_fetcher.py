@@ -7,8 +7,6 @@ code duplication between source-specific implementations.
 """
 
 import os
-import sys
-import threading
 import time
 from abc import ABC, abstractmethod
 from concurrent.futures import TimeoutError as FutureTimeoutError
