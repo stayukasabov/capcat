@@ -384,6 +384,9 @@ def _cmd_init(args: list[str]) -> None:
             if not user_settings.exists():
                 user_settings.parent.mkdir(parents=True, exist_ok=True)
                 user_settings.write_text(GLOBAL_SETTINGS_TEMPLATE, encoding="utf-8")
+            vault_settings = Path("Config") / "Global-settings.yaml"
+            if not vault_settings.exists():
+                vault_settings.write_text(GLOBAL_SETTINGS_TEMPLATE, encoding="utf-8")
         print("Capcat project initialized.")
         print("  Config/   -- your themes")
         print("  .capcat/  -- internal state (don't edit)")
