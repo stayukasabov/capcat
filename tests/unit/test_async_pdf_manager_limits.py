@@ -40,6 +40,11 @@ class TestPdfExceedsSizeLimit:
 
 
 class TestInitializePdfManager:
+    def teardown_method(self):
+        """Reset global state between tests."""
+        from capcat.core.async_pdf_manager import shutdown_pdf_manager
+        shutdown_pdf_manager()
+
     def test_initialize_seeds_singleton_with_config(self):
         cfg = PdfConfig(max_pdf_size_bytes=999_999, max_pdf_per_article=5)
         mgr = initialize_pdf_manager(cfg)
