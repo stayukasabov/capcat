@@ -55,18 +55,22 @@ def _resolve_count(
     source_config: "SourceConfig",
     config=None,
 ) -> int:
-    """Resolve article count: CLI flag > source YAML > global config default.
+    """Resolve article count: CLI flag > capcat.yml sources list > source YAML > global config default.
 
     Args:
         cli_count: Value from --count flag, or None if not provided.
         source_config: The source's SourceConfig (has article_count field).
-        config: FetchNewsConfig instance (used for global default fallback).
+        config: FetchNewsConfig instance (used for vault overrides and global fallback).
 
     Returns:
         Number of articles to fetch.
     """
     if cli_count is not None:
         return cli_count
+    if config is not None:
+        vault_count = config.source_overrides.get(source_config.name, {}).get("article_count")
+        if vault_count is not None:
+            return int(vault_count)
     if source_config.article_count is not None:
         return source_config.article_count
     if config is not None:
