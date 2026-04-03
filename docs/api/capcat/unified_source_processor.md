@@ -174,7 +174,7 @@ Process articles using the new source system.
 
 **Returns:** None
 
-⚠️ **High complexity:** 15
+⚠️ **High complexity:** 19
 
 ##### _process_articles_with_new_system
 

@@ -144,6 +144,25 @@ Returns True if all completed, False if timeout.
 
 **Returns:** bool
 
+##### wait_until_idle
+
+```python
+def wait_until_idle(self, timeout: float = 60.0) -> bool
+```
+
+Block until the download queue is empty and no downloads are active.
+
+Returns True if idle before timeout, False if timeout expired.
+Used after all articles are processed to drain pending PDF downloads
+before the batch command returns.
+
+**Parameters:**
+
+- `self`
+- `timeout` (float) *optional*
+
+**Returns:** bool
+
 ##### get_status
 
 ```python
@@ -183,7 +202,10 @@ Return True if HEAD response reports Content-Length > max_bytes.
 def initialize_pdf_manager(pdf_config: 'PdfConfig') -> AsyncPDFManager
 ```
 
-Create and cache the global AsyncPDFManager with the given config.
+Return the running global AsyncPDFManager, creating and starting it if needed.
+
+Idempotent: subsequent calls with any config return the already-running instance.
+The manager is started on first creation; callers must not call .start() themselves.
 
 **Parameters:**
 
