@@ -12,6 +12,10 @@ Mirror builtin source configs to userspace Config/sources/active/.
 
 **Value:** `{'.yaml', '.yml', '.json'}`
 
+### _SKIP_DIRS
+
+**Value:** `{'__pycache__'}`
+
 ## Classes
 
 ### SourceConfigMirror
@@ -121,6 +125,8 @@ def _prompt(self, message: str) -> str
 ```
 
 Display prompt; use questionary in TUI mode, print+input in CLI mode.
+
+Returns 'n' silently when stdin is not a tty (non-interactive/background run).
 
 **Parameters:**
 
@@ -255,7 +261,7 @@ Detect and silently copy items present in builtins but absent from user mirror.
 
 **Returns:** dict
 
-⚠️ **High complexity:** 26
+⚠️ **High complexity:** 27
 
 ##### _step2_3_changed_builtins
 
@@ -332,6 +338,6 @@ Never overwrites user files.
 
 **Returns:** None
 
-⚠️ **High complexity:** 15
+⚠️ **High complexity:** 16
 
 
