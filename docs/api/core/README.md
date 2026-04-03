@@ -33,7 +33,6 @@ Clean architecture implementation applying SOLID principles:
 - Interface Segregation: Small, focused interfaces
 - Dependency Inversion: Depend on abstractions not concretions
 - [`core.session_pool`](./session_pool.md) - Global session pooling for optimal network performance across all sources
-- [`core.constants`](./constants.md) - Application-wide constants for Capcat
 - [`core.html_generator`](./html_generator.md) - HTML Generator for Capcat - Static Site Generation
 Creates self-contained HTML files from markdown content with embedded CSS and JavaScript
 - [`core.shutdown`](./shutdown.md) - Graceful shutdown handling for Capcat

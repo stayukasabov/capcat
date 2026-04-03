@@ -15,14 +15,6 @@ code duplication between source-specific implementations.
 
 **Value:** `False`
 
-### LARGE_PDF_THRESHOLD_MB
-
-**Value:** `5`
-
-### SKIP_PROMPT_TIMEOUT_SECONDS
-
-**Value:** `20`
-
 ### BYTES_TO_MB
 
 **Value:** `1024 * 1024`
@@ -277,56 +269,6 @@ Returns:
 - `base_folder` (str)
 
 **Returns:** Tuple[bool, str, str]
-
-##### _check_pdf_size_and_prompt
-
-```python
-def _check_pdf_size_and_prompt(self, url: str, title: str, is_direct_pdf: bool = False) -> bool
-```
-
-Check PDF file size and prompt user to skip if large.
-
-Args:
-    url: PDF file URL
-    title: Article title
-    is_direct_pdf: True if URL itself is a PDF (not discovered in content)
-
-Returns:
-    True if user wants to skip, False to proceed
-
-**Parameters:**
-
-- `self`
-- `url` (str)
-- `title` (str)
-- `is_direct_pdf` (bool) *optional*
-
-**Returns:** bool
-
-##### _prompt_user_skip
-
-```python
-def _prompt_user_skip(self, title: str, size_mb: float, is_direct_pdf: bool = False) -> bool
-```
-
-Prompt user to skip large PDF download with ESC key.
-
-Args:
-    title: Article title
-    size_mb: File size in megabytes
-    is_direct_pdf: True if URL itself is a PDF (not discovered in content)
-
-Returns:
-    True if ESC pressed (skip), False on timeout (proceed)
-
-**Parameters:**
-
-- `self`
-- `title` (str)
-- `size_mb` (float)
-- `is_direct_pdf` (bool) *optional*
-
-**Returns:** bool
 
 ##### _fetch_web_content
 
@@ -910,27 +852,6 @@ Return (link_text, href) pairs for PDF links found outside header/footer.
 
 ⚠️ **High complexity:** 14
 
-### _listen_for_esc
-
-```python
-def _listen_for_esc(stop_event: threading.Event) -> None
-```
-
-Background thread target: set stop_event when ESC is pressed.
-
-Uses termios to put stdin in raw mode so individual keypresses are
-readable without waiting for Enter. Exits silently if stdin is not
-a tty (piped input, CI, etc.).
-
-Args:
-    stop_event: Event to set when ESC (0x1b) is detected.
-
-**Parameters:**
-
-- `stop_event` (threading.Event)
-
-**Returns:** None
-
 ### set_global_update_mode
 
 ```python
@@ -956,7 +877,7 @@ Get the global update mode flag.
 ### convert_html_with_timeout
 
 ```python
-def convert_html_with_timeout(html_content: str, url: str, timeout: int = CONVERSION_TIMEOUT_SECONDS) -> str
+def convert_html_with_timeout(html_content: str, url: str, timeout: int = None) -> str
 ```
 
 Convert HTML to markdown with thread-safe timeout protection.

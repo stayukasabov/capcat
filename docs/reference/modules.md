@@ -292,7 +292,6 @@ for config-driven sources in Capcat
 - [core.config.__init__](../api/core/__init__.md) - Configuration management package for Capcat
 - [core.config.source_base](../api/core/source_base.md) - Base configuration classes for news sources
 - [core.config.source_registry](../api/core/source_registry.md) - Source Registry for managing all available news sources and their configurations
-- [core.constants](../api/core/constants.md) - Application-wide constants for Capcat
 - [core.conversion_executor](../api/core/conversion_executor.md) - Shared executor pool for HTML-to-Markdown conversion to prevent nested ThreadPoolExecutor deadlock
 - [core.design_system_compiler](../api/core/design_system_compiler.md) - Design System Compiler for Capcat HTML Generation
 
@@ -498,9 +497,9 @@ Usage:
 
 ## Statistics
 
-- **Total Modules**: 360
-- **Total Classes**: 627
-- **Total Functions**: 780
-- **Public Functions**: 611
+- **Total Modules**: 359
+- **Total Classes**: 629
+- **Total Functions**: 783
+- **Public Functions**: 613
 - **Documentation Coverage**: 78.3%
 

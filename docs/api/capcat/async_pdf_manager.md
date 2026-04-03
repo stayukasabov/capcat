@@ -23,13 +23,14 @@ Instead of downloading PDFs synchronously during article processing, this manage
 ##### __init__
 
 ```python
-def __init__(self, max_workers: int = 4)
+def __init__(self, max_workers: int = 4, pdf_config: PdfConfig = None)
 ```
 
 **Parameters:**
 
 - `self`
 - `max_workers` (int) *optional*
+- `pdf_config` (PdfConfig) *optional*
 
 ##### start
 
@@ -159,6 +160,36 @@ Get current status of the PDF download manager.
 
 
 ## Functions
+
+### pdf_exceeds_size_limit
+
+```python
+def pdf_exceeds_size_limit(url: str, session, max_bytes: int) -> bool
+```
+
+Return True if HEAD response reports Content-Length > max_bytes.
+
+**Parameters:**
+
+- `url` (str)
+- `session`
+- `max_bytes` (int)
+
+**Returns:** bool
+
+### initialize_pdf_manager
+
+```python
+def initialize_pdf_manager(pdf_config: 'PdfConfig') -> AsyncPDFManager
+```
+
+Create and cache the global AsyncPDFManager with the given config.
+
+**Parameters:**
+
+- `pdf_config` ('PdfConfig')
+
+**Returns:** AsyncPDFManager
 
 ### get_pdf_manager
 

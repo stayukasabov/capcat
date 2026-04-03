@@ -224,14 +224,15 @@ Process a single article using the new source system.
 ### _resolve_count
 
 ```python
-def _resolve_count(cli_count: Optional[int], source_config: 'SourceConfig') -> int
+def _resolve_count(cli_count: Optional[int], source_config: 'SourceConfig', config = None) -> int
 ```
 
-Resolve article count: CLI flag > source YAML > default 30.
+Resolve article count: CLI flag > source YAML > global config default.
 
 Args:
     cli_count: Value from --count flag, or None if not provided.
     source_config: The source's SourceConfig (has article_count field).
+    config: FetchNewsConfig instance (used for global default fallback).
 
 Returns:
     Number of articles to fetch.
@@ -240,6 +241,7 @@ Returns:
 
 - `cli_count` (Optional[int])
 - `source_config` ('SourceConfig')
+- `config` *optional*
 
 **Returns:** int
 
