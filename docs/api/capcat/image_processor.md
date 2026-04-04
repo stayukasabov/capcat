@@ -44,7 +44,7 @@ def __init__(self, session: Optional[requests.Session] = None)
 ##### process_article_images
 
 ```python
-def process_article_images(self, html_content: str, source_config: dict, base_url: str, output_folder: str, page_title: str = '', media_enabled: bool = False, article_url: str = '') -> Dict[str, str]
+def process_article_images(self, html_content: str, source_config: dict, base_url: str, output_folder: str, page_title: str = '', media_enabled: bool = False, article_url: str = '', min_pixel_dimension: int = 0, max_image_bytes: int = 0) -> Dict[str, str]
 ```
 
 Process images for an article using source-specific configuration.
@@ -71,6 +71,8 @@ Returns:
 - `page_title` (str) *optional*
 - `media_enabled` (bool) *optional*
 - `article_url` (str) *optional*
+- `min_pixel_dimension` (int) *optional*
+- `max_image_bytes` (int) *optional*
 
 **Returns:** Dict[str, str]
 
@@ -179,10 +181,10 @@ Download images with size limits and return URL to filename mapping.
 ##### _download_images_with_checking
 
 ```python
-def _download_images_with_checking(self, image_urls: List[str], output_folder: str, media_enabled: bool = False, min_image_size: int = 0, referer: str = '') -> Dict[str, str]
+def _download_images_with_checking(self, image_urls: List[str], output_folder: str, media_enabled: bool = False, min_image_size: int = 0, referer: str = '', min_pixel_dimension: int = 0, max_image_bytes: int = 0) -> Dict[str, str]
 ```
 
-Download images with simple per-image checking and optional size filtering.
+Download images with per-image size and dimension filtering.
 
 **Parameters:**
 
@@ -192,6 +194,8 @@ Download images with simple per-image checking and optional size filtering.
 - `media_enabled` (bool) *optional*
 - `min_image_size` (int) *optional*
 - `referer` (str) *optional*
+- `min_pixel_dimension` (int) *optional*
+- `max_image_bytes` (int) *optional*
 
 **Returns:** Dict[str, str]
 
@@ -243,6 +247,44 @@ Download single image with minimum size filtering.
 - `images_dir` (str)
 - `counter` (int)
 - `min_size` (int)
+- `referer` (str) *optional*
+
+**Returns:** Optional[str]
+
+##### _download_single_image_with_min_pixels
+
+```python
+def _download_single_image_with_min_pixels(self, url: str, images_dir: str, counter: int, min_pixel_dimension: int, referer: str = '') -> Optional[str]
+```
+
+Download image and reject it if both dimensions are below min_pixel_dimension.
+
+**Parameters:**
+
+- `self`
+- `url` (str)
+- `images_dir` (str)
+- `counter` (int)
+- `min_pixel_dimension` (int)
+- `referer` (str) *optional*
+
+**Returns:** Optional[str]
+
+##### _download_single_image_with_max_bytes
+
+```python
+def _download_single_image_with_max_bytes(self, url: str, images_dir: str, counter: int, max_bytes: int, referer: str = '') -> Optional[str]
+```
+
+Skip download if content-length exceeds max_bytes; download otherwise.
+
+**Parameters:**
+
+- `self`
+- `url` (str)
+- `images_dir` (str)
+- `counter` (int)
+- `max_bytes` (int)
 - `referer` (str) *optional*
 
 **Returns:** Optional[str]

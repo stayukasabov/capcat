@@ -289,7 +289,7 @@ Fetch and process regular web page content.
 
 **Returns:** Tuple[bool, Optional[str], Optional[str]]
 
-⚠️ **High complexity:** 65
+⚠️ **High complexity:** 68
 
 ##### _cleanup_empty_images_folder
 
@@ -429,7 +429,7 @@ processing.
 
 **Returns:** str
 
-⚠️ **High complexity:** 95
+⚠️ **High complexity:** 97
 
 ##### _fallback_image_detection
 
@@ -777,7 +777,7 @@ Override to extract content using configured selectors.
 - `base_folder` (str)
 - `progress_callback` *optional*
 
-⚠️ **High complexity:** 98
+⚠️ **High complexity:** 101
 
 ##### _cleanup_empty_images_folder
 
