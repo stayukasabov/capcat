@@ -341,7 +341,14 @@ class ImageProcessor:
         min_image_size: int = 0, referer: str = "",
         min_pixel_dimension: int = 0, max_image_bytes: int = 0,
     ) -> Dict[str, str]:
-        """Download images with per-image size and dimension filtering."""
+        """Download images applying all active filters as a pipeline.
+
+        Filter order:
+        1. max_image_bytes: HEAD check before download; reject if too large.
+        2. min_image_size: byte floor after download; delete if too small.
+        3. min_pixel_dimension: pixel check after download; delete if too small.
+        Filters are independent and all active ones are applied.
+        """
         images_dir = os.path.join(output_folder, "images")
         os.makedirs(images_dir, exist_ok=True)
 
@@ -350,26 +357,13 @@ class ImageProcessor:
 
         for url in image_urls:
             try:
-                if max_image_bytes > 0:
-                    filename = self._download_single_image_with_max_bytes(
-                        url, images_dir, image_counter, max_image_bytes,
-                        referer=referer,
-                    )
-                elif min_pixel_dimension > 0:
-                    filename = self._download_single_image_with_min_pixels(
-                        url, images_dir, image_counter, min_pixel_dimension,
-                        referer=referer,
-                    )
-                elif min_image_size > 0:
-                    filename = self._download_single_image_with_min_size(
-                        url, images_dir, image_counter, min_image_size,
-                        referer=referer,
-                    )
-                else:
-                    filename = self._download_single_image_simple(
-                        url, images_dir, image_counter, referer=referer,
-                    )
-
+                filename = self._download_single_image_filtered(
+                    url, images_dir, image_counter,
+                    max_image_bytes=max_image_bytes,
+                    min_image_size=min_image_size,
+                    min_pixel_dimension=min_pixel_dimension,
+                    referer=referer,
+                )
                 if filename:
                     downloaded[url] = filename
                     image_counter += 1
@@ -378,6 +372,77 @@ class ImageProcessor:
                 self.logger.debug(f"Failed to download {url}: {e}")
 
         return downloaded
+
+    def _download_single_image_filtered(
+        self, url: str, images_dir: str, counter: int,
+        max_image_bytes: int = 0, min_image_size: int = 0,
+        min_pixel_dimension: int = 0, referer: str = "",
+    ) -> Optional[str]:
+        """Download one image and apply all active filters.
+
+        Applies max_image_bytes (pre-download HEAD), min_image_size (post-download
+        byte floor), and min_pixel_dimension (post-download pixel floor) in sequence.
+        Any failing filter removes the file and returns None.
+        """
+        headers = {"Referer": referer} if referer else {}
+
+        # Pre-download: reject by byte ceiling via HEAD request
+        if max_image_bytes > 0:
+            try:
+                head = self.session.head(url, timeout=10, headers=headers)
+                cl = head.headers.get("content-length")
+                if cl and int(cl) > max_image_bytes:
+                    self.logger.debug(
+                        f"Skipping {url}: {cl} bytes > {max_image_bytes} bytes maximum"
+                    )
+                    return None
+            except Exception:
+                pass  # HEAD failed; attempt GET anyway
+
+        response = self.session.get(url, timeout=30, stream=True, headers=headers)
+        response.raise_for_status()
+
+        extension = self._get_extension_from_url_or_content(
+            url, response.headers.get("content-type")
+        )
+        filename = f"image-{counter}{extension}"
+        filepath = os.path.join(images_dir, filename)
+
+        downloaded_size = 0
+        with open(filepath, "wb") as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                f.write(chunk)
+                downloaded_size += len(chunk)
+
+        # Post-download: reject by byte ceiling (actual size)
+        if max_image_bytes > 0 and downloaded_size > max_image_bytes:
+            os.remove(filepath)
+            self.logger.debug(
+                f"Removed {filename}: {downloaded_size} bytes > {max_image_bytes} bytes"
+            )
+            return None
+
+        # Post-download: reject by byte floor
+        if min_image_size > 0 and downloaded_size < min_image_size:
+            os.remove(filepath)
+            self.logger.debug(
+                f"Removed {filename}: {downloaded_size} bytes < {min_image_size} bytes minimum"
+            )
+            return None
+
+        # Post-download: reject by pixel floor
+        if min_pixel_dimension > 0:
+            dims = self._read_image_dimensions(filepath)
+            if dims is not None:
+                w, h = dims
+                if w < min_pixel_dimension or h < min_pixel_dimension:
+                    os.remove(filepath)
+                    self.logger.debug(
+                        f"Removed {filename}: {w}×{h}px < {min_pixel_dimension}px minimum"
+                    )
+                    return None
+
+        return filename
 
     def _has_explicit_source_config(self, source_config: Dict) -> bool:
         """Check if source has explicit configuration (not a generic/discovered source)."""

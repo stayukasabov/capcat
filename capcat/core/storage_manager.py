@@ -9,6 +9,7 @@ independently from the main article fetching logic.
 import os
 from pathlib import Path
 
+from .config import get_config
 from .logging_config import get_logger
 from .utils import sanitize_filename
 
@@ -21,19 +22,22 @@ _logger = get_logger(__name__)
 def article_md_filename(title: str) -> str:
     """Return sanitized markdown filename for an article (e.g. 'My-Title.md').
 
-    The base stem is truncated at 200 chars before adding the extension.
+    Truncation respects processing.max_filename_length from config.
     Spaces are replaced with hyphens.
     """
-    return sanitize_filename(title, max_length=200).replace(" ", "-") + ".md"
+    max_len = get_config().processing.max_filename_length
+    return sanitize_filename(title, max_length=max_len).replace(" ", "-") + ".md"
 
 
 def comments_md_filename(title: str) -> str:
     """Return sanitized markdown filename for comments (e.g. 'My-Title-Comments.md').
 
-    The base stem is truncated at 200 chars; '-Comments.md' is appended after truncation.
+    Truncation respects processing.max_filename_length from config.
+    '-Comments.md' is appended after truncation.
     Spaces are replaced with hyphens.
     """
-    return sanitize_filename(title, max_length=200).replace(" ", "-") + "-Comments.md"
+    max_len = get_config().processing.max_filename_length
+    return sanitize_filename(title, max_length=max_len).replace(" ", "-") + "-Comments.md"
 
 
 def find_article_md(folder: Path) -> "Path | None":
