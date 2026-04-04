@@ -184,7 +184,13 @@ Download images with size limits and return URL to filename mapping.
 def _download_images_with_checking(self, image_urls: List[str], output_folder: str, media_enabled: bool = False, min_image_size: int = 0, referer: str = '', min_pixel_dimension: int = 0, max_image_bytes: int = 0) -> Dict[str, str]
 ```
 
-Download images with per-image size and dimension filtering.
+Download images applying all active filters as a pipeline.
+
+Filter order:
+1. max_image_bytes: HEAD check before download; reject if too large.
+2. min_image_size: byte floor after download; delete if too small.
+3. min_pixel_dimension: pixel check after download; delete if too small.
+Filters are independent and all active ones are applied.
 
 **Parameters:**
 
@@ -198,6 +204,33 @@ Download images with per-image size and dimension filtering.
 - `max_image_bytes` (int) *optional*
 
 **Returns:** Dict[str, str]
+
+##### _download_single_image_filtered
+
+```python
+def _download_single_image_filtered(self, url: str, images_dir: str, counter: int, max_image_bytes: int = 0, min_image_size: int = 0, min_pixel_dimension: int = 0, referer: str = '') -> Optional[str]
+```
+
+Download one image and apply all active filters.
+
+Applies max_image_bytes (pre-download HEAD), min_image_size (post-download
+byte floor), and min_pixel_dimension (post-download pixel floor) in sequence.
+Any failing filter removes the file and returns None.
+
+**Parameters:**
+
+- `self`
+- `url` (str)
+- `images_dir` (str)
+- `counter` (int)
+- `max_image_bytes` (int) *optional*
+- `min_image_size` (int) *optional*
+- `min_pixel_dimension` (int) *optional*
+- `referer` (str) *optional*
+
+**Returns:** Optional[str]
+
+⚠️ **High complexity:** 14
 
 ##### _has_explicit_source_config
 

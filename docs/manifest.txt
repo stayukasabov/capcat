@@ -1,5 +1,5 @@
 Capcat Documentation Manifest
-Generated: 2026-04-04 06:02:59 UTC
+Generated: 2026-04-04 06:58:33 UTC
 Success rate: 2/2 tasks
 
 Generated Documentation:
@@ -27,6 +27,7 @@ Generated Documentation:
   - api/build/add_source_command.md
   - api/build/add_source_service.md
   - api/build/article_fetcher.md
+  - api/build/async_pdf_manager.md
   - api/build/base_source.md
   - api/build/bundle_manager.md
   - api/build/bundle_models.md
@@ -440,5 +441,5 @@ Generated Documentation:
   - superpowers/specs/2026-04-02-user-config-yaml-inventory.md
   - troubleshooting.md
 
-Total files: 764
+Total files: 765
 Documentation size: 44.3 MB
