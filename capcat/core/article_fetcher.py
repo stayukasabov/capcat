@@ -774,11 +774,17 @@ class ArticleFetcher(ABC):
             self.logger.debug(f"Failed to parse HTML from {url}: {e}")
             return False, None, None
 
-        # Remove script and style elements
-        for script in soup(
-            ["script", "style", "nav", "header", "footer", "aside"]
-        ):
-            script.decompose()
+        # Remove elements based on config flags
+        _cfg = get_config().processing
+        _remove_tags = ["header", "footer", "aside"]
+        if _cfg.remove_script_tags:
+            _remove_tags.append("script")
+        if _cfg.remove_style_tags:
+            _remove_tags.append("style")
+        if _cfg.remove_nav_tags:
+            _remove_tags.append("nav")
+        for tag in soup(_remove_tags):
+            tag.decompose()
 
         # Report cleanup progress
         if progress_callback:
@@ -2354,7 +2360,8 @@ class ArticleFetcher(ABC):
                 "Downloading PDF",
                 total=None,
                 show_spinner=True,
-                show_count=False
+                show_count=False,
+                spinner_style=get_config().ui.progress_spinner_style,
             )
             progress_indicator.start()
 
@@ -2872,11 +2879,17 @@ class NewsSourceArticleFetcher(ArticleFetcher):
         # header/footer links are excluded to avoid corporate footer PDFs.
         _collected_pdf_links = _collect_pdf_links_from_soup(soup, url)
 
-        # Remove script and style elements
-        for script in soup(
-            ["script", "style", "nav", "header", "footer", "aside"]
-        ):
-            script.decompose()
+        # Remove elements based on config flags
+        _cfg = get_config().processing
+        _remove_tags = ["header", "footer", "aside"]
+        if _cfg.remove_script_tags:
+            _remove_tags.append("script")
+        if _cfg.remove_style_tags:
+            _remove_tags.append("style")
+        if _cfg.remove_nav_tags:
+            _remove_tags.append("nav")
+        for tag in soup(_remove_tags):
+            tag.decompose()
 
         # Report cleanup progress
         if progress_callback:
