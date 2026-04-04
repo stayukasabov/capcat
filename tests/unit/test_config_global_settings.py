@@ -46,9 +46,9 @@ class TestFetchNewsConfigPdf:
 
     def test_from_dict_ui_preserved(self):
         """from_dict() must not silently drop ui section."""
-        data = {"ui": {"use_emojis": False}}
+        data = {"ui": {"progress_spinner_style": "wave"}}
         cfg = FetchNewsConfig.from_dict(data)
-        assert cfg.ui.use_emojis is False
+        assert cfg.ui.progress_spinner_style == "wave"
 
 
 class TestFilterFields:
