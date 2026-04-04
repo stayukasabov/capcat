@@ -115,12 +115,15 @@ processing:
   # Default: 1000
   max_images_media_mode: 1000
 
-  # Skip images smaller than this in pixels (width and height).
+  # Skip images whose width OR height is smaller than this value in pixels.
+  # Raises the floor above the built-in 64px icon/tracker filter.
+  # Example: 400 keeps only editorial-sized images; 150 is a light filter.
   # Default: 150
   min_image_dimensions: 150
 
-  # Skip images larger than this in bytes.
-  # Default: 5242880 (5MB). Example: 1048576 = 1MB
+  # Skip images larger than this in bytes (checked via content-length before download).
+  # Protects vault disk space from raw high-resolution files.
+  # Default: 5242880 (5MB). Examples: 1048576 = 1MB, 2097152 = 2MB
   max_image_size_bytes: 5242880
 
   # Maximum characters in vault filenames.
@@ -148,18 +151,24 @@ processing:
   create_comments_file: true
 
   # Strip <script> tags from HTML before conversion.
+  # Set to false to keep inline script text in the markdown output.
   # Default: true
   remove_script_tags: true
 
   # Strip <style> tags from HTML before conversion.
+  # Set to false to keep inline CSS text in the markdown output.
   # Default: true
   remove_style_tags: true
 
   # Strip <nav> tags from HTML before conversion.
+  # Set to false to include navigation menus and breadcrumbs in the output.
   # Default: true
   remove_nav_tags: true
 
-  # Preserve line breaks in markdown output.
+  # Produce hard line breaks in markdown for every <br> tag.
+  # When true: <br> becomes \\ (Obsidian, GitHub, CommonMark hard break).
+  # When false: <br> becomes a plain newline — renderer controls reflowing.
+  # Advanced users: set false for cleaner paragraph flow in strict renderers.
   # Default: true
   markdown_line_breaks: true
 
@@ -170,42 +179,22 @@ ui:
   # Default: dots
   progress_spinner_style: dots
 
-  # Spinner style for batch operations.
-  # Options: activity, progress, pulse, wave, dots, scan
-  # Default: activity
-  batch_spinner_style: activity
-
-  # Progress bar width in characters.
-  # Default: 25
-  progress_bar_width: 25
-
-  # Show animated progress indicators.
-  # Default: true
-  show_progress_animations: true
-
-  # Use emoji in output.
-  # Default: true
-  use_emojis: true
-
   # Use colors in terminal output.
   # Default: true
   use_colors: true
 
-  # Show per-article detail during fetch.
-  # Default: false
-  show_detailed_progress: false
-
 # ─── Logging ────────────────────────────────────────────
 logging:
-  # Log level for all output. Options: DEBUG, INFO, WARNING, ERROR
-  # Default: INFO
-  default_level: INFO
-
-  # Log level for terminal output.
+  # Console log verbosity. Options: DEBUG, INFO, WARNING, ERROR
+  # INFO shows normal fetch progress.
+  # WARNING suppresses info messages — useful for scripted/quiet runs
+  #   that need cleaner output than -q but still want error visibility.
+  # DEBUG shows full request-level detail.
+  # Note: -V / --verbose and -q / --quiet flags override this at runtime.
   # Default: INFO
   console_level: INFO
 
-  # Log level written to log file.
+  # Log level written to log file (when --log-file is used).
   # Default: DEBUG
   file_level: DEBUG
 
@@ -216,14 +205,6 @@ logging:
   # Number of rotated log files to keep.
   # Default: 5
   log_file_backup_count: 5
-
-  # Include timestamps in log output.
-  # Default: true
-  include_timestamps: true
-
-  # Include module names in log output.
-  # Default: true
-  include_module_names: true
 
   # Auto-create log directory if it does not exist.
   # Default: true
@@ -806,4 +787,6 @@ def _setup_logging(
 ) -> None:
     """Configure logging for the current command."""
     from capcat.core.logging_config import setup_logging
-    setup_logging(verbose=verbose, quiet=quiet, log_file=log_file)
+    from capcat.core.config import get_config
+    console_level = get_config().logging.console_level
+    setup_logging(verbose=verbose, quiet=quiet, log_file=log_file, level=console_level)

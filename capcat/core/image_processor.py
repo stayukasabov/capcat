@@ -38,6 +38,8 @@ class ImageProcessor:
         page_title: str = "",
         media_enabled: bool = False,
         article_url: str = "",
+        min_pixel_dimension: int = 0,
+        max_image_bytes: int = 0,
     ) -> Dict[str, str]:
         """
         Process images for an article using source-specific configuration.
@@ -84,6 +86,8 @@ class ImageProcessor:
             downloaded_images = self._download_images_with_checking(
                 image_urls, output_folder, media_enabled, min_image_size,
                 referer=article_url or base_url,
+                min_pixel_dimension=min_pixel_dimension,
+                max_image_bytes=max_image_bytes,
             )
 
             self.logger.info(f"Processed {len(downloaded_images)} images")
@@ -335,8 +339,9 @@ class ImageProcessor:
     def _download_images_with_checking(
         self, image_urls: List[str], output_folder: str, media_enabled: bool = False,
         min_image_size: int = 0, referer: str = "",
+        min_pixel_dimension: int = 0, max_image_bytes: int = 0,
     ) -> Dict[str, str]:
-        """Download images with simple per-image checking and optional size filtering."""
+        """Download images with per-image size and dimension filtering."""
         images_dir = os.path.join(output_folder, "images")
         os.makedirs(images_dir, exist_ok=True)
 
@@ -345,8 +350,17 @@ class ImageProcessor:
 
         for url in image_urls:
             try:
-                # Download with optional size filtering
-                if min_image_size > 0:
+                if max_image_bytes > 0:
+                    filename = self._download_single_image_with_max_bytes(
+                        url, images_dir, image_counter, max_image_bytes,
+                        referer=referer,
+                    )
+                elif min_pixel_dimension > 0:
+                    filename = self._download_single_image_with_min_pixels(
+                        url, images_dir, image_counter, min_pixel_dimension,
+                        referer=referer,
+                    )
+                elif min_image_size > 0:
                     filename = self._download_single_image_with_min_size(
                         url, images_dir, image_counter, min_image_size,
                         referer=referer,
@@ -468,6 +482,86 @@ class ImageProcessor:
                     return None
 
             self.logger.debug(f"Downloaded {filename} ({downloaded_size} bytes)")
+            return filename
+
+        except Exception as e:
+            self.logger.debug(f"Failed to download {url}: {e}")
+            return None
+
+    def _download_single_image_with_min_pixels(
+        self, url: str, images_dir: str, counter: int,
+        min_pixel_dimension: int, referer: str = ""
+    ) -> Optional[str]:
+        """Download image and reject it if both dimensions are below min_pixel_dimension."""
+        try:
+            headers = {"Referer": referer} if referer else {}
+            response = self.session.get(url, timeout=30, stream=True, headers=headers)
+            response.raise_for_status()
+
+            extension = self._get_extension_from_url_or_content(
+                url, response.headers.get("content-type")
+            )
+            filename = f"image-{counter}{extension}"
+            filepath = os.path.join(images_dir, filename)
+
+            with open(filepath, "wb") as f:
+                for chunk in response.iter_content(chunk_size=8192):
+                    f.write(chunk)
+
+            dims = self._read_image_dimensions(filepath)
+            if dims is not None:
+                w, h = dims
+                if w < min_pixel_dimension or h < min_pixel_dimension:
+                    os.remove(filepath)
+                    self.logger.debug(
+                        f"Skipping {filename}: {w}×{h}px < {min_pixel_dimension}px minimum"
+                    )
+                    return None
+
+            return filename
+
+        except Exception as e:
+            self.logger.debug(f"Failed to download {url}: {e}")
+            return None
+
+    def _download_single_image_with_max_bytes(
+        self, url: str, images_dir: str, counter: int,
+        max_bytes: int, referer: str = ""
+    ) -> Optional[str]:
+        """Skip download if content-length exceeds max_bytes; download otherwise."""
+        try:
+            headers = {"Referer": referer} if referer else {}
+            head_response = self.session.head(url, timeout=10, headers=headers)
+            content_length = head_response.headers.get("content-length")
+
+            if content_length and int(content_length) > max_bytes:
+                self.logger.debug(
+                    f"Skipping {url}: {content_length} bytes > {max_bytes} bytes maximum"
+                )
+                return None
+
+            response = self.session.get(url, timeout=30, stream=True, headers=headers)
+            response.raise_for_status()
+
+            extension = self._get_extension_from_url_or_content(
+                url, response.headers.get("content-type")
+            )
+            filename = f"image-{counter}{extension}"
+            filepath = os.path.join(images_dir, filename)
+
+            downloaded_size = 0
+            with open(filepath, "wb") as f:
+                for chunk in response.iter_content(chunk_size=8192):
+                    f.write(chunk)
+                    downloaded_size += len(chunk)
+
+            if downloaded_size > max_bytes:
+                os.remove(filepath)
+                self.logger.debug(
+                    f"Removed {filename}: {downloaded_size} bytes > {max_bytes} bytes maximum"
+                )
+                return None
+
             return filename
 
         except Exception as e:
