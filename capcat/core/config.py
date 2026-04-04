@@ -81,20 +81,13 @@ class ProcessingConfig:
 class UIConfig:
     """User interface and experience configuration settings."""
 
-    # Progress bar settings
+    # Progress spinner style for article fetching
     progress_spinner_style: str = (
         "dots"  # dots, wave, loading, pulse, bounce, modern
     )
-    batch_spinner_style: str = (
-        "activity"  # activity, progress, pulse, wave, dots, scan
-    )
-    progress_bar_width: int = 25
-    show_progress_animations: bool = True
 
-    # Visual feedback
-    use_emojis: bool = True
+    # Color output
     use_colors: bool = True
-    show_detailed_progress: bool = False
 
 
 @dataclass
@@ -108,8 +101,6 @@ class LoggingConfig:
 
     # Log formatting
     use_colors: bool = True
-    include_timestamps: bool = True
-    include_module_names: bool = True
 
     # File logging
     auto_create_log_dir: bool = True

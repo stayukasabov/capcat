@@ -9,6 +9,8 @@ from urllib.parse import unquote
 
 from bs4 import BeautifulSoup, Comment, NavigableString
 
+from .config import get_config
+
 
 def _normalize_url(url: str) -> str:
     """Normalize URL by properly handling encoding/decoding issues."""
@@ -123,10 +125,16 @@ def html_to_markdown(html_content: str, base_url: str = None) -> str:
         if base_url:
             soup.base_url = base_url
 
-        # Remove script, style, and other unwanted elements
-        for tag in soup(
-            ["script", "style", "nav", "header", "footer", "aside", "button"]
-        ):
+        # Remove elements based on config flags
+        cfg = get_config().processing
+        _remove = ["header", "footer", "aside", "button"]
+        if cfg.remove_script_tags:
+            _remove.append("script")
+        if cfg.remove_style_tags:
+            _remove.append("style")
+        if cfg.remove_nav_tags:
+            _remove.append("nav")
+        for tag in soup(_remove):
             tag.decompose()
 
         # Enhanced cleanup for InfoQ and other sources
@@ -694,7 +702,7 @@ def _convert_element(element, depth=0, max_depth=50) -> str:
         else:
             markdown = ""
     elif element.name == "br":
-        markdown = "\n"
+        markdown = "\\\n" if get_config().processing.markdown_line_breaks else "\n"
     elif element.name == "hr":
         markdown = "\n---\n\n"
     elif element.name == "strong" or element.name == "b":
