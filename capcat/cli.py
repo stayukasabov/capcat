@@ -73,8 +73,14 @@ network:
 
 # ─── Processing ─────────────────────────────────────────
 processing:
-  # Default articles fetched per source per run.
-  # Per-source article_count in each source's config.yaml overrides this.
+  # Global fallback — articles fetched per source when no per-source count
+  # is set. This value is rarely reached for sources that already have
+  # article_count defined in their own config.
+  #
+  # To set a per-source count, edit the source's config.yaml in your vault:
+  #   Config/sources/active/hn/config.yaml  →  article_count: 10
+  #   Config/sources/active/lb/config.yaml  →  article_count: 5
+  #
   # Default: 30
   article_count: 30
 
