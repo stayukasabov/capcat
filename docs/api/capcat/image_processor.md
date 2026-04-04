@@ -82,7 +82,7 @@ Returns:
 def _read_image_dimensions(filepath: str) -> Optional[Tuple[int, int]]
 ```
 
-Return (width, height) for PNG or JPEG files by reading header bytes.
+Return (width, height) for PNG, JPEG, or WebP files by reading header bytes.
 Returns None if the format is unrecognised or parsing fails.
 
 **Parameters:**
@@ -91,7 +91,7 @@ Returns None if the format is unrecognised or parsing fails.
 
 **Returns:** Optional[Tuple[int, int]]
 
-⚠️ **High complexity:** 11
+⚠️ **High complexity:** 19
 
 ##### _extract_image_urls
 
