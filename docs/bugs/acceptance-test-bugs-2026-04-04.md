@@ -352,3 +352,30 @@ All three WebP chunk variants (VP8 lossy, VP8L lossless, VP8X extended) should r
 Set `min_image_dimensions: 5000`. Run `capcat fetch bbc guardian -q`. Images appear in `images/` folders despite being 1536×864px.
 
 **Fix:** Extended `_read_image_dimensions` with VP8/VP8L/VP8X header parsing. Header read increased from 26 to 30 bytes.
+
+---
+
+## B23 — capcat fetch ignores all sources after first (space-separated CLI)
+
+**Severity:** High
+**Symptom:** `capcat fetch bbc guardian` only fetched BBC articles. The Guardian folder was absent. All combined-source acceptance tests that used space syntax were silently single-source.
+**Root cause:** `cli.py:476` — `sources = [s.strip() for s in args[0].split(",")]` reads only `args[0]`. Additional positional args (`args[1]`, etc.) silently ignored.
+**Affected files:** `capcat/cli.py`
+**Expected behaviour:** Both `capcat fetch bbc guardian` and `capcat fetch bbc,guardian` should fetch both sources.
+**How to reproduce:**
+```bash
+capcat fetch bbc guardian -q
+# Check: only BBC-News_* folder appears; no Guardian folder
+```
+**Fix:** Changed line 476 to `sources = [s.strip() for a in args for s in a.split(",") if s.strip()]`. Fixed in commit `0c07228`, merged to main 2026-04-04.
+
+---
+
+## B24 — remove_script_tags: false not observable in config-driven sources
+
+**Severity:** Low
+**Symptom:** Setting `remove_script_tags: false` for BBC and Guardian produced no observable `<script>` content in output markdown.
+**Root cause:** Config-driven sources use CSS content selectors targeting article body elements. These selectors do not include areas with `<script>` tags. Extracted content never contains script tags regardless of the setting.
+**Affected files:** `capcat/core/article_fetcher.py` (config-driven path)
+**Expected behaviour:** Setting is respected in code (confirmed) but has no observable effect on sources whose content selectors exclude script-bearing DOM areas.
+**Status:** Not a bug — documented limitation. Setting is only observable on generic-path sources or sources with inline scripts in the content selector target.
