@@ -14,6 +14,21 @@ GLOBAL_SETTINGS_TEMPLATE = """\
 # Edit this file to tune behavior for this vault.
 # All fields are optional. Defaults are shown in comments.
 # Restart capcat after editing.
+#
+# ── Article count ────────────────────────────────────────────────────────────
+# The article_count field below is a global fallback only.
+# Each source has its own count defined in its config.yaml inside your vault:
+#   Config/sources/active/hn/config.yaml  →  article_count: 10
+#   Config/sources/active/lb/config.yaml  →  article_count: 5
+# Edit those files to control how many articles each source fetches.
+# The global fallback here only applies to custom sources that have no
+# article_count in their own config.yaml.
+#
+# ── Upgrading ────────────────────────────────────────────────────────────────
+# After a capcat upgrade, new settings may have been added to this template.
+# To regenerate this file with all the latest settings:
+#   capcat settings --force
+# Warning: --force overwrites this file completely. Back up your edits first.
 
 # ─── PDF Downloads ──────────────────────────────────────
 pdf:
