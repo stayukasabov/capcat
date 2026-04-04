@@ -326,3 +326,29 @@ Setting `progress_spinner_style: wave` has no visible effect on the main article
 **How to reproduce:**
 Set `progress_spinner_style: wave`. Observe no change in spinner during fetch.
 
+
+
+## B22 — `min_image_dimensions` silently skipped for WebP images
+
+**Severity:** High — the dominant image format from BBC/Guardian is WebP; the filter has no effect in practice
+
+**Symptom:**
+Setting `min_image_dimensions: 5000` downloads all WebP images regardless of their pixel dimensions. Images at 1536×864px survive when they should be rejected.
+
+**Root cause:**
+`_read_image_dimensions` in `image_processor.py` only parsed PNG and JPEG headers. For any unrecognised format it returns `None`. The filter in `_download_single_image_filtered` skips the check when `dims is None`:
+```python
+if dims is not None:   # ← webp hits this as None → check silently bypassed
+    ...delete if below threshold
+```
+
+**Affected files:**
+- `capcat/core/image_processor.py:112-161` — `_read_image_dimensions` missing WebP (VP8, VP8L, VP8X) header parsers
+
+**Expected behaviour:**
+All three WebP chunk variants (VP8 lossy, VP8L lossless, VP8X extended) should return correct `(width, height)` so the pixel floor filter applies.
+
+**How to reproduce:**
+Set `min_image_dimensions: 5000`. Run `capcat fetch bbc guardian -q`. Images appear in `images/` folders despite being 1536×864px.
+
+**Fix:** Extended `_read_image_dimensions` with VP8/VP8L/VP8X header parsing. Header read increased from 26 to 30 bytes.
