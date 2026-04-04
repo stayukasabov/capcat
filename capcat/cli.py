@@ -239,6 +239,8 @@ def _print_help() -> None:
         "  remove-source    Remove a source\n"
         "  generate-config  Generate a YAML config\n"
         "  settings         Write Global-settings.yaml template to Config/\n"
+        "  settings --force Overwrite existing Global-settings.yaml with the\n"
+        "                   latest template (preserves nothing — back up first)\n"
         "\nOptions:\n"
         "  -L <file>        Log output to file\n"
         "  -V, --verbose    Verbose output\n"
@@ -697,6 +699,22 @@ def _cmd_remove_source(args: list[str]) -> None:
 
 def _cmd_settings(args: list[str]) -> None:
     """Write Global-settings.yaml template to Config/ directory."""
+    if args and args[0] in ("-h", "--help"):
+        print(
+            "Usage: capcat settings [--force]\n\n"
+            "Write the Global-settings.yaml template to Config/ in the current vault.\n\n"
+            "The file controls vault-wide defaults: network timeouts, image limits,\n"
+            "PDF rules, logging, and UI preferences.\n\n"
+            "Per-source article counts are NOT set here. Edit the source's own\n"
+            "config.yaml inside your vault instead:\n"
+            "  Config/sources/active/hn/config.yaml  →  article_count: 10\n\n"
+            "Options:\n"
+            "  --force   Overwrite an existing Global-settings.yaml with the latest\n"
+            "            template. All local edits will be lost — back up the file\n"
+            "            first if you want to keep custom values.\n"
+            "            Useful after a capcat upgrade to pick up newly added settings.\n"
+        )
+        return
     force = "--force" in args
     out = Path("Config") / "Global-settings.yaml"
     if out.exists() and not force:

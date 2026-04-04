@@ -222,7 +222,17 @@ capcat remove-source [--dry-run] [--batch FILE] [--undo [ID]]
 def _cmd_settings(args: list[str]) -> None
 ```
 
-Write Global-settings.yaml template to Config/ directory.
+Write the Global-settings.yaml template to `Config/` in the current vault.
+
+The file controls vault-wide defaults: network timeouts, image limits, PDF rules,
+logging, and UI preferences. Per-source article counts are not set here — edit the
+source's own `Config/sources/active/<source>/config.yaml` instead.
+
+**Options:**
+
+- `--force` — Overwrite an existing `Global-settings.yaml` with the latest template.
+  All local edits will be lost. Back up the file first if you want to preserve custom
+  values. Use after a capcat upgrade to pick up newly added settings.
 
 **Parameters:**
 
