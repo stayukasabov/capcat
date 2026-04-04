@@ -112,18 +112,42 @@ class ImageProcessor:
     @staticmethod
     def _read_image_dimensions(filepath: str) -> Optional[Tuple[int, int]]:
         """
-        Return (width, height) for PNG or JPEG files by reading header bytes.
+        Return (width, height) for PNG, JPEG, or WebP files by reading header bytes.
         Returns None if the format is unrecognised or parsing fails.
         """
         try:
             with open(filepath, "rb") as f:
-                header = f.read(26)
+                header = f.read(30)
 
             # PNG: signature (8) + IHDR length (4) + "IHDR" (4) + w (4) + h (4)
             if header[:8] == b"\x89PNG\r\n\x1a\n":
                 if len(header) >= 24:
                     w, h = struct.unpack(">II", header[16:24])
                     return w, h
+                return None
+
+            # WebP: RIFF....WEBP + chunk type
+            if header[:4] == b"RIFF" and header[8:12] == b"WEBP":
+                chunk = header[12:16]
+                if chunk == b"VP8 ":
+                    # Lossy: width/height at bytes 26-29
+                    if len(header) >= 30:
+                        w = struct.unpack_from("<H", header, 26)[0] & 0x3FFF
+                        h = struct.unpack_from("<H", header, 28)[0] & 0x3FFF
+                        return w, h
+                elif chunk == b"VP8L":
+                    # Lossless: packed width-1 / height-1 at bytes 21-24
+                    if len(header) >= 25:
+                        bits = struct.unpack_from("<I", header, 21)[0]
+                        w = (bits & 0x3FFF) + 1
+                        h = ((bits >> 14) & 0x3FFF) + 1
+                        return w, h
+                elif chunk == b"VP8X":
+                    # Extended: canvas width-1 / height-1 at bytes 24-29 (24-bit LE each)
+                    if len(header) >= 30:
+                        w = struct.unpack("<I", header[24:27] + b"\x00")[0] + 1
+                        h = struct.unpack("<I", header[27:30] + b"\x00")[0] + 1
+                        return w, h
                 return None
 
             # JPEG: starts with FF D8
