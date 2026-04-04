@@ -155,3 +155,174 @@ Added `_download_images = get_config().processing.download_images` guard before 
 | `console_level` | `logging` | Terminal log verbosity | Never read; only DEBUG/INFO/ERROR affected by --verbose/-q flags |
 | `use_emojis` | `ui` | Emoji in terminal output | Never read; `use_colors` read instead from `logging.use_colors` |
 | `use_colors` | `ui` | ANSI colors in output | Hardcoded to True in progress.py; `logging.use_colors` read by logging setup |
+
+---
+
+## B15 — `min_image_dimensions` never checked — `max_image_bytes` routing takes priority
+
+**Severity:** High — `min_image_dimensions` setting has no observable effect even when explicitly configured
+
+**Symptom:**
+Setting `min_image_dimensions: 5000` in `Global-settings.yaml` has no effect. Images of any pixel size are downloaded (limited only by `max_image_size_bytes`).
+
+**Root cause:**
+`image_processor.py:_download_images_with_checking` uses exclusive `if/elif` branching:
+```python
+if max_image_bytes > 0:         # ALWAYS True (default is 5242880)
+    filename = _download_single_image_with_max_bytes(...)
+elif min_pixel_dimension > 0:   # UNREACHABLE — above is always True
+    filename = _download_single_image_with_min_pixels(...)
+```
+Since `max_image_size_bytes` defaults to 5242880 (non-zero), the `max_image_bytes > 0` branch is always taken. `min_pixel_dimension` is never checked.
+
+**Affected files:**
+- `capcat/core/image_processor.py:_download_images_with_checking` (lines 353-370) — exclusive branching prevents pixel filter from being applied
+
+**Expected behaviour:**
+Both `max_image_size_bytes` and `min_image_dimensions` should be applied as a pipeline: first reject images by byte ceiling (cheap pre-download HEAD check), then reject by pixel dimensions after download.
+
+**How to reproduce:**
+Set `min_image_dimensions: 5000` in `Global-settings.yaml`. Run `capcat fetch bbc -q`. Observe images still downloaded despite 5000px minimum.
+
+---
+
+## B16 — `max_filename_length` truncates folders but not markdown filenames
+
+**Severity:** Medium — .md filenames inside article folders are not truncated
+
+**Symptom:**
+Setting `max_filename_length: 15` truncates article folder names correctly but the `.md` file inside uses the full title (up to 200 chars).
+
+**Root cause:**
+`storage_manager.py:27,36` — `article_md_filename` and `comments_md_filename` hardcode `max_length=200`:
+```python
+def article_md_filename(title: str) -> str:
+    return sanitize_filename(title, max_length=200).replace(" ", "-") + ".md"
+```
+When `max_length` is explicitly passed to `sanitize_filename`, it overrides the config lookup. Folder creation goes through `sanitize_filename(title)` with no explicit max_length, so it correctly reads the config value.
+
+**Affected files:**
+- `capcat/core/storage_manager.py:27` — `article_md_filename` hardcodes `max_length=200`
+- `capcat/core/storage_manager.py:36` — `comments_md_filename` hardcodes `max_length=200`
+
+**Expected behaviour:**
+Both folder names and markdown filenames should be truncated to `max_filename_length`.
+
+**How to reproduce:**
+Set `max_filename_length: 15`. Run `capcat fetch bbc -q`. Folder names are ≤15 chars; `.md` filenames are full length.
+
+---
+
+## B17 — `user_agent` setting ignored — session pool uses rotating UA strings
+
+**Severity:** Medium — user cannot identify their bot or use a custom User-Agent
+
+**Symptom:**
+Setting `user_agent: "TestBot/1.0"` in `Global-settings.yaml` has no effect. Verbose output shows a random Mozilla browser UA string.
+
+**Root cause:**
+`session_pool.py:92` — `_create_session` always uses `random.choice(USER_AGENTS)` instead of reading `config.network.user_agent`:
+```python
+user_agent = random.choice(USER_AGENTS)  # ignores config
+```
+
+**Affected files:**
+- `capcat/core/session_pool.py:92` — UA selection ignores `self.config.network.user_agent`
+
+**Expected behaviour:**
+When `user_agent` is set to a non-default value, it should be used. When set to default (`"Capcat/2.0 (Personal news archiver)"`) the existing rotation behaviour is acceptable.
+
+**How to reproduce:**
+Set `user_agent: "TestBot/1.0"`. Run `capcat fetch bbc -V`. Debug log shows `Using User-Agent for bbc: Mozilla/5.0...` instead of `TestBot/1.0`.
+
+---
+
+## B18 — `max_retries` ignored — session pool hardcodes `max_retries=3`
+
+**Severity:** Low — user cannot tune retry count via config
+
+**Symptom:**
+Setting `max_retries: 0` in `Global-settings.yaml` has no effect. Sessions still retry 3 times on connection failure.
+
+**Root cause:**
+`session_pool.py:118` — `HTTPAdapter` is created with `max_retries=3` hardcoded:
+```python
+adapter = requests.adapters.HTTPAdapter(
+    pool_connections=self.config.network.pool_connections,
+    pool_maxsize=self.config.network.pool_maxsize,
+    max_retries=3,  # hardcoded, ignores config
+)
+```
+
+**Affected files:**
+- `capcat/core/session_pool.py:118` — `max_retries` hardcoded
+
+**Expected behaviour:**
+`max_retries` should use `self.config.network.max_retries`.
+
+**How to reproduce:**
+Set `max_retries: 0`. Observe fetch still retries on transient failures.
+
+---
+
+## B19 — `use_colors: false` ignored — ANSI codes always emitted
+
+**Severity:** Medium — cannot disable color output via config; piped output contains raw escape sequences
+
+**Symptom:**
+Setting `use_colors: false` in `Global-settings.yaml` has no effect. Terminal and piped output still contains ANSI color escape sequences (`\033[38;5;230m` etc.).
+
+**Root cause:**
+`progress.py` hardcodes `use_colors = True` at 18+ sites. None of them reads `get_config().ui.use_colors`. Example at line 200:
+```python
+use_colors = True  # hardcoded — never reads config
+```
+
+**Affected files:**
+- `capcat/core/progress.py` — `use_colors = True` hardcoded throughout
+
+**Expected behaviour:**
+`use_colors: false` should suppress all ANSI escape sequences from terminal output.
+
+**How to reproduce:**
+Set `use_colors: false`. Run `capcat fetch bbc 2>&1 | cat`. Output still contains `\033[` sequences.
+
+---
+
+## B20 — `progress.py:1104` references removed `UIConfig.show_progress_animations`
+
+**Severity:** Low — dead code; `get_progress_indicator` is never called, so no runtime crash
+
+**Symptom:**
+`progress.py` function `get_progress_indicator` references `config.ui.show_progress_animations`, which was removed from `UIConfig` in v1.9.15. This would `AttributeError` if called.
+
+**Root cause:**
+`get_progress_indicator` was not updated when `show_progress_animations` was removed from `UIConfig`.
+
+**Affected files:**
+- `capcat/core/progress.py:1104` — stale attribute reference
+
+**How to reproduce:**
+`python3 -c "from capcat.core.progress import get_progress_indicator; get_progress_indicator('test', 3)"` → `AttributeError`
+
+---
+
+## B21 — `progress_spinner_style` only affects PDF spinner, not main article fetch spinner
+
+**Severity:** Low — setting has no visible effect for most users (PDF download spinner is rarely seen)
+
+**Symptom:**
+Setting `progress_spinner_style: wave` has no visible effect on the main article fetch display. The "CATCHING ▶" activity spinner is always shown.
+
+**Root cause:**
+`get_batch_progress` in `progress.py:1109` instantiates `BatchProgress` without passing `spinner_style`. `BatchProgress` defaults to `"activity"` spinner. The config value is only passed to the PDF download `ProgressIndicator` at `article_fetcher.py:2364`.
+
+**Affected files:**
+- `capcat/core/progress.py:1127-1130` — `get_batch_progress` does not pass `spinner_style` to `BatchProgress`
+
+**Expected behaviour:**
+`progress_spinner_style` should affect the main article fetch spinner.
+
+**How to reproduce:**
+Set `progress_spinner_style: wave`. Observe no change in spinner during fetch.
+
