@@ -12,6 +12,7 @@ import threading
 import time
 from typing import Any, Callable, Optional
 
+from .config import get_config
 from .logging_config import get_logger
 
 
@@ -197,7 +198,7 @@ class ProgressIndicator:
         self._show_cursor()
 
         # Always try to use colors if the terminal supports them
-        use_colors = True
+        use_colors = get_config().ui.use_colors
 
         # Spiral character for completion with color if supported
         if use_colors:
@@ -235,7 +236,7 @@ class ProgressIndicator:
         self._show_cursor()
 
         # Always try to use colors if the terminal supports them
-        use_colors = True
+        use_colors = get_config().ui.use_colors
 
         # Dice character for error with color if supported
         if use_colors:
@@ -277,7 +278,7 @@ class ProgressIndicator:
         while not self._stop_event.is_set():
             if sys.stdout.isatty():
                 # Always try to use colors if the terminal supports them
-                use_colors = True
+                use_colors = get_config().ui.use_colors
 
                 # Dice sequence animation with colors if supported
                 if use_colors:
@@ -507,7 +508,7 @@ class BatchProgress:
             return
 
         # Always try to use colors if the terminal supports them
-        use_colors = True
+        use_colors = get_config().ui.use_colors
 
         # Dice sequence animation with colors if supported
         if use_colors:
@@ -611,7 +612,7 @@ class BatchProgress:
 
         if not self.quiet:
             # Always try to use colors if the terminal supports them
-            use_colors = True
+            use_colors = get_config().ui.use_colors
 
             # Show item count only for multiple items (hide for single items)
             if self.total_items > 1:
@@ -709,7 +710,7 @@ class BatchProgress:
             and item_name
         ):
             # Always try to use colors
-            use_colors = True
+            use_colors = get_config().ui.use_colors
 
             if use_colors:
                 status_symbol = (
@@ -779,7 +780,7 @@ class BatchProgress:
 
         if not self.quiet:
             # Always try to use colors if the terminal supports them
-            use_colors = True
+            use_colors = get_config().ui.use_colors
 
             # Prepare the main completion message
             if self.failed == 0:
@@ -878,7 +879,7 @@ class BatchProgress:
             return
 
         # Always try to use colors if the terminal supports them
-        use_colors = True
+        use_colors = get_config().ui.use_colors
 
         # Dice sequence animation with colors if supported
         if use_colors:
@@ -1101,7 +1102,7 @@ def get_progress_indicator(
         return ProgressIndicator(
             message,
             total,
-            show_spinner=config.ui.show_progress_animations,
+            show_spinner=True,
             spinner_style=config.ui.progress_spinner_style,
         )
 
@@ -1127,4 +1128,5 @@ def get_batch_progress(
     if quiet:
         return QuietProgress(operation_name, total_items)
     else:
-        return BatchProgress(operation_name, total_items, quiet, verbose)
+        spinner_style = get_config().ui.progress_spinner_style
+        return BatchProgress(operation_name, total_items, quiet, verbose, spinner_style)

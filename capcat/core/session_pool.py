@@ -88,8 +88,10 @@ class SessionPool:
         """
         session = requests.Session()
 
-        # Use realistic, rotating User-Agent instead of generic one
-        user_agent = random.choice(USER_AGENTS)
+        # Use configured user_agent if explicitly set (non-default), else rotate
+        _default_ua = "Capcat/2.0 (Personal news archiver)"
+        _config_ua = self.config.network.user_agent
+        user_agent = _config_ua if _config_ua != _default_ua else random.choice(USER_AGENTS)
 
         # Configure comprehensive browser-like headers
         session.headers.update(
@@ -115,7 +117,7 @@ class SessionPool:
         adapter = requests.adapters.HTTPAdapter(
             pool_connections=self.config.network.pool_connections,
             pool_maxsize=self.config.network.pool_maxsize,
-            max_retries=3,  # Built-in retry mechanism
+            max_retries=self.config.network.max_retries,
         )
 
         session.mount("http://", adapter)
