@@ -470,10 +470,10 @@ def _cmd_fetch(args: list[str], log_file: str | None = None) -> None:
     log_file = lf or log_file
 
     if not args:
-        print("capcat fetch: source list required (comma-separated)")
+        print("capcat fetch: source list required (space- or comma-separated)")
         raise SystemExit(1)
 
-    sources = [s.strip() for s in args[0].split(",")]
+    sources = [s.strip() for a in args for s in a.split(",") if s.strip()]
     count = int(count_str) if count_str is not None else None
 
     _setup_logging(verbose=verbose, quiet=quiet, log_file=log_file)
