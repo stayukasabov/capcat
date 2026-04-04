@@ -575,16 +575,18 @@ def test_load_manifest_returns_empty_dict_silently_for_zero_byte_file(tmp_path, 
     assert not any(r.levelno >= logging.WARNING for r in caplog.records)
 
 
-def test_load_manifest_returns_empty_dict_and_warns_on_malformed_json(tmp_path, caplog):
+def test_load_manifest_returns_empty_dict_and_warns_on_malformed_json(tmp_path):
     import logging
+    from unittest.mock import MagicMock, patch
     manifest_path = tmp_path / ".capcat" / "source_hashes.json"
     manifest_path.parent.mkdir(parents=True)
     manifest_path.write_text("not json", encoding="utf-8")
     mirror = SourceConfigMirror(project_root=tmp_path, tui_mode=False)
-    with caplog.at_level(logging.WARNING, logger="capcat"):
+    mock_logger = MagicMock()
+    with patch("capcat.core.logging_config.get_logger", return_value=mock_logger):
         result = mirror._load_manifest()
     assert result == {}
-    assert any(r.levelno >= logging.WARNING for r in caplog.records)
+    mock_logger.warning.assert_called_once()
 
 
 def test_check_for_upgrades_calls_resync_only_when_manifest_absent(tmp_path, monkeypatch):
