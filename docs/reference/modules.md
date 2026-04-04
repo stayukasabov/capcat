@@ -35,6 +35,7 @@ Complete reference of all modules, classes, and functions in Capcat.
 - [build.lib.capcat.commands.single](../api/build/single.md) - Single article fetch command
 - [build.lib.capcat.core.__init__](../api/build/__init__.md)
 - [build.lib.capcat.core.article_fetcher](../api/build/article_fetcher.md) - Shared article fetching functionality for Capcat sources
+- [build.lib.capcat.core.async_pdf_manager](../api/build/async_pdf_manager.md) - Asynchronous PDF download manager to prevent thread pool exhaustion
 - [build.lib.capcat.core.circuit_breaker](../api/build/circuit_breaker.md) - Circuit Breaker pattern implementation for Capcat
 - [build.lib.capcat.core.cli_recovery](../api/build/cli_recovery.md) - CLI error recovery and user guidance system
 - [build.lib.capcat.core.cli_validation](../api/build/cli_validation.md) - Enhanced CLI validation and error handling for better user experience
@@ -123,7 +124,7 @@ Replaces {{placeholder}} variables with actual values from configuration
 - [build.lib.capcat.core.theme_utils](../api/build/theme_utils.md) - Theme utilities for hash-based theme persistence
 - [build.lib.capcat.core.timeout_config](../api/build/timeout_config.md) - Adaptive timeout configuration for Capcat
 - [build.lib.capcat.core.timeout_wrapper](../api/build/timeout_wrapper.md) - Timeout wrapper utilities for preventing hanging operations
-- [build.lib.capcat.core.tui_context](../api/build/tui_context.md) - TUI context flag
+- [build.lib.capcat.core.tui_context](../api/build/tui_context.md) - TUI context flag and per-fetch result accumulation
 - [build.lib.capcat.core.unified_article_processor](../api/build/unified_article_processor.md) - Unified Article Processor - Universal entry point for all article processing
 - [build.lib.capcat.core.unified_media_processor](../api/build/unified_media_processor.md) - Unified Media Processor Integration Layer
 - [build.lib.capcat.core.unified_source_processor](../api/build/unified_source_processor.md) - Unified Source Processor for Capcat
@@ -142,6 +143,11 @@ for config-driven sources in Capcat
 - [build.lib.capcat.sources.builtin.__init__](../api/build/__init__.md)
 - [build.lib.capcat.sources.builtin.custom.hn.source](../api/build/source.md) - Hacker News source implementation for the new source system
 - [build.lib.capcat.sources.builtin.custom.lb.source](../api/build/source.md) - Lobsters source implementation for the new source system
+- [build.lib.capcat.sources.builtin.custom.medium.source](../api/build/source.md) - Medium
+- [build.lib.capcat.sources.builtin.custom.substack.source](../api/build/source.md) - Substack
+- [build.lib.capcat.sources.builtin.custom.twitter.source](../api/build/source.md) - Twitter/X
+- [build.lib.capcat.sources.builtin.custom.vimeo.source](../api/build/source.md) - Vimeo specialized source implementation
+- [build.lib.capcat.sources.builtin.custom.youtube.source](../api/build/source.md) - YouTube specialized source implementation
 - [build.lib.capcat.sources.specialized.__init__](../api/build/__init__.md) - Specialized source implementations for platforms like Medium and Substack
 - [build.lib.capcat.sources.specialized.medium.source](../api/build/source.md) - Medium
 - [build.lib.capcat.sources.specialized.substack.source](../api/build/source.md) - Substack
@@ -497,9 +503,9 @@ Usage:
 
 ## Statistics
 
-- **Total Modules**: 359
-- **Total Classes**: 629
-- **Total Functions**: 784
-- **Public Functions**: 614
-- **Documentation Coverage**: 78.3%
+- **Total Modules**: 365
+- **Total Classes**: 639
+- **Total Functions**: 813
+- **Public Functions**: 631
+- **Documentation Coverage**: 77.6%
 
