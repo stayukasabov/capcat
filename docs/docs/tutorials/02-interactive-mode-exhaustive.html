@@ -261,7 +261,7 @@ print(f&quot;  Selected option: {action_names.get(action, action)}&quot;)
 <li><code>action == &#x27;exit&#x27;</code></li>
 </ul>
 
-<p>Result: Prints &quot;Exiting interactive mode.&quot; and returns to shell.</p>
+<p>Result: Clears the terminal and returns to shell.</p>
 
 <h2>Source Management Submenu</h2>
 
@@ -1072,8 +1072,24 @@ summary += f&quot;Generate HTML: {generate_html}\n&quot;
 <pre><code>print(&quot;--------------------&quot;)
 print(&quot;SUMMARY&quot;)
 print(summary)
-print(&quot;--------------------&quot;)
+print(
+    &quot;  Note: Downloading PDFs can slow down the process significantly.\n&quot;
+    &quot;  You can configure the PDF size limit and other behaviors in\n&quot;
+    &quot;  Config/Global-settings.yaml inside your vault.&quot;
+)
+print(&quot;--------------------\n&quot;)
 </code></pre>
+
+<h4>Step 2.5: PDF Confirmation</h4>
+<pre><code>with suppress_logging():
+    want_pdfs = questionary.confirm(
+        &quot;  Download attached PDFs?&quot;,
+        default=True,
+        style=custom_style,
+        qmark=&quot;&quot;,
+    ).ask()
+</code></pre>
+<p>The PDF note is printed in the static SUMMARY block (before questionary renders) so it appears above the prompt in the terminal.</p>
 
 <h4>Step 3: Argument Construction</h4>
 <pre><code>args = [action]
@@ -1087,6 +1103,9 @@ elif action == &#x27;single&#x27;:
 
 if generate_html:
     args.append(&#x27;--html&#x27;)
+
+if want_pdfs:
+    args.append(&#x27;--media&#x27;)
 </code></pre>
 
 <h4>Step 4: Execution</h4>
@@ -1110,7 +1129,13 @@ SUMMARY
 Action: bundle
 Bundle: tech
 Generate HTML: true
+
+  Note: Downloading PDFs can slow down the process significantly.
+  You can configure the PDF size limit and other behaviors in
+  Config/Global-settings.yaml inside your vault.
 --------------------
+
+  Download attached PDFs? (Y/n)
 
 Executing command...
 

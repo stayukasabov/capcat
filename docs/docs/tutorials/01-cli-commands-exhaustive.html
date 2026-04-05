@@ -250,8 +250,14 @@ capcat single URL --output ~/Articles --log-file fetch.log
 
 <h4>Required Arguments:</h4>
 <ul>
-<li><code>sources</code> - Comma-separated list of source IDs (no spaces)</li>
+<li><code>sources</code> - Space- or comma-separated list of source IDs (both forms work)</li>
 </ul>
+
+<h4>Source list examples:</h4>
+<pre><code>capcat fetch bbc guardian       # space-separated
+capcat fetch bbc,guardian       # comma-separated (equivalent)
+capcat fetch hn bbc guardian    # three sources, space-separated
+</code></pre>
 
 <h4>Available Sources:</h4> Use <code>capcat list sources</code> to see all available source IDs.
 
