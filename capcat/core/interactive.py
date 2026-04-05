@@ -93,7 +93,7 @@ def start_interactive_mode():
         first_run = False
 
         if not action or action == 'exit':
-            print("Exiting interactive mode.")
+            os.system("clear")
             return
 
         # Clear questionary's selection echo and show our own
@@ -762,7 +762,7 @@ def _show_completion_screen(generate_html: bool, success: bool, fetch_result=Non
         ).ask()
 
     if not choice or choice == "exit":
-        print("Exiting interactive mode.")
+        os.system("clear")
         sys.exit(0)
     # choice == "menu": return, call stack unwinds to start_interactive_mode() while loop
 
