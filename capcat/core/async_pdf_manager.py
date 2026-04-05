@@ -302,15 +302,29 @@ class AsyncPDFManager:
         Returns True if idle before timeout, False if timeout expired.
         Used after all articles are processed to drain pending PDF downloads
         before the batch command returns.
+
+        Logs an INFO progress message every 10 seconds while downloads are
+        active so the terminal does not appear frozen.
         """
         import time as _time
         deadline = _time.monotonic() + timeout
+        last_report = _time.monotonic() - 10.0  # trigger first log immediately
         while _time.monotonic() < deadline:
             with self._lock:
                 queue_empty = self.download_queue.empty()
-                no_active = len(self.active_downloads) == 0
-            if queue_empty and no_active:
+                active_count = len(self.active_downloads)
+                queued_count = self.download_queue.qsize()
+            if queue_empty and active_count == 0:
                 return True
+            now = _time.monotonic()
+            if now - last_report >= 10.0:
+                self.logger.info(
+                    "Downloading PDFs: %d active, %d queued, %d completed",
+                    active_count,
+                    queued_count,
+                    len(self.completed_downloads),
+                )
+                last_report = now
             _time.sleep(0.1)
         return False
 
