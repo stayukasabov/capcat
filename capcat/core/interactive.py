@@ -664,7 +664,12 @@ def _confirm_and_execute(action, selection, generate_html):
     print("--------------------")
     print("SUMMARY")
     print(summary)
-    print("--------------------")
+    print(
+        "  Note: Downloading PDFs can slow down the process significantly.\n"
+        "  You can configure the PDF size limit and other behaviors in\n"
+        "  Config/Global-settings.yaml inside your vault."
+    )
+    print("--------------------\n")
 
     # Construct the argument list for run_app
     args = [action]
@@ -679,11 +684,6 @@ def _confirm_and_execute(action, selection, generate_html):
     if generate_html:
         args.append('--html')
 
-    print(
-        "\n  Note: Downloading PDFs can slow down the process significantly.\n"
-        "  You can configure the PDF size limit and other behaviors in\n"
-        "  Config/Global-settings.yaml inside your vault.\n"
-    )
     with suppress_logging():
         want_pdfs = questionary.confirm(
             "  Download attached PDFs?",
