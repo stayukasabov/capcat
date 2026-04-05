@@ -156,6 +156,9 @@ Returns True if idle before timeout, False if timeout expired.
 Used after all articles are processed to drain pending PDF downloads
 before the batch command returns.
 
+Logs an INFO progress message every 10 seconds while downloads are
+active so the terminal does not appear frozen.
+
 **Parameters:**
 
 - `self`
