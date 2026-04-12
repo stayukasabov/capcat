@@ -52,6 +52,18 @@ class TestPdfDownloadsWithoutMediaFlag:
 
         assert "downloading_research.pdf" in result
 
+    def test_pdf_not_queued_when_download_files_false(self, tmp_path):
+        """When download_files=False, PDF links must NOT be queued."""
+        fetcher = self._make_fetcher(download_files=False)
+        markdown = "[Paper](https://example.com/research.pdf)\n\nSome content."
+
+        result = fetcher._download_pdf_links_from_markdown(markdown, str(tmp_path))
+
+        assert "downloading_research.pdf" not in result, (
+            "PDF must NOT be queued when download_files=False"
+        )
+        assert "https://example.com/research.pdf" in result
+
     def test_non_pdf_links_unchanged_without_media_flag(self, tmp_path):
         """Non-PDF links must not be touched when download_files=False."""
         fetcher = self._make_fetcher(download_files=False)
