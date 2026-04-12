@@ -404,13 +404,11 @@ class ArticleFetcher(ABC):
             file_type = None
             is_pdf_file = False
             try:
-                # Check for PDF files first (always handled, regardless of
-                # --media flag)
                 is_pdf_file = self._is_pdf_url(url)
 
-                if is_pdf_file:
+                if is_pdf_file and self.download_files:
                     file_type = "pdf"
-                elif self.download_files:
+                elif not is_pdf_file and self.download_files:
                     # Use timeout wrappers for media type checks (can hang on
                     # slow servers)
                     is_doc = safe_network_operation(
@@ -1651,13 +1649,11 @@ class ArticleFetcher(ABC):
                     if not any(p in path_lower for p in _ui_path_patterns):
                         quick_filtered_links.append((link_type, url, alt_text))
             elif link_type == "document":
-                # PDFs are always downloaded — they are article content.
-                # Other document types (doc, xls, etc.) require --media flag.
                 is_pdf = path_lower.endswith(".pdf") or "pdf" in path_lower
-                if is_pdf:
+                if is_pdf and self.download_files:
                     if not path_lower.endswith((".html", ".htm")):
                         quick_filtered_links.append((link_type, url, alt_text))
-                elif self.download_files:
+                elif not is_pdf and self.download_files:
                     # Non-PDF documents only with --media flag
                     if path_lower.endswith(
                         (
