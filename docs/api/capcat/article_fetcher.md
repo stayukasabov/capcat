@@ -318,6 +318,9 @@ This prevents thread pool exhaustion by not blocking article processing
 threads on slow PDF downloads. PDFs are downloaded asynchronously
 in the background.
 
+Only runs when download_files=True (--media flag). Returns content
+unchanged when the user opted out of media downloads.
+
 **Parameters:**
 
 - `self`
