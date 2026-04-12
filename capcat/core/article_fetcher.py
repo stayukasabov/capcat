@@ -406,6 +406,13 @@ class ArticleFetcher(ABC):
             try:
                 is_pdf_file = self._is_pdf_url(url)
 
+                if is_pdf_file and not self.download_files:
+                    # User opted out of PDF downloads — redirect to landing page
+                    # or produce a stub article without downloading.
+                    return self._handle_pdf_no_download(
+                        title, url, index, base_folder, progress_callback
+                    )
+
                 if is_pdf_file and self.download_files:
                     file_type = "pdf"
                 elif not is_pdf_file and self.download_files:
@@ -464,6 +471,65 @@ class ArticleFetcher(ABC):
     def _is_pdf_url(self, url: str) -> bool:
         """Check if a URL points specifically to a PDF file."""
         return self.media_processor.is_pdf_url(url)
+
+    def _handle_pdf_no_download(
+        self,
+        title: str,
+        url: str,
+        index: int,
+        base_folder: str,
+        progress_callback=None,
+    ) -> Tuple[bool, Optional[str], Optional[str]]:
+        """Handle a direct PDF URL when download_files=False.
+
+        Tries to redirect to an HTML landing page for known domains (arxiv,
+        biorxiv, medrxiv). Falls back to a stub markdown article for all
+        other domains.
+        """
+        from .pdf_landing_resolver import resolve_pdf_to_landing_page
+
+        landing_url = resolve_pdf_to_landing_page(url)
+        if landing_url:
+            self.logger.info(
+                f"PDF redirect: {url} → {landing_url}"
+            )
+            return self._fetch_web_content(
+                title, landing_url, index, base_folder, progress_callback
+            )
+
+        # Unknown domain — write a stub article
+        safe_title = sanitize_filename(title)
+        article_folder_name = self._get_unique_folder_name(base_folder, safe_title)
+        article_folder_path = os.path.join(base_folder, article_folder_name)
+        os.makedirs(article_folder_path, exist_ok=True)
+
+        stub = (
+            f"# {title}\n\n"
+            f"> This article is a direct link to a PDF file.\n\n"
+            f"**Source:** [{url}]({url})\n\n"
+            f"To read the content, re-run with PDF download enabled "
+            f"or pass `--media` on the CLI.\n"
+        )
+        md_path = os.path.join(article_folder_path, article_md_filename(title))
+        with open(md_path, "w", encoding="utf-8") as f:
+            f.write(stub)
+
+        if self.generate_html:
+            try:
+                from capcat.htmlgen import HTMLGeneratorFactory
+                html_gen = HTMLGeneratorFactory.create()
+                html_gen.generate_article_html_from_template(
+                    str(md_path),
+                    title,
+                    [],
+                    {"template": {"variant": "article-no-comments"}},
+                    html_subfolder=False,
+                    is_single_article=True,
+                )
+            except Exception as e:
+                self.logger.debug(f"HTML generation skipped for PDF stub: {e}")
+
+        return True, title, article_folder_path
 
     def _handle_media_file(
         self,
@@ -647,9 +713,9 @@ class ArticleFetcher(ABC):
         """Fetch and process regular web page content."""
         config = get_config()
 
-        # Check for PDF files and skip if too large
+        # Check for PDF files and skip if too large (only when downloading)
         is_direct_pdf_url = url.lower().endswith('.pdf')
-        if is_direct_pdf_url:
+        if is_direct_pdf_url and self.download_files:
             if pdf_exceeds_size_limit(url, self.session, get_config().pdf.max_pdf_size_bytes):
                 self.logger.info("Skipping oversized PDF: %s", url)
                 return True, None, None
@@ -748,6 +814,12 @@ class ArticleFetcher(ABC):
             'application/pdf' in content_type or
             url.lower().endswith('.pdf')
         )
+
+        if is_pdf and not self.download_files:
+            # Response is a PDF but user opted out — use the no-download handler
+            return self._handle_pdf_no_download(
+                title, url, 0, base_folder, progress_callback
+            )
 
         if is_pdf:
             # Handle PDF article URLs with streaming download
