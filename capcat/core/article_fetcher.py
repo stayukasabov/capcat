@@ -524,7 +524,7 @@ class ArticleFetcher(ABC):
             f"> This article is a direct link to a PDF file.\n\n"
             f"**Source:** [{url}]({url})\n\n"
             f"To read the content, re-run with PDF download enabled "
-            f"or pass `--media` on the CLI.\n"
+            f"or pass `--pdfs` on the CLI.\n"
         )
         md_path = os.path.join(article_folder_path, article_md_filename(display_title))
         with open(md_path, "w", encoding="utf-8") as f:

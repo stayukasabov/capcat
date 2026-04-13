@@ -97,7 +97,7 @@ class TestPdfStubArticle:
         assert len(md_files) == 1
         content = md_files[0].read_text()
         assert "direct link to a PDF" in content.lower() or "pdf" in content.lower()
-        assert "--media" in content
+        assert "--pdfs" in content
 
     def test_stub_contains_source_url(self, tmp_path):
         """Stub article must include the original PDF URL."""
