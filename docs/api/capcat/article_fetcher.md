@@ -209,7 +209,7 @@ Returns:
 
 **Returns:** Tuple[bool, Optional[str], Optional[str]]
 
-⚠️ **High complexity:** 16
+⚠️ **High complexity:** 17
 
 ##### _is_pdf_url
 
