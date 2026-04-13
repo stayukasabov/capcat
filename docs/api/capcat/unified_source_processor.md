@@ -221,7 +221,7 @@ Process a single article using the new source system.
 
 **Returns:** bool
 
-⚠️ **High complexity:** 21
+⚠️ **High complexity:** 22
 
 
 ## Functions
