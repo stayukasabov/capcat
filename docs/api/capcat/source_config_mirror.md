@@ -276,7 +276,7 @@ def _step2_3_changed_builtins(self, manifest: dict) -> dict
 
 **Returns:** dict
 
-⚠️ **High complexity:** 13
+⚠️ **High complexity:** 12
 
 ##### _backup
 

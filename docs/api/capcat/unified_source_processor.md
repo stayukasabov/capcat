@@ -250,6 +250,34 @@ Returns:
 
 **Returns:** int
 
+### _resolve_media
+
+```python
+def _resolve_media(download_files: bool, download_pdfs: bool, source_config: 'SourceConfig', config = None) -> tuple
+```
+
+Resolve (download_files, download_pdfs) from 4-level hierarchy.
+
+Priority: CLI flags > capcat.yml source entry > source config.yaml > Global-settings.yaml.
+
+Args:
+    download_files: True if --media CLI flag was passed.
+    download_pdfs: True if --pdfs CLI flag was passed.
+    source_config: SourceConfig instance for this source.
+    config: FetchNewsConfig instance. Defaults to get_config().
+
+Returns:
+    (download_files, download_pdfs) tuple of resolved booleans.
+
+**Parameters:**
+
+- `download_files` (bool)
+- `download_pdfs` (bool)
+- `source_config` ('SourceConfig')
+- `config` *optional*
+
+**Returns:** tuple
+
 ### _build_article_metadata
 
 ```python

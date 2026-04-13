@@ -34,6 +34,15 @@ Logging-related configuration settings.
 PDF download configuration settings.
 
 
+### MediaConfig
+
+Per-session media download toggles.
+
+These are the vault-level defaults for what types of files are downloaded.
+Override per-source in source config.yaml or capcat.yml source entries.
+CLI flags always take precedence.
+
+
 ### FetchNewsConfig
 
 Main configuration class containing all settings.
@@ -225,7 +234,7 @@ Args:
 - `self`
 - `data` (Dict[str, Any])
 
-⚠️ **High complexity:** 12
+⚠️ **High complexity:** 18
 
 ##### get_config
 
