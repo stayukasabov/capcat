@@ -665,8 +665,7 @@ def _confirm_and_execute(action, selection, generate_html):
     print("SUMMARY")
     print(summary)
     print(
-        "  Note: Choosing Yes downloads PDFs, videos, audio, and documents,\n"
-        "  which can slow down the process significantly.\n"
+        "  Note: Downloading PDFs can slow down the process significantly.\n"
         "  Configure limits in Config/Global-settings.yaml inside your vault."
     )
     print("--------------------\n")
