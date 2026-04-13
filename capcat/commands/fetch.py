@@ -55,6 +55,7 @@ def process_sources(
                     quiet=getattr(args, "quiet", False),
                     verbose=getattr(args, "verbose", False),
                     download_files=getattr(args, "media", False),
+                    download_pdfs=getattr(args, "pdfs", False),
                     batch_mode=is_batch,
                     generate_html=generate_html,
                 )

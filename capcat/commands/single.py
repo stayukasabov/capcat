@@ -84,6 +84,7 @@ def scrape_single_article(
     output_dir: str,
     verbose: bool = False,
     files: bool = False,
+    pdfs: bool = False,
     generate_html: bool = False,
     update_mode: bool = False,
 ) -> Tuple[bool, Optional[str]]:
@@ -96,7 +97,8 @@ def scrape_single_article(
         url: Article URL to scrape.
         output_dir: Base directory for output (uses project Capcats/ if ".").
         verbose: Enable verbose logging output.
-        files: Download all media files (PDFs, audio, video).
+        files: Download all media files (audio, video, documents).
+        pdfs: Download PDF files (--pdfs flag).
         generate_html: Generate HTML version of article.
         update_mode: Update existing article instead of creating new.
 
@@ -191,7 +193,7 @@ def scrape_single_article(
                     return False
 
             session = get_global_session("generic")
-            fetcher = GenericArticleFetcher(session, download_files=files)
+            fetcher = GenericArticleFetcher(session, download_files=files, download_pdfs=pdfs)
             success, returned_title, content_path = fetcher.fetch_article_content(
                 f"Article from {url}", url, 1, base_dir, None
             )

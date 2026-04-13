@@ -134,7 +134,7 @@ class TestPdfLinkPath:
 
 
 # ---------------------------------------------------------------------------
-# TUI: --media flag appended when user answers yes to PDF prompt
+# TUI: --pdfs flag appended when user answers yes to PDF prompt
 # ---------------------------------------------------------------------------
 
 class TestTuiMediaFlag:
@@ -150,7 +150,8 @@ class TestTuiMediaFlag:
             from capcat.core.interactive import _confirm_and_execute
             _confirm_and_execute("fetch", ["hn"], False)
 
-        assert "--media" in dispatched
+        assert "--pdfs" in dispatched
+        assert "--media" not in dispatched
 
     def test_media_flag_not_appended_when_no(self):
         dispatched = []
@@ -164,4 +165,5 @@ class TestTuiMediaFlag:
             from capcat.core.interactive import _confirm_and_execute
             _confirm_and_execute("fetch", ["hn"], False)
 
+        assert "--pdfs" not in dispatched
         assert "--media" not in dispatched

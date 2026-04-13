@@ -176,6 +176,7 @@ class UnifiedSourceProcessor:
         download_files: bool = False,
         batch_mode: bool = False,
         generate_html: bool = False,
+        download_pdfs: bool = False,
     ) -> None:
         """
         Universal article processing function. All sources route through the new system.
@@ -188,6 +189,7 @@ class UnifiedSourceProcessor:
             download_files: Enable media file downloads
             batch_mode: Whether processing multiple sources (affects retry messages)
             generate_html: Generate HTML version after fetching
+            download_pdfs: Enable PDF downloads (--pdfs flag)
         """
         if not self._is_source_in_new_system(source_name):
             raise ValueError(
@@ -197,7 +199,7 @@ class UnifiedSourceProcessor:
             )
         return self._process_with_new_system(
             source_name, count, output_dir, quiet, verbose, download_files,
-            batch_mode, generate_html,
+            batch_mode, generate_html, download_pdfs,
         )
 
     def _process_with_new_system(
@@ -210,6 +212,7 @@ class UnifiedSourceProcessor:
         download_files: bool = False,
         batch_mode: bool = False,
         generate_html: bool = False,
+        download_pdfs: bool = False,
     ) -> None:
         """Process articles using the new source system."""
         # Run source config mirror (first-run copy or upgrade diff)
@@ -296,7 +299,7 @@ class UnifiedSourceProcessor:
 
             # Process articles using new system approach
             self._process_articles_with_new_system(
-                source, articles, base_dir, download_files, quiet, verbose
+                source, articles, base_dir, download_files, quiet, verbose, download_pdfs
             )
 
             # Drain pending PDF downloads before returning.
@@ -340,6 +343,7 @@ class UnifiedSourceProcessor:
         download_files: bool,
         quiet: bool,
         verbose: bool,
+        download_pdfs: bool = False,
     ):
         """Process articles using the new source system with parallel execution."""
         # Filter out duplicate URLs
@@ -389,6 +393,7 @@ class UnifiedSourceProcessor:
                         download_files,
                         progress,
                         i,
+                        download_pdfs,
                     )
                     futures[future] = (i, article)
 
@@ -470,6 +475,7 @@ class UnifiedSourceProcessor:
         download_files: bool,
         progress_tracker=None,
         index: int = 1,
+        download_pdfs: bool = False,
     ) -> bool:
         """Process a single article using the new source system."""
 
@@ -481,6 +487,7 @@ class UnifiedSourceProcessor:
             success, article_path = source.fetch_article_content(
                 article, base_dir, progress_callback,
                 download_files=download_files,
+                download_pdfs=download_pdfs,
             )
             comments_written = False
 
@@ -574,6 +581,7 @@ def process_source_articles(
     batch_mode: bool = False,
     generate_html: bool = False,
     project_root: Optional[Path] = None,
+    download_pdfs: bool = False,
 ) -> None:
     """
     Convenience function to process articles from any source.
@@ -587,9 +595,10 @@ def process_source_articles(
         download_files: Enable media file downloads
         batch_mode: Whether processing multiple sources (affects retry messages)
         project_root: Optional project root override
+        download_pdfs: Enable PDF downloads (--pdfs flag)
     """
     processor = get_unified_processor(project_root=project_root)
     processor.process_source_articles(
         source_name, count, output_dir, quiet, verbose, download_files, batch_mode,
-        generate_html,
+        generate_html, download_pdfs,
     )

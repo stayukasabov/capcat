@@ -117,7 +117,7 @@ class ConfigDrivenSource(BaseSource):
 
     def fetch_article_content(
         self, article: Article, output_dir: str, progress_callback=None,
-        download_files: bool = False,
+        download_files: bool = False, download_pdfs: bool = False,
     ) -> Tuple[bool, Optional[str]]:
         """
         Fetch article content using configured content selectors.
@@ -138,7 +138,7 @@ class ConfigDrivenSource(BaseSource):
 
             # Prepare configuration for NewsSourceArticleFetcher
             fetcher_config = self._prepare_fetcher_config()
-            fetcher = NewsSourceArticleFetcher(fetcher_config, self.session, download_files=download_files)
+            fetcher = NewsSourceArticleFetcher(fetcher_config, self.session, download_files=download_files, download_pdfs=download_pdfs)
 
             # Fetch content
             success, title, folder_path = fetcher._fetch_web_content(

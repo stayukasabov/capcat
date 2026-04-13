@@ -168,7 +168,7 @@ class HnSource(BaseSource):
 
     def fetch_article_content(
         self, article: Article, output_dir: str, progress_callback=None,
-        download_files: bool = False,
+        download_files: bool = False, download_pdfs: bool = False,
     ) -> Tuple[bool, Optional[str]]:
         """
         Fetch article content from Hacker News.
@@ -210,7 +210,7 @@ class HnSource(BaseSource):
                 ],
             }
 
-            fetcher = NewsSourceArticleFetcher(fetcher_config, self.session, download_files=download_files)
+            fetcher = NewsSourceArticleFetcher(fetcher_config, self.session, download_files=download_files, download_pdfs=download_pdfs)
 
             # Set timeout to prevent hangs during conversion
             original_timeout = self.session.timeout if hasattr(self.session, 'timeout') else None

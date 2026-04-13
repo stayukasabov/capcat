@@ -158,21 +158,25 @@ class ArticleFetcher(ABC):
 
     def __init__(
         self, session: requests.Session, download_files: bool = False,
-        source_code: str = "unknown", generate_html: bool = False
+        source_code: str = "unknown", generate_html: bool = False,
+        download_pdfs: bool = False
     ):
         """
         Initialize with a requests session for connection pooling.
 
         Args:
             session: Requests session for connection pooling
-            download_files: Whether to download all media files
+            download_files: Whether to download all media files (audio, video, docs)
             source_code: Source identifier for rate limiting
                 (e.g., 'hn', 'scientificamerican')
             generate_html: Whether to generate HTML output files
+            download_pdfs: Whether to download PDF files (--pdfs flag)
         """
         self.session = session
-        # Whether to download all files (PDFs, audio, video)
+        # Whether to download all files (audio, video, documents)
         self.download_files = download_files
+        # Whether to download PDFs (independent of download_files)
+        self.download_pdfs = download_pdfs or download_files
         self.source_code = source_code
         self.generate_html = generate_html
         self.logger = get_logger(self.__class__.__name__)
@@ -406,14 +410,14 @@ class ArticleFetcher(ABC):
             try:
                 is_pdf_file = self._is_pdf_url(url)
 
-                if is_pdf_file and not self.download_files:
+                if is_pdf_file and not self.download_pdfs:
                     # User opted out of PDF downloads — redirect to landing page
                     # or produce a stub article without downloading.
                     return self._handle_pdf_no_download(
                         title, url, index, base_folder, progress_callback
                     )
 
-                if is_pdf_file and self.download_files:
+                if is_pdf_file and self.download_pdfs:
                     file_type = "pdf"
                 elif not is_pdf_file and self.download_files:
                     # Use timeout wrappers for media type checks (can hang on
@@ -727,7 +731,7 @@ class ArticleFetcher(ABC):
 
         # Check for PDF files and skip if too large (only when downloading)
         is_direct_pdf_url = url.lower().endswith('.pdf')
-        if is_direct_pdf_url and self.download_files:
+        if is_direct_pdf_url and self.download_pdfs:
             if pdf_exceeds_size_limit(url, self.session, get_config().pdf.max_pdf_size_bytes):
                 self.logger.info("Skipping oversized PDF: %s", url)
                 return True, None, None
@@ -827,7 +831,7 @@ class ArticleFetcher(ABC):
             url.lower().endswith('.pdf')
         )
 
-        if is_pdf and not self.download_files:
+        if is_pdf and not self.download_pdfs:
             # Response is a PDF but user opted out — use the no-download handler
             return self._handle_pdf_no_download(
                 title, url, 0, base_folder, progress_callback
@@ -1221,10 +1225,10 @@ class ArticleFetcher(ABC):
         threads on slow PDF downloads. PDFs are downloaded asynchronously
         in the background.
 
-        Only runs when download_files=True (--media flag). Returns content
-        unchanged when the user opted out of media downloads.
+        Only runs when download_pdfs=True (--pdfs flag). Returns content
+        unchanged when the user opted out of PDF downloads.
         """
-        if not self.download_files:
+        if not self.download_pdfs:
             return markdown_content
 
         # Use async PDF manager to prevent thread blocking
@@ -1734,7 +1738,7 @@ class ArticleFetcher(ABC):
                         quick_filtered_links.append((link_type, url, alt_text))
             elif link_type == "document":
                 is_pdf = path_lower.endswith(".pdf") or "pdf" in path_lower
-                if is_pdf and self.download_files:
+                if is_pdf and self.download_pdfs:
                     if not path_lower.endswith((".html", ".htm")):
                         quick_filtered_links.append((link_type, url, alt_text))
                 elif not is_pdf and self.download_files:
@@ -2786,9 +2790,9 @@ class NewsSourceArticleFetcher(ArticleFetcher):
 
     def __init__(
         self, source_config: Dict[str, Any], session: requests.Session,
-        download_files: bool = False,
+        download_files: bool = False, download_pdfs: bool = False,
     ):
-        super().__init__(session, download_files=download_files)
+        super().__init__(session, download_files=download_files, download_pdfs=download_pdfs)
         self.source_config = source_config
         self.logger = get_logger(
             f"{__name__.replace('core.', '')}.{source_config['name']}"

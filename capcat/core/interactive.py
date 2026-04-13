@@ -691,7 +691,7 @@ def _confirm_and_execute(action, selection, generate_html):
             qmark="",
         ).ask()
     if want_pdfs:
-        args.append('--media')
+        args.append('--pdfs')
 
     if is_tui_active():
         reset_fetch_results()

@@ -345,7 +345,7 @@ class LbSource(BaseSource):
 
     def fetch_article_content(
         self, article: Article, output_dir: str, progress_callback=None,
-        download_files: bool = False,
+        download_files: bool = False, download_pdfs: bool = False,
     ) -> Tuple[bool, Optional[str]]:
         """
         Fetch article content from Lobsters with enhanced error handling.
@@ -384,7 +384,7 @@ class LbSource(BaseSource):
                     ],
                 }
 
-                fetcher = NewsSourceArticleFetcher(fetcher_config, self.session, download_files=download_files)
+                fetcher = NewsSourceArticleFetcher(fetcher_config, self.session, download_files=download_files, download_pdfs=download_pdfs)
 
                 # Fetch article content first
                 success, title, folder_path = fetcher.fetch_article_content(

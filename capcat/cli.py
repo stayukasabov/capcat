@@ -419,6 +419,7 @@ def _cmd_single(args: list[str], log_file: str | None = None) -> None:
     verbose, args = _pop_flag(args, "-V", "--verbose")
     quiet, args = _pop_flag(args, "-q", "--quiet")
     media, args = _pop_flag(args, "-M", "--media")
+    pdfs, args = _pop_flag(args, "-P", "--pdfs")
     html, args = _pop_flag(args, "-H", "--html")
     update, args = _pop_flag(args, "-U", "--update")
     output, args = _pop_value(args, "-o", "--output", default=".")
@@ -439,6 +440,7 @@ def _cmd_single(args: list[str], log_file: str | None = None) -> None:
         output_dir=output,
         verbose=verbose,
         files=media,
+        pdfs=pdfs or media,
         generate_html=html,
         update_mode=update,
     )
@@ -462,6 +464,7 @@ def _cmd_fetch(args: list[str], log_file: str | None = None) -> None:
     verbose, args = _pop_flag(args, "-V", "--verbose")
     quiet, args = _pop_flag(args, "-q", "--quiet")
     media, args = _pop_flag(args, "-M", "--media")
+    pdfs, args = _pop_flag(args, "-P", "--pdfs")
     html, args = _pop_flag(args, "-H", "--html")
     update, args = _pop_flag(args, "-U", "--update")
     output, args = _pop_value(args, "-o", "--output", default=".")
@@ -483,7 +486,7 @@ def _cmd_fetch(args: list[str], log_file: str | None = None) -> None:
     from capcat.commands.fetch import process_sources
 
     _args = _argparse.Namespace(
-        count=count, quiet=quiet, verbose=verbose, media=media
+        count=count, quiet=quiet, verbose=verbose, media=media, pdfs=pdfs or media
     )
     logger = get_logger(__name__)
     process_sources(
@@ -512,6 +515,7 @@ def _cmd_bundle(args: list[str], log_file: str | None = None) -> None:
     verbose, args = _pop_flag(args, "-V", "--verbose")
     quiet, args = _pop_flag(args, "-q", "--quiet")
     media, args = _pop_flag(args, "-M", "--media")
+    pdfs, args = _pop_flag(args, "-P", "--pdfs")
     html, args = _pop_flag(args, "-H", "--html")
     update, args = _pop_flag(args, "-U", "--update")
     all_bundles, args = _pop_flag(args, "-A", "--all")
@@ -568,7 +572,7 @@ def _cmd_bundle(args: list[str], log_file: str | None = None) -> None:
     from capcat.commands.fetch import process_sources
 
     _args = _argparse.Namespace(
-        count=count, quiet=quiet, verbose=verbose, media=media
+        count=count, quiet=quiet, verbose=verbose, media=media, pdfs=pdfs or media
     )
     logger = get_logger(__name__)
     process_sources(
