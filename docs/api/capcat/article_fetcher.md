@@ -39,17 +39,18 @@ while allowing source-specific customizations.
 ##### __init__
 
 ```python
-def __init__(self, session: requests.Session, download_files: bool = False, source_code: str = 'unknown', generate_html: bool = False)
+def __init__(self, session: requests.Session, download_files: bool = False, source_code: str = 'unknown', generate_html: bool = False, download_pdfs: bool = False)
 ```
 
 Initialize with a requests session for connection pooling.
 
 Args:
     session: Requests session for connection pooling
-    download_files: Whether to download all media files
+    download_files: Whether to download all media files (audio, video, docs)
     source_code: Source identifier for rate limiting
         (e.g., 'hn', 'scientificamerican')
     generate_html: Whether to generate HTML output files
+    download_pdfs: Whether to download PDF files (--pdfs flag)
 
 **Parameters:**
 
@@ -58,6 +59,7 @@ Args:
 - `download_files` (bool) *optional*
 - `source_code` (str) *optional*
 - `generate_html` (bool) *optional*
+- `download_pdfs` (bool) *optional*
 
 ##### set_download_files
 
@@ -207,7 +209,7 @@ Returns:
 
 **Returns:** Tuple[bool, Optional[str], Optional[str]]
 
-⚠️ **High complexity:** 12
+⚠️ **High complexity:** 16
 
 ##### _is_pdf_url
 
@@ -223,6 +225,29 @@ Check if a URL points specifically to a PDF file.
 - `url` (str)
 
 **Returns:** bool
+
+##### _handle_pdf_no_download
+
+```python
+def _handle_pdf_no_download(self, title: str, url: str, index: int, base_folder: str, progress_callback = None) -> Tuple[bool, Optional[str], Optional[str]]
+```
+
+Handle a direct PDF URL when download_files=False.
+
+Tries to redirect to an HTML landing page for known domains (arxiv,
+biorxiv, medrxiv). Falls back to a stub markdown article for all
+other domains.
+
+**Parameters:**
+
+- `self`
+- `title` (str)
+- `url` (str)
+- `index` (int)
+- `base_folder` (str)
+- `progress_callback` *optional*
+
+**Returns:** Tuple[bool, Optional[str], Optional[str]]
 
 ##### _handle_media_file
 
@@ -289,7 +314,7 @@ Fetch and process regular web page content.
 
 **Returns:** Tuple[bool, Optional[str], Optional[str]]
 
-⚠️ **High complexity:** 68
+⚠️ **High complexity:** 71
 
 ##### _cleanup_empty_images_folder
 
@@ -318,8 +343,8 @@ This prevents thread pool exhaustion by not blocking article processing
 threads on slow PDF downloads. PDFs are downloaded asynchronously
 in the background.
 
-Only runs when download_files=True (--media flag). Returns content
-unchanged when the user opted out of media downloads.
+Only runs when download_pdfs=True (--pdfs flag). Returns content
+unchanged when the user opted out of PDF downloads.
 
 **Parameters:**
 
@@ -432,7 +457,7 @@ processing.
 
 **Returns:** str
 
-⚠️ **High complexity:** 97
+⚠️ **High complexity:** 99
 
 ##### _fallback_image_detection
 
@@ -737,7 +762,7 @@ Configurable article fetcher that works with any news source.
 ##### __init__
 
 ```python
-def __init__(self, source_config: Dict[str, Any], session: requests.Session, download_files: bool = False)
+def __init__(self, source_config: Dict[str, Any], session: requests.Session, download_files: bool = False, download_pdfs: bool = False)
 ```
 
 **Parameters:**
@@ -746,6 +771,7 @@ def __init__(self, source_config: Dict[str, Any], session: requests.Session, dow
 - `source_config` (Dict[str, Any])
 - `session` (requests.Session)
 - `download_files` (bool) *optional*
+- `download_pdfs` (bool) *optional*
 
 ##### should_skip_url
 

@@ -72,6 +72,7 @@ Clean architecture implementation applying SOLID principles:
 - Liskov Substitution: RetryStrategy implementations interchangeable
 - Interface Segregation: Small, focused interfaces
 - Dependency Inversion: Depend on abstractions not concretions
+- [build.lib.capcat.core.pdf_landing_resolver](../api/build/pdf_landing_resolver.md) - Resolve direct PDF URLs to their HTML landing pages where possible
 - [build.lib.capcat.core.progress](../api/build/progress.md) - Progress indicators and status reporting for Capcat
 - [build.lib.capcat.core.rate_limiter](../api/build/rate_limiter.md) - Rate limiting system for Capcat to prevent overwhelming source servers
 - [build.lib.capcat.core.retry](../api/build/retry.md) - Retry mechanisms with exponential backoff for Capcat
@@ -210,6 +211,7 @@ Clean architecture implementation applying SOLID principles:
 - Liskov Substitution: RetryStrategy implementations interchangeable
 - Interface Segregation: Small, focused interfaces
 - Dependency Inversion: Depend on abstractions not concretions
+- [capcat.core.pdf_landing_resolver](../api/capcat/pdf_landing_resolver.md) - Resolve direct PDF URLs to their HTML landing pages where possible
 - [capcat.core.progress](../api/capcat/progress.md) - Progress indicators and status reporting for Capcat
 - [capcat.core.rate_limiter](../api/capcat/rate_limiter.md) - Rate limiting system for Capcat to prevent overwhelming source servers
 - [capcat.core.retry](../api/capcat/retry.md) - Retry mechanisms with exponential backoff for Capcat
@@ -503,9 +505,9 @@ Usage:
 
 ## Statistics
 
-- **Total Modules**: 365
+- **Total Modules**: 367
 - **Total Classes**: 639
-- **Total Functions**: 813
-- **Public Functions**: 631
-- **Documentation Coverage**: 77.6%
+- **Total Functions**: 817
+- **Public Functions**: 633
+- **Documentation Coverage**: 77.5%
 

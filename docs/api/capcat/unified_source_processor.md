@@ -124,7 +124,7 @@ Raises ValueError listing any sources that would fall through to the deleted leg
 ##### process_source_articles
 
 ```python
-def process_source_articles(self, source_name: str, count: Optional[int], output_dir: str, quiet: bool = False, verbose: bool = False, download_files: bool = False, batch_mode: bool = False, generate_html: bool = False) -> None
+def process_source_articles(self, source_name: str, count: Optional[int], output_dir: str, quiet: bool = False, verbose: bool = False, download_files: bool = False, batch_mode: bool = False, generate_html: bool = False, download_pdfs: bool = False) -> None
 ```
 
 Universal article processing function. All sources route through the new system.
@@ -137,6 +137,7 @@ Args:
     download_files: Enable media file downloads
     batch_mode: Whether processing multiple sources (affects retry messages)
     generate_html: Generate HTML version after fetching
+    download_pdfs: Enable PDF downloads (--pdfs flag)
 
 **Parameters:**
 
@@ -149,13 +150,14 @@ Args:
 - `download_files` (bool) *optional*
 - `batch_mode` (bool) *optional*
 - `generate_html` (bool) *optional*
+- `download_pdfs` (bool) *optional*
 
 **Returns:** None
 
 ##### _process_with_new_system
 
 ```python
-def _process_with_new_system(self, source_name: str, count: Optional[int], output_dir: str, quiet: bool = False, verbose: bool = False, download_files: bool = False, batch_mode: bool = False, generate_html: bool = False) -> None
+def _process_with_new_system(self, source_name: str, count: Optional[int], output_dir: str, quiet: bool = False, verbose: bool = False, download_files: bool = False, batch_mode: bool = False, generate_html: bool = False, download_pdfs: bool = False) -> None
 ```
 
 Process articles using the new source system.
@@ -171,6 +173,7 @@ Process articles using the new source system.
 - `download_files` (bool) *optional*
 - `batch_mode` (bool) *optional*
 - `generate_html` (bool) *optional*
+- `download_pdfs` (bool) *optional*
 
 **Returns:** None
 
@@ -179,7 +182,7 @@ Process articles using the new source system.
 ##### _process_articles_with_new_system
 
 ```python
-def _process_articles_with_new_system(self, source, articles, base_dir: str, download_files: bool, quiet: bool, verbose: bool)
+def _process_articles_with_new_system(self, source, articles, base_dir: str, download_files: bool, quiet: bool, verbose: bool, download_pdfs: bool = False)
 ```
 
 Process articles using the new source system with parallel execution.
@@ -193,13 +196,14 @@ Process articles using the new source system with parallel execution.
 - `download_files` (bool)
 - `quiet` (bool)
 - `verbose` (bool)
+- `download_pdfs` (bool) *optional*
 
 ⚠️ **High complexity:** 16
 
 ##### _process_single_article_new_system
 
 ```python
-def _process_single_article_new_system(self, source, article, base_dir: str, download_files: bool, progress_tracker = None, index: int = 1) -> bool
+def _process_single_article_new_system(self, source, article, base_dir: str, download_files: bool, progress_tracker = None, index: int = 1, download_pdfs: bool = False) -> bool
 ```
 
 Process a single article using the new source system.
@@ -213,6 +217,7 @@ Process a single article using the new source system.
 - `download_files` (bool)
 - `progress_tracker` *optional*
 - `index` (int) *optional*
+- `download_pdfs` (bool) *optional*
 
 **Returns:** bool
 
@@ -292,7 +297,7 @@ Get global unified processor instance.
 ### process_source_articles
 
 ```python
-def process_source_articles(source_name: str, count: Optional[int], output_dir: str, quiet: bool = False, verbose: bool = False, download_files: bool = False, batch_mode: bool = False, generate_html: bool = False, project_root: Optional[Path] = None) -> None
+def process_source_articles(source_name: str, count: Optional[int], output_dir: str, quiet: bool = False, verbose: bool = False, download_files: bool = False, batch_mode: bool = False, generate_html: bool = False, project_root: Optional[Path] = None, download_pdfs: bool = False) -> None
 ```
 
 Convenience function to process articles from any source.
@@ -306,6 +311,7 @@ Args:
     download_files: Enable media file downloads
     batch_mode: Whether processing multiple sources (affects retry messages)
     project_root: Optional project root override
+    download_pdfs: Enable PDF downloads (--pdfs flag)
 
 **Parameters:**
 
@@ -318,6 +324,7 @@ Args:
 - `batch_mode` (bool) *optional*
 - `generate_html` (bool) *optional*
 - `project_root` (Optional[Path]) *optional*
+- `download_pdfs` (bool) *optional*
 
 **Returns:** None
 

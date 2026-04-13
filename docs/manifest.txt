@@ -1,5 +1,5 @@
 Capcat Documentation Manifest
-Generated: 2026-04-12 17:07:58 UTC
+Generated: 2026-04-13 09:44:35 UTC
 Success rate: 2/2 tasks
 
 Generated Documentation:
@@ -68,6 +68,7 @@ Generated Documentation:
   - api/build/media_executor.md
   - api/build/media_processor.md
   - api/build/network_resilience.md
+  - api/build/pdf_landing_resolver.md
   - api/build/performance_monitor.md
   - api/build/progress.md
   - api/build/questionary_ui.md
@@ -163,6 +164,7 @@ Generated Documentation:
   - api/capcat/media_processor.md
   - api/capcat/network_resilience.md
   - api/capcat/news_source_adapter.md
+  - api/capcat/pdf_landing_resolver.md
   - api/capcat/performance_monitor.md
   - api/capcat/progress.md
   - api/capcat/questionary_ui.md
@@ -443,5 +445,5 @@ Generated Documentation:
   - superpowers/specs/2026-04-02-user-config-yaml-inventory.md
   - troubleshooting.md
 
-Total files: 767
+Total files: 769
 Documentation size: 44.4 MB

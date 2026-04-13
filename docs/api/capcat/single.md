@@ -66,7 +66,7 @@ Handle article scraping with specialized sources (Medium, Substack, etc.).
 ### scrape_single_article
 
 ```python
-def scrape_single_article(url: str, output_dir: str, verbose: bool = False, files: bool = False, generate_html: bool = False, update_mode: bool = False) -> Tuple[bool, Optional[str]]
+def scrape_single_article(url: str, output_dir: str, verbose: bool = False, files: bool = False, pdfs: bool = False, generate_html: bool = False, update_mode: bool = False) -> Tuple[bool, Optional[str]]
 ```
 
 Scrape a single article from any supported source.
@@ -78,7 +78,8 @@ Args:
     url: Article URL to scrape.
     output_dir: Base directory for output (uses project Capcats/ if ".").
     verbose: Enable verbose logging output.
-    files: Download all media files (PDFs, audio, video).
+    files: Download all media files (audio, video, documents).
+    pdfs: Download PDF files (--pdfs flag).
     generate_html: Generate HTML version of article.
     update_mode: Update existing article instead of creating new.
 
@@ -91,6 +92,7 @@ Returns:
 - `output_dir` (str)
 - `verbose` (bool) *optional*
 - `files` (bool) *optional*
+- `pdfs` (bool) *optional*
 - `generate_html` (bool) *optional*
 - `update_mode` (bool) *optional*
 

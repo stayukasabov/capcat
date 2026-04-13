@@ -59,6 +59,7 @@ Handles post-processing HTML generation after article scraping is complete
 - [`capcat.core.media_processor`](./media_processor.md) - Media processing component for Capcat
 - [`capcat.core.source_config`](./source_config.md) - Source configuration for optimized URL detection in Capcat
 - [`capcat.core.url_utils`](./url_utils.md) - URL validation and normalization utilities for Capcat
+- [`capcat.core.pdf_landing_resolver`](./pdf_landing_resolver.md) - Resolve direct PDF URLs to their HTML landing pages where possible
 - [`capcat.core.design_system_compiler`](./design_system_compiler.md) - Design System Compiler for Capcat HTML Generation
 
 Compiles CSS custom properties from the design system into hardcoded values

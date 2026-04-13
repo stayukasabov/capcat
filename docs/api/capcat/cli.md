@@ -171,7 +171,7 @@ capcat bundle <name> [--count N] [--output DIR] [--media] [--html]
 
 **Returns:** None
 
-⚠️ **High complexity:** 14
+⚠️ **High complexity:** 15
 
 ### _cmd_list
 
