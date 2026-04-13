@@ -418,6 +418,13 @@ class ArticleFetcher(ABC):
                     )
 
                 if is_pdf_file and self.download_pdfs:
+                    from capcat.core.async_pdf_manager import pdf_exceeds_size_limit
+                    from capcat.core.config import get_config as _get_config
+                    if pdf_exceeds_size_limit(url, self.session, _get_config().pdf.max_pdf_size_bytes):
+                        self.logger.info("Skipping oversized PDF: %s", url)
+                        return self._handle_pdf_no_download(
+                            title, url, index, base_folder, progress_callback
+                        )
                     file_type = "pdf"
                 elif not is_pdf_file and self.download_files:
                     # Use timeout wrappers for media type checks (can hang on
