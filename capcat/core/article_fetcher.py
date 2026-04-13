@@ -497,20 +497,32 @@ class ArticleFetcher(ABC):
                 title, landing_url, index, base_folder, progress_callback
             )
 
-        # Unknown domain — write a stub article
-        safe_title = sanitize_filename(title)
+        # Unknown domain — write a stub article.
+        # Derive a clean display title from the URL filename when the caller
+        # passed the generic "Article from <url>" fallback (single command).
+        # Preserve meaningful titles provided by sources (e.g. HN article title).
+        from urllib.parse import unquote
+        if title.startswith("Article from "):
+            url_filename = os.path.splitext(
+                os.path.basename(unquote(urlparse(url).path))
+            )[0]
+            display_title = url_filename if url_filename else title
+        else:
+            display_title = title
+
+        safe_title = sanitize_filename(display_title)
         article_folder_name = self._get_unique_folder_name(base_folder, safe_title)
         article_folder_path = os.path.join(base_folder, article_folder_name)
         os.makedirs(article_folder_path, exist_ok=True)
 
         stub = (
-            f"# {title}\n\n"
+            f"# {display_title}\n\n"
             f"> This article is a direct link to a PDF file.\n\n"
             f"**Source:** [{url}]({url})\n\n"
             f"To read the content, re-run with PDF download enabled "
             f"or pass `--media` on the CLI.\n"
         )
-        md_path = os.path.join(article_folder_path, article_md_filename(title))
+        md_path = os.path.join(article_folder_path, article_md_filename(display_title))
         with open(md_path, "w", encoding="utf-8") as f:
             f.write(stub)
 
@@ -520,7 +532,7 @@ class ArticleFetcher(ABC):
                 html_gen = HTMLGeneratorFactory.create()
                 html_gen.generate_article_html_from_template(
                     str(md_path),
-                    title,
+                    display_title,
                     [],
                     {"template": {"variant": "article-no-comments"}},
                     html_subfolder=False,
@@ -529,7 +541,7 @@ class ArticleFetcher(ABC):
             except Exception as e:
                 self.logger.debug(f"HTML generation skipped for PDF stub: {e}")
 
-        return True, title, article_folder_path
+        return True, display_title, article_folder_path
 
     def _handle_media_file(
         self,

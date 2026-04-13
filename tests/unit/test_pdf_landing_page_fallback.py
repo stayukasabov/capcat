@@ -135,6 +135,49 @@ class TestPdfStubArticle:
 
         mock_dl.assert_not_called()
 
+    def test_stub_title_derived_from_url_filename_when_generic(self, tmp_path):
+        """When title is the generic 'Article from ...' fallback, stub must use URL filename."""
+        fetcher = self._make_fetcher(download_files=False)
+        pdf_url = "https://example.com/research-paper.pdf"
+        generic_title = f"Article from {pdf_url}"
+
+        with (
+            patch("capcat.core.unified_article_processor.get_unified_processor") as mock_proc,
+            patch("capcat.core.article_fetcher.download_file"),
+        ):
+            mock_proc.return_value._registry.can_handle_url.return_value = False
+            success, returned_title, folder = fetcher.fetch_article_content(
+                generic_title, pdf_url, 0, str(tmp_path)
+            )
+
+        assert success is True
+        md_files = list(tmp_path.rglob("*.md"))
+        content = md_files[0].read_text()
+        # Heading must use filename, not the raw URL
+        assert "research-paper" in content
+        assert "Article from https" not in content
+        # Folder name must not contain raw URL
+        assert "Article from https" not in str(folder)
+
+    def test_stub_preserves_meaningful_title(self, tmp_path):
+        """When a real title is provided (e.g. from HN), stub must keep it."""
+        fetcher = self._make_fetcher(download_files=False)
+        pdf_url = "https://example.com/paper.pdf"
+        real_title = "Attention Is All You Need"
+
+        with (
+            patch("capcat.core.unified_article_processor.get_unified_processor") as mock_proc,
+            patch("capcat.core.article_fetcher.download_file"),
+        ):
+            mock_proc.return_value._registry.can_handle_url.return_value = False
+            success, returned_title, folder = fetcher.fetch_article_content(
+                real_title, pdf_url, 0, str(tmp_path)
+            )
+
+        md_files = list(tmp_path.rglob("*.md"))
+        content = md_files[0].read_text()
+        assert "Attention Is All You Need" in content
+
 
 # ---------------------------------------------------------------------------
 # Tests for landing-page redirect in fetch_article_content
