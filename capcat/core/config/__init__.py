@@ -55,6 +55,7 @@ try:
     _impl = sys.modules[_config_impl_name]
     FetchNewsConfig = _impl.FetchNewsConfig
     LoggingConfig = _impl.LoggingConfig
+    MediaConfig = _impl.MediaConfig
     NetworkConfig = _impl.NetworkConfig
     PdfConfig = _impl.PdfConfig
     ProcessingConfig = _impl.ProcessingConfig
@@ -153,6 +154,9 @@ except (ImportError, FileNotFoundError):
     class UIConfig:
         """Stub for UIConfig when the main config module is unavailable."""
 
+    class MediaConfig:
+        """Stub for MediaConfig when the main config module is unavailable."""
+
     class PdfConfig:
         """Stub for PdfConfig when the main config module is unavailable."""
 
@@ -170,6 +174,7 @@ __all__ = [
     "load_config",
     "save_config",
     "FetchNewsConfig",
+    "MediaConfig",
     "NetworkConfig",
     "ProcessingConfig",
     "LoggingConfig",

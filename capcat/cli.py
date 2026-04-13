@@ -40,6 +40,31 @@ pdf:
   # Default: 10
   max_pdf_per_article: 10
 
+# ─── Media Downloads ─────────────────────────────────────
+media:
+  # Download PDF files when capcat encounters a direct PDF link.
+  # When false, capcat generates a stub note instead of downloading the PDF.
+  # Override per-source in Config/sources/active/<source>/config.yaml
+  # or per-run in Config/capcat.yml under the source entry.
+  # Default: false
+  download_pdfs: false
+
+  # Download and embed images locally.
+  # Default: true
+  download_images: true
+
+  # Download video files.
+  # Default: false
+  download_videos: false
+
+  # Download audio files.
+  # Default: false
+  download_audio: false
+
+  # Download generic document files (non-PDF).
+  # Default: false
+  download_documents: false
+
 # ─── Network ────────────────────────────────────────────
 network:
   # TCP connection timeout in seconds. Increase for slow servers.

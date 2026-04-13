@@ -44,6 +44,10 @@ class SourceConfig:
     # shown in TUI source lists or bundle descriptions.
     hidden: bool = False
 
+    # Per-source media download overrides. Dict keys match MediaConfig field names.
+    # Loaded from the source's config.yaml `media:` block. None means no override.
+    media_overrides: Optional[Dict] = None
+
     # Optional custom configuration
     custom_config: Dict[str, Any] = None
 

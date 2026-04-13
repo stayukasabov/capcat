@@ -173,6 +173,7 @@ class SourceRegistry:
                         article_count=int(config.get("article_count")) if config.get("article_count") is not None else None,
                         hidden=config.get("hidden", False),
                         custom_config=config,
+                        media_overrides=config.get("media") if isinstance(config.get("media"), dict) else None,
                     )
 
                     # Validate configuration
@@ -251,6 +252,7 @@ class SourceRegistry:
             article_count=int(config_data.get("article_count")) if config_data.get("article_count") is not None else None,
             hidden=config_data.get("hidden", False),
             custom_config=config_data,
+            media_overrides=config_data.get("media") if isinstance(config_data.get("media"), dict) else None,
         )
 
         # Load source class

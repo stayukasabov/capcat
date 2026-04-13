@@ -78,6 +78,61 @@ def _resolve_count(
     return get_config().processing.article_count
 
 
+def _resolve_media(
+    download_files: bool,
+    download_pdfs: bool,
+    source_config: "SourceConfig",
+    config=None,
+) -> tuple:
+    """Resolve (download_files, download_pdfs) from 4-level hierarchy.
+
+    Priority: CLI flags > capcat.yml source entry > source config.yaml > Global-settings.yaml.
+
+    Args:
+        download_files: True if --media CLI flag was passed.
+        download_pdfs: True if --pdfs CLI flag was passed.
+        source_config: SourceConfig instance for this source.
+        config: FetchNewsConfig instance. Defaults to get_config().
+
+    Returns:
+        (download_files, download_pdfs) tuple of resolved booleans.
+    """
+    # CLI always wins — no further resolution needed
+    if download_files or download_pdfs:
+        return download_files, download_pdfs
+
+    if config is None:
+        config = get_config()
+
+    media = config.media
+    res_images = media.download_images
+    res_videos = media.download_videos
+    res_audio = media.download_audio
+    res_docs = media.download_documents
+    res_pdfs = media.download_pdfs
+
+    # Level 3: source config.yaml media_overrides
+    if source_config.media_overrides:
+        mo = source_config.media_overrides
+        res_images = mo.get("download_images", res_images)
+        res_videos = mo.get("download_videos", res_videos)
+        res_audio = mo.get("download_audio", res_audio)
+        res_docs = mo.get("download_documents", res_docs)
+        res_pdfs = mo.get("download_pdfs", res_pdfs)
+
+    # Level 2: capcat.yml source entry media:
+    vault_media = config.source_overrides.get(source_config.name, {}).get("media")
+    if isinstance(vault_media, dict):
+        res_images = vault_media.get("download_images", res_images)
+        res_videos = vault_media.get("download_videos", res_videos)
+        res_audio = vault_media.get("download_audio", res_audio)
+        res_docs = vault_media.get("download_documents", res_docs)
+        res_pdfs = vault_media.get("download_pdfs", res_pdfs)
+
+    res_files = res_images or res_videos or res_audio or res_docs
+    return res_files, res_pdfs
+
+
 def _build_article_metadata(article, source) -> dict:
     """Build frontmatter metadata dict for an article."""
     tags = list(dict.fromkeys([source.config.name, source.config.category]))
@@ -248,6 +303,11 @@ class UnifiedSourceProcessor:
             # Resolve per-source count (CLI > source YAML > global config)
             resolved_count = _resolve_count(count, source_config, get_config())
 
+            # Resolve media settings: CLI > capcat.yml > source config.yaml > global config
+            resolved_files, resolved_pdfs = _resolve_media(
+                download_files, download_pdfs, source_config, get_config()
+            )
+
             self.logger.info(
                 f"Fetching top {resolved_count} articles from {source_config.display_name}..."
             )
@@ -299,7 +359,7 @@ class UnifiedSourceProcessor:
 
             # Process articles using new system approach
             self._process_articles_with_new_system(
-                source, articles, base_dir, download_files, quiet, verbose, download_pdfs
+                source, articles, base_dir, resolved_files, quiet, verbose, resolved_pdfs
             )
 
             # Drain pending PDF downloads before returning.

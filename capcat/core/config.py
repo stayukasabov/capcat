@@ -116,6 +116,22 @@ class PdfConfig:
     max_pdf_per_article: int = 10
 
 
+@dataclass
+class MediaConfig:
+    """Per-session media download toggles.
+
+    These are the vault-level defaults for what types of files are downloaded.
+    Override per-source in source config.yaml or capcat.yml source entries.
+    CLI flags always take precedence.
+    """
+
+    download_pdfs: bool = False
+    download_images: bool = True
+    download_videos: bool = False
+    download_audio: bool = False
+    download_documents: bool = False
+
+
 def _filter_fields(cls, data: dict) -> dict:
     """Return only keys that are known fields on the dataclass cls."""
     known = {f.name for f in fields(cls)}
@@ -131,6 +147,7 @@ class FetchNewsConfig:
     logging: LoggingConfig = None
     ui: UIConfig = None
     pdf: PdfConfig = None
+    media: MediaConfig = None
     source_overrides: dict = None
 
     def __post_init__(self):
@@ -149,6 +166,8 @@ class FetchNewsConfig:
             self.ui = UIConfig()
         if self.pdf is None:
             self.pdf = PdfConfig()
+        if self.media is None:
+            self.media = MediaConfig()
         if self.source_overrides is None:
             self.source_overrides = {}
 
@@ -440,6 +459,19 @@ class ConfigManager:
 
         for section_name, section_data in data.items():
             if section_name in ("sources", "bundles"):
+                continue
+            if section_name == "media" and isinstance(section_data, dict):
+                # Handle media: section specially — update MediaConfig and also
+                # sync download_* fields into ProcessingConfig for backward compat
+                # (article_fetcher.py reads config.processing.download_images).
+                for key, value in section_data.items():
+                    if hasattr(self._config.media, key):
+                        setattr(self._config.media, key, value)
+                        self.logger.debug(f"Set media.{key} = {value}")
+                    else:
+                        self.logger.warning(f"Unknown config key: media.{key}")
+                    if key.startswith("download_") and hasattr(self._config.processing, key):
+                        setattr(self._config.processing, key, value)
                 continue
             if hasattr(self._config, section_name) and isinstance(
                 section_data, dict
