@@ -484,10 +484,13 @@ class UnifiedSourceProcessor:
                 progress_tracker.update_item_progress(progress, stage)
 
         try:
+            import inspect as _inspect
+            _params = _inspect.signature(source.fetch_article_content).parameters
+            _fetch_kwargs = {"download_files": download_files}
+            if "download_pdfs" in _params:
+                _fetch_kwargs["download_pdfs"] = download_pdfs
             success, article_path = source.fetch_article_content(
-                article, base_dir, progress_callback,
-                download_files=download_files,
-                download_pdfs=download_pdfs,
+                article, base_dir, progress_callback, **_fetch_kwargs
             )
             comments_written = False
 
