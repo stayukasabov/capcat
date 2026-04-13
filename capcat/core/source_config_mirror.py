@@ -325,9 +325,6 @@ class SourceConfigMirror:
                 shutil.copy2(builtin_file, user_file)
                 manifest[key]["builtin_hash"] = new_builtin_hash
                 manifest[key]["user_hash"] = new_builtin_hash
-        else:
-            for key, _, new_builtin_hash in override_candidates:
-                manifest[key]["builtin_hash"] = new_builtin_hash
 
         return manifest
 

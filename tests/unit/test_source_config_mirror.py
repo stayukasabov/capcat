@@ -386,12 +386,13 @@ def test_step3_overrides_and_backs_up_when_user_says_yes(tmp_path, monkeypatch):
 
 
 def test_step3_does_not_override_when_user_says_no(tmp_path, monkeypatch):
-    """Builtin changed, user unmodified, user declines -> file unchanged, builtin_hash updated."""
+    """Builtin changed, user unmodified, user declines -> file unchanged, builtin_hash NOT updated."""
     m, project, user_cfg, cfg_dir = _setup_changed_builtin(
         tmp_path, monkeypatch, user_modified=False
     )
     original_user_content = (user_cfg / "bbc.yaml").read_text()
-    new_builtin_hash = hashlib.sha256((cfg_dir / "bbc.yaml").read_bytes()).hexdigest()
+    manifest_before = json.loads((project / ".capcat" / "source_hashes.json").read_text())
+    old_builtin_hash = manifest_before["config_driven/configs/bbc.yaml"]["builtin_hash"]
 
     monkeypatch.setattr("builtins.input", lambda _: "n")
 
@@ -399,7 +400,7 @@ def test_step3_does_not_override_when_user_says_no(tmp_path, monkeypatch):
 
     assert (user_cfg / "bbc.yaml").read_text() == original_user_content
     manifest = json.loads((project / ".capcat" / "source_hashes.json").read_text())
-    assert manifest["config_driven/configs/bbc.yaml"]["builtin_hash"] == new_builtin_hash
+    assert manifest["config_driven/configs/bbc.yaml"]["builtin_hash"] == old_builtin_hash
 
 
 def test_backup_collision_uses_counter_suffix(tmp_path, monkeypatch):

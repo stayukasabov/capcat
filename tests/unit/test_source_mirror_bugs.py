@@ -1,7 +1,9 @@
-"""Regression tests for B4 and B5 — source config mirror bugs.
+"""Regression tests for B4, B5, and B1 (2026-04-13) — source config mirror bugs.
 
 B4: __pycache__/*.pyc files must not appear in the mirror manifest.
 B5: upgrade prompt must not fire when stdin is non-interactive.
+B1: declining an upgrade (or silent non-interactive decline) must NOT update
+    builtin_hash in the manifest, so the upgrade offer re-appears next run.
 """
 import sys
 from pathlib import Path
@@ -179,3 +181,119 @@ class TestPromptNonInteractive:
             result = mirror._prompt("Update?")
         mock_input.assert_called_once()
         assert result == "n"
+
+
+# ---------------------------------------------------------------------------
+# B1 — declining upgrade must NOT update builtin_hash in manifest
+# ---------------------------------------------------------------------------
+
+class TestUpgradeDeclinePreservesBuiltinHash:
+    """When user declines (or non-interactive silent decline), builtin_hash must
+    remain unchanged so the upgrade offer appears again on the next run."""
+
+    def _setup_mirror_with_stale_vault(self, tmp_path):
+        """Return a mirror whose manifest has one stale entry.
+
+        builtin file (v2) is newer than the vault file (v1).
+        The manifest currently records the OLD builtin hash (v1).
+        user_hash matches the vault file hash (v1) — user never modified it.
+        """
+        import hashlib
+
+        # Builtin (new version, v2)
+        builtin_dir = tmp_path / "sources_builtin" / "custom" / "hn"
+        builtin_dir.mkdir(parents=True)
+        builtin_src = builtin_dir / "source.py"
+        builtin_src.write_text("# v2 with download_pdfs")
+
+        # Vault (old version, v1)
+        vault_dir = tmp_path / "Config" / "sources" / "active" / "custom" / "hn"
+        vault_dir.mkdir(parents=True)
+        vault_src = vault_dir / "source.py"
+        vault_src.write_text("# v1 without download_pdfs")
+
+        # Hashes
+        h_v1 = hashlib.sha256(b"# v1 without download_pdfs").hexdigest()
+        h_v2 = hashlib.sha256(b"# v2 with download_pdfs").hexdigest()
+
+        # Manifest: builtin_hash = v1 hash (old), user_hash = v1 hash
+        manifest_dir = tmp_path / ".capcat"
+        manifest_dir.mkdir()
+        import json
+        (manifest_dir / "source_hashes.json").write_text(json.dumps({
+            "custom/hn/source.py": {
+                "builtin_hash": h_v1,
+                "user_hash": h_v1,
+            }
+        }))
+
+        from capcat.core.source_config_mirror import SourceConfigMirror
+        mirror = SourceConfigMirror.__new__(SourceConfigMirror)
+        mirror._root = tmp_path
+        mirror._tui_mode = False
+
+        # Patch _builtin_file_for_key and _resolve_user_file to use tmp dirs
+        def fake_builtin(key):
+            return builtin_src if key == "custom/hn/source.py" else None
+
+        def fake_user(key):
+            return vault_src if key == "custom/hn/source.py" else None
+
+        return mirror, fake_builtin, fake_user, h_v1, h_v2
+
+    def test_decline_does_not_update_builtin_hash(self, tmp_path):
+        """When user says 'n', manifest.builtin_hash must stay at old value."""
+        import json
+        from unittest.mock import patch
+
+        mirror, fake_builtin, fake_user, h_v1, h_v2 = self._setup_mirror_with_stale_vault(tmp_path)
+
+        with (
+            patch.object(mirror, "_builtin_file_for_key", side_effect=fake_builtin),
+            patch.object(mirror, "_resolve_user_file", side_effect=fake_user),
+            patch.object(mirror, "_prompt", return_value="n"),
+        ):
+            manifest = mirror._load_manifest()
+            manifest = mirror._step2_3_changed_builtins(manifest)
+
+        # builtin_hash must remain v1 — upgrade was declined
+        assert manifest["custom/hn/source.py"]["builtin_hash"] == h_v1, (
+            "builtin_hash must NOT be updated when upgrade is declined — "
+            "otherwise the upgrade offer is permanently suppressed"
+        )
+
+    def test_accept_does_update_builtin_hash(self, tmp_path):
+        """When user accepts, manifest.builtin_hash must be updated to v2."""
+        import json
+        from unittest.mock import patch
+
+        mirror, fake_builtin, fake_user, h_v1, h_v2 = self._setup_mirror_with_stale_vault(tmp_path)
+
+        with (
+            patch.object(mirror, "_builtin_file_for_key", side_effect=fake_builtin),
+            patch.object(mirror, "_resolve_user_file", side_effect=fake_user),
+            patch.object(mirror, "_prompt", return_value="y"),
+            patch.object(mirror, "_backup", return_value=tmp_path),
+        ):
+            manifest = mirror._load_manifest()
+            manifest = mirror._step2_3_changed_builtins(manifest)
+
+        assert manifest["custom/hn/source.py"]["builtin_hash"] == h_v2
+
+    def test_decline_leaves_vault_file_unchanged(self, tmp_path):
+        """Vault file content must not change when upgrade is declined."""
+        from unittest.mock import patch
+
+        mirror, fake_builtin, fake_user, h_v1, h_v2 = self._setup_mirror_with_stale_vault(tmp_path)
+        vault_src = tmp_path / "Config" / "sources" / "active" / "custom" / "hn" / "source.py"
+        original_content = vault_src.read_text()
+
+        with (
+            patch.object(mirror, "_builtin_file_for_key", side_effect=fake_builtin),
+            patch.object(mirror, "_resolve_user_file", side_effect=fake_user),
+            patch.object(mirror, "_prompt", return_value="n"),
+        ):
+            manifest = mirror._load_manifest()
+            mirror._step2_3_changed_builtins(manifest)
+
+        assert vault_src.read_text() == original_content
