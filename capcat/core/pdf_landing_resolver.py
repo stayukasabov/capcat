@@ -3,10 +3,11 @@
 Returns None for unknown domains so the caller can fall back to a stub article.
 """
 import re
+from typing import Optional
 from urllib.parse import urlparse
 
 
-def resolve_pdf_to_landing_page(url: str) -> str | None:
+def resolve_pdf_to_landing_page(url: str) -> Optional[str]:
     """Return an HTML landing-page URL for a known PDF URL pattern, or None."""
     parsed = urlparse(url)
     host = parsed.netloc.lower().lstrip("www.")
