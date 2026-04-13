@@ -457,21 +457,10 @@ class ConfigManager:
                             f"Vault source override: {name} = {overrides}"
                         )
 
+        # First pass: merge all sections except media.
+        # media: is deferred so its processing sync wins over any processing: values.
         for section_name, section_data in data.items():
-            if section_name in ("sources", "bundles"):
-                continue
-            if section_name == "media" and isinstance(section_data, dict):
-                # Handle media: section specially — update MediaConfig and also
-                # sync download_* fields into ProcessingConfig for backward compat
-                # (article_fetcher.py reads config.processing.download_images).
-                for key, value in section_data.items():
-                    if hasattr(self._config.media, key):
-                        setattr(self._config.media, key, value)
-                        self.logger.debug(f"Set media.{key} = {value}")
-                    else:
-                        self.logger.warning(f"Unknown config key: media.{key}")
-                    if key.startswith("download_") and hasattr(self._config.processing, key):
-                        setattr(self._config.processing, key, value)
+            if section_name in ("sources", "bundles", "media"):
                 continue
             if hasattr(self._config, section_name) and isinstance(
                 section_data, dict
@@ -489,6 +478,19 @@ class ConfigManager:
                         )
             else:
                 self.logger.warning(f"Unknown config section: {section_name}")
+
+        # Second pass: apply media: section last so its download_* syncs to
+        # ProcessingConfig always win over any processing: values above.
+        media_data = data.get("media")
+        if isinstance(media_data, dict):
+            for key, value in media_data.items():
+                if hasattr(self._config.media, key):
+                    setattr(self._config.media, key, value)
+                    self.logger.debug(f"Set media.{key} = {value}")
+                else:
+                    self.logger.warning(f"Unknown config key: media.{key}")
+                if key.startswith("download_") and hasattr(self._config.processing, key):
+                    setattr(self._config.processing, key, value)
 
     def get_config(self) -> FetchNewsConfig:
         """Get the current configuration.

@@ -45,6 +45,23 @@ class TestMediaConfigYamlLoading:
         mgr._load_settings_file(settings)
         assert mgr._config.processing.download_images is False
 
+    def test_media_section_wins_over_processing_section(self, tmp_path):
+        """When both media: and processing: sections are present (as in Global-settings.yaml),
+        media.download_images=false must still win over processing.download_images=true."""
+        settings = tmp_path / "s.yaml"
+        settings.write_text(
+            "media:\n"
+            "  download_images: false\n"
+            "processing:\n"
+            "  download_images: true\n"
+        )
+        from capcat.core.config import ConfigManager
+        mgr = ConfigManager()
+        mgr._load_settings_file(settings)
+        assert mgr._config.processing.download_images is False, (
+            "media.download_images=false must override processing.download_images=true"
+        )
+
     def test_unknown_media_key_does_not_raise(self, tmp_path):
         settings = tmp_path / "s.yaml"
         settings.write_text("media:\n  unknown_key: true\n")
