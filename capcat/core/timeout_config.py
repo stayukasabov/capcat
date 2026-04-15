@@ -9,6 +9,7 @@ import threading
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
+from .config import get_config
 from .logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -314,9 +315,17 @@ def get_timeout_for_source(source_code: str, use_adaptive: bool = True) -> Timeo
             logger.debug(f"Using adaptive timeout for {source_code}")
             return recommended
 
-    # Fall back to default
-    logger.debug(f"Using default timeout for {source_code}")
-    return SOURCE_TIMEOUTS["default"]
+    # Fall back to config values
+    cfg = get_config().network
+    logger.debug(
+        f"Using config timeout for {source_code}: "
+        f"{cfg.connect_timeout}s connect, {cfg.read_timeout}s read"
+    )
+    return TimeoutConfig(
+        connect_timeout=cfg.connect_timeout,
+        read_timeout=cfg.read_timeout,
+        total_timeout=cfg.connect_timeout + cfg.read_timeout + 5,
+    )
 
 
 def record_response_time(source_code: str, duration: float):
