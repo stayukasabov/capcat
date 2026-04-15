@@ -234,7 +234,7 @@ Args:
 - `self`
 - `data` (Dict[str, Any])
 
-⚠️ **High complexity:** 18
+⚠️ **High complexity:** 17
 
 ##### get_config
 
