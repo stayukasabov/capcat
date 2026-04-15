@@ -3240,6 +3240,7 @@ class NewsSourceArticleFetcher(ArticleFetcher):
                 article_folder=article_folder_path,
                 source_name=source_name,
                 session=self.session,
+                media_enabled=self.download_files,
             )
 
             # Save the final content with processed media

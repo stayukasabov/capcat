@@ -320,3 +320,75 @@ class TestArticleFetcherImageGate:
         assert self.IMAGE_URL in attempted, (
             "Image URL must reach download_file() when processing.download_images=True"
         )
+
+
+class TestUnifiedMediaProcessorGate:
+    """media_enabled=True must bypass processing.download_images=False gate.
+
+    BUG E1: UnifiedMediaProcessor.process_article_media() has a `media_enabled`
+    parameter but line 50 only checks `get_config().processing.download_images`.
+    When a source-level override sets download_files=True on the fetcher,
+    process_article_media is called without media_enabled=True, so the gate
+    always blocks images when global download_images=False.
+    """
+
+    def _call_processor(self, media_enabled: bool, download_images_cfg: bool) -> bool:
+        """Call process_article_media and return whether image_processor was invoked."""
+        from unittest.mock import MagicMock, patch
+        from capcat.core.unified_media_processor import UnifiedMediaProcessor
+        from capcat.core.config import FetchNewsConfig
+
+        cfg = FetchNewsConfig()
+        cfg.processing.download_images = download_images_cfg
+
+        called = []
+
+        mock_image_processor = MagicMock()
+        mock_image_processor.process_article_images.side_effect = (
+            lambda *a, **kw: called.append(True) or {}
+        )
+
+        with (
+            patch("capcat.core.unified_media_processor.get_config", return_value=cfg),
+            patch(
+                "capcat.core.unified_media_processor.get_image_processor",
+                return_value=mock_image_processor,
+            ),
+            patch.object(
+                UnifiedMediaProcessor, "_load_source_config", return_value={}
+            ),
+        ):
+            UnifiedMediaProcessor.process_article_media(
+                content="text",
+                html_content="<html></html>",
+                url="https://example.com/article",
+                article_folder="/tmp",
+                source_name="test",
+                session=MagicMock(),
+                media_enabled=media_enabled,
+            )
+
+        return bool(called)
+
+    def test_media_enabled_true_bypasses_download_images_false(self):
+        """media_enabled=True must invoke image processor even when download_images=False."""
+        invoked = self._call_processor(media_enabled=True, download_images_cfg=False)
+        assert invoked, (
+            "image_processor must be called when media_enabled=True, "
+            "regardless of processing.download_images"
+        )
+
+    def test_media_enabled_false_download_images_false_skips(self):
+        """media_enabled=False + download_images=False must skip image processing."""
+        invoked = self._call_processor(media_enabled=False, download_images_cfg=False)
+        assert not invoked, (
+            "image_processor must NOT be called when both media_enabled=False "
+            "and processing.download_images=False"
+        )
+
+    def test_media_enabled_false_download_images_true_proceeds(self):
+        """media_enabled=False + download_images=True must still process images."""
+        invoked = self._call_processor(media_enabled=False, download_images_cfg=True)
+        assert invoked, (
+            "image_processor must be called when processing.download_images=True"
+        )

@@ -47,7 +47,7 @@ class UnifiedMediaProcessor:
         logger = get_logger(__name__)
 
         try:
-            if not get_config().processing.download_images:
+            if not (get_config().processing.download_images or media_enabled):
                 return content
 
             # Load source configuration
