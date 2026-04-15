@@ -1,15 +1,16 @@
-"""Tests for PDF download behaviour relative to the --media flag.
+"""Tests for PDF download behaviour relative to flags.
 
-PDFs respect the download_files flag: they are downloaded only when --media
-is passed (download_files=True). When the user answers No to "Download media
-files?", PDFs are skipped and the original links are preserved unchanged.
+download_pdfs controls PDF downloads independently of download_files.
+--media sets both download_files=True and download_pdfs=True at the CLI level.
+When the user answers No to the PDF prompt, download_pdfs=False regardless of
+download_files.
 """
 from unittest.mock import MagicMock, patch
 import pytest
 
 
 class TestPdfDownloadsWithoutMediaFlag:
-    """PDFs must be skipped when download_files=False (--media not passed)."""
+    """PDFs must be skipped when download_pdfs=False."""
 
     def setup_method(self):
         from capcat.core.async_pdf_manager import shutdown_pdf_manager
@@ -19,7 +20,7 @@ class TestPdfDownloadsWithoutMediaFlag:
         from capcat.core.async_pdf_manager import shutdown_pdf_manager
         shutdown_pdf_manager()
 
-    def _make_fetcher(self, download_files: bool):
+    def _make_fetcher(self, download_files: bool, download_pdfs: bool = False):
         import requests
         from capcat.core.article_fetcher import ArticleFetcher
 
@@ -30,7 +31,7 @@ class TestPdfDownloadsWithoutMediaFlag:
         session = requests.Session()
         with patch("capcat.core.ethical_scraping.get_ethical_manager") as mock_em:
             mock_em.return_value.configure = MagicMock()
-            fetcher = _Fetcher(session, download_files=download_files)
+            fetcher = _Fetcher(session, download_files=download_files, download_pdfs=download_pdfs)
         return fetcher
 
     def test_pdf_links_not_queued_without_media_flag(self, tmp_path):
@@ -46,8 +47,8 @@ class TestPdfDownloadsWithoutMediaFlag:
         assert "https://example.com/research.pdf" in result
 
     def test_pdf_links_queued_with_media_flag(self, tmp_path):
-        """PDFs must also queue when download_files=True (baseline check)."""
-        fetcher = self._make_fetcher(download_files=True)
+        """PDFs queue when download_files=True and download_pdfs=True (--media path)."""
+        fetcher = self._make_fetcher(download_files=True, download_pdfs=True)
         markdown = "[Paper](https://example.com/research.pdf)\n\nSome content."
 
         result = fetcher._download_pdf_links_from_markdown(markdown, str(tmp_path))
@@ -78,7 +79,7 @@ class TestPdfDownloadsWithoutMediaFlag:
 
 
 class TestPdfDirectUrlRespectsFlag:
-    """When an article URL itself is a PDF, download_files=False must skip download."""
+    """When an article URL itself is a PDF, download_pdfs=False must skip download."""
 
     def setup_method(self):
         from capcat.core.async_pdf_manager import shutdown_pdf_manager
@@ -88,7 +89,7 @@ class TestPdfDirectUrlRespectsFlag:
         from capcat.core.async_pdf_manager import shutdown_pdf_manager
         shutdown_pdf_manager()
 
-    def _make_fetcher(self, download_files: bool):
+    def _make_fetcher(self, download_files: bool, download_pdfs: bool = False):
         import requests
         from capcat.core.article_fetcher import ArticleFetcher
 
@@ -99,7 +100,7 @@ class TestPdfDirectUrlRespectsFlag:
         session = requests.Session()
         with patch("capcat.core.ethical_scraping.get_ethical_manager") as mock_em:
             mock_em.return_value.configure = MagicMock()
-            fetcher = _Fetcher(session, download_files=download_files)
+            fetcher = _Fetcher(session, download_files=download_files, download_pdfs=download_pdfs)
         return fetcher
 
     def test_pdf_article_url_not_downloaded_without_media_flag(self, tmp_path):
@@ -120,8 +121,8 @@ class TestPdfDirectUrlRespectsFlag:
         mock_dl.assert_not_called()
 
     def test_pdf_article_url_downloaded_with_media_flag(self, tmp_path):
-        """When article URL is a PDF and download_files=True, must download it."""
-        fetcher = self._make_fetcher(download_files=True)
+        """When article URL is a PDF and download_pdfs=True, must download it."""
+        fetcher = self._make_fetcher(download_files=True, download_pdfs=True)
         pdf_url = "https://arxiv.org/pdf/2301.00001.pdf"
 
         with (
@@ -137,7 +138,7 @@ class TestPdfDirectUrlRespectsFlag:
 
 
 class TestPdfContentLinksRespectFlag:
-    """PDF links found in article HTML content must respect download_files flag."""
+    """PDF links found in article HTML content must respect download_pdfs flag."""
 
     def setup_method(self):
         from capcat.core.async_pdf_manager import shutdown_pdf_manager
@@ -147,7 +148,7 @@ class TestPdfContentLinksRespectFlag:
         from capcat.core.async_pdf_manager import shutdown_pdf_manager
         shutdown_pdf_manager()
 
-    def _make_fetcher(self, download_files: bool):
+    def _make_fetcher(self, download_files: bool, download_pdfs: bool = False):
         import requests
         from capcat.core.article_fetcher import ArticleFetcher
 
@@ -158,7 +159,7 @@ class TestPdfContentLinksRespectFlag:
         session = requests.Session()
         with patch("capcat.core.ethical_scraping.get_ethical_manager") as mock_em:
             mock_em.return_value.configure = MagicMock()
-            fetcher = _Fetcher(session, download_files=download_files)
+            fetcher = _Fetcher(session, download_files=download_files, download_pdfs=download_pdfs)
         return fetcher
 
     def test_pdf_content_link_not_downloaded_without_media_flag(self, tmp_path):
@@ -178,10 +179,10 @@ class TestPdfContentLinksRespectFlag:
         mock_dl.assert_not_called()
 
     def test_pdf_content_link_downloaded_with_media_flag(self, tmp_path):
-        """PDF links found in article content must be downloaded when download_files=True."""
+        """PDF links found in article content must be downloaded when download_pdfs=True."""
         from bs4 import BeautifulSoup
 
-        fetcher = self._make_fetcher(download_files=True)
+        fetcher = self._make_fetcher(download_files=True, download_pdfs=True)
         html = '<html><body><a href="https://example.com/paper.pdf">PDF</a></body></html>'
         soup = BeautifulSoup(html, "html.parser")
         markdown = "[PDF](https://example.com/paper.pdf)\n\nSome content."

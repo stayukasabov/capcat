@@ -32,10 +32,10 @@ class TestAsyncPDFDownloads:
 
             mock_download.side_effect = slow_download
 
-            # Create fetcher with download_files enabled
+            # Create fetcher with download_files and download_pdfs enabled (--media path)
             mock_session = Mock()
             mock_config = {"name": "test-source"}
-            fetcher = NewsSourceArticleFetcher(mock_config, mock_session, download_files=True)
+            fetcher = NewsSourceArticleFetcher(mock_config, mock_session, download_files=True, download_pdfs=True)
 
             # Markdown content with multiple PDF links
             markdown_content = """

@@ -175,8 +175,12 @@ class ArticleFetcher(ABC):
         self.session = session
         # Whether to download all files (audio, video, documents)
         self.download_files = download_files
-        # Whether to download PDFs (independent of download_files)
-        self.download_pdfs = download_pdfs or download_files
+        # Whether to download PDFs — independent of download_files.
+        # CLI couples --media → --pdfs via `pdfs = pdfs or media` in cli.py,
+        # so by the time we reach here, download_pdfs is already True when
+        # --media was used. The or-download_files was redundant and harmful:
+        # it caused config download_images=True to override download_pdfs=False.
+        self.download_pdfs = download_pdfs
         self.source_code = source_code
         self.generate_html = generate_html
         self.logger = get_logger(self.__class__.__name__)
