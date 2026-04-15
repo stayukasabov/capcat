@@ -150,6 +150,25 @@ class ImageProcessor:
                         return w, h
                 return None
 
+            # AVIF / HEIF: ISO Base Media ftyp box (bytes 4-7 == "ftyp")
+            if len(header) >= 12 and header[4:8] == b"ftyp":
+                avif_brands = {b"avif", b"avis", b"heic", b"heif", b"mif1"}
+                major_brand = header[8:12]
+                is_avif = major_brand in avif_brands
+                if not is_avif:
+                    for i in range(16, len(header) - 3, 4):
+                        if header[i:i + 4] in avif_brands:
+                            is_avif = True
+                            break
+                if is_avif:
+                    with open(filepath, "rb") as f:
+                        data = f.read(4096)
+                    idx = data.find(b"ispe")
+                    if idx >= 4 and idx + 16 <= len(data):
+                        w, h = struct.unpack(">II", data[idx + 8: idx + 16])
+                        return w, h
+                return None
+
             # JPEG: starts with FF D8
             if header[:2] == b"\xff\xd8":
                 with open(filepath, "rb") as f:
