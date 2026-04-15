@@ -252,3 +252,71 @@ class TestResolveMedia:
         files, pdfs = _resolve_media(False, False, sc, cfg)
         assert files is False
         assert pdfs is False
+
+
+class TestArticleFetcherImageGate:
+    """download_files=True must enable images even when processing.download_images=False.
+
+    When _resolve_media returns download_files=True (because a source-level or CLI
+    override enables images), ArticleFetcher must respect that and not skip images
+    based solely on processing.download_images.
+    """
+
+    IMAGE_URL = "https://example.com/photo.jpg"
+
+    def _run_filter(self, download_files: bool, download_images_cfg: bool) -> list:
+        """Run _process_embedded_media_efficiently and return attempted download URLs."""
+        import requests
+        from unittest.mock import MagicMock, patch
+        from bs4 import BeautifulSoup
+        from capcat.core.article_fetcher import NewsSourceArticleFetcher
+        from capcat.core.config import FetchNewsConfig
+
+        cfg = FetchNewsConfig()
+        cfg.processing.download_images = download_images_cfg
+
+        session = MagicMock(spec=requests.Session)
+        source_config = {
+            "name": "test", "base_url": "https://example.com",
+            "content_selectors": ["article"], "article_selectors": ["a"],
+        }
+        fetcher = NewsSourceArticleFetcher(source_config, session, download_files=download_files)
+
+        html = f'<img src="{self.IMAGE_URL}"/>'
+        soup = BeautifulSoup(html, "html.parser")
+
+        attempted = []
+
+        def fake_download(url, *args, **kwargs):
+            attempted.append(url)
+            return None  # don't actually write anything
+
+        with (
+            patch("capcat.core.article_fetcher.get_config", return_value=cfg),
+            patch("capcat.core.article_fetcher.download_file", side_effect=fake_download),
+        ):
+            fetcher._process_embedded_media_efficiently(soup, "", "/tmp", self.IMAGE_URL)
+
+        return attempted
+
+    def test_download_files_true_enables_images_when_config_false(self):
+        """download_files=True must attempt image download even when processing.download_images=False."""
+        attempted = self._run_filter(download_files=True, download_images_cfg=False)
+        assert self.IMAGE_URL in attempted, (
+            "Image URL must reach download_file() when download_files=True, "
+            "regardless of processing.download_images"
+        )
+
+    def test_both_false_skips_images(self):
+        """download_files=False and processing.download_images=False must skip images."""
+        attempted = self._run_filter(download_files=False, download_images_cfg=False)
+        assert self.IMAGE_URL not in attempted, (
+            "Image URL must NOT reach download_file() when both flags are False"
+        )
+
+    def test_config_true_enables_images_normally(self):
+        """processing.download_images=True must attempt image download (existing behaviour)."""
+        attempted = self._run_filter(download_files=False, download_images_cfg=True)
+        assert self.IMAGE_URL in attempted, (
+            "Image URL must reach download_file() when processing.download_images=True"
+        )

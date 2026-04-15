@@ -1713,7 +1713,8 @@ class ArticleFetcher(ABC):
             path_lower = parsed_url.path.lower()
 
             # Quick extension-based filtering
-            if link_type == "image" and not _download_images:
+            # download_files=True (resolved from priority chain) also enables images
+            if link_type == "image" and not (_download_images or self.download_files):
                 continue
             if link_type == "image":
                 if path_lower.endswith(
