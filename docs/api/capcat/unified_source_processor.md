@@ -124,7 +124,7 @@ Raises ValueError listing any sources that would fall through to the deleted leg
 ##### process_source_articles
 
 ```python
-def process_source_articles(self, source_name: str, count: Optional[int], output_dir: str, quiet: bool = False, verbose: bool = False, download_files: bool = False, batch_mode: bool = False, generate_html: bool = False, download_pdfs: bool = False) -> None
+def process_source_articles(self, source_name: str, count: Optional[int], output_dir: str, quiet: bool = False, verbose: bool = False, download_files: bool = False, batch_mode: bool = False, generate_html: bool = False, download_pdfs: bool = False, force_no_pdfs: bool = False) -> None
 ```
 
 Universal article processing function. All sources route through the new system.
@@ -138,6 +138,7 @@ Args:
     batch_mode: Whether processing multiple sources (affects retry messages)
     generate_html: Generate HTML version after fetching
     download_pdfs: Enable PDF downloads (--pdfs flag)
+    force_no_pdfs: True when the TUI user explicitly answered 'No' to PDFs.
 
 **Parameters:**
 
@@ -151,13 +152,14 @@ Args:
 - `batch_mode` (bool) *optional*
 - `generate_html` (bool) *optional*
 - `download_pdfs` (bool) *optional*
+- `force_no_pdfs` (bool) *optional*
 
 **Returns:** None
 
 ##### _process_with_new_system
 
 ```python
-def _process_with_new_system(self, source_name: str, count: Optional[int], output_dir: str, quiet: bool = False, verbose: bool = False, download_files: bool = False, batch_mode: bool = False, generate_html: bool = False, download_pdfs: bool = False) -> None
+def _process_with_new_system(self, source_name: str, count: Optional[int], output_dir: str, quiet: bool = False, verbose: bool = False, download_files: bool = False, batch_mode: bool = False, generate_html: bool = False, download_pdfs: bool = False, force_no_pdfs: bool = False) -> None
 ```
 
 Process articles using the new source system.
@@ -174,6 +176,7 @@ Process articles using the new source system.
 - `batch_mode` (bool) *optional*
 - `generate_html` (bool) *optional*
 - `download_pdfs` (bool) *optional*
+- `force_no_pdfs` (bool) *optional*
 
 **Returns:** None
 
@@ -253,7 +256,7 @@ Returns:
 ### _resolve_media
 
 ```python
-def _resolve_media(download_files: bool, download_pdfs: bool, source_config: 'SourceConfig', config = None) -> tuple
+def _resolve_media(download_files: bool, download_pdfs: bool, source_config: 'SourceConfig', config = None, force_no_pdfs: bool = False) -> tuple
 ```
 
 Resolve (download_files, download_pdfs) from 4-level hierarchy.
@@ -265,6 +268,8 @@ Args:
     download_pdfs: True if --pdfs CLI flag was passed.
     source_config: SourceConfig instance for this source.
     config: FetchNewsConfig instance. Defaults to get_config().
+    force_no_pdfs: True when the user explicitly answered 'No' to the TUI
+        PDF prompt. Overrides all config-level pdf settings.
 
 Returns:
     (download_files, download_pdfs) tuple of resolved booleans.
@@ -275,6 +280,7 @@ Returns:
 - `download_pdfs` (bool)
 - `source_config` ('SourceConfig')
 - `config` *optional*
+- `force_no_pdfs` (bool) *optional*
 
 **Returns:** tuple
 
@@ -325,7 +331,7 @@ Get global unified processor instance.
 ### process_source_articles
 
 ```python
-def process_source_articles(source_name: str, count: Optional[int], output_dir: str, quiet: bool = False, verbose: bool = False, download_files: bool = False, batch_mode: bool = False, generate_html: bool = False, project_root: Optional[Path] = None, download_pdfs: bool = False) -> None
+def process_source_articles(source_name: str, count: Optional[int], output_dir: str, quiet: bool = False, verbose: bool = False, download_files: bool = False, batch_mode: bool = False, generate_html: bool = False, project_root: Optional[Path] = None, download_pdfs: bool = False, force_no_pdfs: bool = False) -> None
 ```
 
 Convenience function to process articles from any source.
@@ -340,6 +346,7 @@ Args:
     batch_mode: Whether processing multiple sources (affects retry messages)
     project_root: Optional project root override
     download_pdfs: Enable PDF downloads (--pdfs flag)
+    force_no_pdfs: True when the TUI user explicitly answered 'No' to PDFs.
 
 **Parameters:**
 
@@ -353,6 +360,7 @@ Args:
 - `generate_html` (bool) *optional*
 - `project_root` (Optional[Path]) *optional*
 - `download_pdfs` (bool) *optional*
+- `force_no_pdfs` (bool) *optional*
 
 **Returns:** None
 
