@@ -181,7 +181,10 @@ class EthicalScrapingManager:
             crawl_delay: Required crawl delay from robots.txt
             min_delay: Minimum delay even if robots.txt doesn't specify
         """
-        effective_delay = max(crawl_delay, min_delay, self.crawl_delay)
+        # robots.txt Crawl-delay is designed for mass crawlers (Googlebot etc.)
+        # and is not appropriate for a personal reader fetching ~30 articles.
+        # Apply only the user-configured crawl_delay and the caller's min_delay.
+        effective_delay = max(min_delay, self.crawl_delay)
         sleep_time = 0.0
 
         with self._lock:
