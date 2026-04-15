@@ -58,6 +58,7 @@ def process_sources(
                     download_pdfs=getattr(args, "pdfs", False),
                     batch_mode=is_batch,
                     generate_html=generate_html,
+                    force_no_pdfs=getattr(args, "no_pdfs", False),
                 )
                 successful_sources.append(source)
                 completed += 1

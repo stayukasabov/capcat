@@ -254,6 +254,70 @@ class TestResolveMedia:
         assert pdfs is False
 
 
+class TestResolveMediaForceNoPdfs:
+    """BUG: TUI 'No PDFs' answer is ignored when config has download_pdfs=True.
+
+    _resolve_media(False, False, ...) falls through to config.media.download_pdfs.
+    If the user's Global-settings.yaml has download_pdfs=True (e.g. left over from
+    acceptance testing), PDFs download even after the user chose 'No' in the TUI.
+
+    Fix: force_no_pdfs=True parameter overrides config, ensuring TUI 'No' wins.
+    """
+
+    def _make_source_config(self):
+        from capcat.core.source_system.base_source import SourceConfig
+        return SourceConfig(
+            name="hn", display_name="HN", base_url="https://news.ycombinator.com",
+            category="tech",
+        )
+
+    def _make_config_with_pdfs_true(self):
+        from capcat.core.config import FetchNewsConfig, MediaConfig
+        cfg = FetchNewsConfig()
+        cfg.media = MediaConfig(download_pdfs=True)
+        return cfg
+
+    def test_force_no_pdfs_overrides_config_true(self):
+        """force_no_pdfs=True must return pdfs=False even when config has download_pdfs=True."""
+        from capcat.core.unified_source_processor import _resolve_media
+        sc = self._make_source_config()
+        cfg = self._make_config_with_pdfs_true()
+
+        _, pdfs = _resolve_media(False, False, sc, cfg, force_no_pdfs=True)
+
+        assert pdfs is False, (
+            f"Expected pdfs=False with force_no_pdfs=True, got {pdfs}. "
+            "TUI 'No PDFs' answer is being ignored — config.media.download_pdfs=True wins."
+        )
+
+    def test_force_no_pdfs_overrides_source_config_yaml(self):
+        """force_no_pdfs=True must win even when source config.yaml overrides download_pdfs=True."""
+        from capcat.core.unified_source_processor import _resolve_media
+        from capcat.core.source_system.base_source import SourceConfig
+        sc = SourceConfig(
+            name="hn", display_name="HN", base_url="https://news.ycombinator.com",
+            category="tech",
+            media_overrides={"download_pdfs": True},
+        )
+        from capcat.core.config import FetchNewsConfig, MediaConfig
+        cfg = FetchNewsConfig()
+        cfg.media = MediaConfig(download_pdfs=False)
+
+        _, pdfs = _resolve_media(False, False, sc, cfg, force_no_pdfs=True)
+
+        assert pdfs is False
+
+    def test_force_no_pdfs_false_still_uses_config(self):
+        """force_no_pdfs=False (default) must not change existing config-driven behaviour."""
+        from capcat.core.unified_source_processor import _resolve_media
+        sc = self._make_source_config()
+        cfg = self._make_config_with_pdfs_true()
+
+        _, pdfs = _resolve_media(False, False, sc, cfg, force_no_pdfs=False)
+
+        assert pdfs is True, "Default behaviour (force_no_pdfs=False) must not suppress config pdfs=True"
+
+
 class TestArticleFetcherImageGate:
     """download_files=True must enable images even when processing.download_images=False.
 

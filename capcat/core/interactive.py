@@ -692,6 +692,8 @@ def _confirm_and_execute(action, selection, generate_html):
         ).ask()
     if want_pdfs:
         args.append('--pdfs')
+    else:
+        args.append('--no-pdfs')
 
     if is_tui_active():
         reset_fetch_results()

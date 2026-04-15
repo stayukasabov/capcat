@@ -83,6 +83,7 @@ def _resolve_media(
     download_pdfs: bool,
     source_config: "SourceConfig",
     config=None,
+    force_no_pdfs: bool = False,
 ) -> tuple:
     """Resolve (download_files, download_pdfs) from 4-level hierarchy.
 
@@ -93,6 +94,8 @@ def _resolve_media(
         download_pdfs: True if --pdfs CLI flag was passed.
         source_config: SourceConfig instance for this source.
         config: FetchNewsConfig instance. Defaults to get_config().
+        force_no_pdfs: True when the user explicitly answered 'No' to the TUI
+            PDF prompt. Overrides all config-level pdf settings.
 
     Returns:
         (download_files, download_pdfs) tuple of resolved booleans.
@@ -130,6 +133,11 @@ def _resolve_media(
         res_pdfs = vault_media.get("download_pdfs", res_pdfs)
 
     res_files = res_images or res_videos or res_audio or res_docs
+
+    # TUI explicit "No PDFs" overrides all config-level settings
+    if force_no_pdfs:
+        res_pdfs = False
+
     return res_files, res_pdfs
 
 
@@ -232,6 +240,7 @@ class UnifiedSourceProcessor:
         batch_mode: bool = False,
         generate_html: bool = False,
         download_pdfs: bool = False,
+        force_no_pdfs: bool = False,
     ) -> None:
         """
         Universal article processing function. All sources route through the new system.
@@ -245,6 +254,7 @@ class UnifiedSourceProcessor:
             batch_mode: Whether processing multiple sources (affects retry messages)
             generate_html: Generate HTML version after fetching
             download_pdfs: Enable PDF downloads (--pdfs flag)
+            force_no_pdfs: True when the TUI user explicitly answered 'No' to PDFs.
         """
         if not self._is_source_in_new_system(source_name):
             raise ValueError(
@@ -254,7 +264,7 @@ class UnifiedSourceProcessor:
             )
         return self._process_with_new_system(
             source_name, count, output_dir, quiet, verbose, download_files,
-            batch_mode, generate_html, download_pdfs,
+            batch_mode, generate_html, download_pdfs, force_no_pdfs,
         )
 
     def _process_with_new_system(
@@ -268,6 +278,7 @@ class UnifiedSourceProcessor:
         batch_mode: bool = False,
         generate_html: bool = False,
         download_pdfs: bool = False,
+        force_no_pdfs: bool = False,
     ) -> None:
         """Process articles using the new source system."""
         # Run source config mirror (first-run copy or upgrade diff)
@@ -305,7 +316,8 @@ class UnifiedSourceProcessor:
 
             # Resolve media settings: CLI > capcat.yml > source config.yaml > global config
             resolved_files, resolved_pdfs = _resolve_media(
-                download_files, download_pdfs, source_config, get_config()
+                download_files, download_pdfs, source_config, get_config(),
+                force_no_pdfs=force_no_pdfs,
             )
 
             self.logger.info(
@@ -645,6 +657,7 @@ def process_source_articles(
     generate_html: bool = False,
     project_root: Optional[Path] = None,
     download_pdfs: bool = False,
+    force_no_pdfs: bool = False,
 ) -> None:
     """
     Convenience function to process articles from any source.
@@ -659,9 +672,10 @@ def process_source_articles(
         batch_mode: Whether processing multiple sources (affects retry messages)
         project_root: Optional project root override
         download_pdfs: Enable PDF downloads (--pdfs flag)
+        force_no_pdfs: True when the TUI user explicitly answered 'No' to PDFs.
     """
     processor = get_unified_processor(project_root=project_root)
     processor.process_source_articles(
         source_name, count, output_dir, quiet, verbose, download_files, batch_mode,
-        generate_html, download_pdfs,
+        generate_html, download_pdfs, force_no_pdfs,
     )
