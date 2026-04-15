@@ -269,8 +269,6 @@ Update the progress display with current item sub-progress.
 
 - `self`
 
-⚠️ **High complexity:** 12
-
 ##### start
 
 ```python
@@ -342,8 +340,6 @@ Args:
 - `self`
 - `success` (bool) *optional*
 - `item_name` (Optional[str]) *optional*
-
-⚠️ **High complexity:** 11
 
 ##### get_summary
 
@@ -418,8 +414,6 @@ Force an immediate display update with current progress.
 **Parameters:**
 
 - `self`
-
-⚠️ **High complexity:** 12
 
 
 ### QuietProgress

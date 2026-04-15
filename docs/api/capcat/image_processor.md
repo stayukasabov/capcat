@@ -91,7 +91,7 @@ Returns None if the format is unrecognised or parsing fails.
 
 **Returns:** Optional[Tuple[int, int]]
 
-⚠️ **High complexity:** 19
+⚠️ **High complexity:** 27
 
 ##### _extract_image_urls
 
