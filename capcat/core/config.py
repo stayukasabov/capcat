@@ -62,7 +62,6 @@ class ProcessingConfig:
     max_filename_length: int = 100
 
     # Content processing
-    remove_script_tags: bool = True
     remove_style_tags: bool = True
     remove_nav_tags: bool = True
 
@@ -86,8 +85,6 @@ class UIConfig:
         "dots"  # dots, wave, loading, pulse, bounce, modern
     )
 
-    # Color output
-    use_colors: bool = True
 
 
 @dataclass
@@ -98,9 +95,6 @@ class LoggingConfig:
     default_level: str = "INFO"
     file_level: str = "DEBUG"
     console_level: str = "INFO"
-
-    # Log formatting
-    use_colors: bool = True
 
     # File logging
     auto_create_log_dir: bool = True
@@ -400,7 +394,6 @@ class ConfigManager:
             ),
             # Logging settings
             "CAPCAT_LOG_LEVEL": ("logging", "default_level", str),
-            "CAPCAT_USE_COLORS": ("logging", "use_colors", bool),
         }
 
         for env_var, (section, key, type_func) in env_mappings.items():

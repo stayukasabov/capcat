@@ -1,7 +1,7 @@
 """Tests for config keys that were previously dead code.
 
 Covers:
-- remove_script_tags / remove_style_tags / remove_nav_tags
+- remove_style_tags / remove_nav_tags
 - console_level
 - progress_spinner_style
 - min_image_dimensions
@@ -18,14 +18,13 @@ from capcat.core.config import FetchNewsConfig, ProcessingConfig, UIConfig, Logg
 # HTML tag removal flags
 # ---------------------------------------------------------------------------
 
-def _fetch_article_content(html: str, remove_script=True, remove_style=True, remove_nav=True):
+def _fetch_article_content(html: str, remove_style=True, remove_nav=True):
     """Helper: run html_to_markdown with given remove_* flags active via config."""
     from capcat.core.formatter import html_to_markdown
     from capcat.core.config import ProcessingConfig, FetchNewsConfig
 
     cfg = FetchNewsConfig()
     cfg.processing = ProcessingConfig(
-        remove_script_tags=remove_script,
         remove_style_tags=remove_style,
         remove_nav_tags=remove_nav,
     )
@@ -34,15 +33,10 @@ def _fetch_article_content(html: str, remove_script=True, remove_style=True, rem
 
 
 class TestRemoveTagFlags:
-    def test_remove_script_true_strips_script(self):
+    def test_script_always_stripped(self):
         html = "<p>Text</p><script>alert(1)</script>"
-        result = _fetch_article_content(html, remove_script=True)
+        result = _fetch_article_content(html)
         assert "alert" not in result
-
-    def test_remove_script_false_keeps_script_text(self):
-        html = "<p>Text</p><script>alert(1)</script>"
-        result = _fetch_article_content(html, remove_script=False)
-        assert "alert" in result
 
     def test_remove_style_true_strips_style(self):
         html = "<p>Text</p><style>.foo{color:red}</style>"

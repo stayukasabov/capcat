@@ -197,14 +197,7 @@ class ProgressIndicator:
         # Always restore cursor when stopping
         self._show_cursor()
 
-        # Always try to use colors if the terminal supports them
-        use_colors = get_config().ui.use_colors
-
-        # Spiral character for completion with color if supported
-        if use_colors:
-            dice_char = "\033[1;91m◐\033[0m"
-        else:
-            dice_char = "◐"
+        dice_char = "\033[1;91m◐\033[0m"
 
         if success_message:
             print(f"{dice_char}{success_message.upper()}")
@@ -235,14 +228,7 @@ class ProgressIndicator:
         # Always restore cursor on error
         self._show_cursor()
 
-        # Always try to use colors if the terminal supports them
-        use_colors = get_config().ui.use_colors
-
-        # Dice character for error with color if supported
-        if use_colors:
-            dice_char = "\033[1;31m◒\033[0m"
-        else:
-            dice_char = "◒"
+        dice_char = "\033[1;31m◒\033[0m"
         print(f"{dice_char}{error_message.upper()}")
 
     def _create_progress_bar(self, percentage: float, width: int = 8) -> str:
@@ -277,44 +263,24 @@ class ProgressIndicator:
         """Internal spinner animation method with enhanced loading visualization."""
         while not self._stop_event.is_set():
             if sys.stdout.isatty():
-                # Always try to use colors if the terminal supports them
-                use_colors = get_config().ui.use_colors
-
-                # Dice sequence animation with colors if supported
-                if use_colors:
-                    dice_chars = [
-                        "\033[1;38;5;166m◐\033[0m",
-                        "\033[1;38;5;166m◓\033[0m",
-                        "\033[1;38;5;166m◑\033[0m",
-                        "\033[1;38;5;166m◒\033[0m",
-                    ]
-                else:
-                    dice_chars = ["◐", "◓", "◑", "◒"]
+                dice_chars = [
+                    "\033[1;38;5;166m◐\033[0m",
+                    "\033[1;38;5;166m◓\033[0m",
+                    "\033[1;38;5;166m◑\033[0m",
+                    "\033[1;38;5;166m◒\033[0m",
+                ]
                 dice_char = dice_chars[self.spinner_index % len(dice_chars)]
 
-                # Spinner characters with colors if supported
-                if use_colors:
-                    spinner_chars = [
-                        "\033[38;5;166m CATCHING ▶\033[0m",
-                        "\033[38;5;166m CATCHING ▶\033[0m",
-                        "\033[38;5;166m CATCHING ▶\033[0m",
-                        "\033[38;5;166m CATCHING ▶\033[0m",
-                        "\033[38;5;166m CATCHING ▶\033[0m",
-                        "\033[38;5;166m CATCHING ▶\033[0m",
-                        "\033[38;5;166m CATCHING ▶\033[0m",
-                        "\033[38;5;166m CATCHING ▶\033[0m",
-                    ]
-                else:
-                    spinner_chars = [
-                        "CATCHING ▶",
-                        "CATCHING ▶",
-                        "CATCHING ▶",
-                        "CATCHING ▶",
-                        "CATCHING ▶",
-                        "CATCHING ▶",
-                        "CATCHING ▶",
-                        "CATCHING ▶",
-                    ]
+                spinner_chars = [
+                    "\033[38;5;166m CATCHING ▶\033[0m",
+                    "\033[38;5;166m CATCHING ▶\033[0m",
+                    "\033[38;5;166m CATCHING ▶\033[0m",
+                    "\033[38;5;166m CATCHING ▶\033[0m",
+                    "\033[38;5;166m CATCHING ▶\033[0m",
+                    "\033[38;5;166m CATCHING ▶\033[0m",
+                    "\033[38;5;166m CATCHING ▶\033[0m",
+                    "\033[38;5;166m CATCHING ▶\033[0m",
+                ]
                 spinner_char = spinner_chars[
                     self.spinner_index % len(spinner_chars)
                 ]
@@ -507,43 +473,24 @@ class BatchProgress:
         if self.quiet:
             return
 
-        # Always try to use colors if the terminal supports them
-        use_colors = get_config().ui.use_colors
-
-        # Dice sequence animation with colors if supported
-        if use_colors:
-            dice_chars = [
-                "\033[1;38;5;166m◐\033[0m",
-                "\033[1;38;5;166m◓\033[0m",
-                "\033[1;38;5;166m◑\033[0m",
-                "\033[1;38;5;166m◒\033[0m",
-            ]
-        else:
-            dice_chars = ["◐", "◓", "◑", "◒"]
+        dice_chars = [
+            "\033[1;38;5;166m◐\033[0m",
+            "\033[1;38;5;166m◓\033[0m",
+            "\033[1;38;5;166m◑\033[0m",
+            "\033[1;38;5;166m◒\033[0m",
+        ]
         dice_char = dice_chars[self.spinner_index % len(dice_chars)]
 
-        if use_colors:
-            spinner_chars = [
-                "\033[38;5;166m CATCHING ▶\033[0m",
-                "\033[38;5;166m CATCHING ▶\033[0m",
-                "\033[38;5;166m CATCHING ▶\033[0m",
-                "\033[38;5;166m CATCHING ▶\033[0m",
-                "\033[38;5;166m CATCHING ▶\033[0m",
-                "\033[38;5;166m CATCHING ▶\033[0m",
-                "\033[38;5;166m CATCHING ▶\033[0m",
-                "\033[38;5;166m CATCHING ▶\033[0m",
-            ]
-        else:
-            spinner_chars = [
-                " CATCHING ▶",
-                " CATCHING ▶",
-                " CATCHING ▶",
-                " CATCHING ▶",
-                " CATCHING ▶",
-                " CATCHING ▶",
-                " CATCHING ▶",
-                " CATCHING ▶",
-            ]
+        spinner_chars = [
+            "\033[38;5;166m CATCHING ▶\033[0m",
+            "\033[38;5;166m CATCHING ▶\033[0m",
+            "\033[38;5;166m CATCHING ▶\033[0m",
+            "\033[38;5;166m CATCHING ▶\033[0m",
+            "\033[38;5;166m CATCHING ▶\033[0m",
+            "\033[38;5;166m CATCHING ▶\033[0m",
+            "\033[38;5;166m CATCHING ▶\033[0m",
+            "\033[38;5;166m CATCHING ▶\033[0m",
+        ]
         spinner_char = spinner_chars[self.spinner_index % len(spinner_chars)]
 
         if self.total_items > 0:
@@ -611,28 +558,15 @@ class BatchProgress:
         set_progress_active(True)
 
         if not self.quiet:
-            # Always try to use colors if the terminal supports them
-            use_colors = get_config().ui.use_colors
-
             # Show item count only for multiple items (hide for single items)
             if self.total_items > 1:
-                if use_colors:
-                    print(
-                        f"\033[1;38;5;157m▷\033[0m STARTING {self.operation_name.upper()} ({self.total_items} ITEMS)"
-                    )
-                else:
-                    print(
-                        f"▷ STARTING {self.operation_name.upper()} ({self.total_items} ITEMS)"
-                    )
+                print(
+                    f"\033[1;38;5;157m▷\033[0m STARTING {self.operation_name.upper()} ({self.total_items} ITEMS)"
+                )
             else:
-                if use_colors:
-                    print(
-                        f"\033[1;38;5;157m▷\033[0m STARTING {self.operation_name.upper()}"
-                    )
-                else:
-                    print(
-                        f"▷ STARTING {self.operation_name.upper()}"
-                    )
+                print(
+                    f"\033[1;38;5;157m▷\033[0m STARTING {self.operation_name.upper()}"
+                )
 
         self.logger.info(
             f"Starting {self.operation_name} batch operation ({self.total_items} items)"
@@ -709,21 +643,13 @@ class BatchProgress:
             and self._verbose
             and item_name
         ):
-            # Always try to use colors
-            use_colors = get_config().ui.use_colors
-
-            if use_colors:
-                status_symbol = (
-                    "\033[1;32m\u2611\033[0m"
-                    if success
-                    else "\033[1;31m\u2612\033[0m"
-                )
-                dice_char = "\033[1;38;5;166m◐\033[0m"
-                spinner_char = "\033[38;5;166m CATCHING ▶\033[0m"
-            else:
-                status_symbol = "\u2611" if success else "\u2612"
-                dice_char = "◐"
-                spinner_char = " CATCHING ▶"
+            status_symbol = (
+                "\033[1;32m\u2611\033[0m"
+                if success
+                else "\033[1;31m\u2612\033[0m"
+            )
+            dice_char = "\033[1;38;5;166m◐\033[0m"
+            spinner_char = "\033[38;5;166m CATCHING ▶\033[0m"
 
             # Clear progress line before printing item completion
             if sys.stdout.isatty():
@@ -779,35 +705,20 @@ class BatchProgress:
         self._show_cursor()
 
         if not self.quiet:
-            # Always try to use colors if the terminal supports them
-            use_colors = get_config().ui.use_colors
-
             # Prepare the main completion message
             if self.failed == 0:
                 # Show count only for multiple items
                 if self.total_items > 1:
-                    if use_colors:
-                        main_message = f"\033[1;38;5;157m◉\033[0m ALL {self.completed} {self.operation_name.upper()} COMPLETED SUCCESSFULLY!"
-                    else:
-                        main_message = f"◉ ALL {self.completed} {self.operation_name.upper()} COMPLETED SUCCESSFULLY!"
+                    main_message = f"\033[1;38;5;157m◉\033[0m ALL {self.completed} {self.operation_name.upper()} COMPLETED SUCCESSFULLY!"
                 else:
-                    if use_colors:
-                        main_message = f"\033[1;38;5;157m◉\033[0m {self.operation_name.upper()} COMPLETED SUCCESSFULLY!"
-                    else:
-                        main_message = f"◉ {self.operation_name.upper()} COMPLETED SUCCESSFULLY!"
+                    main_message = f"\033[1;38;5;157m◉\033[0m {self.operation_name.upper()} COMPLETED SUCCESSFULLY!"
             else:
-                if use_colors:
-                    main_message = f"\033[1;38;5;217m◯\033[0m {self.operation_name.upper()} FINISHED WITH {self.failed} FAILURES"
-                else:
-                    main_message = f"◯ {self.operation_name.upper()} FINISHED WITH {self.failed} FAILURES"
+                main_message = f"\033[1;38;5;217m◯\033[0m {self.operation_name.upper()} FINISHED WITH {self.failed} FAILURES"
 
             print(main_message)
 
             # Print summary on next line
-            if use_colors:
-                print(f"\033[38;5;166m CATCHING ▶\033[0m {summary.upper()}")
-            else:
-                print(f" CATCHING ▶{summary.upper()}")
+            print(f"\033[38;5;166m CATCHING ▶\033[0m {summary.upper()}")
         else:
             # In quiet mode, only show essential information
             if self.failed > 0:
@@ -878,43 +789,24 @@ class BatchProgress:
         if self.quiet:
             return
 
-        # Always try to use colors if the terminal supports them
-        use_colors = get_config().ui.use_colors
-
-        # Dice sequence animation with colors if supported
-        if use_colors:
-            dice_chars = [
-                "\033[1;38;5;166m◐\033[0m",
-                "\033[1;38;5;166m◓\033[0m",
-                "\033[1;38;5;166m◑\033[0m",
-                "\033[1;38;5;166m◒\033[0m",
-            ]
-        else:
-            dice_chars = ["◐", "◓", "◑", "◒"]
+        dice_chars = [
+            "\033[1;38;5;166m◐\033[0m",
+            "\033[1;38;5;166m◓\033[0m",
+            "\033[1;38;5;166m◑\033[0m",
+            "\033[1;38;5;166m◒\033[0m",
+        ]
         dice_char = dice_chars[self.spinner_index % len(dice_chars)]
 
-        if use_colors:
-            spinner_chars = [
-                "\033[38;5;166m CATCHING ▶\033[0m",
-                "\033[38;5;166m CATCHING ▶\033[0m",
-                "\033[38;5;166m CATCHING ▶\033[0m",
-                "\033[38;5;166m CATCHING ▶\033[0m",
-                "\033[38;5;166m CATCHING ▶\033[0m",
-                "\033[38;5;166m CATCHING ▶\033[0m",
-                "\033[38;5;166m CATCHING ▶\033[0m",
-                "\033[38;5;166m CATCHING ▶\033[0m",
-            ]
-        else:
-            spinner_chars = [
-                " CATCHING ▶",
-                " CATCHING ▶",
-                " CATCHING ▶",
-                " CATCHING ▶",
-                " CATCHING ▶",
-                " CATCHING ▶",
-                " CATCHING ▶",
-                " CATCHING ▶",
-            ]
+        spinner_chars = [
+            "\033[38;5;166m CATCHING ▶\033[0m",
+            "\033[38;5;166m CATCHING ▶\033[0m",
+            "\033[38;5;166m CATCHING ▶\033[0m",
+            "\033[38;5;166m CATCHING ▶\033[0m",
+            "\033[38;5;166m CATCHING ▶\033[0m",
+            "\033[38;5;166m CATCHING ▶\033[0m",
+            "\033[38;5;166m CATCHING ▶\033[0m",
+            "\033[38;5;166m CATCHING ▶\033[0m",
+        ]
         spinner_char = spinner_chars[self.spinner_index % len(spinner_chars)]
 
         if self.total_items > 0:

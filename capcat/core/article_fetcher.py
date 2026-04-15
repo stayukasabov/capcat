@@ -869,9 +869,7 @@ class ArticleFetcher(ABC):
 
         # Remove elements based on config flags
         _cfg = get_config().processing
-        _remove_tags = ["header", "footer", "aside"]
-        if _cfg.remove_script_tags:
-            _remove_tags.append("script")
+        _remove_tags = ["header", "footer", "aside", "script"]
         if _cfg.remove_style_tags:
             _remove_tags.append("style")
         if _cfg.remove_nav_tags:
@@ -2979,9 +2977,7 @@ class NewsSourceArticleFetcher(ArticleFetcher):
 
         # Remove elements based on config flags
         _cfg = get_config().processing
-        _remove_tags = ["header", "footer", "aside"]
-        if _cfg.remove_script_tags:
-            _remove_tags.append("script")
+        _remove_tags = ["header", "footer", "aside", "script"]
         if _cfg.remove_style_tags:
             _remove_tags.append("style")
         if _cfg.remove_nav_tags:

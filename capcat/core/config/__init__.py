@@ -89,7 +89,6 @@ except (ImportError, FileNotFoundError):
                 """Article processing and media download defaults."""
                 max_workers = 8
                 max_filename_length = 100
-                remove_script_tags = True
                 remove_style_tags = True
                 remove_nav_tags = True
                 download_images = True
@@ -100,7 +99,6 @@ except (ImportError, FileNotFoundError):
             class logging:
                 """Logging output defaults."""
                 default_level = "INFO"
-                use_colors = True
 
             def to_dict(self):
                 """Convert config to dictionary format for compatibility."""
@@ -119,7 +117,6 @@ except (ImportError, FileNotFoundError):
                     "processing": {
                         "max_workers": self.processing.max_workers,
                         "max_filename_length": self.processing.max_filename_length,
-                        "remove_script_tags": self.processing.remove_script_tags,
                         "remove_style_tags": self.processing.remove_style_tags,
                         "remove_nav_tags": self.processing.remove_nav_tags,
                         "download_images": self.processing.download_images,
@@ -129,7 +126,6 @@ except (ImportError, FileNotFoundError):
                     },
                     "logging": {
                         "default_level": self.logging.default_level,
-                        "use_colors": self.logging.use_colors,
                     },
                 }
 

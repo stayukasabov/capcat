@@ -127,9 +127,7 @@ def html_to_markdown(html_content: str, base_url: str = None) -> str:
 
         # Remove elements based on config flags
         cfg = get_config().processing
-        _remove = ["header", "footer", "aside", "button"]
-        if cfg.remove_script_tags:
-            _remove.append("script")
+        _remove = ["header", "footer", "aside", "button", "script"]
         if cfg.remove_style_tags:
             _remove.append("style")
         if cfg.remove_nav_tags:

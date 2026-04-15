@@ -4,7 +4,6 @@ B15: min_image_dimensions and max_image_size_bytes applied as pipeline
 B16: max_filename_length applies to md filenames, not just folders
 B17: user_agent config respected when non-default
 B18: max_retries config respected
-B19: use_colors: false suppresses ANSI in progress output
 B20: get_progress_indicator no longer references removed show_progress_animations
 B21: get_batch_progress passes progress_spinner_style to BatchProgress
 """
@@ -224,42 +223,6 @@ class TestMaxRetriesConfig:
             pool._create_session("test_source")
             kwargs = mock_adapter.call_args.kwargs
             assert kwargs["max_retries"] == 5
-
-
-# ---------------------------------------------------------------------------
-# B19 — use_colors: false suppresses ANSI in BatchProgress
-# ---------------------------------------------------------------------------
-
-class TestUseColorsConfig:
-    def test_use_colors_false_no_ansi_in_start_banner(self, capsys):
-        from capcat.core.progress import BatchProgress
-        from capcat.core.config import FetchNewsConfig, UIConfig
-
-        cfg = FetchNewsConfig()
-        cfg.ui = UIConfig(use_colors=False)
-        with patch("capcat.core.progress.get_config", return_value=cfg):
-            bp = BatchProgress("Test Op", 3)
-            with patch.object(bp, "_hide_cursor"), \
-                 patch("capcat.core.logging_config.set_progress_active"):
-                bp.start()
-
-        captured = capsys.readouterr().out
-        assert "\033[" not in captured, f"ANSI codes found: {captured!r}"
-
-    def test_use_colors_true_has_ansi_in_start_banner(self, capsys):
-        from capcat.core.progress import BatchProgress
-        from capcat.core.config import FetchNewsConfig, UIConfig
-
-        cfg = FetchNewsConfig()
-        cfg.ui = UIConfig(use_colors=True)
-        with patch("capcat.core.progress.get_config", return_value=cfg):
-            bp = BatchProgress("Test Op", 3)
-            with patch.object(bp, "_hide_cursor"), \
-                 patch("capcat.core.logging_config.set_progress_active"):
-                bp.start()
-
-        captured = capsys.readouterr().out
-        assert "\033[" in captured
 
 
 # ---------------------------------------------------------------------------

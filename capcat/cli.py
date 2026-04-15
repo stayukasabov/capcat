@@ -175,11 +175,6 @@ processing:
   # Default: true
   create_comments_file: true
 
-  # Strip <script> tags from HTML before conversion.
-  # Set to false to keep inline script text in the markdown output.
-  # Default: true
-  remove_script_tags: true
-
   # Strip <style> tags from HTML before conversion.
   # Set to false to keep inline CSS text in the markdown output.
   # Default: true
@@ -203,10 +198,6 @@ ui:
   # Options: dots, wave, loading, pulse, bounce, modern
   # Default: dots
   progress_spinner_style: dots
-
-  # Use colors in terminal output.
-  # Default: true
-  use_colors: true
 
 # ─── Logging ────────────────────────────────────────────
 logging:
@@ -235,9 +226,6 @@ logging:
   # Default: true
   auto_create_log_dir: true
 
-  # Colorize log output.
-  # Default: true
-  use_colors: true
 """
 
 
