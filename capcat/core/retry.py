@@ -117,7 +117,7 @@ def network_retry(func: Callable) -> Callable:
     import requests
 
     return exponential_backoff_retry(
-        max_retries=3,
+        max_retries=None,
         base_delay=1.0,
         retryable_exceptions=(
             ConnectionError,
