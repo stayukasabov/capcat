@@ -68,8 +68,13 @@ class UnifiedArticleProcessor:
         # Step 1: Check specialized sources first
         if self._registry.can_handle_url(url):
             self.logger.info(f"Specialized source detected for URL: {url}")
-            return self._process_with_specialized_source(
+            success, result_title, folder = self._process_with_specialized_source(
                 url, title, base_folder, update_mode
+            )
+            if success:
+                return success, result_title, folder
+            self.logger.warning(
+                f"Specialized source failed for {url}, falling back to generic handler"
             )
 
         # Step 2: Detect source-specific handler
