@@ -74,6 +74,23 @@ Dynamically set the download_files flag.
 - `self`
 - `download_files` (bool)
 
+##### _source_max_pdf_bytes
+
+```python
+def _source_max_pdf_bytes(self) -> int
+```
+
+Return the PDF size limit in bytes.
+
+Base implementation returns the global config value.
+NewsSourceArticleFetcher overrides this to check source YAML first.
+
+**Parameters:**
+
+- `self`
+
+**Returns:** int
+
 ##### _create_markdown_link_replacement
 
 ```python
@@ -772,6 +789,23 @@ def __init__(self, source_config: Dict[str, Any], session: requests.Session, dow
 - `session` (requests.Session)
 - `download_files` (bool) *optional*
 - `download_pdfs` (bool) *optional*
+
+##### _source_max_pdf_bytes
+
+```python
+def _source_max_pdf_bytes(self) -> int
+```
+
+Return the PDF size limit in bytes for this source.
+
+Checks source config YAML for media.max_pdf_size_mb first;
+falls back to the global pdf.max_pdf_size_bytes.
+
+**Parameters:**
+
+- `self`
+
+**Returns:** int
 
 ##### should_skip_url
 

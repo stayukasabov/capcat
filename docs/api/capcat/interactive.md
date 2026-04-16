@@ -179,7 +179,7 @@ Prints a summary and executes the command by calling run_app directly.
 - `selection`
 - `generate_html`
 
-⚠️ **High complexity:** 13
+⚠️ **High complexity:** 14
 
 ### _show_completion_screen
 
