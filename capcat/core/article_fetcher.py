@@ -1706,6 +1706,9 @@ class ArticleFetcher(ABC):
         for link_type, url, alt_text in all_links:
             parsed_url = urlparse(url)
             path_lower = parsed_url.path.lower()
+            # Check only the filename part for UI patterns — directory names like
+            # "tahoe-icons" or "menu-designs" must not filter legitimate article images.
+            filename_lower = path_lower.rsplit("/", 1)[-1]
 
             # Quick extension-based filtering
             # download_files=True (resolved from priority chain) also enables images
@@ -1726,8 +1729,8 @@ class ArticleFetcher(ABC):
                         ".ico",
                     )
                 ):
-                    # Skip if URL path looks like a UI/icon element
-                    if any(p in path_lower for p in _ui_path_patterns):
+                    # Skip if the image filename looks like a UI/icon element
+                    if any(p in filename_lower for p in _ui_path_patterns):
                         self.logger.debug(f"Skipping UI path image: {url}")
                         continue
                     quick_filtered_links.append((link_type, url, alt_text))
@@ -1737,7 +1740,7 @@ class ArticleFetcher(ABC):
                     pattern in path_lower
                     for pattern in ["image", "img", "photo", "pic"]
                 ):
-                    if not any(p in path_lower for p in _ui_path_patterns):
+                    if not any(p in filename_lower for p in _ui_path_patterns):
                         quick_filtered_links.append((link_type, url, alt_text))
             elif link_type == "document":
                 is_pdf = path_lower.endswith(".pdf") or "pdf" in path_lower

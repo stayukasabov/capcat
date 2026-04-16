@@ -260,9 +260,12 @@ class ImageProcessor:
                 ):
                     continue
 
-                # Skip UI/icon/logo images based on URL path
+                # Skip UI/icon/logo images based on the filename only — checking
+                # the full path would falsely filter images in directories whose
+                # names contain pattern words (e.g. "tahoe-icons/article-img.webp").
                 parsed_path = urlparse(full_url).path.lower()
-                if any(p in parsed_path for p in self._UI_PATH_PATTERNS):
+                filename_only = parsed_path.rsplit("/", 1)[-1]
+                if any(p in filename_only for p in self._UI_PATH_PATTERNS):
                     self.logger.debug(f"Skipping UI path image: {full_url}")
                     continue
 
