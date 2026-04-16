@@ -202,6 +202,14 @@ class ArticleFetcher(ABC):
         """Dynamically set the download_files flag."""
         self.download_files = download_files
 
+    def _source_max_pdf_bytes(self) -> int:
+        """Return the PDF size limit in bytes.
+
+        Base implementation returns the global config value.
+        NewsSourceArticleFetcher overrides this to check source YAML first.
+        """
+        return get_config().pdf.max_pdf_size_bytes
+
     def _create_markdown_link_replacement(
         self,
         markdown_content: str,
@@ -423,8 +431,7 @@ class ArticleFetcher(ABC):
 
                 if is_pdf_file and self.download_pdfs:
                     from capcat.core.async_pdf_manager import pdf_exceeds_size_limit
-                    from capcat.core.config import get_config as _get_config
-                    if pdf_exceeds_size_limit(url, self.session, _get_config().pdf.max_pdf_size_bytes):
+                    if pdf_exceeds_size_limit(url, self.session, self._source_max_pdf_bytes()):
                         self.logger.info("Skipping oversized PDF: %s", url)
                         return self._handle_pdf_no_download(
                             title, url, index, base_folder, progress_callback
@@ -743,7 +750,7 @@ class ArticleFetcher(ABC):
         # Check for PDF files and skip if too large (only when downloading)
         is_direct_pdf_url = url.lower().endswith('.pdf')
         if is_direct_pdf_url and self.download_pdfs:
-            if pdf_exceeds_size_limit(url, self.session, get_config().pdf.max_pdf_size_bytes):
+            if pdf_exceeds_size_limit(url, self.session, self._source_max_pdf_bytes()):
                 self.logger.info("Skipping oversized PDF: %s", url)
                 return True, None, None
 
@@ -2807,6 +2814,17 @@ class NewsSourceArticleFetcher(ArticleFetcher):
         self.logger = get_logger(
             f"{__name__.replace('core.', '')}.{source_config['name']}"
         )
+
+    def _source_max_pdf_bytes(self) -> int:
+        """Return the PDF size limit in bytes for this source.
+
+        Checks source config YAML for media.max_pdf_size_mb first;
+        falls back to the global pdf.max_pdf_size_bytes.
+        """
+        mb = self.source_config.get("media", {}).get("max_pdf_size_mb")
+        if mb is not None:
+            return int(mb) * 1024 * 1024
+        return get_config().pdf.max_pdf_size_bytes
 
     def should_skip_url(self, url: str, title: str) -> bool:
         """Skip URLs based on source configuration."""
