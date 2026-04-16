@@ -1939,6 +1939,18 @@ class ArticleFetcher(ABC):
                                         protocol_relative_url
                                     )
 
+                                    # Also try bare filename (with and without
+                                    # query string) — covers cases where the
+                                    # formatter emitted only the basename, e.g.
+                                    # "img.webp?t=123" from a relative-URL page
+                                    basename = parsed.path.rsplit("/", 1)[-1]
+                                    if basename:
+                                        relative_url_variants.append(basename)
+                                        if parsed.query:
+                                            relative_url_variants.append(
+                                                f"{basename}?{parsed.query}"
+                                            )
+
                                     for variant in relative_url_variants:
                                         if (
                                             variant
