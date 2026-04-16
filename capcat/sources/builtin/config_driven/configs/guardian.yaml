@@ -97,3 +97,7 @@ custom_config:
     The Guardian robots.txt contains restrictions on LLM/AI usage for commercial purposes.
     This configuration is for personal news archiving only, which is permitted.
     Respect rate limits and avoid comment sections as per robots.txt disallow rules.
+
+# Per-source PDF settings.
+media:
+  download_pdfs: false

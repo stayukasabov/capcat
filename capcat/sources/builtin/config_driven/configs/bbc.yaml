@@ -68,3 +68,7 @@ image_processing:
     - "nav img"
     - "header img"
     - "footer img"
+
+# Per-source PDF settings.
+media:
+  download_pdfs: false

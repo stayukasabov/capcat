@@ -72,3 +72,8 @@ image_processing:
     - "header img"
     - "footer img"
     - ".sidebar img"
+
+# Per-source PDF settings.
+media:
+  download_pdfs: true
+  max_pdf_size_mb: 10
