@@ -1947,6 +1947,26 @@ class ArticleFetcher(ABC):
                                         protocol_relative_url
                                     )
 
+                                    # Also try path relative to the article's
+                                    # base URL directory — covers pages that
+                                    # use relative URLs like "images/foo.webp"
+                                    base_dir = urlparse(base_url).path
+                                    if not base_dir.endswith("/"):
+                                        base_dir = (
+                                            base_dir.rsplit("/", 1)[0] + "/"
+                                        )
+                                    img_path = parsed.path
+                                    if img_path.startswith(base_dir):
+                                        doc_relative = img_path[len(base_dir):]
+                                        if doc_relative:
+                                            relative_url_variants.append(
+                                                doc_relative
+                                            )
+                                            if parsed.query:
+                                                relative_url_variants.append(
+                                                    f"{doc_relative}?{parsed.query}"
+                                                )
+
                                     # Also try bare filename (with and without
                                     # query string) — covers cases where the
                                     # formatter emitted only the basename, e.g.
@@ -1962,7 +1982,7 @@ class ArticleFetcher(ABC):
                                     for variant in relative_url_variants:
                                         if (
                                             variant
-                                            and variant in markdown_content
+                                            and f"]({variant})" in markdown_content
                                         ):
                                             self.logger.debug(
                                                 f"Also replacing relative"
@@ -1976,6 +1996,10 @@ class ArticleFetcher(ABC):
                                                 alt_text,
                                                 is_image=True
                                             )
+                                            # Stop after first match —
+                                            # avoids corrupting already-correct
+                                            # paths via substring replacement
+                                            break
 
                             else:
                                 # Replace document/audio/video links with local path
