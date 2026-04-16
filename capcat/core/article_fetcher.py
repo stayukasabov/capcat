@@ -980,13 +980,6 @@ class ArticleFetcher(ABC):
         article_content += "---\n"
         article_content += markdown_content
 
-        # Add footer with source URL to encourage visiting original article
-        article_content += f"\n\n---\n\n**Source URL:** [{url}]({url})"
-
-        # Add comments URL if available (for HN and Lobsters)
-        # Note: comment_url should be handled separately from article fetching
-        # TODO: Separate comment fetching from article fetching completely
-
         # Save the preliminary article
         filename = os.path.join(article_folder_path, article_md_filename(page_title))
         try:
@@ -1182,13 +1175,6 @@ class ArticleFetcher(ABC):
             updated_article_content += media_warning
         updated_article_content += "---\n\n"
         updated_article_content += markdown_content
-
-        # Add footer with source URL to encourage visiting original article
-        updated_article_content += f"\n\n---\n\n**Source URL:** [{url}]({url})"
-
-        # Add comments URL if available (for HN and Lobsters)
-        # Note: comment_url should be handled separately from article fetching
-        # TODO: Separate comment fetching from article fetching completely
 
         with open(filename, "w", encoding="utf-8") as f:
             f.write(updated_article_content)
