@@ -95,6 +95,7 @@ class StreamlinedCommentProcessor:
         if user_elem:
             original_name = user_elem.get_text().strip()
             if original_name:
+                user_name = original_name
                 user_link = f"https://news.ycombinator.com/user?id={original_name}"
 
         comment_text_elem = comment_elem.select_one(comment_text_selector)

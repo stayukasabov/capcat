@@ -155,3 +155,42 @@ def test_get_source_factory_two_project_root_calls_return_different_instances(tm
     f1 = get_source_factory(project_root=tmp_path)
     f2 = get_source_factory(project_root=tmp_path)
     assert f1 is not f2
+
+
+_MINIMAL_SOURCE_PY = """\
+from capcat.core.source_system.base_source import BaseSource
+
+class MinimalSource(BaseSource):
+    @property
+    def source_type(self):
+        return "custom"
+    def discover_articles(self, count=10):
+        return []
+    def fetch_article_content(self, article, output_dir, progress_callback=None,
+                              download_files=False, download_pdfs=False):
+        return (False, None)
+"""
+
+
+def test_custom_source_has_comments_propagated_to_source_config(tmp_path):
+    """has_comments: true in config.yaml must appear on SourceConfig.has_comments."""
+    from capcat.core.source_system.source_registry import SourceRegistry
+
+    src_dir = tmp_path / "builtin" / "custom" / "mysite"
+    src_dir.mkdir(parents=True)
+    (src_dir / "config.yaml").write_text(
+        "display_name: My Site\n"
+        "base_url: https://mysite.example.com\n"
+        "has_comments: true\n"
+        "supports_comments: true\n"
+    )
+    (src_dir / "source.py").write_text(_MINIMAL_SOURCE_PY)
+
+    registry = SourceRegistry(project_root=tmp_path)
+    registry._builtin_path = tmp_path / "builtin"
+    sources = registry.discover_sources()
+
+    assert "mysite" in sources, "Custom source not discovered"
+    assert sources["mysite"].has_comments is True, (
+        "has_comments must be read from config.yaml and set on SourceConfig"
+    )

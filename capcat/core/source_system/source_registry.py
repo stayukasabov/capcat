@@ -248,6 +248,7 @@ class SourceRegistry:
             timeout=config_data.get("timeout", 10.0),
             rate_limit=config_data.get("rate_limit", 1.0),
             supports_comments=config_data.get("supports_comments", False),
+            has_comments=config_data.get("has_comments", False),
             category=config_data.get("category", "general"),
             article_count=int(config_data.get("article_count")) if config_data.get("article_count") is not None else None,
             hidden=config_data.get("hidden", False),

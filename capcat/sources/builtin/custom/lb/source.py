@@ -29,9 +29,11 @@ from capcat.core.source_system.base_source import (
 def _lb_depth(elem) -> int:
     """Extract comment depth from Lobsters comment tree structure.
 
-    Lobsters wraps each comment in <li class="comments_subtree">. Top-level
-    comments have two such ancestors (one for themselves, one for the thread
-    root), so depth = ancestor count - 2, minimum 0.
+    Lobsters HTML wraps the entire comment list in an outer
+    <li class="comments_subtree">, then wraps each comment in another
+    <li class="comments_subtree">. Top-level comments therefore have 2 such
+    ancestors; replies have 3; nested replies have 4; etc.
+    depth = ancestor count - 2, minimum 0.
     """
     return max(0, len(elem.find_parents(class_="comments_subtree")) - 2)
 
@@ -598,38 +600,60 @@ class LbSource(BaseSource):
         Returns:
             bool: True if comments were successfully saved, False otherwise
         """
+        if not comment_url:
+            self.logger.debug(f"No comment URL available for: {article_title}")
+            return False
+
+        if not article_folder_path or not os.path.exists(article_folder_path):
+            self.logger.error(f"Invalid article folder path: {article_folder_path}")
+            return False
+
+        # Add cache-busting headers when in update mode to ensure fresh comments
+        headers = {}
+        if get_global_update_mode():
+            headers.update({
+                "Cache-Control": "no-cache, no-store, must-revalidate",
+                "Pragma": "no-cache",
+                "Expires": "0"
+            })
+            self.logger.debug("Using cache-busting headers for comment update")
+
         try:
-            if not comment_url:
-                self.logger.debug(
-                    f"No comment URL available for: {article_title}"
-                )
-                return False
-
-            # Add cache-busting headers when in update mode to ensure fresh comments
-            headers = {}
-            if get_global_update_mode():
-                headers.update({
-                    "Cache-Control": "no-cache, no-store, must-revalidate",
-                    "Pragma": "no-cache",
-                    "Expires": "0"
-                })
-                self.logger.debug("Using cache-busting headers for comment update")
-
+            self.logger.debug(f"Fetching comments from: {comment_url}")
             response = get_ethical_manager().request_with_backoff(
                 self.session, comment_url,
                 timeout=self.config.timeout,
                 headers=headers,
             )
+        except requests.exceptions.Timeout:
+            self.logger.warning(
+                f"Timeout fetching comments for {article_title} — skipping comments"
+            )
+            return False
+        except requests.exceptions.HTTPError as e:
+            status = e.response.status_code if e.response is not None else "unknown"
+            self.logger.warning(
+                f"HTTP {status} fetching comments for {article_title}: {comment_url}"
+            )
+            return False
+        except requests.exceptions.ConnectionError:
+            self.logger.warning(
+                f"Connection error fetching comments for {article_title} — network unavailable"
+            )
+            return False
+        except requests.exceptions.RequestException as e:
+            self.logger.warning(
+                f"Request error fetching comments for {article_title}: {e}"
+            )
+            return False
 
-            # Use optimized streamlined comment processor
+        try:
             from capcat.core.streamlined_comment_processor import create_optimized_comment_processor
 
+            response.encoding = "utf-8"
             soup = BeautifulSoup(response.text, "html.parser")
-
-            # Create optimized processor with unlimited comments
             processor = create_optimized_comment_processor(max_comments=None)
 
-            # Generate content based on mode (HTML or Markdown)
             if html_mode:
                 content = processor.generate_inline_comments_html(
                     processor.process_comments_flattened(soup, **_LB_SELECTORS),
@@ -647,13 +671,11 @@ class LbSource(BaseSource):
                 )
                 filename = os.path.join(article_folder_path, comments_md_filename(article_title))
 
-            # Get metrics for logging
             metrics = processor.get_performance_metrics()
             self.logger.info(
                 f"Processed {metrics['comments_processed']} comments with {metrics['links_processed']} links for: {article_title}"
             )
 
-            # Skip writing if no comments were found
             if metrics['comments_processed'] == 0:
                 self.logger.debug(f"No comments found for: {article_title} — skipping file write")
                 return False
@@ -667,9 +689,6 @@ class LbSource(BaseSource):
             )
             return True
 
-
         except Exception as e:
-            self.logger.error(
-                f"Failed to fetch comments for {article_title}: {str(e)}"
-            )
+            self.logger.error(f"Failed to process comments for {article_title}: {e}")
             return False

@@ -307,3 +307,35 @@ def test_lb_selectors_depth_fn_extracts_levels():
     assert comments[0]["level"] == 0, "Top-level comment should be level 0"
     assert comments[1]["level"] == 1, "First reply should be level 1"
     assert comments[2]["level"] == 2, "Nested reply should be level 2"
+
+
+_LB_HTML_WITH_USERS = """
+<ol class="comments comments1">
+  <li class="comments_subtree">
+    <ol class="comments">
+      <li class="comments_subtree">
+        <div class="comment" id="c_u1">
+          <a class="user" href="/u/alice">alice</a>
+          <div class="comment_text"><p>Hello from alice</p></div>
+        </div>
+      </li>
+      <li class="comments_subtree">
+        <div class="comment" id="c_u2">
+          <div class="comment_text"><p>Anonymous comment</p></div>
+        </div>
+      </li>
+    </ol>
+  </li>
+</ol>
+"""
+
+
+def test_lb_comment_user_names_extracted():
+    """user field is populated from .user element, not hardcoded 'Anonymous'."""
+    from capcat.sources.builtin.custom.lb.source import _LB_SELECTORS
+    soup = BeautifulSoup(_LB_HTML_WITH_USERS, "html.parser")
+    processor = StreamlinedCommentProcessor()
+    comments = processor.process_comments_flattened(soup, **_LB_SELECTORS)
+    assert len(comments) == 2
+    assert comments[0]["user"] == "alice", "User name must be extracted from .user element"
+    assert comments[1]["user"] == "Anonymous", "Missing user element should fall back to 'Anonymous'"
