@@ -2839,99 +2839,115 @@ class NewsSourceArticleFetcher(ArticleFetcher):
         if progress_callback:
             progress_callback(0.0, "fetching")
 
-        try:
-            # Use source-specific timeout instead of global read_timeout
-            source_timeout = self.source_config.get(
-                "timeout", config.network.read_timeout
-            )
-            response = self.session.get(url, timeout=source_timeout)
-            response.raise_for_status()
+        source_timeout = self.source_config.get(
+            "timeout", config.network.read_timeout
+        )
+        max_retries = self.source_config.get("max_retries", 0)
 
-            # Ensure UTF-8 encoding to prevent Unicode corruption
-            response.encoding = 'utf-8'
-        except requests.exceptions.Timeout:
-            if is_tui_active():
-                self.logger.debug(f"Timeout fetching article content from {url}")
-                record_fetch_result(False, "timeout")
-            else:
-                self.logger.warning(f"Timeout fetching article content from {url}")
-            return False, None, None
-        except requests.exceptions.HTTPError as e:
-            if e.response.status_code == 403:
-                if is_tui_active():
+        response = None
+        for attempt in range(max_retries + 1):
+            try:
+                response = self.session.get(url, timeout=source_timeout)
+                response.raise_for_status()
+                # Ensure UTF-8 encoding to prevent Unicode corruption
+                response.encoding = 'utf-8'
+                break  # success — exit retry loop
+            except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
+                # Transient errors — retry if attempts remain
+                if attempt < max_retries:
+                    retry_delay = 1.0 * (2 ** attempt)  # 1s, 2s, 4s …
                     self.logger.debug(
-                        f"Access forbidden for article {url} - anti-bot protection detected"
+                        f"Transient error fetching {url} (attempt {attempt + 1}/{max_retries + 1}): "
+                        f"{type(e).__name__}. Retrying in {retry_delay:.0f}s."
                     )
-                    record_fetch_result(False, "blocked")
+                    time.sleep(retry_delay)
+                    continue
+                # All attempts exhausted
+                if isinstance(e, requests.exceptions.Timeout):
+                    if is_tui_active():
+                        self.logger.debug(f"Timeout fetching article content from {url}")
+                        record_fetch_result(False, "timeout")
+                    else:
+                        self.logger.warning(f"Timeout fetching article content from {url}")
                 else:
-                    self.logger.warning(
-                        f"Access forbidden for article {url} - anti-bot protection detected"
-                    )
-            elif e.response.status_code == 404:
-                if is_tui_active():
-                    self.logger.debug(
-                        f"Article not found at {url} - may have been deleted"
-                    )
-                    record_fetch_result(False, "not found")
+                    if is_tui_active():
+                        self.logger.debug(
+                            f"Connection error fetching {url} - network may be unavailable"
+                        )
+                        record_fetch_result(False, "error")
+                    else:
+                        self.logger.warning(
+                            f"Connection error fetching {url} - network may be unavailable"
+                        )
+                return False, None, None
+            except requests.exceptions.HTTPError as e:
+                if e.response.status_code == 403:
+                    if is_tui_active():
+                        self.logger.debug(
+                            f"Access forbidden for article {url} - anti-bot protection detected"
+                        )
+                        record_fetch_result(False, "blocked")
+                    else:
+                        self.logger.warning(
+                            f"Access forbidden for article {url} - anti-bot protection detected"
+                        )
+                elif e.response.status_code == 404:
+                    if is_tui_active():
+                        self.logger.debug(
+                            f"Article not found at {url} - may have been deleted"
+                        )
+                        record_fetch_result(False, "not found")
+                    else:
+                        self.logger.warning(
+                            f"Article not found at {url} - may have been deleted"
+                        )
+                elif e.response.status_code == 429:
+                    if is_tui_active():
+                        self.logger.debug(
+                            f"Rate limited accessing {url} - try reducing request frequency"
+                        )
+                        record_fetch_result(False, "error")
+                    else:
+                        self.logger.warning(
+                            f"Rate limited accessing {url} - try reducing request frequency"
+                        )
+                elif e.response.status_code >= 500:
+                    if is_tui_active():
+                        self.logger.debug(
+                            f"Server error ({e.response.status_code}) fetching {url} - temporary issue"
+                        )
+                        record_fetch_result(False, "error")
+                    else:
+                        self.logger.warning(
+                            f"Server error ({e.response.status_code}) fetching {url} - temporary issue"
+                        )
                 else:
-                    self.logger.warning(
-                        f"Article not found at {url} - may have been deleted"
-                    )
-            elif e.response.status_code == 429:
+                    if is_tui_active():
+                        self.logger.debug(
+                            f"HTTP error {e.response.status_code} fetching {url}"
+                        )
+                        record_fetch_result(False, "error")
+                    else:
+                        self.logger.warning(
+                            f"HTTP error {e.response.status_code} fetching {url}"
+                        )
+                return False, None, None
+            except requests.exceptions.RequestException as e:
                 if is_tui_active():
-                    self.logger.debug(
-                        f"Rate limited accessing {url} - try reducing request frequency"
-                    )
+                    self.logger.debug(f"Request error fetching {url}: {e}")
                     record_fetch_result(False, "error")
                 else:
-                    self.logger.warning(
-                        f"Rate limited accessing {url} - try reducing request frequency"
-                    )
-            elif e.response.status_code >= 500:
+                    self.logger.warning(f"Request error fetching {url}: {e}")
+                return False, None, None
+            except Exception as e:
                 if is_tui_active():
-                    self.logger.debug(
-                        f"Server error ({e.response.status_code}) fetching {url} - temporary issue"
-                    )
+                    self.logger.debug(f"Unexpected error fetching {url}: {e}")
                     record_fetch_result(False, "error")
                 else:
-                    self.logger.warning(
-                        f"Server error ({e.response.status_code}) fetching {url} - temporary issue"
-                    )
-            else:
-                if is_tui_active():
-                    self.logger.debug(
-                        f"HTTP error {e.response.status_code} fetching {url}"
-                    )
-                    record_fetch_result(False, "error")
-                else:
-                    self.logger.warning(
-                        f"HTTP error {e.response.status_code} fetching {url}"
-                    )
-            return False, None, None
-        except requests.exceptions.ConnectionError:
-            if is_tui_active():
-                self.logger.debug(
-                    f"Connection error fetching {url} - network may be unavailable"
-                )
-                record_fetch_result(False, "error")
-            else:
-                self.logger.warning(
-                    f"Connection error fetching {url} - network may be unavailable"
-                )
-            return False, None, None
-        except requests.exceptions.RequestException as e:
-            if is_tui_active():
-                self.logger.debug(f"Request error fetching {url}: {e}")
-                record_fetch_result(False, "error")
-            else:
-                self.logger.warning(f"Request error fetching {url}: {e}")
-            return False, None, None
-        except Exception as e:
-            if is_tui_active():
-                self.logger.debug(f"Unexpected error fetching {url}: {e}")
-                record_fetch_result(False, "error")
-            else:
-                self.logger.error(f"Unexpected error fetching {url}: {e}")
+                    self.logger.error(f"Unexpected error fetching {url}: {e}")
+                return False, None, None
+
+        if response is None:
             return False, None, None
 
         # Report parsing progress
@@ -3041,8 +3057,10 @@ class NewsSourceArticleFetcher(ArticleFetcher):
 
         # Convert HTML to Markdown — do this BEFORE creating the folder so
         # a failed conversion doesn't leave an empty directory behind.
+        # Use convert_html_with_timeout (not html_to_markdown directly) so a
+        # complex page cannot block the thread indefinitely.
         try:
-            markdown_content = html_to_markdown(content_html, url)
+            markdown_content = convert_html_with_timeout(content_html, url)
         except Exception as e:
             self.logger.debug(
                 f"Failed to convert HTML to Markdown for {url}: {e}"

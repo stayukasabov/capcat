@@ -42,6 +42,9 @@ template:
 
 # HTTP request timeout in seconds.
 timeout: 10
+# Retry transient errors (Timeout, ConnectionError) this many times.
+# 0 = no retry (default). 1 = one extra attempt on transient failure.
+max_retries: 1
 # Minimum delay between requests to avoid rate-limiting.
 rate_limit: 1.0
 
