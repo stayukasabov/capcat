@@ -1692,23 +1692,12 @@ class ArticleFetcher(ABC):
         # Track downloaded URLs to avoid duplicates
         download_cache = {}  # url -> (local_path, link_type)
 
-        # URL path segments that indicate a UI/icon/navigation image
-        _ui_path_patterns = (
-            "icon", "logo", "social", "avatar", "sprite",
-            "banner", "/ad/", "pixel", "tracker", "beacon",
-            "nav", "header", "footer", "menu", "button",
-            "share", "loading", "spinner", "1x1",
-        )
-
         # First pass: Quick filtering based on extensions
         quick_filtered_links = []
         _download_images = get_config().processing.download_images
         for link_type, url, alt_text in all_links:
             parsed_url = urlparse(url)
             path_lower = parsed_url.path.lower()
-            # Check only the filename part for UI patterns — directory names like
-            # "tahoe-icons" or "menu-designs" must not filter legitimate article images.
-            filename_lower = path_lower.rsplit("/", 1)[-1]
 
             # Quick extension-based filtering
             # download_files=True (resolved from priority chain) also enables images
@@ -1729,10 +1718,6 @@ class ArticleFetcher(ABC):
                         ".ico",
                     )
                 ):
-                    # Skip if the image filename looks like a UI/icon element
-                    if any(p in filename_lower for p in _ui_path_patterns):
-                        self.logger.debug(f"Skipping UI path image: {url}")
-                        continue
                     quick_filtered_links.append((link_type, url, alt_text))
                 # Also include links that look like they might be images based
                 # on common patterns
@@ -1740,8 +1725,7 @@ class ArticleFetcher(ABC):
                     pattern in path_lower
                     for pattern in ["image", "img", "photo", "pic"]
                 ):
-                    if not any(p in filename_lower for p in _ui_path_patterns):
-                        quick_filtered_links.append((link_type, url, alt_text))
+                    quick_filtered_links.append((link_type, url, alt_text))
             elif link_type == "document":
                 is_pdf = path_lower.endswith(".pdf") or "pdf" in path_lower
                 if is_pdf and self.download_pdfs:
@@ -1892,6 +1876,30 @@ class ArticleFetcher(ABC):
                             future.result()
                         )
                         if success and local_path:
+                            # Post-download: discard images whose both
+                            # dimensions are at or below min_image_dimensions
+                            # (catches tiny icons/trackers regardless of URL).
+                            if link_type == "image":
+                                from capcat.core.image_processor import ImageProcessor
+                                min_dim = get_config().processing.min_image_dimensions
+                                full_local = os.path.join(
+                                    article_folder_path, local_path
+                                )
+                                dims = ImageProcessor._read_image_dimensions(
+                                    full_local
+                                )
+                                if dims and dims[0] <= min_dim and dims[1] <= min_dim:
+                                    self.logger.debug(
+                                        f"Discarding small image "
+                                        f"{local_path} ({dims[0]}x{dims[1]})"
+                                    )
+                                    try:
+                                        os.remove(full_local)
+                                    except OSError:
+                                        pass
+                                    skipped_count += 1
+                                    continue
+
                             processed_count += 1
                             # Update markdown content with local path
                             # Track URL replacement attempts

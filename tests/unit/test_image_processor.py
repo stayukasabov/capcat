@@ -1,5 +1,5 @@
 """
-Tests for ImageProcessor URL path filtering and pixel-dimension rejection.
+Tests for ImageProcessor pixel-dimension rejection.
 """
 import os
 import struct
@@ -8,71 +8,6 @@ import tempfile
 import pytest
 
 from capcat.core.image_processor import ImageProcessor
-
-
-# ---------------------------------------------------------------------------
-# _UI_PATH_PATTERNS — URL path filtering
-# ---------------------------------------------------------------------------
-
-class TestUIPathPatterns:
-    """_extract_image_urls skips images whose URL path matches _UI_PATH_PATTERNS."""
-
-    def _processor(self):
-        return ImageProcessor.__new__(ImageProcessor)
-
-    def _path_is_blocked(self, url_path: str) -> bool:
-        """Return True if the path would be filtered by _UI_PATH_PATTERNS."""
-        proc = self._processor()
-        from urllib.parse import urlparse
-        path = urlparse(f"https://example.com{url_path}").path.lower()
-        return any(p in path for p in ImageProcessor._UI_PATH_PATTERNS)
-
-    # Paths that SHOULD be filtered
-    def test_icon_in_path(self):
-        assert self._path_is_blocked("/assets/icon-32.png")
-
-    def test_logo_in_path(self):
-        assert self._path_is_blocked("/static/images/logo.svg")
-
-    def test_social_in_path(self):
-        assert self._path_is_blocked("/img/social-share.png")
-
-    def test_pixel_tracker(self):
-        assert self._path_is_blocked("/track/pixel.gif")
-
-    def test_1x1_tracker(self):
-        assert self._path_is_blocked("/beacon/1x1.gif")
-
-    def test_nav_image(self):
-        assert self._path_is_blocked("/ui/nav-arrow.png")
-
-    def test_spinner(self):
-        assert self._path_is_blocked("/loading/spinner.gif")
-
-    # Real-world cases from arXiv (the original motivation for this feature)
-    def test_arxiv_abspage_logo(self):
-        assert self._path_is_blocked("/static/base/images/arxiv-logo.png")
-
-    def test_arxiv_social_icon(self):
-        assert self._path_is_blocked("/static/browse/0.3.4/images/icons/social/twitter.png")
-
-    # Paths that should NOT be filtered
-    def test_article_figure_passes(self):
-        assert not self._path_is_blocked("/figures/fig1.png")
-
-    def test_bbc_content_image_passes(self):
-        assert not self._path_is_blocked("/news/special/2024/newsspec_46817/hi/image.png")
-
-    def test_guardian_content_image_passes(self):
-        assert not self._path_is_blocked(
-            "/img/media/2024/photo-article-main.jpg"
-        )
-
-    def test_arxiv_content_image_passes(self):
-        assert not self._path_is_blocked("/html/2403.12345/assets/x1.png")
-
-    def test_deep_path_no_keyword_passes(self):
-        assert not self._path_is_blocked("/content/uploads/2024/03/photo.jpg")
 
 
 # ---------------------------------------------------------------------------
