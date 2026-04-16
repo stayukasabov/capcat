@@ -29,3 +29,52 @@ class TestSourceMaxPdfBytes:
         with patch("capcat.core.article_fetcher.get_config", return_value=mock_config):
             fetcher = _make_fetcher({"name": "test"})
             assert fetcher._source_max_pdf_bytes() == 12345678
+
+
+class TestResolveMediaPerSourcePdf:
+    """_resolve_media honours source YAML download_pdfs and force_no_pdfs."""
+
+    def _make_source_config(self, download_pdfs_override=None):
+        sc = MagicMock()
+        sc.media_overrides = (
+            {"download_pdfs": download_pdfs_override}
+            if download_pdfs_override is not None
+            else {}
+        )
+        return sc
+
+    def _make_config(self, download_pdfs=False):
+        mock_config = MagicMock()
+        mock_config.media.download_pdfs = download_pdfs
+        mock_config.media.download_images = False
+        mock_config.media.download_videos = False
+        mock_config.media.download_audio = False
+        mock_config.media.download_documents = False
+        mock_config.source_overrides = {}
+        return mock_config
+
+    def test_source_yaml_true_overrides_global_false(self):
+        """Source YAML download_pdfs: true wins over global download_pdfs: False."""
+        from capcat.core.unified_source_processor import _resolve_media
+        source_config = self._make_source_config(download_pdfs_override=True)
+        _files, pdfs = _resolve_media(
+            download_files=False,
+            download_pdfs=False,
+            source_config=source_config,
+            config=self._make_config(download_pdfs=False),
+            force_no_pdfs=False,
+        )
+        assert pdfs is True
+
+    def test_force_no_pdfs_overrides_source_yaml_true(self):
+        """TUI 'No' (force_no_pdfs=True) beats source YAML download_pdfs: true."""
+        from capcat.core.unified_source_processor import _resolve_media
+        source_config = self._make_source_config(download_pdfs_override=True)
+        _files, pdfs = _resolve_media(
+            download_files=False,
+            download_pdfs=False,
+            source_config=source_config,
+            config=self._make_config(download_pdfs=False),
+            force_no_pdfs=True,
+        )
+        assert pdfs is False
