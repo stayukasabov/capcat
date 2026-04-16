@@ -103,9 +103,10 @@ class TestTuiAppendsPdfsFlag:
         with patch("capcat.core.interactive.questionary") as mock_q, \
              patch("capcat.core.interactive.suppress_logging"), \
              patch("capcat.cli._dispatch") as mock_dispatch:
-            mock_confirm = MagicMock()
-            mock_confirm.ask.return_value = True
-            mock_q.confirm.return_value = mock_confirm
+            mock_select = MagicMock()
+            mock_select.ask.return_value = "yes"
+            mock_q.select.return_value = mock_select
+            mock_q.Choice = MagicMock(side_effect=lambda label, value: value)
 
             from capcat.core.interactive import _confirm_and_execute
             try:
@@ -123,9 +124,10 @@ class TestTuiAppendsPdfsFlag:
         with patch("capcat.core.interactive.questionary") as mock_q, \
              patch("capcat.core.interactive.suppress_logging"), \
              patch("capcat.cli._dispatch") as mock_dispatch:
-            mock_confirm = MagicMock()
-            mock_confirm.ask.return_value = True
-            mock_q.confirm.return_value = mock_confirm
+            mock_select = MagicMock()
+            mock_select.ask.return_value = "yes"
+            mock_q.select.return_value = mock_select
+            mock_q.Choice = MagicMock(side_effect=lambda label, value: value)
 
             from capcat.core.interactive import _confirm_and_execute
             try:

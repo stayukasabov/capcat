@@ -664,10 +664,6 @@ def _confirm_and_execute(action, selection, generate_html):
     print("--------------------")
     print("SUMMARY")
     print(summary)
-    print(
-        "  Note: Downloading PDFs can slow down the process significantly.\n"
-        "  Configure limits in Config/Global-settings.yaml inside your vault."
-    )
     print("--------------------\n")
 
     # Construct the argument list for run_app
@@ -683,17 +679,31 @@ def _confirm_and_execute(action, selection, generate_html):
     if generate_html:
         args.append('--html')
 
+    print(
+        "  PDFs can be enabled or limited per source in source YAML files:\n"
+        "    media:\n"
+        "      download_pdfs: true\n"
+        "      max_pdf_size_mb: 10    # optional — overrides global limit\n"
+        "  See Config/sources/ for details.\n"
+    )
     with suppress_logging():
-        want_pdfs = questionary.confirm(
+        pdf_choice = questionary.select(
             "  Download attached PDFs?",
-            default=True,
+            choices=[
+                questionary.Choice("Yes              — download PDFs for all sources", "yes"),
+                questionary.Choice("No               — skip PDFs for all sources", "no"),
+                questionary.Choice("Source defaults  — each source uses its YAML setting", "source_defaults"),
+            ],
             style=custom_style,
             qmark="",
+            pointer="▶",
+            instruction="\n   (Use arrow keys to navigate)",
         ).ask()
-    if want_pdfs:
+    if pdf_choice == "yes":
         args.append('--pdfs')
-    else:
+    elif pdf_choice == "no":
         args.append('--no-pdfs')
+    # "source_defaults": emit nothing — _resolve_media decides per source
 
     if is_tui_active():
         reset_fetch_results()

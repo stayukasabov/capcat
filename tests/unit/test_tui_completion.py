@@ -14,18 +14,18 @@ def _run_completion(generate_html, success, user_choice="menu"):
     return mock_screen
 
 
-def _mock_pdf_confirm():
-    """Return a patch that answers 'no' to the PDF download prompt."""
+def _mock_pdf_select():
+    """Return a patch that answers 'no' to the PDF download select prompt."""
     m = MagicMock()
-    m.return_value.ask.return_value = False
-    return patch("capcat.core.interactive.questionary.confirm", m)
+    m.return_value.ask.return_value = "no"
+    return patch("capcat.core.interactive.questionary.select", m)
 
 
 def test_completion_screen_called_on_success():
     """_show_completion_screen must be called after successful dispatch."""
     with patch("capcat.cli._dispatch"), \
          patch("capcat.core.interactive._show_completion_screen") as mock_screen, \
-         _mock_pdf_confirm():
+         _mock_pdf_select():
         from capcat.core.interactive import _confirm_and_execute
         _confirm_and_execute("bundle", "techpro", False)
     args, kwargs = mock_screen.call_args
@@ -36,7 +36,7 @@ def test_completion_screen_called_on_nonzero_exit():
     """_show_completion_screen must be called even when dispatch exits non-zero."""
     with patch("capcat.cli._dispatch", side_effect=SystemExit(1)), \
          patch("capcat.core.interactive._show_completion_screen") as mock_screen, \
-         _mock_pdf_confirm():
+         _mock_pdf_select():
         from capcat.core.interactive import _confirm_and_execute
         _confirm_and_execute("bundle", "techpro", False)
     args, kwargs = mock_screen.call_args
@@ -47,7 +47,7 @@ def test_completion_screen_called_on_exception():
     """_show_completion_screen must be called when dispatch raises unexpectedly."""
     with patch("capcat.cli._dispatch", side_effect=RuntimeError("network down")), \
          patch("capcat.core.interactive._show_completion_screen") as mock_screen, \
-         _mock_pdf_confirm():
+         _mock_pdf_select():
         from capcat.core.interactive import _confirm_and_execute
         _confirm_and_execute("fetch", ["hn"], True)
     args, kwargs = mock_screen.call_args

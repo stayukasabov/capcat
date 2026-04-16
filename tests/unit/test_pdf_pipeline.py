@@ -141,10 +141,10 @@ class TestTuiMediaFlag:
     def test_media_flag_appended_when_yes(self):
         dispatched = []
 
-        confirm_mock = MagicMock()
-        confirm_mock.return_value.ask.return_value = True
+        select_mock = MagicMock()
+        select_mock.return_value.ask.return_value = "yes"
 
-        with patch("capcat.core.interactive.questionary.confirm", confirm_mock), \
+        with patch("capcat.core.interactive.questionary.select", select_mock), \
              patch("capcat.cli._dispatch", side_effect=lambda a: dispatched.extend(a)), \
              patch("capcat.core.interactive._show_completion_screen"):
             from capcat.core.interactive import _confirm_and_execute
@@ -156,10 +156,10 @@ class TestTuiMediaFlag:
     def test_media_flag_not_appended_when_no(self):
         dispatched = []
 
-        confirm_mock = MagicMock()
-        confirm_mock.return_value.ask.return_value = False
+        select_mock = MagicMock()
+        select_mock.return_value.ask.return_value = "no"
 
-        with patch("capcat.core.interactive.questionary.confirm", confirm_mock), \
+        with patch("capcat.core.interactive.questionary.select", select_mock), \
              patch("capcat.cli._dispatch", side_effect=lambda a: dispatched.extend(a)), \
              patch("capcat.core.interactive._show_completion_screen"):
             from capcat.core.interactive import _confirm_and_execute

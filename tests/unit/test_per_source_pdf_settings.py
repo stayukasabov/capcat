@@ -78,3 +78,43 @@ class TestResolveMediaPerSourcePdf:
             force_no_pdfs=True,
         )
         assert pdfs is False
+
+
+class TestTuiFlagEmission:
+    """TUI PDF menu emits correct flags for each choice."""
+
+    def _run_confirm_and_execute(self, pdf_choice, action="bundle", selection="all"):
+        """Invoke _confirm_and_execute with a mocked PDF questionary answer."""
+        import capcat.core.interactive as interactive_mod
+
+        captured_args = []
+
+        def fake_dispatch(args):
+            captured_args.extend(args)
+
+        with (
+            patch.object(interactive_mod.questionary, "select") as mock_select,
+            patch("capcat.cli._dispatch", side_effect=fake_dispatch),
+            patch("capcat.core.interactive._show_completion_screen"),
+            patch("capcat.core.tui_context.is_tui_active", return_value=False),
+        ):
+            mock_select.return_value.ask.return_value = pdf_choice
+            interactive_mod._confirm_and_execute(action, selection, generate_html=False)
+
+        return captured_args
+
+    def test_source_defaults_emits_no_pdf_flag(self):
+        """'Source defaults' must not append --pdfs or --no-pdfs."""
+        args = self._run_confirm_and_execute("source_defaults")
+        assert "--pdfs" not in args
+        assert "--no-pdfs" not in args
+
+    def test_yes_emits_pdfs_flag(self):
+        args = self._run_confirm_and_execute("yes")
+        assert "--pdfs" in args
+        assert "--no-pdfs" not in args
+
+    def test_no_emits_no_pdfs_flag(self):
+        args = self._run_confirm_and_execute("no")
+        assert "--no-pdfs" in args
+        assert "--pdfs" not in args

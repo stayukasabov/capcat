@@ -4,15 +4,16 @@ from unittest.mock import patch, MagicMock
 
 def test_pdf_info_message_printed_before_prompt(capsys):
     """
-    An informational message about PDF download speed and config must be
-    printed before the questionary.confirm prompt is shown.
+    An informational message about per-source PDF config must be
+    printed before the questionary.select prompt is shown.
     """
     with patch("capcat.core.interactive.questionary") as mock_q, \
          patch("capcat.core.interactive.suppress_logging"), \
          patch("capcat.cli._dispatch"):
-        mock_confirm = MagicMock()
-        mock_confirm.ask.return_value = False
-        mock_q.confirm.return_value = mock_confirm
+        mock_select = MagicMock()
+        mock_select.ask.return_value = "no"
+        mock_q.select.return_value = mock_select
+        mock_q.Choice = MagicMock(side_effect=lambda label, value: value)
 
         from capcat.core.interactive import _confirm_and_execute
         try:
@@ -21,9 +22,9 @@ def test_pdf_info_message_printed_before_prompt(capsys):
             pass
 
     captured = capsys.readouterr()
-    assert "significant" in captured.out.lower(), (
-        "Message about PDF download speed must be printed before the prompt"
+    assert "download_pdfs" in captured.out, (
+        "Info block must mention download_pdfs so users know the YAML key"
     )
-    assert "Global-settings.yaml" in captured.out, (
-        "Message must reference Global-settings.yaml so users know where to configure"
+    assert "Config/sources/" in captured.out, (
+        "Info block must reference Config/sources/ so users know where to configure"
     )
