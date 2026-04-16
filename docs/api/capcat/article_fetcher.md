@@ -474,7 +474,7 @@ processing.
 
 **Returns:** str
 
-⚠️ **High complexity:** 102
+⚠️ **High complexity:** 105
 
 ##### _fallback_image_detection
 

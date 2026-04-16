@@ -9,10 +9,6 @@ Modular, DRY architecture with source-specific configurations.
 
 ## Constants
 
-### _UI_PATH_PATTERNS
-
-**Value:** `('icon', 'logo', 'social', 'avatar', 'sprite', 'banner', '/ad/', 'pixel', 'tracker', 'beacon', 'nav', 'header', 'footer', 'menu', 'button', 'share', 'loading', 'spinner', '1x1')`
-
 ### _MIN_PIXEL_DIMENSION
 
 **Value:** `64`
@@ -110,7 +106,7 @@ Extract image URLs using source-specific selectors.
 
 **Returns:** List[str]
 
-⚠️ **High complexity:** 19
+⚠️ **High complexity:** 18
 
 ##### _should_skip_image
 
