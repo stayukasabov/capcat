@@ -142,7 +142,7 @@ class SourceConfigMirror:
                 shutil.copy2(f, dest_file)
                 h = self._compute_hash(f)
                 key = f"config_driven/configs/{f.name}"
-                manifest[key] = {"builtin_hash": h, "user_hash": h}
+                manifest[key] = {"ownership": "config", "builtin_hash": h, "user_hash": h}
 
     def _mirror_custom(self, manifest: dict) -> None:
         src = self._builtin_custom_dir()
@@ -164,7 +164,8 @@ class SourceConfigMirror:
                     if builtin_f.exists():
                         h = self._compute_hash(builtin_f)
                         key = f"custom/{source_dir.name}/{rel}"
-                        manifest[key] = {"builtin_hash": h, "user_hash": h}
+                        ownership = "app" if f.suffix == ".py" else "config"
+                        manifest[key] = {"ownership": ownership, "builtin_hash": h, "user_hash": h}
 
     def _mirror_bundles(self, manifest: dict) -> None:
         src = self._builtin_bundles_dir()
@@ -178,7 +179,7 @@ class SourceConfigMirror:
                 shutil.copy2(f, dest_file)
                 h = self._compute_hash(f)
                 key = f"bundles/{f.name}"
-                manifest[key] = {"builtin_hash": h, "user_hash": h}
+                manifest[key] = {"ownership": "config", "builtin_hash": h, "user_hash": h}
 
     # ------------------------------------------------------------------
     # Upgrade diff placeholders (implemented in Tasks 3-5)

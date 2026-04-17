@@ -664,3 +664,35 @@ def test_unified_processor_calls_mirror_on_first_fetch(tmp_path, monkeypatch):
         pass  # We only care that mirror was called
 
     assert "first_mirror" in mirror_calls
+
+
+def test_first_mirror_custom_writes_app_ownership_for_py(tmp_path, monkeypatch):
+    """source.py files get ownership='app' in manifest after first mirror."""
+    from capcat.core.source_config_mirror import SourceConfigMirror
+    m = SourceConfigMirror(tmp_path, tui_mode=False)
+    builtin_custom = tmp_path / "_builtin" / "custom" / "hn"
+    builtin_custom.mkdir(parents=True)
+    (builtin_custom / "source.py").write_text("# code\n")
+    (builtin_custom / "config.yaml").write_text("name: hn\n")
+    monkeypatch.setattr(m, "_builtin_custom_dir", lambda: builtin_custom.parent)
+    monkeypatch.setattr(m, "_builtin_config_driven_dir", lambda: tmp_path / "_empty_cfg")
+    monkeypatch.setattr(m, "_builtin_bundles_dir", lambda: tmp_path / "_empty_bun")
+    m.run_first_mirror()
+    manifest = json.loads((tmp_path / ".capcat" / "source_hashes.json").read_text())
+    assert manifest["custom/hn/source.py"]["ownership"] == "app"
+    assert manifest["custom/hn/config.yaml"]["ownership"] == "config"
+
+
+def test_first_mirror_config_driven_writes_config_ownership(tmp_path, monkeypatch):
+    """Config-driven YAML files get ownership='config' in manifest."""
+    from capcat.core.source_config_mirror import SourceConfigMirror
+    m = SourceConfigMirror(tmp_path, tui_mode=False)
+    builtin_cfg = tmp_path / "_builtin" / "config_driven" / "configs"
+    builtin_cfg.mkdir(parents=True)
+    (builtin_cfg / "bbc.yaml").write_text("name: bbc\n")
+    monkeypatch.setattr(m, "_builtin_config_driven_dir", lambda: builtin_cfg)
+    monkeypatch.setattr(m, "_builtin_custom_dir", lambda: tmp_path / "_empty_cust")
+    monkeypatch.setattr(m, "_builtin_bundles_dir", lambda: tmp_path / "_empty_bun")
+    m.run_first_mirror()
+    manifest = json.loads((tmp_path / ".capcat" / "source_hashes.json").read_text())
+    assert manifest["config_driven/configs/bbc.yaml"]["ownership"] == "config"
