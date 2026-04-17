@@ -32,16 +32,7 @@ class SubstackSource(BaseSource):
     @classmethod
     def can_handle_url(cls, url: str) -> bool:
         """Check if this source can handle the given URL."""
-        substack_patterns = [
-            r"\.substack\.com",
-            r"substack\.com",
-            r"/p/[^/]+",  # Substack post URLs
-            r"/archive",  # Substack archive URLs
-        ]
-        return any(
-            re.search(pattern, url, re.IGNORECASE)
-            for pattern in substack_patterns
-        )
+        return bool(re.search(r"\.?substack\.com", url, re.IGNORECASE))
 
     def discover_articles(self, count: int) -> List[Article]:
         """

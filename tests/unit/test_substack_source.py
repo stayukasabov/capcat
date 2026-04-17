@@ -42,6 +42,18 @@ class TestSubstackCanHandleUrl:
     def test_rejects_empty(self):
         assert not SubstackSource.can_handle_url("")
 
+    def test_rejects_non_substack_archive_url(self):
+        # /archive pattern was matching /archives/ on unrelated sites
+        assert not SubstackSource.can_handle_url(
+            "https://www.thehistoryblog.com/archives/75848"
+        )
+
+    def test_rejects_non_substack_slash_p_url(self):
+        # /p/<slug> pattern was matching non-Substack /p/ paths
+        assert not SubstackSource.can_handle_url(
+            "https://example.com/p/some-article"
+        )
+
     def test_source_type_is_custom(self):
         source = SubstackSource(_config())
         assert source.source_type == "custom"
