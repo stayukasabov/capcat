@@ -40,6 +40,44 @@ class TestDrainProgressLogging:
             "Downloading PDFs" in c for c in calls
         ), f"Expected 'Downloading PDFs' in logger.info calls, got: {calls}"
 
+    def test_drain_does_not_repeat_log_when_state_unchanged(self):
+        """
+        When counts do not change between ticks, drain must NOT emit the
+        same 'Downloading PDFs' line more than once — repeated identical
+        messages look like a frozen terminal to the user.
+
+        Mocks monotonic() to advance 11 seconds per call (above the 10s
+        throttle threshold) so the old time-based approach would log on
+        every iteration. The new state-change logic must log exactly once.
+        """
+        import time as _time_mod
+
+        manager = AsyncPDFManager(max_workers=1)
+        manager.start()
+
+        fake_url = "http://example.com/stalled.pdf"
+        with manager._lock:
+            manager.active_downloads[fake_url] = threading.Event()
+
+        tick = [0.0]
+        def fast_monotonic():
+            tick[0] += 11.0
+            return tick[0]
+
+        mock_info = MagicMock()
+        with patch.object(manager.logger, "info", mock_info), \
+             patch("time.monotonic", fast_monotonic), \
+             patch("time.sleep", lambda _: None):
+            manager.wait_until_idle(timeout=60.0)
+
+        manager.stop()
+
+        pdf_calls = [c for c in mock_info.call_args_list if "Downloading PDFs" in str(c)]
+        assert len(pdf_calls) == 1, (
+            f"Expected exactly 1 'Downloading PDFs' log when state is unchanged, "
+            f"got {len(pdf_calls)}: {pdf_calls}"
+        )
+
     def test_drain_does_not_log_when_already_idle(self):
         """
         When queue is empty and no active downloads, drain must return True
