@@ -351,3 +351,43 @@ class TestResyncManifestBuiltinHash:
         entry = manifest["custom/myhn/source.py"]
         assert entry["builtin_hash"] == ""
         assert entry["ownership"] == "user"
+
+
+class TestDiffFiles:
+    def test_diff_files_shows_user_vs_new_default(self, tmp_path):
+        """_diff_files returns unified diff with user as 'your version', builtin as 'new default'."""
+        from capcat.core.source_config_mirror import SourceConfigMirror
+        m = SourceConfigMirror(tmp_path, tui_mode=False)
+        user_f = tmp_path / "user.yaml"
+        builtin_f = tmp_path / "builtin.yaml"
+        user_f.write_text("article_count: 10\nrate_limit: 1.0\n")
+        builtin_f.write_text("article_count: 30\nrate_limit: 1.0\n")
+        diff = m._diff_files(user_f, builtin_f)
+        assert "--- your version" in diff
+        assert "+++ new default" in diff
+        assert "-article_count: 10" in diff
+        assert "+article_count: 30" in diff
+
+    def test_diff_files_returns_empty_for_identical(self, tmp_path):
+        """_diff_files returns empty string when files are identical."""
+        from capcat.core.source_config_mirror import SourceConfigMirror
+        m = SourceConfigMirror(tmp_path, tui_mode=False)
+        f1 = tmp_path / "a.yaml"
+        f2 = tmp_path / "b.yaml"
+        f1.write_text("name: bbc\n")
+        f2.write_text("name: bbc\n")
+        assert m._diff_files(f1, f2) == ""
+
+
+class TestKeyDisplayName:
+    def test_custom_source_display(self):
+        from capcat.core.source_config_mirror import _key_display_name
+        assert _key_display_name("custom/hn/source.py") == "hn/source.py"
+
+    def test_config_driven_display(self):
+        from capcat.core.source_config_mirror import _key_display_name
+        assert _key_display_name("config_driven/configs/bbc.yaml") == "bbc.yaml"
+
+    def test_bundles_display(self):
+        from capcat.core.source_config_mirror import _key_display_name
+        assert _key_display_name("bundles/bundles.yml") == "bundles.yml"

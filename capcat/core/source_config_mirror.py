@@ -15,6 +15,18 @@ except ImportError:
     questionary = None  # type: ignore[assignment]
 
 
+def _key_display_name(key: str) -> str:
+    """Convert a manifest key to a short human-readable name."""
+    if key.startswith("custom/"):
+        parts = key.split("/", 2)
+        return f"{parts[1]}/{parts[2]}" if len(parts) == 3 else key
+    if key.startswith("config_driven/configs/"):
+        return key.removeprefix("config_driven/configs/")
+    if key.startswith("bundles/"):
+        return key.removeprefix("bundles/")
+    return key
+
+
 class SourceConfigMirror:
     """Copy and track builtin source configs in userspace."""
 
@@ -344,6 +356,24 @@ class SourceConfigMirror:
             backup_name = key.replace("/", "-")
             shutil.copy2(user_path, backup_dir / backup_name)
         return backup_dir
+
+    def _diff_files(self, user_file: Path, builtin_file: Path) -> str:
+        """Return a unified diff of user_file vs builtin_file.
+
+        fromfile='your version', tofile='new default'.
+        Returns empty string if files are identical.
+        """
+        import difflib
+        user_lines = user_file.read_text(encoding="utf-8", errors="replace").splitlines(keepends=True)
+        builtin_lines = builtin_file.read_text(encoding="utf-8", errors="replace").splitlines(keepends=True)
+        diff = list(difflib.unified_diff(
+            user_lines,
+            builtin_lines,
+            fromfile="your version",
+            tofile="new default",
+            lineterm="",
+        ))
+        return "".join(diff)
 
     def _resolve_user_file(self, key: str) -> Optional[Path]:
         """Locate the actual user file for a manifest key. Returns None if absent."""
