@@ -359,48 +359,36 @@ def test_step2_skips_when_user_modified(tmp_path, monkeypatch):
     assert (user_cfg / "bbc.yaml").read_text() == user_content_before
 
 
-def test_step3_overrides_and_backs_up_when_user_says_yes(tmp_path, monkeypatch):
-    """Builtin changed, user unmodified, user accepts -> backup created, file overridden."""
+def test_step3_overrides_silently_when_user_unmodified(tmp_path, monkeypatch):
+    """Builtin changed, user unmodified -> silently overwrite, no prompt, no backup."""
     m, project, user_cfg, cfg_dir = _setup_changed_builtin(
         tmp_path, monkeypatch, user_modified=False
     )
     new_builtin_content = (cfg_dir / "bbc.yaml").read_text()
 
-    call_count = [0]
-    def fake_input(prompt):
-        call_count[0] += 1
-        return "y"  # accept override
-
-    monkeypatch.setattr("builtins.input", fake_input)
-    monkeypatch.setattr("sys.stdin", type("_Tty", (), {"isatty": staticmethod(lambda: True)})())
-
     m.check_for_upgrades()
 
     # User file now has new builtin content
     assert (user_cfg / "bbc.yaml").read_text() == new_builtin_content
-    # Backup dir exists
+    # No backup needed — user never modified
     backup_dirs = list((project / "Config" / "sources").glob("backup_*"))
-    assert len(backup_dirs) == 1
-    # Backup contains flattened filename
-    assert (backup_dirs[0] / "config_driven-configs-bbc.yaml").exists()
+    assert len(backup_dirs) == 0
 
 
-def test_step3_does_not_override_when_user_says_no(tmp_path, monkeypatch):
-    """Builtin changed, user unmodified, user declines -> file unchanged, builtin_hash NOT updated."""
+def test_step3_unmodified_config_gets_new_hash_after_silent_overwrite(tmp_path, monkeypatch):
+    """Builtin changed, user unmodified -> manifest builtin_hash and user_hash updated to new value."""
     m, project, user_cfg, cfg_dir = _setup_changed_builtin(
         tmp_path, monkeypatch, user_modified=False
     )
-    original_user_content = (user_cfg / "bbc.yaml").read_text()
-    manifest_before = json.loads((project / ".capcat" / "source_hashes.json").read_text())
-    old_builtin_hash = manifest_before["config_driven/configs/bbc.yaml"]["builtin_hash"]
-
-    monkeypatch.setattr("builtins.input", lambda _: "n")
+    new_builtin_content = (cfg_dir / "bbc.yaml").read_text()
 
     m.check_for_upgrades()
 
-    assert (user_cfg / "bbc.yaml").read_text() == original_user_content
+    assert (user_cfg / "bbc.yaml").read_text() == new_builtin_content
     manifest = json.loads((project / ".capcat" / "source_hashes.json").read_text())
-    assert manifest["config_driven/configs/bbc.yaml"]["builtin_hash"] == old_builtin_hash
+    new_hash = hashlib.sha256(new_builtin_content.encode()).hexdigest()
+    assert manifest["config_driven/configs/bbc.yaml"]["builtin_hash"] == new_hash
+    assert manifest["config_driven/configs/bbc.yaml"]["user_hash"] == new_hash
 
 
 def test_backup_collision_uses_counter_suffix(tmp_path, monkeypatch):

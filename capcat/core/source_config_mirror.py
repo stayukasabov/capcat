@@ -265,15 +265,18 @@ class SourceConfigMirror:
         from capcat.core.logging_config import get_logger
         logger = get_logger(__name__)
 
-        override_candidates: list = []  # (key, user_path, new_builtin_hash)
+        app_overwrite: list = []     # (key, user_file, builtin_file, new_hash, user_modified)
+        config_silent: list = []     # (key, user_file, builtin_file, new_hash)
+        config_modified: list = []   # (key, user_file, builtin_file, new_hash)
         keys_to_remove: list = []
 
         for key, entry in list(manifest.items()):
             stored_builtin_hash = entry.get("builtin_hash", "")
             stored_user_hash = entry.get("user_hash", "")
+            ownership = entry.get("ownership", "config")  # backward compat: missing → config
 
             if not stored_builtin_hash:
-                continue  # user-added source
+                continue  # user-added source — never touch
 
             builtin_file = self._builtin_file_for_key(key)
             if builtin_file is None:
@@ -287,58 +290,57 @@ class SourceConfigMirror:
                 continue
 
             current_builtin_hash = self._compute_hash(builtin_file)
-
             if current_builtin_hash == stored_builtin_hash:
                 continue  # builtin unchanged
 
             current_user_hash = self._compute_hash(user_file)
+            user_modified = current_user_hash != stored_user_hash
 
-            if current_user_hash != stored_user_hash:
-                continue  # user modified — skip silently
-
-            override_candidates.append((key, user_file, current_builtin_hash))
+            if ownership == "app":
+                app_overwrite.append((key, user_file, builtin_file, current_builtin_hash, user_modified))
+            elif user_modified:
+                config_modified.append((key, user_file, builtin_file, current_builtin_hash))
+            else:
+                config_silent.append((key, user_file, builtin_file, current_builtin_hash))
 
         for key in keys_to_remove:
             del manifest[key]
 
-        if not override_candidates:
-            return manifest
+        # 1. App-owned: always overwrite; backup if user had edits
+        for key, user_file, builtin_file, new_hash, user_modified in app_overwrite:
+            if user_modified:
+                try:
+                    self._backup([(key, user_file)])
+                except OSError as exc:
+                    logger.warning(
+                        f"Backup failed for {_key_display_name(key)} ({exc}) — skipping update"
+                    )
+                    continue
+                logger.warning(
+                    f"Updated {_key_display_name(key)} (had local edits — "
+                    f"backup created at Config/sources/backup_*/)"
+                )
+            else:
+                logger.info(f"Updated {_key_display_name(key)}")
+            shutil.copy2(builtin_file, user_file)
+            manifest[key]["builtin_hash"] = new_hash
+            manifest[key]["user_hash"] = new_hash
 
-        # Group by domain for prompt
-        src_keys = [k for k, _, _ in override_candidates if k.startswith("config_driven/")]
-        cust_keys = [k for k, _, _ in override_candidates if k.startswith("custom/")]
-        bun_keys = [k for k, _, _ in override_candidates if k.startswith("bundles/")]
+        # 2. Config-owned, unmodified: silent overwrite
+        for key, user_file, builtin_file, new_hash in config_silent:
+            logger.info(f"Updated {_key_display_name(key)}")
+            shutil.copy2(builtin_file, user_file)
+            manifest[key]["builtin_hash"] = new_hash
+            manifest[key]["user_hash"] = new_hash
 
-        src_names = [Path(k.removeprefix("config_driven/configs/")).stem for k in src_keys]
-        # Strip second extension for .yaml.disabled stems
-        src_names = [Path(n).stem if "." in n else n for n in src_names]
-        cust_display = [k.removeprefix("custom/") for k in cust_keys]
-        bun_display = [k.removeprefix("bundles/") for k in bun_keys]
+        # 3. Config-owned, user-modified: interactive prompt
+        if config_modified:
+            manifest = self._prompt_config_updates(manifest, config_modified)
 
-        total = len(override_candidates)
-        today_str = date.today().isoformat()
-        msg = (
-            f"Capcat: {total} item(s) have updates available:\n"
-            f"  Sources: {', '.join(src_names) if src_names else '(none)'}\n"
-            f"  Custom sources: {', '.join(cust_display) if cust_display else '(none)'}\n"
-            f"  Bundles: {', '.join(bun_display) if bun_display else '(none)'}\n"
-            f"Override with new defaults? Your files are unmodified.\n"
-            f"Backup will be created at Config/sources/backup_{today_str}/. [Y/n]"
-        )
-        answer = self._prompt(msg)
-        if answer.strip().lower() in ("", "y", "yes"):
-            try:
-                self._backup([(k, p) for k, p, _ in override_candidates])
-            except OSError as exc:
-                print(f"Capcat: backup failed ({exc}) — override aborted.")
-                return manifest
+        return manifest
 
-            for key, user_file, new_builtin_hash in override_candidates:
-                builtin_file = self._builtin_file_for_key(key)
-                shutil.copy2(builtin_file, user_file)
-                manifest[key]["builtin_hash"] = new_builtin_hash
-                manifest[key]["user_hash"] = new_builtin_hash
-
+    def _prompt_config_updates(self, manifest: dict, candidates: list) -> dict:
+        """Interactive prompt for config files the user has modified. Stub — Task 6."""
         return manifest
 
     def _backup(self, resolved_user_files: list) -> Path:
