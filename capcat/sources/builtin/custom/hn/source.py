@@ -37,6 +37,7 @@ _HN_SELECTORS = {
     "user_selector": ".hnuser",
     "comment_text_selector": ".comment",
     "depth_fn": _hn_depth,
+    "profile_url_fn": lambda n: f"https://news.ycombinator.com/user?id={n}",
 }
 
 

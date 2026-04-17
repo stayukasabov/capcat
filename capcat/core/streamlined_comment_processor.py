@@ -36,6 +36,7 @@ class StreamlinedCommentProcessor:
         user_selector: str = ".hnuser",
         comment_text_selector: str = ".comment",
         depth_fn: Optional[Callable[[Any], int]] = None,
+        profile_url_fn: Optional[Callable[[str], str]] = None,
     ) -> List[Dict[str, Any]]:
         """
         Process comments preserving nesting depth.
@@ -65,6 +66,7 @@ class StreamlinedCommentProcessor:
                     comment_text_selector,
                     idx,
                     depth_fn=depth_fn,
+                    profile_url_fn=profile_url_fn,
                 )
                 if comment_data and comment_data["text"]:
                     comments.append(comment_data)
@@ -82,6 +84,7 @@ class StreamlinedCommentProcessor:
         comment_text_selector: str,
         index: int,
         depth_fn: Optional[Callable[[Any], int]] = None,
+        profile_url_fn: Optional[Callable[[str], str]] = None,
     ) -> Optional[Dict[str, Any]]:
         """
         Fast comment data extraction without deep processing.
@@ -94,9 +97,8 @@ class StreamlinedCommentProcessor:
 
         if user_elem:
             original_name = user_elem.get_text().strip()
-            if original_name:
-                user_name = original_name
-                user_link = f"https://news.ycombinator.com/user?id={original_name}"
+            if original_name and profile_url_fn:
+                user_link = profile_url_fn(original_name)
 
         comment_text_elem = comment_elem.select_one(comment_text_selector)
         if not comment_text_elem:
