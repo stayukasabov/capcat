@@ -544,10 +544,12 @@ def test_resync_manifest_when_missing(tmp_path, monkeypatch):
     manifest = json.loads((project / ".capcat" / "source_hashes.json").read_text())
     assert "config_driven/configs/bbc.yaml" in manifest
     entry = manifest["config_driven/configs/bbc.yaml"]
-    # Both hashes set to current user file hash (not builtin)
+    # builtin_hash = actual installed builtin; user_hash = current user file
+    builtin_hash = hashlib.sha256(b"name: bbc\n").hexdigest()
     user_hash = hashlib.sha256(user_content.encode()).hexdigest()
-    assert entry["builtin_hash"] == user_hash
+    assert entry["builtin_hash"] == builtin_hash
     assert entry["user_hash"] == user_hash
+    assert entry["ownership"] == "config"
 
 
 def test_load_manifest_returns_none_when_file_absent(tmp_path):

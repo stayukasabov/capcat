@@ -388,11 +388,14 @@ class SourceConfigMirror:
 
     def _resync_manifest(self) -> None:
         """Rebuild manifest from current user files when source_hashes.json is missing.
-        Never overwrites user files."""
-        from capcat.core.logging_config import get_logger
-        logger = get_logger(__name__)
-        logger.debug("Capcat: source_hashes.json missing — rebuilt from current state.")
 
+        Uses the actual installed builtin hash as the baseline so future
+        check_for_upgrades() diffs are accurate.
+        """
+        from capcat.core.logging_config import get_logger
+        get_logger(__name__).debug(
+            "Capcat: source_hashes.json missing — rebuilt from current state."
+        )
         manifest = {}
 
         # config_driven
@@ -403,9 +406,15 @@ class SourceConfigMirror:
                     f.suffix in self._CONFIG_DRIVEN_EXTS
                     or f.name.endswith(".yaml.disabled")
                 ):
-                    h = self._compute_hash(f)
                     key = f"config_driven/configs/{f.name}"
-                    manifest[key] = {"builtin_hash": h, "user_hash": h}
+                    user_h = self._compute_hash(f)
+                    builtin_f = self._builtin_file_for_key(key)
+                    builtin_h = self._compute_hash(builtin_f) if builtin_f else ""
+                    manifest[key] = {
+                        "ownership": "config",
+                        "builtin_hash": builtin_h,
+                        "user_hash": user_h,
+                    }
 
         # custom
         user_custom = self._user_custom_dir()
@@ -415,17 +424,33 @@ class SourceConfigMirror:
                     for f in source_dir.rglob("*"):
                         if f.is_file() and not self._SKIP_DIRS.intersection(f.parts):
                             rel = f.relative_to(source_dir)
-                            h = self._compute_hash(f)
                             key = f"custom/{source_dir.name}/{rel}"
-                            manifest[key] = {"builtin_hash": h, "user_hash": h}
+                            user_h = self._compute_hash(f)
+                            builtin_f = self._builtin_file_for_key(key)
+                            builtin_h = self._compute_hash(builtin_f) if builtin_f else ""
+                            if not builtin_f:
+                                ownership = "user"
+                            else:
+                                ownership = "app" if f.suffix == ".py" else "config"
+                            manifest[key] = {
+                                "ownership": ownership,
+                                "builtin_hash": builtin_h,
+                                "user_hash": user_h,
+                            }
 
         # bundles
         user_bundles = self._user_bundles_dir()
         if user_bundles.exists():
             for f in user_bundles.iterdir():
                 if f.is_file() and f.suffix == ".yml":
-                    h = self._compute_hash(f)
                     key = f"bundles/{f.name}"
-                    manifest[key] = {"builtin_hash": h, "user_hash": h}
+                    user_h = self._compute_hash(f)
+                    builtin_f = self._builtin_file_for_key(key)
+                    builtin_h = self._compute_hash(builtin_f) if builtin_f else ""
+                    manifest[key] = {
+                        "ownership": "config",
+                        "builtin_hash": builtin_h,
+                        "user_hash": user_h,
+                    }
 
         self._save_manifest(manifest)

@@ -297,3 +297,57 @@ class TestUpgradeDeclinePreservesBuiltinHash:
             mirror._step2_3_changed_builtins(manifest)
 
         assert vault_src.read_text() == original_content
+
+
+class TestResyncManifestBuiltinHash:
+    def test_resync_sets_builtin_hash_from_installed_package(self, tmp_path, monkeypatch):
+        """_resync_manifest uses the actual installed builtin hash, not the user file hash."""
+        from capcat.core.source_config_mirror import SourceConfigMirror
+        import hashlib, json
+
+        # User has hn/source.py with old content
+        user_src = tmp_path / "Config" / "sources" / "active" / "custom" / "hn" / "source.py"
+        user_src.parent.mkdir(parents=True)
+        user_src.write_text("# old code\n")
+
+        # Builtin has new content
+        builtin_src = tmp_path / "_builtin" / "custom" / "hn" / "source.py"
+        builtin_src.parent.mkdir(parents=True)
+        builtin_src.write_text("# new code\n")
+
+        m = SourceConfigMirror(tmp_path, tui_mode=False)
+        monkeypatch.setattr(m, "_builtin_custom_dir", lambda: builtin_src.parent.parent)
+        monkeypatch.setattr(m, "_builtin_config_driven_dir", lambda: tmp_path / "_empty")
+        monkeypatch.setattr(m, "_builtin_bundles_dir", lambda: tmp_path / "_empty2")
+        # No manifest exists — triggers _resync_manifest
+        (tmp_path / ".capcat").mkdir(exist_ok=True)
+        m.check_for_upgrades()
+
+        manifest = json.loads((tmp_path / ".capcat" / "source_hashes.json").read_text())
+        entry = manifest["custom/hn/source.py"]
+        builtin_hash = hashlib.sha256(b"# new code\n").hexdigest()
+        user_hash = hashlib.sha256(b"# old code\n").hexdigest()
+        assert entry["builtin_hash"] == builtin_hash, "builtin_hash must be installed builtin, not user file"
+        assert entry["user_hash"] == user_hash
+        assert entry["ownership"] == "app"
+
+    def test_resync_marks_user_owned_when_no_builtin(self, tmp_path, monkeypatch):
+        """_resync_manifest sets builtin_hash='' for files with no installed builtin."""
+        from capcat.core.source_config_mirror import SourceConfigMirror
+        import json
+
+        user_src = tmp_path / "Config" / "sources" / "active" / "custom" / "myhn" / "source.py"
+        user_src.parent.mkdir(parents=True)
+        user_src.write_text("# custom\n")
+
+        m = SourceConfigMirror(tmp_path, tui_mode=False)
+        monkeypatch.setattr(m, "_builtin_custom_dir", lambda: tmp_path / "_empty_cust")
+        monkeypatch.setattr(m, "_builtin_config_driven_dir", lambda: tmp_path / "_empty_cfg")
+        monkeypatch.setattr(m, "_builtin_bundles_dir", lambda: tmp_path / "_empty_bun")
+        (tmp_path / ".capcat").mkdir(exist_ok=True)
+        m.check_for_upgrades()
+
+        manifest = json.loads((tmp_path / ".capcat" / "source_hashes.json").read_text())
+        entry = manifest["custom/myhn/source.py"]
+        assert entry["builtin_hash"] == ""
+        assert entry["ownership"] == "user"
