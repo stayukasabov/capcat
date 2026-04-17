@@ -545,3 +545,107 @@ class TestConfigModifiedNonInteractive:
         m, user_cfg = self._setup_modified_config(tmp_path, monkeypatch)
         m.check_for_upgrades()
         assert user_cfg.read_text() == "article_count: 5\n"
+
+
+class TestConfigModifiedInteractivePrompt:
+    def _make_candidate(self, tmp_path, key, user_content, builtin_content, old_builtin_content):
+        import hashlib
+        parts = key.split("/")
+        if key.startswith("config_driven/configs/"):
+            user_f = tmp_path / "Config" / "sources" / "active" / "config_driven" / "configs" / parts[-1]
+            builtin_f = tmp_path / "_builtin" / "config_driven" / "configs" / parts[-1]
+        else:
+            user_f = tmp_path / "Config" / "sources" / "active" / key
+            builtin_f = tmp_path / "_builtin" / key
+        user_f.parent.mkdir(parents=True, exist_ok=True)
+        builtin_f.parent.mkdir(parents=True, exist_ok=True)
+        user_f.write_text(user_content)
+        builtin_f.write_text(builtin_content)
+        new_hash = hashlib.sha256(builtin_content.encode()).hexdigest()
+        return (key, user_f, builtin_f, new_hash)
+
+    def test_overwrite_all_applies_all_candidates(self, tmp_path, monkeypatch):
+        """Choosing 'Overwrite all' copies all builtin files and updates manifest."""
+        import sys
+        from unittest.mock import MagicMock
+        import capcat.core.source_config_mirror as scm
+        from capcat.core.source_config_mirror import SourceConfigMirror
+
+        mock_q = MagicMock()
+        mock_q.select.return_value.ask.return_value = "Overwrite all with new defaults"
+        monkeypatch.setattr(scm, "questionary", mock_q)
+        monkeypatch.setattr(sys, "stdin", MagicMock(isatty=lambda: True))
+
+        m = SourceConfigMirror(tmp_path, tui_mode=False)
+        c1 = self._make_candidate(tmp_path, "config_driven/configs/bbc.yaml", "count: 5\n", "count: 30\n", "count: 20\n")
+        c2 = self._make_candidate(tmp_path, "config_driven/configs/guardian.yaml", "count: 3\n", "count: 30\n", "count: 20\n")
+        manifest = {
+            c1[0]: {"ownership": "config", "builtin_hash": "old", "user_hash": "old"},
+            c2[0]: {"ownership": "config", "builtin_hash": "old", "user_hash": "old"},
+        }
+        result = m._prompt_config_updates(manifest, [c1, c2])
+
+        assert c1[1].read_text() == "count: 30\n"
+        assert c2[1].read_text() == "count: 30\n"
+        assert result[c1[0]]["builtin_hash"] == c1[3]
+        assert result[c1[0]]["user_hash"] == c1[3]
+
+    def test_no_keeps_all_user_files(self, tmp_path, monkeypatch):
+        """Choosing 'No' leaves all user files untouched."""
+        import sys
+        from unittest.mock import MagicMock
+        import capcat.core.source_config_mirror as scm
+        from capcat.core.source_config_mirror import SourceConfigMirror
+
+        mock_q = MagicMock()
+        mock_q.select.return_value.ask.return_value = "No \u2014 keep my modifications"
+        monkeypatch.setattr(scm, "questionary", mock_q)
+        monkeypatch.setattr(sys, "stdin", MagicMock(isatty=lambda: True))
+
+        m = SourceConfigMirror(tmp_path, tui_mode=False)
+        c1 = self._make_candidate(tmp_path, "config_driven/configs/bbc.yaml", "count: 5\n", "count: 30\n", "count: 20\n")
+        manifest = {c1[0]: {"ownership": "config", "builtin_hash": "old", "user_hash": "old"}}
+        result = m._prompt_config_updates(manifest, [c1])
+
+        assert c1[1].read_text() == "count: 5\n", "User file must not change"
+
+    def test_select_individually_updates_chosen_skips_other(self, tmp_path, monkeypatch):
+        """'Select individually' updates files the user says yes to, skips the rest."""
+        import sys
+        from unittest.mock import MagicMock, call
+        import capcat.core.source_config_mirror as scm
+        from capcat.core.source_config_mirror import SourceConfigMirror
+
+        top_choice = MagicMock()
+        top_choice.ask.return_value = "Select individually"
+        per_update = MagicMock()
+        per_update.ask.return_value = "Update"
+        per_skip = MagicMock()
+        per_skip.ask.return_value = "Skip"
+
+        call_count = {"n": 0}
+        def select_side_effect(msg, choices):
+            call_count["n"] += 1
+            if call_count["n"] == 1:
+                return top_choice
+            elif call_count["n"] == 2:
+                return per_update   # update bbc
+            else:
+                return per_skip     # skip guardian
+
+        mock_q = MagicMock()
+        mock_q.select.side_effect = select_side_effect
+        monkeypatch.setattr(scm, "questionary", mock_q)
+        monkeypatch.setattr(sys, "stdin", MagicMock(isatty=lambda: True))
+
+        m = SourceConfigMirror(tmp_path, tui_mode=False)
+        c1 = self._make_candidate(tmp_path, "config_driven/configs/bbc.yaml", "count: 5\n", "count: 30\n", "count: 20\n")
+        c2 = self._make_candidate(tmp_path, "config_driven/configs/guardian.yaml", "count: 3\n", "count: 30\n", "count: 20\n")
+        manifest = {
+            c1[0]: {"ownership": "config", "builtin_hash": "old", "user_hash": "old"},
+            c2[0]: {"ownership": "config", "builtin_hash": "old", "user_hash": "old"},
+        }
+        result = m._prompt_config_updates(manifest, [c1, c2])
+
+        assert c1[1].read_text() == "count: 30\n", "bbc should be updated"
+        assert c2[1].read_text() == "count: 3\n", "guardian should be unchanged"

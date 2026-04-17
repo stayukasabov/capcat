@@ -351,7 +351,56 @@ class SourceConfigMirror:
             )
             return manifest
 
-        # Interactive path — implemented in Task 7
+        names_display = "\n".join(
+            f"  - {_key_display_name(k)}" for k, _, _, _ in candidates
+        )
+        message = f"Capcat detected local modifications in:\n{names_display}\n"
+
+        top_choice = questionary.select(
+            message,
+            choices=[
+                "Overwrite all with new defaults",
+                "Select individually",
+                "No \u2014 keep my modifications",
+            ],
+        ).ask()
+
+        if top_choice is None or top_choice.startswith("No"):
+            return manifest
+
+        if top_choice == "Overwrite all with new defaults":
+            try:
+                self._backup([(k, p) for k, p, _, _ in candidates])
+            except OSError as exc:
+                print(f"Capcat: backup failed ({exc}) \u2014 update aborted.")
+                return manifest
+            for key, user_file, builtin_file, new_hash in candidates:
+                shutil.copy2(builtin_file, user_file)
+                manifest[key]["builtin_hash"] = new_hash
+                manifest[key]["user_hash"] = new_hash
+            return manifest
+
+        # Select individually
+        for key, user_file, builtin_file, new_hash in candidates:
+            diff = self._diff_files(user_file, builtin_file)
+            if diff:
+                print(f"\n{_key_display_name(key)}:\n{diff}")
+            per_choice = questionary.select(
+                f"Update {_key_display_name(key)}?",
+                choices=["Update", "Skip"],
+            ).ask()
+            if per_choice == "Update":
+                try:
+                    self._backup([(key, user_file)])
+                except OSError as exc:
+                    print(
+                        f"Capcat: backup failed for {_key_display_name(key)} ({exc}) \u2014 skipping."
+                    )
+                    continue
+                shutil.copy2(builtin_file, user_file)
+                manifest[key]["builtin_hash"] = new_hash
+                manifest[key]["user_hash"] = new_hash
+
         return manifest
 
     def _backup(self, resolved_user_files: list) -> Path:
