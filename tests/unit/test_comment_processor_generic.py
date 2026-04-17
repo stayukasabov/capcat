@@ -331,11 +331,13 @@ _LB_HTML_WITH_USERS = """
 
 
 def test_lb_comment_user_names_extracted():
-    """user field is populated from .user element, not hardcoded 'Anonymous'."""
+    """Display name is always 'Anonymous'; profile link encodes the real username."""
     from capcat.sources.builtin.custom.lb.source import _LB_SELECTORS
     soup = BeautifulSoup(_LB_HTML_WITH_USERS, "html.parser")
     processor = StreamlinedCommentProcessor()
     comments = processor.process_comments_flattened(soup, **_LB_SELECTORS)
     assert len(comments) == 2
-    assert comments[0]["user"] == "alice", "User name must be extracted from .user element"
+    assert comments[0]["user"] == "Anonymous", "Display name must always be 'Anonymous'"
+    assert "alice" in comments[0]["user_link"], "Profile link must encode the real username"
     assert comments[1]["user"] == "Anonymous", "Missing user element should fall back to 'Anonymous'"
+    assert comments[1]["user_link"] == "#", "Missing user element should produce '#' link"
