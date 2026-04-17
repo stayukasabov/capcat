@@ -30,7 +30,7 @@ def __init__(self, max_comments: int = 100, max_links_per_comment: int = 5)
 ##### process_comments_flattened
 
 ```python
-def process_comments_flattened(self, soup: BeautifulSoup, comment_selector: str, user_selector: str = '.hnuser', comment_text_selector: str = '.comment', depth_fn: Optional[Callable[[Any], int]] = None) -> List[Dict[str, Any]]
+def process_comments_flattened(self, soup: BeautifulSoup, comment_selector: str, user_selector: str = '.hnuser', comment_text_selector: str = '.comment', depth_fn: Optional[Callable[[Any], int]] = None, profile_url_fn: Optional[Callable[[str], str]] = None) -> List[Dict[str, Any]]
 ```
 
 Process comments preserving nesting depth.
@@ -54,13 +54,14 @@ Returns:
 - `user_selector` (str) *optional*
 - `comment_text_selector` (str) *optional*
 - `depth_fn` (Optional[Callable[[Any], int]]) *optional*
+- `profile_url_fn` (Optional[Callable[[str], str]]) *optional*
 
 **Returns:** List[Dict[str, Any]]
 
 ##### _extract_comment_data_fast
 
 ```python
-def _extract_comment_data_fast(self, comment_elem, user_selector: str, comment_text_selector: str, index: int, depth_fn: Optional[Callable[[Any], int]] = None) -> Optional[Dict[str, Any]]
+def _extract_comment_data_fast(self, comment_elem, user_selector: str, comment_text_selector: str, index: int, depth_fn: Optional[Callable[[Any], int]] = None, profile_url_fn: Optional[Callable[[str], str]] = None) -> Optional[Dict[str, Any]]
 ```
 
 Fast comment data extraction without deep processing.
@@ -73,6 +74,7 @@ Fast comment data extraction without deep processing.
 - `comment_text_selector` (str)
 - `index` (int)
 - `depth_fn` (Optional[Callable[[Any], int]]) *optional*
+- `profile_url_fn` (Optional[Callable[[str], str]]) *optional*
 
 **Returns:** Optional[Dict[str, Any]]
 
