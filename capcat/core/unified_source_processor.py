@@ -182,6 +182,7 @@ class UnifiedSourceProcessor:
         self.config = get_config()
         self.project_root = project_root
         # Initialize new source system if available
+        self._mirror_done = False
         self.new_source_factory = None
         if NEW_SOURCE_SYSTEM_AVAILABLE:
             try:
@@ -281,8 +282,9 @@ class UnifiedSourceProcessor:
         force_no_pdfs: bool = False,
     ) -> None:
         """Process articles using the new source system."""
-        # Run source config mirror (first-run copy or upgrade diff)
-        if MIRROR_AVAILABLE:
+        # Run source config mirror once per processor instance (first-run copy or upgrade diff)
+        if MIRROR_AVAILABLE and not self._mirror_done:
+            self._mirror_done = True
             try:
                 project_root = self.project_root
                 if project_root is None:

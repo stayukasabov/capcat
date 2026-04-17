@@ -711,3 +711,39 @@ def test_add_source_manifest_entry_has_user_ownership(tmp_path):
     key = next(iter(data))
     assert data[key]["ownership"] == "user"
     assert data[key]["builtin_hash"] == ""
+
+
+def test_mirror_check_runs_only_once_per_batch(tmp_path, monkeypatch):
+    """check_for_upgrades is called exactly once even when processing multiple sources."""
+    from capcat.core.unified_source_processor import UnifiedSourceProcessor
+
+    (tmp_path / ".capcat").mkdir()
+    call_count = {"n": 0}
+
+    class FakeMirror:
+        def __init__(self, project_root, tui_mode):
+            pass
+        def is_mirrored(self):
+            return True
+        def check_for_upgrades(self):
+            call_count["n"] += 1
+
+    monkeypatch.setattr(
+        "capcat.core.unified_source_processor.SourceConfigMirror", FakeMirror
+    )
+    monkeypatch.setattr(
+        "capcat.core.unified_source_processor.find_project_root", lambda: tmp_path
+    )
+
+    processor = UnifiedSourceProcessor(project_root=tmp_path)
+    processor.new_source_factory = None
+
+    for source in ("bbc", "guardian"):
+        try:
+            processor._process_with_new_system(source, 3, str(tmp_path))
+        except Exception:
+            pass
+
+    assert call_count["n"] == 1, (
+        f"check_for_upgrades called {call_count['n']} times — must be exactly once per batch"
+    )
