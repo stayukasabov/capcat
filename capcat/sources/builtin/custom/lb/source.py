@@ -39,10 +39,10 @@ def _lb_depth(elem) -> int:
 
 _LB_SELECTORS = {
     "comment_selector": ".comment",
-    "user_selector": ".user",
+    "user_selector": ".byline a[href^='/~']:not([aria-hidden])",
     "comment_text_selector": ".comment_text",
     "depth_fn": _lb_depth,
-    "profile_url_fn": lambda n: f"https://lobste.rs/u/{n}",
+    "profile_url_fn": lambda n: f"https://lobste.rs/~{n}",
 }
 
 

@@ -36,8 +36,15 @@ _HN_HTML = """
 
 _LB_HTML = """
 <div class="comment" id="c2">
-  <a class="user" href="/u/bob">bob</a>
-  <div class="comment_text"><p>Interesting read.</p></div>
+  <div class="details">
+    <div class="byline">
+      <span>
+        <a aria-hidden="true" href="/~bob" tabindex="-1"><img alt="bob avatar"/></a>
+        <a href="/~bob">bob</a>
+      </span>
+    </div>
+    <div class="comment_text"><p>Interesting read.</p></div>
+  </div>
 </div>
 """
 
@@ -49,8 +56,9 @@ _HN_SELECTORS = {
 
 _LB_SELECTORS = {
     "comment_selector": ".comment",
-    "user_selector": ".user",
+    "user_selector": ".byline a[href^='/~']:not([aria-hidden])",
     "comment_text_selector": ".comment_text",
+    "profile_url_fn": lambda n: f"https://lobste.rs/~{n}",
 }
 
 
@@ -71,6 +79,22 @@ def test_lb_selectors_via_generic_interface():
     comments = processor.process_comments_flattened(soup, **_LB_SELECTORS)
     assert isinstance(comments, list)
     assert len(comments) == 1
+
+
+def test_lb_profile_url_uses_tilde_prefix():
+    """
+    LB profile URL must use /~username format (not /u/username).
+    user_link must be https://lobste.rs/~<name>, not '#'.
+    Regression for: .user selector was outdated, /u/ was wrong URL format.
+    """
+    soup = BeautifulSoup(_LB_HTML, "html.parser")
+    processor = StreamlinedCommentProcessor()
+    comments = processor.process_comments_flattened(soup, **_LB_SELECTORS)
+    assert len(comments) == 1
+    assert comments[0]["user_link"] == "https://lobste.rs/~bob", (
+        f"Expected https://lobste.rs/~bob, got {comments[0]['user_link']}"
+    )
+    assert comments[0]["user"] == "Anonymous"
 
 
 def test_generate_inline_comments_markdown_uses_comment_list():
@@ -315,7 +339,14 @@ _LB_HTML_WITH_USERS = """
     <ol class="comments">
       <li class="comments_subtree">
         <div class="comment" id="c_u1">
-          <a class="user" href="/u/alice">alice</a>
+          <div class="details">
+            <div class="byline">
+              <span>
+                <a aria-hidden="true" href="/~alice" tabindex="-1"><img alt="alice avatar"/></a>
+                <a href="/~alice">alice</a>
+              </span>
+            </div>
+          </div>
           <div class="comment_text"><p>Hello from alice</p></div>
         </div>
       </li>
@@ -338,6 +369,6 @@ def test_lb_comment_user_names_extracted():
     comments = processor.process_comments_flattened(soup, **_LB_SELECTORS)
     assert len(comments) == 2
     assert comments[0]["user"] == "Anonymous", "Display name must always be 'Anonymous'"
-    assert "alice" in comments[0]["user_link"], "Profile link must encode the real username"
+    assert comments[0]["user_link"] == "https://lobste.rs/~alice", "Profile link must be https://lobste.rs/~<username>"
     assert comments[1]["user"] == "Anonymous", "Missing user element should fall back to 'Anonymous'"
     assert comments[1]["user_link"] == "#", "Missing user element should produce '#' link"
