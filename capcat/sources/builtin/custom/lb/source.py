@@ -18,7 +18,6 @@ from bs4 import BeautifulSoup
 from capcat.core.article_fetcher import get_global_update_mode
 from capcat.core.storage_manager import comments_md_filename
 from capcat.core.article_fetcher import NewsSourceArticleFetcher
-from capcat.core.ethical_scraping import get_ethical_manager
 from capcat.core.source_system.base_source import (
     Article,
     ArticleDiscoveryError,
@@ -621,11 +620,15 @@ class LbSource(BaseSource):
 
         try:
             self.logger.debug(f"Fetching comments from: {comment_url}")
-            response = get_ethical_manager().request_with_backoff(
-                self.session, comment_url,
+            # Use session.get directly — lobste.rs robots.txt has Disallow: / for
+            # User-agent: *, which would block the ethical manager's robots.txt check.
+            # RSS and article fetching in this source also bypass the ethical manager.
+            response = self.session.get(
+                comment_url,
                 timeout=self.config.timeout,
                 headers=headers,
             )
+            response.raise_for_status()
         except requests.exceptions.Timeout:
             self.logger.warning(
                 f"Timeout fetching comments for {article_title} — skipping comments"
