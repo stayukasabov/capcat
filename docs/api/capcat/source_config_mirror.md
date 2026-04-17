@@ -276,6 +276,24 @@ def _step2_3_changed_builtins(self, manifest: dict) -> dict
 
 **Returns:** dict
 
+⚠️ **High complexity:** 14
+
+##### _prompt_config_updates
+
+```python
+def _prompt_config_updates(self, manifest: dict, candidates: list) -> dict
+```
+
+Interactive prompt for config-owned files that the user has modified.
+
+**Parameters:**
+
+- `self`
+- `manifest` (dict)
+- `candidates` (list)
+
+**Returns:** dict
+
 ⚠️ **High complexity:** 12
 
 ##### _backup
@@ -292,6 +310,25 @@ Copy user files to timestamped backup dir. Raises OSError on failure.
 - `resolved_user_files` (list)
 
 **Returns:** Path
+
+##### _diff_files
+
+```python
+def _diff_files(self, user_file: Path, builtin_file: Path) -> str
+```
+
+Return a unified diff of user_file vs builtin_file.
+
+fromfile='your version', tofile='new default'.
+Returns empty string if files are identical.
+
+**Parameters:**
+
+- `self`
+- `user_file` (Path)
+- `builtin_file` (Path)
+
+**Returns:** str
 
 ##### _resolve_user_file
 
@@ -330,7 +367,9 @@ def _resync_manifest(self) -> None
 ```
 
 Rebuild manifest from current user files when source_hashes.json is missing.
-Never overwrites user files.
+
+Uses the actual installed builtin hash as the baseline so future
+check_for_upgrades() diffs are accurate.
 
 **Parameters:**
 
@@ -338,6 +377,22 @@ Never overwrites user files.
 
 **Returns:** None
 
-⚠️ **High complexity:** 16
+⚠️ **High complexity:** 17
 
+
+## Functions
+
+### _key_display_name
+
+```python
+def _key_display_name(key: str) -> str
+```
+
+Convert a manifest key to a short human-readable name.
+
+**Parameters:**
+
+- `key` (str)
+
+**Returns:** str
 
