@@ -37,6 +37,10 @@ class TestMediumCanHandleUrl:
         # Must not claim Substack URLs
         assert not MediumSource.can_handle_url("https://example.substack.com/p/post")
 
+    def test_rejects_non_medium_at_url(self):
+        # /@<user> pattern was matching non-Medium sites (e.g. Ghost blogs)
+        assert not MediumSource.can_handle_url("https://someblog.com/@author/article")
+
     def test_rejects_youtube(self):
         assert not MediumSource.can_handle_url("https://www.youtube.com/watch?v=abc")
 

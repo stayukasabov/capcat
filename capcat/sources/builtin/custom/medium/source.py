@@ -32,21 +32,7 @@ class MediumSource(BaseSource):
     @classmethod
     def can_handle_url(cls, url: str) -> bool:
         """Check if this source can handle the given URL."""
-        # More specific patterns to avoid conflicts with Substack
-        medium_patterns = [
-            r"medium\.com",
-            r"[^/]+\.medium\.com",
-            r"/@[^/]+",  # Medium profile URLs
-        ]
-
-        # Only match Medium URLs, not Substack
-        if ".substack.com" in url.lower():
-            return False
-
-        return any(
-            re.search(pattern, url, re.IGNORECASE)
-            for pattern in medium_patterns
-        )
+        return bool(re.search(r"\.?medium\.com", url, re.IGNORECASE))
 
     def discover_articles(self, count: int) -> List[Article]:
         """
