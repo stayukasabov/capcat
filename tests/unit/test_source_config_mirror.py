@@ -696,3 +696,28 @@ def test_first_mirror_config_driven_writes_config_ownership(tmp_path, monkeypatc
     m.run_first_mirror()
     manifest = json.loads((tmp_path / ".capcat" / "source_hashes.json").read_text())
     assert manifest["config_driven/configs/bbc.yaml"]["ownership"] == "config"
+
+
+def test_add_source_manifest_entry_has_user_ownership(tmp_path):
+    """add_source writes ownership='user' with empty builtin_hash."""
+    import hashlib, json
+    from capcat.core.source_system.add_source_service import AddSourceService
+
+    (tmp_path / ".capcat").mkdir()
+    config_dir = tmp_path / "Config" / "sources" / "active" / "config_driven" / "configs"
+    config_dir.mkdir(parents=True)
+
+    config_file = config_dir / "bbc.yaml"
+    config_file.write_text("name: bbc\n")
+
+    svc = AddSourceService.__new__(AddSourceService)
+    svc._project_root = tmp_path
+    svc._config_path = config_dir
+    svc._logger = __import__("logging").getLogger("test")
+    svc._write_manifest_entry(config_file.name)
+
+    manifest_path = tmp_path / ".capcat" / "source_hashes.json"
+    data = json.loads(manifest_path.read_text())
+    key = next(iter(data))
+    assert data[key]["ownership"] == "user"
+    assert data[key]["builtin_hash"] == ""
