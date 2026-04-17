@@ -340,7 +340,18 @@ class SourceConfigMirror:
         return manifest
 
     def _prompt_config_updates(self, manifest: dict, candidates: list) -> dict:
-        """Interactive prompt for config files the user has modified. Stub — Task 6."""
+        """Interactive prompt for config-owned files that the user has modified."""
+        is_interactive = sys.stdin.isatty() and questionary is not None
+
+        if not is_interactive:
+            names = ", ".join(_key_display_name(k) for k, _, _, _ in candidates)
+            print(
+                f"WARNING: source updates available for modified files: {names}\n"
+                f"Run capcat fetch interactively to review."
+            )
+            return manifest
+
+        # Interactive path — implemented in Task 7
         return manifest
 
     def _backup(self, resolved_user_files: list) -> Path:

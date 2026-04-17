@@ -490,3 +490,58 @@ class TestAppOwnershipUpdatePath:
         m.check_for_upgrades()
 
         assert user_cfg.read_text() == "article_count: 30\n"
+
+
+import os
+
+
+class TestConfigModifiedNonInteractive:
+    def _setup_modified_config(self, tmp_path, monkeypatch):
+        import hashlib, json
+        from capcat.core.source_config_mirror import SourceConfigMirror
+
+        builtin_cfg = tmp_path / "_builtin" / "config_driven" / "configs" / "bbc.yaml"
+        builtin_cfg.parent.mkdir(parents=True)
+        builtin_cfg.write_text("article_count: 30\n")
+
+        user_cfg = tmp_path / "Config" / "sources" / "active" / "config_driven" / "configs" / "bbc.yaml"
+        user_cfg.parent.mkdir(parents=True)
+        user_cfg.write_text("article_count: 5\n")  # user's custom value
+
+        # Scenario: builtin was at "20", user copy was also "20" (user_hash == builtin_hash).
+        # User then manually changed their file to "5". Now builtin upgraded to "30".
+        # user_hash in manifest still = hash("20") — showing user HAS modified since last sync.
+        old_hash = hashlib.sha256(b"article_count: 20\n").hexdigest()
+        manifest = {
+            "config_driven/configs/bbc.yaml": {
+                "ownership": "config",
+                "builtin_hash": old_hash,
+                "user_hash": old_hash,  # last-known = the original copy; user has since changed to "5"
+            }
+        }
+        (tmp_path / ".capcat").mkdir(exist_ok=True)
+        (tmp_path / ".capcat" / "source_hashes.json").write_text(json.dumps(manifest))
+
+        m = SourceConfigMirror(tmp_path, tui_mode=False)
+        monkeypatch.setattr(m, "_builtin_config_driven_dir", lambda: builtin_cfg.parent)
+        monkeypatch.setattr(m, "_builtin_custom_dir", lambda: tmp_path / "_empty_cust")
+        monkeypatch.setattr(m, "_builtin_bundles_dir", lambda: tmp_path / "_empty_bun")
+        return m, user_cfg
+
+    def test_non_interactive_preserves_user_config(self, tmp_path, monkeypatch, capsys):
+        """Non-interactive mode (stdin not a tty) skips prompt, keeps user file."""
+        import sys
+        m, user_cfg = self._setup_modified_config(tmp_path, monkeypatch)
+        monkeypatch.setattr(sys, "stdin", open(os.devnull))
+        m.check_for_upgrades()
+        assert user_cfg.read_text() == "article_count: 5\n", "User file must not be overwritten"
+        captured = capsys.readouterr()
+        assert "WARNING" in captured.out or "updates available" in captured.out
+
+    def test_non_interactive_with_questionary_none_preserves_user_config(self, tmp_path, monkeypatch):
+        """When questionary is unavailable, non-interactive path preserves user file."""
+        import capcat.core.source_config_mirror as scm
+        monkeypatch.setattr(scm, "questionary", None)
+        m, user_cfg = self._setup_modified_config(tmp_path, monkeypatch)
+        m.check_for_upgrades()
+        assert user_cfg.read_text() == "article_count: 5\n"
