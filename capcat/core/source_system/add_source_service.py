@@ -93,7 +93,7 @@ class AddSourceService:
                     manifest = json.loads(content)
                 except json.JSONDecodeError as exc:
                     self._logger.warning(f"Failed to read manifest, starting fresh: {exc}")
-        manifest[key] = {"builtin_hash": "", "user_hash": user_hash}
+        manifest[key] = {"ownership": "user", "builtin_hash": "", "user_hash": user_hash}
         try:
             manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
         except OSError as exc:

@@ -359,48 +359,36 @@ def test_step2_skips_when_user_modified(tmp_path, monkeypatch):
     assert (user_cfg / "bbc.yaml").read_text() == user_content_before
 
 
-def test_step3_overrides_and_backs_up_when_user_says_yes(tmp_path, monkeypatch):
-    """Builtin changed, user unmodified, user accepts -> backup created, file overridden."""
+def test_step3_overrides_silently_when_user_unmodified(tmp_path, monkeypatch):
+    """Builtin changed, user unmodified -> silently overwrite, no prompt, no backup."""
     m, project, user_cfg, cfg_dir = _setup_changed_builtin(
         tmp_path, monkeypatch, user_modified=False
     )
     new_builtin_content = (cfg_dir / "bbc.yaml").read_text()
 
-    call_count = [0]
-    def fake_input(prompt):
-        call_count[0] += 1
-        return "y"  # accept override
-
-    monkeypatch.setattr("builtins.input", fake_input)
-    monkeypatch.setattr("sys.stdin", type("_Tty", (), {"isatty": staticmethod(lambda: True)})())
-
     m.check_for_upgrades()
 
     # User file now has new builtin content
     assert (user_cfg / "bbc.yaml").read_text() == new_builtin_content
-    # Backup dir exists
+    # No backup needed — user never modified
     backup_dirs = list((project / "Config" / "sources").glob("backup_*"))
-    assert len(backup_dirs) == 1
-    # Backup contains flattened filename
-    assert (backup_dirs[0] / "config_driven-configs-bbc.yaml").exists()
+    assert len(backup_dirs) == 0
 
 
-def test_step3_does_not_override_when_user_says_no(tmp_path, monkeypatch):
-    """Builtin changed, user unmodified, user declines -> file unchanged, builtin_hash NOT updated."""
+def test_step3_unmodified_config_gets_new_hash_after_silent_overwrite(tmp_path, monkeypatch):
+    """Builtin changed, user unmodified -> manifest builtin_hash and user_hash updated to new value."""
     m, project, user_cfg, cfg_dir = _setup_changed_builtin(
         tmp_path, monkeypatch, user_modified=False
     )
-    original_user_content = (user_cfg / "bbc.yaml").read_text()
-    manifest_before = json.loads((project / ".capcat" / "source_hashes.json").read_text())
-    old_builtin_hash = manifest_before["config_driven/configs/bbc.yaml"]["builtin_hash"]
-
-    monkeypatch.setattr("builtins.input", lambda _: "n")
+    new_builtin_content = (cfg_dir / "bbc.yaml").read_text()
 
     m.check_for_upgrades()
 
-    assert (user_cfg / "bbc.yaml").read_text() == original_user_content
+    assert (user_cfg / "bbc.yaml").read_text() == new_builtin_content
     manifest = json.loads((project / ".capcat" / "source_hashes.json").read_text())
-    assert manifest["config_driven/configs/bbc.yaml"]["builtin_hash"] == old_builtin_hash
+    new_hash = hashlib.sha256(new_builtin_content.encode()).hexdigest()
+    assert manifest["config_driven/configs/bbc.yaml"]["builtin_hash"] == new_hash
+    assert manifest["config_driven/configs/bbc.yaml"]["user_hash"] == new_hash
 
 
 def test_backup_collision_uses_counter_suffix(tmp_path, monkeypatch):
@@ -544,10 +532,12 @@ def test_resync_manifest_when_missing(tmp_path, monkeypatch):
     manifest = json.loads((project / ".capcat" / "source_hashes.json").read_text())
     assert "config_driven/configs/bbc.yaml" in manifest
     entry = manifest["config_driven/configs/bbc.yaml"]
-    # Both hashes set to current user file hash (not builtin)
+    # builtin_hash = actual installed builtin; user_hash = current user file
+    builtin_hash = hashlib.sha256(b"name: bbc\n").hexdigest()
     user_hash = hashlib.sha256(user_content.encode()).hexdigest()
-    assert entry["builtin_hash"] == user_hash
+    assert entry["builtin_hash"] == builtin_hash
     assert entry["user_hash"] == user_hash
+    assert entry["ownership"] == "config"
 
 
 def test_load_manifest_returns_none_when_file_absent(tmp_path):
@@ -664,3 +654,60 @@ def test_unified_processor_calls_mirror_on_first_fetch(tmp_path, monkeypatch):
         pass  # We only care that mirror was called
 
     assert "first_mirror" in mirror_calls
+
+
+def test_first_mirror_custom_writes_app_ownership_for_py(tmp_path, monkeypatch):
+    """source.py files get ownership='app' in manifest after first mirror."""
+    from capcat.core.source_config_mirror import SourceConfigMirror
+    m = SourceConfigMirror(tmp_path, tui_mode=False)
+    builtin_custom = tmp_path / "_builtin" / "custom" / "hn"
+    builtin_custom.mkdir(parents=True)
+    (builtin_custom / "source.py").write_text("# code\n")
+    (builtin_custom / "config.yaml").write_text("name: hn\n")
+    monkeypatch.setattr(m, "_builtin_custom_dir", lambda: builtin_custom.parent)
+    monkeypatch.setattr(m, "_builtin_config_driven_dir", lambda: tmp_path / "_empty_cfg")
+    monkeypatch.setattr(m, "_builtin_bundles_dir", lambda: tmp_path / "_empty_bun")
+    m.run_first_mirror()
+    manifest = json.loads((tmp_path / ".capcat" / "source_hashes.json").read_text())
+    assert manifest["custom/hn/source.py"]["ownership"] == "app"
+    assert manifest["custom/hn/config.yaml"]["ownership"] == "config"
+
+
+def test_first_mirror_config_driven_writes_config_ownership(tmp_path, monkeypatch):
+    """Config-driven YAML files get ownership='config' in manifest."""
+    from capcat.core.source_config_mirror import SourceConfigMirror
+    m = SourceConfigMirror(tmp_path, tui_mode=False)
+    builtin_cfg = tmp_path / "_builtin" / "config_driven" / "configs"
+    builtin_cfg.mkdir(parents=True)
+    (builtin_cfg / "bbc.yaml").write_text("name: bbc\n")
+    monkeypatch.setattr(m, "_builtin_config_driven_dir", lambda: builtin_cfg)
+    monkeypatch.setattr(m, "_builtin_custom_dir", lambda: tmp_path / "_empty_cust")
+    monkeypatch.setattr(m, "_builtin_bundles_dir", lambda: tmp_path / "_empty_bun")
+    m.run_first_mirror()
+    manifest = json.loads((tmp_path / ".capcat" / "source_hashes.json").read_text())
+    assert manifest["config_driven/configs/bbc.yaml"]["ownership"] == "config"
+
+
+def test_add_source_manifest_entry_has_user_ownership(tmp_path):
+    """add_source writes ownership='user' with empty builtin_hash."""
+    import hashlib, json
+    from capcat.core.source_system.add_source_service import AddSourceService
+
+    (tmp_path / ".capcat").mkdir()
+    config_dir = tmp_path / "Config" / "sources" / "active" / "config_driven" / "configs"
+    config_dir.mkdir(parents=True)
+
+    config_file = config_dir / "bbc.yaml"
+    config_file.write_text("name: bbc\n")
+
+    svc = AddSourceService.__new__(AddSourceService)
+    svc._project_root = tmp_path
+    svc._config_path = config_dir
+    svc._logger = __import__("logging").getLogger("test")
+    svc._write_manifest_entry(config_file.name)
+
+    manifest_path = tmp_path / ".capcat" / "source_hashes.json"
+    data = json.loads(manifest_path.read_text())
+    key = next(iter(data))
+    assert data[key]["ownership"] == "user"
+    assert data[key]["builtin_hash"] == ""

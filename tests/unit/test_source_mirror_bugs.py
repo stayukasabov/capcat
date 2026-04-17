@@ -241,8 +241,9 @@ class TestUpgradeDeclinePreservesBuiltinHash:
 
         return mirror, fake_builtin, fake_user, h_v1, h_v2
 
-    def test_decline_does_not_update_builtin_hash(self, tmp_path):
-        """When user says 'n', manifest.builtin_hash must stay at old value."""
+    def test_unmodified_config_updates_builtin_hash_silently(self, tmp_path):
+        """Unmodified config file (no ownership field → backward compat → 'config') is
+        silently overwritten; builtin_hash is updated to the new builtin hash."""
         import json
         from unittest.mock import patch
 
@@ -251,16 +252,12 @@ class TestUpgradeDeclinePreservesBuiltinHash:
         with (
             patch.object(mirror, "_builtin_file_for_key", side_effect=fake_builtin),
             patch.object(mirror, "_resolve_user_file", side_effect=fake_user),
-            patch.object(mirror, "_prompt", return_value="n"),
         ):
             manifest = mirror._load_manifest()
             manifest = mirror._step2_3_changed_builtins(manifest)
 
-        # builtin_hash must remain v1 — upgrade was declined
-        assert manifest["custom/hn/source.py"]["builtin_hash"] == h_v1, (
-            "builtin_hash must NOT be updated when upgrade is declined — "
-            "otherwise the upgrade offer is permanently suppressed"
-        )
+        # builtin_hash updated — silent overwrite happened
+        assert manifest["custom/hn/source.py"]["builtin_hash"] == h_v2
 
     def test_accept_does_update_builtin_hash(self, tmp_path):
         """When user accepts, manifest.builtin_hash must be updated to v2."""
@@ -280,20 +277,375 @@ class TestUpgradeDeclinePreservesBuiltinHash:
 
         assert manifest["custom/hn/source.py"]["builtin_hash"] == h_v2
 
-    def test_decline_leaves_vault_file_unchanged(self, tmp_path):
-        """Vault file content must not change when upgrade is declined."""
+    def test_unmodified_config_vault_file_is_updated(self, tmp_path):
+        """Unmodified config file is overwritten with new builtin content."""
         from unittest.mock import patch
 
         mirror, fake_builtin, fake_user, h_v1, h_v2 = self._setup_mirror_with_stale_vault(tmp_path)
         vault_src = tmp_path / "Config" / "sources" / "active" / "custom" / "hn" / "source.py"
-        original_content = vault_src.read_text()
 
         with (
             patch.object(mirror, "_builtin_file_for_key", side_effect=fake_builtin),
             patch.object(mirror, "_resolve_user_file", side_effect=fake_user),
-            patch.object(mirror, "_prompt", return_value="n"),
         ):
             manifest = mirror._load_manifest()
             mirror._step2_3_changed_builtins(manifest)
 
-        assert vault_src.read_text() == original_content
+        assert vault_src.read_text() == "# v2 with download_pdfs"
+
+
+class TestResyncManifestBuiltinHash:
+    def test_resync_sets_builtin_hash_from_installed_package(self, tmp_path, monkeypatch):
+        """_resync_manifest uses the actual installed builtin hash, not the user file hash."""
+        from capcat.core.source_config_mirror import SourceConfigMirror
+        import hashlib, json
+
+        # User has hn/source.py with old content
+        user_src = tmp_path / "Config" / "sources" / "active" / "custom" / "hn" / "source.py"
+        user_src.parent.mkdir(parents=True)
+        user_src.write_text("# old code\n")
+
+        # Builtin has new content
+        builtin_src = tmp_path / "_builtin" / "custom" / "hn" / "source.py"
+        builtin_src.parent.mkdir(parents=True)
+        builtin_src.write_text("# new code\n")
+
+        m = SourceConfigMirror(tmp_path, tui_mode=False)
+        monkeypatch.setattr(m, "_builtin_custom_dir", lambda: builtin_src.parent.parent)
+        monkeypatch.setattr(m, "_builtin_config_driven_dir", lambda: tmp_path / "_empty")
+        monkeypatch.setattr(m, "_builtin_bundles_dir", lambda: tmp_path / "_empty2")
+        # No manifest exists — triggers _resync_manifest
+        (tmp_path / ".capcat").mkdir(exist_ok=True)
+        m.check_for_upgrades()
+
+        manifest = json.loads((tmp_path / ".capcat" / "source_hashes.json").read_text())
+        entry = manifest["custom/hn/source.py"]
+        builtin_hash = hashlib.sha256(b"# new code\n").hexdigest()
+        user_hash = hashlib.sha256(b"# old code\n").hexdigest()
+        assert entry["builtin_hash"] == builtin_hash, "builtin_hash must be installed builtin, not user file"
+        assert entry["user_hash"] == user_hash
+        assert entry["ownership"] == "app"
+
+    def test_resync_marks_user_owned_when_no_builtin(self, tmp_path, monkeypatch):
+        """_resync_manifest sets builtin_hash='' for files with no installed builtin."""
+        from capcat.core.source_config_mirror import SourceConfigMirror
+        import json
+
+        user_src = tmp_path / "Config" / "sources" / "active" / "custom" / "myhn" / "source.py"
+        user_src.parent.mkdir(parents=True)
+        user_src.write_text("# custom\n")
+
+        m = SourceConfigMirror(tmp_path, tui_mode=False)
+        monkeypatch.setattr(m, "_builtin_custom_dir", lambda: tmp_path / "_empty_cust")
+        monkeypatch.setattr(m, "_builtin_config_driven_dir", lambda: tmp_path / "_empty_cfg")
+        monkeypatch.setattr(m, "_builtin_bundles_dir", lambda: tmp_path / "_empty_bun")
+        (tmp_path / ".capcat").mkdir(exist_ok=True)
+        m.check_for_upgrades()
+
+        manifest = json.loads((tmp_path / ".capcat" / "source_hashes.json").read_text())
+        entry = manifest["custom/myhn/source.py"]
+        assert entry["builtin_hash"] == ""
+        assert entry["ownership"] == "user"
+
+
+class TestDiffFiles:
+    def test_diff_files_shows_user_vs_new_default(self, tmp_path):
+        """_diff_files returns unified diff with user as 'your version', builtin as 'new default'."""
+        from capcat.core.source_config_mirror import SourceConfigMirror
+        m = SourceConfigMirror(tmp_path, tui_mode=False)
+        user_f = tmp_path / "user.yaml"
+        builtin_f = tmp_path / "builtin.yaml"
+        user_f.write_text("article_count: 10\nrate_limit: 1.0\n")
+        builtin_f.write_text("article_count: 30\nrate_limit: 1.0\n")
+        diff = m._diff_files(user_f, builtin_f)
+        assert "--- your version" in diff
+        assert "+++ new default" in diff
+        assert "-article_count: 10" in diff
+        assert "+article_count: 30" in diff
+
+    def test_diff_files_returns_empty_for_identical(self, tmp_path):
+        """_diff_files returns empty string when files are identical."""
+        from capcat.core.source_config_mirror import SourceConfigMirror
+        m = SourceConfigMirror(tmp_path, tui_mode=False)
+        f1 = tmp_path / "a.yaml"
+        f2 = tmp_path / "b.yaml"
+        f1.write_text("name: bbc\n")
+        f2.write_text("name: bbc\n")
+        assert m._diff_files(f1, f2) == ""
+
+
+class TestKeyDisplayName:
+    def test_custom_source_display(self):
+        from capcat.core.source_config_mirror import _key_display_name
+        assert _key_display_name("custom/hn/source.py") == "hn/source.py"
+
+    def test_config_driven_display(self):
+        from capcat.core.source_config_mirror import _key_display_name
+        assert _key_display_name("config_driven/configs/bbc.yaml") == "bbc.yaml"
+
+    def test_bundles_display(self):
+        from capcat.core.source_config_mirror import _key_display_name
+        assert _key_display_name("bundles/bundles.yml") == "bundles.yml"
+
+
+class TestAppOwnershipUpdatePath:
+    def _setup(self, tmp_path, monkeypatch, user_content, builtin_content):
+        from capcat.core.source_config_mirror import SourceConfigMirror
+        import hashlib, json
+
+        builtin_src = tmp_path / "_builtin" / "custom" / "hn" / "source.py"
+        builtin_src.parent.mkdir(parents=True)
+        builtin_src.write_text(builtin_content)
+
+        user_src = tmp_path / "Config" / "sources" / "active" / "custom" / "hn" / "source.py"
+        user_src.parent.mkdir(parents=True)
+        user_src.write_text(user_content)
+
+        old_builtin_hash = hashlib.sha256(user_content.encode()).hexdigest()
+        manifest = {
+            "custom/hn/source.py": {
+                "ownership": "app",
+                "builtin_hash": old_builtin_hash,
+                "user_hash": old_builtin_hash,
+            }
+        }
+        (tmp_path / ".capcat").mkdir(exist_ok=True)
+        (tmp_path / ".capcat" / "source_hashes.json").write_text(
+            json.dumps(manifest)
+        )
+        m = SourceConfigMirror(tmp_path, tui_mode=False)
+        monkeypatch.setattr(m, "_builtin_custom_dir", lambda: builtin_src.parent.parent)
+        monkeypatch.setattr(m, "_builtin_config_driven_dir", lambda: tmp_path / "_empty")
+        monkeypatch.setattr(m, "_builtin_bundles_dir", lambda: tmp_path / "_empty2")
+        return m, user_src
+
+    def test_app_file_overwritten_silently_when_unmodified(self, tmp_path, monkeypatch):
+        """App-owned file with no user modifications is overwritten silently."""
+        m, user_src = self._setup(tmp_path, monkeypatch, "# old\n", "# new\n")
+        m.check_for_upgrades()
+        assert user_src.read_text() == "# new\n"
+
+    def test_app_file_overwritten_even_when_user_modified(self, tmp_path, monkeypatch):
+        """App-owned file is overwritten even if user edited it; backup is created."""
+        import hashlib, json
+        from capcat.core.source_config_mirror import SourceConfigMirror
+
+        builtin_src = tmp_path / "_builtin" / "custom" / "hn" / "source.py"
+        builtin_src.parent.mkdir(parents=True)
+        builtin_src.write_text("# new\n")
+
+        user_src = tmp_path / "Config" / "sources" / "active" / "custom" / "hn" / "source.py"
+        user_src.parent.mkdir(parents=True)
+        user_src.write_text("# user edit\n")  # user modified
+
+        original_hash = hashlib.sha256(b"# old\n").hexdigest()
+        manifest = {
+            "custom/hn/source.py": {
+                "ownership": "app",
+                "builtin_hash": original_hash,  # old builtin
+                "user_hash": original_hash,     # user had the old version originally
+            }
+        }
+        (tmp_path / ".capcat").mkdir(exist_ok=True)
+        (tmp_path / ".capcat" / "source_hashes.json").write_text(json.dumps(manifest))
+
+        m = SourceConfigMirror(tmp_path, tui_mode=False)
+        monkeypatch.setattr(m, "_builtin_custom_dir", lambda: builtin_src.parent.parent)
+        monkeypatch.setattr(m, "_builtin_config_driven_dir", lambda: tmp_path / "_empty")
+        monkeypatch.setattr(m, "_builtin_bundles_dir", lambda: tmp_path / "_empty2")
+        m.check_for_upgrades()
+
+        assert user_src.read_text() == "# new\n", "App file must be overwritten"
+        backup_dirs = list((tmp_path / "Config" / "sources").glob("backup_*"))
+        assert len(backup_dirs) == 1, "Backup must be created when user had edits"
+
+    def test_config_unmodified_overwritten_silently(self, tmp_path, monkeypatch):
+        """Config-owned file with no user modifications is overwritten silently."""
+        import hashlib, json
+        from capcat.core.source_config_mirror import SourceConfigMirror
+
+        builtin_cfg = tmp_path / "_builtin" / "config_driven" / "configs" / "bbc.yaml"
+        builtin_cfg.parent.mkdir(parents=True)
+        builtin_cfg.write_text("article_count: 30\n")
+
+        user_cfg = tmp_path / "Config" / "sources" / "active" / "config_driven" / "configs" / "bbc.yaml"
+        user_cfg.parent.mkdir(parents=True)
+        user_cfg.write_text("article_count: 20\n")  # old content
+
+        old_hash = hashlib.sha256(b"article_count: 20\n").hexdigest()
+        manifest = {
+            "config_driven/configs/bbc.yaml": {
+                "ownership": "config",
+                "builtin_hash": old_hash,
+                "user_hash": old_hash,  # user never modified
+            }
+        }
+        (tmp_path / ".capcat").mkdir(exist_ok=True)
+        (tmp_path / ".capcat" / "source_hashes.json").write_text(json.dumps(manifest))
+
+        m = SourceConfigMirror(tmp_path, tui_mode=False)
+        monkeypatch.setattr(m, "_builtin_config_driven_dir", lambda: builtin_cfg.parent)
+        monkeypatch.setattr(m, "_builtin_custom_dir", lambda: tmp_path / "_empty_cust")
+        monkeypatch.setattr(m, "_builtin_bundles_dir", lambda: tmp_path / "_empty_bun")
+        m.check_for_upgrades()
+
+        assert user_cfg.read_text() == "article_count: 30\n"
+
+
+import os
+
+
+class TestConfigModifiedNonInteractive:
+    def _setup_modified_config(self, tmp_path, monkeypatch):
+        import hashlib, json
+        from capcat.core.source_config_mirror import SourceConfigMirror
+
+        builtin_cfg = tmp_path / "_builtin" / "config_driven" / "configs" / "bbc.yaml"
+        builtin_cfg.parent.mkdir(parents=True)
+        builtin_cfg.write_text("article_count: 30\n")
+
+        user_cfg = tmp_path / "Config" / "sources" / "active" / "config_driven" / "configs" / "bbc.yaml"
+        user_cfg.parent.mkdir(parents=True)
+        user_cfg.write_text("article_count: 5\n")  # user's custom value
+
+        # Scenario: builtin was at "20", user copy was also "20" (user_hash == builtin_hash).
+        # User then manually changed their file to "5". Now builtin upgraded to "30".
+        # user_hash in manifest still = hash("20") — showing user HAS modified since last sync.
+        old_hash = hashlib.sha256(b"article_count: 20\n").hexdigest()
+        manifest = {
+            "config_driven/configs/bbc.yaml": {
+                "ownership": "config",
+                "builtin_hash": old_hash,
+                "user_hash": old_hash,  # last-known = the original copy; user has since changed to "5"
+            }
+        }
+        (tmp_path / ".capcat").mkdir(exist_ok=True)
+        (tmp_path / ".capcat" / "source_hashes.json").write_text(json.dumps(manifest))
+
+        m = SourceConfigMirror(tmp_path, tui_mode=False)
+        monkeypatch.setattr(m, "_builtin_config_driven_dir", lambda: builtin_cfg.parent)
+        monkeypatch.setattr(m, "_builtin_custom_dir", lambda: tmp_path / "_empty_cust")
+        monkeypatch.setattr(m, "_builtin_bundles_dir", lambda: tmp_path / "_empty_bun")
+        return m, user_cfg
+
+    def test_non_interactive_preserves_user_config(self, tmp_path, monkeypatch, capsys):
+        """Non-interactive mode (stdin not a tty) skips prompt, keeps user file."""
+        import sys
+        m, user_cfg = self._setup_modified_config(tmp_path, monkeypatch)
+        monkeypatch.setattr(sys, "stdin", open(os.devnull))
+        m.check_for_upgrades()
+        assert user_cfg.read_text() == "article_count: 5\n", "User file must not be overwritten"
+        captured = capsys.readouterr()
+        assert "WARNING" in captured.out or "updates available" in captured.out
+
+    def test_non_interactive_with_questionary_none_preserves_user_config(self, tmp_path, monkeypatch):
+        """When questionary is unavailable, non-interactive path preserves user file."""
+        import capcat.core.source_config_mirror as scm
+        monkeypatch.setattr(scm, "questionary", None)
+        m, user_cfg = self._setup_modified_config(tmp_path, monkeypatch)
+        m.check_for_upgrades()
+        assert user_cfg.read_text() == "article_count: 5\n"
+
+
+class TestConfigModifiedInteractivePrompt:
+    def _make_candidate(self, tmp_path, key, user_content, builtin_content, old_builtin_content):
+        import hashlib
+        parts = key.split("/")
+        if key.startswith("config_driven/configs/"):
+            user_f = tmp_path / "Config" / "sources" / "active" / "config_driven" / "configs" / parts[-1]
+            builtin_f = tmp_path / "_builtin" / "config_driven" / "configs" / parts[-1]
+        else:
+            user_f = tmp_path / "Config" / "sources" / "active" / key
+            builtin_f = tmp_path / "_builtin" / key
+        user_f.parent.mkdir(parents=True, exist_ok=True)
+        builtin_f.parent.mkdir(parents=True, exist_ok=True)
+        user_f.write_text(user_content)
+        builtin_f.write_text(builtin_content)
+        new_hash = hashlib.sha256(builtin_content.encode()).hexdigest()
+        return (key, user_f, builtin_f, new_hash)
+
+    def test_overwrite_all_applies_all_candidates(self, tmp_path, monkeypatch):
+        """Choosing 'Overwrite all' copies all builtin files and updates manifest."""
+        import sys
+        from unittest.mock import MagicMock
+        import capcat.core.source_config_mirror as scm
+        from capcat.core.source_config_mirror import SourceConfigMirror
+
+        mock_q = MagicMock()
+        mock_q.select.return_value.ask.return_value = "Overwrite all with new defaults"
+        monkeypatch.setattr(scm, "questionary", mock_q)
+        monkeypatch.setattr(sys, "stdin", MagicMock(isatty=lambda: True))
+
+        m = SourceConfigMirror(tmp_path, tui_mode=False)
+        c1 = self._make_candidate(tmp_path, "config_driven/configs/bbc.yaml", "count: 5\n", "count: 30\n", "count: 20\n")
+        c2 = self._make_candidate(tmp_path, "config_driven/configs/guardian.yaml", "count: 3\n", "count: 30\n", "count: 20\n")
+        manifest = {
+            c1[0]: {"ownership": "config", "builtin_hash": "old", "user_hash": "old"},
+            c2[0]: {"ownership": "config", "builtin_hash": "old", "user_hash": "old"},
+        }
+        result = m._prompt_config_updates(manifest, [c1, c2])
+
+        assert c1[1].read_text() == "count: 30\n"
+        assert c2[1].read_text() == "count: 30\n"
+        assert result[c1[0]]["builtin_hash"] == c1[3]
+        assert result[c1[0]]["user_hash"] == c1[3]
+
+    def test_no_keeps_all_user_files(self, tmp_path, monkeypatch):
+        """Choosing 'No' leaves all user files untouched."""
+        import sys
+        from unittest.mock import MagicMock
+        import capcat.core.source_config_mirror as scm
+        from capcat.core.source_config_mirror import SourceConfigMirror
+
+        mock_q = MagicMock()
+        mock_q.select.return_value.ask.return_value = "No \u2014 keep my modifications"
+        monkeypatch.setattr(scm, "questionary", mock_q)
+        monkeypatch.setattr(sys, "stdin", MagicMock(isatty=lambda: True))
+
+        m = SourceConfigMirror(tmp_path, tui_mode=False)
+        c1 = self._make_candidate(tmp_path, "config_driven/configs/bbc.yaml", "count: 5\n", "count: 30\n", "count: 20\n")
+        manifest = {c1[0]: {"ownership": "config", "builtin_hash": "old", "user_hash": "old"}}
+        result = m._prompt_config_updates(manifest, [c1])
+
+        assert c1[1].read_text() == "count: 5\n", "User file must not change"
+
+    def test_select_individually_updates_chosen_skips_other(self, tmp_path, monkeypatch):
+        """'Select individually' updates files the user says yes to, skips the rest."""
+        import sys
+        from unittest.mock import MagicMock, call
+        import capcat.core.source_config_mirror as scm
+        from capcat.core.source_config_mirror import SourceConfigMirror
+
+        top_choice = MagicMock()
+        top_choice.ask.return_value = "Select individually"
+        per_update = MagicMock()
+        per_update.ask.return_value = "Update"
+        per_skip = MagicMock()
+        per_skip.ask.return_value = "Skip"
+
+        call_count = {"n": 0}
+        def select_side_effect(msg, choices):
+            call_count["n"] += 1
+            if call_count["n"] == 1:
+                return top_choice
+            elif call_count["n"] == 2:
+                return per_update   # update bbc
+            else:
+                return per_skip     # skip guardian
+
+        mock_q = MagicMock()
+        mock_q.select.side_effect = select_side_effect
+        monkeypatch.setattr(scm, "questionary", mock_q)
+        monkeypatch.setattr(sys, "stdin", MagicMock(isatty=lambda: True))
+
+        m = SourceConfigMirror(tmp_path, tui_mode=False)
+        c1 = self._make_candidate(tmp_path, "config_driven/configs/bbc.yaml", "count: 5\n", "count: 30\n", "count: 20\n")
+        c2 = self._make_candidate(tmp_path, "config_driven/configs/guardian.yaml", "count: 3\n", "count: 30\n", "count: 20\n")
+        manifest = {
+            c1[0]: {"ownership": "config", "builtin_hash": "old", "user_hash": "old"},
+            c2[0]: {"ownership": "config", "builtin_hash": "old", "user_hash": "old"},
+        }
+        result = m._prompt_config_updates(manifest, [c1, c2])
+
+        assert c1[1].read_text() == "count: 30\n", "bbc should be updated"
+        assert c2[1].read_text() == "count: 3\n", "guardian should be unchanged"

@@ -15,6 +15,18 @@ except ImportError:
     questionary = None  # type: ignore[assignment]
 
 
+def _key_display_name(key: str) -> str:
+    """Convert a manifest key to a short human-readable name."""
+    if key.startswith("custom/"):
+        parts = key.split("/", 2)
+        return f"{parts[1]}/{parts[2]}" if len(parts) == 3 else key
+    if key.startswith("config_driven/configs/"):
+        return key.removeprefix("config_driven/configs/")
+    if key.startswith("bundles/"):
+        return key.removeprefix("bundles/")
+    return key
+
+
 class SourceConfigMirror:
     """Copy and track builtin source configs in userspace."""
 
@@ -142,7 +154,7 @@ class SourceConfigMirror:
                 shutil.copy2(f, dest_file)
                 h = self._compute_hash(f)
                 key = f"config_driven/configs/{f.name}"
-                manifest[key] = {"builtin_hash": h, "user_hash": h}
+                manifest[key] = {"ownership": "config", "builtin_hash": h, "user_hash": h}
 
     def _mirror_custom(self, manifest: dict) -> None:
         src = self._builtin_custom_dir()
@@ -164,7 +176,8 @@ class SourceConfigMirror:
                     if builtin_f.exists():
                         h = self._compute_hash(builtin_f)
                         key = f"custom/{source_dir.name}/{rel}"
-                        manifest[key] = {"builtin_hash": h, "user_hash": h}
+                        ownership = "app" if f.suffix == ".py" else "config"
+                        manifest[key] = {"ownership": ownership, "builtin_hash": h, "user_hash": h}
 
     def _mirror_bundles(self, manifest: dict) -> None:
         src = self._builtin_bundles_dir()
@@ -178,7 +191,7 @@ class SourceConfigMirror:
                 shutil.copy2(f, dest_file)
                 h = self._compute_hash(f)
                 key = f"bundles/{f.name}"
-                manifest[key] = {"builtin_hash": h, "user_hash": h}
+                manifest[key] = {"ownership": "config", "builtin_hash": h, "user_hash": h}
 
     # ------------------------------------------------------------------
     # Upgrade diff placeholders (implemented in Tasks 3-5)
@@ -252,15 +265,18 @@ class SourceConfigMirror:
         from capcat.core.logging_config import get_logger
         logger = get_logger(__name__)
 
-        override_candidates: list = []  # (key, user_path, new_builtin_hash)
+        app_overwrite: list = []     # (key, user_file, builtin_file, new_hash, user_modified)
+        config_silent: list = []     # (key, user_file, builtin_file, new_hash)
+        config_modified: list = []   # (key, user_file, builtin_file, new_hash)
         keys_to_remove: list = []
 
         for key, entry in list(manifest.items()):
             stored_builtin_hash = entry.get("builtin_hash", "")
             stored_user_hash = entry.get("user_hash", "")
+            ownership = entry.get("ownership", "config")  # backward compat: missing → config
 
             if not stored_builtin_hash:
-                continue  # user-added source
+                continue  # user-added source — never touch
 
             builtin_file = self._builtin_file_for_key(key)
             if builtin_file is None:
@@ -274,57 +290,116 @@ class SourceConfigMirror:
                 continue
 
             current_builtin_hash = self._compute_hash(builtin_file)
-
             if current_builtin_hash == stored_builtin_hash:
                 continue  # builtin unchanged
 
             current_user_hash = self._compute_hash(user_file)
+            user_modified = current_user_hash != stored_user_hash
 
-            if current_user_hash != stored_user_hash:
-                continue  # user modified — skip silently
-
-            override_candidates.append((key, user_file, current_builtin_hash))
+            if ownership == "app":
+                app_overwrite.append((key, user_file, builtin_file, current_builtin_hash, user_modified))
+            elif user_modified:
+                config_modified.append((key, user_file, builtin_file, current_builtin_hash))
+            else:
+                config_silent.append((key, user_file, builtin_file, current_builtin_hash))
 
         for key in keys_to_remove:
             del manifest[key]
 
-        if not override_candidates:
+        # 1. App-owned: always overwrite; backup if user had edits
+        for key, user_file, builtin_file, new_hash, user_modified in app_overwrite:
+            if user_modified:
+                try:
+                    self._backup([(key, user_file)])
+                except OSError as exc:
+                    logger.warning(
+                        f"Backup failed for {_key_display_name(key)} ({exc}) — skipping update"
+                    )
+                    continue
+                logger.warning(
+                    f"Updated {_key_display_name(key)} (had local edits — "
+                    f"backup created at Config/sources/backup_*/)"
+                )
+            else:
+                logger.info(f"Updated {_key_display_name(key)}")
+            shutil.copy2(builtin_file, user_file)
+            manifest[key]["builtin_hash"] = new_hash
+            manifest[key]["user_hash"] = new_hash
+
+        # 2. Config-owned, unmodified: silent overwrite
+        for key, user_file, builtin_file, new_hash in config_silent:
+            logger.info(f"Updated {_key_display_name(key)}")
+            shutil.copy2(builtin_file, user_file)
+            manifest[key]["builtin_hash"] = new_hash
+            manifest[key]["user_hash"] = new_hash
+
+        # 3. Config-owned, user-modified: interactive prompt
+        if config_modified:
+            manifest = self._prompt_config_updates(manifest, config_modified)
+
+        return manifest
+
+    def _prompt_config_updates(self, manifest: dict, candidates: list) -> dict:
+        """Interactive prompt for config-owned files that the user has modified."""
+        is_interactive = sys.stdin.isatty() and questionary is not None
+
+        if not is_interactive:
+            names = ", ".join(_key_display_name(k) for k, _, _, _ in candidates)
+            print(
+                f"WARNING: source updates available for modified files: {names}\n"
+                f"Run capcat fetch interactively to review."
+            )
             return manifest
 
-        # Group by domain for prompt
-        src_keys = [k for k, _, _ in override_candidates if k.startswith("config_driven/")]
-        cust_keys = [k for k, _, _ in override_candidates if k.startswith("custom/")]
-        bun_keys = [k for k, _, _ in override_candidates if k.startswith("bundles/")]
-
-        src_names = [Path(k.removeprefix("config_driven/configs/")).stem for k in src_keys]
-        # Strip second extension for .yaml.disabled stems
-        src_names = [Path(n).stem if "." in n else n for n in src_names]
-        cust_display = [k.removeprefix("custom/") for k in cust_keys]
-        bun_display = [k.removeprefix("bundles/") for k in bun_keys]
-
-        total = len(override_candidates)
-        today_str = date.today().isoformat()
-        msg = (
-            f"Capcat: {total} item(s) have updates available:\n"
-            f"  Sources: {', '.join(src_names) if src_names else '(none)'}\n"
-            f"  Custom sources: {', '.join(cust_display) if cust_display else '(none)'}\n"
-            f"  Bundles: {', '.join(bun_display) if bun_display else '(none)'}\n"
-            f"Override with new defaults? Your files are unmodified.\n"
-            f"Backup will be created at Config/sources/backup_{today_str}/. [Y/n]"
+        names_display = "\n".join(
+            f"  - {_key_display_name(k)}" for k, _, _, _ in candidates
         )
-        answer = self._prompt(msg)
-        if answer.strip().lower() in ("", "y", "yes"):
-            try:
-                self._backup([(k, p) for k, p, _ in override_candidates])
-            except OSError as exc:
-                print(f"Capcat: backup failed ({exc}) — override aborted.")
-                return manifest
+        message = f"Capcat detected local modifications in:\n{names_display}\n"
 
-            for key, user_file, new_builtin_hash in override_candidates:
-                builtin_file = self._builtin_file_for_key(key)
+        top_choice = questionary.select(
+            message,
+            choices=[
+                "Overwrite all with new defaults",
+                "Select individually",
+                "No \u2014 keep my modifications",
+            ],
+        ).ask()
+
+        if top_choice is None or top_choice.startswith("No"):
+            return manifest
+
+        if top_choice == "Overwrite all with new defaults":
+            try:
+                self._backup([(k, p) for k, p, _, _ in candidates])
+            except OSError as exc:
+                print(f"Capcat: backup failed ({exc}) \u2014 update aborted.")
+                return manifest
+            for key, user_file, builtin_file, new_hash in candidates:
                 shutil.copy2(builtin_file, user_file)
-                manifest[key]["builtin_hash"] = new_builtin_hash
-                manifest[key]["user_hash"] = new_builtin_hash
+                manifest[key]["builtin_hash"] = new_hash
+                manifest[key]["user_hash"] = new_hash
+            return manifest
+
+        # Select individually
+        for key, user_file, builtin_file, new_hash in candidates:
+            diff = self._diff_files(user_file, builtin_file)
+            if diff:
+                print(f"\n{_key_display_name(key)}:\n{diff}")
+            per_choice = questionary.select(
+                f"Update {_key_display_name(key)}?",
+                choices=["Update", "Skip"],
+            ).ask()
+            if per_choice == "Update":
+                try:
+                    self._backup([(key, user_file)])
+                except OSError as exc:
+                    print(
+                        f"Capcat: backup failed for {_key_display_name(key)} ({exc}) \u2014 skipping."
+                    )
+                    continue
+                shutil.copy2(builtin_file, user_file)
+                manifest[key]["builtin_hash"] = new_hash
+                manifest[key]["user_hash"] = new_hash
 
         return manifest
 
@@ -343,6 +418,24 @@ class SourceConfigMirror:
             backup_name = key.replace("/", "-")
             shutil.copy2(user_path, backup_dir / backup_name)
         return backup_dir
+
+    def _diff_files(self, user_file: Path, builtin_file: Path) -> str:
+        """Return a unified diff of user_file vs builtin_file.
+
+        fromfile='your version', tofile='new default'.
+        Returns empty string if files are identical.
+        """
+        import difflib
+        user_lines = user_file.read_text(encoding="utf-8", errors="replace").splitlines(keepends=True)
+        builtin_lines = builtin_file.read_text(encoding="utf-8", errors="replace").splitlines(keepends=True)
+        diff = list(difflib.unified_diff(
+            user_lines,
+            builtin_lines,
+            fromfile="your version",
+            tofile="new default",
+            lineterm="",
+        ))
+        return "".join(diff)
 
     def _resolve_user_file(self, key: str) -> Optional[Path]:
         """Locate the actual user file for a manifest key. Returns None if absent."""
@@ -387,11 +480,14 @@ class SourceConfigMirror:
 
     def _resync_manifest(self) -> None:
         """Rebuild manifest from current user files when source_hashes.json is missing.
-        Never overwrites user files."""
-        from capcat.core.logging_config import get_logger
-        logger = get_logger(__name__)
-        logger.debug("Capcat: source_hashes.json missing — rebuilt from current state.")
 
+        Uses the actual installed builtin hash as the baseline so future
+        check_for_upgrades() diffs are accurate.
+        """
+        from capcat.core.logging_config import get_logger
+        get_logger(__name__).debug(
+            "Capcat: source_hashes.json missing — rebuilt from current state."
+        )
         manifest = {}
 
         # config_driven
@@ -402,9 +498,15 @@ class SourceConfigMirror:
                     f.suffix in self._CONFIG_DRIVEN_EXTS
                     or f.name.endswith(".yaml.disabled")
                 ):
-                    h = self._compute_hash(f)
                     key = f"config_driven/configs/{f.name}"
-                    manifest[key] = {"builtin_hash": h, "user_hash": h}
+                    user_h = self._compute_hash(f)
+                    builtin_f = self._builtin_file_for_key(key)
+                    builtin_h = self._compute_hash(builtin_f) if builtin_f else ""
+                    manifest[key] = {
+                        "ownership": "config",
+                        "builtin_hash": builtin_h,
+                        "user_hash": user_h,
+                    }
 
         # custom
         user_custom = self._user_custom_dir()
@@ -414,17 +516,33 @@ class SourceConfigMirror:
                     for f in source_dir.rglob("*"):
                         if f.is_file() and not self._SKIP_DIRS.intersection(f.parts):
                             rel = f.relative_to(source_dir)
-                            h = self._compute_hash(f)
                             key = f"custom/{source_dir.name}/{rel}"
-                            manifest[key] = {"builtin_hash": h, "user_hash": h}
+                            user_h = self._compute_hash(f)
+                            builtin_f = self._builtin_file_for_key(key)
+                            builtin_h = self._compute_hash(builtin_f) if builtin_f else ""
+                            if not builtin_f:
+                                ownership = "user"
+                            else:
+                                ownership = "app" if f.suffix == ".py" else "config"
+                            manifest[key] = {
+                                "ownership": ownership,
+                                "builtin_hash": builtin_h,
+                                "user_hash": user_h,
+                            }
 
         # bundles
         user_bundles = self._user_bundles_dir()
         if user_bundles.exists():
             for f in user_bundles.iterdir():
                 if f.is_file() and f.suffix == ".yml":
-                    h = self._compute_hash(f)
                     key = f"bundles/{f.name}"
-                    manifest[key] = {"builtin_hash": h, "user_hash": h}
+                    user_h = self._compute_hash(f)
+                    builtin_f = self._builtin_file_for_key(key)
+                    builtin_h = self._compute_hash(builtin_f) if builtin_f else ""
+                    manifest[key] = {
+                        "ownership": "config",
+                        "builtin_hash": builtin_h,
+                        "user_hash": user_h,
+                    }
 
         self._save_manifest(manifest)
