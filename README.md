@@ -1,6 +1,6 @@
 # Capcat — A command-line tool designed to solve content preservation challenges with Ethical Scraping.
 
-Captures articles from 12 curated sources as clean Markdown files with optional self-contained HTML output. Supports interactive TUI and batch automation.
+Captures articles from 17 sources as clean Markdown files with optional self-contained HTML output. Supports interactive TUI and batch automation.
 
 ## Installation
 
