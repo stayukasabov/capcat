@@ -393,6 +393,45 @@ vim Config/sources/active/config_driven/configs/sourcename.yaml
 capcat fetch sourcename --count 3
 </code></pre>
 
+<h2>Automatic Source Updates</h2>
+
+<p>Capcat ships with built-in source configurations for all predefined sources (HN, BBC, Guardian, etc.).
+When a new version of Capcat is released with updated source configs, you are notified the next time you run a fetch.</p>
+
+<h3>App Updates (Silent)</h3>
+
+<p>If the upstream source config has changed but your local copy is unmodified, Capcat silently applies the update
+and continues the fetch. No action required.</p>
+
+<h3>Config Updates (Interactive Prompt)</h3>
+
+<p>If you have edited a source config file and an upstream update is also available for that file, Capcat prompts
+you with an interactive selection:</p>
+
+<pre><code>WARNING: source updates available for modified files: bbc.yaml
+Run capcat fetch interactively to review.
+</code></pre>
+
+<p>Running interactively presents a choice per modified file:</p>
+<pre><code>bbc.yaml — local copy differs from upstream update
+
+  Keep my version
+  Apply upstream update (replaces your edits)
+  Skip for now
+</code></pre>
+
+<p>Use arrow keys to select and press Enter. Your choice is applied before the fetch proceeds.</p>
+
+<h3>Ownership Model</h3>
+
+<p>Each source config has an ownership field in the vault manifest:</p>
+<ul>
+<li><code>ownership: app</code> — Capcat manages this file; updates apply silently.</li>
+<li><code>ownership: user</code> — You have edited this file; updates prompt for review.</li>
+</ul>
+
+<p>Ownership flips to <code>user</code> automatically the first time you edit a source config. You do not manage this manually.</p>
+
 <h2>Pro Tips</h2>
 
 <h4>Quick Testing:</h4>

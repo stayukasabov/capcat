@@ -164,41 +164,69 @@ capcat single URL --html
 
 <h2>Media Download Control</h2>
 
-<h3>Images (Always Downloaded)</h3>
+<h3>Images (Default)</h3>
 
-<p>Images are always downloaded and embedded:</p>
+<p>Images are downloaded and embedded by default. No flag required:</p>
 
 <pre><code>capcat fetch hn --count 10
-# Images automatically downloaded
+# Images automatically downloaded to images/
 </code></pre>
 
-<h3>Additional Media (Videos, Audio, PDFs)</h3>
+<p>Disable image downloads globally in <code>Config/Global-settings.yaml</code>:</p>
+<pre><code>processing:
+  download_images: false
+</code></pre>
 
-<p>Use <code>--media</code> flag for additional files:</p>
+<h3>PDF Downloads</h3>
+
+<p>Use <code>--pdfs</code> to download PDF files linked in articles, independently of other media:</p>
+
+<pre><code>capcat fetch nature --count 10 --pdfs
+</code></pre>
+
+<p>PDFs are downloaded asynchronously in the background. A progress line appears only when the count changes:</p>
+<pre><code>Downloading PDFs: 3 active, 2 queued, 8 completed
+</code></pre>
+
+<h4>PDF size and count limits:</h4>
+<pre><code>pdf:
+  max_pdf_size_bytes: 20971520   # Skip PDFs larger than 20 MB
+  max_pdf_per_article: 10        # Cap per article
+</code></pre>
+
+<h3>All Media (Videos, Audio, Documents)</h3>
+
+<p>Use <code>--media</code> to download everything — images, PDFs, videos, audio, and documents:</p>
 
 <pre><code>capcat fetch nature --count 10 --media
 </code></pre>
 
-<p>Downloads:</p>
-<ul>
-<li>Videos (MP4, WebM, etc.)</li>
-<li>Audio files (MP3, WAV, etc.)</li>
-<li>Documents (PDF, DOCX, etc.)</li>
-</ul>
+<p><code>--media</code> is a superset of <code>--pdfs</code>. Using <code>--media</code> enables PDF downloads automatically.</p>
 
-<h4>Warning:</h4> <code>--media</code> significantly increases:
-<ul>
-<li>Download time</li>
-<li>Disk space usage</li>
-<li>Network bandwidth</li>
-</ul>
+<h3>Per-Source PDF Defaults</h3>
+
+<p>Some sources (Nature, IEEE, Scientific American) have PDF-heavy content. Their default PDF behaviour
+is configured in their <code>config.yaml</code> via a <code>media:</code> block:</p>
+
+<pre><code>media:
+  download_pdfs: true          # Enable PDFs for this source by default
+  max_pdf_size_mb: 10          # Source-level size cap (overrides global)
+</code></pre>
+
+<p>The resolution order from highest to lowest priority:</p>
+<ol>
+<li>CLI flag (<code>--pdfs</code> / <code>--media</code> / <code>--no-pdfs</code>)</li>
+<li>TUI prompt answer (Yes / No / Source defaults)</li>
+<li>Per-source <code>media:</code> block in <code>config.yaml</code></li>
+<li>Global <code>Global-settings.yaml</code> <code>media.download_pdfs</code></li>
+</ol>
 
 <h3>Media Storage</h3>
 
 <div class="ascii-art">Article_Folder/
 ├── article.md
-├── images/      # Always downloaded
-└── files/       # Videos, PDFs, audio (with --media)
+├── images/      # Images (default)
+└── files/       # PDFs, videos, audio (--pdfs or --media)
 </div>
 
 <h2>Output Location</h2>

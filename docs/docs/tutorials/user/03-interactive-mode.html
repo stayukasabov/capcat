@@ -307,6 +307,42 @@ Test fetch? Yes
 <li>Usage statistics shown</li>
 </ul>
 
+<h2>PDF Download Prompt</h2>
+
+<p>When running any fetch in interactive mode, Capcat presents a PDF download prompt after you confirm
+the fetch options and before articles are retrieved:</p>
+
+<pre><code>Download PDFs?
+
+  &gt; Yes — download all PDF links found in articles
+    No — skip PDFs (links kept as external references)
+    Source defaults — use each source's own PDF setting
+</code></pre>
+
+<p>Use arrow keys to select and press Enter.</p>
+
+<h3>What each option does</h3>
+
+<h4>Yes:</h4>
+<p>PDF files linked in articles are downloaded asynchronously to <code>files/</code> inside each article folder.
+Progress is shown only when the download count changes:</p>
+<pre><code>Downloading PDFs: 3 active, 2 queued, 8 completed
+</code></pre>
+
+<h4>No:</h4>
+<p>PDF links are preserved in the article markdown as external URLs. Nothing is downloaded.</p>
+
+<h4>Source defaults:</h4>
+<p>Each source uses its own configured PDF behaviour. Sources with PDF-heavy content
+(Nature, IEEE, Scientific American) have PDF downloads enabled by default. Other sources default to off.</p>
+
+<h3>Equivalent CLI flags</h3>
+
+<pre><code>capcat catch --pdfs          # Same as answering Yes
+capcat catch --no-pdfs       # Same as answering No
+capcat catch                 # Same as Source defaults (no override)
+</code></pre>
+
 <h2>Pro Tips</h2>
 
 <h4>Fast Navigation:</h4>
