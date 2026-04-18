@@ -284,27 +284,43 @@ capcat single URL --update
 
 <h3>Global Settings</h3>
 
-<p>Edit <code>capcat.yml</code>:</p>
+<p>Global settings live in <code>Config/Global-settings.yaml</code> inside your vault. Generate it with:</p>
 
-<pre><code>vim capcat.yml
+<pre><code>capcat settings --force
+</code></pre>
+
+<p>Then edit directly:</p>
+
+<pre><code>vim Config/Global-settings.yaml
 </code></pre>
 
 <p>Common customizations:</p>
 
 <pre><code>processing:
   max_workers: 16           # Parallel downloads (faster)
-  download_images: true     # Always on
-  download_videos: false    # Off unless --media
+  download_images: true     # On by default
 
 network:
   connect_timeout: 15       # Connection timeout
   read_timeout: 45          # Read timeout
 
 logging:
-  default_level: &quot;INFO&quot;     # Log verbosity
+  console_level: &quot;INFO&quot;     # Log verbosity (DEBUG, INFO, WARNING, ERROR)
 </code></pre>
 
-<p>Save and settings apply to all future fetches.</p>
+<p>Save and settings apply to all future fetches — no restart required.</p>
+
+<h3>Source Selection</h3>
+
+<p><code>capcat.yml</code> at the vault root controls which sources run and how many articles each fetches:</p>
+
+<pre><code>sources:
+  - name: hn
+    article_count: 10
+  - name: bbc
+    article_count: 5
+bundles: {}
+</code></pre>
 
 <h3>Per-Source Customization</h3>
 

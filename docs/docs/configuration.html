@@ -90,89 +90,65 @@
 <p>Capcat uses a hierarchical configuration system with the following precedence (highest to lowest):</p>
 
 <ol>
-<li><h4>Command-line arguments</h4> (highest priority)</li>
-<li><h4>Environment variables</h4></li>
-<li><h4>Configuration files</h4> (<code>capcat.yml</code>, <code>capcat.json</code>)</li>
-<li><h4>Default values</h4> (lowest priority)</li>
+<li><h4>Command-line flags</h4> (highest priority — e.g. <code>--pdfs</code>, <code>--media</code>, <code>--count</code>)</li>
+<li><h4>Environment variables</h4> (<code>CAPCAT_*</code>)</li>
+<li><h4>Vault config files</h4> (<code>Config/Global-settings.yaml</code>, <code>capcat.yml</code>)</li>
+<li><h4>Built-in defaults</h4> (lowest priority)</li>
 </ol>
 
-<h2>System Configuration</h2>
+<h2>Vault Configuration Files</h2>
 
-<h3>Configuration Files</h3>
+<p>All configuration lives inside your <strong>vault directory</strong> — the project folder where capcat stores your archives. There is no application-level config file.</p>
 
-<p>Create configuration files in the application root directory:</p>
+<h3>capcat.yml — Source Selection</h3>
 
-<h3>YAML Configuration (Recommended)</h3>
-<pre><code># capcat.yml
-network:
-  connect_timeout: 10
-  read_timeout: 8
-  user_agent: &quot;Mozilla/5.0 (compatible; Capcat/2.0)&quot;
-  max_retries: 3
-  retry_delay: 1.0
+<p>Located at the <strong>vault root</strong>. Controls which sources are active and how many articles each fetches per run:</p>
 
-processing:
-  max_workers: 8
-  download_images: true
-  download_videos: false
-  download_audio: false
-  download_documents: false
-
-logging:
-  default_level: &quot;INFO&quot;
-  use_colors: true
-
-output:
-  base_path: &quot;../&quot;
-  date_format: &quot;%d-%m-%Y&quot;
-  create_date_folders: true
+<pre><code># &lt;vault&gt;/capcat.yml
+sources:
+  - name: hn
+    article_count: 10
+  - name: bbc
+    article_count: 5
+  - name: guardian
+    article_count: 5
+bundles: {}
 </code></pre>
 
-<h3>JSON Configuration</h3>
-<pre><code>{
-  &quot;network&quot;: {
-    &quot;connect_timeout&quot;: 10,
-    &quot;read_timeout&quot;: 8,
-    &quot;user_agent&quot;: &quot;Mozilla/5.0 (compatible; Capcat/2.0)&quot;,
-    &quot;max_retries&quot;: 3,
-    &quot;retry_delay&quot;: 1.0
-  },
-  &quot;processing&quot;: {
-    &quot;max_workers&quot;: 8,
-    &quot;download_images&quot;: true,
-    &quot;download_videos&quot;: false,
-    &quot;download_audio&quot;: false,
-    &quot;download_documents&quot;: false
-  },
-  &quot;logging&quot;: {
-    &quot;default_level&quot;: &quot;INFO&quot;,
-    &quot;use_colors&quot;: true
-  },
-  &quot;output&quot;: {
-    &quot;base_path&quot;: &quot;../&quot;,
-    &quot;date_format&quot;: &quot;%d-%m-%Y&quot;,
-    &quot;create_date_folders&quot;: true
-  }
-}
+<h3>Config/Global-settings.yaml — All Other Settings</h3>
+
+<p>Located at <code>&lt;vault&gt;/Config/Global-settings.yaml</code>. Controls network behaviour, processing options, PDF downloads, UI, and logging. Generate or reset it with:</p>
+
+<pre><code>cd &lt;vault&gt;
+capcat settings --force
 </code></pre>
+
+<p>Edit the generated file directly. Settings take effect on the next fetch — no restart required.</p>
 
 <h3>Environment Variables</h3>
 
-<p>All configuration options can be overridden with environment variables using the <code>CAPCAT_</code> prefix:</p>
+<p>Selected settings can be overridden at runtime with <code>CAPCAT_*</code> environment variables:</p>
 
-<pre><code># Network configuration
-export CAPCAT_NETWORK_CONNECT_TIMEOUT=15
-export CAPCAT_NETWORK_READ_TIMEOUT=10
-export CAPCAT_NETWORK_USER_AGENT=&quot;Custom User Agent&quot;
+<pre><code># Network
+export CAPCAT_CONNECT_TIMEOUT=15
+export CAPCAT_READ_TIMEOUT=10
+export CAPCAT_USER_AGENT="Custom User Agent"
+export CAPCAT_MAX_RETRIES=5
+export CAPCAT_RETRY_DELAY=2.0
 
-# Processing configuration
-export CAPCAT_PROCESSING_MAX_WORKERS=12
-export CAPCAT_PROCESSING_DOWNLOAD_VIDEOS=true
+# Processing
+export CAPCAT_MAX_WORKERS=12
+export CAPCAT_DOWNLOAD_IMAGES=true
+export CAPCAT_DOWNLOAD_VIDEOS=false
+export CAPCAT_DOWNLOAD_AUDIO=false
+export CAPCAT_DOWNLOAD_DOCUMENTS=false
+export CAPCAT_MAX_FILENAME_LENGTH=80
 
-# Logging configuration
-export CAPCAT_LOGGING_DEFAULT_LEVEL=DEBUG
-export CAPCAT_LOGGING_USE_COLORS=false
+# Logging
+export CAPCAT_LOG_LEVEL=DEBUG
 </code></pre>
+
+<p>Environment variables override vault config files but are overridden by CLI flags.</p>
 
 <h3>Command-Line Overrides</h3>
 
