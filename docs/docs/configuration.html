@@ -181,7 +181,10 @@ export CAPCAT_LOGGING_USE_COLORS=false
 <pre><code># Override worker count
 capcat bundle tech --count 10 --workers 12
 
-# Override media downloading
+# Download PDFs only (independent of other media)
+capcat fetch hn --count 10 --pdfs
+
+# Download all media (images, PDFs, video, audio, documents)
 capcat fetch hn,bbc --count 15 --media
 
 # Override output path
@@ -227,24 +230,62 @@ capcat -V -L debug.log fetch hn --count 15
 
 <pre><code>processing:
   max_workers: 8              # Parallel processing workers
-  download_images: true       # Download and embed images
-  download_videos: false      # Download video files
-  download_audio: false       # Download audio files
-  download_documents: false   # Download PDF/document files
-  skip_existing: true         # Skip existing articles
-  content_timeout: 30         # Content fetching timeout
+  download_images: true       # Download and embed images (default: true)
+  download_videos: false      # Download video files (requires --media)
+  download_audio: false       # Download audio files (requires --media)
+  download_documents: false   # Download non-PDF documents (requires --media)
+  create_comments_file: true  # Save comments alongside articles
+  max_filename_length: 100    # Maximum characters in vault filenames
+  min_image_dimensions: 150   # Skip images smaller than this (px)
+  max_image_size_bytes: 5242880  # Skip images larger than this (5 MB)
+  markdown_line_breaks: true  # Convert &lt;br&gt; to hard line breaks (\)
+  conversion_timeout: 30      # HTML-to-Markdown conversion timeout (seconds)
 </code></pre>
 
 <h4>Options:</h4>
 <ul>
 <li><code>max_workers</code>: Number of parallel ThreadPoolExecutor workers</li>
-<li><code>download_images</code>: Always download images (embedded in articles)</li>
-<li><code>download_videos</code>: Download video files (requires --media flag)</li>
-<li><code>download_audio</code>: Download audio files (requires --media flag)</li>
-<li><code>download_documents</code>: Download PDF/document files (requires --media flag)</li>
-<li><code>skip_existing</code>: Skip articles that already exist</li>
-<li><code>content_timeout</code>: Timeout for content fetching operations</li>
+<li><code>download_images</code>: Download and embed images locally (on by default)</li>
+<li><code>download_videos</code>: Download video files (requires <code>--media</code> flag)</li>
+<li><code>download_audio</code>: Download audio files (requires <code>--media</code> flag)</li>
+<li><code>download_documents</code>: Download non-PDF documents (requires <code>--media</code> flag)</li>
+<li><code>create_comments_file</code>: Fetch and save comments alongside each article</li>
+<li><code>max_filename_length</code>: Truncate vault folder and file names to this length</li>
+<li><code>min_image_dimensions</code>: Reject images whose width or height is below this value in pixels</li>
+<li><code>max_image_size_bytes</code>: Reject images larger than this in bytes (checked via Content-Length before download)</li>
+<li><code>markdown_line_breaks</code>: When true, <code>&lt;br&gt;</code> becomes a hard break (<code>\</code>); when false, a plain newline</li>
+<li><code>conversion_timeout</code>: Timeout for HTML-to-Markdown conversion per article</li>
 </ul>
+
+<h3>PDF Configuration</h3>
+
+<p>PDF downloads are controlled independently of other media via the <code>pdf:</code> section and the <code>--pdfs</code> flag.</p>
+
+<pre><code>pdf:
+  max_pdf_size_bytes: 20971520   # Skip PDFs larger than 20 MB
+  max_pdf_per_article: 10        # Maximum PDFs queued per article
+</code></pre>
+
+<h4>Options:</h4>
+<ul>
+<li><code>max_pdf_size_bytes</code>: PDFs whose Content-Length exceeds this value are skipped entirely</li>
+<li><code>max_pdf_per_article</code>: Cap on the number of PDF links processed per article</li>
+</ul>
+
+<h4>CLI flags:</h4>
+<ul>
+<li><code>--pdfs</code>: Download PDF links in articles (independent of <code>--media</code>)</li>
+<li><code>--no-pdfs</code>: Explicitly suppress PDF downloads even when source defaults enable them</li>
+<li><code>--media</code>: Download all media including PDFs (superset of <code>--pdfs</code>)</li>
+</ul>
+
+<h4>Per-source PDF defaults:</h4>
+<p>Individual source configs can set their own PDF behaviour via a <code>media:</code> block:</p>
+<pre><code>media:
+  download_pdfs: true          # Enable PDFs for this source by default
+  max_pdf_size_mb: 10          # Source-level size cap (overrides global)
+</code></pre>
+<p>Resolution order (highest to lowest priority): CLI flag → TUI prompt answer → per-source <code>media:</code> → global <code>media.download_pdfs</code>.</p>
 
 <h3>Logging Configuration</h3>
 

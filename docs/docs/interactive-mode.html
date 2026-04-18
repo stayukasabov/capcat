@@ -509,6 +509,39 @@ Fetching 3 articles...
 <li>Speed optimization</li>
 </ul>
 
+<h2>PDF Download Prompt</h2>
+
+<p>After the HTML generation prompt, all fetch operations present a PDF download prompt:</p>
+
+<div class="ascii-art">Download PDFs?
+
+  &gt; Yes — download all PDF links found in articles
+    No — skip PDFs (links kept as external references)
+    Source defaults — use each source's own PDF setting
+
+   (Use arrow keys, press Enter to confirm)
+</div>
+
+<h4>Yes:</h4>
+<p>PDF links in articles are queued for asynchronous background download into <code>files/</code> inside each article folder.
+Progress is logged only when the count changes:</p>
+<pre><code>Downloading PDFs: 3 active, 2 queued, 8 completed
+</code></pre>
+
+<h4>No:</h4>
+<p>PDF links remain as external URLs in the article markdown. No files are downloaded.</p>
+
+<h4>Source defaults:</h4>
+<p>Each source applies its own configured PDF behaviour. Sources with PDF-heavy content
+(Nature, IEEE, Scientific American) have PDF downloads enabled by default in their <code>config.yaml</code>.
+All other sources default to off.</p>
+
+<h4>CLI equivalents:</h4>
+<pre><code>capcat catch --pdfs      # Yes
+capcat catch --no-pdfs   # No
+capcat catch             # Source defaults
+</code></pre>
+
 <h2>Execution Summary</h2>
 
 <p>Before execution, interactive mode shows a summary:</p>
