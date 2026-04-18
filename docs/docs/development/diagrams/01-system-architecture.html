@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>System Architecture Diagrams</title>
+    <title>System Architecture Diagrams — v1.9</title>
     <link rel="stylesheet" href="../../../css/design-system.css">
     <link rel="stylesheet" href="../../../css/main.css">    <link rel="icon" type="image/x-icon" href="../../../icons/Capcat.ico">
 
@@ -81,22 +81,20 @@
             <div class="doc-content">
 
 <div class="nav-breadcrumb"><a href="../../index.html">Documentation Home</a> / <a href="../index.html">development</a> / diagrams</div>
-<h1>System Architecture Diagrams</h1>
+<h1>System Architecture Diagrams — v1.9</h1>
 
 <h2>Complete System Architecture</h2>
 
 <div class="mermaid">graph TB
     subgraph User Interface Layer
         CLI[CLI Interfacecli.py]
-        Interactive[Interactive Modeinteractive.py]
-        Wrapper[Bash Wrappercapcat]
+        TUI[Interactive TUIcapcat catch]
     end
 
-    subgraph Core Orchestration Layer
-        Main[Main Applicationcapcat.py]
-        Config[Configurationconfig.py]
-        Logging[Logging Systemlogging_config.py]
-        Shutdown[Graceful Shutdownshutdown.py]
+    subgraph Vault Layer — user-owned
+        CY[capcat.ymlsource list + counts]
+        GS[Global-settings.yamlnetwork · logging · PDF]
+        SC[sources/active/per-source configs]
     end
 
     subgraph Source System Layer
@@ -111,27 +109,25 @@
         BaseSource[Base SourceAbstract interface]
     end
 
-    subgraph Shared Infrastructure
+    subgraph Processing Pipeline
         SessionPool[Session PoolConnection reuse]
         ArticleFetcher[Article FetcherContent processing]
         MediaProcessor[Media ProcessorImage/video handling]
         HTMLConverter[HTML ConverterMarkdown generation]
+        PDFManager[AsyncPDFManagerBackground thread]
     end
 
     subgraph Output Layer
-        FileWriter[File WriterMarkdown output]
+        FileWriter[File WriterMarkdown + frontmatter]
         HTMLGen[HTML GeneratorWeb view]
-        MediaDownload[Media DownloaderFile management]
+        MediaDownload[Media + PDFs]
     end
 
-    CLI --> Main
-    Interactive --> Main
-    Wrapper --> CLI
-
-    Main --> Config
-    Main --> Logging
-    Main --> Shutdown
-    Main --> Registry
+    CLI --> CY
+    TUI --> CY
+    CY --> Registry
+    GS --> Registry
+    SC --> Registry
 
     Registry --> Factory
     Registry --> Monitor
@@ -145,14 +141,21 @@
     BaseSource --> ArticleFetcher
     ArticleFetcher --> MediaProcessor
     ArticleFetcher --> HTMLConverter
+    ArticleFetcher --> PDFManager
 
     HTMLConverter --> FileWriter
     FileWriter --> HTMLGen
     MediaProcessor --> MediaDownload
+    PDFManager --> MediaDownload
 
-    style Main fill:#d75f00,stroke:#333,stroke-width:4px,color:#fff
+    style CLI fill:#d75f00,stroke:#333,stroke-width:4px,color:#fff
+    style TUI fill:#d75f00,stroke:#333,stroke-width:4px,color:#fff
+    style CY fill:#ffa500,stroke:#333,stroke-width:2px
+    style GS fill:#ffa500,stroke:#333,stroke-width:2px
+    style SC fill:#ffa500,stroke:#333,stroke-width:2px
     style Registry fill:#4ecdc4,stroke:#333,stroke-width:2px
     style Factory fill:#4ecdc4,stroke:#333,stroke-width:2px
+    style PDFManager fill:#4ecdc4,stroke:#333,stroke-width:2px
 </div>
 
 <h3 class="text-center">Use the free software <a href="https://www.drawio.com/" target="_blank" rel="noopener">Draw.io</a> to clearly visualize the mermaid diagrams.</h3>
@@ -163,17 +166,20 @@
 
 <div class="mermaid">flowchart TD
     User[User Command] --> Parse[CLI Parser]
-    Parse --> Validate[Input Validation]
-    Validate --> Registry[Source Registry]
+    Parse --> Vault[Resolve Vault Config4-level hierarchy]
 
-    Registry --> Discover[Discover Sources]
-    Discover --> ConfigSources[Config YAML Files]
-    Discover --> CustomSources[Custom Python Classes]
+    Vault --> VL1[CLI flags — highest priority]
+    Vault --> VL2[TUI prompt — session override]
+    Vault --> VL3[Per-source config.yaml]
+    Vault --> VL4[Global-settings.yaml — defaults]
 
-    ConfigSources --> Factory
-    CustomSources --> Factory
+    VL4 --> Registry[Source Registry]
+    VL3 --> Registry
+    VL2 --> Registry
+    VL1 --> Registry
 
-    Factory[Source Factory] --> Instantiate[Create Source Instances]
+    Registry --> Factory[Source Factory]
+    Factory --> Instantiate[Create Source Instances]
     Instantiate --> Pool[Shared Session Pool]
 
     Pool --> Parallel[Parallel Execution]
@@ -182,31 +188,30 @@
     Parallel --> S2[Source 2get_articles]
     Parallel --> S3[Source Nget_articles]
 
-    S1 --> Articles1[Articles List]
-    S2 --> Articles2[Articles List]
-    S3 --> Articles3[Articles List]
-
-    Articles1 --> Process[Processing Pipeline]
-    Articles2 --> Process
-    Articles3 --> Process
+    S1 --> Process[Processing Pipeline]
+    S2 --> Process
+    S3 --> Process
 
     Process --> Fetch[Fetch Content]
     Fetch --> Extract[Extract Text]
     Extract --> Media[Process Media]
-    Media --> Convert[Convert to Markdown]
+    Media --> Convert[Convert to Markdown + frontmatter]
 
-    Convert --> Output[Output Generation]
+    Convert --> PDFCheck{PDF URLs detected?}
+    PDFCheck -->|Yes + download_pdfs| AsyncPDF[AsyncPDFManagerBackground thread]
+    PDFCheck -->|No| Output[Output Generation]
+    AsyncPDF --> Output
+
     Output --> Structure[Create Folder Structure]
     Structure --> Write[Write Files]
-    Write --> Generate[Generate HTML Optional]
-
-    Generate --> Complete[Operation Complete]
-    Complete --> Report[Display Summary]
+    Write --> Complete[Operation Complete]
 
     style Parse fill:#ffa500,stroke:#333,stroke-width:2px
+    style Vault fill:#ffa500,stroke:#333,stroke-width:2px
     style Factory fill:#4ecdc4,stroke:#333,stroke-width:2px
     style Parallel fill:#d75f00,stroke:#333,stroke-width:2px,color:#fff
     style Process fill:#4ecdc4,stroke:#333,stroke-width:2px
+    style AsyncPDF fill:#4ecdc4,stroke:#333,stroke-width:2px
 </div>
 
 <h3 class="text-center">Use the free software <a href="https://www.drawio.com/" target="_blank" rel="noopener">Draw.io</a> to clearly visualize the mermaid diagrams.</h3>
@@ -298,6 +303,7 @@
 <div class="mermaid">sequenceDiagram
     participant U as User
     participant M as Main App
+    participant V as Vault Config
     participant R as Registry
     participant F as Factory
     participant S as Source
@@ -306,6 +312,10 @@
     participant FW as File Writer
 
     U->>M: capcat fetch hn --count 10
+    M->>V: Resolve vault config
+    V->>V: CLI flags → TUI → per-source → Global-settings.yaml
+    V-->>M: Resolved config (count=10, download_pdfs=false)
+
     M->>R: get_source('hn')
     R->>R: Lookup source config
     R->>F: create_source(config)
@@ -320,11 +330,10 @@
     activate A
     A->>A: HTTP request
     A->>A: Parse HTML
-    A->>A: Extract content
-    A-->>S: Article content
+    A->>A: Extract content + comments
+    A-->>S: Article with YAML frontmatter
     deactivate A
 
-    S->>S: Fetch comments (if applicable)
     S-->>M: List of 10 Articles
     deactivate S
 
@@ -337,15 +346,15 @@
     MP-->>M: Updated article
     deactivate MP
 
-    M->>FW: write_article(article, path)
+    M->>FW: write_article(article, vault_path)
     activate FW
-    FW->>FW: Create folder structure
-    FW->>FW: Write article.md
-    FW->>FW: Copy media files
+    FW->>FW: Create News/news_DD-MM-YYYY/ folder
+    FW->>FW: Write article.md with frontmatter
+    FW->>FW: Write hn-comments-*.md with backlink
     FW-->>M: Success
     deactivate FW
 
-    M-->>U: [OK] 10 articles saved
+    M-->>U: [OK] 10 articles saved to vault
 </div>
 
 <h3 class="text-center">Use the free software <a href="https://www.drawio.com/" target="_blank" rel="noopener">Draw.io</a> to clearly visualize the mermaid diagrams.</h3>
@@ -461,6 +470,7 @@
         P1[article_fetcher.py]
         P2[unified_media_processor.py]
         P3[html_converter.py]
+        P4[async_pdf_manager.py]
     end
 
     E1 --> P1
@@ -481,8 +491,10 @@
     S3 --> P1
     P1 --> P2
     P1 --> P3
+    P1 --> P4
 
     style C1 fill:#d75f00,stroke:#333,stroke-width:2px,color:#fff
+    style P4 fill:#4ecdc4,stroke:#333,stroke-width:2px
 </div>
 
 <h3 class="text-center">Use the free software <a href="https://www.drawio.com/" target="_blank" rel="noopener">Draw.io</a> to clearly visualize the mermaid diagrams.</h3>
@@ -492,28 +504,28 @@
 <h2>Configuration System</h2>
 
 <div class="mermaid">graph LR
-    subgraph Priority Levels
-        A[Command Line ArgsHighest Priority]
-        B[Environment Variables]
-        C[Config Filecapcat.yml]
-        D[Default ValuesLowest Priority]
+    subgraph Priority Levels — highest to lowest
+        A[CLI Flag--pdfs --count 20 --mediaOverrides everything. Ephemeral.]
+        B[TUI PromptInteractive select menuSession-level override.]
+        C[Per-Source ConfigConfig/sources/active/hn/config.yamlPermanent per-source settings.]
+        D[Global SettingsConfig/Global-settings.yamlVault-wide defaults.]
     end
 
-    A --> E{Merge Configuration}
-    B --> E
-    C --> E
-    D --> E
+    A -->|overrides| B
+    B -->|overrides| C
+    C -->|overrides| D
 
-    E --> F[Final Config Object]
+    D --> F[Resolved Config]
 
-    F --> G[Used by Application]
+    F --> G[Used by Pipeline]
 
     G --> G1[count: 30]
-    G --> G2[output_dir: News/]
-    G --> G3[media: false]
+    G --> G2[download_pdfs: true/false]
+    G --> G3[max_pdf_size_mb: 50]
     G --> G4[html: false]
 
     style A fill:#d75f00,stroke:#333,stroke-width:2px,color:#fff
+    style B fill:#ffa500,stroke:#333,stroke-width:2px
     style F fill:#4ecdc4,stroke:#333,stroke-width:2px
 </div>
 
@@ -674,26 +686,28 @@
 
 <div class="mermaid">timeline
     title Architecture Evolution
-    2020-2021 : Initial Architecture
-              Single source support
-              Synchronous processing
-              No abstraction
-    2021-2022 : Multi-source Architecture
-              Multiple sources added
-              Parallel processing
-              Basic source interface
-    2022-2023 : Registry Pattern
-              Auto-discovery
-              Dynamic loading
-              Validation system
-    2023-2024 : Hybrid Architecture
-              Config-driven sources
-              Custom sources
-              Factory pattern
-    2024-2025 : Current Architecture
-              Performance monitor
-              Advanced error handling
-              Enterprise features
+    v1.0 : Initial Architecture
+         Single source support
+         Synchronous processing
+         Clone-and-run install
+         Config mixed into app directory
+    v1.3 : Multi-source Architecture
+          Multiple sources added
+          Parallel processing
+          Basic source interface
+          Registry pattern
+    v1.6 : Hybrid Sources
+          Config-driven sources
+          Custom sources
+          Factory pattern
+          pipx install support
+    v1.9 : Vault Architecture
+          Tool separated from user data
+          capcat init scaffolds vault
+          4-level config hierarchy
+          AsyncPDFManager
+          Source update ownership model
+          YAML frontmatter + wikilinks
 </div>
 
 <h3 class="text-center">Use the free software <a href="https://www.drawio.com/" target="_blank" rel="noopener">Draw.io</a> to clearly visualize the mermaid diagrams.</h3>

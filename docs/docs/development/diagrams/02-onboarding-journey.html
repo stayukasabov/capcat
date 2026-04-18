@@ -88,23 +88,23 @@
 <div class="mermaid">timeline
     title Two-Week Onboarding Journey
     Day 1 : Environment Setup
-          Clone repository
-          Install dependencies
-          First successful run
+          pipx install capcat
+          cd ~/my-vault && capcat init
+          First successful capcat catch
           Join team channels
     Day 2-3 : Codebase Exploration
             Read architecture docs
             Trace code execution
-            Complete exercises
+            Explore vault structure
             Ask lots of questions
     Day 4-5 : First Contribution
-            Fix documentation typo
+            Fix documentation detail
             Add config-driven source
             Create first PR
             Participate in code review
     Week 2 : Deep Dives
            Architecture session
-           UX principles session
+           UX + vault model session
            Testing workshop
            Code review practice
     Week 2 : Integration
@@ -123,50 +123,46 @@
 <div class="mermaid">flowchart TD
     Start([New Team MemberStarts]) --> A[Prerequisites Check]
 
-    A --> B1{Python 3.8+ Installed?}
+    A --> B1{Python 3.10+ Installed?}
     B1 -->|No| C1[Install Python]
     C1 --> B1
-    B1 -->|Yes| B2{Git Configured?}
+    B1 -->|Yes| B2{pipx installed?}
 
-    B2 -->|No| C2[Configure Git]
+    B2 -->|No| C2[pip install pipx]
     C2 --> B2
-    B2 -->|Yes| B3{GitHub Access?}
+    B2 -->|Yes| D[pipx install capcat]
 
-    B3 -->|No| C3[Request Access]
-    C3 --> B3
-    B3 -->|Yes| D[Clone Repository]
-
-    D --> E[./scripts/fix_dependencies.sh]
-    E --> F{Setup Successful?}
-
-    F -->|No| G[Troubleshoot]
+    D --> E{Install Successful?}
+    E -->|No| G[Troubleshoot]
     G --> G1[Check error messages]
     G1 --> G2[Consult docs]
     G2 --> G3{Resolved?}
     G3 -->|No| G4[Ask Team for Help]
-    G4 --> E
-    G3 -->|Yes| F
+    G4 --> D
+    G3 -->|Yes| E
 
-    F -->|Yes| H[Verify Installation]
-    H --> I[capcat list sources]
-    I --> J{Works?}
+    E -->|Yes| F[Choose or create vault directory]
+    F --> H[cd ~/my-vault]
+    H --> I[capcat init]
+    I --> J{Vault scaffolded?}
 
     J -->|No| G
-    J -->|Yes| K[First Fetch]
+    J -->|Yes| K[capcat catch]
+    K --> L{First fetch works?}
 
-    K --> L[capcat fetch hn --count 5]
-    L --> M{Success?}
+    L -->|No| G
+    L -->|Yes| M[Explore vault output]
 
-    M -->|No| G
-    M -->|Yes| N[Day 1 Complete [OK]]
+    M --> N[Read Config/Global-settings.yaml]
+    N --> O[Day 1 Complete [OK]]
 
-    N --> O[Read UX Personas]
-    O --> P[Join Team Standup]
-    P --> Q[Ready for Day 2]
+    O --> P[Read architecture docs]
+    P --> Q[Join Team Standup]
+    Q --> R[Ready for Day 2]
 
     style Start fill:#d75f00,stroke:#333,stroke-width:2px,color:#fff
-    style N fill:#4ecdc4,stroke:#333,stroke-width:2px
-    style Q fill:#4ecdc4,stroke:#333,stroke-width:2px
+    style O fill:#4ecdc4,stroke:#333,stroke-width:2px
+    style R fill:#4ecdc4,stroke:#333,stroke-width:2px
 </div>
 
 <h3 class="text-center">Use the free software <a href="https://www.drawio.com/" target="_blank" rel="noopener">Draw.io</a> to clearly visualize the mermaid diagrams.</h3>
@@ -177,24 +173,24 @@
 
 <div class="mermaid">graph TB
     subgraph Junior Developer Path
-        JD1[Day 1: Setup]
+        JD1[Day 1: pipx install + vault init]
         JD2[Day 2-3: Code Exploration]
         JD3[Day 4-5: Simple Contribution]
-        JD4[Week 2: Architecture Deep Dive]
+        JD4[Week 2: Architecture + Vault Deep Dive]
         JD5[Week 3-4: Independent Tasks]
     end
 
     subgraph Product Designer Path
-        PD1[Day 1: UX Context]
-        PD2[Day 2-3: User Research]
-        PD3[Day 4-5: Persona Workshop]
+        PD1[Day 1: Install + first catch]
+        PD2[Day 2-3: Vault structure + UX context]
+        PD3[Day 4-5: Config hierarchy + heuristics]
         PD4[Week 2: Technical Constraints]
         PD5[Week 3-4: Design Collaboration]
     end
 
     subgraph Senior Developer Path
-        SD1[Day 1: Quick Setup]
-        SD2[Day 2: Architecture Review]
+        SD1[Day 1: Quick setup — pipx + vault]
+        SD2[Day 2: Architecture + ownership model]
         SD3[Day 3: Code Review Practice]
         SD4[Week 2: Lead Feature]
         SD5[Week 3-4: Mentor Others]
@@ -219,28 +215,28 @@
 
 <div class="mermaid">mindmap
   root((Week 1Exercises))
-    Exercise 1: Run Capcat
-      Basic fetch command
-      Interactive mode
-      Check output files
-      Explore folder structure
-    Exercise 2: Trace Code
+    Exercise 1: Install + Init
+      pipx install capcat
+      cd into vault directory
+      capcat init
+      Explore scaffolded Config/
+    Exercise 2: First Fetch
+      capcat catch — interactive TUI
+      capcat fetch hn --count 5
+      Check News/ output folder
+      Open article in Obsidian
+    Exercise 3: Config Tuning
+      Edit capcat.yml counts
+      Edit per-source config.yaml
+      Try --count flag override
+      Observe 4-level hierarchy
+    Exercise 4: Trace Code
       Add debug prints
       Follow execution
-      Identify components
-      Map data flow
-    Exercise 3: Read Sources
-      Config-driven example
-      Custom source example
-      Compare approaches
-      Understand patterns
-    Exercise 4: Run Tests
-      All test suite
-      Specific tests
-      With coverage
-      Fix failing test
+      Identify vault resolution path
+      Map PDF manager flow
     Exercise 5: First PR
-      Fix typo
+      Fix doc detail
       Add config source
       Update docs
       Pass code review
@@ -261,22 +257,22 @@
     Note over N: Week 1 Learning
 
     N->>D: Read architecture.md
-    D-->>N: High-level overview
+    D-->>N: High-level overview — 5 layers, vault model
 
     N->>D: Read 01-architecture-logic.md
-    D-->>N: Detailed technical explanation
+    D-->>N: Vault separation, config hierarchy, ownership model
 
-    N->>C: Explore capcat.py
-    C-->>N: Main application logic
+    N->>C: Explore capcat.py and cli.py
+    C-->>N: Main application logic + vault resolution
 
-    N->>N: Draw architecture from memory
-    Note over N: Self-test understanding
+    N->>N: Run capcat init in a test vault
+    Note over N: Self-test: observe scaffolded Config/ structure
 
     N->>M: Architecture questions
-    M-->>N: Clarifications & examples
+    M-->>N: Clarifications on vault vs tool boundary
 
-    N->>C: Trace article fetch flow
-    C-->>N: Hands-on understanding
+    N->>C: Trace article fetch + PDF manager flow
+    C-->>N: Hands-on understanding of async drain
 
     N->>M: Present understanding
     M-->>N: Validation & corrections
@@ -432,8 +428,8 @@
     C4 -->|Partial| R4[Extended Onboarding]
     R4 --> C4
 
-    C1 --> M1[Setup workingFirst fetch successful]
-    C2 --> M2[Architecture understoodFirst PR merged]
+    C1 --> M1[Vault init + first fetch successful]
+    C2 --> M2[Architecture + vault model understoodFirst PR merged]
     C3 --> M3[Independent workCode review participation]
     C4 --> M4[Feature deliveredTeam contributor]
 
@@ -451,8 +447,8 @@
 
 <div class="mermaid">graph LR
     subgraph Week 1 Skills
-        W1A[Environment Setup]
-        W1B[Basic CLI Usage]
+        W1A[Vault Setup + pipx install]
+        W1B[Basic CLI + TUI Usage]
         W1C[Code Reading]
         W1D[Git Workflow]
     end
@@ -624,7 +620,7 @@
       Architecture docs
       API reference
       Tutorials
-      Configuration guides
+      Vault + config guides
     Code Examples
       Existing sources
       Test files
