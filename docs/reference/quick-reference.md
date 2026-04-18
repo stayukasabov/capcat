@@ -68,7 +68,7 @@
       <td>ai</td>
     </tr>
     <tr>
-      <td><code>google-reserch</code></td>
+      <td><code>google-research</code></td>
       <td>Google Research</td>
       <td>ai</td>
     </tr>
@@ -105,7 +105,7 @@
     </tr>
     <tr>
       <td><code>ai</code></td>
-      <td>mitnews, google-reserch</td>
+      <td>mitnews, google-research</td>
     </tr>
     <tr>
       <td><code>sports</code></td>

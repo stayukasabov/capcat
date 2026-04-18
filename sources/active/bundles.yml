@@ -33,7 +33,7 @@ bundles:
     description: "AI, Machine Learning, and Rationality sources"
     sources:
     - mitnews
-    - google-reserch
+    - google-research
     default_count: 20
 
   sports:

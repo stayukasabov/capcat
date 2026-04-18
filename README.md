@@ -32,7 +32,7 @@ capcat list sources
 capcat --version
 ```
 
-No init required — capcat initializes automatically on first run.
+Capcat initializes the vault automatically on first run.
 
 ## Commands
 
@@ -47,7 +47,7 @@ No init required — capcat initializes automatically on first run.
 | `add-source --url <url>` | Add a custom RSS/news source |
 | `remove-source` | Remove a source |
 | `generate-config` | Generate a YAML config |
-| `init` | Manually initialize project in current directory |
+| `init` | Explicitly scaffold vault (runs automatically on first use) |
 
 ## Options
 
@@ -55,7 +55,8 @@ No init required — capcat initializes automatically on first run.
 |------|-------------|
 | `--count N` | Number of articles to fetch (default: 30) |
 | `--output DIR` | Output directory (default: current dir) |
-| `--media` | Download video, audio, and PDF files |
+| `--media` | Download images, video, audio, and PDF files |
+| `--pdfs` | Download PDF files only (independent of --media) |
 | `--html` | Generate self-contained HTML output |
 | `--update` | Re-fetch and update existing articles |
 | `-V, --verbose` | Verbose output |
@@ -79,15 +80,19 @@ Pre-configured topic collections:
 
 ## Available Sources
 
-**Tech**: Hacker News (`hn`), Lobsters (`lb`), InfoQ (`iq`), IEEE Spectrum (`ieee`), Mashable, Gizmodo, Futurism
+**Tech Pro**: Hacker News (`hn`), Lobsters (`lb`), InfoQ (`iq`)
 
-**AI**: Google Research (`googleai`), OpenAI (`openai`), MIT News (`mitnews`), LessWrong (`lesswrong`)
+**Tech**: IEEE Spectrum (`ieee`), Mashable (`mashable`)
+
+**AI**: Google Research (`google-research`), MIT News (`mitnews`)
 
 **News**: BBC (`bbc`), The Guardian (`guardian`)
 
 **Science**: Nature (`nature`), Scientific American (`scientificamerican`)
 
 **Sports**: BBC Sport (`bbcsport`)
+
+**Custom**: Medium, Substack (add via `capcat add-source`)
 
 ## Output Structure
 
@@ -129,7 +134,7 @@ max_workers: 8
 download_media: false
 ```
 
-Config priority: CLI args → environment variables → `capcat.yml` → defaults.
+Config priority: CLI flag, TUI prompt, per-source `Config/sources/active/<source>/config.yaml`, `Config/Global-settings.yaml`.
 
 ## Automation
 

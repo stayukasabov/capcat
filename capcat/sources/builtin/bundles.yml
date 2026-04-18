@@ -33,7 +33,7 @@ bundles:
     description: "AI, Machine Learning, and Rationality sources"
     sources:
     - mitnews
-    - google-reserch
+    - google-research
 
   sports:
     # World sports news sources.
