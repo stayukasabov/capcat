@@ -207,12 +207,12 @@ capcat bundle ai --count 25 --html
 
 <p>Add morning collection (8 AM):</p>
 
-<pre><code>0 8 * * * cd /path/to/Capcat/Application &amp;&amp; capcat bundle tech --count 20 --html &gt;&gt; ~/capcat.log 2&gt;&amp;1
+<pre><code>0 8 * * * cd ~/my-vault &amp;&amp;capcat bundle tech --count 20 --html &gt;&gt; ~/capcat.log 2&gt;&amp;1
 </code></pre>
 
 <p>Add evening collection (6 PM):</p>
 
-<pre><code>0 18 * * * cd /path/to/Capcat/Application &amp;&amp; capcat bundle news --count 15 --html &gt;&gt; ~/capcat.log 2&gt;&amp;1
+<pre><code>0 18 * * * cd ~/my-vault &amp;&amp;capcat bundle news --count 15 --html &gt;&gt; ~/capcat.log 2&gt;&amp;1
 </code></pre>
 
 <p>Check your log:</p>

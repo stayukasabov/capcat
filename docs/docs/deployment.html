@@ -154,7 +154,7 @@ python -c &quot;from core.source_system.source_registry import get_source_regist
 <br>
 <p>Create production configuration file:</p>
 <br>
-<pre><code># /opt/capcat/config/production.yml
+<pre><code># ~/my-vault/Config/Global-settings.yaml
 network:
   connect_timeout: 15
   read_timeout: 10
@@ -164,26 +164,11 @@ network:
 
 processing:
   max_workers: 8
-  download_images: true
-  download_videos: false  # Disable to save bandwidth/storage
-  download_audio: false
-  download_documents: false
-  skip_existing: true
+  article_count: 30
 
 logging:
-  default_level: &quot;INFO&quot;
-  use_colors: false
-  log_to_file: true
-  log_file_path: &quot;/var/log/capcat/capcat.log&quot;
-  max_file_size: &quot;50MB&quot;
-  backup_count: 5
-  format: &quot;detailed&quot;
-
-output:
-  base_path: &quot;/data/capcat/archives&quot;
-  date_format: &quot;%d-%m-%Y&quot;
-  create_date_folders: true
-  sanitize_filenames: true
+  console_level: WARNING
+  file_level: INFO
 </code></pre>
 <br>
 <h3>3. Directory Structure Setup</h3>

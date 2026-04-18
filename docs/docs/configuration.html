@@ -268,8 +268,8 @@ capcat -V -L debug.log fetch hn --count 15
 <p>Controls logging behavior and output.</p>
 
 <pre><code>logging:
-  default_level: &quot;INFO&quot;       # Default log level (DEBUG, INFO, WARNING, ERROR)
-  use_colors: true           # Colored console output
+  console_level: INFO        # Console log level (DEBUG, INFO, WARNING, ERROR)
+  file_level: DEBUG          # Log file level when --log-file is used
 </code></pre>
 
 <h4>Log Levels:</h4>
@@ -301,26 +301,20 @@ capcat -L logs/news-$(date +%Y%m%d-%H%M%S).log bundle news --count 10
 <li><h4>File</h4> Timestamped entries with module names and full context (debugging)</li>
 </ul>
 
-<h3>Output Configuration</h3>
+<h3>Output Structure</h3>
 
-<p>Controls output directory structure and file naming.</p>
+<p>Output is always written into the vault. The folder structure is fixed and date-based:</p>
 
-<pre><code>output:
-  base_path: &quot;../&quot;           # Base output directory
-  date_format: &quot;%d-%m-%Y&quot;    # Date format for folders
-  create_date_folders: true  # Create date-based folders
-  sanitize_filenames: true   # Clean invalid filename characters
-  max_filename_length: 100   # Maximum filename length
-</code></pre>
+<div class="ascii-art">News/News_DD-MM-YYYY/Source_DD-MM-YYYY/Article-Title/
+├── article.md
+├── article-Comments.md      # If comments enabled
+├── images/                  # Downloaded images
+└── files/                   # PDFs and other media
 
-<h4>Options:</h4>
-<ul>
-<li><code>base_path</code>: Base directory for all output</li>
-<li><code>date_format</code>: Python strftime format for date folders</li>
-<li><code>create_date_folders</code>: Create date-based organization</li>
-<li><code>sanitize_filenames</code>: Remove invalid filesystem characters</li>
-<li><code>max_filename_length</code>: Truncate long filenames</li>
-</ul>
+Capcats/cc_DD-MM-YYYY-Article-Title/   # Single-article output
+</div>
+
+<p>Use <code>max_filename_length</code> in <code>processing:</code> to control folder and file name length.</p>
 
 <h2>Source Configuration</h2>
 
@@ -483,211 +477,59 @@ print(report)
 &quot;
 </code></pre>
 
-<h2>Environment-Specific Configuration</h2>
+<h2>Common Configuration Recipes</h2>
 
-<h3>Development Environment</h3>
-<pre><code># capcat-dev.yml
+<h3>Fast daily fetch</h3>
+<pre><code># Config/Global-settings.yaml
 network:
-  connect_timeout: 5
-  read_timeout: 5
-  max_retries: 1
+  crawl_delay: 0.1
 
 processing:
-  max_workers: 4
-  download_videos: false
-
-logging:
-  default_level: &quot;DEBUG&quot;
-  use_colors: true
-  log_to_file: true
-</code></pre>
-
-<h3>Production Environment</h3>
-<pre><code># capcat-prod.yml
-network:
-  connect_timeout: 15
-  read_timeout: 10
-  max_retries: 3
-  retry_delay: 2.0
-
-processing:
-  max_workers: 16
+  max_workers: 8
   download_images: true
-  download_videos: true
 
 logging:
-  default_level: &quot;INFO&quot;
-  use_colors: false
-  log_to_file: true
-  format: &quot;json&quot;
+  console_level: &quot;WARNING&quot;   # Suppress info noise in cron
 </code></pre>
 
-<h3>Testing Environment</h3>
-<pre><code># capcat-test.yml
-network:
-  connect_timeout: 3
-  read_timeout: 3
-  max_retries: 0
-
-processing:
-  max_workers: 2
-  download_images: false
-  download_videos: false
-
-logging:
-  default_level: &quot;WARNING&quot;
-  use_colors: false
-</code></pre>
-
-<h2>Security Configuration</h2>
-
-<h3>API Keys and Secrets</h3>
-
-<p>Use environment variables for sensitive data:</p>
-
-<pre><code># Configuration file
-custom_config:
-  api_key: &quot;${NEWS_API_KEY}&quot;
-  secret_token: &quot;${SECRET_TOKEN}&quot;
-  database_url: &quot;${DATABASE_URL}&quot;
-</code></pre>
-
-<pre><code># Environment variables
-export NEWS_API_KEY=&quot;your-api-key-here&quot;
-export SECRET_TOKEN=&quot;your-secret-token&quot;
-export DATABASE_URL=&quot;postgresql://user:pass@localhost/db&quot;
-</code></pre>
-
-<h3>User Agent Configuration</h3>
-
-<p>Use realistic user agents to avoid being blocked:</p>
-
-<pre><code>network:
-  user_agent: &quot;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36&quot;
-</code></pre>
-
-<h3>Rate Limiting</h3>
-
-<p>Configure appropriate rate limits to respect server resources:</p>
-
-<pre><code># Global rate limiting
-network:
-  retry_delay: 2.0
-
-# Per-source rate limiting
-rate_limit: 1.5  # Minimum 1.5 seconds between requests
-</code></pre>
-
-<h2>Performance Tuning</h2>
-
-<h3>High-Performance Configuration</h3>
-<pre><code>network:
-  connect_timeout: 8
-  read_timeout: 6
-  pool_connections: 50
-  pool_maxsize: 50
-
-processing:
-  max_workers: 16  # Adjust based on CPU cores
-  skip_existing: true
-  content_timeout: 20
-</code></pre>
-
-<h3>Memory-Constrained Configuration</h3>
+<h3>Research archival with PDFs</h3>
 <pre><code>processing:
-  max_workers: 4
+  max_workers: 4             # Slower but stable
+  download_images: true
+
+pdf:
+  max_pdf_size_bytes: 52428800   # Allow up to 50 MB
+  max_pdf_per_article: 20
+
+logging:
+  console_level: &quot;INFO&quot;
+</code></pre>
+
+<h3>Minimal disk usage</h3>
+<pre><code>processing:
+  download_images: false
   download_videos: false
   download_audio: false
   download_documents: false
-
-logging:
-  log_to_file: false  # Reduce memory usage
+  create_comments_file: false
 </code></pre>
 
-<h2>Configuration Examples</h2>
+<h2>Regenerating Global-settings.yaml</h2>
 
-<h3>News Aggregation Setup</h3>
-<pre><code># Optimized for news aggregation
-processing:
-  max_workers: 12
-  download_images: true
-  download_videos: false
+<p>After a Capcat upgrade, new settings may have been added to the template. To add them without losing your edits, compare with the latest template:</p>
 
-sources:
-  priority:
-    - &quot;bbc&quot;
-    - &quot;guardian&quot;
-    - &quot;bbc&quot;
-
-bundles:
-  daily_news:
-    - &quot;bbc&quot;
-    - &quot;guardian&quot;
-    - &quot;bbc&quot;
-    count: 50
+<pre><code># Generate fresh template to a temp file and diff
+capcat settings &gt; /tmp/latest-settings.yaml
+diff Config/Global-settings.yaml /tmp/latest-settings.yaml
 </code></pre>
 
-<h3>Research Configuration</h3>
-<pre><code># Optimized for research/archival
-processing:
-  download_images: true
-  download_videos: true
-  download_documents: true
-  skip_existing: false
+<p>Or overwrite completely (back up your edits first):</p>
 
-logging:
-  default_level: &quot;DEBUG&quot;
-  log_to_file: true
-
-output:
-  create_date_folders: true
-  sanitize_filenames: true
+<pre><code>cp Config/Global-settings.yaml Config/Global-settings.yaml.bak
+capcat settings --force
 </code></pre>
 
-<h2>Configuration Management</h2>
-
-<h3>Loading Custom Configuration</h3>
-<pre><code># Specify configuration file
-export CAPCAT_CONFIG_FILE=&quot;config/production.yml&quot;
-capcat bundle tech --count 10
-
-# Multiple configuration files (merged in order)
-export CAPCAT_CONFIG_FILES=&quot;config/base.yml,config/production.yml&quot;
-</code></pre>
-
-<h3>Configuration Validation Script</h3>
-<pre><code>#!/usr/bin/env python3
-&quot;&quot;&quot;Configuration validation script.&quot;&quot;&quot;
-
-import yaml
-from pathlib import Path
-from core.config import load_config, validate_config
-
-def validate_config_file(config_path):
-    &quot;&quot;&quot;Validate a configuration file.&quot;&quot;&quot;
-    try:
-        config = load_config(config_path)
-        errors = validate_config(config)
-
-        if errors:
-            print(f&quot;Configuration errors in {config_path}:&quot;)
-            for error in errors:
-                print(f&quot;  - {error}&quot;)
-        else:
-            print(f&quot;Configuration valid: {config_path}&quot;)
-
-    except Exception as e:
-        print(f&quot;Failed to load {config_path}: {e}&quot;)
-
-if __name__ == &quot;__main__&quot;:
-    for config_file in [&quot;capcat.yml&quot;, &quot;capcat.json&quot;]:
-        if Path(config_file).exists():
-            validate_config_file(config_file)
-</code></pre>
-
-
-
-<em>This configuration guide covers all aspects of Capcat configuration management. For source-specific configuration details, see the Source Development Guide.</em>
+<em>For source-specific configuration details, see the Source Development Guide.</em>
 
 <script type="module">
   import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';

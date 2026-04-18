@@ -187,11 +187,6 @@ logging:
   file_level: &quot;DEBUG&quot;          # Log level for file output
   console_level: &quot;INFO&quot;        # Log level for console output
 
-  # Log Formatting
-  use_colors: true             # Colored console output
-  include_timestamps: true     # Include timestamps in logs
-  include_module_names: true   # Include module/function names in logs
-
   # File Logging
   auto_create_log_dir: true    # Automatically create log directories
   max_log_file_size: 10485760  # Max log file size in bytes (10MB)
@@ -201,16 +196,7 @@ logging:
 # UI CONFIGURATION
 # ============================================================
 ui:
-  # Progress Animations
   progress_spinner_style: &quot;dots&quot;     # Spinner style: dots, wave, loading, pulse, bounce, modern
-  batch_spinner_style: &quot;activity&quot;    # Batch spinner: activity, progress, pulse, wave, dots, scan
-  progress_bar_width: 25             # Width of progress bars in characters
-  show_progress_animations: true     # Enable/disable progress animations
-
-  # Visual Feedback
-  use_emojis: true                   # Use emojis in output (disable per CLAUDE.md)
-  use_colors: true                   # Colored terminal output
-  show_detailed_progress: false      # Show detailed article-level progress
 </code></pre>
 
 <h3>capcat.json Structure</h3>
@@ -246,21 +232,12 @@ ui:
     &quot;default_level&quot;: &quot;INFO&quot;,
     &quot;file_level&quot;: &quot;DEBUG&quot;,
     &quot;console_level&quot;: &quot;INFO&quot;,
-    &quot;use_colors&quot;: true,
-    &quot;include_timestamps&quot;: true,
-    &quot;include_module_names&quot;: true,
     &quot;auto_create_log_dir&quot;: true,
     &quot;max_log_file_size&quot;: 10485760,
     &quot;log_file_backup_count&quot;: 5
   },
   &quot;ui&quot;: {
-    &quot;progress_spinner_style&quot;: &quot;dots&quot;,
-    &quot;batch_spinner_style&quot;: &quot;activity&quot;,
-    &quot;progress_bar_width&quot;: 25,
-    &quot;show_progress_animations&quot;: true,
-    &quot;use_emojis&quot;: true,
-    &quot;use_colors&quot;: true,
-    &quot;show_detailed_progress&quot;: false
+    &quot;progress_spinner_style&quot;: &quot;dots&quot;
   }
 }
 </code></pre>
@@ -338,7 +315,7 @@ processing = ProcessingConfig(
 </code></pre>
 
 <h3>UIConfig</h3>
-<p>Location: Application/core/config.py:68</p>
+<p>Location: Application/core/config.py:80</p>
 
 <h4>Purpose:</h4> User interface and experience configuration settings.
 
@@ -346,12 +323,6 @@ processing = ProcessingConfig(
 
 <ul>
 <li><h4>progress_spinner_style</h4> → str</li>
-<li><h4>batch_spinner_style</h4> → str</li>
-<li><h4>progress_bar_width</h4> → int</li>
-<li><h4>show_progress_animations</h4> → bool</li>
-<li><h4>use_emojis</h4> → bool</li>
-<li><h4>use_colors</h4> → bool</li>
-<li><h4>show_detailed_progress</h4> → bool</li>
 </ul>
 
 <h4>Spinner Styles:</h4>
@@ -371,14 +342,12 @@ processing = ProcessingConfig(
 <pre><code>from core.config import UIConfig
 
 ui = UIConfig(
-    progress_spinner_style=&quot;wave&quot;,
-    use_emojis=False,  # Per CLAUDE.md requirement
-    show_detailed_progress=True
+    progress_spinner_style=&quot;wave&quot;
 )
 </code></pre>
 
 <h3>LoggingConfig</h3>
-<p>Location: Application/core/config.py:88</p>
+<p>Location: Application/core/config.py:91</p>
 
 <h4>Purpose:</h4> Logging-related configuration settings.
 
@@ -388,9 +357,6 @@ ui = UIConfig(
 <li><h4>default_level</h4> → str</li>
 <li><h4>file_level</h4> → str</li>
 <li><h4>console_level</h4> → str</li>
-<li><h4>use_colors</h4> → bool</li>
-<li><h4>include_timestamps</h4> → bool</li>
-<li><h4>include_module_names</h4> → bool</li>
 <li><h4>auto_create_log_dir</h4> → bool</li>
 <li><h4>max_log_file_size</h4> → int</li>
 <li><h4>log_file_backup_count</h4> → int</li>
@@ -409,8 +375,8 @@ ui = UIConfig(
 <pre><code>from core.config import LoggingConfig
 
 logging = LoggingConfig(
-    default_level=&quot;DEBUG&quot;,
-    use_colors=False,
+    console_level=&quot;DEBUG&quot;,
+    file_level=&quot;DEBUG&quot;,
     max_log_file_size=20971520  # 20MB
 )
 </code></pre>
@@ -926,8 +892,7 @@ processing:
   download_documents: true
 
 logging:
-  default_level: &quot;WARNING&quot;
-  use_colors: true
+  console_level: &quot;WARNING&quot;
 </code></pre>
 
 <h3>Debug Setup</h3>
@@ -942,11 +907,6 @@ logging:
   default_level: &quot;DEBUG&quot;
   file_level: &quot;DEBUG&quot;
   console_level: &quot;DEBUG&quot;
-  include_timestamps: true
-  include_module_names: true
-
-ui:
-  show_detailed_progress: true
 </code></pre>
 
 <h3>Minimal Setup</h3>
@@ -956,12 +916,7 @@ ui:
   download_documents: false
 
 logging:
-  default_level: &quot;ERROR&quot;
-  use_colors: false
-
-ui:
-  show_progress_animations: false
-  use_emojis: false
+  console_level: &quot;ERROR&quot;
 </code></pre>
 
 <h2>Source Code Locations</h2>
@@ -970,8 +925,8 @@ ui:
 <ul>
 <li><code>NetworkConfig</code> - Application/core/config.py:18</li>
 <li><code>ProcessingConfig</code> - Application/core/config.py:42</li>
-<li><code>UIConfig</code> - Application/core/config.py:68</li>
-<li><code>LoggingConfig</code> - Application/core/config.py:88</li>
+<li><code>UIConfig</code> - Application/core/config.py:80</li>
+<li><code>LoggingConfig</code> - Application/core/config.py:91</li>
 <li><code>FetchNewsConfig</code> - Application/core/config.py:108</li>
 <li><code>ConfigManager</code> - Application/core/config.py:161</li>
 </ul>

@@ -693,11 +693,11 @@ if protection_result.is_aggregator:
 <ol>
 <li>Command-line arguments</li>
 <li>Environment variables</li>
-<li>Configuration files (<code>capcat.yml</code>)</li>
+<li>Configuration files (<code>Config/Global-settings.yaml</code>)</li>
 <li>Default values</li>
 </ol>
 
-<pre><code># Example: capcat.yml
+<pre><code># Example: Config/Global-settings.yaml
 network:
   connect_timeout: 10
   read_timeout: 8
@@ -705,12 +705,11 @@ network:
 
 processing:
   max_workers: 8
-  download_images: true
-  download_videos: false
+  article_count: 30
 
 logging:
-  default_level: &quot;INFO&quot;
-  use_colors: true
+  console_level: INFO
+  file_level: DEBUG
 </code></pre>
 
 <h2>Template System Architecture</h2>

@@ -886,25 +886,26 @@ logger.critical(&quot;Critical message&quot;)
 
 <h4>Signature:</h4>
 <pre><code>def setup_logging(
-    log_level: str = &quot;INFO&quot;,
-    log_file: str = None,
-    use_colors: bool = True
-) -&gt; None
+    level: str = &quot;INFO&quot;,
+    log_file: Optional[str] = None,
+    quiet: bool = False,
+    verbose: bool = False,
+) -&gt; logging.Logger
 </code></pre>
 
 <h4>Parameters:</h4>
 <ul>
-<li><code>log_level</code> (str, default=&quot;INFO&quot;) - Log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)</li>
+<li><code>level</code> (str, default=&quot;INFO&quot;) - Log level (DEBUG, INFO, WARNING, ERROR)</li>
 <li><code>log_file</code> (str, optional) - Path to log file</li>
-<li><code>use_colors</code> (bool, default=True) - Enable colored console output</li>
+<li><code>quiet</code> (bool, default=False) - Suppress info messages</li>
+<li><code>verbose</code> (bool, default=False) - Enable debug output</li>
 </ul>
 
 <h4>Behavior:</h4>
 <ul>
 <li>Configures root logger</li>
-<li>Sets up console handler with optional colors</li>
+<li>Sets up console handler</li>
 <li>Sets up file handler if log_file specified</li>
-<li>Formats with timestamps and module names</li>
 </ul>
 
 <h4>Example:</h4>
@@ -912,9 +913,8 @@ logger.critical(&quot;Critical message&quot;)
 
 # Setup logging
 setup_logging(
-    log_level=&quot;DEBUG&quot;,
-    log_file=&quot;capcat.log&quot;,
-    use_colors=True
+    level=&quot;DEBUG&quot;,
+    log_file=&quot;capcat.log&quot;
 )
 
 # Use logger
