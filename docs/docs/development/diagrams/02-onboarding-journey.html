@@ -89,7 +89,7 @@
     title Two-Week Onboarding Journey
     Day 1 : Environment Setup
           pipx install capcat
-          cd ~/my-vault && capcat init
+          cd ~/my-vault
           First successful capcat catch
           Join team channels
     Day 2-3 : Codebase Exploration
@@ -143,11 +143,7 @@
 
     E -->|Yes| F[Choose or create vault directory]
     F --> H[cd ~/my-vault]
-    H --> I[capcat init]
-    I --> J{Vault scaffolded?}
-
-    J -->|No| G
-    J -->|Yes| K[capcat catch]
+    H --> K[capcat catch]
     K --> L{First fetch works?}
 
     L -->|No| G
@@ -215,10 +211,10 @@
 
 <div class="mermaid">mindmap
   root((Week 1Exercises))
-    Exercise 1: Install + Init
+    Exercise 1: Install + First Run
       pipx install capcat
       cd into vault directory
-      capcat init
+      capcat catch
       Explore scaffolded Config/
     Exercise 2: First Fetch
       capcat catch — interactive TUI
@@ -265,8 +261,8 @@
     N->>C: Explore capcat.py and cli.py
     C-->>N: Main application logic + vault resolution
 
-    N->>N: Run capcat init in a test vault
-    Note over N: Self-test: observe scaffolded Config/ structure
+    N->>N: Run capcat catch in a test vault
+    Note over N: Self-test: observe scaffolded Config/ structure on first run
 
     N->>M: Architecture questions
     M-->>N: Clarifications on vault vs tool boundary

@@ -138,11 +138,11 @@ capcat list bundles
 
 <h2>Project Setup</h2>
 
-<p>Capcat uses a project directory to store your config, sources, and output. The first command you run automatically initializes the current directory as a capcat project. You can also initialize explicitly:</p>
+<p>Capcat uses a project directory to store your config, sources, and output. The first command you run automatically initializes the current directory as a capcat project:</p>
 
 <pre><code>mkdir my-news
 cd my-news
-capcat init
+capcat catch
 </code></pre>
 
 <p>This creates:</p>
@@ -166,7 +166,7 @@ capcat init
 └── Capcats/                         # Single-article output (git-ignored)
 </div>
 
-<p><strong>Auto-init:</strong> Running any capcat command (<code>capcat catch</code>, <code>capcat fetch</code>, etc.) in an uninitialised directory automatically runs <code>capcat init</code> silently.</p>
+<p><strong>Auto-init:</strong> Running any capcat command in an uninitialised directory automatically scaffolds the vault structure on first use.</p>
 
 <p><strong>Theme upgrades:</strong> When the capcat package updates, themes are automatically refreshed in <code>Config/themes/</code> on next use (with a confirmation prompt in CLI mode).</p>
 
