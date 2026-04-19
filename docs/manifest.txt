@@ -1,5 +1,5 @@
 Capcat Documentation Manifest
-Generated: 2026-04-18 18:47:39 UTC
+Generated: 2026-04-19 11:07:20 UTC
 Success rate: 2/2 tasks
 
 Generated Documentation:
