@@ -85,3 +85,48 @@ class TestMediumFetch:
             success, folder = source.fetch_article_content(article, str(tmp_path))
 
         assert success is False
+
+
+class TestMediumFallbackLoop:
+    def test_failed_medium_fetch_does_not_recurse(self, tmp_path):
+        """Regression: when Medium specialized fetch returns (False, None),
+        the generic fallback must not re-enter the specialized handler.
+
+        Bug: GenericArticleFetcher inherited ArticleFetcher's specialized-source
+        check, so process_article -> medium fails -> generic fallback ->
+        fetch_article_content -> process_article looped infinitely.
+        """
+        import requests
+        from capcat.core.unified_article_processor import (
+            UnifiedArticleProcessor,
+            get_unified_processor,
+        )
+
+        call_count = [0]
+        _orig = UnifiedArticleProcessor.process_article
+
+        def _tracking(self_inst, url, title, index, base_folder, **kw):
+            call_count[0] += 1
+            if call_count[0] > 2:
+                raise AssertionError(
+                    f"Infinite loop: process_article called {call_count[0]} times"
+                )
+            return _orig(self_inst, url, title, index, base_folder, **kw)
+
+        mock_session = MagicMock(spec=requests.Session)
+        mock_session.get.side_effect = Exception("403 mocked")
+        mock_session.head.side_effect = Exception("403 mocked")
+
+        with patch.object(MediumSource, "fetch_article_content", return_value=(False, None)):
+            with patch.object(UnifiedArticleProcessor, "process_article", _tracking):
+                with patch("capcat.core.session_pool.get_global_session", return_value=mock_session):
+                    get_unified_processor().process_article(
+                        url="https://medium.com/@user/test-loop-regression",
+                        title="Test Article",
+                        index=0,
+                        base_folder=str(tmp_path),
+                    )
+
+        assert call_count[0] == 1, (
+            f"process_article called {call_count[0]} times — expected 1 (no recursion)"
+        )

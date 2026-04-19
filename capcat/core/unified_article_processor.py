@@ -244,6 +244,10 @@ class UnifiedArticleProcessor:
         fetcher = GenericArticleFetcher(
             session, download_files=download_files
         )
+        # Prevent re-entering the specialized-source dispatcher, which would
+        # cause process_article -> specialized fail -> generic -> process_article
+        # infinite loop for URLs handled by specialized sources (Medium, etc.).
+        fetcher._use_specialized_sources = False
 
         return fetcher.fetch_article_content(
             title, url, index, base_folder, progress_callback

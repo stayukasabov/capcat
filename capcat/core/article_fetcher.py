@@ -184,6 +184,9 @@ class ArticleFetcher(ABC):
         self.source_code = source_code
         self.generate_html = generate_html
         self.logger = get_logger(self.__class__.__name__)
+        # Set to False on GenericArticleFetcher to prevent re-entering the
+        # specialized-source dispatcher and causing an infinite loop.
+        self._use_specialized_sources = True
 
         # Initialize MediaProcessor for delegating media operations
         from .media_processor import MediaProcessor
@@ -397,8 +400,10 @@ class ArticleFetcher(ABC):
             from capcat.core.unified_article_processor import get_unified_processor as get_article_processor
             article_processor = get_article_processor()
 
-            # Check if this URL should be handled by a specialized source
-            if article_processor._registry.can_handle_url(url):
+            # Check if this URL should be handled by a specialized source.
+            # Skipped on GenericArticleFetcher (_use_specialized_sources=False)
+            # to prevent the fallback path from looping back into itself.
+            if self._use_specialized_sources and article_processor._registry.can_handle_url(url):
                 self.logger.info(f"Single article: Specialized source detected for {url}")
 
                 # Get global update mode setting
