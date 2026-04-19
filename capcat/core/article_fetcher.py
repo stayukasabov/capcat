@@ -332,7 +332,7 @@ class ArticleFetcher(ABC):
             # This allows us to create proper error articles instead of
             # failing silently
             if response.status_code >= 400:
-                self.logger.warning(
+                self.logger.debug(
                     f"HTTP {response.status_code} for {url}"
                 )
 

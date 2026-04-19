@@ -70,3 +70,81 @@ class TestNetworkRetryRespectsConfig:
         assert counter["n"] == 4, (
             f"Expected 4 attempts (1 + 3 retries), got {counter['n']}."
         )
+
+
+class TestNetworkRetryDoesNotRetry4xx:
+    """network_retry must not retry HTTP 4xx errors (client errors are permanent)."""
+
+    def _mock_config(self, max_retries: int = 3):
+        cfg = MagicMock()
+        cfg.network.max_retries = max_retries
+        cfg.network.retry_delay = 0.0
+        return cfg
+
+    def test_http_403_not_retried(self):
+        """HTTPError (403) must cause one attempt only, no retries."""
+        import requests
+        from capcat.core.retry import network_retry
+
+        call_count = {"n": 0}
+
+        def raises_403():
+            call_count["n"] += 1
+            response = MagicMock()
+            response.status_code = 403
+            raise requests.exceptions.HTTPError(response=response)
+
+        decorated = network_retry(raises_403)
+
+        with patch("capcat.core.retry.get_config", return_value=self._mock_config(3)):
+            with pytest.raises(requests.exceptions.HTTPError):
+                decorated()
+
+        assert call_count["n"] == 1, (
+            f"Expected 1 attempt (no retry on 403), got {call_count['n']}. "
+            "network_retry is retrying HTTP 4xx errors."
+        )
+
+    def test_http_404_not_retried(self):
+        """HTTPError (404) must cause one attempt only, no retries."""
+        import requests
+        from capcat.core.retry import network_retry
+
+        call_count = {"n": 0}
+
+        def raises_404():
+            call_count["n"] += 1
+            response = MagicMock()
+            response.status_code = 404
+            raise requests.exceptions.HTTPError(response=response)
+
+        decorated = network_retry(raises_404)
+
+        with patch("capcat.core.retry.get_config", return_value=self._mock_config(3)):
+            with pytest.raises(requests.exceptions.HTTPError):
+                decorated()
+
+        assert call_count["n"] == 1, (
+            f"Expected 1 attempt (no retry on 404), got {call_count['n']}."
+        )
+
+    def test_connection_error_still_retried(self):
+        """ConnectionError must still be retried (it is transient)."""
+        import requests
+        from capcat.core.retry import network_retry
+
+        call_count = {"n": 0}
+
+        def raises_connection_error():
+            call_count["n"] += 1
+            raise requests.exceptions.ConnectionError("simulated")
+
+        decorated = network_retry(raises_connection_error)
+
+        with patch("capcat.core.retry.get_config", return_value=self._mock_config(1)):
+            with pytest.raises(requests.exceptions.ConnectionError):
+                decorated()
+
+        assert call_count["n"] == 2, (
+            f"Expected 2 attempts (1 + 1 retry), got {call_count['n']}."
+        )

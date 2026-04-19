@@ -199,7 +199,7 @@ class MediumSource(BaseSource):
             return True, article_folder
 
         except Exception as e:
-            self.logger.error(f"Failed to fetch Medium content directly: {e}")
+            self.logger.debug(f"Failed to fetch Medium content directly: {e}")
             return False, None
 
     # Custom image downloading methods removed - now using UnifiedMediaProcessor
@@ -318,7 +318,7 @@ class MediumSource(BaseSource):
             return "none"
 
         except Exception as e:
-            self.logger.warning(
+            self.logger.debug(
                 f"Error checking paywall status for {url}: {e}"
             )
             return "none"

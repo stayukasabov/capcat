@@ -93,7 +93,7 @@ def exponential_backoff_retry(
                     time.sleep(retry_delay)
                 except Exception as e:
                     # Non-retryable exception, fail immediately
-                    logger.error(
+                    logger.debug(
                         f"Non-retryable error in {func.__name__}: {e}"
                     )
                     raise
@@ -126,7 +126,6 @@ def network_retry(func: Callable) -> Callable:
             requests.exceptions.ConnectionError,
             requests.exceptions.Timeout,
             requests.exceptions.ChunkedEncodingError,
-            requests.exceptions.RequestException,
         ),
         skip_after=None,  # Don't skip, raise exception after retries
     )(func)
