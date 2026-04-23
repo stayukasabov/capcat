@@ -18,13 +18,14 @@ def test_init_creates_config_dir(project_dir: Path):
     assert not (project_dir / "Config" / "capcat.yml").exists()
 
 
-def test_init_creates_source_dirs(project_dir: Path):
+def test_init_does_not_create_source_dirs(project_dir: Path):
+    """Source dirs are owned by SourceConfigMirror, not init_project.
+    Pre-creating them causes is_mirrored() to return True on first fetch,
+    skipping run_first_mirror() and leaving the vault with no YAMLs (B6)."""
     from capcat.commands.init import init_project
     init_project(project_dir)
     sources_active = project_dir / "Config" / "sources" / "active"
-    assert (sources_active / "config_driven" / "configs").is_dir()
-    assert (sources_active / "custom").is_dir()
-    assert (sources_active / "bundles").is_dir()
+    assert not sources_active.exists()
 
 
 def test_init_creates_gitignore(project_dir: Path):
