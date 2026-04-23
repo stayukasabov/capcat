@@ -36,7 +36,7 @@ class StreamlinedCommentProcessor:
         user_selector: str = ".hnuser",
         comment_text_selector: str = ".comment",
         depth_fn: Optional[Callable[[Any], int]] = None,
-        profile_url_fn: Optional[Callable[[str], str]] = None,
+        comment_permalink_fn: Optional[Callable[[str], str]] = None,
     ) -> List[Dict[str, Any]]:
         """
         Process comments preserving nesting depth.
@@ -48,9 +48,15 @@ class StreamlinedCommentProcessor:
             comment_text_selector: CSS selector for comment text
             depth_fn: Optional callable(element) -> int returning nesting depth.
                       If None, all comments get level=0.
+            comment_permalink_fn: Optional callable(comment_id: str) -> str that
+                      generates a direct comment URL from the comment element's id
+                      attribute. No username is passed or stored. If None, user_link
+                      falls back to '#'.
 
         Returns:
             List of comment dicts with 'level' field reflecting nesting depth.
+            'user' is always 'Anonymous'. 'user_link' is a comment permalink (no
+            username stored anywhere in the output).
         """
         comments = []
         comment_elements = soup.select(comment_selector)
@@ -66,7 +72,7 @@ class StreamlinedCommentProcessor:
                     comment_text_selector,
                     idx,
                     depth_fn=depth_fn,
-                    profile_url_fn=profile_url_fn,
+                    comment_permalink_fn=comment_permalink_fn,
                 )
                 if comment_data and comment_data["text"]:
                     comments.append(comment_data)
@@ -84,21 +90,21 @@ class StreamlinedCommentProcessor:
         comment_text_selector: str,
         index: int,
         depth_fn: Optional[Callable[[Any], int]] = None,
-        profile_url_fn: Optional[Callable[[str], str]] = None,
+        comment_permalink_fn: Optional[Callable[[str], str]] = None,
     ) -> Optional[Dict[str, Any]]:
         """
         Fast comment data extraction without deep processing.
+        Username is never read or stored. user_link is derived from the comment
+        element's id attribute via comment_permalink_fn so readers can validate
+        the comment on the source site without capcat retaining personal data.
+        Falls back to '#' when no permalink function is provided.
         """
-        comment_id = comment_elem.get("id", f"comment_{index}")
-
-        user_elem = comment_elem.select_one(user_selector)
-        user_name = "Anonymous"
-        user_link = "#"
-
-        if user_elem:
-            original_name = user_elem.get_text().strip()
-            if original_name and profile_url_fn:
-                user_link = profile_url_fn(original_name)
+        comment_id = comment_elem.get("id", "")
+        user_link = (
+            comment_permalink_fn(comment_id)
+            if comment_id and comment_permalink_fn
+            else "#"
+        )
 
         comment_text_elem = comment_elem.select_one(comment_text_selector)
         if not comment_text_elem:
@@ -115,7 +121,7 @@ class StreamlinedCommentProcessor:
 
         return {
             "id": comment_id,
-            "user": user_name,
+            "user": "Anonymous",
             "user_link": user_link,
             "text": comment_text,
             "level": depth,
@@ -205,7 +211,7 @@ class StreamlinedCommentProcessor:
             level = comment.get('level', 0)
             prefix = "> " * level  # e.g. "" / "> " / "> > "
 
-            md_content += f"{prefix}**{comment['user']}** ([profile]({comment['user_link']}))\n\n"
+            md_content += f"{prefix}**{comment['user']}** ([comment]({comment['user_link']}))\n\n"
 
             # Prefix each paragraph of the comment text
             for paragraph in comment['text'].split('\n\n'):
@@ -264,7 +270,7 @@ class StreamlinedCommentProcessor:
             <div class="comment" id="comment-{i}" {indent_style}>
                 <h3 class="comment-header">
                     <strong>{comment['user']}</strong>
-                    <a href="{comment['user_link']}" target="_blank" rel="noopener noreferrer" class="profile-link">(profile)</a>
+                    <a href="{comment['user_link']}" target="_blank" rel="noopener noreferrer" class="comment-link">(comment)</a>
                 </h3>
                 <div class="comment-text">
                     {formatted_text}

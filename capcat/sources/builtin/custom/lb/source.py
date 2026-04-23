@@ -42,7 +42,6 @@ _LB_SELECTORS = {
     "user_selector": ".byline a[href^='/~']:not([aria-hidden])",
     "comment_text_selector": ".comment_text",
     "depth_fn": _lb_depth,
-    "profile_url_fn": lambda n: f"https://lobste.rs/~{n}",
 }
 
 
