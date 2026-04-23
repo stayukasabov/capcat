@@ -1,9 +1,12 @@
-"""Regression tests for B4, B5, and B1 (2026-04-13) — source config mirror bugs.
+"""Regression tests for B4, B5, B1, and B6 — source config mirror bugs.
 
 B4: __pycache__/*.pyc files must not appear in the mirror manifest.
 B5: upgrade prompt must not fire when stdin is non-interactive.
 B1: declining an upgrade (or silent non-interactive decline) must NOT update
     builtin_hash in the manifest, so the upgrade offer re-appears next run.
+B6: init_project must not pre-create Config/sources/active dirs; is_mirrored()
+    must return False after a fresh init so run_first_mirror() is called on
+    the first fetch.
 """
 import sys
 from pathlib import Path
@@ -649,3 +652,55 @@ class TestConfigModifiedInteractivePrompt:
 
         assert c1[1].read_text() == "count: 30\n", "bbc should be updated"
         assert c2[1].read_text() == "count: 3\n", "guardian should be unchanged"
+
+
+# ---------------------------------------------------------------------------
+# B6 — init_project must not pre-create source dirs; is_mirrored stays False
+# ---------------------------------------------------------------------------
+
+class TestInitDoesNotPreCreateSourceDirs:
+    """B6 regression: init_project creating Config/sources/active dirs caused
+    is_mirrored() to return True immediately, skipping run_first_mirror() and
+    leaving users with no source YAML files on first fetch."""
+
+    def test_init_does_not_create_source_active_dirs(self, tmp_path):
+        """init_project must not create Config/sources/active/* directories."""
+        from capcat.commands.init import init_project
+        init_project(tmp_path)
+        sources_active = tmp_path / "Config" / "sources" / "active"
+        assert not sources_active.exists(), (
+            "init_project must not pre-create Config/sources/active — "
+            "SourceConfigMirror owns that directory"
+        )
+
+    def test_is_mirrored_false_after_fresh_init(self, tmp_path):
+        """is_mirrored() must return False after init_project so run_first_mirror() fires."""
+        from capcat.commands.init import init_project
+        from capcat.core.source_config_mirror import SourceConfigMirror
+        init_project(tmp_path)
+        mirror = SourceConfigMirror(tmp_path, tui_mode=False)
+        assert mirror.is_mirrored() is False, (
+            "is_mirrored() returned True after init — source YAMLs will never be copied"
+        )
+
+    def test_first_mirror_runs_after_init(self, tmp_path, monkeypatch):
+        """run_first_mirror() must be called (not check_for_upgrades) on first fetch after init."""
+        from capcat.commands.init import init_project
+        from capcat.core.source_config_mirror import SourceConfigMirror
+        init_project(tmp_path)
+
+        # Provide a minimal builtin config_driven dir with one YAML
+        builtin_cfg = tmp_path / "_builtin_cfg"
+        builtin_cfg.mkdir()
+        (builtin_cfg / "bbc.yaml").write_text("name: bbc\n")
+
+        mirror = SourceConfigMirror(tmp_path, tui_mode=False)
+        monkeypatch.setattr(mirror, "_builtin_config_driven_dir", lambda: builtin_cfg)
+        monkeypatch.setattr(mirror, "_builtin_custom_dir", lambda: tmp_path / "_empty_cust")
+        monkeypatch.setattr(mirror, "_builtin_bundles_dir", lambda: tmp_path / "_empty_bun")
+
+        assert not mirror.is_mirrored()
+        mirror.run_first_mirror()
+
+        user_yaml = tmp_path / "Config" / "sources" / "active" / "config_driven" / "configs" / "bbc.yaml"
+        assert user_yaml.exists(), "bbc.yaml must be copied by run_first_mirror after a fresh init"

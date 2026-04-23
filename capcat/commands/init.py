@@ -73,11 +73,9 @@ def init_project(root: Path, reinit: bool = False) -> None:
     themes_dir.mkdir(exist_ok=True)
     _copy_themes_to(themes_dir)
 
-    # Source config directories
-    sources_active = config_dir / "sources" / "active"
-    (sources_active / "config_driven" / "configs").mkdir(parents=True, exist_ok=True)
-    (sources_active / "custom").mkdir(parents=True, exist_ok=True)
-    (sources_active / "bundles").mkdir(parents=True, exist_ok=True)
+    # Source config directories are created by SourceConfigMirror on first fetch.
+    # Do not pre-create them here — an empty dir causes is_mirrored() to return
+    # True, which skips run_first_mirror() and leaves the vault with no YAMLs.
 
     gitignore = root / ".gitignore"
     if gitignore.exists():
