@@ -5,6 +5,7 @@ Compiles CSS custom properties from the design system into hardcoded values
 for performance optimization and self-contained HTML generation.
 """
 
+import base64
 import re
 from pathlib import Path
 from typing import Dict, Optional, Tuple
@@ -391,17 +392,60 @@ class DesignSystemCompiler:
             self.logger.error(f"Error extracting color definitions: {e}")
             return ""
 
+    def _build_font_face_css(self) -> str:
+        """
+        Extract @font-face rules from design-system.css and replace each
+        url("IBMPlex/filename.woff2") reference with a base64 data URI so
+        the generated HTML is fully self-contained for offline archiving.
+
+        Returns empty string if design-system.css or font files are missing.
+        Fonts that cannot be read are silently left with their original URL
+        so partial availability does not break the output.
+        """
+        if not self.design_system_path.exists():
+            return ""
+
+        try:
+            ds_css = self.design_system_path.read_text(encoding="utf-8")
+        except OSError:
+            return ""
+
+        font_face_blocks = re.findall(r'@font-face\s*\{[^}]+\}', ds_css, re.DOTALL)
+        if not font_face_blocks:
+            return ""
+
+        def _to_data_uri(match: re.Match) -> str:
+            url_value = match.group(1).strip("\"'")
+            font_path = self.themes_dir / url_value
+            if not font_path.exists():
+                return match.group(0)
+            try:
+                encoded = base64.b64encode(font_path.read_bytes()).decode("ascii")
+                return f'url("data:font/woff2;base64,{encoded}")'
+            except OSError:
+                return match.group(0)
+
+        resolved_blocks = [
+            re.sub(r'url\(["\']?([^"\')\s]+)["\']?\)', _to_data_uri, block)
+            for block in font_face_blocks
+        ]
+
+        self.logger.debug(f"Embedded {len(resolved_blocks)} @font-face rules as data URIs")
+        return "/* IBM Plex Serif - embedded for offline archiving */\n" + "\n\n".join(resolved_blocks) + "\n\n"
+
     def replace_css_variables(self, css_content: str) -> str:
         """
         Replace design system var() references with hardcoded values.
         Injects color variable definitions for theme switching.
+        Injects @font-face rules with base64 data URIs for offline archiving.
         Removes @import statements since variables are resolved.
 
         Args:
             css_content: CSS content with var() references
 
         Returns:
-            CSS content with typography/spacing hardcoded, colors injected
+            CSS content with typography/spacing hardcoded, colors injected,
+            and IBM Plex Serif fonts embedded as data URIs.
         """
         computed_values = self.get_computed_values()
 
@@ -412,10 +456,17 @@ class DesignSystemCompiler:
         # Remove @import statements - no longer needed after compilation
         compiled_css = re.sub(r'@import\s+url\([\'"]?[^\'"]+[\'"]?\);?\s*', '', css_content)
 
-        # Inject color variable definitions at the top
+        # Inject @font-face rules with data URIs at the very top
+        font_face_css = self._build_font_face_css()
+
+        # Inject color variable definitions
         color_definitions = self._extract_color_variable_definitions()
         if color_definitions:
             compiled_css = color_definitions + "\n" + compiled_css
+
+        # Prepend font-face before everything else
+        if font_face_css:
+            compiled_css = font_face_css + compiled_css
 
         # Preserve only COLOR variables for theme switching
         # Everything else (typography, spacing, layout) gets hardcoded
