@@ -1,5 +1,5 @@
 Capcat Documentation Manifest
-Generated: 2026-04-23 18:23:44 UTC
+Generated: 2026-04-23 20:30:17 UTC
 Success rate: 2/2 tasks
 
 Generated Documentation:
@@ -427,6 +427,7 @@ Generated Documentation:
   - superpowers/plans/2026-04-16-per-source-pdf-settings.md
   - superpowers/plans/2026-04-17-source-update-ux.md
   - superpowers/plans/2026-04-18-capcat-casestudy-part-two.md
+  - superpowers/plans/2026-04-23-hn-gdpr-comment-permalink.md
   - superpowers/specs/2026-03-15-breadcrumb-phase1-folder-naming-design.md
   - superpowers/specs/2026-03-15-breadcrumb-phase2-html-rendering-design.md
   - superpowers/specs/2026-03-15-claude-md-context-engineering-design.md
@@ -453,5 +454,5 @@ Generated Documentation:
   - superpowers/specs/2026-04-18-capcat-casestudy-part-two-design.md
   - troubleshooting.md
 
-Total files: 777
-Documentation size: 44.5 MB
+Total files: 778
+Documentation size: 44.6 MB

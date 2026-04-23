@@ -30,7 +30,7 @@ def __init__(self, max_comments: int = 100, max_links_per_comment: int = 5)
 ##### process_comments_flattened
 
 ```python
-def process_comments_flattened(self, soup: BeautifulSoup, comment_selector: str, user_selector: str = '.hnuser', comment_text_selector: str = '.comment', depth_fn: Optional[Callable[[Any], int]] = None, profile_url_fn: Optional[Callable[[str], str]] = None) -> List[Dict[str, Any]]
+def process_comments_flattened(self, soup: BeautifulSoup, comment_selector: str, user_selector: str = '.hnuser', comment_text_selector: str = '.comment', depth_fn: Optional[Callable[[Any], int]] = None, comment_permalink_fn: Optional[Callable[[str], str]] = None) -> List[Dict[str, Any]]
 ```
 
 Process comments preserving nesting depth.
@@ -42,9 +42,15 @@ Args:
     comment_text_selector: CSS selector for comment text
     depth_fn: Optional callable(element) -> int returning nesting depth.
               If None, all comments get level=0.
+    comment_permalink_fn: Optional callable(comment_id: str) -> str that
+              generates a direct comment URL from the comment element's id
+              attribute. No username is passed or stored. If None, user_link
+              falls back to '#'.
 
 Returns:
     List of comment dicts with 'level' field reflecting nesting depth.
+    'user' is always 'Anonymous'. 'user_link' is a comment permalink (no
+    username stored anywhere in the output).
 
 **Parameters:**
 
@@ -54,17 +60,21 @@ Returns:
 - `user_selector` (str) *optional*
 - `comment_text_selector` (str) *optional*
 - `depth_fn` (Optional[Callable[[Any], int]]) *optional*
-- `profile_url_fn` (Optional[Callable[[str], str]]) *optional*
+- `comment_permalink_fn` (Optional[Callable[[str], str]]) *optional*
 
 **Returns:** List[Dict[str, Any]]
 
 ##### _extract_comment_data_fast
 
 ```python
-def _extract_comment_data_fast(self, comment_elem, user_selector: str, comment_text_selector: str, index: int, depth_fn: Optional[Callable[[Any], int]] = None, profile_url_fn: Optional[Callable[[str], str]] = None) -> Optional[Dict[str, Any]]
+def _extract_comment_data_fast(self, comment_elem, user_selector: str, comment_text_selector: str, index: int, depth_fn: Optional[Callable[[Any], int]] = None, comment_permalink_fn: Optional[Callable[[str], str]] = None) -> Optional[Dict[str, Any]]
 ```
 
 Fast comment data extraction without deep processing.
+Username is never read or stored. user_link is derived from the comment
+element's id attribute via comment_permalink_fn so readers can validate
+the comment on the source site without capcat retaining personal data.
+Falls back to '#' when no permalink function is provided.
 
 **Parameters:**
 
@@ -74,7 +84,7 @@ Fast comment data extraction without deep processing.
 - `comment_text_selector` (str)
 - `index` (int)
 - `depth_fn` (Optional[Callable[[Any], int]]) *optional*
-- `profile_url_fn` (Optional[Callable[[str], str]]) *optional*
+- `comment_permalink_fn` (Optional[Callable[[str], str]]) *optional*
 
 **Returns:** Optional[Dict[str, Any]]
 
