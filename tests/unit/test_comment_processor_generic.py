@@ -58,7 +58,6 @@ _LB_SELECTORS = {
     "comment_selector": ".comment",
     "user_selector": ".byline a[href^='/~']:not([aria-hidden])",
     "comment_text_selector": ".comment_text",
-    "profile_url_fn": lambda n: f"https://lobste.rs/~{n}",
 }
 
 
@@ -81,18 +80,17 @@ def test_lb_selectors_via_generic_interface():
     assert len(comments) == 1
 
 
-def test_lb_profile_url_uses_tilde_prefix():
+def test_lb_user_link_is_hash_no_username_stored():
     """
-    LB profile URL must use /~username format (not /u/username).
-    user_link must be https://lobste.rs/~<name>, not '#'.
-    Regression for: .user selector was outdated, /u/ was wrong URL format.
+    LB user_link must be '#' — no username stored in output (GDPR).
+    LB has no comment_permalink_fn so the fallback '#' is used.
     """
     soup = BeautifulSoup(_LB_HTML, "html.parser")
     processor = StreamlinedCommentProcessor()
     comments = processor.process_comments_flattened(soup, **_LB_SELECTORS)
     assert len(comments) == 1
-    assert comments[0]["user_link"] == "https://lobste.rs/~bob", (
-        f"Expected https://lobste.rs/~bob, got {comments[0]['user_link']}"
+    assert comments[0]["user_link"] == "#", (
+        f"user_link must be '#' (no username stored), got {comments[0]['user_link']}"
     )
     assert comments[0]["user"] == "Anonymous"
 
@@ -235,7 +233,7 @@ def test_markdown_level_one_has_blockquote_prefix():
     result = processor.generate_inline_comments_markdown(comments, "Title", "https://example.com")
     assert "> Reply comment" in result
     # Header line must have exactly one prefix, not two
-    assert "> **Anonymous** ([profile]" in result
+    assert "> **Anonymous** ([comment]" in result
     assert "> **Anonymous** > " not in result
 
 
@@ -362,13 +360,13 @@ _LB_HTML_WITH_USERS = """
 
 
 def test_lb_comment_user_names_extracted():
-    """Display name is always 'Anonymous'; profile link encodes the real username."""
+    """Display name is always 'Anonymous'; user_link is '#' — no username stored (GDPR)."""
     from capcat.sources.builtin.custom.lb.source import _LB_SELECTORS
     soup = BeautifulSoup(_LB_HTML_WITH_USERS, "html.parser")
     processor = StreamlinedCommentProcessor()
     comments = processor.process_comments_flattened(soup, **_LB_SELECTORS)
     assert len(comments) == 2
     assert comments[0]["user"] == "Anonymous", "Display name must always be 'Anonymous'"
-    assert comments[0]["user_link"] == "https://lobste.rs/~alice", "Profile link must be https://lobste.rs/~<username>"
+    assert comments[0]["user_link"] == "#", "user_link must be '#' — no username stored"
     assert comments[1]["user"] == "Anonymous", "Missing user element should fall back to 'Anonymous'"
     assert comments[1]["user_link"] == "#", "Missing user element should produce '#' link"
