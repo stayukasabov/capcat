@@ -33,20 +33,19 @@ _HN_SELECTORS = {
     "comment_selector": ".comment-tree .athing",
     "user_selector": ".hnuser",
     "comment_text_selector": ".comment",
-    "comment_permalink_fn": lambda cid: f"https://news.ycombinator.com/item?id={cid}",
 }
 
 
 class TestCommentPermalinkReplacesProfileUrl:
-    def test_user_link_is_hn_item_permalink(self):
-        """user_link must be a comment permalink, not a user profile URL."""
+    def test_user_link_is_hash_no_external_url(self):
+        """user_link must be '#' — no external URL that could reveal commenter identity."""
         soup = _make_hn_soup("43000001", "seizethecheese", "Great point.")
         processor = create_optimized_comment_processor(max_comments=None)
         comments = processor.process_comments_flattened(soup, **_HN_SELECTORS)
         assert len(comments) == 1
         link = comments[0]["user_link"]
-        assert "news.ycombinator.com/item?id=43000001" in link, (
-            f"user_link must be comment permalink, got: {link}"
+        assert link == "#", (
+            f"user_link must be '#' (no external URL stored), got: {link}"
         )
 
     def test_username_not_in_user_link(self):
@@ -66,15 +65,17 @@ class TestCommentPermalinkReplacesProfileUrl:
         comments = processor.process_comments_flattened(soup, **_HN_SELECTORS)
         assert comments[0]["user"] == "Anonymous"
 
-    def test_markdown_output_uses_comment_label(self):
-        """Markdown output must use '(comment)' label, not '(profile)'."""
+    def test_markdown_output_has_no_external_link(self):
+        """Markdown output must not contain any external link for the commenter."""
         soup = _make_hn_soup("43000004", "seizethecheese", "Test comment.")
         processor = create_optimized_comment_processor(max_comments=None)
         comments = processor.process_comments_flattened(soup, **_HN_SELECTORS)
         md = processor.generate_inline_comments_markdown(
             comments, "Test Article", "https://news.ycombinator.com/item?id=99", None
         )
-        assert "[comment]" in md, "Markdown must use '[comment]' label"
+        assert "news.ycombinator.com/item?id=43000004" not in md, (
+            "Markdown must not link to commenter's HN page"
+        )
         assert "profile" not in md, "Markdown must not use 'profile' label"
 
     def test_markdown_output_contains_no_username(self):
@@ -89,13 +90,16 @@ class TestCommentPermalinkReplacesProfileUrl:
             "Username must not appear anywhere in markdown output"
         )
 
-    def test_html_output_uses_comment_label(self):
-        """HTML output must use 'comment' link text, not 'profile'."""
+    def test_html_output_has_no_external_commenter_link(self):
+        """HTML output must not contain any external link to the commenter's page."""
         soup = _make_hn_soup("43000006", "seizethecheese", "HTML test.")
         processor = create_optimized_comment_processor(max_comments=None)
         comments = processor.process_comments_flattened(soup, **_HN_SELECTORS)
         html = processor.generate_inline_comments_html(
             comments, "Test Article", "https://news.ycombinator.com/item?id=99"
+        )
+        assert "news.ycombinator.com/item?id=43000006" not in html, (
+            "HTML must not link to commenter's HN page"
         )
         assert "profile" not in html, "HTML must not use 'profile' label"
 
@@ -123,9 +127,12 @@ class TestCommentPermalinkReplacesProfileUrl:
             "comment_permalink_fn must be present in process_comments_flattened signature"
         )
 
-    def test_hn_selectors_has_no_profile_url_fn(self):
-        """_HN_SELECTORS in hn/source.py must not contain profile_url_fn."""
+    def test_hn_selectors_has_no_external_link_fn(self):
+        """_HN_SELECTORS must not contain profile_url_fn or comment_permalink_fn."""
         from capcat.sources.builtin.custom.hn.source import _HN_SELECTORS as hn_sel
         assert "profile_url_fn" not in hn_sel, (
             "_HN_SELECTORS must not contain profile_url_fn"
+        )
+        assert "comment_permalink_fn" not in hn_sel, (
+            "_HN_SELECTORS must not contain comment_permalink_fn — permalink reveals commenter identity"
         )
