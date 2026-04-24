@@ -11,7 +11,7 @@ Enhanced with comment functionality from V1 implementation.
 
 ### _HN_SELECTORS
 
-**Value:** `{'comment_selector': '.comment-tree .athing', 'user_selector': '.hnuser', 'comment_text_selector': '.comment', 'depth_fn': _hn_depth, 'comment_permalink_fn': lambda cid: f'https://news.ycombinator.com/item?id={cid}'}`
+**Value:** `{'comment_selector': '.comment-tree .athing', 'user_selector': '.hnuser', 'comment_text_selector': '.comment', 'depth_fn': _hn_depth}`
 
 ## Classes
 
