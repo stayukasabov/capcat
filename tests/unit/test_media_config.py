@@ -81,6 +81,24 @@ class TestMediaConfigYamlLoading:
         # media keeps its own default (True) — only media: section controls MediaConfig
         assert mgr._config.media.download_images is True
 
+    def test_processing_download_images_false_not_overwritten_by_media_true(self, tmp_path):
+        """When both sections present, processing.download_images=false must survive.
+
+        Regression for B2: media: second-pass sync overwrote processing.download_images=False
+        with True when media.download_images was True (the default).
+        """
+        settings = tmp_path / "s.yaml"
+        settings.write_text(
+            "media:\n  download_images: true\n"
+            "processing:\n  download_images: false\n"
+        )
+        from capcat.core.config import ConfigManager
+        mgr = ConfigManager()
+        mgr._load_settings_file(settings)
+        assert mgr._config.processing.download_images is False, (
+            "processing.download_images=false must survive when media.download_images=true"
+        )
+
 
 class TestGlobalSettingsTemplate:
     def test_template_contains_media_section(self):
@@ -238,6 +256,24 @@ class TestResolveMedia:
         cfg = self._make_config(media_kwargs={"download_images": True})
         files, pdfs = _resolve_media(False, False, sc, cfg)
         assert files is True
+
+    def test_processing_download_images_false_gates_media_true(self):
+        """_resolve_media must return files=False when processing.download_images=False,
+        even when media.download_images=True.
+
+        Regression for B2: media.download_images=True made _resolve_media return
+        files=True regardless of processing.download_images, causing images to
+        download even when the user set processing.download_images=false.
+        """
+        from capcat.core.unified_source_processor import _resolve_media
+        sc = self._make_source_config()
+        cfg = self._make_config(media_kwargs={"download_images": True})
+        cfg.processing.download_images = False  # user explicitly disabled
+        files, _ = _resolve_media(False, False, sc, cfg)
+        assert files is False, (
+            "files must be False when processing.download_images=False, "
+            f"even though media.download_images=True. Got files={files}"
+        )
 
     def test_all_false_returns_false_false(self):
         from capcat.core.unified_source_processor import _resolve_media

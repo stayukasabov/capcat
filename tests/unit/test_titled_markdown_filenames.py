@@ -27,6 +27,22 @@ def test_article_md_filename_truncates_at_200_chars():
     assert len(result.removesuffix(".md")) <= 200
 
 
+def test_article_md_filename_total_length_respects_max():
+    """Total filename INCLUDING .md extension must be <= max_filename_length.
+
+    Regression for B1: stem was truncated to max_len, then .md appended,
+    producing a file of max_len + 3 chars.
+    """
+    from unittest.mock import patch, MagicMock
+    cfg = MagicMock()
+    cfg.processing.max_filename_length = 15
+    with patch("capcat.core.storage_manager.get_config", return_value=cfg), \
+         patch("capcat.core.utils.get_config", return_value=cfg):
+        result = article_md_filename("This is a very long title")
+    assert result.endswith(".md")
+    assert len(result) <= 15, f"Expected total len <=15, got {len(result)}: {result}"
+
+
 # ---------------------------------------------------------------------------
 # comments_md_filename
 # ---------------------------------------------------------------------------
@@ -40,6 +56,22 @@ def test_comments_md_filename_truncates_at_200_chars():
     result = comments_md_filename(long)
     assert result.endswith("-Comments.md")
     assert len(result.removesuffix("-Comments.md")) <= 200
+
+
+def test_comments_md_filename_total_length_respects_max():
+    """Total filename INCLUDING -Comments.md must be <= max_filename_length.
+
+    Regression for B1: stem was truncated to max_len, then -Comments.md appended,
+    producing a file far over max_len.
+    """
+    from unittest.mock import patch, MagicMock
+    cfg = MagicMock()
+    cfg.processing.max_filename_length = 20
+    with patch("capcat.core.storage_manager.get_config", return_value=cfg), \
+         patch("capcat.core.utils.get_config", return_value=cfg):
+        result = comments_md_filename("This is a very long title")
+    assert result.endswith("-Comments.md")
+    assert len(result) <= 20, f"Expected total len <=20, got {len(result)}: {result}"
 
 
 # ---------------------------------------------------------------------------

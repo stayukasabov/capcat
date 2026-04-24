@@ -483,7 +483,11 @@ class ConfigManager:
                 else:
                     self.logger.warning(f"Unknown config key: media.{key}")
                 if key.startswith("download_") and hasattr(self._config.processing, key):
-                    setattr(self._config.processing, key, value)
+                    # media False always wins; media True only syncs if processing
+                    # is already True — prevents overwriting an explicit False set
+                    # in the processing: section of the same file.
+                    if not value or getattr(self._config.processing, key, True):
+                        setattr(self._config.processing, key, value)
 
     def get_config(self) -> FetchNewsConfig:
         """Get the current configuration.

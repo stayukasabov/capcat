@@ -108,7 +108,9 @@ def _resolve_media(
         config = get_config()
 
     media = config.media
-    res_images = media.download_images
+    # processing.download_images=False is a global gate that overrides media defaults.
+    # Both must be True for images to be enabled at the global level.
+    res_images = media.download_images and config.processing.download_images
     res_videos = media.download_videos
     res_audio = media.download_audio
     res_docs = media.download_documents
