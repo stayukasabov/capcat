@@ -18,7 +18,7 @@ class AlreadyInitializedError(Exception):
 
 
 def _copy_themes_to(dest: Path) -> None:
-    """Copy base.css, design-system.css, and Space-Grotesk/ from package themes to dest."""
+    """Copy base.css and design-system.css from package themes to dest."""
     from capcat import __version__
 
     pkg_themes = Path(__file__).parent.parent / "themes"
@@ -27,13 +27,6 @@ def _copy_themes_to(dest: Path) -> None:
         src = pkg_themes / filename
         if src.exists():
             shutil.copy2(src, dest / filename)
-
-    font_src = pkg_themes / "Space-Grotesk"
-    font_dst = dest / "Space-Grotesk"
-    if font_src.is_dir():
-        if font_dst.exists():
-            shutil.rmtree(font_dst)
-        shutil.copytree(font_src, font_dst)
 
     (dest / ".capcat-version").write_text(__version__ + "\n")
 
