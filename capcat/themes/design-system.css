@@ -1,76 +1,6 @@
 /* Capcat Design System - Golden Ratio Typography & Multiples of 8 Spacing */
 /* Mathematical foundation for consistent, scalable design */
 
-/* ====================================
-   FONT DECLARATIONS - IBM PLEX SERIF
-   ================================== */
-
-@font-face {
-  font-family: "IBM Plex Serif";
-  src:
-    url("../IBMPlex/IBMPlexSerif-Thin.woff2") format("woff2"),
-    url("../IBMPlex/IBMPlexSerif-Thin.woff") format("woff"),
-    url("../IBMPlex/IBMPlexSerif-Thin.ttf") format("truetype");
-  font-weight: 200;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "IBM Plex Serif";
-  src:
-    url("../IBMPlex/IBMPlexSerif-Light.woff2") format("woff2"),
-    url("../IBMPlex/IBMPlexSerif-Light.woff") format("woff"),
-    url("../IBMPlex/IBMPlexSerif-Light.ttf") format("truetype");
-  font-weight: 300;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "IBM Plex Serif";
-  src:
-    url("../IBMPlex/IBMPlexSerif-Regular.woff2") format("woff2"),
-    url("../IBMPlex/IBMPlexSerif-Regular.woff") format("woff"),
-    url("../IBMPlex/IBMPlexSerif-Regular.ttf") format("truetype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "IBM Plex Serif";
-  src:
-    url("../IBMPlex/IBMPlexSerif-Medium.woff2") format("woff2"),
-    url("../IBMPlex/IBMPlexSerif-Medium.woff") format("woff"),
-    url("../IBMPlex/IBMPlexSerif-Medium.ttf") format("truetype");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "IBM Plex Serif";
-  src:
-    url("../IBMPlex/IBMPlexSerif-SemiBold.woff2") format("woff2"),
-    url("../IBMPlex/IBMPlexSerif-SemiBold.woff") format("woff"),
-    url("../IBMPlex/IBMPlexSerif-SemiBold.ttf") format("truetype");
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "IBM Plex Serif";
-  src:
-    url("../IBMPlex/IBMPlexSerif-Bold.woff2") format("woff2"),
-    url("../IBMPlex/IBMPlexSerif-Bold.woff") format("woff"),
-    url("../IBMPlex/IBMPlexSerif-Bold.ttf") format("truetype");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
 /* Root font size for rem calculations - 16px base */
 html {
   font-size: 16px; /* 1rem = 16px */
@@ -153,7 +83,7 @@ html {
   --weight-display: var(--font-weight-thin-plus);
 
   /* Font family tokens */
-  --font-family-serif: "IBM Plex Serif", Georgia, "Times New Roman", serif;
+  --font-family-serif: Georgia, "Times New Roman", serif;
   --font-family-heading: var(--font-family-serif);
   --font-family-directory: var(--font-family-serif);
   /*  Sans-serif*/
@@ -500,7 +430,7 @@ computed values based on the configuration.
    DIRECTORY-NAME & CONTENT-AREA STYLES
    ================================== */
 
-/* Directory name styling - uses IBM Plex Serif */
+/* Directory name styling */
 .directory-name {
   font-family: var(--font-family-directory);
 }
@@ -509,7 +439,7 @@ computed values based on the configuration.
   font-family: var(--font-family-directory);
 }
 
-/* Content area heading styles - uses IBM Plex Serif */
+/* Content area heading styles */
 .content-area h1,
 .content-area h2,
 .content-area h3,

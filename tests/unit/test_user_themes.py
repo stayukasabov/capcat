@@ -22,11 +22,11 @@ def test_init_copies_design_system_css(tmp_path):
     assert (tmp_path / "Config" / "themes" / "design-system.css").exists()
 
 
-def test_init_copies_space_grotesk_fonts(tmp_path):
+def test_init_does_not_copy_font_folders(tmp_path):
     init_project(tmp_path)
-    font_dir = tmp_path / "Config" / "themes" / "Space-Grotesk"
-    assert font_dir.is_dir()
-    assert any(f.suffix in (".woff", ".woff2") for f in font_dir.iterdir())
+    themes_dir = tmp_path / "Config" / "themes"
+    font_dirs = [p for p in themes_dir.iterdir() if p.is_dir()]
+    assert font_dirs == [], f"No font folders should be copied; found: {font_dirs}"
 
 
 def test_init_writes_version_marker(tmp_path):
