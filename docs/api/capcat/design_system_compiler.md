@@ -233,26 +233,6 @@ Returns:
 
 ⚠️ **High complexity:** 18
 
-##### _build_font_face_css
-
-```python
-def _build_font_face_css(self) -> str
-```
-
-Extract @font-face rules from design-system.css and replace each
-url("IBMPlex/filename.woff2") reference with a base64 data URI so
-the generated HTML is fully self-contained for offline archiving.
-
-Returns empty string if design-system.css or font files are missing.
-Fonts that cannot be read are silently left with their original URL
-so partial availability does not break the output.
-
-**Parameters:**
-
-- `self`
-
-**Returns:** str
-
 ##### replace_css_variables
 
 ```python
@@ -261,15 +241,13 @@ def replace_css_variables(self, css_content: str) -> str
 
 Replace design system var() references with hardcoded values.
 Injects color variable definitions for theme switching.
-Injects @font-face rules with base64 data URIs for offline archiving.
 Removes @import statements since variables are resolved.
 
 Args:
     css_content: CSS content with var() references
 
 Returns:
-    CSS content with typography/spacing hardcoded, colors injected,
-    and IBM Plex Serif fonts embedded as data URIs.
+    CSS content with typography/spacing hardcoded and colors injected.
 
 **Parameters:**
 
@@ -297,18 +275,6 @@ Returns:
 
 
 ## Functions
-
-### _to_data_uri
-
-```python
-def _to_data_uri(match: re.Match) -> str
-```
-
-**Parameters:**
-
-- `match` (re.Match)
-
-**Returns:** str
 
 ### is_color_variable
 
