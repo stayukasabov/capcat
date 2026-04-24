@@ -29,7 +29,7 @@ Raised when init is called on an existing project without --reinit.
 def _copy_themes_to(dest: Path) -> None
 ```
 
-Copy base.css, design-system.css, and Space-Grotesk/ from package themes to dest.
+Copy base.css and design-system.css from package themes to dest.
 
 **Parameters:**
 
