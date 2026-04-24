@@ -211,7 +211,7 @@ class StreamlinedCommentProcessor:
             level = comment.get('level', 0)
             prefix = "> " * level  # e.g. "" / "> " / "> > "
 
-            md_content += f"{prefix}**{comment['user']}**\n\n"
+            md_content += f"{prefix}**{comment['user']}** ([comment]({comment['user_link']}))\n\n"
 
             # Prefix each paragraph of the comment text
             for paragraph in comment['text'].split('\n\n'):
@@ -270,6 +270,7 @@ class StreamlinedCommentProcessor:
             <div class="comment" id="comment-{i}" {indent_style}>
                 <h3 class="comment-header">
                     <strong>{comment['user']}</strong>
+                    <a href="{comment['user_link']}" target="_blank" rel="noopener noreferrer" class="comment-link">(comment)</a>
                 </h3>
                 <div class="comment-text">
                     {formatted_text}

@@ -233,7 +233,7 @@ def test_markdown_level_one_has_blockquote_prefix():
     result = processor.generate_inline_comments_markdown(comments, "Title", "https://example.com")
     assert "> Reply comment" in result
     # Header line must have exactly one prefix, not two
-    assert "> **Anonymous**" in result
+    assert "> **Anonymous** ([comment]" in result
     assert "> **Anonymous** > " not in result
 
 
