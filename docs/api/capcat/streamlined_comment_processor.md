@@ -106,7 +106,7 @@ Streamlined comment text processing with minimal link handling.
 ##### generate_inline_comments_markdown
 
 ```python
-def generate_inline_comments_markdown(self, comments: List[Dict[str, Any]], article_title: str, comment_url: str, article_folder_path: str = None) -> str
+def generate_inline_comments_markdown(self, comments: List[Dict[str, Any]], article_title: str, comment_url: str, article_folder_path: str = None, link_text: str = 'comment') -> str
 ```
 
 Generate inline comments markdown with flattened structure.
@@ -121,13 +121,14 @@ If article_folder_path is provided, prepends and appends a
 - `article_title` (str)
 - `comment_url` (str)
 - `article_folder_path` (str) *optional*
+- `link_text` (str) *optional*
 
 **Returns:** str
 
 ##### generate_inline_comments_html
 
 ```python
-def generate_inline_comments_html(self, comments: List[Dict[str, Any]], article_title: str, comment_url: str) -> str
+def generate_inline_comments_html(self, comments: List[Dict[str, Any]], article_title: str, comment_url: str, link_text: str = 'comment') -> str
 ```
 
 Generate inline comments HTML directly, skipping markdown conversion.
@@ -139,6 +140,7 @@ Optimized for HTML post-processor performance.
 - `comments` (List[Dict[str, Any]])
 - `article_title` (str)
 - `comment_url` (str)
+- `link_text` (str) *optional*
 
 **Returns:** str
 
