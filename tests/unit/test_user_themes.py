@@ -22,14 +22,6 @@ def test_init_copies_design_system_css(tmp_path):
     assert (tmp_path / "Config" / "themes" / "design-system.css").exists()
 
 
-def test_init_copies_ibm_plex_serif_fonts(tmp_path):
-    init_project(tmp_path)
-    font_dir = tmp_path / "Config" / "themes" / "IBMPlex"
-    assert font_dir.is_dir(), "IBMPlex/ font directory must be present after init"
-    woff2_files = [f for f in font_dir.iterdir() if f.suffix == ".woff2"]
-    assert len(woff2_files) >= 6, f"Expected 6 woff2 files, found {len(woff2_files)}"
-
-
 def test_init_writes_version_marker(tmp_path):
     from capcat import __version__
     init_project(tmp_path)

@@ -1,58 +1,6 @@
 /* Capcat Design System - Golden Ratio Typography & Multiples of 8 Spacing */
 /* Mathematical foundation for consistent, scalable design */
 
-/* ====================================
-   FONT DECLARATIONS - IBM PLEX SERIF
-   ================================== */
-
-@font-face {
-  font-family: "IBM Plex Serif";
-  src: url("IBMPlex/IBMPlexSerif-Thin.woff2") format("woff2");
-  font-weight: 200;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "IBM Plex Serif";
-  src: url("IBMPlex/IBMPlexSerif-Light.woff2") format("woff2");
-  font-weight: 300;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "IBM Plex Serif";
-  src: url("IBMPlex/IBMPlexSerif-Regular.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "IBM Plex Serif";
-  src: url("IBMPlex/IBMPlexSerif-Medium.woff2") format("woff2");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "IBM Plex Serif";
-  src: url("IBMPlex/IBMPlexSerif-SemiBold.woff2") format("woff2");
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "IBM Plex Serif";
-  src: url("IBMPlex/IBMPlexSerif-Bold.woff2") format("woff2");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
 /* Root font size for rem calculations - 16px base */
 html {
   font-size: 16px; /* 1rem = 16px */
@@ -135,7 +83,7 @@ html {
   --weight-display: var(--font-weight-thin-plus);
 
   /* Font family tokens */
-  --font-family-serif: "IBM Plex Serif", Georgia, "Times New Roman", serif;
+  --font-family-serif: Georgia, "Times New Roman", serif;
   --font-family-heading: var(--font-family-serif);
   --font-family-directory: var(--font-family-serif);
   /*  Sans-serif*/
