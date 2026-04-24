@@ -37,7 +37,6 @@ _HN_SELECTORS = {
     "user_selector": ".hnuser",
     "comment_text_selector": ".comment",
     "depth_fn": _hn_depth,
-    "comment_permalink_fn": lambda cid: f"https://news.ycombinator.com/item?id={cid}",
 }
 
 
