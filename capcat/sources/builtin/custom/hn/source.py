@@ -355,6 +355,7 @@ class HnSource(BaseSource):
                     processor.process_comments_flattened(soup, **_HN_SELECTORS),
                     article_title,
                     comment_url,
+                    link_text="view on HN",
                 )
                 filename = os.path.join(article_folder_path, "html", "comments.html")
                 os.makedirs(os.path.dirname(filename), exist_ok=True)
@@ -364,6 +365,7 @@ class HnSource(BaseSource):
                     article_title,
                     comment_url,
                     article_folder_path,
+                    link_text="view on HN",
                 )
                 filename = os.path.join(article_folder_path, comments_md_filename(article_title))
 

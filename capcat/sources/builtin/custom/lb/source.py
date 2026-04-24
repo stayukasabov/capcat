@@ -42,6 +42,7 @@ _LB_SELECTORS = {
     "user_selector": ".byline a[href^='/~']:not([aria-hidden])",
     "comment_text_selector": ".comment_text",
     "depth_fn": _lb_depth,
+    "comment_permalink_fn": lambda cid: f"https://lobste.rs/c/{cid.removeprefix('c_')}" if cid else "#",
 }
 
 
@@ -662,6 +663,7 @@ class LbSource(BaseSource):
                     processor.process_comments_flattened(soup, **_LB_SELECTORS),
                     article_title,
                     comment_url,
+                    link_text="view on Lobsters",
                 )
                 filename = os.path.join(article_folder_path, "html", "comments.html")
                 os.makedirs(os.path.dirname(filename), exist_ok=True)
@@ -671,6 +673,7 @@ class LbSource(BaseSource):
                     article_title,
                     comment_url,
                     article_folder_path,
+                    link_text="view on Lobsters",
                 )
                 filename = os.path.join(article_folder_path, comments_md_filename(article_title))
 

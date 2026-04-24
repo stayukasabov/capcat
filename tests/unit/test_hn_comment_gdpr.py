@@ -67,14 +67,15 @@ class TestCommentPermalinkPresent:
         assert comments[0]["user"] == "Anonymous"
 
     def test_markdown_output_has_comment_link(self):
-        """Markdown output contains [comment](permalink) link."""
+        """Markdown output contains [view on HN](permalink) link."""
         soup = _make_hn_soup("43000004", "seizethecheese", "Test comment.")
         processor = create_optimized_comment_processor(max_comments=None)
         comments = processor.process_comments_flattened(soup, **_HN_SELECTORS_WITH_PERMALINK)
         md = processor.generate_inline_comments_markdown(
-            comments, "Test Article", "https://news.ycombinator.com/item?id=99", None
+            comments, "Test Article", "https://news.ycombinator.com/item?id=99", None,
+            link_text="view on HN",
         )
-        assert "[comment]" in md, "Markdown must include [comment] link"
+        assert "[view on HN]" in md, "Markdown must include [view on HN] link"
         assert "news.ycombinator.com/item?id=43000004" in md, (
             "Markdown must link to comment permalink"
         )

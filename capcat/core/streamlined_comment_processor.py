@@ -181,7 +181,8 @@ class StreamlinedCommentProcessor:
         comments: List[Dict[str, Any]],
         article_title: str,
         comment_url: str,
-        article_folder_path: str = None
+        article_folder_path: str = None,
+        link_text: str = "comment",
     ) -> str:
         """
         Generate inline comments markdown with flattened structure.
@@ -211,7 +212,7 @@ class StreamlinedCommentProcessor:
             level = comment.get('level', 0)
             prefix = "> " * level  # e.g. "" / "> " / "> > "
 
-            md_content += f"{prefix}**{comment['user']}** ([comment]({comment['user_link']}))\n\n"
+            md_content += f"{prefix}**{comment['user']}** ([{link_text}]({comment['user_link']}))\n\n"
 
             # Prefix each paragraph of the comment text
             for paragraph in comment['text'].split('\n\n'):
@@ -228,7 +229,8 @@ class StreamlinedCommentProcessor:
         self,
         comments: List[Dict[str, Any]],
         article_title: str,
-        comment_url: str
+        comment_url: str,
+        link_text: str = "comment",
     ) -> str:
         """
         Generate inline comments HTML directly, skipping markdown conversion.
@@ -270,7 +272,7 @@ class StreamlinedCommentProcessor:
             <div class="comment" id="comment-{i}" {indent_style}>
                 <h3 class="comment-header">
                     <strong>{comment['user']}</strong>
-                    <a href="{comment['user_link']}" target="_blank" rel="noopener noreferrer" class="comment-link">(comment)</a>
+                    <a href="{comment['user_link']}" target="_blank" rel="noopener noreferrer" class="comment-link">({link_text})</a>
                 </h3>
                 <div class="comment-text">
                     {formatted_text}

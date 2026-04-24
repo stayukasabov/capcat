@@ -360,13 +360,13 @@ _LB_HTML_WITH_USERS = """
 
 
 def test_lb_comment_user_names_extracted():
-    """Display name is always 'Anonymous'; user_link is '#' — no username stored (GDPR)."""
+    """Display name is always 'Anonymous'; user_link is a comment permalink (no username)."""
     from capcat.sources.builtin.custom.lb.source import _LB_SELECTORS
     soup = BeautifulSoup(_LB_HTML_WITH_USERS, "html.parser")
     processor = StreamlinedCommentProcessor()
     comments = processor.process_comments_flattened(soup, **_LB_SELECTORS)
     assert len(comments) == 2
     assert comments[0]["user"] == "Anonymous", "Display name must always be 'Anonymous'"
-    assert comments[0]["user_link"] == "#", "user_link must be '#' — no username stored"
+    assert "alice" not in comments[0]["user_link"], "Username must not appear in user_link"
+    assert "lobste.rs/c/" in comments[0]["user_link"], "user_link must be a Lobsters comment permalink"
     assert comments[1]["user"] == "Anonymous", "Missing user element should fall back to 'Anonymous'"
-    assert comments[1]["user_link"] == "#", "Missing user element should produce '#' link"
