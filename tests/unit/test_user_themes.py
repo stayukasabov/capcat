@@ -22,6 +22,13 @@ def test_init_copies_design_system_css(tmp_path):
     assert (tmp_path / "Config" / "themes" / "design-system.css").exists()
 
 
+def test_init_copies_space_grotesk_fonts(tmp_path):
+    init_project(tmp_path)
+    font_dir = tmp_path / "Config" / "themes" / "Space-Grotesk"
+    assert font_dir.is_dir()
+    assert any(f.suffix in (".woff", ".woff2") for f in font_dir.iterdir())
+
+
 def test_init_writes_version_marker(tmp_path):
     from capcat import __version__
     init_project(tmp_path)
