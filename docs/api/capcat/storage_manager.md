@@ -122,6 +122,7 @@ def article_md_filename(title: str) -> str
 Return sanitized markdown filename for an article (e.g. 'My-Title.md').
 
 Truncation respects processing.max_filename_length from config.
+The total filename length (including '.md') is <= max_filename_length.
 Spaces are replaced with hyphens.
 
 **Parameters:**
@@ -139,7 +140,7 @@ def comments_md_filename(title: str) -> str
 Return sanitized markdown filename for comments (e.g. 'My-Title-Comments.md').
 
 Truncation respects processing.max_filename_length from config.
-'-Comments.md' is appended after truncation.
+The total filename length (including '-Comments.md') is <= max_filename_length.
 Spaces are replaced with hyphens.
 
 **Parameters:**

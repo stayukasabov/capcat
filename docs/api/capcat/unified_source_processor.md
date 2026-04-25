@@ -284,6 +284,8 @@ Returns:
 
 **Returns:** tuple
 
+⚠️ **High complexity:** 11
+
 ### _build_article_metadata
 
 ```python
