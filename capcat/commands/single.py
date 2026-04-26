@@ -6,6 +6,29 @@ from typing import Optional, Tuple
 from urllib.parse import urlparse
 
 
+def _rename_to_dated(article_folder: str, date_str: str) -> str:
+    """Rename article_folder to '<date_str>-<name>' in its parent directory.
+
+    Idempotent: returns the original path unchanged if it already starts
+    with ``date_str + '-'``.
+
+    Args:
+        article_folder: Absolute path to the article folder to rename.
+        date_str: Date prefix in DD-MM-YYYY format.
+
+    Returns:
+        Absolute path to the (possibly renamed) folder.
+    """
+    from pathlib import Path
+
+    folder = Path(article_folder)
+    if folder.name.startswith(date_str + "-"):
+        return article_folder
+    new_path = folder.parent / f"{date_str}-{folder.name}"
+    folder.rename(new_path)
+    return str(new_path)
+
+
 def _scrape_with_specialized_source(
     url: str,
     output_dir: str,
