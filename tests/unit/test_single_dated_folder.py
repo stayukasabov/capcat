@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from capcat.commands.single import _rename_to_dated, _scrape_with_specialized_source
+from capcat.commands.single import _rename_to_dated, _scrape_with_specialized_source, scrape_single_article
 
 
 def test_rename_adds_date_prefix(tmp_path):
@@ -142,6 +142,69 @@ def test_specialized_source_returns_dated_folder(tmp_path):
             "https://medium.com/some/article",
             output_dir=".",
             generate_html=False,
+        )
+
+    assert success is True
+    import re
+    assert re.match(r"\d{2}-\d{2}-\d{4}-", Path(result_dir).name), (
+        f"Expected DD-MM-YYYY- prefix, got: {Path(result_dir).name}"
+    )
+
+
+def test_known_source_path_returns_dated_folder(tmp_path):
+    """Known-source branch of scrape_single_article returns a DD-MM-YYYY folder."""
+    from unittest.mock import MagicMock, patch
+
+    article_folder = tmp_path / "My-HN-Article"
+    article_folder.mkdir()
+
+    mock_source_obj = MagicMock()
+    mock_source_obj.fetch_article_content.return_value = (True, str(article_folder))
+
+    mock_factory = MagicMock()
+    mock_factory.get_available_sources.return_value = ["hn"]
+    mock_factory.create_source.return_value = mock_source_obj
+
+    mock_registry = MagicMock()
+    mock_registry.can_handle_url.return_value = False  # skip specialized path
+    mock_registry.get_source_config.return_value = MagicMock(display_name="Hacker News")
+
+    with patch("capcat.core.source_system.source_registry.get_source_registry", return_value=mock_registry), \
+         patch("capcat.core.source_config.detect_source", return_value="hn"), \
+         patch("capcat.core.source_system.source_factory.get_source_factory", return_value=mock_factory), \
+         patch("capcat.core.config.get_capcats_dir", return_value=tmp_path):
+        success, result_dir = scrape_single_article(
+            "https://news.ycombinator.com/item?id=123",
+            output_dir=".",
+        )
+
+    assert success is True
+    import re
+    assert re.match(r"\d{2}-\d{2}-\d{4}-", Path(result_dir).name), (
+        f"Expected DD-MM-YYYY- prefix, got: {Path(result_dir).name}"
+    )
+
+
+def test_generic_path_returns_dated_folder(tmp_path):
+    """Generic fallback of scrape_single_article returns a DD-MM-YYYY folder."""
+    from unittest.mock import MagicMock, patch
+
+    article_folder = tmp_path / "Some-Generic-Article"
+    article_folder.mkdir()
+
+    mock_session = MagicMock()
+    mock_registry = MagicMock()
+    mock_registry.can_handle_url.return_value = False
+
+    with patch("capcat.core.source_system.source_registry.get_source_registry", return_value=mock_registry), \
+         patch("capcat.core.source_config.detect_source", return_value=None), \
+         patch("capcat.core.config.get_capcats_dir", return_value=tmp_path), \
+         patch("capcat.core.session_pool.get_global_session", return_value=mock_session), \
+         patch("capcat.core.article_fetcher.ArticleFetcher.fetch_article_content",
+               return_value=(True, str(article_folder), "Some Generic Article")):
+        success, result_dir = scrape_single_article(
+            "https://example.com/some-article",
+            output_dir=".",
         )
 
     assert success is True

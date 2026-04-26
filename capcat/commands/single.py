@@ -147,51 +147,46 @@ def scrape_single_article(
     source = detect_source(url)
 
     if output_dir != ".":
-        base_dir = os.path.abspath(output_dir)
+        parent_dir = os.path.abspath(output_dir)
     else:
         from capcat.core.config import get_capcats_dir
-        capcats_dir = str(get_capcats_dir())
-        formatted_date = datetime.now().strftime("%d-%m-%Y")
+        parent_dir = str(get_capcats_dir())
 
-        if source:
-            registry = get_source_registry()
-            config = registry.get_source_config(source)
-            source_name = config.display_name if config else source
-            logger.info(f"We have an optimization for {source_name}")
-
-            from capcat.core.utils import get_source_folder_name
-            source_folder_name = f"{get_source_folder_name(source)}_{formatted_date}"
-            base_dir = os.path.join(capcats_dir, source_folder_name)
-        else:
-            parsed_url = urlparse(url)
-            url_path = parsed_url.path.rstrip("/")
-            url_title = url_path.split("/")[-1] if url_path else parsed_url.netloc
-
-            from capcat.core.utils import sanitize_filename
-            safe_title = sanitize_filename(url_title, max_length=100)
-            base_dir = os.path.join(capcats_dir, safe_title.title())
+    os.makedirs(parent_dir, exist_ok=True)
+    formatted_date = datetime.now().strftime("%d-%m-%Y")
 
     success = False
-    use_generic = not source
+    base_dir = parent_dir  # Will be updated to dated article folder if fetch succeeds
 
     try:
-        if source and not use_generic:
+        # Try known source optimization first
+        if source:
             from capcat.core.source_system.source_factory import get_source_factory
             from capcat.core.source_system.base_source import Article
 
             factory = get_source_factory()
             if source in factory.get_available_sources():
+                registry = get_source_registry()
+                config = registry.get_source_config(source)
+                source_name = config.display_name if config else source
+                logger.info(f"We have an optimization for {source_name}")
+
                 source_obj = factory.create_source(source)
                 article = Article(title=f"Article from {url}", url=url)
                 # BaseSource.fetch_article_content returns (bool, Optional[str]) — 2-tuple
-                success, _ = source_obj.fetch_article_content(article, base_dir, None)
+                success, article_folder = source_obj.fetch_article_content(article, parent_dir, None)
+                if success and article_folder:
+                    base_dir = _rename_to_dated(article_folder, formatted_date)
+                else:
+                    base_dir = parent_dir
             else:
                 logger.info(
                     f"Source {source} not found in registry, using generic scraper"
                 )
-                use_generic = True
+                source = None  # Fall back to generic path
 
-        if not source or use_generic:
+        # Generic fallback when no known source or known source failed
+        if not source:
             from capcat.core.article_fetcher import ArticleFetcher
             from capcat.core.session_pool import get_global_session
 
@@ -216,9 +211,13 @@ def scrape_single_article(
 
             session = get_global_session("generic")
             fetcher = GenericArticleFetcher(session, download_files=files, download_pdfs=pdfs)
-            success, returned_title, content_path = fetcher.fetch_article_content(
-                f"Article from {url}", url, 1, base_dir, None
+            success, article_folder, _ = fetcher.fetch_article_content(
+                f"Article from {url}", url, 1, parent_dir, None
             )
+            if success and article_folder:
+                base_dir = _rename_to_dated(article_folder, formatted_date)
+            else:
+                base_dir = parent_dir
 
     except Exception as e:
         logger.error(f"Failed to process single article: {e}")
