@@ -201,7 +201,8 @@ def test_generic_path_returns_dated_folder(tmp_path):
          patch("capcat.core.config.get_capcats_dir", return_value=tmp_path), \
          patch("capcat.core.session_pool.get_global_session", return_value=mock_session), \
          patch("capcat.core.article_fetcher.ArticleFetcher.fetch_article_content",
-               return_value=(True, str(article_folder), "Some Generic Article")):
+               # Real return order: (success, title, folder_path)
+               return_value=(True, "Some Generic Article", str(article_folder))):
         success, result_dir = scrape_single_article(
             "https://example.com/some-article",
             output_dir=".",

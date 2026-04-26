@@ -211,7 +211,8 @@ def scrape_single_article(
 
             session = get_global_session("generic")
             fetcher = GenericArticleFetcher(session, download_files=files, download_pdfs=pdfs)
-            success, article_folder, _ = fetcher.fetch_article_content(
+            # ArticleFetcher.fetch_article_content returns (success, title, folder_path)
+            success, _, article_folder = fetcher.fetch_article_content(
                 f"Article from {url}", url, 1, parent_dir, None
             )
             if success and article_folder:
