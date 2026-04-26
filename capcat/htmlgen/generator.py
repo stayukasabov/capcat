@@ -1955,8 +1955,8 @@ class ArticleHTMLGenerator:
             lesswrong_pattern = r"\*\*[^*]+\*\*\s*\(<a[^>]*>profile</a>\)"
             lesswrong_matches = re.findall(lesswrong_pattern, content)
 
-            # Try HN/Lobsters format
-            hn_lobsters_pattern = r"\*\*[^*]+\*\*\s*\(\[profile\]\([^)]*\)\)"
+            # Try HN/Lobsters format (matches any link text: [profile], [view on HN], etc.)
+            hn_lobsters_pattern = r"\*\*[^*]+\*\*\s*\(\[[^\]]+\]\([^)]*\)\)"
             hn_lobsters_matches = re.findall(hn_lobsters_pattern, content)
 
             # Return the count from whichever pattern matched
