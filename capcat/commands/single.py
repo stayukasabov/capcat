@@ -43,12 +43,12 @@ def _scrape_with_specialized_source(
     from capcat.core.source_system.source_registry import get_source_registry
 
     logger = get_logger(__name__)
-    source_result = get_source_registry().get_source_for_url(url)
-    if not source_result:
+    source_match = get_source_registry().get_source_for_url(url)
+    if not source_match:
         logger.error(f"No specialized source available for URL: {url}")
         return False, None
 
-    source_instance, source_id = source_result
+    source_instance, source_id = source_match
 
     if output_dir == ".":
         from capcat.core.config import get_capcats_dir
@@ -59,21 +59,20 @@ def _scrape_with_specialized_source(
     os.makedirs(capcats_dir, exist_ok=True)
 
     formatted_date = datetime.now().strftime("%d-%m-%Y")
-    source_folder = f"{source_id.title()}_{formatted_date}"
-    final_output_dir = os.path.join(capcats_dir, source_folder)
-    os.makedirs(final_output_dir, exist_ok=True)
 
     logger.info(f"Processing {source_id.title()} article with paywall detection...")
 
     try:
         from capcat.core.source_system.base_source import Article
 
+        # Empty title - source will extract actual title during fetch
         article = Article(title="", url=url)
         success, folder_path = source_instance.fetch_article_content(
-            article, final_output_dir, progress_callback=None
+            article, capcats_dir, progress_callback=None
         )
 
-        if success:
+        if success and folder_path:
+            folder_path = _rename_to_dated(folder_path, formatted_date)
             logger.info(
                 f"Successfully saved {source_id.title()} content to: {folder_path}"
             )
@@ -91,15 +90,15 @@ def _scrape_with_specialized_source(
                 except Exception as e:
                     logger.warning(f"Failed to generate HTML: {e}")
 
-            logger.info(f"Output location: {final_output_dir}")
-            return True, final_output_dir
+            logger.info(f"Output location: {folder_path}")
+            return True, folder_path
         else:
             logger.error(f"Failed to fetch {source_id.title()} content")
-            return False, final_output_dir
+            return False, capcats_dir
 
     except Exception as e:
         logger.error(f"Error processing {source_id.title()} article: {e}")
-        return False, final_output_dir
+        return False, capcats_dir
 
 
 def scrape_single_article(

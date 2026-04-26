@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from capcat.commands.single import _rename_to_dated
+from capcat.commands.single import _rename_to_dated, _scrape_with_specialized_source
 
 
 def test_rename_adds_date_prefix(tmp_path):
@@ -121,3 +121,31 @@ def test_rename_folder_with_special_characters(tmp_path):
     result = _rename_to_dated(str(folder), "26-04-2026")
     assert Path(result).name == "26-04-2026-Article_with_underscores_and.dots"
     assert Path(result).exists()
+
+
+def test_specialized_source_returns_dated_folder(tmp_path):
+    """_scrape_with_specialized_source must return a DD-MM-YYYY-prefixed folder."""
+    from unittest.mock import MagicMock, patch
+
+    article_folder = tmp_path / "My-Medium-Article"
+    article_folder.mkdir()
+
+    mock_source = MagicMock()
+    mock_source.fetch_article_content.return_value = (True, str(article_folder))
+
+    mock_registry = MagicMock()
+    mock_registry.get_source_for_url.return_value = (mock_source, "medium")
+
+    with patch("capcat.core.source_system.source_registry.get_source_registry", return_value=mock_registry), \
+         patch("capcat.core.config.get_capcats_dir", return_value=tmp_path):
+        success, result_dir = _scrape_with_specialized_source(
+            "https://medium.com/some/article",
+            output_dir=".",
+            generate_html=False,
+        )
+
+    assert success is True
+    import re
+    assert re.match(r"\d{2}-\d{2}-\d{4}-", Path(result_dir).name), (
+        f"Expected DD-MM-YYYY- prefix, got: {Path(result_dir).name}"
+    )
