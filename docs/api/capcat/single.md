@@ -45,6 +45,31 @@ Returns:
 
 ## Functions
 
+### _rename_to_dated
+
+```python
+def _rename_to_dated(article_folder: str, date_str: str) -> str
+```
+
+Rename article_folder to '<date_str>-<name>' in its parent directory.
+
+Idempotent: returns the original path unchanged if it already starts
+with ``date_str + '-'``.
+
+Args:
+    article_folder: Absolute path to the article folder to rename.
+    date_str: Date prefix in DD-MM-YYYY format.
+
+Returns:
+    Absolute path to the (possibly renamed) folder.
+
+**Parameters:**
+
+- `article_folder` (str)
+- `date_str` (str)
+
+**Returns:** str
+
 ### _scrape_with_specialized_source
 
 ```python
@@ -98,5 +123,5 @@ Returns:
 
 **Returns:** Tuple[bool, Optional[str]]
 
-⚠️ **High complexity:** 14
+⚠️ **High complexity:** 15
 
