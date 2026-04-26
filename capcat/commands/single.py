@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import os
 from typing import Optional, Tuple
-from urllib.parse import urlparse
 
 
 def _rename_to_dated(article_folder: str, date_str: str) -> str:
