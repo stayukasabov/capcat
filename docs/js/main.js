@@ -522,6 +522,7 @@ window.addEventListener("load", () => {
 if (document.querySelector('[data-plyr-provider="youtube"]')) {
     new Plyr('[data-plyr-provider="youtube"]', {
         controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'],
-        youtube: { noCookie: true, rel: 0, showinfo: 0, modestbranding: 1 }
+        quality: { default: 1080, options: [1080, 720, 480, 360] },
+        youtube: { noCookie: true, rel: 0, showinfo: 0, modestbranding: 1, vq: 'hd1080' }
     });
 }
