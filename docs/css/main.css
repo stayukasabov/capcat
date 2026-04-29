@@ -406,6 +406,7 @@ transition: background 1s ease, box-shadow 0.3s ease;
 }
 
 .hero-demo__player {
+  aspect-ratio: 8 / 5;
   width: 100%;
 }
 
