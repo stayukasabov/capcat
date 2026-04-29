@@ -401,6 +401,8 @@ transition: background 1s ease, box-shadow 0.3s ease;
   max-width: var(--measure-optimal);
   margin: 0 auto;
   overflow: hidden;
+  background: #000;
+  transform: translateZ(0); /* force GPU layer, prevents subpixel bleed at border-radius */
 }
 
 .hero-demo__player {
