@@ -60,11 +60,8 @@ class TestMediumFetch:
 
         fake_folder = str(tmp_path / "Medium_Article")
 
-        with patch.object(
-            source,
-            "_fetch_medium_content_direct",
-            return_value=(True, fake_folder),
-        ):
+        with patch.object(source, "_is_paywalled", return_value="none"), \
+             patch.object(source, "_fetch_medium_content_direct", return_value=(True, fake_folder)):
             Path(fake_folder).mkdir(parents=True, exist_ok=True)
             (Path(fake_folder) / "article.md").write_text("# Test", encoding="utf-8")
             success, folder = source.fetch_article_content(article, str(tmp_path))
@@ -77,11 +74,8 @@ class TestMediumFetch:
         source = MediumSource(_config())
         article = Article(title="Test Article", url="https://medium.com/@user/test-abc")
 
-        with patch.object(
-            source,
-            "_fetch_medium_content_direct",
-            return_value=(False, None),
-        ):
+        with patch.object(source, "_is_paywalled", return_value="none"), \
+             patch.object(source, "_fetch_medium_content_direct", return_value=(False, None)):
             success, folder = source.fetch_article_content(article, str(tmp_path))
 
         assert success is False
