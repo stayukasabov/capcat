@@ -406,6 +406,12 @@ transition: background 1s ease, box-shadow 0.3s ease;
   transform: translateZ(0); /* force GPU layer, prevents subpixel bleed at border-radius */
 }
 
+@media (min-width: 900px) {
+  .hero-demo {
+    width: 900px;
+  }
+}
+
 .hero-demo__player {
   aspect-ratio: 16 / 9;
   width: 100%;
