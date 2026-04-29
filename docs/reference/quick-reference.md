@@ -132,7 +132,7 @@
 
 **Single mode** (`capcat single <url>`):
 ```
-~/Desktop/Vault/Capcats/cc_DD-MM-YYYY-Title/
+~/Desktop/Vault/Capcats/DD-MM-YYYY-Title/
 ```
 
 ## Common Commands

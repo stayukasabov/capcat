@@ -447,7 +447,7 @@ class HackerNewsSource(BaseSource):
         News/news_DD-MM-YYYY/Source_DD-MM-YYYY/NN_Title/
 
     Single mode:
-        Capcats/cc_DD-MM-YYYY-Title/
+        Capcats/DD-MM-YYYY-Title/
     &quot;&quot;&quot;
     date_str = datetime.now().strftime(&#x27;%d-%m-%Y&#x27;)
 
@@ -460,7 +460,7 @@ class HackerNewsSource(BaseSource):
         path = Path(base_dir) / source_dir / article_dir
     else:
         # Single: direct archiving
-        article_name = f&quot;cc_{date_str}-{slugify(article.title)}&quot;
+        article_name = f&quot;{date_str}-{slugify(article.title)}&quot;
         path = Path(&quot;../Capcats&quot;) / article_name
 
     # Create structure
