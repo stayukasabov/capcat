@@ -10,14 +10,36 @@ from typing import List, Optional, Tuple
 import requests
 from bs4 import BeautifulSoup
 
-from core.article_fetcher import get_global_update_mode
-from core.news_source_adapter import NewsSourceArticleFetcher
-from core.source_system.base_source import (
+from capcat.core.article_fetcher import get_global_update_mode
+from capcat.core.storage_manager import comments_md_filename
+from capcat.core.article_fetcher import NewsSourceArticleFetcher
+from capcat.core.ethical_scraping import get_ethical_manager
+from capcat.core.source_system.base_source import (
     Article,
     ArticleDiscoveryError,
     BaseSource,
     ContentFetchError,
 )
+
+
+def _hn_depth(elem) -> int:
+    """Extract comment depth from HN's td.ind img width attribute (40px per level)."""
+    img = elem.select_one("td.ind img")
+    if img and img.get("width") is not None:
+        try:
+            return int(img["width"]) // 40
+        except (ValueError, TypeError):
+            return 0
+    return 0
+
+
+_HN_SELECTORS = {
+    "comment_selector": ".comment-tree .athing",
+    "user_selector": ".hnuser",
+    "comment_text_selector": ".comment",
+    "depth_fn": _hn_depth,
+    "comment_permalink_fn": lambda cid: f"https://news.ycombinator.com/item?id={cid}",
+}
 
 
 class HnSource(BaseSource):
@@ -330,7 +352,7 @@ class HnSource(BaseSource):
 
         try:
             # Use optimized streamlined comment processor
-            from core.streamlined_comment_processor import create_optimized_comment_processor
+            from capcat.core.streamlined_comment_processor import create_optimized_comment_processor
 
             # Ensure UTF-8 encoding
             response.encoding = 'utf-8'
@@ -342,19 +364,23 @@ class HnSource(BaseSource):
 
             # Generate content based on mode (HTML or Markdown)
             if html_mode:
-                # Generate HTML directly - skip markdown conversion
-                content = processor.process_hacker_news_comments_html_optimized(
-                    soup, article_title, comment_url
+                content = processor.generate_inline_comments_html(
+                    processor.process_comments_flattened(soup, **_HN_SELECTORS),
+                    article_title,
+                    comment_url,
+                    link_text="view on HN",
                 )
                 filename = os.path.join(article_folder_path, "html", "comments.html")
-                # Ensure html directory exists
                 os.makedirs(os.path.dirname(filename), exist_ok=True)
             else:
-                # Generate markdown (default behavior)
-                content = processor.process_hacker_news_comments_optimized(
-                    soup, article_title, comment_url
+                content = processor.generate_inline_comments_markdown(
+                    processor.process_comments_flattened(soup, **_HN_SELECTORS),
+                    article_title,
+                    comment_url,
+                    article_folder_path,
+                    link_text="view on HN",
                 )
-                filename = os.path.join(article_folder_path, "comments.md")
+                filename = os.path.join(article_folder_path, comments_md_filename(article_title))
 
             # Get metrics for logging
             metrics = processor.get_performance_metrics()

@@ -15,18 +15,33 @@ from typing import List, Optional, Tuple
 import requests
 from bs4 import BeautifulSoup
 
-from core.article_fetcher import get_global_update_mode
-from core.news_source_adapter import NewsSourceArticleFetcher
-from core.network_resilience import (
+from capcat.core.article_fetcher import get_global_update_mode
+from capcat.core.storage_manager import comments_md_filename
+from capcat.core.article_fetcher import NewsSourceArticleFetcher
+from capcat.core.network_resilience import (
     get_retry_executor,
     URLFallbackExecutor,
 )
-from core.source_system.base_source import (
+from capcat.core.source_system.base_source import (
     Article,
     ArticleDiscoveryError,
     BaseSource,
     ContentFetchError,
 )
+
+
+def _lb_depth(elem) -> int:
+    """Extract comment depth from Lobsters comment tree structure."""
+    return max(0, len(elem.find_parents(class_="comments_subtree")) - 2)
+
+
+_LB_SELECTORS = {
+    "comment_selector": ".comment",
+    "user_selector": ".byline a[href^='/~']:not([aria-hidden])",
+    "comment_text_selector": ".comment_text",
+    "depth_fn": _lb_depth,
+    "comment_permalink_fn": lambda cid: f"https://lobste.rs/c/{cid.removeprefix('c_')}" if cid else "#",
+}
 
 
 class LbSource(BaseSource):
@@ -656,7 +671,7 @@ class LbSource(BaseSource):
                 return False
 
             # Use optimized streamlined comment processor
-            from core.streamlined_comment_processor import create_optimized_comment_processor
+            from capcat.core.streamlined_comment_processor import create_optimized_comment_processor
 
             soup = BeautifulSoup(response.text, "html.parser")
 
@@ -665,19 +680,23 @@ class LbSource(BaseSource):
 
             # Generate content based on mode (HTML or Markdown)
             if html_mode:
-                # Generate HTML directly - skip markdown conversion
-                content = processor.process_lobsters_comments_html_optimized(
-                    soup, article_title, comment_url
+                content = processor.generate_inline_comments_html(
+                    processor.process_comments_flattened(soup, **_LB_SELECTORS),
+                    article_title,
+                    comment_url,
+                    link_text="comment",
                 )
                 filename = os.path.join(article_folder_path, "html", "comments.html")
-                # Ensure html directory exists
                 os.makedirs(os.path.dirname(filename), exist_ok=True)
             else:
-                # Generate markdown (default behavior)
-                content = processor.process_lobsters_comments_optimized(
-                    soup, article_title, comment_url
+                content = processor.generate_inline_comments_markdown(
+                    processor.process_comments_flattened(soup, **_LB_SELECTORS),
+                    article_title,
+                    comment_url,
+                    article_folder_path,
+                    link_text="comment",
                 )
-                filename = os.path.join(article_folder_path, "comments.md")
+                filename = os.path.join(article_folder_path, comments_md_filename(article_title))
 
             # Get metrics for logging
             metrics = processor.get_performance_metrics()
