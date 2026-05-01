@@ -9,7 +9,6 @@ This package contains the following modules:
 - [`core.source_configs`](./source_configs.md) - Modular source configuration system with backward compatibility
 - [`core.timeout_config`](./timeout_config.md) - Adaptive timeout configuration for Capcat
 - [`core.storage_manager`](./storage_manager.md) - Storage management component for Capcat
-- [`core.streamlined_comment_processor`](./streamlined_comment_processor.md) - Streamlined comment processor for optimizing nested structure handling and reducing conversion time
 - [`core.formatter`](./formatter.md) - HTML to Markdown converter for Capcat
 - [`core.command_logging`](./command_logging.md) - Enhanced command logging for CLI debugging and audit trail
 - [`core.config`](./config.md) - Configuration management for Capcat

@@ -1,5 +1,5 @@
 Capcat Documentation Manifest
-Generated: 2026-04-29 12:18:02 UTC
+Generated: 2026-05-01 18:49:23 UTC
 Success rate: 2/2 tasks
 
 Generated Documentation:
@@ -439,5 +439,5 @@ Generated Documentation:
   - superpowers/specs/2026-04-18-capcat-casestudy-part-two-design.md
   - troubleshooting.md
 
-Total files: 763
-Documentation size: 44.4 MB
+Total files: 764
+Documentation size: 45.3 MB

@@ -135,7 +135,7 @@ single <url>          # Process single article
 
 ### Single Articles
 ```
-../Capcats/DD-MM-YYYY-Title/
+../Capcats/cc_DD-MM-YYYY-Title/
 ├── article.md
 ├── images/
 └── files/

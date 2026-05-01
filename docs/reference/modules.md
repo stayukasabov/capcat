@@ -376,7 +376,6 @@ or refuse connection
 - [core.source_system.validation_engine](../api/core/validation_engine.md) - Enhanced configuration validation engine for the source system
 - [core.specialized_source_manager](../api/core/specialized_source_manager.md) - Specialized Source Manager for automatic URL-based source activation
 - [core.storage_manager](../api/core/storage_manager.md) - Storage management component for Capcat
-- [core.streamlined_comment_processor](../api/core/streamlined_comment_processor.md) - Streamlined comment processor for optimizing nested structure handling and reducing conversion time
 - [core.template_renderer](../api/core/template_renderer.md) - Simple Template Renderer for Capcat
 Replaces {{placeholder}} variables with actual values from configuration
 - [core.theme_utils](../api/core/theme_utils.md) - Theme utilities for hash-based theme persistence
@@ -505,9 +504,9 @@ Usage:
 
 ## Statistics
 
-- **Total Modules**: 367
-- **Total Classes**: 643
-- **Total Functions**: 823
-- **Public Functions**: 633
-- **Documentation Coverage**: 76.9%
+- **Total Modules**: 366
+- **Total Classes**: 642
+- **Total Functions**: 824
+- **Public Functions**: 632
+- **Documentation Coverage**: 76.7%
 
