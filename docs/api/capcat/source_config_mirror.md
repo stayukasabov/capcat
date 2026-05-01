@@ -277,6 +277,8 @@ Detects builtin files whose hash has changed since the last mirror and applies t
 
 **Backward compatibility:** manifest entries that lack an `ownership` field are treated as app-owned when the key ends in `.py`, regardless of the stored value. This covers vaults created before the `ownership` field was introduced and prevents stale source files from persisting after a capcat upgrade.
 
+**Drift repair:** for app-owned `.py` files, if `current_user_hash != stored_user_hash` even when the builtin hash appears unchanged, the user file is repaired from the builtin. This catches the reinstall scenario where `_resync_manifest()` writes `stored_builtin_hash = current builtin` but the vault's `source.py` is still stale.
+
 **Parameters:**
 
 - `self`
@@ -284,7 +286,7 @@ Detects builtin files whose hash has changed since the last mirror and applies t
 
 **Returns:** dict
 
-⚠️ **High complexity:** 15
+⚠️ **High complexity:** 17
 
 ##### _prompt_config_updates
 

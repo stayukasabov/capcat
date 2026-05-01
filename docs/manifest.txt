@@ -1,5 +1,5 @@
 Capcat Documentation Manifest
-Generated: 2026-05-01 19:23:40 UTC
+Generated: 2026-05-01 19:42:55 UTC
 Success rate: 2/2 tasks
 
 Generated Documentation:
@@ -279,7 +279,6 @@ Generated Documentation:
   - api/core/source_registry.md
   - api/core/specialized_source_manager.md
   - api/core/storage_manager.md
-  - api/core/streamlined_comment_processor.md
   - api/core/template_renderer.md
   - api/core/theme_utils.md
   - api/core/timeout_config.md
@@ -439,5 +438,5 @@ Generated Documentation:
   - superpowers/specs/2026-04-18-capcat-casestudy-part-two-design.md
   - troubleshooting.md
 
-Total files: 764
+Total files: 763
 Documentation size: 45.3 MB
