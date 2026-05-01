@@ -273,7 +273,14 @@ class SourceConfigMirror:
         for key, entry in list(manifest.items()):
             stored_builtin_hash = entry.get("builtin_hash", "")
             stored_user_hash = entry.get("user_hash", "")
-            ownership = entry.get("ownership", "config")  # backward compat: missing → config
+            # .py files are always app-owned — even in old manifests that predate the
+            # ownership field. Without this, missing ownership defaults to "config",
+            # causing changed .py files to hit the interactive prompt path and get
+            # skipped silently in non-interactive (-q) mode.
+            if key.endswith(".py"):
+                ownership = "app"
+            else:
+                ownership = entry.get("ownership", "config")
 
             if not stored_builtin_hash:
                 continue  # user-added source — never touch

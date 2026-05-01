@@ -713,6 +713,63 @@ def test_add_source_manifest_entry_has_user_ownership(tmp_path):
     assert data[key]["builtin_hash"] == ""
 
 
+def test_step2_py_file_no_ownership_field_auto_updated_noninteractive(tmp_path, monkeypatch):
+    """Old manifests lack 'ownership' on .py entries. They must still be auto-updated
+    (treated as app-owned) even when user_hash differs from stored_user_hash.
+
+    Regression: without fix, missing ownership defaults to 'config', and a changed
+    user_hash causes the entry to go through the interactive prompt path which skips
+    in non-interactive mode, leaving the stale .py file in place.
+    """
+    project = tmp_path / "project"
+    (project / ".capcat").mkdir(parents=True)
+
+    builtin_root = tmp_path / "_builtin"
+    custom_dir = builtin_root / "custom"
+    hn_builtin = custom_dir / "hn"
+    hn_builtin.mkdir(parents=True)
+
+    user_custom = project / "Config" / "sources" / "active" / "custom" / "hn"
+    user_custom.mkdir(parents=True)
+    (project / "Config" / "sources" / "active" / "config_driven" / "configs").mkdir(parents=True)
+    (project / "Config" / "sources" / "active" / "bundles").mkdir(parents=True)
+
+    # Three versions: stored (what manifest remembers), user (stale capcat-modified), builtin (new)
+    stored_content = "# source v1\n"
+    user_content = "# source v2 - modified by old capcat\n"  # user_hash != stored_user_hash
+    builtin_content = "# source v3 - new builtin\n"
+
+    stored_hash = hashlib.sha256(stored_content.encode()).hexdigest()
+    (hn_builtin / "source.py").write_text(builtin_content)
+    (user_custom / "source.py").write_text(user_content)
+
+    # Old manifest: NO 'ownership' field for .py entry
+    manifest = {
+        "custom/hn/source.py": {
+            "builtin_hash": stored_hash,
+            "user_hash": stored_hash,
+            # no "ownership" key — simulates manifest created before ownership field existed
+        }
+    }
+    (project / ".capcat" / "source_hashes.json").write_text(json.dumps(manifest))
+
+    m = SourceConfigMirror(project, tui_mode=False)
+    monkeypatch.setattr(m, "_builtin_config_driven_dir", lambda: builtin_root / "config_driven" / "configs")
+    monkeypatch.setattr(m, "_builtin_custom_dir", lambda: custom_dir)
+    monkeypatch.setattr(m, "_builtin_bundles_dir", lambda: builtin_root)
+
+    m.check_for_upgrades()
+
+    # .py file must be updated to new builtin content regardless of missing ownership field
+    assert (user_custom / "source.py").read_text() == builtin_content, (
+        ".py file with missing ownership field must be auto-updated (treated as app-owned)"
+    )
+    updated_manifest = json.loads((project / ".capcat" / "source_hashes.json").read_text())
+    new_hash = hashlib.sha256(builtin_content.encode()).hexdigest()
+    assert updated_manifest["custom/hn/source.py"]["builtin_hash"] == new_hash
+    assert updated_manifest["custom/hn/source.py"]["user_hash"] == new_hash
+
+
 def test_mirror_check_runs_only_once_per_batch(tmp_path, monkeypatch):
     """check_for_upgrades is called exactly once even when processing multiple sources."""
     from capcat.core.unified_source_processor import UnifiedSourceProcessor
