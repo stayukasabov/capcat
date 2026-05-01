@@ -297,11 +297,18 @@ class SourceConfigMirror:
                 continue
 
             current_builtin_hash = self._compute_hash(builtin_file)
-            if current_builtin_hash == stored_builtin_hash:
-                continue  # builtin unchanged
-
             current_user_hash = self._compute_hash(user_file)
             user_modified = current_user_hash != stored_user_hash
+
+            if current_builtin_hash == stored_builtin_hash:
+                # Builtin unchanged — but for app-owned .py files, also check whether
+                # the user file has drifted from the stored user_hash. This catches the
+                # reinstall scenario: _resync_manifest() writes stored_builtin_hash =
+                # current builtin, but the vault's source.py is still stale. Without
+                # this check the file would silently stay broken forever.
+                if ownership == "app" and user_modified:
+                    app_overwrite.append((key, user_file, builtin_file, current_builtin_hash, True))
+                continue
 
             if ownership == "app":
                 app_overwrite.append((key, user_file, builtin_file, current_builtin_hash, user_modified))

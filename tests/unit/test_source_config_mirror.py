@@ -770,6 +770,63 @@ def test_step2_py_file_no_ownership_field_auto_updated_noninteractive(tmp_path, 
     assert updated_manifest["custom/hn/source.py"]["user_hash"] == new_hash
 
 
+def test_step2_py_file_drifted_user_repaired_when_builtin_unchanged(tmp_path, monkeypatch):
+    """If manifest shows builtin unchanged but user .py file has drifted from the
+    stored user_hash, the file must be repaired from the builtin.
+
+    Scenario: uninstall + reinstall capcat causes _resync_manifest() to write
+    stored_builtin_hash = hash(NEW builtin). On next run current_builtin_hash ==
+    stored_builtin_hash so the upgrade check skips the file — but the user's
+    Config/sources/active/custom/hn/source.py is still the OLD stale content.
+    """
+    project = tmp_path / "project"
+    (project / ".capcat").mkdir(parents=True)
+
+    builtin_root = tmp_path / "_builtin"
+    custom_dir = builtin_root / "custom"
+    hn_builtin = custom_dir / "hn"
+    hn_builtin.mkdir(parents=True)
+
+    user_custom = project / "Config" / "sources" / "active" / "custom" / "hn"
+    user_custom.mkdir(parents=True)
+    (project / "Config" / "sources" / "active" / "config_driven" / "configs").mkdir(parents=True)
+    (project / "Config" / "sources" / "active" / "bundles").mkdir(parents=True)
+
+    builtin_content = "# source v3 - new builtin\n"
+    stale_user_content = "# source v1 - old stale content from before GDPR fix\n"
+
+    builtin_hash = hashlib.sha256(builtin_content.encode()).hexdigest()
+    stale_hash = hashlib.sha256(stale_user_content.encode()).hexdigest()
+
+    (hn_builtin / "source.py").write_text(builtin_content)
+    (user_custom / "source.py").write_text(stale_user_content)
+
+    # Manifest after resync: stored_builtin_hash == current builtin (new),
+    # but stored_user_hash doesn't match current user file (stale).
+    # This is what _resync_manifest() writes after a reinstall.
+    manifest = {
+        "custom/hn/source.py": {
+            "ownership": "app",
+            "builtin_hash": builtin_hash,   # matches current builtin
+            "user_hash": builtin_hash,      # resync assumed user == builtin (wrong)
+        }
+    }
+    (project / ".capcat" / "source_hashes.json").write_text(json.dumps(manifest))
+
+    m = SourceConfigMirror(project, tui_mode=False)
+    monkeypatch.setattr(m, "_builtin_config_driven_dir", lambda: builtin_root / "config_driven" / "configs")
+    monkeypatch.setattr(m, "_builtin_custom_dir", lambda: custom_dir)
+    monkeypatch.setattr(m, "_builtin_bundles_dir", lambda: builtin_root)
+
+    m.check_for_upgrades()
+
+    assert (user_custom / "source.py").read_text() == builtin_content, (
+        "Drifted .py file must be repaired from builtin even when builtin hash is unchanged"
+    )
+    updated_manifest = json.loads((project / ".capcat" / "source_hashes.json").read_text())
+    assert updated_manifest["custom/hn/source.py"]["user_hash"] == builtin_hash
+
+
 def test_mirror_check_runs_only_once_per_batch(tmp_path, monkeypatch):
     """check_for_upgrades is called exactly once even when processing multiple sources."""
     from capcat.core.unified_source_processor import UnifiedSourceProcessor
