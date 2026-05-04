@@ -67,6 +67,8 @@ Analyze the entire project structure.
 
 **Returns:** None
 
+⚠️ **High complexity:** 14
+
 ##### _analyze_file
 
 ```python
