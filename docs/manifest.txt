@@ -1,5 +1,5 @@
 Capcat Documentation Manifest
-Generated: 2026-05-04 10:30:59 UTC
+Generated: 2026-05-04 10:46:04 UTC
 Success rate: 1/1 tasks
 
 Generated Documentation:
@@ -276,6 +276,7 @@ Generated Documentation:
   - api/core/url_utils.md
   - api/core/utils.md
   - api/core/validation_engine.md
+  - api/index.md
   - api/scripts/README.md
   - api/scripts/add_doc_navigation.md
   - api/scripts/apply_mermaid_design_system.md
@@ -373,5 +374,5 @@ Generated Documentation:
   - superpowers/specs/2026-04-18-capcat-casestudy-part-two-design.md
   - troubleshooting.md
 
-Total files: 671
+Total files: 672
 Documentation size: 45.2 MB

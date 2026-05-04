@@ -2,19 +2,17 @@ title: Capcat Documentation
 url: "https://capcat.org"
 baseurl: ""
 
-# Do not use any GitHub Pages theme — we provide our own layout
+# No theme — layout is provided by docs/_layouts/default.html
 theme: ~
 
-# All generated .md files include front matter — no optional-front-matter plugin needed
-plugins:
-  - jekyll-titles-from-headings
-
-# Exclude local tooling from the built site
+# Exclude files that would conflict with the existing homepage or are not public docs
 exclude:
   - Gemfile
   - Gemfile.lock
   - manifest.txt
   - UTILITY-CLASSES.md
   - ACCESSIBILITY-REMEDIATION-PLAN.md
+  - index.md
+  - README.md
   - bugs/
   - superpowers/

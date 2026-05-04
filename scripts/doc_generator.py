@@ -1303,7 +1303,7 @@ MIT-Style Non-Commercial License - see [LICENSE.txt](../LICENSE.txt) file for de
 **Note**: This tool is designed for personal archiving and research purposes. Please respect robots.txt and terms of service for all sources.
 """
 
-        with open(self.output_dir / "README.md", 'w') as f:
+        with open(self.output_dir / "api" / "README.md", 'w') as f:
             f.write(_JEKYLL_FRONT_MATTER + readme_content)
 
     def generate_index(self) -> None:
@@ -1381,7 +1381,7 @@ Last generated: $(date)
 **Need help?** Check the [Developer Guide](developer/guide.md) or create an issue on GitHub.
 """
 
-        with open(self.output_dir / "index.md", 'w') as f:
+        with open(self.output_dir / "api" / "index.md", 'w') as f:
             f.write(_JEKYLL_FRONT_MATTER + index_content)
 
 
