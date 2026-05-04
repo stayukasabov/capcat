@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.source_system.source_backup_manager
 
 **File:** `Application/core/source_system/source_backup_manager.py`

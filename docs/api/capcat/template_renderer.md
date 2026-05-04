@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.template_renderer
 
 **File:** `Application/capcat/core/template_renderer.py`

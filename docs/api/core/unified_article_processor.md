@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.unified_article_processor
 
 **File:** `Application/core/unified_article_processor.py`

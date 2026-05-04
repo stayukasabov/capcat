@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.cli
 
 **File:** `Application/capcat/cli.py`

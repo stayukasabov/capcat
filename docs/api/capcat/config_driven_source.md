@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.source_system.config_driven_source
 
 **File:** `Application/capcat/core/source_system/config_driven_source.py`

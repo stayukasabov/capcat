@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.source_system.bundle_ui
 
 **File:** `Application/capcat/core/source_system/bundle_ui.py`

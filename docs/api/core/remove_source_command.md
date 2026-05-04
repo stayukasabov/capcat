@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.source_system.remove_source_command
 
 **File:** `Application/core/source_system/remove_source_command.py`

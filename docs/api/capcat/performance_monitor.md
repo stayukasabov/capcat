@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.source_system.performance_monitor
 
 **File:** `Application/capcat/core/source_system/performance_monitor.py`

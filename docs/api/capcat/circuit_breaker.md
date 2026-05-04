@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.circuit_breaker
 
 **File:** `Application/capcat/core/circuit_breaker.py`

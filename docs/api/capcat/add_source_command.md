@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.source_system.add_source_command
 
 **File:** `Application/capcat/core/source_system/add_source_command.py`

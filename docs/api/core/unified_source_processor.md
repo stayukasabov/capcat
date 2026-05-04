@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.unified_source_processor
 
 **File:** `Application/core/unified_source_processor.py`

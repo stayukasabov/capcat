@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.htmlgen.generator
 
 **File:** `Application/capcat/htmlgen/generator.py`

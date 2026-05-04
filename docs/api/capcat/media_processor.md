@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.media_processor
 
 **File:** `Application/capcat/core/media_processor.py`

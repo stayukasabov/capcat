@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.article_fetcher
 
 **File:** `Application/core/article_fetcher.py`

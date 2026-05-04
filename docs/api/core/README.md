@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # Core Package
 
 ## Overview

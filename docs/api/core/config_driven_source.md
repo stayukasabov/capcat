@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.source_system.config_driven_source
 
 **File:** `Application/core/source_system/config_driven_source.py`

@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.ethical_scraping
 
 **File:** `Application/core/ethical_scraping.py`

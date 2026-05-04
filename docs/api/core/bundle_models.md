@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.source_system.bundle_models
 
 **File:** `Application/core/source_system/bundle_models.py`

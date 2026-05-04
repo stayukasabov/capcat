@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.source_system.add_source_service
 
 **File:** `Application/core/source_system/add_source_service.py`

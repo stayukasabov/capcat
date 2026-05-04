@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.network_resilience
 
 **File:** `Application/capcat/core/network_resilience.py`

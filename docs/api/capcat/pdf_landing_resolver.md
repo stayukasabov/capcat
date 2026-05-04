@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.pdf_landing_resolver
 
 **File:** `Application/capcat/core/pdf_landing_resolver.py`

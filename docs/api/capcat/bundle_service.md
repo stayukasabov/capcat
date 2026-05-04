@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.source_system.bundle_service
 
 **File:** `Application/capcat/core/source_system/bundle_service.py`

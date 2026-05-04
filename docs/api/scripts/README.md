@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # Scripts Package
 
 ## Overview

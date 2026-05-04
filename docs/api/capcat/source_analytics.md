@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.source_system.source_analytics
 
 **File:** `Application/capcat/core/source_system/source_analytics.py`

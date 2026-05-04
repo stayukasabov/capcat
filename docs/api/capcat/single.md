@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.commands.single
 
 **File:** `Application/capcat/commands/single.py`

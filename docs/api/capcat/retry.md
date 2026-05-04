@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.retry
 
 **File:** `Application/capcat/core/retry.py`

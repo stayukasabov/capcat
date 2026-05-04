@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.command_logging
 
 **File:** `Application/capcat/core/command_logging.py`

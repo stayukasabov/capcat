@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.design_system_compiler
 
 **File:** `Application/core/design_system_compiler.py`

@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.media_executor
 
 **File:** `Application/capcat/core/media_executor.py`

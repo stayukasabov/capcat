@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.network_resilience
 
 **File:** `Application/core/network_resilience.py`

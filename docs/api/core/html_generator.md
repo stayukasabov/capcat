@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.html_generator
 
 **File:** `Application/core/html_generator.py`

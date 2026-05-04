@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.timeout_config
 
 **File:** `Application/capcat/core/timeout_config.py`

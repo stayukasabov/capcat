@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.commands.generate_config
 
 **File:** `Application/capcat/commands/generate_config.py`

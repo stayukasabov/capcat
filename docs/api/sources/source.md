@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # sources.specialized.youtube.source
 
 **File:** `Application/sources/specialized/youtube/source.py`

@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.source_config_mirror
 
 **File:** `Application/capcat/core/source_config_mirror.py`

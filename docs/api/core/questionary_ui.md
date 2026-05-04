@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.source_system.questionary_ui
 
 **File:** `Application/core/source_system/questionary_ui.py`

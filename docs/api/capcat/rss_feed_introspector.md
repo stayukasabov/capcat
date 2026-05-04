@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.source_system.rss_feed_introspector
 
 **File:** `Application/capcat/core/source_system/rss_feed_introspector.py`

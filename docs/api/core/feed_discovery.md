@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.source_system.feed_discovery
 
 **File:** `Application/core/source_system/feed_discovery.py`

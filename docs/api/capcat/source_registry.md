@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.source_system.source_registry
 
 **File:** `Application/capcat/core/source_system/source_registry.py`

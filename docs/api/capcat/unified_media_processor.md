@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.unified_media_processor
 
 **File:** `Application/capcat/core/unified_media_processor.py`

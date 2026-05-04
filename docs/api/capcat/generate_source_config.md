@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.scripts.generate_source_config
 
 **File:** `Application/capcat/scripts/generate_source_config.py`

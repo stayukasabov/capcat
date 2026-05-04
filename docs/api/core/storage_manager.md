@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.storage_manager
 
 **File:** `Application/core/storage_manager.py`

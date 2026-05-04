@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.source_system.source_config_generator
 
 **File:** `Application/capcat/core/source_system/source_config_generator.py`

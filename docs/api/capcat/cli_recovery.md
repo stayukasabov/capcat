@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.cli_recovery
 
 **File:** `Application/capcat/core/cli_recovery.py`

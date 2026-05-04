@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # Sources Package
 
 ## Overview

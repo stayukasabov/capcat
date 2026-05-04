@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # Component Details
 
 ## Source System Components

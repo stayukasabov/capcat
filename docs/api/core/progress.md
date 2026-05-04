@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.progress
 
 **File:** `Application/core/progress.py`

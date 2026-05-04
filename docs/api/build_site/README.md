@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # Build_Site Package
 
 ## Overview

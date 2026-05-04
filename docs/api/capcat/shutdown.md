@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.shutdown
 
 **File:** `Application/capcat/core/shutdown.py`

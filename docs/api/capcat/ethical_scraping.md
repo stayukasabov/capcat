@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.ethical_scraping
 
 **File:** `Application/capcat/core/ethical_scraping.py`

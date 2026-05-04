@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.downloader
 
 **File:** `Application/capcat/core/downloader.py`

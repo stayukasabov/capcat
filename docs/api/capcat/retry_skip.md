@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.retry_skip
 
 **File:** `Application/capcat/core/retry_skip.py`

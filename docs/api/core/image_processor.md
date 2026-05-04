@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.image_processor
 
 **File:** `Application/core/image_processor.py`

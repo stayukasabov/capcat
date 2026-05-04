@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.formatter
 
 **File:** `Application/core/formatter.py`

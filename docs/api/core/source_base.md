@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.config.source_base
 
 **File:** `Application/core/config/source_base.py`

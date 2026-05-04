@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.logging_config
 
 **File:** `Application/core/logging_config.py`

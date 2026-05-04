@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.session_pool
 
 **File:** `Application/core/session_pool.py`

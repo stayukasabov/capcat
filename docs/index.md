@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # Capcat Documentation
 
 Welcome to the comprehensive documentation for Capcat, a modular news article archiving system.

@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # API Reference
 
 This is the complete API reference for Capcat.

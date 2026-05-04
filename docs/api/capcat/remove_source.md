@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.commands.remove_source
 
 **File:** `Application/capcat/commands/remove_source.py`

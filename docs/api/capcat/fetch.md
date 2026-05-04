@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.commands.fetch
 
 **File:** `Application/capcat/commands/fetch.py`

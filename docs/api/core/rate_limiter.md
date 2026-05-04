@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.rate_limiter
 
 **File:** `Application/core/rate_limiter.py`

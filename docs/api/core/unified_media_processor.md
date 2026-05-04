@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.unified_media_processor
 
 **File:** `Application/core/unified_media_processor.py`

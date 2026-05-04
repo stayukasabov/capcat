@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.error_handling
 
 **File:** `Application/core/error_handling.py`

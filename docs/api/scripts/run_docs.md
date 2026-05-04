@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # scripts.run_docs
 
 **File:** `Application/scripts/run_docs.py`

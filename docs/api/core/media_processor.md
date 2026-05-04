@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.media_processor
 
 **File:** `Application/core/media_processor.py`

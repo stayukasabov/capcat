@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # __version__
 
 **File:** `Application/__version__.py`

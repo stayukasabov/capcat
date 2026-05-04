@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # sources.specialized.youtube.__init__
 
 **File:** `Application/sources/specialized/youtube/__init__.py`

@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # sources.base.config_schema
 
 **File:** `Application/sources/base/config_schema.py`

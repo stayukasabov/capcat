@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.enhanced_argparse
 
 **File:** `Application/core/enhanced_argparse.py`

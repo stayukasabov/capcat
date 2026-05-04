@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.url_utils
 
 **File:** `Application/capcat/core/url_utils.py`

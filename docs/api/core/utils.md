@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.utils
 
 **File:** `Application/core/utils.py`

@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.html_post_processor
 
 **File:** `Application/capcat/core/html_post_processor.py`

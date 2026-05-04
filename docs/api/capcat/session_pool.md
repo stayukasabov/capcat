@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.session_pool
 
 **File:** `Application/capcat/core/session_pool.py`

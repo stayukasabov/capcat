@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.timeout_config
 
 **File:** `Application/core/timeout_config.py`

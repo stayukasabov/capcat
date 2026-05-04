@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.media_config
 
 **File:** `Application/capcat/core/media_config.py`

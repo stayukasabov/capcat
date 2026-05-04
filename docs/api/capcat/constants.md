@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.constants
 
 **File:** `Application/capcat/core/constants.py`

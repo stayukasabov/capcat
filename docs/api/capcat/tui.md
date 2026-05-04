@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.tui
 
 **File:** `Application/capcat/tui.py`

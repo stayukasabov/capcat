@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.source_system.base_source
 
 **File:** `Application/core/source_system/base_source.py`

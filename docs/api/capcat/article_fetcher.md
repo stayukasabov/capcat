@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.article_fetcher
 
 **File:** `Application/capcat/core/article_fetcher.py`

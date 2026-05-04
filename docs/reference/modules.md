@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # Module Reference
 
 Complete reference of all modules, classes, and functions in Capcat.

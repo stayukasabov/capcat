@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.design_system_compiler
 
 **File:** `Application/capcat/core/design_system_compiler.py`

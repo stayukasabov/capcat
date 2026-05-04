@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.sources.builtin.custom.hn.source
 
 **File:** `Application/capcat/sources/builtin/custom/hn/source.py`

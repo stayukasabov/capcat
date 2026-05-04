@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.source_system.performance_monitor
 
 **File:** `Application/core/source_system/performance_monitor.py`

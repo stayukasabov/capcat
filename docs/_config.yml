@@ -5,17 +5,9 @@ baseurl: ""
 # Do not use any GitHub Pages theme — we provide our own layout
 theme: ~
 
-# Whitelisted GitHub Pages plugins
+# All generated .md files include front matter — no optional-front-matter plugin needed
 plugins:
-  - jekyll-optional-front-matter
   - jekyll-titles-from-headings
-
-# Apply default layout to all pages (including .md without front matter)
-defaults:
-  - scope:
-      path: ""
-    values:
-      layout: "default"
 
 # Exclude local tooling from the built site
 exclude:

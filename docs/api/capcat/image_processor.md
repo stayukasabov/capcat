@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.image_processor
 
 **File:** `Application/capcat/core/image_processor.py`

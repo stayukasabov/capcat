@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.news_source_adapter
 
 **File:** `Application/core/news_source_adapter.py`

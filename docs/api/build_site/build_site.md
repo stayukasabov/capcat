@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # build_site
 
 **File:** `Application/build_site.py`

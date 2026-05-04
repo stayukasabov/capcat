@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.source_system.bundle_service
 
 **File:** `Application/core/source_system/bundle_service.py`

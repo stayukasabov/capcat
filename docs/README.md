@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # Capcat - News Article Archiving System
 
 A powerful, modular news article archiving system that fetches articles from 13+ sources, converts them to Markdown, and organizes them with media files.

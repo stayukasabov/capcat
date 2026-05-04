@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.shutdown
 
 **File:** `Application/core/shutdown.py`

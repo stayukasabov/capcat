@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.commands.init
 
 **File:** `Application/capcat/commands/init.py`

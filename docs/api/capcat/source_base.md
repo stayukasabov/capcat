@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.config.source_base
 
 **File:** `Application/capcat/core/config/source_base.py`

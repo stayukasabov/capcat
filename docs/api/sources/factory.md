@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # sources.base.factory
 
 **File:** `Application/sources/base/factory.py`

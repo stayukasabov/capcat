@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # __Version__ Package
 
 ## Overview

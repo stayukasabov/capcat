@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.rate_limiter
 
 **File:** `Application/capcat/core/rate_limiter.py`

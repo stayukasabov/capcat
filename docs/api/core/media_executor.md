@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.media_executor
 
 **File:** `Application/core/media_executor.py`

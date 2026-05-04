@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.source_system.rss_feed_introspector
 
 **File:** `Application/core/source_system/rss_feed_introspector.py`

@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.htmlgen.factory
 
 **File:** `Application/capcat/htmlgen/factory.py`

@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.error_handling
 
 **File:** `Application/capcat/core/error_handling.py`

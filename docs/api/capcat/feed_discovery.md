@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.source_system.feed_discovery
 
 **File:** `Application/capcat/core/source_system/feed_discovery.py`

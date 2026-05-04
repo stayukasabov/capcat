@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.config
 
 **File:** `Application/core/config.py`

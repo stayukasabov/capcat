@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.update_manager
 
 **File:** `Application/core/update_manager.py`

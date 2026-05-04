@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.exceptions
 
 **File:** `Application/core/exceptions.py`

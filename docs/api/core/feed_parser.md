@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.source_system.feed_parser
 
 **File:** `Application/core/source_system/feed_parser.py`

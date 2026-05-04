@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # cli
 
 **File:** `Application/cli.py`

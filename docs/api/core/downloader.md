@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.downloader
 
 **File:** `Application/core/downloader.py`

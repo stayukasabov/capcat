@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.async_pdf_manager
 
 **File:** `Application/capcat/core/async_pdf_manager.py`

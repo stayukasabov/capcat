@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.source_system.removal_ui
 
 **File:** `Application/core/source_system/removal_ui.py`

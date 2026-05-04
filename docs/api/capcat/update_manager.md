@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.update_manager
 
 **File:** `Application/capcat/core/update_manager.py`

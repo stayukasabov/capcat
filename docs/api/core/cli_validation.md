@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.cli_validation
 
 **File:** `Application/core/cli_validation.py`

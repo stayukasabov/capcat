@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.progress
 
 **File:** `Application/capcat/core/progress.py`

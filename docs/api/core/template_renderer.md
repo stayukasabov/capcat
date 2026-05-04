@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.template_renderer
 
 **File:** `Application/core/template_renderer.py`

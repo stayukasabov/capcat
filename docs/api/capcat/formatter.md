@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.formatter
 
 **File:** `Application/capcat/core/formatter.py`

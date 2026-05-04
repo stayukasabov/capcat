@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.retry_skip
 
 **File:** `Application/core/retry_skip.py`

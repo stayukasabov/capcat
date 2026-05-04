@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.circuit_breaker
 
 **File:** `Application/core/circuit_breaker.py`

@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.command_logging
 
 **File:** `Application/core/command_logging.py`

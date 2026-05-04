@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.source_system.enhanced_remove_command
 
 **File:** `Application/capcat/core/source_system/enhanced_remove_command.py`

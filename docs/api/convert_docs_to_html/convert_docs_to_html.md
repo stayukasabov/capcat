@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # convert_docs_to_html
 
 **File:** `Application/convert_docs_to_html.py`

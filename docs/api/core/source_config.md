@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.source_system.source_config
 
 **File:** `Application/core/source_system/source_config.py`

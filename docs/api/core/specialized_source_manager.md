@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.specialized_source_manager
 
 **File:** `Application/core/specialized_source_manager.py`

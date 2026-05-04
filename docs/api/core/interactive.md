@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.interactive
 
 **File:** `Application/core/interactive.py`

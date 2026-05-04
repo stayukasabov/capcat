@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.enhanced_argparse
 
 **File:** `Application/capcat/core/enhanced_argparse.py`

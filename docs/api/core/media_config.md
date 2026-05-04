@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.media_config
 
 **File:** `Application/core/media_config.py`

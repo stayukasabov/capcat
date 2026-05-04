@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.url_utils
 
 **File:** `Application/core/url_utils.py`

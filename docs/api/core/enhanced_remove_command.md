@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # core.source_system.enhanced_remove_command
 
 **File:** `Application/core/source_system/enhanced_remove_command.py`

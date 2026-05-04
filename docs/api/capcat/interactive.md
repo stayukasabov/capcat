@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.interactive
 
 **File:** `Application/capcat/core/interactive.py`

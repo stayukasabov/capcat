@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.logging_config
 
 **File:** `Application/capcat/core/logging_config.py`

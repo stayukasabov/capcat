@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # capcat.core.theme_utils
 
 **File:** `Application/capcat/core/theme_utils.py`

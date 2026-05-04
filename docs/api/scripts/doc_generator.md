@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # scripts.doc_generator
 
 **File:** `Application/scripts/doc_generator.py`
@@ -7,6 +11,12 @@
 Documentation Generator for Capcat
 
 Automatically extracts and generates comprehensive documentation from the codebase.
+
+## Constants
+
+### _JEKYLL_FRONT_MATTER
+
+**Value:** `'---\nlayout: default\n---\n\n'`
 
 ## Classes
 
