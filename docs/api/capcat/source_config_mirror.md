@@ -1,5 +1,6 @@
 ---
 layout: default
+render_with_liquid: false
 ---
 
 # capcat.core.source_config_mirror

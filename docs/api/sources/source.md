@@ -1,5 +1,6 @@
 ---
 layout: default
+render_with_liquid: false
 ---
 
 # sources.specialized.youtube.source

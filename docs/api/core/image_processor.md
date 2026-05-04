@@ -1,5 +1,6 @@
 ---
 layout: default
+render_with_liquid: false
 ---
 
 # core.image_processor

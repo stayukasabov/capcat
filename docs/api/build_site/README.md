@@ -1,5 +1,6 @@
 ---
 layout: default
+render_with_liquid: false
 ---
 
 # Build_Site Package

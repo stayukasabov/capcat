@@ -1,5 +1,6 @@
 ---
 layout: default
+render_with_liquid: false
 ---
 
 # convert_docs_to_html

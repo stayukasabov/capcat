@@ -1,5 +1,6 @@
 ---
 layout: default
+render_with_liquid: false
 ---
 
 # scripts.doc_generator
@@ -16,7 +17,7 @@ Automatically extracts and generates comprehensive documentation from the codeba
 
 ### _JEKYLL_FRONT_MATTER
 
-**Value:** `'---\nlayout: default\n---\n\n'`
+**Value:** `'---\nlayout: default\nrender_with_liquid: false\n---\n\n'`
 
 ## Classes
 

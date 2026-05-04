@@ -21,7 +21,7 @@ except ImportError:
     yaml = None
 
 # Prepended to every generated .md file so Jekyll renders them with the site layout.
-_JEKYLL_FRONT_MATTER = "---\nlayout: default\n---\n\n"
+_JEKYLL_FRONT_MATTER = "---\nlayout: default\nrender_with_liquid: false\n---\n\n"
 
 
 @dataclass
