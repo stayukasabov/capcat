@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.core.update_manager
 
 **File:** `Application/capcat/core/update_manager.py`

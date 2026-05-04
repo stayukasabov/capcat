@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # core.circuit_breaker
 
 **File:** `Application/core/circuit_breaker.py`

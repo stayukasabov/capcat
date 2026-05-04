@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # core.html_post_processor
 
 **File:** `Application/core/html_post_processor.py`

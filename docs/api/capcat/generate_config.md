@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.commands.generate_config
 
 **File:** `Application/capcat/commands/generate_config.py`

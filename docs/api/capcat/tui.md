@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.tui
 
 **File:** `Application/capcat/tui.py`

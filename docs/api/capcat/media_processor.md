@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.core.media_processor
 
 **File:** `Application/capcat/core/media_processor.py`

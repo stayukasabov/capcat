@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # core.storage_manager
 
 **File:** `Application/core/storage_manager.py`

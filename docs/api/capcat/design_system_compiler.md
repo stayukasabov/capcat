@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.core.design_system_compiler
 
 **File:** `Application/capcat/core/design_system_compiler.py`

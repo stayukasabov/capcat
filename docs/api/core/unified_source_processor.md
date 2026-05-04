@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # core.unified_source_processor
 
 **File:** `Application/core/unified_source_processor.py`

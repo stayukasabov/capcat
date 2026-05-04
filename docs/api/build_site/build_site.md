@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # build_site
 
 **File:** `Application/build_site.py`
@@ -41,5 +46,5 @@ Inject favicon link into <head> if not already present.
 def build_site()
 ```
 
-Replace {% include %} directives and old HTML with actual content.
+Replace include directives and old HTML with actual content.
 

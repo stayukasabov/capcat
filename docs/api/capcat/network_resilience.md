@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.core.network_resilience
 
 **File:** `Application/capcat/core/network_resilience.py`

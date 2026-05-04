@@ -20,6 +20,9 @@ try:
 except ImportError:
     yaml = None
 
+# Prepended to every generated .md file so Jekyll renders them with the site layout.
+_JEKYLL_FRONT_MATTER = "---\nlayout: default\nrender_with_liquid: false\n---\n\n"
+
 
 @dataclass
 class FunctionDoc:
@@ -339,7 +342,7 @@ This package contains the following modules:
             overview_content += "\n"
 
         with open(package_dir / "README.md", 'w') as f:
-            f.write(overview_content)
+            f.write(_JEKYLL_FRONT_MATTER + overview_content)
 
         # Individual module documentation
         for module in modules:
@@ -391,7 +394,7 @@ This package contains the following modules:
                 content += self._format_function_docs(func)
 
         with open(package_dir / f"{module_name}.md", 'w') as f:
-            f.write(content)
+            f.write(_JEKYLL_FRONT_MATTER + content)
 
     def _format_class_docs(self, cls: ClassDoc) -> str:
         """Format class documentation."""
@@ -493,7 +496,7 @@ This is the complete API reference for Capcat.
 """
 
         with open(api_dir / "README.md", 'w') as f:
-            f.write(content)
+            f.write(_JEKYLL_FRONT_MATTER + content)
 
     def generate_architecture_docs(self) -> None:
         """Generate architecture documentation with diagrams."""
@@ -617,7 +620,7 @@ Progress tracking and logging throughout the pipeline.
 """
 
         with open(arch_dir / "system.md", 'w') as f:
-            f.write(system_arch)
+            f.write(_JEKYLL_FRONT_MATTER + system_arch)
 
         # Component details
         self._generate_component_docs(arch_dir)
@@ -712,7 +715,7 @@ Source-specific configuration and metadata.
 """
 
         with open(arch_dir / "components.md", 'w') as f:
-            f.write(components_content)
+            f.write(_JEKYLL_FRONT_MATTER + components_content)
 
     def generate_module_reference(self) -> None:
         """Generate complete module reference."""
@@ -762,7 +765,7 @@ Complete reference of all modules, classes, and functions in Capcat.
 """
 
         with open(ref_dir / "modules.md", 'w') as f:
-            f.write(content)
+            f.write(_JEKYLL_FRONT_MATTER + content)
 
     def generate_developer_guide(self) -> None:
         """Generate developer guide."""
@@ -1005,7 +1008,7 @@ except Exception as e:
 """
 
         with open(dev_dir / "guide.md", 'w') as f:
-            f.write(guide_content)
+            f.write(_JEKYLL_FRONT_MATTER + guide_content)
 
     def generate_readme(self) -> None:
         """Generate comprehensive README."""
@@ -1300,8 +1303,8 @@ MIT-Style Non-Commercial License - see [LICENSE.txt](../LICENSE.txt) file for de
 **Note**: This tool is designed for personal archiving and research purposes. Please respect robots.txt and terms of service for all sources.
 """
 
-        with open(self.output_dir / "README.md", 'w') as f:
-            f.write(readme_content)
+        with open(self.output_dir / "api" / "README.md", 'w') as f:
+            f.write(_JEKYLL_FRONT_MATTER + readme_content)
 
     def generate_index(self) -> None:
         """Generate documentation index."""
@@ -1378,8 +1381,8 @@ Last generated: $(date)
 **Need help?** Check the [Developer Guide](developer/guide.md) or create an issue on GitHub.
 """
 
-        with open(self.output_dir / "index.md", 'w') as f:
-            f.write(index_content)
+        with open(self.output_dir / "api" / "index.md", 'w') as f:
+            f.write(_JEKYLL_FRONT_MATTER + index_content)
 
 
 def main():

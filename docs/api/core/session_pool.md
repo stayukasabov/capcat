@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # core.session_pool
 
 **File:** `Application/core/session_pool.py`

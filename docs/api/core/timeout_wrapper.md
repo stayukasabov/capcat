@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # core.timeout_wrapper
 
 **File:** `Application/core/timeout_wrapper.py`

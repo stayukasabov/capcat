@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.core.retry
 
 **File:** `Application/capcat/core/retry.py`

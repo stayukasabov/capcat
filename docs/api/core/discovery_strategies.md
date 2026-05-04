@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # core.source_system.discovery_strategies
 
 **File:** `Application/core/source_system/discovery_strategies.py`

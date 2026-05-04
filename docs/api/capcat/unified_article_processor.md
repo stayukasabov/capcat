@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.core.unified_article_processor
 
 **File:** `Application/capcat/core/unified_article_processor.py`

@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # core.source_system.add_source_command
 
 **File:** `Application/core/source_system/add_source_command.py`

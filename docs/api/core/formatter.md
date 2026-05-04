@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # core.formatter
 
 **File:** `Application/core/formatter.py`

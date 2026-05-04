@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # core.cli_validation
 
 **File:** `Application/core/cli_validation.py`

@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # sources.base.config_schema
 
 **File:** `Application/sources/base/config_schema.py`

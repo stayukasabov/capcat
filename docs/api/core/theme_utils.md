@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # core.theme_utils
 
 **File:** `Application/core/theme_utils.py`

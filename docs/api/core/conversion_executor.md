@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # core.conversion_executor
 
 **File:** `Application/core/conversion_executor.py`

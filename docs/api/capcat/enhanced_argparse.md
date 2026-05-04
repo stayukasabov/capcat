@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.core.enhanced_argparse
 
 **File:** `Application/capcat/core/enhanced_argparse.py`

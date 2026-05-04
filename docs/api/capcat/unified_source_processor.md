@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.core.unified_source_processor
 
 **File:** `Application/capcat/core/unified_source_processor.py`

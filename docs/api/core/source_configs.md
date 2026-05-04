@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # core.source_configs
 
 **File:** `Application/core/source_configs.py`

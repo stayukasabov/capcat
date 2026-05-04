@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.commands.init
 
 **File:** `Application/capcat/commands/init.py`

@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # core.network_resilience
 
 **File:** `Application/core/network_resilience.py`

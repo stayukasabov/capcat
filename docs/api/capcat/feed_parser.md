@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.core.source_system.feed_parser
 
 **File:** `Application/capcat/core/source_system/feed_parser.py`

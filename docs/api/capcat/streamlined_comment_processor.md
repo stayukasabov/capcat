@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.core.streamlined_comment_processor
 
 **File:** `Application/capcat/core/streamlined_comment_processor.py`

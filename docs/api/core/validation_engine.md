@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # core.source_system.validation_engine
 
 **File:** `Application/core/source_system/validation_engine.py`

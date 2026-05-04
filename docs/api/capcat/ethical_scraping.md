@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.core.ethical_scraping
 
 **File:** `Application/capcat/core/ethical_scraping.py`

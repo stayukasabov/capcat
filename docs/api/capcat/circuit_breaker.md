@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.core.circuit_breaker
 
 **File:** `Application/capcat/core/circuit_breaker.py`

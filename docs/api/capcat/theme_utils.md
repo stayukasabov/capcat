@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.core.theme_utils
 
 **File:** `Application/capcat/core/theme_utils.py`

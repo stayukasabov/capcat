@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.htmlgen.generator
 
 **File:** `Application/capcat/htmlgen/generator.py`

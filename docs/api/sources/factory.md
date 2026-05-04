@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # sources.base.factory
 
 **File:** `Application/sources/base/factory.py`

@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.core.logging_config
 
 **File:** `Application/capcat/core/logging_config.py`

@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.htmlgen.factory
 
 **File:** `Application/capcat/htmlgen/factory.py`

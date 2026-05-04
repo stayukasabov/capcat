@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.core.html_post_processor
 
 **File:** `Application/capcat/core/html_post_processor.py`

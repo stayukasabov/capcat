@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.core.source_system.removal_ui
 
 **File:** `Application/capcat/core/source_system/removal_ui.py`

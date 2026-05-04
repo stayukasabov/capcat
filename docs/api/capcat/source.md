@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.sources.builtin.custom.hn.source
 
 **File:** `Application/capcat/sources/builtin/custom/hn/source.py`

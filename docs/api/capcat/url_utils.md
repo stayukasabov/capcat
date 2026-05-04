@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.core.url_utils
 
 **File:** `Application/capcat/core/url_utils.py`

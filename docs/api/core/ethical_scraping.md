@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # core.ethical_scraping
 
 **File:** `Application/core/ethical_scraping.py`

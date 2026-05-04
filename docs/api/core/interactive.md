@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # core.interactive
 
 **File:** `Application/core/interactive.py`

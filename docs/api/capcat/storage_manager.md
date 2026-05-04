@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.core.storage_manager
 
 **File:** `Application/capcat/core/storage_manager.py`

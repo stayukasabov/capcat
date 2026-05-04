@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # __Version__ Package
 
 ## Overview

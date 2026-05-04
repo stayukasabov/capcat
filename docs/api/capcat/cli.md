@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.cli
 
 **File:** `Application/capcat/cli.py`

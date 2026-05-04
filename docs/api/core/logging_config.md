@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # core.logging_config
 
 **File:** `Application/core/logging_config.py`

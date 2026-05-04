@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # core.specialized_source_manager
 
 **File:** `Application/core/specialized_source_manager.py`

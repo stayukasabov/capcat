@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.core.article_fetcher
 
 **File:** `Application/capcat/core/article_fetcher.py`

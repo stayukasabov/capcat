@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # core.enhanced_argparse
 
 **File:** `Application/core/enhanced_argparse.py`

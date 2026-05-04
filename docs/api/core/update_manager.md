@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # core.update_manager
 
 **File:** `Application/core/update_manager.py`

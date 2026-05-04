@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.core.image_processor
 
 **File:** `Application/capcat/core/image_processor.py`

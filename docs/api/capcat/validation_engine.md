@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.core.source_system.validation_engine
 
 **File:** `Application/capcat/core/source_system/validation_engine.py`

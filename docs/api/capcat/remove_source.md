@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.commands.remove_source
 
 **File:** `Application/capcat/commands/remove_source.py`

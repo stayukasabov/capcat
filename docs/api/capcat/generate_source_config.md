@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.scripts.generate_source_config
 
 **File:** `Application/capcat/scripts/generate_source_config.py`

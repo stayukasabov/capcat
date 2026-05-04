@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # core.url_utils
 
 **File:** `Application/core/url_utils.py`

@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # core.source_system.rss_feed_introspector
 
 **File:** `Application/core/source_system/rss_feed_introspector.py`

@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # core.html_generator
 
 **File:** `Application/core/html_generator.py`

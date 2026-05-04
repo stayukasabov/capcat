@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.core.exceptions
 
 **File:** `Application/capcat/core/exceptions.py`

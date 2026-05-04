@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.core.constants
 
 **File:** `Application/capcat/core/constants.py`

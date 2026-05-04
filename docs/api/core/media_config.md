@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # core.media_config
 
 **File:** `Application/core/media_config.py`

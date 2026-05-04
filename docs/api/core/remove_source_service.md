@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # core.source_system.remove_source_service
 
 **File:** `Application/core/source_system/remove_source_service.py`

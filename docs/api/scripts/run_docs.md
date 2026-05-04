@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # scripts.run_docs
 
 **File:** `Application/scripts/run_docs.py`

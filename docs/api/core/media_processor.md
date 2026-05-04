@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # core.media_processor
 
 **File:** `Application/core/media_processor.py`

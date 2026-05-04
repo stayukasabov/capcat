@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # Module Reference
 
 Complete reference of all modules, classes, and functions in Capcat.

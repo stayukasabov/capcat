@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # core.shutdown
 
 **File:** `Application/core/shutdown.py`

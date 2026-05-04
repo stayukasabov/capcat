@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.core.template_renderer
 
 **File:** `Application/capcat/core/template_renderer.py`

@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # convert_docs_to_html
 
 **File:** `Application/convert_docs_to_html.py`

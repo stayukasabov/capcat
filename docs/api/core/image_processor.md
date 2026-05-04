@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # core.image_processor
 
 **File:** `Application/core/image_processor.py`

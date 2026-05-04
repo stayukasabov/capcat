@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.core.shutdown
 
 **File:** `Application/capcat/core/shutdown.py`

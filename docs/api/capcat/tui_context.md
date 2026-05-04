@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.core.tui_context
 
 **File:** `Application/capcat/core/tui_context.py`

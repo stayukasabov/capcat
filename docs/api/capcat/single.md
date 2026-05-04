@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.commands.single
 
 **File:** `Application/capcat/commands/single.py`

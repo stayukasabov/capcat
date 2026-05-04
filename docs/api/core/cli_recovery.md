@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # core.cli_recovery
 
 **File:** `Application/core/cli_recovery.py`

@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.core.rate_limiter
 
 **File:** `Application/capcat/core/rate_limiter.py`

@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # core.template_renderer
 
 **File:** `Application/core/template_renderer.py`

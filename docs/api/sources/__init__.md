@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # sources.specialized.youtube.__init__
 
 **File:** `Application/sources/specialized/youtube/__init__.py`

@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # core.retry_skip
 
 **File:** `Application/core/retry_skip.py`

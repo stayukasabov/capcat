@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # core.downloader
 
 **File:** `Application/core/downloader.py`

@@ -1,5 +1,5 @@
 Capcat Documentation Manifest
-Generated: 2026-05-04 09:43:09 UTC
+Generated: 2026-05-04 11:50:28 UTC
 Success rate: 1/1 tasks
 
 Generated Documentation:
@@ -276,6 +276,7 @@ Generated Documentation:
   - api/core/url_utils.md
   - api/core/utils.md
   - api/core/validation_engine.md
+  - api/index.md
   - api/scripts/README.md
   - api/scripts/add_doc_navigation.md
   - api/scripts/apply_mermaid_design_system.md
@@ -355,6 +356,7 @@ Generated Documentation:
   - superpowers/plans/2026-04-18-capcat-casestudy-part-two.md
   - superpowers/plans/2026-04-23-hn-gdpr-comment-permalink.md
   - superpowers/plans/2026-04-26-single-dated-folder.md
+  - superpowers/plans/2026-05-04-jekyll-docs.md
   - superpowers/specs/2026-03-15-breadcrumb-phase1-folder-naming-design.md
   - superpowers/specs/2026-03-15-breadcrumb-phase2-html-rendering-design.md
   - superpowers/specs/2026-03-17-titled-markdown-filenames-design.md
@@ -372,5 +374,5 @@ Generated Documentation:
   - superpowers/specs/2026-04-18-capcat-casestudy-part-two-design.md
   - troubleshooting.md
 
-Total files: 668
+Total files: 672
 Documentation size: 45.2 MB

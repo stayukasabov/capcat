@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.commands.fetch
 
 **File:** `Application/capcat/commands/fetch.py`

@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # core.retry
 
 **File:** `Application/core/retry.py`

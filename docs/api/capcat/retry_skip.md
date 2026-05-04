@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.core.retry_skip
 
 **File:** `Application/capcat/core/retry_skip.py`

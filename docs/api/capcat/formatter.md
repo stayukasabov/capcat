@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.core.formatter
 
 **File:** `Application/capcat/core/formatter.py`

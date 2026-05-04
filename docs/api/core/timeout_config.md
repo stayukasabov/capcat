@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # core.timeout_config
 
 **File:** `Application/core/timeout_config.py`

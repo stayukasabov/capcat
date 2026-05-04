@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # core.error_handling
 
 **File:** `Application/core/error_handling.py`

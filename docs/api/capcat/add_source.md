@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.commands.add_source
 
 **File:** `Application/capcat/commands/add_source.py`

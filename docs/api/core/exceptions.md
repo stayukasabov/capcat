@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # core.exceptions
 
 **File:** `Application/core/exceptions.py`

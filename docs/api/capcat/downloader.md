@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.core.downloader
 
 **File:** `Application/capcat/core/downloader.py`

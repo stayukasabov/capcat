@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # core.rate_limiter
 
 **File:** `Application/core/rate_limiter.py`

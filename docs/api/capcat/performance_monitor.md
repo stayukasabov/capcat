@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.core.source_system.performance_monitor
 
 **File:** `Application/capcat/core/source_system/performance_monitor.py`

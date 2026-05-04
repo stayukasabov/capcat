@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # core.article_fetcher
 
 **File:** `Application/core/article_fetcher.py`

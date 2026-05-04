@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # core.source_system.enhanced_remove_command
 
 **File:** `Application/core/source_system/enhanced_remove_command.py`

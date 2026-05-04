@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.core.error_handling
 
 **File:** `Application/capcat/core/error_handling.py`

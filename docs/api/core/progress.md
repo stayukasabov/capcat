@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # core.progress
 
 **File:** `Application/core/progress.py`

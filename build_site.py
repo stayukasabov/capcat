@@ -39,7 +39,7 @@ def inject_favicon(content, favicon_path):
     return content
 
 def build_site():
-    """Replace {% include %} directives and old HTML with actual content."""
+    """Replace include directives and old HTML with actual content."""
 
     # Read include files
     header_html = Path('docs/_includes/header.html').read_text(encoding='utf-8')

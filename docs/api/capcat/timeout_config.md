@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.core.timeout_config
 
 **File:** `Application/capcat/core/timeout_config.py`

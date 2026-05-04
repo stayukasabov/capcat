@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.core.cli_validation
 
 **File:** `Application/capcat/core/cli_validation.py`

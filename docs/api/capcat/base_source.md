@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # capcat.core.source_system.base_source
 
 **File:** `Application/capcat/core/source_system/base_source.py`
