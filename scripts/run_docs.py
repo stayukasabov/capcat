@@ -51,11 +51,6 @@ def main():
     if run_command("python3 scripts/doc_generator.py", "API documentation generation"):
         success_count += 1
 
-    # Task 2: Generate architecture diagrams
-    total_tasks += 1
-    if run_command("python3 scripts/generate_diagrams.py", "Architecture diagrams generation"):
-        success_count += 1
-
     # Summary
     print("\n📊 Documentation Generation Summary")
     print("=" * 50)
