@@ -1,0 +1,28 @@
+title: Capcat Documentation
+url: "https://capcat.org"
+baseurl: ""
+
+# Do not use any GitHub Pages theme — we provide our own layout
+theme: ~
+
+# Whitelisted GitHub Pages plugins
+plugins:
+  - jekyll-optional-front-matter
+  - jekyll-titles-from-headings
+
+# Apply default layout to all pages (including .md without front matter)
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: "default"
+
+# Exclude local tooling from the built site
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - manifest.txt
+  - UTILITY-CLASSES.md
+  - ACCESSIBILITY-REMEDIATION-PLAN.md
+  - bugs/
+  - superpowers/
