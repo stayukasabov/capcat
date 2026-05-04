@@ -1,6 +1,6 @@
 Capcat Documentation Manifest
-Generated: 2026-05-01 19:42:55 UTC
-Success rate: 2/2 tasks
+Generated: 2026-05-04 09:08:06 UTC
+Success rate: 1/2 tasks
 
 Generated Documentation:
   - ACCESSIBILITY-REMEDIATION-PLAN.md
@@ -205,8 +205,6 @@ Generated Documentation:
   - api/capcat/url_utils.md
   - api/capcat/utils.md
   - api/capcat/validation_engine.md
-  - api/capcat_legacy/README.md
-  - api/capcat_legacy/capcat_legacy.md
   - api/cleanup_development_files/README.md
   - api/cleanup_development_files/cleanup_development_files.md
   - api/cleanup_repo/README.md
@@ -319,9 +317,6 @@ Generated Documentation:
   - api/htmlgen/__init__.md
   - api/htmlgen/base_generator.md
   - api/htmlgen/generator.md
-  - api/legacy/README.md
-  - api/legacy/cli.md
-  - api/legacy/run_capcat.md
   - api/quick_cli_fix/README.md
   - api/quick_cli_fix/quick_cli_fix.md
   - api/remove_br_tags/README.md
@@ -438,5 +433,5 @@ Generated Documentation:
   - superpowers/specs/2026-04-18-capcat-casestudy-part-two-design.md
   - troubleshooting.md
 
-Total files: 763
-Documentation size: 45.3 MB
+Total files: 756
+Documentation size: 45.2 MB

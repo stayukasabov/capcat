@@ -389,100 +389,21 @@ Replaces {{placeholder}} variables with actual values from configuration
 - [core.url_utils](../api/core/url_utils.md) - URL validation and normalization utilities for Capcat
 - [core.utils](../api/core/utils.md) - Core utilities for the Capcat application
 
-### Debug
-
-- [debug.content-extraction-debugger](../api/debug/content-extraction-debugger.md) - Content Extraction Debugging Tool for Capcat
-Helps diagnose why articles return empty markdown or fail to fetch
-- [debug.fix-sources](../api/debug/fix-sources.md) - Source Fix Tool
-Automatically suggests and applies fixes for problematic sources
-- [debug.log-analyzer](../api/debug/log-analyzer.md) - Capcat Log Analyzer
-Analyzes Capcat logs to identify patterns in failures and warnings
-- [debug.quick-troubleshoot](../api/debug/quick-troubleshoot.md) - Quick Troubleshoot Script
-Immediately diagnose the three failing URLs from the error messages
-- [debug.simple-troubleshoot](../api/debug/simple-troubleshoot.md) - Simple troubleshoot script without emojis per CLAUDE
-- [debug.source-tester](../api/debug/source-tester.md) - Source Configuration Tester
-Tests Capcat source configurations and suggests fixes
-
-### Htmlgen
-
-- [htmlgen.__init__](../api/htmlgen/__init__.md) - Compartmentalized HTML Generation System for Capcat
-- [htmlgen.base.base_generator](../api/htmlgen/base_generator.md) - Base HTML Generator for Compartmentalized HTML Generation System
-- [htmlgen.hn.generator](../api/htmlgen/generator.md) - Hacker News specific HTML generator implementation
-- [htmlgen.lb.generator](../api/htmlgen/generator.md) - Lobsters specific HTML generator implementation
-- [htmlgen.lesswrong.generator](../api/htmlgen/generator.md) - LessWrong specific HTML generator implementation
-
-### Legacy
-
-- [legacy.cli](../api/legacy/cli.md) - Professional CLI interface for Capcat using subcommand architecture
-- [legacy.run_capcat](../api/legacy/run_capcat.md) - Capcat - News Article Archiving System (Enhanced Python Wrapper)
-
-Refactored wrapper with robust dependency management, intelligent error
-handling, and comprehensive validation
-
 ### Root
 
 - [__version__](../api/root/__version__.md) - Capcat version information
-- [add_jekyll_frontmatter](../api/root/add_jekyll_frontmatter.md) - Add Jekyll front matter to all HTML files so Jekyll processes them
 - [build_site](../api/root/build_site.md) - Build script: Replace Jekyll includes with actual HTML content
-- [capcat_legacy](../api/root/capcat_legacy.md) - Capcat - News Article Archiving System
-
-A free and open-source tool to make people's lives easier
-- [cleanup_development_files](../api/root/cleanup_development_files.md) - Remove internal development files from git tracking
-- [cleanup_repo](../api/root/cleanup_repo.md) - Repository cleanup script: Remove unnecessary files from git tracking
 - [cli](../api/root/cli.md) - Professional CLI interface for Capcat using subcommand architecture
 - [convert_docs_to_html](../api/root/convert_docs_to_html.md) - Convert Markdown documentation to clean HTML with minimal styling
-- [convert_to_markdown](../api/root/convert_to_markdown.md)
-- [delete_h4_colon](../api/root/delete_h4_colon.md) - Delete colon after </h4> tags
-- [quick_cli_fix](../api/root/quick_cli_fix.md) - Quick CLI validation fix to catch common flag mistakes
-- [run_capcat](../api/root/run_capcat.md) - Capcat - News Article Archiving System (Enhanced Python Wrapper)
-
-Refactored wrapper with robust dependency management, intelligent error
-handling, and comprehensive validation
-- [update_html_includes](../api/root/update_html_includes.md) - Update all HTML files in docs/ to use includes system for header and footer
-- [update_html_jekyll](../api/root/update_html_jekyll.md) - Update all HTML files in docs/ to use Jekyll includes for header and footer
-- [update_includes](../api/root/update_includes.md) - Update script: Replace old header/footer HTML with new includes
 
 ### Scripts
 
-- [scripts.add_doc_navigation](../api/scripts/add_doc_navigation.md) - Add chapter navigation links to documentation HTML files
-- [scripts.apply_mermaid_design_system](../api/scripts/apply_mermaid_design_system.md) - Apply design system CSS variables to Mermaid diagram styling in diagrams/*
-- [scripts.convert_md_tables_to_html](../api/scripts/convert_md_tables_to_html.md) - Convert Markdown Tables to Centered HTML Tables
-
-Scans all markdown files in website/docs/ directory and converts
-markdown tables to centered HTML tables with proper styling
 - [scripts.doc_generator](../api/scripts/doc_generator.md) - Documentation Generator for Capcat
 
 Automatically extracts and generates comprehensive documentation from the codebase
-- [scripts.extract_and_summarize](../api/scripts/extract_and_summarize.md) - This script extracts text from HTML files in the AgentBrew folder, 
-chunks it, and creates markdown files with placeholders for summaries
-- [scripts.final_extractor](../api/scripts/final_extractor.md) - This script intelligently extracts meaningful text content from HTML files, 
-chunks it, and creates markdown files with placeholders for summaries
-- [scripts.generate_diagrams](../api/scripts/generate_diagrams.md) - Generate Architecture Diagrams for Capcat
-
-Creates Mermaid diagrams for system architecture, data flow, and component relationships
-- [scripts.generate_source_config](../api/scripts/generate_source_config.md) - Interactive script to generate comprehensive YAML configuration files
-for config-driven sources in Capcat
-- [scripts.intelligent_html_extractor](../api/scripts/intelligent_html_extractor.md) - This script intelligently extracts text content from HTML files, 
-chunks it, and creates markdown files with placeholders for summaries
-- [scripts.rename_ink_to_imprint](../api/scripts/rename_ink_to_imprint.md) - Rename all instances of --cream to --paper in website/css/ files
-- [scripts.replace_exhaustive](../api/scripts/replace_exhaustive.md) - Replace "Exhaustive" with "Comprehensive" in all website files
-- [scripts.replace_menus_with_menu](../api/scripts/replace_menus_with_menu.md) - Replace 'menus' with 'menu' in text under Mermaid diagrams in diagrams/*
 - [scripts.run_docs](../api/scripts/run_docs.md) - Documentation Generation Runner
 
 Convenient script to generate all documentation types
-- [scripts.setup_dependencies](../api/scripts/setup_dependencies.md) - Automated Dependency Setup and Repair Script for Capcat
-
-This script provides robust virtual environment management with:
-- Intelligent venv validation and repair
-- Dependency verification and installation
-- Path corruption detection and fixing
-- Fallback mechanisms for common issues
-- Comprehensive logging and diagnostics
-
-Usage:
-    python3 scripts/setup_dependencies
-- [scripts.update_footer_text](../api/scripts/update_footer_text.md) - Update footer text in website HTML files
-- [scripts.update_svg_color](../api/scripts/update_svg_color.md) - Update SVG fill color in all documentation HTML files
 
 ### Sources
 
@@ -505,9 +426,9 @@ Usage:
 
 ## Statistics
 
-- **Total Modules**: 367
-- **Total Classes**: 643
-- **Total Functions**: 825
-- **Public Functions**: 632
-- **Documentation Coverage**: 76.6%
+- **Total Modules**: 329
+- **Total Classes**: 615
+- **Total Functions**: 728
+- **Public Functions**: 539
+- **Documentation Coverage**: 74.0%
 

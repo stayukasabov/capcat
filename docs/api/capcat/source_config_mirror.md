@@ -269,16 +269,6 @@ Detect and silently copy items present in builtins but absent from user mirror.
 def _step2_3_changed_builtins(self, manifest: dict) -> dict
 ```
 
-Detects builtin files whose hash has changed since the last mirror and applies the appropriate update strategy:
-
-- **app-owned** (`.py` files): always overwritten automatically; backup created if the user had local edits.
-- **config-owned, unmodified**: silently overwritten.
-- **config-owned, user-modified**: interactive prompt (skipped silently in non-interactive / `-q` mode).
-
-**Backward compatibility:** manifest entries that lack an `ownership` field are treated as app-owned when the key ends in `.py`, regardless of the stored value. This covers vaults created before the `ownership` field was introduced and prevents stale source files from persisting after a capcat upgrade.
-
-**Drift repair:** for app-owned `.py` files, if `current_user_hash != stored_user_hash` even when the builtin hash appears unchanged, the user file is repaired from the builtin. This catches the reinstall scenario where `_resync_manifest()` writes `stored_builtin_hash = current builtin` but the vault's `source.py` is still stale.
-
 **Parameters:**
 
 - `self`
