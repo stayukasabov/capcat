@@ -9,10 +9,8 @@ render_with_liquid: false
 
 This package contains the following modules:
 
-- [`capcat.__init__`](./__init__.md) - Capcat — A command-line tool designed to solve content preservation challenges with Ethical Scraping
 - [`capcat.cli`](./cli.md) - CLI entry point for Capcat
 - [`capcat.tui`](./tui.md) - TUI entry point — delegates to core interactive module
-- [`capcat.__main__`](./__main__.md)
 - [`capcat.core.unified_article_processor`](./unified_article_processor.md) - Unified Article Processor - Universal entry point for all article processing
 - [`capcat.core.image_processor`](./image_processor.md) - Global Image Processor for Capcat
 - [`capcat.core.source_configs`](./source_configs.md) - Modular source configuration system with backward compatibility
@@ -43,7 +41,6 @@ Clean architecture implementation applying SOLID principles:
 - [`capcat.core.constants`](./constants.md) - Application-wide constants for Capcat
 - [`capcat.core.shutdown`](./shutdown.md) - Graceful shutdown handling for Capcat
 - [`capcat.core.rate_limiter`](./rate_limiter.md) - Rate limiting system for Capcat to prevent overwhelming source servers
-- [`capcat.core.__init__`](./__init__.md)
 - [`capcat.core.ethical_scraping`](./ethical_scraping.md) - Ethical scraping utilities for Capcat
 - [`capcat.core.source_config_mirror`](./source_config_mirror.md) - Mirror builtin source configs to userspace Config/sources/active/
 - [`capcat.core.error_handling`](./error_handling.md) - Comprehensive error handling and recovery system for Capcat
@@ -76,23 +73,17 @@ for performance optimization and self-contained HTML generation
 - [`capcat.core.template_renderer`](./template_renderer.md) - Simple Template Renderer for Capcat
 Replaces {{placeholder}} variables with actual values from configuration
 - [`capcat.core.async_pdf_manager`](./async_pdf_manager.md) - Asynchronous PDF download manager to prevent thread pool exhaustion
-- [`capcat.htmlgen.__init__`](./__init__.md) - HTML generation module for Capcat
 - [`capcat.htmlgen.factory`](./factory.md) - Factory for creating ArticleHTMLGenerator instances
 - [`capcat.htmlgen.generator`](./generator.md) - HTML Generator for Capcat - Static Site Generation
 Creates self-contained HTML files from markdown content with embedded CSS and JavaScript
 - [`capcat.scripts.generate_source_config`](./generate_source_config.md) - Interactive script to generate comprehensive YAML configuration files
 for config-driven sources in Capcat
-- [`capcat.scripts.__init__`](./__init__.md)
-- [`capcat.sources.__init__`](./__init__.md)
 - [`capcat.commands.fetch`](./fetch.md) - Batch fetch command — processes multiple sources via the unified processor
 - [`capcat.commands.add_source`](./add_source.md) - Add-source command — interactive RSS source addition
 - [`capcat.commands.remove_source`](./remove_source.md) - Remove-source command — interactive source removal with backup/undo support
 - [`capcat.commands.single`](./single.md) - Single article fetch command
 - [`capcat.commands.generate_config`](./generate_config.md) - Generate-config command — launches the interactive source config generator
-- [`capcat.commands.__init__`](./__init__.md)
 - [`capcat.commands.init`](./init.md) - Implementation of capcat init command
-- [`capcat.sources.builtin.__init__`](./__init__.md)
-- [`capcat.sources.base.__init__`](./__init__.md) - Base classes and interfaces for the source system
 - [`capcat.sources.builtin.custom.twitter.source`](./source.md) - Twitter/X
 - [`capcat.sources.builtin.custom.lb.source`](./source.md) - Lobsters source implementation for the new source system
 - [`capcat.sources.builtin.custom.substack.source`](./source.md) - Substack
@@ -100,7 +91,6 @@ for config-driven sources in Capcat
 - [`capcat.sources.builtin.custom.medium.source`](./source.md) - Medium
 - [`capcat.sources.builtin.custom.youtube.source`](./source.md) - YouTube specialized source implementation
 - [`capcat.sources.builtin.custom.hn.source`](./source.md) - Hacker News source implementation for the new source system
-- [`capcat.core.config.__init__`](./__init__.md) - Configuration management package for Capcat
 - [`capcat.core.config.source_registry`](./source_registry.md) - Source Registry for managing all available news sources and their configurations
 - [`capcat.core.config.source_base`](./source_base.md) - Base configuration classes for news sources
 - [`capcat.core.source_system.bundle_manager`](./bundle_manager.md)
@@ -115,7 +105,6 @@ for config-driven sources in Capcat
 - [`capcat.core.source_system.bundle_models`](./bundle_models.md) - Data models for bundle management
 - [`capcat.core.source_system.source_factory`](./source_factory.md) - Source factory for creating and managing news source instances
 - [`capcat.core.source_system.performance_monitor`](./performance_monitor.md) - Source performance monitoring system for the hybrid architecture
-- [`capcat.core.source_system.__init__`](./__init__.md)
 - [`capcat.core.source_system.bundle_validator`](./bundle_validator.md) - Bundle validation logic
 - [`capcat.core.source_system.bundle_ui`](./bundle_ui.md) - User interface components for bundle management
 - [`capcat.core.source_system.rss_feed_introspector`](./rss_feed_introspector.md)

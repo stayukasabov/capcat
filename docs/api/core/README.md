@@ -70,7 +70,6 @@ for performance optimization and self-contained HTML generation
 - [`core.template_renderer`](./template_renderer.md) - Simple Template Renderer for Capcat
 Replaces {{placeholder}} variables with actual values from configuration
 - [`core.specialized_source_manager`](./specialized_source_manager.md) - Specialized Source Manager for automatic URL-based source activation
-- [`core.config.__init__`](./__init__.md) - Configuration management package for Capcat
 - [`core.config.source_registry`](./source_registry.md) - Source Registry for managing all available news sources and their configurations
 - [`core.config.source_base`](./source_base.md) - Base configuration classes for news sources
 - [`core.source_system.bundle_manager`](./bundle_manager.md)
@@ -85,7 +84,6 @@ Replaces {{placeholder}} variables with actual values from configuration
 - [`core.source_system.bundle_models`](./bundle_models.md) - Data models for bundle management
 - [`core.source_system.source_factory`](./source_factory.md) - Source factory for creating and managing news source instances
 - [`core.source_system.performance_monitor`](./performance_monitor.md) - Source performance monitoring system for the hybrid architecture
-- [`core.source_system.__init__`](./__init__.md) - Source system for specialized source handling
 - [`core.source_system.bundle_validator`](./bundle_validator.md) - Bundle validation logic
 - [`core.source_system.bundle_ui`](./bundle_ui.md) - User interface components for bundle management
 - [`core.source_system.rss_feed_introspector`](./rss_feed_introspector.md)

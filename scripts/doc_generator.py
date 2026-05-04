@@ -87,6 +87,10 @@ class CodeAnalyzer:
             and "run_capcat_old" not in f.name  # Exclude legacy run_capcat_old files
             and "Animation-tests" not in str(f)  # Exclude Animation-tests directory
             and "PDF2MD" not in str(f)  # Exclude PDF2MD directory
+            and "/build/" not in str(f)  # Exclude build/ artifacts directory
+            and "/Config/" not in str(f)  # Exclude gitignored Config/ directory
+            and "/Video/" not in str(f)  # Exclude gitignored Video/ directory
+            and f.name not in ("__init__.py", "__main__.py", "__version__.py")  # Jekyll skips _-prefixed files
         ]
 
         for file_path in python_files:
