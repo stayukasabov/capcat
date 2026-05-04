@@ -1,6 +1,6 @@
 Capcat Documentation Manifest
-Generated: 2026-05-04 09:08:06 UTC
-Success rate: 1/2 tasks
+Generated: 2026-05-04 09:43:09 UTC
+Success rate: 1/1 tasks
 
 Generated Documentation:
   - ACCESSIBILITY-REMEDIATION-PLAN.md
@@ -14,12 +14,6 @@ Generated Documentation:
   - api/Video/analyze_audio.md
   - api/__version__/README.md
   - api/__version__/__version__.md
-  - api/add_jekyll_frontmatter/README.md
-  - api/add_jekyll_frontmatter/add_jekyll_frontmatter.md
-  - api/analyze_hn_pdf_patterns/README.md
-  - api/analyze_hn_pdf_patterns/analyze_hn_pdf_patterns.md
-  - api/analyze_hn_pdfs_simple/README.md
-  - api/analyze_hn_pdfs_simple/analyze_hn_pdfs_simple.md
   - api/build/README.md
   - api/build/__init__.md
   - api/build/__main__.md
@@ -205,16 +199,10 @@ Generated Documentation:
   - api/capcat/url_utils.md
   - api/capcat/utils.md
   - api/capcat/validation_engine.md
-  - api/cleanup_development_files/README.md
-  - api/cleanup_development_files/cleanup_development_files.md
-  - api/cleanup_repo/README.md
-  - api/cleanup_repo/cleanup_repo.md
   - api/cli/README.md
   - api/cli/cli.md
   - api/convert_docs_to_html/README.md
   - api/convert_docs_to_html/convert_docs_to_html.md
-  - api/convert_to_markdown/README.md
-  - api/convert_to_markdown/convert_to_markdown.md
   - api/core/README.md
   - api/core/__init__.md
   - api/core/add_source_command.md
@@ -288,49 +276,6 @@ Generated Documentation:
   - api/core/url_utils.md
   - api/core/utils.md
   - api/core/validation_engine.md
-  - api/debug/README.md
-  - api/debug/content-extraction-debugger.md
-  - api/debug/fix-sources.md
-  - api/debug/log-analyzer.md
-  - api/debug/quick-troubleshoot.md
-  - api/debug/simple-troubleshoot.md
-  - api/debug/source-tester.md
-  - api/debug_pdf_stalling/README.md
-  - api/debug_pdf_stalling/debug_pdf_stalling.md
-  - api/delete_h4_colon/README.md
-  - api/delete_h4_colon/delete_h4_colon.md
-  - api/fix_ascii_formatting/README.md
-  - api/fix_ascii_formatting/fix_ascii_formatting.md
-  - api/fix_breadcrumbs/README.md
-  - api/fix_breadcrumbs/fix_breadcrumbs.md
-  - api/fix_colon_formatting/README.md
-  - api/fix_colon_formatting/fix_colon_formatting.md
-  - api/fix_ethical_scraping_links/README.md
-  - api/fix_ethical_scraping_links/fix_ethical_scraping_links.md
-  - api/fix_footer_typo/README.md
-  - api/fix_footer_typo/fix_footer_typo.md
-  - api/fix_mismatched_tags/README.md
-  - api/fix_mismatched_tags/fix_mismatched_tags.md
-  - api/fix_sources_in_docs/README.md
-  - api/fix_sources_in_docs/fix_sources_in_docs.md
-  - api/htmlgen/README.md
-  - api/htmlgen/__init__.md
-  - api/htmlgen/base_generator.md
-  - api/htmlgen/generator.md
-  - api/quick_cli_fix/README.md
-  - api/quick_cli_fix/quick_cli_fix.md
-  - api/remove_br_tags/README.md
-  - api/remove_br_tags/remove_br_tags.md
-  - api/remove_hr_tags/README.md
-  - api/remove_hr_tags/remove_hr_tags.md
-  - api/replace_h4_with_h3/README.md
-  - api/replace_h4_with_h3/replace_h4_with_h3.md
-  - api/replace_strong_tags/README.md
-  - api/replace_strong_tags/replace_strong_tags.md
-  - api/replace_strong_with_h4/README.md
-  - api/replace_strong_with_h4/replace_strong_with_h4.md
-  - api/run_capcat/README.md
-  - api/run_capcat/run_capcat.md
   - api/scripts/README.md
   - api/scripts/add_doc_navigation.md
   - api/scripts/apply_mermaid_design_system.md
@@ -353,12 +298,6 @@ Generated Documentation:
   - api/sources/config_schema.md
   - api/sources/factory.md
   - api/sources/source.md
-  - api/update_html_includes/README.md
-  - api/update_html_includes/update_html_includes.md
-  - api/update_html_jekyll/README.md
-  - api/update_html_jekyll/update_html_jekyll.md
-  - api/update_includes/README.md
-  - api/update_includes/update_includes.md
   - architecture/components.md
   - architecture/roadmap.md
   - architecture/system.md
@@ -433,5 +372,5 @@ Generated Documentation:
   - superpowers/specs/2026-04-18-capcat-casestudy-part-two-design.md
   - troubleshooting.md
 
-Total files: 756
+Total files: 668
 Documentation size: 45.2 MB
