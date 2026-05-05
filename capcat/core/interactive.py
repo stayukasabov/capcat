@@ -690,9 +690,9 @@ def _confirm_and_execute(action, selection, generate_html):
         pdf_choice = questionary.select(
             "  Download attached PDFs?",
             choices=[
-                questionary.Choice("Yes              — download PDFs for all sources", "yes"),
-                questionary.Choice("No               — skip PDFs for all sources", "no"),
-                questionary.Choice("Source defaults  — each source uses its YAML setting", "source_defaults"),
+                questionary.Choice("Yes - download PDFs for all sources", "yes"),
+                questionary.Choice("No - skip PDFs for all sources", "no"),
+                questionary.Choice("Source defaults - each source uses its YAML setting", "source_defaults"),
             ],
             style=custom_style,
             qmark="",
