@@ -249,3 +249,306 @@ class TestDiscoverArticlesApi:
             source.discover_articles(count=1)
 
         source.session.get.assert_not_called()
+
+
+class TestCleanApiCommentHtml:
+    """HnSource._clean_api_comment_html converts API HTML to clean text."""
+
+    def test_strips_paragraph_tags(self):
+        source = _make_hn_source()
+        result = source._clean_api_comment_html("<p>Hello world</p>")
+        assert result == "Hello world"
+
+    def test_converts_links_to_markdown(self):
+        source = _make_hn_source()
+        result = source._clean_api_comment_html(
+            '<p>See <a href="https://example.com">this link</a> for details</p>'
+        )
+        assert "[this link](https://example.com)" in result
+
+    def test_handles_nested_paragraphs(self):
+        source = _make_hn_source()
+        result = source._clean_api_comment_html(
+            "<p>First paragraph</p><p>Second paragraph</p>"
+        )
+        assert "First paragraph" in result
+        assert "Second paragraph" in result
+        assert "\n\n" in result
+
+    def test_strips_reply_links(self):
+        source = _make_hn_source()
+        result = source._clean_api_comment_html(
+            '<p>Good point</p><p><a href="reply?id=123">reply</a></p>'
+        )
+        # The reply link should be removed entirely
+        assert "reply?id=" not in result
+
+    def test_handles_empty_input(self):
+        source = _make_hn_source()
+        result = source._clean_api_comment_html("")
+        assert result == ""
+
+    def test_handles_none_input(self):
+        source = _make_hn_source()
+        result = source._clean_api_comment_html(None)
+        assert result == ""
+
+    def test_limits_links_per_comment(self):
+        """Excess links beyond max_links_per_comment are stripped."""
+        source = _make_hn_source()
+        html = "<p>" + " ".join(
+            f'<a href="https://example.com/{i}">link{i}</a>' for i in range(10)
+        ) + "</p>"
+        result = source._clean_api_comment_html(html)
+        link_count = result.count("](")
+        assert link_count <= 5
+
+
+class TestFetchCommentsApi:
+    """fetch_comments must use the Firebase API for recursive comment fetching."""
+
+    def setup_method(self):
+        HnSource._hn_compliance_message_shown = False
+
+    def teardown_method(self):
+        HnSource._hn_compliance_message_shown = False
+
+    def test_fetch_comments_builds_correct_format(self, tmp_path):
+        """Comments fetched via API produce the standard dict format."""
+        source = _make_hn_source()
+        mock_manager = MagicMock()
+
+        mock_manager.request_hn_api.side_effect = [
+            {"id": 201, "by": "user1", "text": "<p>Great article</p>", "kids": [301], "type": "comment"},
+            {"id": 301, "by": "user2", "text": "<p>I agree</p>", "type": "comment"},
+        ]
+
+        with patch(
+            "capcat.sources.builtin.custom.hn.source.get_ethical_manager",
+            return_value=mock_manager,
+        ), patch(
+            "capcat.core.streamlined_comment_processor.create_optimized_comment_processor"
+        ) as mock_processor_factory:
+            mock_processor = MagicMock()
+            mock_processor.generate_inline_comments_markdown.return_value = "# Comments"
+            mock_processor.get_performance_metrics.return_value = {
+                "comments_processed": 2, "links_processed": 0
+            }
+            mock_processor_factory.return_value = mock_processor
+
+            source.fetch_comments(
+                comment_url="https://news.ycombinator.com/item?id=100",
+                article_title="Test Article",
+                article_folder_path=str(tmp_path),
+                comment_ids=[201],
+            )
+
+        call_args = mock_processor.generate_inline_comments_markdown.call_args
+        comments = call_args[0][0]
+        assert len(comments) == 2
+        assert comments[0]["user"] == "Anonymous"
+        assert comments[0]["level"] == 0
+        assert comments[0]["user_link"] == "https://news.ycombinator.com/item?id=201"
+        assert comments[1]["level"] == 1
+
+    def test_fetch_comments_skips_deleted(self, tmp_path):
+        """Deleted comments are skipped but their children are still fetched."""
+        source = _make_hn_source()
+        mock_manager = MagicMock()
+
+        mock_manager.request_hn_api.side_effect = [
+            {"id": 201, "deleted": True, "kids": [301], "type": "comment"},
+            {"id": 301, "by": "user2", "text": "<p>Child of deleted</p>", "type": "comment"},
+        ]
+
+        with patch(
+            "capcat.sources.builtin.custom.hn.source.get_ethical_manager",
+            return_value=mock_manager,
+        ), patch(
+            "capcat.core.streamlined_comment_processor.create_optimized_comment_processor"
+        ) as mock_processor_factory:
+            mock_processor = MagicMock()
+            mock_processor.generate_inline_comments_markdown.return_value = "# Comments"
+            mock_processor.get_performance_metrics.return_value = {
+                "comments_processed": 1, "links_processed": 0
+            }
+            mock_processor_factory.return_value = mock_processor
+
+            source.fetch_comments(
+                comment_url="https://news.ycombinator.com/item?id=100",
+                article_title="Test",
+                article_folder_path=str(tmp_path),
+                comment_ids=[201],
+            )
+
+        comments = mock_processor.generate_inline_comments_markdown.call_args[0][0]
+        assert len(comments) == 1
+        assert comments[0]["id"] == "301"
+
+    def test_fetch_comments_skips_dead(self, tmp_path):
+        """Dead (flagged) comments are skipped."""
+        source = _make_hn_source()
+        mock_manager = MagicMock()
+
+        mock_manager.request_hn_api.side_effect = [
+            {"id": 201, "dead": True, "by": "user1", "text": "<p>flagged</p>", "type": "comment"},
+        ]
+
+        with patch(
+            "capcat.sources.builtin.custom.hn.source.get_ethical_manager",
+            return_value=mock_manager,
+        ), patch(
+            "capcat.core.streamlined_comment_processor.create_optimized_comment_processor"
+        ) as mock_processor_factory:
+            mock_processor = MagicMock()
+            mock_processor.generate_inline_comments_markdown.return_value = "# Comments"
+            mock_processor.get_performance_metrics.return_value = {
+                "comments_processed": 0, "links_processed": 0
+            }
+            mock_processor_factory.return_value = mock_processor
+
+            source.fetch_comments(
+                comment_url="https://news.ycombinator.com/item?id=100",
+                article_title="Test",
+                article_folder_path=str(tmp_path),
+                comment_ids=[201],
+            )
+
+        comments = mock_processor.generate_inline_comments_markdown.call_args[0][0]
+        assert len(comments) == 0
+
+    def test_fetch_comments_no_html_requests(self, tmp_path):
+        """fetch_comments must not call session.get (no HTML scraping)."""
+        source = _make_hn_source()
+        mock_manager = MagicMock()
+        mock_manager.request_hn_api.side_effect = [
+            {"id": 201, "by": "user1", "text": "<p>Hi</p>", "type": "comment"},
+        ]
+
+        with patch(
+            "capcat.sources.builtin.custom.hn.source.get_ethical_manager",
+            return_value=mock_manager,
+        ), patch(
+            "capcat.core.streamlined_comment_processor.create_optimized_comment_processor"
+        ) as mock_processor_factory:
+            mock_processor = MagicMock()
+            mock_processor.generate_inline_comments_markdown.return_value = "# Comments"
+            mock_processor.get_performance_metrics.return_value = {
+                "comments_processed": 1, "links_processed": 0
+            }
+            mock_processor_factory.return_value = mock_processor
+
+            source.fetch_comments(
+                comment_url="https://news.ycombinator.com/item?id=100",
+                article_title="Test",
+                article_folder_path=str(tmp_path),
+                comment_ids=[201],
+            )
+
+        source.session.get.assert_not_called()
+
+
+class TestComplianceMessage:
+    """The HN API compliance message must display once per session."""
+
+    def setup_method(self):
+        HnSource._hn_compliance_message_shown = False
+
+    def teardown_method(self):
+        HnSource._hn_compliance_message_shown = False
+
+    def test_compliance_message_shown_once(self, tmp_path):
+        """Message appears on first call, not on second."""
+        source = _make_hn_source()
+        mock_manager = MagicMock()
+        mock_manager.request_hn_api.return_value = {
+            "id": 201, "by": "u", "text": "<p>Hi</p>", "type": "comment"
+        }
+
+        with patch(
+            "capcat.sources.builtin.custom.hn.source.get_ethical_manager",
+            return_value=mock_manager,
+        ), patch(
+            "capcat.core.streamlined_comment_processor.create_optimized_comment_processor"
+        ) as mock_pf:
+            mock_p = MagicMock()
+            mock_p.generate_inline_comments_markdown.return_value = "# C"
+            mock_p.get_performance_metrics.return_value = {
+                "comments_processed": 1, "links_processed": 0
+            }
+            mock_pf.return_value = mock_p
+
+            source.fetch_comments(
+                comment_url="https://news.ycombinator.com/item?id=100",
+                article_title="First",
+                article_folder_path=str(tmp_path),
+                comment_ids=[201],
+            )
+
+        assert HnSource._hn_compliance_message_shown is True
+
+
+class TestNoHtmlScraping:
+    """HnSource must never make direct HTTP requests to news.ycombinator.com."""
+
+    def setup_method(self):
+        HnSource._hn_compliance_message_shown = False
+
+    def teardown_method(self):
+        HnSource._hn_compliance_message_shown = False
+
+    def test_full_flow_no_hn_html_requests(self, tmp_path):
+        """
+        Full discover + fetch flow must only hit hacker-news.firebaseio.com,
+        never news.ycombinator.com directly.
+        """
+        source = _make_hn_source()
+
+        mock_manager = MagicMock()
+        all_api_urls = []
+
+        def track_api_calls(session, url, **kwargs):
+            all_api_urls.append(url)
+            if "topstories" in url:
+                return [101]
+            if "/item/101" in url:
+                return {
+                    "id": 101, "title": "Test", "url": "https://example.com",
+                    "kids": [201], "type": "story",
+                }
+            if "/item/201" in url:
+                return {
+                    "id": 201, "by": "u", "text": "<p>Comment</p>",
+                    "type": "comment",
+                }
+            return None
+
+        mock_manager.request_hn_api.side_effect = track_api_calls
+
+        with patch(
+            "capcat.sources.builtin.custom.hn.source.get_ethical_manager",
+            return_value=mock_manager,
+        ), patch(
+            "capcat.core.streamlined_comment_processor.create_optimized_comment_processor"
+        ) as mock_pf:
+            mock_p = MagicMock()
+            mock_p.generate_inline_comments_markdown.return_value = "# C"
+            mock_p.get_performance_metrics.return_value = {
+                "comments_processed": 1, "links_processed": 0
+            }
+            mock_pf.return_value = mock_p
+
+            articles = source.discover_articles(count=1)
+            source.fetch_comments(
+                comment_url=articles[0].comment_url,
+                article_title=articles[0].title,
+                article_folder_path=str(tmp_path),
+                comment_ids=articles[0].comment_ids,
+            )
+
+        for url in all_api_urls:
+            assert "hacker-news.firebaseio.com" in url, (
+                f"Request to non-API URL detected: {url}"
+            )
+
+        source.session.get.assert_not_called()
