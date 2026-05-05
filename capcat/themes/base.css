@@ -365,9 +365,9 @@ main {
 .header .breadcrumb {
   align-self: flex-start;
   text-align: left;
-  padding: 0 1rem;
-  margin-bottom: 0;
-  font-weight: var(--font-weight-thin-plus);
+  padding: 0 1.6rem;
+  margin: 2.5rem 0 0.5rem 0;
+  font-weight: var(--font-weight-thin);
 }
 
 .header .breadcrumb span {
@@ -1065,9 +1065,9 @@ figcaption {
   .header .breadcrumb {
     align-self: center;
     text-align: left;
-    padding: 0 1.6rem;
-    margin: 2.5rem 0 0.5rem 0;
-    font-weight: var(--font-weight-thin);
+    padding: 0 1rem;
+    margin-bottom: 0;
+    font-weight: var(--font-weight-thin-plus);
   }
 
   .header nav.breadcrumb span {
