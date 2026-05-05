@@ -109,6 +109,14 @@ class Article:
     summary: Optional[str] = None
     tags: List[str] = None
 
+    # HN-specific: list of top-level comment IDs from the story item's kids array.
+    # Only populated by HnSource. Other sources leave this as None.
+    comment_ids: Optional[List[int]] = None
+
+    # HN-specific: the numeric story ID from the Firebase API.
+    # Used for permalink generation. None for non-HN sources.
+    hn_item_id: Optional[int] = None
+
     def __post_init__(self) -> None:
         """Ensure tags is never None after construction."""
         if self.tags is None:

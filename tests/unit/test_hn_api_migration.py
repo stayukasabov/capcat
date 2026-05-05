@@ -88,3 +88,32 @@ class TestRequestHnApi:
 
         assert result is None
         assert session.get.call_count == 2
+
+
+from capcat.core.source_system.base_source import Article
+
+
+class TestArticleHnFields:
+    """Article dataclass must support optional HN-specific fields."""
+
+    def test_article_has_comment_ids_field(self):
+        """Article accepts comment_ids kwarg."""
+        article = Article(
+            title="Test", url="https://example.com",
+            comment_ids=[100, 200, 300],
+        )
+        assert article.comment_ids == [100, 200, 300]
+
+    def test_article_has_hn_item_id_field(self):
+        """Article accepts hn_item_id kwarg."""
+        article = Article(
+            title="Test", url="https://example.com",
+            hn_item_id=12345,
+        )
+        assert article.hn_item_id == 12345
+
+    def test_article_hn_fields_default_none(self):
+        """HN fields default to None when not provided."""
+        article = Article(title="Test", url="https://example.com")
+        assert article.comment_ids is None
+        assert article.hn_item_id is None
