@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # scripts.extract_and_summarize
 
 **File:** `Application/scripts/extract_and_summarize.py`

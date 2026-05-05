@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # scripts.update_footer_text
 
 **File:** `Application/scripts/update_footer_text.py`

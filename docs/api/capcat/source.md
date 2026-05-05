@@ -9,14 +9,18 @@ render_with_liquid: false
 
 ## Description
 
-Hacker News source implementation for the new source system.
-Enhanced with comment functionality from V1 implementation.
+Hacker News source implementation using the official Firebase API.
+Uses hacker-news.firebaseio.com/v0/ for article discovery and comment fetching.
 
 ## Constants
 
-### _HN_SELECTORS
+### _HN_API_BASE
 
-**Value:** `{'comment_selector': '.comment-tree .athing', 'user_selector': '.hnuser', 'comment_text_selector': '.comment', 'depth_fn': _hn_depth, 'comment_permalink_fn': lambda cid: f'https://news.ycombinator.com/item?id={cid}'}`
+**Value:** `'https://hacker-news.firebaseio.com/v0'`
+
+### _MAX_LINKS_PER_COMMENT
+
+**Value:** `5`
 
 ## Classes
 
@@ -24,7 +28,11 @@ Enhanced with comment functionality from V1 implementation.
 
 **Inherits from:** BaseSource
 
-Hacker News source implementation with comment support.
+Hacker News source implementation using the official Firebase API.
+
+All article discovery and comment fetching uses the HN Firebase API
+at hacker-news.firebaseio.com/v0/. No HTML is scraped from
+news.ycombinator.com for discovery or comments.
 
 #### Methods
 
@@ -46,8 +54,10 @@ def source_type(self) -> str
 def discover_articles(self, count: int) -> List[Article]
 ```
 
-Discover articles from Hacker News with comment URLs.
-Supports pagination for fetching >30 articles.
+Discover articles from Hacker News via the official Firebase API.
+
+Fetches /v0/topstories.json for story IDs, then fetches metadata
+for each story sequentially with rate limiting.
 
 **Parameters:**
 
@@ -56,7 +66,7 @@ Supports pagination for fetching >30 articles.
 
 **Returns:** List[Article]
 
-⚠️ **High complexity:** 21
+⚠️ **High complexity:** 13
 
 ##### fetch_article_content
 
@@ -111,19 +121,24 @@ Custom skip logic for Hacker News.
 ##### fetch_comments
 
 ```python
-def fetch_comments(self, comment_url: str, article_title: str, article_folder_path: str, html_mode: bool = False) -> bool
+def fetch_comments(self, comment_url: str, article_title: str, article_folder_path: str, html_mode: bool = False, comment_ids: Optional[List[int]] = None) -> bool
 ```
 
-Fetch and save Hacker News comments using optimized streamlined processor.
+Fetch and save HN comments via the official Firebase API.
+
+Recursively fetches each comment item from /v0/item/{id}.json,
+building a flat list with depth tracking. Passes the result to
+StreamlinedCommentProcessor for rendering.
 
 Args:
-    comment_url: URL to the HN comments page
+    comment_url: URL of the comments page (used in output header)
     article_title: Title of the article for logging
-    article_folder_path: Specific folder path for this article
-    html_mode: If True, generate HTML directly; if False, generate markdown
+    article_folder_path: Folder path for saving the output file
+    html_mode: If True, generate HTML; if False, generate markdown
+    comment_ids: List of top-level comment IDs from the story item
 
 Returns:
-    bool: True if comments were successfully saved, False otherwise
+    True if comments were successfully saved, False otherwise
 
 **Parameters:**
 
@@ -132,25 +147,61 @@ Returns:
 - `article_title` (str)
 - `article_folder_path` (str)
 - `html_mode` (bool) *optional*
+- `comment_ids` (Optional[List[int]]) *optional*
 
 **Returns:** bool
 
-⚠️ **High complexity:** 15
-
-
-## Functions
-
-### _hn_depth
+##### _fetch_comment_tree
 
 ```python
-def _hn_depth(elem) -> int
+def _fetch_comment_tree(self, manager, comment_ids: List[int], depth: int) -> List[dict]
 ```
 
-Extract comment depth from HN's td.ind img width attribute (40px per level).
+Recursively fetch comments from the HN Firebase API.
+
+Args:
+    manager: EthicalScrapingManager instance
+    comment_ids: List of comment IDs to fetch
+    depth: Current nesting depth (0 = top-level)
+
+Returns:
+    Flat list of comment dicts in display order
 
 **Parameters:**
 
-- `elem`
+- `self`
+- `manager`
+- `comment_ids` (List[int])
+- `depth` (int)
 
-**Returns:** int
+**Returns:** List[dict]
+
+##### _clean_api_comment_html
+
+```python
+def _clean_api_comment_html(self, html: str) -> str
+```
+
+Convert HN API comment HTML to clean text with markdown links.
+
+The Firebase API returns comment text as HTML-encoded content
+(e.g. <p>tags, <a> links, <code> blocks). This method converts
+it to plain text with markdown-style links, matching the output
+format of the former HTML scraper.
+
+Args:
+    html: HTML string from the API's text field
+
+Returns:
+    Cleaned text with markdown links
+
+**Parameters:**
+
+- `self`
+- `html` (str)
+
+**Returns:** str
+
+⚠️ **High complexity:** 12
+
 

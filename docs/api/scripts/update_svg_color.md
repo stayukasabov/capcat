@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # scripts.update_svg_color
 
 **File:** `Application/scripts/update_svg_color.py`

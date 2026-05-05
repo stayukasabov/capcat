@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # scripts.rename_ink_to_imprint
 
 **File:** `Application/scripts/rename_ink_to_imprint.py`

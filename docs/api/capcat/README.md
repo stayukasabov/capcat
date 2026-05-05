@@ -90,7 +90,7 @@ for config-driven sources in Capcat
 - [`capcat.sources.builtin.custom.vimeo.source`](./source.md) - Vimeo specialized source implementation
 - [`capcat.sources.builtin.custom.medium.source`](./source.md) - Medium
 - [`capcat.sources.builtin.custom.youtube.source`](./source.md) - YouTube specialized source implementation
-- [`capcat.sources.builtin.custom.hn.source`](./source.md) - Hacker News source implementation for the new source system
+- [`capcat.sources.builtin.custom.hn.source`](./source.md) - Hacker News source implementation using the official Firebase API
 - [`capcat.core.config.source_registry`](./source_registry.md) - Source Registry for managing all available news sources and their configurations
 - [`capcat.core.config.source_base`](./source_base.md) - Base configuration classes for news sources
 - [`capcat.core.source_system.bundle_manager`](./bundle_manager.md)

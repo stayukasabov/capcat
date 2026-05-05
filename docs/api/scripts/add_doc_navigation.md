@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # scripts.add_doc_navigation
 
 **File:** `Application/scripts/add_doc_navigation.py`

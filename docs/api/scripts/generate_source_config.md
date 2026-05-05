@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # scripts.generate_source_config
 
 **File:** `Application/scripts/generate_source_config.py`

@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # scripts.apply_mermaid_design_system
 
 **File:** `Application/scripts/apply_mermaid_design_system.py`

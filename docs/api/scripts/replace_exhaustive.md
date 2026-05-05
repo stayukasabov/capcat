@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # scripts.replace_exhaustive
 
 **File:** `Application/scripts/replace_exhaustive.py`

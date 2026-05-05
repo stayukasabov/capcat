@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # scripts.setup_dependencies
 
 **File:** `Application/scripts/setup_dependencies.py`

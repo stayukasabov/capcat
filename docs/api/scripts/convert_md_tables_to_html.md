@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # scripts.convert_md_tables_to_html
 
 **File:** `Application/scripts/convert_md_tables_to_html.py`

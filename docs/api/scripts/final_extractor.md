@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # scripts.final_extractor
 
 **File:** `Application/scripts/final_extractor.py`

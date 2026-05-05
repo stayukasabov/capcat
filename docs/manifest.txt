@@ -1,11 +1,114 @@
 Capcat Documentation Manifest
-Generated: 2026-05-04 14:08:38 UTC
+Generated: 2026-05-05 20:58:35 UTC
 Success rate: 1/1 tasks
 
 Generated Documentation:
   - ACCESSIBILITY-REMEDIATION-PLAN.md
   - README.md
+  - api/Config/README.md
+  - api/Config/custom-hn-source.md
+  - api/Config/custom-lb-source.md
+  - api/Config/source.md
   - api/README.md
+  - api/Video/README.md
+  - api/Video/analyze_audio.md
+  - api/__version__/README.md
+  - api/__version__/__version__.md
+  - api/add_jekyll_frontmatter/README.md
+  - api/add_jekyll_frontmatter/add_jekyll_frontmatter.md
+  - api/analyze_hn_pdf_patterns/README.md
+  - api/analyze_hn_pdf_patterns/analyze_hn_pdf_patterns.md
+  - api/analyze_hn_pdfs_simple/README.md
+  - api/analyze_hn_pdfs_simple/analyze_hn_pdfs_simple.md
+  - api/build/README.md
+  - api/build/__init__.md
+  - api/build/__main__.md
+  - api/build/add_source.md
+  - api/build/add_source_command.md
+  - api/build/add_source_service.md
+  - api/build/article_fetcher.md
+  - api/build/async_pdf_manager.md
+  - api/build/base_source.md
+  - api/build/bundle_manager.md
+  - api/build/bundle_models.md
+  - api/build/bundle_service.md
+  - api/build/bundle_ui.md
+  - api/build/bundle_validator.md
+  - api/build/circuit_breaker.md
+  - api/build/cli.md
+  - api/build/cli_recovery.md
+  - api/build/cli_validation.md
+  - api/build/command_logging.md
+  - api/build/config.md
+  - api/build/config_driven_source.md
+  - api/build/constants.md
+  - api/build/conversion_executor.md
+  - api/build/design_system_compiler.md
+  - api/build/discovery_strategies.md
+  - api/build/downloader.md
+  - api/build/enhanced_argparse.md
+  - api/build/enhanced_remove_command.md
+  - api/build/error_handling.md
+  - api/build/ethical_scraping.md
+  - api/build/exceptions.md
+  - api/build/factory.md
+  - api/build/feed_discovery.md
+  - api/build/feed_parser.md
+  - api/build/fetch.md
+  - api/build/formatter.md
+  - api/build/generate_config.md
+  - api/build/generate_source_config.md
+  - api/build/generator.md
+  - api/build/html_post_processor.md
+  - api/build/image_processor.md
+  - api/build/init.md
+  - api/build/interactive.md
+  - api/build/logging_config.md
+  - api/build/media_config.md
+  - api/build/media_executor.md
+  - api/build/media_processor.md
+  - api/build/network_resilience.md
+  - api/build/pdf_landing_resolver.md
+  - api/build/performance_monitor.md
+  - api/build/progress.md
+  - api/build/questionary_ui.md
+  - api/build/rate_limiter.md
+  - api/build/removal_ui.md
+  - api/build/remove_source.md
+  - api/build/remove_source_command.md
+  - api/build/remove_source_service.md
+  - api/build/retry.md
+  - api/build/retry_skip.md
+  - api/build/rss_feed_introspector.md
+  - api/build/session_pool.md
+  - api/build/shutdown.md
+  - api/build/single.md
+  - api/build/source.md
+  - api/build/source_analytics.md
+  - api/build/source_backup_manager.md
+  - api/build/source_base.md
+  - api/build/source_config.md
+  - api/build/source_config_generator.md
+  - api/build/source_config_mirror.md
+  - api/build/source_configs.md
+  - api/build/source_factory.md
+  - api/build/source_registry.md
+  - api/build/specialized_source_manager.md
+  - api/build/storage_manager.md
+  - api/build/streamlined_comment_processor.md
+  - api/build/template_renderer.md
+  - api/build/theme_utils.md
+  - api/build/timeout_config.md
+  - api/build/timeout_wrapper.md
+  - api/build/tui.md
+  - api/build/tui_context.md
+  - api/build/unified_article_processor.md
+  - api/build/unified_media_processor.md
+  - api/build/unified_source_processor.md
+  - api/build/update_manager.md
+  - api/build/url_utils.md
+  - api/build/utils.md
+  - api/build/validation_engine.md
   - api/build_site/README.md
   - api/build_site/build_site.md
   - api/capcat/README.md
@@ -102,10 +205,18 @@ Generated Documentation:
   - api/capcat/url_utils.md
   - api/capcat/utils.md
   - api/capcat/validation_engine.md
+  - api/capcat_legacy/README.md
+  - api/capcat_legacy/capcat_legacy.md
+  - api/cleanup_development_files/README.md
+  - api/cleanup_development_files/cleanup_development_files.md
+  - api/cleanup_repo/README.md
+  - api/cleanup_repo/cleanup_repo.md
   - api/cli/README.md
   - api/cli/cli.md
   - api/convert_docs_to_html/README.md
   - api/convert_docs_to_html/convert_docs_to_html.md
+  - api/convert_to_markdown/README.md
+  - api/convert_to_markdown/convert_to_markdown.md
   - api/core/README.md
   - api/core/__init__.md
   - api/core/add_source_command.md
@@ -168,6 +279,7 @@ Generated Documentation:
   - api/core/source_registry.md
   - api/core/specialized_source_manager.md
   - api/core/storage_manager.md
+  - api/core/streamlined_comment_processor.md
   - api/core/template_renderer.md
   - api/core/theme_utils.md
   - api/core/timeout_config.md
@@ -179,7 +291,53 @@ Generated Documentation:
   - api/core/url_utils.md
   - api/core/utils.md
   - api/core/validation_engine.md
+  - api/debug/README.md
+  - api/debug/content-extraction-debugger.md
+  - api/debug/fix-sources.md
+  - api/debug/log-analyzer.md
+  - api/debug/quick-troubleshoot.md
+  - api/debug/simple-troubleshoot.md
+  - api/debug/source-tester.md
+  - api/debug_pdf_stalling/README.md
+  - api/debug_pdf_stalling/debug_pdf_stalling.md
+  - api/delete_h4_colon/README.md
+  - api/delete_h4_colon/delete_h4_colon.md
+  - api/fix_ascii_formatting/README.md
+  - api/fix_ascii_formatting/fix_ascii_formatting.md
+  - api/fix_breadcrumbs/README.md
+  - api/fix_breadcrumbs/fix_breadcrumbs.md
+  - api/fix_colon_formatting/README.md
+  - api/fix_colon_formatting/fix_colon_formatting.md
+  - api/fix_ethical_scraping_links/README.md
+  - api/fix_ethical_scraping_links/fix_ethical_scraping_links.md
+  - api/fix_footer_typo/README.md
+  - api/fix_footer_typo/fix_footer_typo.md
+  - api/fix_mismatched_tags/README.md
+  - api/fix_mismatched_tags/fix_mismatched_tags.md
+  - api/fix_sources_in_docs/README.md
+  - api/fix_sources_in_docs/fix_sources_in_docs.md
+  - api/htmlgen/README.md
+  - api/htmlgen/__init__.md
+  - api/htmlgen/base_generator.md
+  - api/htmlgen/generator.md
   - api/index.md
+  - api/legacy/README.md
+  - api/legacy/cli.md
+  - api/legacy/run_capcat.md
+  - api/quick_cli_fix/README.md
+  - api/quick_cli_fix/quick_cli_fix.md
+  - api/remove_br_tags/README.md
+  - api/remove_br_tags/remove_br_tags.md
+  - api/remove_hr_tags/README.md
+  - api/remove_hr_tags/remove_hr_tags.md
+  - api/replace_h4_with_h3/README.md
+  - api/replace_h4_with_h3/replace_h4_with_h3.md
+  - api/replace_strong_tags/README.md
+  - api/replace_strong_tags/replace_strong_tags.md
+  - api/replace_strong_with_h4/README.md
+  - api/replace_strong_with_h4/replace_strong_with_h4.md
+  - api/run_capcat/README.md
+  - api/run_capcat/run_capcat.md
   - api/scripts/README.md
   - api/scripts/add_doc_navigation.md
   - api/scripts/apply_mermaid_design_system.md
@@ -202,6 +360,12 @@ Generated Documentation:
   - api/sources/config_schema.md
   - api/sources/factory.md
   - api/sources/source.md
+  - api/update_html_includes/README.md
+  - api/update_html_includes/update_html_includes.md
+  - api/update_html_jekyll/README.md
+  - api/update_html_jekyll/update_html_jekyll.md
+  - api/update_includes/README.md
+  - api/update_includes/update_includes.md
   - architecture/components.md
   - architecture/roadmap.md
   - architecture/system.md
@@ -260,6 +424,7 @@ Generated Documentation:
   - superpowers/plans/2026-04-23-hn-gdpr-comment-permalink.md
   - superpowers/plans/2026-04-26-single-dated-folder.md
   - superpowers/plans/2026-05-04-jekyll-docs.md
+  - superpowers/plans/2026-05-05-hn-firebase-api-migration.md
   - superpowers/specs/2026-03-15-breadcrumb-phase1-folder-naming-design.md
   - superpowers/specs/2026-03-15-breadcrumb-phase2-html-rendering-design.md
   - superpowers/specs/2026-03-17-titled-markdown-filenames-design.md
@@ -275,7 +440,8 @@ Generated Documentation:
   - superpowers/specs/2026-04-02-global-settings-yaml-design.md
   - superpowers/specs/2026-04-02-user-config-yaml-inventory.md
   - superpowers/specs/2026-04-18-capcat-casestudy-part-two-design.md
+  - superpowers/specs/2026-05-05-hn-firebase-api-migration-design.md
   - troubleshooting.md
 
-Total files: 571
-Documentation size: 44.8 MB
+Total files: 770
+Documentation size: 45.4 MB

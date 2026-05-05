@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # scripts.intelligent_html_extractor
 
 **File:** `Application/scripts/intelligent_html_extractor.py`

@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # scripts.generate_diagrams
 
 **File:** `Application/scripts/generate_diagrams.py`

@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # scripts.replace_menus_with_menu
 
 **File:** `Application/scripts/replace_menus_with_menu.py`

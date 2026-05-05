@@ -17,6 +17,20 @@ Implements best practices:
 3. Rate limiting enforcement
 4. Path validation against robots.txt
 
+## Constants
+
+### _HN_API_USER_AGENT
+
+**Value:** `'Capcat/2.0 (Personal news archiver; uses official HN API)'`
+
+### _HN_API_DOMAIN
+
+**Value:** `'hacker-news.firebaseio.com'`
+
+### _HN_API_MIN_DELAY
+
+**Value:** `0.5`
+
 ## Classes
 
 ### RobotsTxtCache
@@ -191,6 +205,39 @@ Raises:
 **Returns:** requests.Response
 
 ⚠️ **High complexity:** 12
+
+##### request_hn_api
+
+```python
+def request_hn_api(self, session: requests.Session, url: str, timeout: int = 10, max_retries: int = 3, initial_delay: float = 1.0) -> Optional[dict]
+```
+
+Make a rate-limited request to the HN Firebase API.
+
+Sequential only. 0.5s minimum delay between requests. Skips robots.txt
+(Firebase API is explicitly provided for programmatic access).
+Handles 429/503 with exponential backoff.
+
+Args:
+    session: Requests session
+    url: Full Firebase API URL
+    timeout: Request timeout in seconds
+    max_retries: Maximum retry attempts on 429/503
+    initial_delay: Initial backoff delay in seconds
+
+Returns:
+    Parsed JSON dict, or None if the request fails after retries
+
+**Parameters:**
+
+- `self`
+- `session` (requests.Session)
+- `url` (str)
+- `timeout` (int) *optional*
+- `max_retries` (int) *optional*
+- `initial_delay` (float) *optional*
+
+**Returns:** Optional[dict]
 
 ##### validate_source_config
 
