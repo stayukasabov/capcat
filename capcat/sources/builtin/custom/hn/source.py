@@ -1,19 +1,18 @@
 #!/usr/bin/env python3
 """
-Hacker News source implementation for the new source system.
-Enhanced with comment functionality from V1 implementation.
+Hacker News source implementation using the official Firebase API.
+Uses hacker-news.firebaseio.com/v0/ for article discovery and comment fetching.
 """
 
 import os
+import re
 from typing import List, Optional, Tuple
 
 import requests
-from bs4 import BeautifulSoup
 
-from capcat.core.article_fetcher import get_global_update_mode
-from capcat.core.storage_manager import comments_md_filename
 from capcat.core.article_fetcher import NewsSourceArticleFetcher
 from capcat.core.ethical_scraping import get_ethical_manager
+from capcat.core.storage_manager import comments_md_filename
 from capcat.core.source_system.base_source import (
     Article,
     ArticleDiscoveryError,
@@ -21,30 +20,19 @@ from capcat.core.source_system.base_source import (
     ContentFetchError,
 )
 
-def _hn_depth(elem) -> int:
-    """Extract comment depth from HN's td.ind img width attribute (40px per level)."""
-    img = elem.select_one("td.ind img")
-    if img and img.get("width") is not None:
-        try:
-            return int(img["width"]) // 40
-        except (ValueError, TypeError):
-            return 0
-    return 0
-
-
-_HN_SELECTORS = {
-    "comment_selector": ".comment-tree .athing",
-    "user_selector": ".hnuser",
-    "comment_text_selector": ".comment",
-    "depth_fn": _hn_depth,
-    "comment_permalink_fn": lambda cid: f"https://news.ycombinator.com/item?id={cid}",
-}
-
 
 class HnSource(BaseSource):
     """
-    Hacker News source implementation with comment support.
+    Hacker News source implementation using the official Firebase API.
+
+    All article discovery and comment fetching uses the HN Firebase API
+    at hacker-news.firebaseio.com/v0/. No HTML is scraped from
+    news.ycombinator.com for discovery or comments.
     """
+
+    _HN_API_BASE = "https://hacker-news.firebaseio.com/v0"
+    _MAX_LINKS_PER_COMMENT = 5
+    _hn_compliance_message_shown = False
 
     @property
     def source_type(self) -> str:
@@ -52,116 +40,81 @@ class HnSource(BaseSource):
 
     def discover_articles(self, count: int) -> List[Article]:
         """
-        Discover articles from Hacker News with comment URLs.
-        Supports pagination for fetching >30 articles.
-        """
-        import time
+        Discover articles from Hacker News via the official Firebase API.
 
+        Fetches /v0/topstories.json for story IDs, then fetches metadata
+        for each story sequentially with rate limiting.
+        """
         try:
-            self.logger.debug(
-                f"Discovering articles for {self.config.name} (count: {count})"
+            self.logger.info("Fetching top stories from official Hacker News API")
+
+            manager = get_ethical_manager()
+
+            story_ids = manager.request_hn_api(
+                self.session,
+                f"{self._HN_API_BASE}/topstories.json",
+                timeout=self.config.timeout,
             )
+
+            if not story_ids:
+                raise ArticleDiscoveryError(
+                    "Failed to fetch top stories from HN API", self.config.name
+                )
 
             articles = []
-            page = 1
-            max_pages = 10  # Limit to prevent infinite loops
+            first_failed = False
 
-            while len(articles) < count and page <= max_pages:
-                # Construct page URL
-                if page == 1:
-                    page_url = self.config.base_url
-                else:
-                    # HN pagination: ?p=2, ?p=3, etc.
-                    page_url = f"{self.config.base_url}?p={page}"
-                    # Log pagination activity
-                    self.logger.debug(f"Fetching page {page} from {page_url}")
-
-                # Rate limiting: wait between page requests (except first page)
-                if page > 1:
-                    time.sleep(2.0)  # 2 second delay between pages
-
-                response = self.session.get(
-                    page_url, timeout=self.config.timeout
-                )
-                response.raise_for_status()
-
-                # Ensure UTF-8 encoding
-                response.encoding = 'utf-8'
-
-                soup = BeautifulSoup(response.text, "html.parser")
-
-                # Get article rows from Hacker News structure
-                article_rows = soup.select("tr.athing")
-
-                # If no articles found on this page, we've reached the end
-                if not article_rows:
-                    self.logger.debug(f"No more articles found on page {page}")
+            for story_id in story_ids:
+                if len(articles) >= count:
                     break
 
-                for i, row in enumerate(article_rows):
-                    if len(articles) >= count:
-                        break
+                item = manager.request_hn_api(
+                    self.session,
+                    f"{self._HN_API_BASE}/item/{story_id}.json",
+                    timeout=self.config.timeout,
+                )
 
-                    # Get title link
-                    title_link = row.select_one(".titleline > a")
-                    if not title_link:
+                if item is None:
+                    if not articles and not first_failed:
+                        first_failed = True
                         continue
-
-                    href = title_link.get("href", "")
-                    title = title_link.get_text().strip() or "Untitled Article"
-
-                    if not href:
-                        continue
-
-                    # Convert relative URLs to absolute
-                    if href.startswith("/"):
-                        href = "https://news.ycombinator.com" + href
-                    elif href.startswith("item?id="):
-                        # Handle HN discussion pages like "item?id=12345"
-                        href = "https://news.ycombinator.com/" + href
-                    elif not href.startswith(("http://", "https://")):
-                        continue
-
-                    # Get comment URL from the next row (meta row)
-                    comment_url = None
-                    article_id = row.get("id", "")
-                    if article_id:
-                        # Look for the meta row that follows this article
-                        next_sibling = row.find_next_sibling("tr")
-                        if next_sibling:
-                            comment_link = next_sibling.select_one(
-                                f'a[href*="item?id={article_id}"]'
-                            )
-                            if comment_link:
-                                comment_href = comment_link.get("href", "")
-                                if comment_href:
-                                    if comment_href.startswith("/"):
-                                        comment_url = (
-                                            "https://news.ycombinator.com"
-                                            + comment_href
-                                        )
-                                    elif comment_href.startswith("http"):
-                                        comment_url = comment_href
-                                    else:
-                                        # Handle relative URLs like "item?id=12345"
-                                        comment_url = (
-                                            "https://news.ycombinator.com/"
-                                            + comment_href
-                                        )
-
-                    article = Article(
-                        title=title, url=href, comment_url=comment_url
+                    elif not articles and first_failed:
+                        raise ArticleDiscoveryError(
+                            "Network appears down, aborting HN discovery",
+                            self.config.name,
+                        )
+                    self.logger.warning(
+                        f"Skipping story {story_id}: API request failed"
                     )
-                    articles.append(article)
+                    continue
 
-                # Move to next page if we need more articles
-                page += 1
+                if item.get("type") != "story":
+                    continue
+
+                title = item.get("title", "Untitled Article")
+                url = item.get("url") or (
+                    f"https://news.ycombinator.com/item?id={story_id}"
+                )
+                comment_url = f"https://news.ycombinator.com/item?id={story_id}"
+                comment_ids = item.get("kids")
+
+                article = Article(
+                    title=title,
+                    url=url,
+                    comment_url=comment_url,
+                    comment_ids=comment_ids,
+                    hn_item_id=story_id,
+                )
+                articles.append(article)
 
             self.logger.info(
-                f"Successfully discovered {len(articles)} articles for {self.config.name}"
+                f"Successfully discovered {len(articles)} articles "
+                f"for {self.config.name}"
             )
-            return articles[:count]
+            return articles
 
+        except ArticleDiscoveryError:
+            raise
         except Exception as e:
             raise ArticleDiscoveryError(
                 f"Failed to discover articles: {e}", self.config.name
@@ -180,12 +133,13 @@ class HnSource(BaseSource):
 
             # Skip HN discussion pages - only process external articles
             if article.url.startswith("https://news.ycombinator.com/item?id="):
-                self.logger.debug(f"Skipping HN discussion page: {article.title}")
+                self.logger.debug(
+                    f"Skipping HN discussion page: {article.title}"
+                )
                 return False, None
 
-            # Use the standard NewsSourceArticleFetcher for content processing
             fetcher_config = {
-                "name": self.config.display_name,  # Required by NewsSourceArticleFetcher
+                "name": self.config.display_name,
                 "content_selectors": [
                     "article",
                     ".post-content",
@@ -211,14 +165,20 @@ class HnSource(BaseSource):
                 ],
             }
 
-            fetcher = NewsSourceArticleFetcher(fetcher_config, self.session, download_files=download_files, download_pdfs=download_pdfs)
+            fetcher = NewsSourceArticleFetcher(
+                fetcher_config, self.session,
+                download_files=download_files,
+                download_pdfs=download_pdfs,
+            )
 
-            # Set timeout to prevent hangs during conversion
-            original_timeout = self.session.timeout if hasattr(self.session, 'timeout') else None
-            self.session.timeout = 15  # 15 second timeout to prevent hangs
+            original_timeout = (
+                self.session.timeout
+                if hasattr(self.session, "timeout")
+                else None
+            )
+            self.session.timeout = 15
 
             try:
-                # Fetch article content first (using proper method that includes PDF detection)
                 success, title, folder_path = fetcher.fetch_article_content(
                     title=article.title,
                     url=article.url,
@@ -227,11 +187,10 @@ class HnSource(BaseSource):
                     progress_callback=progress_callback,
                 )
             finally:
-                # Restore original timeout
                 if original_timeout is not None:
                     self.session.timeout = original_timeout
-                elif hasattr(self.session, 'timeout'):
-                    delattr(self.session, 'timeout')
+                elif hasattr(self.session, "timeout"):
+                    delattr(self.session, "timeout")
 
             if success:
                 return True, folder_path
@@ -245,38 +204,38 @@ class HnSource(BaseSource):
             )
 
     def _validate_custom_config(self) -> List[str]:
-        """
-        Validate Hacker News-specific configuration.
-        """
-        errors = []
-
-        # TODO: Add source-specific validation logic
-
-        return errors
+        """Validate Hacker News-specific configuration."""
+        return []
 
     def _should_skip_custom(self, url: str, title: str = "") -> bool:
-        """
-        Custom skip logic for Hacker News.
-        """
-        # TODO: Add source-specific skip logic
+        """Custom skip logic for Hacker News."""
         return False
 
     def fetch_comments(
-        self, comment_url: str, article_title: str, article_folder_path: str, html_mode: bool = False
+        self,
+        comment_url: str,
+        article_title: str,
+        article_folder_path: str,
+        html_mode: bool = False,
+        comment_ids: Optional[List[int]] = None,
     ) -> bool:
         """
-        Fetch and save Hacker News comments using optimized streamlined processor.
+        Fetch and save HN comments via the official Firebase API.
+
+        Recursively fetches each comment item from /v0/item/{id}.json,
+        building a flat list with depth tracking. Passes the result to
+        StreamlinedCommentProcessor for rendering.
 
         Args:
-            comment_url: URL to the HN comments page
+            comment_url: URL of the comments page (used in output header)
             article_title: Title of the article for logging
-            article_folder_path: Specific folder path for this article
-            html_mode: If True, generate HTML directly; if False, generate markdown
+            article_folder_path: Folder path for saving the output file
+            html_mode: If True, generate HTML; if False, generate markdown
+            comment_ids: List of top-level comment IDs from the story item
 
         Returns:
-            bool: True if comments were successfully saved, False otherwise
+            True if comments were successfully saved, False otherwise
         """
-        # Validate inputs
         if not comment_url:
             self.logger.debug(f"No comment URL available for: {article_title}")
             return False
@@ -287,119 +246,201 @@ class HnSource(BaseSource):
             )
             return False
 
-        try:
-            # Network request with error handling
-            self.logger.debug(f"Fetching comments from: {comment_url}")
+        if not comment_ids:
+            self.logger.debug(f"No comment IDs available for: {article_title}")
+            comment_ids = []
 
-            # Add cache-busting headers when in update mode to ensure fresh comments
-            headers = {}
-            if get_global_update_mode():
-                headers.update({
-                    "Cache-Control": "no-cache, no-store, must-revalidate",
-                    "Pragma": "no-cache",
-                    "Expires": "0"
-                })
-                self.logger.debug("Using cache-busting headers for comment update")
-
-            response = get_ethical_manager().request_with_backoff(
-                self.session, comment_url,
-                timeout=self.config.timeout,
-                headers=headers,
+        # Show compliance message once per session
+        if not HnSource._hn_compliance_message_shown:
+            self.logger.info(
+                "Using Hacker News API with rate-limited requests "
+                "to comply with site guidelines. This may take a few minutes."
             )
-
-        except requests.exceptions.Timeout:
-            self.logger.warning(
-                f"Timeout fetching comments for {article_title} - skipping comments"
-            )
-            return False
-        except requests.exceptions.HTTPError as e:
-            if e.response.status_code == 403:
-                self.logger.warning(
-                    f"Access forbidden for comments {comment_url} - anti-bot protection detected"
-                )
-            elif e.response.status_code == 404:
-                self.logger.warning(
-                    f"Comments not found for {article_title} - may have been deleted"
-                )
-            else:
-                self.logger.warning(
-                    f"HTTP error {e.response.status_code} fetching comments for {article_title}"
-                )
-            return False
-        except requests.exceptions.ConnectionError:
-            self.logger.warning(
-                f"Connection error fetching comments for {article_title} - network may be unavailable"
-            )
-            return False
-        except requests.exceptions.RequestException as e:
-            self.logger.warning(
-                f"Request error fetching comments for {article_title}: {e}"
-            )
-            return False
+            HnSource._hn_compliance_message_shown = True
 
         try:
-            # Use optimized streamlined comment processor
-            from capcat.core.streamlined_comment_processor import create_optimized_comment_processor
+            manager = get_ethical_manager()
 
-            # Ensure UTF-8 encoding
-            response.encoding = 'utf-8'
+            comments = self._fetch_comment_tree(manager, comment_ids, depth=0)
 
-            soup = BeautifulSoup(response.text, "html.parser")
+            self.logger.debug(
+                f"Fetched {len(comments)} comments for: {article_title}"
+            )
 
-            # Create optimized processor with unlimited comments
+            from capcat.core.streamlined_comment_processor import (
+                create_optimized_comment_processor,
+            )
+
             processor = create_optimized_comment_processor(max_comments=None)
 
-            # Generate content based on mode (HTML or Markdown)
             if html_mode:
                 content = processor.generate_inline_comments_html(
-                    processor.process_comments_flattened(soup, **_HN_SELECTORS),
-                    article_title,
-                    comment_url,
+                    comments, article_title, comment_url,
                     link_text="view on HN",
                 )
-                filename = os.path.join(article_folder_path, "html", "comments.html")
+                filename = os.path.join(
+                    article_folder_path, "html", "comments.html"
+                )
                 os.makedirs(os.path.dirname(filename), exist_ok=True)
             else:
                 content = processor.generate_inline_comments_markdown(
-                    processor.process_comments_flattened(soup, **_HN_SELECTORS),
-                    article_title,
-                    comment_url,
-                    article_folder_path,
-                    link_text="view on HN",
+                    comments, article_title, comment_url,
+                    article_folder_path, link_text="view on HN",
                 )
-                filename = os.path.join(article_folder_path, comments_md_filename(article_title))
+                filename = os.path.join(
+                    article_folder_path, comments_md_filename(article_title)
+                )
 
-            # Get metrics for logging
             metrics = processor.get_performance_metrics()
             self.logger.info(
-                f"Processed {metrics['comments_processed']} comments with {metrics['links_processed']} links for: {article_title}"
+                f"Processed {metrics['comments_processed']} comments "
+                f"with {metrics['links_processed']} links "
+                f"for: {article_title}"
             )
 
-            # Skip writing if no comments were found
-            if metrics['comments_processed'] == 0:
-                self.logger.debug(f"No comments found for: {article_title} — skipping file write")
-                return False
-
-            # File I/O operations with error handling
             try:
-                # In update mode, always overwrite. In normal mode, always write (new files).
                 with open(filename, "w", encoding="utf-8") as f:
                     f.write(content)
 
                 format_type = "HTML" if html_mode else "markdown"
                 self.logger.info(
-                    f"Successfully saved {metrics['comments_processed']} comments as {format_type} for: {article_title}"
+                    f"Successfully saved {len(comments)} comments "
+                    f"as {format_type} for: {article_title}"
                 )
                 return True
 
             except (PermissionError, OSError, UnicodeEncodeError) as file_error:
                 self.logger.error(
-                    f"File I/O error writing comments for {article_title}: {file_error}"
+                    f"File I/O error writing comments "
+                    f"for {article_title}: {file_error}"
                 )
                 return False
 
         except Exception as processing_error:
             self.logger.error(
-                f"Comment processing error for {comment_url}: {processing_error}"
+                f"Comment processing error "
+                f"for {comment_url}: {processing_error}"
             )
             return False
+
+    def _fetch_comment_tree(
+        self,
+        manager,
+        comment_ids: List[int],
+        depth: int,
+    ) -> List[dict]:
+        """
+        Recursively fetch comments from the HN Firebase API.
+
+        Args:
+            manager: EthicalScrapingManager instance
+            comment_ids: List of comment IDs to fetch
+            depth: Current nesting depth (0 = top-level)
+
+        Returns:
+            Flat list of comment dicts in display order
+        """
+        comments = []
+
+        for i, cid in enumerate(comment_ids):
+            self.logger.debug(
+                f"Fetching comment {i + 1}/{len(comment_ids)} (depth {depth})"
+            )
+
+            item = manager.request_hn_api(
+                self.session,
+                f"{self._HN_API_BASE}/item/{cid}.json",
+                timeout=self.config.timeout,
+            )
+
+            if item is None:
+                continue
+
+            is_deleted = item.get("deleted", False)
+            is_dead = item.get("dead", False)
+
+            if not is_deleted and not is_dead:
+                text = self._clean_api_comment_html(item.get("text", ""))
+                if text:
+                    comments.append({
+                        "id": str(cid),
+                        "user": "Anonymous",
+                        "user_link": (
+                            f"https://news.ycombinator.com/item?id={cid}"
+                        ),
+                        "text": text,
+                        "level": depth,
+                    })
+
+            # Recurse into children (even for deleted parents)
+            kids = item.get("kids", [])
+            if kids:
+                children = self._fetch_comment_tree(manager, kids, depth + 1)
+                comments.extend(children)
+
+        return comments
+
+    def _clean_api_comment_html(self, html: str) -> str:
+        """
+        Convert HN API comment HTML to clean text with markdown links.
+
+        The Firebase API returns comment text as HTML-encoded content
+        (e.g. <p>tags, <a> links, <code> blocks). This method converts
+        it to plain text with markdown-style links, matching the output
+        format of the former HTML scraper.
+
+        Args:
+            html: HTML string from the API's text field
+
+        Returns:
+            Cleaned text with markdown links
+        """
+        if not html:
+            return ""
+
+        from bs4 import BeautifulSoup
+
+        soup = BeautifulSoup(html, "html.parser")
+
+        # Remove reply/control links
+        for unwanted in soup.find_all(
+            "a", string=re.compile(r"reply|permalink|parent|flag", re.I)
+        ):
+            unwanted.decompose()
+
+        # Convert remaining links to markdown (up to limit)
+        links_processed = 0
+        for link in soup.find_all("a", href=True):
+            if links_processed >= self._MAX_LINKS_PER_COMMENT:
+                link.decompose()
+                continue
+
+            href = link.get("href", "")
+            link_text = link.get_text().strip()
+
+            if not href or not link_text:
+                link.decompose()
+                continue
+
+            if href.startswith("/"):
+                href = f"https://news.ycombinator.com{href}"
+            elif not href.startswith(("http://", "https://")):
+                href = f"https://{href}"
+
+            link.replace_with(f"[{link_text}]({href})")
+            links_processed += 1
+
+        # Extract text, split by paragraphs
+        paragraphs = []
+        for p in soup.find_all("p"):
+            text = p.get_text().strip()
+            if text:
+                paragraphs.append(text)
+
+        if paragraphs:
+            return "\n\n".join(paragraphs)
+
+        # Fallback: no <p> tags, just get all text
+        text = soup.get_text().strip()
+        lines = [line.strip() for line in text.splitlines() if line.strip()]
+        return "\n\n".join(lines)

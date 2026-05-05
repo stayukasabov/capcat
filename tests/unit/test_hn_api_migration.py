@@ -117,3 +117,135 @@ class TestArticleHnFields:
         article = Article(title="Test", url="https://example.com")
         assert article.comment_ids is None
         assert article.hn_item_id is None
+
+
+from capcat.sources.builtin.custom.hn.source import HnSource
+
+
+def _make_hn_source():
+    """Create an HnSource with a minimal mock config."""
+    config = MagicMock()
+    config.name = "hn"
+    config.display_name = "Hacker News"
+    config.base_url = "https://news.ycombinator.com"
+    config.timeout = 10
+    config.rate_limit = 1.0
+    config.custom_config = {}
+    session = MagicMock()
+    return HnSource(config=config, session=session)
+
+
+class TestDiscoverArticlesApi:
+    """discover_articles must use the Firebase API, not HTML scraping."""
+
+    def test_discover_calls_topstories_endpoint(self):
+        """discover_articles fetches /v0/topstories.json."""
+        source = _make_hn_source()
+        mock_manager = MagicMock()
+        mock_manager.request_hn_api.side_effect = [
+            [101, 102, 103],
+            {"id": 101, "title": "Story A", "url": "https://a.com", "kids": [201], "type": "story"},
+            {"id": 102, "title": "Story B", "url": "https://b.com", "kids": [202, 203], "type": "story"},
+            {"id": 103, "title": "Story C", "url": "https://c.com", "type": "story"},
+        ]
+
+        with patch(
+            "capcat.sources.builtin.custom.hn.source.get_ethical_manager",
+            return_value=mock_manager,
+        ):
+            articles = source.discover_articles(count=3)
+
+        first_call_url = mock_manager.request_hn_api.call_args_list[0][0][1]
+        assert "topstories.json" in first_call_url
+
+    def test_discover_builds_articles_with_comment_ids(self):
+        """Articles have comment_ids populated from the kids array."""
+        source = _make_hn_source()
+        mock_manager = MagicMock()
+        mock_manager.request_hn_api.side_effect = [
+            [101],
+            {"id": 101, "title": "Story A", "url": "https://a.com", "kids": [201, 202], "type": "story"},
+        ]
+
+        with patch(
+            "capcat.sources.builtin.custom.hn.source.get_ethical_manager",
+            return_value=mock_manager,
+        ):
+            articles = source.discover_articles(count=1)
+
+        assert len(articles) == 1
+        assert articles[0].comment_ids == [201, 202]
+        assert articles[0].hn_item_id == 101
+        assert articles[0].comment_url == "https://news.ycombinator.com/item?id=101"
+
+    def test_discover_handles_missing_url(self):
+        """Stories without url field (Ask HN) get HN discussion URL."""
+        source = _make_hn_source()
+        mock_manager = MagicMock()
+        mock_manager.request_hn_api.side_effect = [
+            [101],
+            {"id": 101, "title": "Ask HN: Something", "type": "story"},
+        ]
+
+        with patch(
+            "capcat.sources.builtin.custom.hn.source.get_ethical_manager",
+            return_value=mock_manager,
+        ):
+            articles = source.discover_articles(count=1)
+
+        assert articles[0].url == "https://news.ycombinator.com/item?id=101"
+
+    def test_discover_respects_count(self):
+        """Only count articles returned even if topstories has more."""
+        source = _make_hn_source()
+        mock_manager = MagicMock()
+        mock_manager.request_hn_api.side_effect = [
+            [101, 102, 103, 104, 105],
+            {"id": 101, "title": "A", "url": "https://a.com", "type": "story"},
+            {"id": 102, "title": "B", "url": "https://b.com", "type": "story"},
+        ]
+
+        with patch(
+            "capcat.sources.builtin.custom.hn.source.get_ethical_manager",
+            return_value=mock_manager,
+        ):
+            articles = source.discover_articles(count=2)
+
+        assert len(articles) == 2
+
+    def test_discover_skips_failed_item_fetch(self):
+        """If a story metadata fetch returns None, skip it and continue."""
+        source = _make_hn_source()
+        mock_manager = MagicMock()
+        mock_manager.request_hn_api.side_effect = [
+            [101, 102, 103],
+            None,
+            {"id": 102, "title": "B", "url": "https://b.com", "type": "story"},
+            {"id": 103, "title": "C", "url": "https://c.com", "type": "story"},
+        ]
+
+        with patch(
+            "capcat.sources.builtin.custom.hn.source.get_ethical_manager",
+            return_value=mock_manager,
+        ):
+            articles = source.discover_articles(count=3)
+
+        assert len(articles) == 2
+        assert articles[0].title == "B"
+
+    def test_discover_no_html_requests(self):
+        """discover_articles must not call session.get (no HTML scraping)."""
+        source = _make_hn_source()
+        mock_manager = MagicMock()
+        mock_manager.request_hn_api.side_effect = [
+            [101],
+            {"id": 101, "title": "A", "url": "https://a.com", "type": "story"},
+        ]
+
+        with patch(
+            "capcat.sources.builtin.custom.hn.source.get_ethical_manager",
+            return_value=mock_manager,
+        ):
+            source.discover_articles(count=1)
+
+        source.session.get.assert_not_called()
