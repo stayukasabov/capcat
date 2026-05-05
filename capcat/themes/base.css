@@ -95,7 +95,9 @@ code {
 }
 
 /* Prevent long unbreakable strings from causing horizontal overflow */
-a, p, li {
+a,
+p,
+li {
   overflow-wrap: break-word;
 }
 a {
@@ -460,7 +462,7 @@ h1 {
 }
 
 .header .container h1 {
-  font-size: var(--font-size-h2);
+  font-size: var(--font-size-h1);
   padding: 0 var(--space-md);
   font-weight: var(--weight-heading);
 }
@@ -1063,7 +1065,7 @@ figcaption {
   .header .breadcrumb {
     align-self: center;
     text-align: left;
-    padding: 1em 0;
+    padding: 0 1.6rem;
     margin: 2.5rem 0 0.5rem 0;
     font-weight: var(--font-weight-thin);
   }
