@@ -291,6 +291,80 @@ class EthicalScrapingManager:
         else:
             raise requests.RequestException(f"Failed to fetch {url}")
 
+    _HN_API_USER_AGENT = "Capcat/2.0 (Personal news archiver; uses official HN API)"
+    _HN_API_DOMAIN = "hacker-news.firebaseio.com"
+    _HN_API_MIN_DELAY = 0.5
+
+    def request_hn_api(
+        self,
+        session: requests.Session,
+        url: str,
+        timeout: int = 10,
+        max_retries: int = 3,
+        initial_delay: float = 1.0,
+    ) -> Optional[dict]:
+        """
+        Make a rate-limited request to the HN Firebase API.
+
+        Sequential only. 0.5s minimum delay between requests. Skips robots.txt
+        (Firebase API is explicitly provided for programmatic access).
+        Handles 429/503 with exponential backoff.
+
+        Args:
+            session: Requests session
+            url: Full Firebase API URL
+            timeout: Request timeout in seconds
+            max_retries: Maximum retry attempts on 429/503
+            initial_delay: Initial backoff delay in seconds
+
+        Returns:
+            Parsed JSON dict, or None if the request fails after retries
+        """
+        import logging
+        logger = logging.getLogger(__name__)
+
+        # Enforce rate limit (no robots.txt check for API)
+        self.enforce_rate_limit(
+            self._HN_API_DOMAIN, 0.0, min_delay=self._HN_API_MIN_DELAY
+        )
+
+        headers = {"User-Agent": self._HN_API_USER_AGENT}
+        delay = initial_delay
+
+        for attempt in range(max_retries):
+            try:
+                logger.debug(f"HN API request: {url}")
+                response = session.get(url, timeout=timeout, headers=headers)
+
+                if response.status_code == 429:
+                    retry_after = response.headers.get("Retry-After")
+                    wait_time = float(retry_after) if retry_after else delay
+                    if attempt < max_retries - 1:
+                        logger.debug(f"HN API 429, backing off {wait_time}s")
+                        time.sleep(wait_time)
+                        delay *= 2
+                        continue
+
+                if response.status_code == 503:
+                    if attempt < max_retries - 1:
+                        logger.debug(f"HN API 503, backing off {delay}s")
+                        time.sleep(delay)
+                        delay *= 2
+                        continue
+
+                response.raise_for_status()
+                return response.json()
+
+            except requests.RequestException as e:
+                logger.debug(f"HN API request failed: {e}")
+                if attempt < max_retries - 1:
+                    time.sleep(delay)
+                    delay *= 2
+                else:
+                    return None
+
+        return None
+
     def validate_source_config(
         self, base_url: str, rate_limit: float
     ) -> Tuple[bool, str]:
