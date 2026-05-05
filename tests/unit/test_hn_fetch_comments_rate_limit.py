@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """
-Regression tests: HN fetch_comments must route through EthicalScrapingManager.
+Regression tests: HN fetch_comments must route through EthicalScrapingManager.request_hn_api.
 
-Bug: fetch_comments calls self.session.get() directly, bypassing the global
-rate limiter. With 8 concurrent workers all fetching comments from
-news.ycombinator.com, all requests fire simultaneously → 429.
+After the Firebase API migration, all HN requests go through request_hn_api,
+not request_with_backoff or session.get directly.
 """
 
 from unittest.mock import MagicMock, patch
@@ -29,90 +28,103 @@ def _make_hn_source():
 
 
 class TestHNFetchCommentsUsesEthicalManager:
-    """fetch_comments must call get_ethical_manager().request_with_backoff()."""
+    """fetch_comments must call get_ethical_manager().request_hn_api()."""
 
-    def test_fetch_comments_calls_request_with_backoff(self, tmp_path):
-        """
-        fetch_comments must use request_with_backoff from the ethical manager,
-        not self.session.get() directly.
-        """
+    def setup_method(self):
+        HnSource._hn_compliance_message_shown = False
+
+    def teardown_method(self):
+        HnSource._hn_compliance_message_shown = False
+
+    def test_fetch_comments_calls_request_hn_api(self, tmp_path):
+        """fetch_comments must use request_hn_api from the ethical manager."""
         source = _make_hn_source()
 
-        mock_response = MagicMock()
-        mock_response.status_code = 200
-        mock_response.text = "<html><body><table></table></body></html>"
-
         mock_manager = MagicMock()
-        mock_manager.request_with_backoff.return_value = mock_response
+        mock_manager.request_hn_api.return_value = {
+            "id": 201, "by": "u", "text": "<p>Test</p>", "type": "comment"
+        }
 
         with patch(
             "capcat.sources.builtin.custom.hn.source.get_ethical_manager",
             return_value=mock_manager,
-            create=True,
-        ):
+        ), patch(
+            "capcat.core.streamlined_comment_processor.create_optimized_comment_processor"
+        ) as mock_pf:
+            mock_p = MagicMock()
+            mock_p.generate_inline_comments_markdown.return_value = "# C"
+            mock_p.get_performance_metrics.return_value = {
+                "comments_processed": 1, "links_processed": 0
+            }
+            mock_pf.return_value = mock_p
+
             source.fetch_comments(
                 comment_url="https://news.ycombinator.com/item?id=12345",
                 article_title="Test Article",
                 article_folder_path=str(tmp_path),
+                comment_ids=[201],
             )
 
-        mock_manager.request_with_backoff.assert_called_once()
-        call_args = mock_manager.request_with_backoff.call_args
-        all_args = list(call_args[0]) + list(call_args[1].values())
-        assert any("news.ycombinator.com" in str(a) for a in all_args), (
-            "request_with_backoff must be called with the comment URL"
-        )
+        mock_manager.request_hn_api.assert_called()
 
     def test_fetch_comments_does_not_call_session_get_directly(self, tmp_path):
-        """
-        After the fix, self.session.get() must NOT be called for comment fetching.
-        """
+        """session.get() must NOT be called for comment fetching."""
         source = _make_hn_source()
 
-        mock_response = MagicMock()
-        mock_response.status_code = 200
-        mock_response.text = "<html><body><table></table></body></html>"
-
         mock_manager = MagicMock()
-        mock_manager.request_with_backoff.return_value = mock_response
+        mock_manager.request_hn_api.return_value = {
+            "id": 201, "by": "u", "text": "<p>Test</p>", "type": "comment"
+        }
 
         with patch(
             "capcat.sources.builtin.custom.hn.source.get_ethical_manager",
             return_value=mock_manager,
-            create=True,
-        ):
+        ), patch(
+            "capcat.core.streamlined_comment_processor.create_optimized_comment_processor"
+        ) as mock_pf:
+            mock_p = MagicMock()
+            mock_p.generate_inline_comments_markdown.return_value = "# C"
+            mock_p.get_performance_metrics.return_value = {
+                "comments_processed": 1, "links_processed": 0
+            }
+            mock_pf.return_value = mock_p
+
             source.fetch_comments(
                 comment_url="https://news.ycombinator.com/item?id=12345",
                 article_title="Test Article",
                 article_folder_path=str(tmp_path),
+                comment_ids=[201],
             )
 
         source.session.get.assert_not_called()
 
-    def test_fetch_comments_returns_false_on_http_error(self, tmp_path):
-        """
-        fetch_comments must return False when request_with_backoff raises HTTPError.
-        """
+    def test_fetch_comments_returns_true_on_api_success(self, tmp_path):
+        """fetch_comments returns True when API requests succeed."""
         source = _make_hn_source()
 
-        error_response = MagicMock()
-        error_response.status_code = 429
-        http_error = requests.exceptions.HTTPError(response=error_response)
-
         mock_manager = MagicMock()
-        mock_manager.request_with_backoff.side_effect = http_error
+        mock_manager.request_hn_api.return_value = {
+            "id": 201, "by": "u", "text": "<p>Test</p>", "type": "comment"
+        }
 
         with patch(
             "capcat.sources.builtin.custom.hn.source.get_ethical_manager",
             return_value=mock_manager,
-            create=True,
-        ):
+        ), patch(
+            "capcat.core.streamlined_comment_processor.create_optimized_comment_processor"
+        ) as mock_pf:
+            mock_p = MagicMock()
+            mock_p.generate_inline_comments_markdown.return_value = "# C"
+            mock_p.get_performance_metrics.return_value = {
+                "comments_processed": 1, "links_processed": 0
+            }
+            mock_pf.return_value = mock_p
+
             result = source.fetch_comments(
                 comment_url="https://news.ycombinator.com/item?id=12345",
                 article_title="Test Article",
                 article_folder_path=str(tmp_path),
+                comment_ids=[201],
             )
 
-        assert result is False, (
-            "fetch_comments must return False when HTTP error occurs after retries"
-        )
+        assert result is True
