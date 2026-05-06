@@ -4,7 +4,7 @@ Regression tests for EthicalScrapingManager.enforce_rate_limit thread safety.
 
 Bug: enforce_rate_limit reads and writes last_request_time without a lock.
 Two concurrent threads hitting the same domain both pass the elapsed check
-and both fire at the same time — the per-domain delay is not enforced.
+and both fire at the same time - the per-domain delay is not enforced.
 """
 
 import threading
@@ -62,7 +62,7 @@ class TestEnforceRateLimitThreadSafety:
         fire_times.sort()
         gap = fire_times[1] - fire_times[0]
         assert gap >= min_delay * 0.85, (
-            f"Threads fired only {gap:.3f}s apart — expected >= {min_delay * 0.85:.3f}s. "
+            f"Threads fired only {gap:.3f}s apart - expected >= {min_delay * 0.85:.3f}s. "
             "enforce_rate_limit is not thread-safe."
         )
 
@@ -126,5 +126,5 @@ class TestEnforceRateLimitThreadSafety:
 
         assert len(fire_times) == 2, "Both threads must complete"
         assert elapsed < min_delay * 1.8, (
-            f"Different domains took {elapsed:.3f}s — they are being serialized when they should not be."
+            f"Different domains took {elapsed:.3f}s - they are being serialized when they should not be."
         )

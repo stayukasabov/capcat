@@ -123,7 +123,7 @@ class TestFrontmatterStripping:
         assert "source_code" not in result
         assert "captured" not in result
         assert "techpro" not in result or "techpro" in result and result.count("techpro") == result.count("techpro")  # only in meta if at all
-        # The key check — raw YAML keys must not appear as visible text
+        # The key check - raw YAML keys must not appear as visible text
         assert "source_code: iq" not in result
         assert "captured: '2026-04-03'" not in result
 
@@ -146,7 +146,7 @@ class TestFrontmatterStripping:
 
 
 class TestPdfDownloadBarRendering:
-    """B3 — PDF download bar must wrap properly when there are many PDFs."""
+    """B3 - PDF download bar must wrap properly when there are many PDFs."""
 
     def test_pdf_bar_uses_space_separator_not_middot(self, tmp_path):
         """
@@ -171,7 +171,7 @@ class TestPdfDownloadBarRendering:
         )
 
         assert "&nbsp;·&nbsp;" not in html, (
-            "PDF bar must not use &nbsp;·&nbsp; separator — it dangles on line wrap"
+            "PDF bar must not use &nbsp;·&nbsp; separator - it dangles on line wrap"
         )
         assert 'class="pdf-download-bar"' in html, (
             "PDF download bar must be present when files/*.pdf exist"

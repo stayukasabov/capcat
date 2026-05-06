@@ -1,4 +1,4 @@
-"""Tests for List All Sources TUI — detail view and article_count edit."""
+"""Tests for List All Sources TUI - detail view and article_count edit."""
 from unittest.mock import MagicMock, patch, call
 
 

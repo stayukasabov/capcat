@@ -78,7 +78,7 @@ class TestMediaConfigYamlLoading:
         mgr._load_settings_file(settings)
         # processing is updated
         assert mgr._config.processing.download_images is False
-        # media keeps its own default (True) — only media: section controls MediaConfig
+        # media keeps its own default (True) - only media: section controls MediaConfig
         assert mgr._config.media.download_images is True
 
     def test_processing_download_images_false_not_overwritten_by_media_true(self, tmp_path):
@@ -323,7 +323,7 @@ class TestResolveMediaForceNoPdfs:
 
         assert pdfs is False, (
             f"Expected pdfs=False with force_no_pdfs=True, got {pdfs}. "
-            "TUI 'No PDFs' answer is being ignored — config.media.download_pdfs=True wins."
+            "TUI 'No PDFs' answer is being ignored - config.media.download_pdfs=True wins."
         )
 
     def test_force_no_pdfs_overrides_source_config_yaml(self):

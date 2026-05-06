@@ -113,7 +113,7 @@ class TestDocumentDownloadAcceptHeader:
 
     def test_image_head_does_not_include_accept_pdf(self, tmp_path):
         """
-        Accept: application/pdf must NOT be sent for image downloads — only documents.
+        Accept: application/pdf must NOT be sent for image downloads - only documents.
         """
         head_resp = _make_head_response("image/jpeg")
         get_resp = _make_get_response("image/jpeg")

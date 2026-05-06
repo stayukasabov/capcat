@@ -1,5 +1,5 @@
 """
-Regression tests — BUG F2: network.connect_timeout config is dead code.
+Regression tests - BUG F2: network.connect_timeout config is dead code.
 get_timeout_for_source was returning SOURCE_TIMEOUTS["default"] instead of
 reading config.network.connect_timeout / read_timeout for unknown sources.
 """
@@ -56,6 +56,6 @@ class TestGetTimeoutForSourceUsesConfig:
         ):
             tc = get_timeout_for_source("guardian", use_adaptive=False)
 
-        # guardian has source-specific override — must not be overridden by config
+        # guardian has source-specific override - must not be overridden by config
         assert tc.connect_timeout == SOURCE_TIMEOUTS["guardian"].connect_timeout
         assert tc.read_timeout == SOURCE_TIMEOUTS["guardian"].read_timeout

@@ -9,7 +9,7 @@ from capcat.core.shutdown import GracefulShutdown, get_shutdown
 
 
 def test_sigint_calls_os_exit_immediately():
-    """SIGINT must call os._exit(130) immediately — not set the event."""
+    """SIGINT must call os._exit(130) immediately - not set the event."""
     gs = GracefulShutdown()
     with patch("capcat.core.shutdown.os") as mock_os:
         gs._signal_handler(signal.SIGINT, None)
@@ -29,7 +29,7 @@ def test_signal_handler_no_cleanup_func_parameter():
     import inspect
     params = inspect.signature(GracefulShutdown.__init__).parameters
     assert "cleanup_func" not in params, (
-        "cleanup_func parameter must be removed — it creates a path for "
+        "cleanup_func parameter must be removed - it creates a path for "
         "executor calls from the signal handler (deadlock risk)"
     )
 
@@ -103,7 +103,7 @@ def test_process_sources_prints_cancel_message(tmp_path, capsys):
         mock_gs.__exit__ = MagicMock(return_value=False)
         # hn loop entry: False → process hn (completed=1)
         # lb loop entry: True → break (lb not processed, completed stays 1)
-        # post-loop check: True → print "Cancelled — fetched 1 of 2 sources." + exit 130
+        # post-loop check: True → print "Cancelled - fetched 1 of 2 sources." + exit 130
         mock_gs.should_shutdown.side_effect = [False, True, True]
         MockGS.return_value = mock_gs
 

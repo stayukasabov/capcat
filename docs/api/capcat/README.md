@@ -10,7 +10,7 @@ render_with_liquid: false
 This package contains the following modules:
 
 - [`capcat.cli`](./cli.md) - CLI entry point for Capcat
-- [`capcat.tui`](./tui.md) - TUI entry point — delegates to core interactive module
+- [`capcat.tui`](./tui.md) - TUI entry point - delegates to core interactive module
 - [`capcat.core.unified_article_processor`](./unified_article_processor.md) - Unified Article Processor - Universal entry point for all article processing
 - [`capcat.core.image_processor`](./image_processor.md) - Global Image Processor for Capcat
 - [`capcat.core.source_configs`](./source_configs.md) - Modular source configuration system with backward compatibility
@@ -78,11 +78,11 @@ Replaces {{placeholder}} variables with actual values from configuration
 Creates self-contained HTML files from markdown content with embedded CSS and JavaScript
 - [`capcat.scripts.generate_source_config`](./generate_source_config.md) - Interactive script to generate comprehensive YAML configuration files
 for config-driven sources in Capcat
-- [`capcat.commands.fetch`](./fetch.md) - Batch fetch command — processes multiple sources via the unified processor
-- [`capcat.commands.add_source`](./add_source.md) - Add-source command — interactive RSS source addition
-- [`capcat.commands.remove_source`](./remove_source.md) - Remove-source command — interactive source removal with backup/undo support
+- [`capcat.commands.fetch`](./fetch.md) - Batch fetch command - processes multiple sources via the unified processor
+- [`capcat.commands.add_source`](./add_source.md) - Add-source command - interactive RSS source addition
+- [`capcat.commands.remove_source`](./remove_source.md) - Remove-source command - interactive source removal with backup/undo support
 - [`capcat.commands.single`](./single.md) - Single article fetch command
-- [`capcat.commands.generate_config`](./generate_config.md) - Generate-config command — launches the interactive source config generator
+- [`capcat.commands.generate_config`](./generate_config.md) - Generate-config command - launches the interactive source config generator
 - [`capcat.commands.init`](./init.md) - Implementation of capcat init command
 - [`capcat.sources.builtin.custom.twitter.source`](./source.md) - Twitter/X
 - [`capcat.sources.builtin.custom.lb.source`](./source.md) - Lobsters source implementation for the new source system

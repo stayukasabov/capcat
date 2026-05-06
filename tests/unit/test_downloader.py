@@ -15,7 +15,7 @@ def _mock_4xx_response(status_code):
 
 
 def test_download_file_returns_none_on_403_without_retry(monkeypatch):
-    """4xx response must return None immediately — no retry attempts."""
+    """4xx response must return None immediately - no retry attempts."""
     mock_session = MagicMock()
     mock_session.head.side_effect = Exception("head blocked")
     mock_session.get.return_value = _mock_4xx_response(403)
@@ -50,7 +50,7 @@ def _head_response_with_length(content_length_bytes: int):
 def test_download_file_skips_pdf_exceeding_config_limit(monkeypatch):
     """download_file must skip documents larger than PdfConfig.max_pdf_size_bytes."""
     mock_session = MagicMock()
-    mock_session.head.return_value = _head_response_with_length(2_000_000)  # 2MB — over 500KB limit
+    mock_session.head.return_value = _head_response_with_length(2_000_000)  # 2MB - over 500KB limit
 
     import capcat.core.downloader as dl
     original_config = dl.config
@@ -71,7 +71,7 @@ def test_download_file_skips_pdf_exceeding_config_limit(monkeypatch):
 def test_download_file_allows_pdf_within_config_limit(tmp_path):
     """download_file must proceed when document size is within PdfConfig.max_pdf_size_bytes."""
     mock_session = MagicMock()
-    mock_session.head.return_value = _head_response_with_length(300_000)  # 300KB — under 500KB limit
+    mock_session.head.return_value = _head_response_with_length(300_000)  # 300KB - under 500KB limit
 
     get_resp = MagicMock()
     get_resp.headers = {"content-type": "application/pdf"}

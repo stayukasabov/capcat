@@ -1,4 +1,4 @@
-"""Regression test — themes update prompt must not block non-interactive runs."""
+"""Regression test - themes update prompt must not block non-interactive runs."""
 from unittest.mock import patch
 
 

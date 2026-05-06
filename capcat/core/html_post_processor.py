@@ -474,7 +474,7 @@ class HTMLPostProcessor:
 
         while path.parent != path:
             parts.append(path.name.replace("_", " "))
-            # Stop only at the date folder — the top-level archive boundary
+            # Stop only at the date folder - the top-level archive boundary
             if path.name.lower().startswith("news_"):
                 break
             path = path.parent
@@ -495,7 +495,7 @@ class HTMLPostProcessor:
         if name.startswith("news_"):
             return True
 
-        # Source folder: Source-Name_DD-MM-YYYY — match via registry
+        # Source folder: Source-Name_DD-MM-YYYY - match via registry
         from capcat.core.utils import get_source_folder_name
 
         source_codes = []

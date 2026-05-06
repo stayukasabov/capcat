@@ -57,7 +57,7 @@ Source names must match what `capcat list sources` shows.
 
 ## Tips
 
-- Bundles don't have to be disjoint — a source can appear in multiple bundles
+- Bundles don't have to be disjoint - a source can appear in multiple bundles
 - `--count` applies per source within the bundle, not total
 - Bundle runs use the same 8-worker parallel processing as `capcat fetch`
 - Combine with cron for scheduled collection: `capcat bundle morning --count 20 --html`

@@ -6,7 +6,7 @@ from pathlib import Path
 
 GITIGNORE_BLOCK = """\
 
-# capcat — managed entries
+# capcat - managed entries
 .capcat/
 News/
 Capcats/
@@ -67,13 +67,13 @@ def init_project(root: Path, reinit: bool = False) -> None:
     _copy_themes_to(themes_dir)
 
     # Source config directories are created by SourceConfigMirror on first fetch.
-    # Do not pre-create them here — an empty dir causes is_mirrored() to return
+    # Do not pre-create them here - an empty dir causes is_mirrored() to return
     # True, which skips run_first_mirror() and leaves the vault with no YAMLs.
 
     gitignore = root / ".gitignore"
     if gitignore.exists():
         existing = gitignore.read_text()
-        if "# capcat — managed entries" not in existing:
+        if "# capcat - managed entries" not in existing:
             gitignore.write_text(existing + GITIGNORE_BLOCK)
     else:
         gitignore.write_text(GITIGNORE_BLOCK.lstrip())

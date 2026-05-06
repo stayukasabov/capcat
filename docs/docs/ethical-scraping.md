@@ -5,14 +5,14 @@ render_with_liquid: false
 
 # Ethical Scraping
 
-Capcat enforces ethical scraping practices across all sources. The `EthicalScrapingManager` is the single point of control — no source bypasses it.
+Capcat enforces ethical scraping practices across all sources. The `EthicalScrapingManager` is the single point of control - no source bypasses it.
 
 ## Core Rules
 
 1. **Robots.txt is always checked** before fetching any URL (15-minute TTL cache)
-2. **Rate limiting is mandatory** — minimum 1 second between requests to any domain
-3. **Exponential backoff** on 429/503 responses — never hammers a server
-4. **User-agent disclosure** — identifies as `Capcat/2.0`
+2. **Rate limiting is mandatory** - minimum 1 second between requests to any domain
+3. **Exponential backoff** on 429/503 responses - never hammers a server
+4. **User-agent disclosure** - identifies as `Capcat/2.0`
 
 ## EthicalScrapingManager API
 
@@ -30,7 +30,7 @@ Thread-safe slot reservation. Blocks until the minimum delay has elapsed since t
 manager.enforce_rate_limit(domain, crawl_delay, min_delay=1.0)
 ```
 
-Used by all sources before calling `session.get()`. Required — do not skip.
+Used by all sources before calling `session.get()`. Required - do not skip.
 
 ### can_fetch
 
@@ -67,7 +67,7 @@ data = manager.request_hn_api(session, url)
 
 ## Rate Limit Enforcement
 
-Each domain has a thread-safe last-access timestamp. With 8 concurrent workers, all requests to a domain are serialized through the slot — only one worker proceeds at a time.
+Each domain has a thread-safe last-access timestamp. With 8 concurrent workers, all requests to a domain are serialized through the slot - only one worker proceeds at a time.
 
 Default minimum delay: 1.0 second. Sources override via `rate_limit` in their YAML config or `self.config.rate_limit` in Python sources.
 

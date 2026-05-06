@@ -41,7 +41,7 @@ capcat remove-source --undo <removal-id>
 
 ## Backup Location
 
-`.capcat/backups/` — managed automatically, do not edit manually.
+`.capcat/backups/` - managed automatically, do not edit manually.
 
 ## Usage Analytics
 

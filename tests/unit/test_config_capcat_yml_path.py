@@ -1,4 +1,4 @@
-"""Regression test — ConfigManager must find Config/capcat.yml in vault layout.
+"""Regression test - ConfigManager must find Config/capcat.yml in vault layout.
 
 The vault stores capcat.yml at Config/capcat.yml (not at the project root).
 _load_default_config_files must check Config/capcat.yml before falling back

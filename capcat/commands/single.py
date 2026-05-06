@@ -172,7 +172,7 @@ def scrape_single_article(
 
                 source_obj = factory.create_source(source)
                 article = Article(title=f"Article from {url}", url=url)
-                # BaseSource.fetch_article_content returns (bool, Optional[str]) — 2-tuple
+                # BaseSource.fetch_article_content returns (bool, Optional[str]) - 2-tuple
                 success, article_folder = source_obj.fetch_article_content(article, parent_dir, None)
                 if success and article_folder:
                     base_dir = _rename_to_dated(article_folder, formatted_date)
@@ -197,7 +197,7 @@ def scrape_single_article(
                 """
 
                 def should_skip_url(self, url: str, title: str) -> bool:
-                    """Always return False — no URL is skipped in generic mode.
+                    """Always return False - no URL is skipped in generic mode.
 
                     Args:
                         url: The article URL being evaluated.

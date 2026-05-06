@@ -9,7 +9,7 @@ render_with_liquid: false
 
 ## Description
 
-Generate-config command — launches the interactive source config generator.
+Generate-config command - launches the interactive source config generator.
 
 ## Functions
 

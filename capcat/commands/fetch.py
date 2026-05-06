@@ -1,4 +1,4 @@
-"""Batch fetch command — processes multiple sources via the unified processor."""
+"""Batch fetch command - processes multiple sources via the unified processor."""
 from __future__ import annotations
 
 import argparse
@@ -77,7 +77,7 @@ def process_sources(
                     )
 
         if shutdown.should_shutdown():
-            print(f"\nCancelled — fetched {completed} of {len(sources)} sources.")
+            print(f"\nCancelled - fetched {completed} of {len(sources)} sources.")
             os._exit(130)
 
     return {

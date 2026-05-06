@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
 Regression tests for async PDF manager bugs:
-B1 — placeholder links never updated when downloads take >2 seconds
-B2 — updated links use absolute paths instead of relative
+B1 - placeholder links never updated when downloads take >2 seconds
+B2 - updated links use absolute paths instead of relative
 """
 
 import os
@@ -13,14 +13,14 @@ from capcat.core.async_pdf_manager import AsyncPDFManager
 
 
 class TestStalePlaceholderUpdate:
-    """B1 — update_article_with_completed_downloads is called before downloads finish."""
+    """B1 - update_article_with_completed_downloads is called before downloads finish."""
 
     def test_placeholder_updated_when_download_completes_after_2s(self, tmp_path):
         """
         Placeholder must be replaced even when the PDF download takes >2 seconds.
 
         Current broken behaviour: the update thread sleeps 2s, checks completed_downloads
-        (empty), and exits — placeholder stays in the markdown forever.
+        (empty), and exits - placeholder stays in the markdown forever.
 
         Fixed behaviour: the update thread waits for actual download completion before
         calling update_article_with_completed_downloads.
@@ -107,7 +107,7 @@ class TestStalePlaceholderUpdate:
 
 
 class TestAbsolutePathInUpdatedMarkdown:
-    """B2 — update_article_with_completed_downloads writes absolute paths."""
+    """B2 - update_article_with_completed_downloads writes absolute paths."""
 
     def test_updated_link_uses_relative_path(self, tmp_path):
         """
@@ -223,8 +223,8 @@ class TestFrontmatterPdfUpdate:
 
 
 class TestInitializePdfManager:
-    """B3 — initialize_pdf_manager never starts the worker.
-    B4 — initialize_pdf_manager recreates the manager per-fetcher."""
+    """B3 - initialize_pdf_manager never starts the worker.
+    B4 - initialize_pdf_manager recreates the manager per-fetcher."""
 
     def teardown_method(self):
         """Reset global state between tests."""
@@ -265,7 +265,7 @@ class TestInitializePdfManager:
 
 
 class TestWaitUntilIdle:
-    """B5 — no drain mechanism before shutdown; pending downloads are abandoned."""
+    """B5 - no drain mechanism before shutdown; pending downloads are abandoned."""
 
     def test_wait_until_idle_returns_when_queue_empty(self):
         """wait_until_idle must return True when queue is empty and no active downloads."""
@@ -329,7 +329,7 @@ class TestWaitUntilIdle:
 
 
 class TestBatchShutdownDrain:
-    """B5 end-to-end — PDF manager must be drained and reset after each source batch."""
+    """B5 end-to-end - PDF manager must be drained and reset after each source batch."""
 
     def teardown_method(self):
         from capcat.core.async_pdf_manager import shutdown_pdf_manager

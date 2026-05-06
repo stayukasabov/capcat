@@ -21,9 +21,9 @@ pipx upgrade capcat
 **Symptom**: A source returns 0 articles or fails silently.
 
 **Common causes:**
-- Feed URL changed — check source YAML config under `capcat/sources/builtin/config_driven/configs/`
-- Anti-bot protection (Cloudflare) — use the RSS feed URL instead of the HTML page
-- DNS/network issue — test the feed URL in a browser
+- Feed URL changed - check source YAML config under `capcat/sources/builtin/config_driven/configs/`
+- Anti-bot protection (Cloudflare) - use the RSS feed URL instead of the HTML page
+- DNS/network issue - test the feed URL in a browser
 
 **Check feed validity:**
 ```bash
@@ -36,7 +36,7 @@ capcat list sources   # confirm source is registered
 
 **Symptom**: Article content is binary garbage or unreadable characters.
 
-**Cause**: This was a known issue in versions prior to v1.0.25 where the `Accept-Encoding: br` header was sent but brotli decompression was unavailable. Fixed in v1.0.25 — upgrade:
+**Cause**: This was a known issue in versions prior to v1.0.25 where the `Accept-Encoding: br` header was sent but brotli decompression was unavailable. Fixed in v1.0.25 - upgrade:
 ```bash
 pipx upgrade capcat
 ```
@@ -47,7 +47,7 @@ pipx upgrade capcat
 
 **Symptom**: `"Source 'techpro' is not configured"` when running `capcat bundle all`.
 
-**Cause**: Bundle names were passed as source IDs in versions prior to v1.0.27. Fixed in v1.0.27 — upgrade:
+**Cause**: Bundle names were passed as source IDs in versions prior to v1.0.27. Fixed in v1.0.27 - upgrade:
 ```bash
 pipx upgrade capcat
 ```

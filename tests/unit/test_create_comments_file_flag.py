@@ -1,4 +1,4 @@
-"""Regression test — create_comments_file: false must suppress comments fetching.
+"""Regression test - create_comments_file: false must suppress comments fetching.
 
 B7: unified_source_processor ignored create_comments_file config flag.
 Comments were always fetched regardless of the setting.

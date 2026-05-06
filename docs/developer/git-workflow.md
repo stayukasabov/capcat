@@ -5,11 +5,11 @@
 **Never commit directly to `main`.** All work happens on a feature branch.
 
 Branch naming:
-- `feat/<name>` — new feature
-- `fix/<name>` — bug fix
-- `test/<name>` — tests only
-- `refactor/<name>` — refactoring, no behavior change
-- `docs/<name>` — documentation only
+- `feat/<name>` - new feature
+- `fix/<name>` - bug fix
+- `test/<name>` - tests only
+- `refactor/<name>` - refactoring, no behavior change
+- `docs/<name>` - documentation only
 
 ```bash
 git checkout -b feat/my-feature
@@ -39,7 +39,7 @@ bump: version to 1.0.31
 3. Push branch: `git push -u origin feat/my-feature`
 4. Open PR against `main` via `gh pr create`
 5. All tests must pass before merge
-6. Merge locally or via GitHub — delete branch after merge
+6. Merge locally or via GitHub - delete branch after merge
 
 ## Push Rules
 
@@ -61,7 +61,7 @@ See `docs/developer/release.md` for full release checklist.
 
 ## GitHub Authentication
 
-GitHub remote uses HTTPS. Credentials are stored in macOS Keychain after the first successful push — no password prompt on subsequent pushes.
+GitHub remote uses HTTPS. Credentials are stored in macOS Keychain after the first successful push - no password prompt on subsequent pushes.
 
 ```bash
 git remote -v
@@ -104,4 +104,4 @@ capcat --version
 
 The repo is symlinked: `~/capcat` → Synology Drive path.
 
-Always use `~/capcat/` in bash commands — never the raw Synology path.
+Always use `~/capcat/` in bash commands - never the raw Synology path.

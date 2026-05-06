@@ -27,7 +27,7 @@ def generator():
 # ---------------------------------------------------------------------------
 
 def test_generate_article_html_from_template_exists(generator) -> None:
-    """generate_article_html_from_template must exist — it is the primary entry
+    """generate_article_html_from_template must exist - it is the primary entry
     point called by HTMLPostProcessor for every article and comments page."""
     assert hasattr(generator, "generate_article_html_from_template"), (
         "HTMLGenerator is missing generate_article_html_from_template. "
@@ -48,19 +48,19 @@ def test_generate_article_html_from_template_signature(generator) -> None:
 
 
 def test_generate_directory_index_exists(generator) -> None:
-    """generate_directory_index must exist — called for index.html generation."""
+    """generate_directory_index must exist - called for index.html generation."""
     assert hasattr(generator, "generate_directory_index")
     assert callable(generator.generate_directory_index)
 
 
 def test_generate_article_html_exists(generator) -> None:
-    """generate_article_html must exist — used by article_fetcher PDF path."""
+    """generate_article_html must exist - used by article_fetcher PDF path."""
     assert hasattr(generator, "generate_article_html")
     assert callable(generator.generate_article_html)
 
 
 def test_no_generate_html_file_method(generator) -> None:
-    """generate_html_file must NOT exist — it was a ghost method that caused
+    """generate_html_file must NOT exist - it was a ghost method that caused
     the prod breakage. If someone adds it, this test enforces the right name."""
     assert not hasattr(generator, "generate_html_file"), (
         "generate_html_file should not exist on HTMLGenerator. "

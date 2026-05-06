@@ -909,11 +909,11 @@ class QuietProgress:
         """Accept and discard all constructor arguments."""
 
     def __enter__(self):
-        """Context manager entry — returns self."""
+        """Context manager entry - returns self."""
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        """Context manager exit — no-op."""
+        """Context manager exit - no-op."""
 
     def start(self):
         """No-op start."""

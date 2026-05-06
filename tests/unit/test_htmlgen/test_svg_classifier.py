@@ -1,5 +1,5 @@
 # tests/unit/test_htmlgen/test_svg_classifier.py
-"""Tests for ArticleHTMLGenerator._classify_svg_elements — SVG icon vs illustration classifier."""
+"""Tests for ArticleHTMLGenerator._classify_svg_elements - SVG icon vs illustration classifier."""
 from __future__ import annotations
 import base64
 import urllib.parse
@@ -56,7 +56,7 @@ def test_inline_svg_in_nav_link_gets_icon_class(gen):
     assert _has_icon_class(result), "Expected capcat-icon on nav SVG icon"
 
 
-# ── Test 4: Non-square illustration — no class ───────────────────────────────
+# ── Test 4: Non-square illustration - no class ───────────────────────────────
 
 def test_non_square_svg_gets_no_class(gen):
     html = '<p><img src="diagram.svg" width="800" height="400"/></p>'
@@ -64,7 +64,7 @@ def test_non_square_svg_gets_no_class(gen):
     assert not _has_icon_class(result), "Non-square illustration should not get capcat-icon"
 
 
-# ── Test 5: Sole-child illustration between paragraphs — no class ────────────
+# ── Test 5: Sole-child illustration between paragraphs - no class ────────────
 
 def test_sole_child_between_paragraphs_gets_no_class(gen):
     html = (
@@ -76,7 +76,7 @@ def test_sole_child_between_paragraphs_gets_no_class(gen):
     assert not _has_icon_class(result), "Sole-child illustration between paragraphs should not get capcat-icon"
 
 
-# ── Test 6: No size info — fallback to illustration ──────────────────────────
+# ── Test 6: No size info - fallback to illustration ──────────────────────────
 
 def test_svg_with_no_size_info_gets_no_class(gen):
     html = '<p><img src="unknown.svg"/></p>'
@@ -84,7 +84,7 @@ def test_svg_with_no_size_info_gets_no_class(gen):
     assert not _has_icon_class(result), "SVG with no size info should default to illustration"
 
 
-# ── Test 7: Large square without accessibility/context — illustration ─────────
+# ── Test 7: Large square without accessibility/context - illustration ─────────
 
 def test_large_square_no_context_gets_no_class(gen):
     html = '<p><img src="chart.svg" width="512" height="512"/></p>'
@@ -92,7 +92,7 @@ def test_large_square_no_context_gets_no_class(gen):
     assert not _has_icon_class(result), "Large square with no icon signals should not get capcat-icon"
 
 
-# ── Test 8: Bare img (post-anchor-strip) large square — illustration ──────────
+# ── Test 8: Bare img (post-anchor-strip) large square - illustration ──────────
 
 def test_bare_large_square_img_gets_no_class(gen):
     html = '<div><img src="diagram.svg" width="400" height="400"/></div>'

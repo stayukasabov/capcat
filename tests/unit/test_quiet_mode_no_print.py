@@ -17,9 +17,9 @@ class TestConnectingMessageRespectsQuietMode:
         'Connecting to X' status message. It must use self.logger.info().
 
         Current broken behaviour: print(f"Capcat Info: Connecting to {name}...")
-        fires unconditionally — bypasses the logging system, appears in -q mode.
+        fires unconditionally - bypasses the logging system, appears in -q mode.
 
-        Fixed behaviour: self.logger.info(f"Connecting to {name}...") — suppressed
+        Fixed behaviour: self.logger.info(f"Connecting to {name}...") - suppressed
         when console handler is at WARNING level (quiet mode).
         """
         from capcat.core.source_system.base_source import BaseSource, SourceConfig

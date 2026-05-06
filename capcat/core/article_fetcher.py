@@ -175,7 +175,7 @@ class ArticleFetcher(ABC):
         self.session = session
         # Whether to download all files (audio, video, documents)
         self.download_files = download_files
-        # Whether to download PDFs — independent of download_files.
+        # Whether to download PDFs - independent of download_files.
         # CLI couples --media → --pdfs via `pdfs = pdfs or media` in cli.py,
         # so by the time we reach here, download_pdfs is already True when
         # --media was used. The or-download_files was redundant and harmful:
@@ -428,7 +428,7 @@ class ArticleFetcher(ABC):
                 is_pdf_file = self._is_pdf_url(url)
 
                 if is_pdf_file and not self.download_pdfs:
-                    # User opted out of PDF downloads — redirect to landing page
+                    # User opted out of PDF downloads - redirect to landing page
                     # or produce a stub article without downloading.
                     return self._handle_pdf_no_download(
                         title, url, index, base_folder, progress_callback
@@ -524,7 +524,7 @@ class ArticleFetcher(ABC):
                 title, landing_url, index, base_folder, progress_callback
             )
 
-        # Unknown domain — write a stub article.
+        # Unknown domain - write a stub article.
         # Derive a clean display title from the URL filename when the caller
         # passed the generic "Article from <url>" fallback (single command).
         # Preserve meaningful titles provided by sources (e.g. HN article title).
@@ -855,7 +855,7 @@ class ArticleFetcher(ABC):
         )
 
         if is_pdf and not self.download_pdfs:
-            # Response is a PDF but user opted out — use the no-download handler
+            # Response is a PDF but user opted out - use the no-download handler
             return self._handle_pdf_no_download(
                 title, url, 0, base_folder, progress_callback
             )
@@ -1163,7 +1163,7 @@ class ArticleFetcher(ABC):
                     "article at the source URL above.\n\n"
                 )
 
-        # Download any PDF links still present in markdown (universal — works
+        # Download any PDF links still present in markdown (universal - works
         # for all sources regardless of HTML structure)
         markdown_content = self._download_pdf_links_from_markdown(
             markdown_content, article_folder_path
@@ -1953,7 +1953,7 @@ class ArticleFetcher(ABC):
                                     )
 
                                     # Also try path relative to the article's
-                                    # base URL directory — covers pages that
+                                    # base URL directory - covers pages that
                                     # use relative URLs like "images/foo.webp"
                                     base_dir = urlparse(base_url).path
                                     if not base_dir.endswith("/"):
@@ -1973,7 +1973,7 @@ class ArticleFetcher(ABC):
                                                 )
 
                                     # Also try bare filename (with and without
-                                    # query string) — covers cases where the
+                                    # query string) - covers cases where the
                                     # formatter emitted only the basename, e.g.
                                     # "img.webp?t=123" from a relative-URL page
                                     basename = parsed.path.rsplit("/", 1)[-1]
@@ -2001,7 +2001,7 @@ class ArticleFetcher(ABC):
                                                 alt_text,
                                                 is_image=True
                                             )
-                                            # Stop after first match —
+                                            # Stop after first match -
                                             # avoids corrupting already-correct
                                             # paths via substring replacement
                                             break
@@ -2907,9 +2907,9 @@ class NewsSourceArticleFetcher(ArticleFetcher):
                 response.raise_for_status()
                 # Ensure UTF-8 encoding to prevent Unicode corruption
                 response.encoding = 'utf-8'
-                break  # success — exit retry loop
+                break  # success - exit retry loop
             except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
-                # Transient errors — retry if attempts remain
+                # Transient errors - retry if attempts remain
                 if attempt < max_retries:
                     retry_delay = 1.0 * (2 ** attempt)  # 1s, 2s, 4s …
                     self.logger.debug(
@@ -3019,7 +3019,7 @@ class NewsSourceArticleFetcher(ArticleFetcher):
             return False, None, None
 
         # Detect JavaScript-only SPA shells before attempting extraction.
-        # These pages have a nearly empty body with a root mount point — all
+        # These pages have a nearly empty body with a root mount point - all
         # content is rendered client-side and cannot be extracted without a
         # headless browser.
         body = soup.find("body")
@@ -3047,7 +3047,7 @@ class NewsSourceArticleFetcher(ArticleFetcher):
 
         # Collect PDF links from the FULL page BEFORE cleanup.
         # Sites like arXiv keep their PDF download link inside <aside>, which
-        # gets removed below — so we must harvest it here while it still exists.
+        # gets removed below - so we must harvest it here while it still exists.
         # header/footer links are excluded to avoid corporate footer PDFs.
         _collected_pdf_links = _collect_pdf_links_from_soup(soup, url)
 
@@ -3111,7 +3111,7 @@ class NewsSourceArticleFetcher(ArticleFetcher):
         if progress_callback:
             progress_callback(0.5, "converting")
 
-        # Convert HTML to Markdown — do this BEFORE creating the folder so
+        # Convert HTML to Markdown - do this BEFORE creating the folder so
         # a failed conversion doesn't leave an empty directory behind.
         # Use convert_html_with_timeout (not html_to_markdown directly) so a
         # complex page cannot block the thread indefinitely.

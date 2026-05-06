@@ -9,7 +9,7 @@ render_with_liquid: false
 
 ## Description
 
-Batch fetch command — processes multiple sources via the unified processor.
+Batch fetch command - processes multiple sources via the unified processor.
 
 ## Functions
 

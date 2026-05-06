@@ -16,7 +16,7 @@ def test_hn_folder_name_uses_hyphens():
 
 
 def test_folder_name_contains_no_underscores_as_word_separators():
-    """Word separators must be hyphens — no underscores allowed in the source name."""
+    """Word separators must be hyphens - no underscores allowed in the source name."""
     from capcat.core.utils import get_source_folder_name
     result = get_source_folder_name("hn")
     assert "_" not in result, f"Underscore found in folder name: '{result}'"

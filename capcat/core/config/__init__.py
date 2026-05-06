@@ -262,7 +262,7 @@ def check_theme_upgrade(project_root: "Path") -> None:
 
     themes_dir = Path(project_root) / "Config" / "themes"
     if not themes_dir.exists():
-        return  # uninitialised — silent no-op
+        return  # uninitialised - silent no-op
 
     marker = themes_dir / ".capcat-version"
     try:
@@ -271,7 +271,7 @@ def check_theme_upgrade(project_root: "Path") -> None:
         stored = None
 
     if stored == __version__:
-        return  # up to date — no prompt
+        return  # up to date - no prompt
 
     # When called from inside the TUI, raw input() corrupts the terminal and
     # conflicts with questionary's control of stdin. Skip the prompt entirely
@@ -297,5 +297,5 @@ def check_theme_upgrade(project_root: "Path") -> None:
     if answer in ("", "y", "yes"):
         _copy_themes_to(themes_dir)
     else:
-        # Keep user files — update marker only to suppress re-prompt
+        # Keep user files - update marker only to suppress re-prompt
         marker.write_text(__version__ + "\n")

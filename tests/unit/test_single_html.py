@@ -24,7 +24,7 @@ def test_single_html_calls_process_directory_tree(tmp_path: Path) -> None:
     (fake_folder / "article.md").write_text("# Test\n\nBody.", encoding="utf-8")
 
     # Mock the specialized source chain so we reach the HTML branch.
-    # get_source_for_url returns (source_instance, source_id) — a 2-tuple.
+    # get_source_for_url returns (source_instance, source_id) - a 2-tuple.
     mock_manager = MagicMock()
     mock_manager.can_handle_url.return_value = True
     mock_source = MagicMock()
@@ -54,7 +54,7 @@ def test_single_html_calls_process_directory_tree(tmp_path: Path) -> None:
 
 
 def test_single_html_does_not_call_generate_html_file(tmp_path: Path) -> None:
-    """generate_html_file must never be called — it does not exist on
+    """generate_html_file must never be called - it does not exist on
     HTMLGenerator. Calling it raises AttributeError in production."""
     fake_folder = tmp_path / "article"
     fake_folder.mkdir()
@@ -77,6 +77,6 @@ def test_single_html_does_not_call_generate_html_file(tmp_path: Path) -> None:
 
             # Verify the ghost method still doesn't exist
             assert not hasattr(HTMLGenerator(), "generate_html_file"), (
-                "generate_html_file was added to HTMLGenerator — "
+                "generate_html_file was added to HTMLGenerator - "
                 "update single.py to use it, or remove it and keep process_directory_tree"
             )

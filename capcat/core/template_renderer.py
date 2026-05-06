@@ -127,7 +127,7 @@ class TemplateRenderer:
             Dictionary containing embedded styles and scripts
         """
         try:
-            # Read base.css — prefer Config/themes/ over package copy
+            # Read base.css - prefer Config/themes/ over package copy
             user_base = self._user_themes_dir / "base.css" if self._user_themes_dir else None
             base_css_path = (
                 user_base if user_base and user_base.exists()

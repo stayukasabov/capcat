@@ -69,7 +69,7 @@ class TestEnforceRateLimitIgnoresRobotsCrawlDelay:
         # The user's crawl_delay (0.5s) must still be applied, not 30s
         assert sleep_calls, "Expected a sleep based on user's crawl_delay=0.5s"
         assert max(sleep_calls) <= 0.6, (
-            f"sleep was {max(sleep_calls):.2f}s — expected ≤ 0.6s (user crawl_delay=0.5s)"
+            f"sleep was {max(sleep_calls):.2f}s - expected ≤ 0.6s (user crawl_delay=0.5s)"
         )
         assert max(sleep_calls) < 30.0, "robots.txt crawl_delay=30 must not be used"
 
@@ -90,6 +90,6 @@ class TestEnforceRateLimitIgnoresRobotsCrawlDelay:
         # min_delay=1.0 must be applied; robots.txt 30s ignored
         assert sleep_calls, "Expected a sleep based on min_delay=1.0"
         assert max(sleep_calls) <= 1.1, (
-            f"sleep was {max(sleep_calls):.2f}s — expected ≤ 1.1s (min_delay=1.0)"
+            f"sleep was {max(sleep_calls):.2f}s - expected ≤ 1.1s (min_delay=1.0)"
         )
         assert max(sleep_calls) < 30.0, "robots.txt crawl_delay=30 must not be used"

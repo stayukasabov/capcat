@@ -1,12 +1,12 @@
-# Acceptance Test Bugs — 2026-04-03
+# Acceptance Test Bugs - 2026-04-03
 
 Collected from live acceptance testing of v1.9.6 against the TESTING vault.
 
 ---
 
-## B1 — `article_count` in `capcat.yml` sources list is silently ignored
+## B1 - `article_count` in `capcat.yml` sources list is silently ignored
 
-**Severity:** High — user-facing config option has no effect
+**Severity:** High - user-facing config option has no effect
 
 **Symptom:**
 Configured `article_count: 5` for `hn` in `capcat.yml`:
@@ -21,7 +21,7 @@ Result: 24 articles fetched (the builtin default of 30, minus blocked/JS pages).
 Two-part failure:
 
 1. `ConfigManager._load_settings_file` explicitly strips the `sources` key before merging
-   (`capcat/core/config.py:223` — `data.pop("sources", None)`), so the capcat.yml
+   (`capcat/core/config.py:223` - `data.pop("sources", None)`), so the capcat.yml
    sources list never reaches the config object.
 
 2. `SourceRegistry` loads `article_count` from the builtin source's own
@@ -32,10 +32,10 @@ The resolution chain `_resolve_count` (CLI > source YAML > global config) never
 sees the vault-level value because it is stripped before any resolver runs.
 
 **Affected files:**
-- `capcat/core/config.py:223` — strips sources key
-- `capcat/core/source_system/source_registry.py:173` — article_count loaded from
+- `capcat/core/config.py:223` - strips sources key
+- `capcat/core/source_system/source_registry.py:173` - article_count loaded from
   builtin config only
-- `capcat/core/unified_source_processor.py:53-74` — `_resolve_count` has no
+- `capcat/core/unified_source_processor.py:53-74` - `_resolve_count` has no
   vault-capcat.yml tier
 
 **Expected behaviour:**
@@ -54,26 +54,26 @@ Run `capcat fetch hn -q`. Observe more than 5 articles fetched.
 
 ---
 
-## B2 — Global `processing.article_count` in `Global-settings.yaml` not tested end-to-end
+## B2 - Global `processing.article_count` in `Global-settings.yaml` not tested end-to-end
 
-**Severity:** Medium — untested code path; may work correctly but unverified
+**Severity:** Medium - untested code path; may work correctly but unverified
 
 **Symptom:**
 `Global-settings.yaml` documents `processing.article_count: 30` as the fallback
 when no per-source or CLI count is set. This path was not directly verified during
 acceptance testing because the builtin source config.yaml (30) masks the global
-default (also 30 — identical values).
+default (also 30 - identical values).
 
 To confirm the global default is respected, the builtin source's `article_count`
 would need to be `None` or absent. Currently it is always populated (30).
 
 **Root cause:**
-Not confirmed as a bug — may be working correctly. Needs an isolated test where
+Not confirmed as a bug - may be working correctly. Needs an isolated test where
 `Global-settings.yaml` sets a different value from the builtin source default.
 
 **Affected files:**
-- `capcat/core/unified_source_processor.py:70-73` — fallback to `config.processing.article_count`
-- `capcat/sources/builtin/custom/hn/config.yaml` — always provides article_count: 30,
+- `capcat/core/unified_source_processor.py:70-73` - fallback to `config.processing.article_count`
+- `capcat/sources/builtin/custom/hn/config.yaml` - always provides article_count: 30,
   so global fallback is never reached in practice
 
 **Test needed:**

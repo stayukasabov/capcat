@@ -1,4 +1,4 @@
-"""TUI entry point — delegates to core interactive module."""
+"""TUI entry point - delegates to core interactive module."""
 from __future__ import annotations
 
 

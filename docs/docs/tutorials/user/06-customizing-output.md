@@ -41,7 +41,7 @@ capcat fetch hn --count 20 --html --media
 capcat single https://example.com/article --html --media
 ```
 
-`--media` downloads both images (`download_files=True`) and PDFs (`download_pdfs=True`). These are independent flags — `--media` sets both.
+`--media` downloads both images (`download_files=True`) and PDFs (`download_pdfs=True`). These are independent flags - `--media` sets both.
 
 Per-source PDF control in YAML:
 

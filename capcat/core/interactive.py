@@ -383,7 +383,7 @@ def _edit_source_count(source_id, config):
                 raise ValueError
             break
         except ValueError:
-            print("  Invalid value — must be a positive integer.")
+            print("  Invalid value - must be a positive integer.")
 
     try:
         project_root = find_project_root()
@@ -392,7 +392,7 @@ def _edit_source_count(source_id, config):
         input("\n  Press Enter to continue...")
         return
 
-    # Find userspace YAML path — config-driven sources
+    # Find userspace YAML path - config-driven sources
     yaml_file = (
         project_root
         / "Config"
@@ -683,7 +683,7 @@ def _confirm_and_execute(action, selection, generate_html):
         "  PDFs can be enabled or limited per source in source YAML files:\n"
         "    media:\n"
         "      download_pdfs: true\n"
-        "      max_pdf_size_mb: 10    # optional — overrides global limit\n"
+        "      max_pdf_size_mb: 10    # optional - overrides global limit\n"
         "  See Config/sources/ for details.\n"
     )
     with suppress_logging():
@@ -703,7 +703,7 @@ def _confirm_and_execute(action, selection, generate_html):
         args.append('--pdfs')
     elif pdf_choice == "no":
         args.append('--no-pdfs')
-    # "source_defaults": emit nothing — _resolve_media decides per source
+    # "source_defaults": emit nothing - _resolve_media decides per source
 
     if is_tui_active():
         reset_fetch_results()

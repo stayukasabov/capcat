@@ -140,7 +140,7 @@ def _run_captured(
 def _run_passthrough(
     cmd: list[str], cwd: str, timeout: int
 ) -> tuple[int | None, float, bool]:
-    """Run cmd with no capture — output goes directly to terminal. Returns (exit_code, duration, timed_out)."""
+    """Run cmd with no capture - output goes directly to terminal. Returns (exit_code, duration, timed_out)."""
     start = time.monotonic()
     timed_out = False
     try:
@@ -199,15 +199,15 @@ def _auto_analyze(
     # Exit code
     expected = test["expected_exit"]
     if expected is None:
-        parts.append("exit check skipped — user judges")
+        parts.append("exit check skipped - user judges")
     elif exit_code == expected:
         parts.append(f"Exit {exit_code} ✓")
     else:
         parts.append(f"Exit {exit_code} ✗ (expected {expected})")
 
-    # For passthrough/TUI — no output to analyze further
+    # For passthrough/TUI - no output to analyze further
     if test["is_tui"] or test["passthrough"]:
-        parts.append("(output passed through — no capture)")
+        parts.append("(output passed through - no capture)")
         return " | ".join(parts), None, None
 
     # Expected strings
@@ -323,7 +323,7 @@ def _print_result_passthrough(
 
 def _print_tui_header(test: dict, total: int, fixture_url: str) -> None:
     _print_header(test, total)
-    print("MANUAL TEST — you drive this one.\n")
+    print("MANUAL TEST - you drive this one.\n")
     if fixture_url:
         print(f"  URL to enter when prompted: {fixture_url}\n")
     print("Steps to follow:")
@@ -399,7 +399,7 @@ def _run_one_test(
     # ── Passthrough flow ──────────────────────────────────────────────────────
     elif test["passthrough"]:
         _print_header(test, total)
-        print("Running...  (interactive — output direct to terminal)\n")
+        print("Running...  (interactive - output direct to terminal)\n")
         exit_code, duration, timed_out = _run_passthrough(
             resolved_cmd, tmp_dir, effective_timeout
         )
@@ -436,7 +436,7 @@ def _run_one_test(
         counts[group]["fail"] += 1
         failed_tests.append(
             f"TEST {test['id']}: {test['group']} {test['label']}"
-            + (f" — {note}" if note else "")
+            + (f" - {note}" if note else "")
         )
     else:
         counts[group]["pass"] += 1

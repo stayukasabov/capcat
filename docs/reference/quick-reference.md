@@ -125,9 +125,9 @@
 ```
 ~/Desktop/Vault/News/News_DD-MM-YYYY/Source_DD-MM-YYYY/NN_Title/
 ```
-- `News_DD-MM-YYYY` — date directory for the run
-- `Source_DD-MM-YYYY` — per-source subdirectory
-- `NN_Title` — zero-padded article index + title slug
+- `News_DD-MM-YYYY` - date directory for the run
+- `Source_DD-MM-YYYY` - per-source subdirectory
+- `NN_Title` - zero-padded article index + title slug
 - HTML: `News_DD-MM-YYYY/html/index.html` (with `--html` flag)
 
 **Single mode** (`capcat single <url>`):
@@ -194,7 +194,7 @@ capcat --version                    # print version
 ## Source Management
 
 On first use, Capcat mirrors all builtin source configs to `Config/sources/active/` in your
-project. Edit files there freely — they are never overwritten without your consent.
+project. Edit files there freely - they are never overwritten without your consent.
 
 ### Commands
 

@@ -5,7 +5,7 @@ render_with_liquid: false
 
 # Interactive Mode
 
-Full TUI — no command memorisation needed.
+Full TUI - no command memorisation needed.
 
 ## Launch
 
@@ -27,8 +27,8 @@ capcat catch
 | Catch articles from a single source | `capcat fetch <source>` |
 | Catch a single article by URL | `capcat single <url>` |
 | Manage sources | `capcat add-source` / `capcat remove-source` |
-| Settings | — |
-| Exit | — |
+| Settings | - |
+| Exit | - |
 
 ## Bundle Fetch Flow
 
@@ -56,8 +56,8 @@ capcat catch
 
 Add or remove sources without touching config files:
 
-- **Add** — enter RSS URL, Capcat generates the YAML config
-- **Remove** — pick from list, backup created automatically
+- **Add** - enter RSS URL, Capcat generates the YAML config
+- **Remove** - pick from list, backup created automatically
 
 ## Tips
 

@@ -4,9 +4,9 @@
 
 Semver: `MAJOR.MINOR.PATCH`
 
-- **patch** — bug fixes, no new behavior (e.g. `1.0.30` → `1.0.31`)
-- **minor** — new features, backwards compatible (e.g. `1.0.x` → `1.1.0`)
-- **major** — breaking changes (e.g. `1.x.x` → `2.0.0`)
+- **patch** - bug fixes, no new behavior (e.g. `1.0.30` → `1.0.31`)
+- **minor** - new features, backwards compatible (e.g. `1.0.x` → `1.1.0`)
+- **major** - breaking changes (e.g. `1.x.x` → `2.0.0`)
 
 Do not publish on every commit. Batch related changes, then release when the set is meaningful and tested.
 

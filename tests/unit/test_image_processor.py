@@ -11,7 +11,7 @@ from capcat.core.image_processor import ImageProcessor
 
 
 # ---------------------------------------------------------------------------
-# _read_image_dimensions — PNG and JPEG header parsing
+# _read_image_dimensions - PNG and JPEG header parsing
 # ---------------------------------------------------------------------------
 
 def _make_png(width: int, height: int) -> bytes:
@@ -91,7 +91,7 @@ class TestReadImageDimensions:
 
 
 # ---------------------------------------------------------------------------
-# _read_image_dimensions — AVIF (ISO Base Media / ftyp) parsing
+# _read_image_dimensions - AVIF (ISO Base Media / ftyp) parsing
 # BUG F1: Guardian/BBC serve AVIF files with .jpg extensions. When
 # _read_image_dimensions returned None for AVIF, the pixel floor check was
 # silently skipped, allowing small images through regardless of min_image_dimensions.
@@ -137,7 +137,7 @@ class TestReadImageDimensionsAvif:
             result = ImageProcessor._read_image_dimensions(path)
             assert result == (1200, 800), (
                 f"Expected (1200, 800), got {result}. "
-                "AVIF format is not parsed — min_image_dimensions filter is silently skipped."
+                "AVIF format is not parsed - min_image_dimensions filter is silently skipped."
             )
         finally:
             os.unlink(path)
@@ -153,12 +153,12 @@ class TestReadImageDimensionsAvif:
             os.unlink(path)
 
     def test_avif_returns_tuple_not_none(self):
-        """AVIF must not return None — that causes the pixel floor to be silently skipped."""
+        """AVIF must not return None - that causes the pixel floor to be silently skipped."""
         path = self._write_tmp(_make_avif(640, 480))
         try:
             result = ImageProcessor._read_image_dimensions(path)
             assert result is not None, (
-                "AVIF returned None — pixel dimension filter will be skipped for AVIF images."
+                "AVIF returned None - pixel dimension filter will be skipped for AVIF images."
             )
         finally:
             os.unlink(path)
@@ -173,7 +173,7 @@ def test_min_pixel_dimension_is_64():
 
 
 # ---------------------------------------------------------------------------
-# _is_valid_image_url — CDN proxy URL handling
+# _is_valid_image_url - CDN proxy URL handling
 # ---------------------------------------------------------------------------
 
 class TestIsValidImageUrl:
@@ -221,7 +221,7 @@ class TestIsValidImageUrl:
         assert self._proc()._is_valid_image_url(url) is False
 
     def test_nextjs_image_proxy(self):
-        """/_next/image?url=...jpg has no extension in path — must still pass."""
+        """/_next/image?url=...jpg has no extension in path - must still pass."""
         url = (
             "https://www.whyisthisinteresting.com/_next/image"
             "?url=https%3A%2F%2Fimages.example.com%2Fphoto.jpg&w=1456&q=75"

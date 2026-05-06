@@ -1,5 +1,5 @@
 """
-Regression tests — BUG F3: network.max_retries config is dead code.
+Regression tests - BUG F3: network.max_retries config is dead code.
 network_retry was hardcoding max_retries=3 instead of reading from config.
 """
 import pytest

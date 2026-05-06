@@ -1,4 +1,4 @@
-"""Full ordered test catalog — 74 acceptance tests.
+"""Full ordered test catalog - 74 acceptance tests.
 
 Sentinels replaced at runtime by run_acceptance.py:
   __FIXTURE_URL__  → file://<tmp_dir>/mock_feed.xml

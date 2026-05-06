@@ -1,4 +1,4 @@
-"""Regression test — download_images: false must suppress image downloading.
+"""Regression test - download_images: false must suppress image downloading.
 
 B8: UnifiedMediaProcessor and article_fetcher always downloaded images
 regardless of the download_images config flag.

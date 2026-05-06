@@ -740,7 +740,7 @@ Test a source by fetching its RSS feed and counting articles.
 
 Replaces the old subprocess approach: no full article download,
 no output files created, no 60-second wait. Just an RSS HEAD +
-GET + parse — typically completes in 2–5 seconds.
+GET + parse - typically completes in 2-5 seconds.
 
 Shows the existing ProgressIndicator with live stage updates so
 the user always knows what is happening.

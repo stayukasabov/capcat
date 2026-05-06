@@ -4,7 +4,7 @@ ignored.
 
 Current broken behaviour: ConfigManager._merge_config_data drops the 'sources'
 key with a warning. _resolve_count has no vault-level tier. Setting
-article_count: 5 for hn in capcat.yml has no effect — the builtin source
+article_count: 5 for hn in capcat.yml has no effect - the builtin source
 config.yaml value (30) is always used.
 
 Fixed behaviour: capcat.yml sources list is parsed into

@@ -76,7 +76,7 @@ def test_remove_manifest_entry_after_remove_cleans_stale_entries(project):
     config_dir = project / "Config" / "sources" / "active" / "config_driven" / "configs"
     config_dir.mkdir(parents=True)
     (config_dir / "bbc.yaml").write_text("name: bbc\n")
-    # hn.yaml does NOT exist on disk — stale entry
+    # hn.yaml does NOT exist on disk - stale entry
 
     manifest = {
         "config_driven/configs/bbc.yaml": {"builtin_hash": "aa", "user_hash": "bb"},

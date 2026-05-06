@@ -637,7 +637,7 @@ class LbSource(BaseSource):
             response.raise_for_status()
         except requests.exceptions.Timeout:
             self.logger.warning(
-                f"Timeout fetching comments for {article_title} — skipping comments"
+                f"Timeout fetching comments for {article_title} - skipping comments"
             )
             return False
         except requests.exceptions.HTTPError as e:
@@ -648,7 +648,7 @@ class LbSource(BaseSource):
             return False
         except requests.exceptions.ConnectionError:
             self.logger.warning(
-                f"Connection error fetching comments for {article_title} — network unavailable"
+                f"Connection error fetching comments for {article_title} - network unavailable"
             )
             return False
         except requests.exceptions.RequestException as e:
@@ -689,7 +689,7 @@ class LbSource(BaseSource):
             )
 
             if metrics['comments_processed'] == 0:
-                self.logger.debug(f"No comments found for: {article_title} — skipping file write")
+                self.logger.debug(f"No comments found for: {article_title} - skipping file write")
                 return False
 
             with open(filename, "w", encoding="utf-8") as f:

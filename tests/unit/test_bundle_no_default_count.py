@@ -1,10 +1,10 @@
-"""bundle default_count must be removed — per-source article_count is the single truth."""
+"""bundle default_count must be removed - per-source article_count is the single truth."""
 
 
 def test_bundle_config_has_no_default_count():
     from capcat.core.config.source_base import BundleConfig
     assert not hasattr(BundleConfig, "default_count"), (
-        "BundleConfig still has default_count — remove it"
+        "BundleConfig still has default_count - remove it"
     )
 
 

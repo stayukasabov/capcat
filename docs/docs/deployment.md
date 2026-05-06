@@ -25,7 +25,7 @@ source venv/bin/activate
 pip install -e ".[dev]"
 ```
 
-`pip install -e .` installs in editable mode — source changes take effect immediately without reinstalling.
+`pip install -e .` installs in editable mode - source changes take effect immediately without reinstalling.
 
 ## Update
 
@@ -33,7 +33,7 @@ pip install -e ".[dev]"
 # pipx install
 pipx upgrade capcat
 
-# editable install — pull and the changes are live
+# editable install - pull and the changes are live
 cd ~/capcat && git pull
 ```
 

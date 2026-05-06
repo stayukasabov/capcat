@@ -142,7 +142,7 @@ class UnifiedArticleProcessor:
         from capcat.core.source_system.base_source import Article
         article = Article(title=title or "", url=url)
 
-        # Pass base_folder directly — specialized source creates its own subfolder
+        # Pass base_folder directly - specialized source creates its own subfolder
         output_dir = article_folder if update_mode else base_folder
         success, content_folder = source_instance.fetch_article_content(
             article, output_dir, progress_callback=None

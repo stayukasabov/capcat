@@ -32,7 +32,7 @@ class Reporter:
             match_symbol = "?"
 
         lines = [
-            f"\n## TEST {id} — {group}: {cmd}",
+            f"\n## TEST {id} - {group}: {cmd}",
             f"- **Status**: {status}",
             f"- **Exit**: {exit_display} (expected {expected_display})  {match_symbol}",
             f"- **Duration**: {duration:.1f}s",
@@ -42,7 +42,7 @@ class Reporter:
         if file_count is not None:
             lines.append(f"- **Files created**: {file_count}")
         lines.append(f"- **Auto-analysis**: {analysis}")
-        lines.append(f"- **Note**: {note if note else '—'}")
+        lines.append(f"- **Note**: {note if note else '-'}")
 
         with self._path.open("a", encoding="utf-8") as f:
             f.write("\n".join(lines) + "\n")
@@ -68,7 +68,7 @@ class Reporter:
             )
 
         header_lines = [
-            f"# Capcat Acceptance Test Run — {now}",
+            f"# Capcat Acceptance Test Run - {now}",
             "",
             f"**Passed**: {passed}  **Failed**: {failed_count}  "
             f"**Skipped**: {skipped}  **Total run**: {total_run}",

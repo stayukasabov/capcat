@@ -47,7 +47,7 @@ class SourceConfigGenerator:
 
         image_processing_block = (
             "\n"
-            "# Image downloading configuration — edit to tune for this source.\n"
+            "# Image downloading configuration - edit to tune for this source.\n"
             "image_processing:\n"
             "  allow_extensionless: true   # keep true for CDN URLs without .jpg extension\n"
             "  max_images: 10              # maximum images to download per article\n"

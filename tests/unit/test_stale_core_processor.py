@@ -26,7 +26,7 @@ def test_core_streamlined_comment_processor_does_not_exist():
     try:
         importlib.import_module("core.streamlined_comment_processor")
         assert False, (
-            "core.streamlined_comment_processor is still importable — "
+            "core.streamlined_comment_processor is still importable - "
             "delete core/streamlined_comment_processor.py"
         )
     except (ImportError, ModuleNotFoundError):
@@ -53,8 +53,8 @@ def test_legacy_wrapper_methods_not_importable_from_core():
             for method in gdpr_violating_wrappers:
                 assert not hasattr(cls, method), (
                     f"GDPR-violating method {method!r} exists on "
-                    "core.streamlined_comment_processor.StreamlinedCommentProcessor — "
+                    "core.streamlined_comment_processor.StreamlinedCommentProcessor - "
                     "delete core/streamlined_comment_processor.py"
                 )
     except (ImportError, ModuleNotFoundError):
-        pass  # module gone — that's the desired state
+        pass  # module gone - that's the desired state

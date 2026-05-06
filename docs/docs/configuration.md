@@ -11,8 +11,8 @@ Precedence from highest to lowest:
 
 1. CLI flags (`--count`, `--media`, `--html`, `--output`)
 2. Environment variables (`CAPCAT_*`)
-3. `Config/capcat.yml` — per-vault overrides
-4. `Config/Global-settings.yaml` — global defaults
+3. `Config/capcat.yml` - per-vault overrides
+4. `Config/Global-settings.yaml` - global defaults
 5. Source YAML defaults
 
 ## Global Settings

@@ -15,7 +15,7 @@ Implementation of capcat init command.
 
 ### GITIGNORE_BLOCK
 
-**Value:** `'\n# capcat — managed entries\n.capcat/\nNews/\nCapcats/\n'`
+**Value:** `'\n# capcat - managed entries\n.capcat/\nNews/\nCapcats/\n'`
 
 ## Classes
 

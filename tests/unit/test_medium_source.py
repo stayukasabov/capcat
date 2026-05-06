@@ -122,5 +122,5 @@ class TestMediumFallbackLoop:
                     )
 
         assert call_count[0] == 1, (
-            f"process_article called {call_count[0]} times — expected 1 (no recursion)"
+            f"process_article called {call_count[0]} times - expected 1 (no recursion)"
         )

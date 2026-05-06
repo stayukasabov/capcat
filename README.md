@@ -1,4 +1,4 @@
-# Capcat — A command-line tool designed to solve content preservation challenges with Ethical Scraping.
+# Capcat - A command-line tool designed to solve content preservation challenges with Ethical Scraping.
 
 Captures articles from 17 sources as clean Markdown files with optional self-contained HTML output. Supports interactive TUI and batch automation.
 
@@ -122,7 +122,7 @@ Capcats/cc_DD-MM-YYYY-Title/
 └── images/
 ```
 
-HTML output is fully self-contained — embedded CSS, no external dependencies. Open in any browser, share via email, archive permanently.
+HTML output is fully self-contained - embedded CSS, no external dependencies. Open in any browser, share via email, archive permanently.
 
 ## Configuration
 
@@ -169,7 +169,7 @@ Open an issue or pull request on [GitHub](https://github.com/stayukasabov/capcat
 
 ## License
 
-MIT License — see [LICENSE.txt](LICENSE.txt)
+MIT License - see [LICENSE.txt](LICENSE.txt)
 
 ## Links
 

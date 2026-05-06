@@ -2,7 +2,7 @@ title: Capcat Documentation
 url: "https://capcat.org"
 baseurl: ""
 
-# No theme — layout is provided by docs/_layouts/default.html
+# No theme - layout is provided by docs/_layouts/default.html
 theme: ~
 
 # Exclude files that would conflict with the existing homepage or are not public docs

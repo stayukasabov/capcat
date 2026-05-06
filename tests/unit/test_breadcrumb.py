@@ -33,7 +33,7 @@ def _call(generator, breadcrumb_path, html_subfolder=False, current_file=None):
 
 
 # ---------------------------------------------------------------------------
-# news.html — source index page (1 level deep)
+# news.html - source index page (1 level deep)
 # ---------------------------------------------------------------------------
 
 def test_source_index_date_link_is_one_level_up(generator) -> None:
@@ -45,7 +45,7 @@ def test_source_index_date_link_is_one_level_up(generator) -> None:
 
 
 def test_source_index_shows_only_date_link(generator) -> None:
-    """news.html breadcrumb contains only the date level — source is the h1."""
+    """news.html breadcrumb contains only the date level - source is the h1."""
     crumbs = ["News 14-03-2026", "Hacker News"]
     html = _call(generator, crumbs, html_subfolder=False, current_file="news.html")
     # Only one <a> tag expected
@@ -53,7 +53,7 @@ def test_source_index_shows_only_date_link(generator) -> None:
 
 
 # ---------------------------------------------------------------------------
-# article.html — article directory (2 levels deep)
+# article.html - article directory (2 levels deep)
 # ---------------------------------------------------------------------------
 
 def test_article_date_link_is_two_levels_up(generator) -> None:
@@ -128,12 +128,12 @@ def test_empty_breadcrumb_returns_empty_string(generator) -> None:
 
 
 def test_single_item_breadcrumb_returns_empty_string(generator) -> None:
-    """Fewer than 2 items provides no useful navigation — return empty."""
+    """Fewer than 2 items provides no useful navigation - return empty."""
     assert _call(generator, ["News 14-03-2026"]) == ""
 
 
 # ---------------------------------------------------------------------------
-# Phase 2: Level 0 — date folder formatting
+# Phase 2: Level 0 - date folder formatting
 # ---------------------------------------------------------------------------
 
 def test_level0_formats_date_as_news_d_month_yyyy(generator) -> None:
@@ -152,7 +152,7 @@ def test_level0_does_not_show_raw_dd_mm_yyyy(generator) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Phase 2: Level 1 — source folder formatting
+# Phase 2: Level 1 - source folder formatting
 # ---------------------------------------------------------------------------
 
 def test_level1_strips_date_and_normalises_hyphens(generator) -> None:
@@ -172,7 +172,7 @@ def test_level1_has_no_trailing_date(generator) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Phase 2: Level 2 — comments page article breadcrumb
+# Phase 2: Level 2 - comments page article breadcrumb
 # ---------------------------------------------------------------------------
 
 def test_comments_third_link_points_to_article(generator) -> None:

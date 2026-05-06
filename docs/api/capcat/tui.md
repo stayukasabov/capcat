@@ -9,7 +9,7 @@ render_with_liquid: false
 
 ## Description
 
-TUI entry point — delegates to core interactive module.
+TUI entry point - delegates to core interactive module.
 
 ## Functions
 

@@ -126,7 +126,7 @@ def truncate_title_intelligently(title: str, max_length: int = 200) -> str:
 
     # Step 2: Clean up common separators and redundant information
     # Split on common separators and choose the most meaningful part
-    separators = [' - ', ' | ', ' – ', ' — ', ': ']
+    separators = [' - ', ' | ', ' - ', ' - ', ': ']
     parts = [title]
 
     for sep in separators:

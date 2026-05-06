@@ -69,8 +69,8 @@ pytest tests/unit/ --cov=capcat --cov-report=term-missing
 Each fixed bug must have a corresponding regression test committed before or with the fix. Name the test file after the component: `test_<module>.py`.
 
 Current regression coverage:
-- `test_feed_discovery.py` — feedparser-based `validate_feed()` (lxml removed)
-- `test_feed_parser.py` — `FeedParserFactory` without lxml
-- `test_session_pool.py` — `Accept-Encoding` excludes `br`
-- `test_bundle_expansion.py` — `bundle all` / `--all` expands to source IDs
-- `test_tui_completion.py` — TUI post-completion screen behavior
+- `test_feed_discovery.py` - feedparser-based `validate_feed()` (lxml removed)
+- `test_feed_parser.py` - `FeedParserFactory` without lxml
+- `test_session_pool.py` - `Accept-Encoding` excludes `br`
+- `test_bundle_expansion.py` - `bundle all` / `--all` expands to source IDs
+- `test_tui_completion.py` - TUI post-completion screen behavior

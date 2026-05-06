@@ -9,7 +9,7 @@ Step-by-step guides for common Capcat workflows.
 
 ## Getting Started
 
-- [Quick Start](/docs/quick-start.html) — Install and run your first fetch in 5 minutes
+- [Quick Start](/docs/quick-start.html) - Install and run your first fetch in 5 minutes
 
 ## Fetching Articles
 
@@ -88,6 +88,6 @@ Capcats/
 
 ## Building on Capcat
 
-- [Source Development](/docs/source-development.html) — add config-driven or custom sources
-- [Architecture](/docs/architecture.html) — understand the pipeline
-- [Ethical Scraping](/docs/ethical-scraping.html) — rate limiting and robots.txt compliance
+- [Source Development](/docs/source-development.html) - add config-driven or custom sources
+- [Architecture](/docs/architecture.html) - understand the pipeline
+- [Ethical Scraping](/docs/ethical-scraping.html) - rate limiting and robots.txt compliance

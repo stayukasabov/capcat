@@ -53,7 +53,7 @@ def _make_fetcher(source_config=None, session=None):
 
 
 class TestHtmlConversionTimeout:
-    """html_to_markdown must not block indefinitely — conversion_timeout must apply."""
+    """html_to_markdown must not block indefinitely - conversion_timeout must apply."""
 
     def test_slow_conversion_does_not_hang_thread(self, tmp_path):
         """If html_to_markdown hangs, _fetch_web_content must return within ~2s."""

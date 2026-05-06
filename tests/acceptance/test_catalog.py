@@ -1,4 +1,4 @@
-"""Structural validation tests for catalog.py — ensures all 74 entries are well-formed."""
+"""Structural validation tests for catalog.py - ensures all 74 entries are well-formed."""
 import pytest
 
 REQUIRED_FIELDS = {

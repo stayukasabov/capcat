@@ -100,7 +100,7 @@ def _resolve_media(
     Returns:
         (download_files, download_pdfs) tuple of resolved booleans.
     """
-    # CLI always wins — no further resolution needed
+    # CLI always wins - no further resolution needed
     if download_files or download_pdfs:
         return download_files, download_pdfs
 
@@ -297,7 +297,7 @@ class UnifiedSourceProcessor:
                 else:
                     mirror.check_for_upgrades()
             except NoProjectError:
-                pass  # Not in a project — skip mirror
+                pass  # Not in a project - skip mirror
             except Exception as exc:
                 self.logger.warning(f"Source config mirror failed: {exc}")
 
@@ -386,7 +386,7 @@ class UnifiedSourceProcessor:
                     drained = pdf_mgr.wait_until_idle(timeout=120.0)
                     if not drained:
                         self.logger.warning(
-                            "PDF download drain timed out after 120s — "
+                            "PDF download drain timed out after 120s - "
                             "some PDFs may not have completed"
                         )
                 shutdown_pdf_manager()
@@ -529,7 +529,7 @@ class UnifiedSourceProcessor:
                             progress.item_completed(False, article.title)
 
             finally:
-                # Always runs — on normal exit, on shutdown break, and on timeout.
+                # Always runs - on normal exit, on shutdown break, and on timeout.
                 # cancel_futures=True prevents queued futures from starting.
                 # Calling shutdown() twice is idempotent per Python docs.
                 executor.shutdown(wait=False, cancel_futures=True)
@@ -616,7 +616,7 @@ class UnifiedSourceProcessor:
                             f"Failed to fetch comments for '{article.title}': {comment_error}"
                         )
 
-            # Inject YAML frontmatter — article always, comments if written
+            # Inject YAML frontmatter - article always, comments if written
             if success:
                 article_md = find_article_md(Path(article_path))
                 if article_md:

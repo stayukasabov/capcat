@@ -19,7 +19,7 @@ class TestSourceConfigArticleCount:
         assert _config(article_count=15).article_count == 15
 
     def test_zero_not_accepted(self):
-        """article_count must be positive — 0 should raise ValueError."""
+        """article_count must be positive - 0 should raise ValueError."""
         import pytest
         with pytest.raises(ValueError):
             _config(article_count=0)

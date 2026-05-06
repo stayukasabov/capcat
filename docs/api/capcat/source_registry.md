@@ -216,7 +216,7 @@ def is_builtin_source(self, source_id: str) -> bool
 
 Return True if *source_id* was discovered from the builtin package path.
 
-Builtin sources cannot be removed via the TUI — they are shipped with
+Builtin sources cannot be removed via the TUI - they are shipped with
 the application.  User-added sources (or user overrides of builtins)
 are not in this set and are safe to remove.
 
@@ -370,7 +370,7 @@ Get the source registry.
 When project_root is None, return the cached global singleton, auto-detecting
 the project root so user sources in Config/sources/active/ are included.
 When project_root is non-None, always construct and return a fresh instance
-(singleton bypass — avoids stale-singleton bugs with user-overridden sources).
+(singleton bypass - avoids stale-singleton bugs with user-overridden sources).
 
 **Parameters:**
 

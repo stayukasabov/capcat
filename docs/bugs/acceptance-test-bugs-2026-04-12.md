@@ -1,6 +1,6 @@
-# Acceptance Test — 2026-04-12
+# Acceptance Test - 2026-04-12
 
-**Scope:** PR #31 — PDF downloads now respect the `--media` flag
+**Scope:** PR #31 - PDF downloads now respect the `--media` flag
 **Version tested:** 1.9.22 (local dev build, `pipx install . --force`)
 **Test vault:** `~/Desktop/TESTING/`
 **Sources:** `hn` (article_count: 10)
@@ -10,7 +10,7 @@
 
 ## Findings
 
-### PDF behaviour — `--media` flag gate
+### PDF behaviour - `--media` flag gate
 
 | Test | Command | Expected | Actual | Result |
 |------|---------|----------|--------|--------|
@@ -33,5 +33,5 @@ None. All acceptance criteria met.
 
 ## Notes
 
-- Interactive PDF prompt (`catch` mode) cannot be automated — note text verified via source inspection of installed binary
-- Two articles failed to fetch due to anti-bot protection (researchgate.net) and timeout (phyphox.org) — unrelated to this fix
+- Interactive PDF prompt (`catch` mode) cannot be automated - note text verified via source inspection of installed binary
+- Two articles failed to fetch due to anti-bot protection (researchgate.net) and timeout (phyphox.org) - unrelated to this fix

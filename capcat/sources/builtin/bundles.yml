@@ -42,6 +42,6 @@ bundles:
     - bbcsport
 
   all:
-    # All available sources — populated dynamically at runtime.
+    # All available sources - populated dynamically at runtime.
     description: "All available sources"
     sources: []  # Will be populated dynamically

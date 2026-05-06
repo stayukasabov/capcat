@@ -1,4 +1,4 @@
-"""Capcat — A command-line tool designed to solve content preservation challenges with Ethical Scraping."""
+"""Capcat - A command-line tool designed to solve content preservation challenges with Ethical Scraping."""
 
 __version__ = "1.9.85"
 

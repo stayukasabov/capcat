@@ -1,4 +1,4 @@
-"""Tests for SourceConfigMirror — first-run config_driven mirror."""
+"""Tests for SourceConfigMirror - first-run config_driven mirror."""
 from __future__ import annotations
 
 import hashlib
@@ -370,7 +370,7 @@ def test_step3_overrides_silently_when_user_unmodified(tmp_path, monkeypatch):
 
     # User file now has new builtin content
     assert (user_cfg / "bbc.yaml").read_text() == new_builtin_content
-    # No backup needed — user never modified
+    # No backup needed - user never modified
     backup_dirs = list((project / "Config" / "sources").glob("backup_*"))
     assert len(backup_dirs) == 0
 
@@ -609,7 +609,7 @@ def test_check_for_upgrades_proceeds_to_step1_when_manifest_empty(tmp_path, monk
 
 
 def test_resync_manifest_never_emits_warning(tmp_path, caplog):
-    """_resync_manifest must never emit WARNING — always DEBUG."""
+    """_resync_manifest must never emit WARNING - always DEBUG."""
     mirror = SourceConfigMirror(tmp_path, tui_mode=False)
     with caplog.at_level(logging.DEBUG):
         mirror._resync_manifest()
@@ -748,7 +748,7 @@ def test_step2_py_file_no_ownership_field_auto_updated_noninteractive(tmp_path, 
         "custom/hn/source.py": {
             "builtin_hash": stored_hash,
             "user_hash": stored_hash,
-            # no "ownership" key — simulates manifest created before ownership field existed
+            # no "ownership" key - simulates manifest created before ownership field existed
         }
     }
     (project / ".capcat" / "source_hashes.json").write_text(json.dumps(manifest))
@@ -776,7 +776,7 @@ def test_step2_py_file_drifted_user_repaired_when_builtin_unchanged(tmp_path, mo
 
     Scenario: uninstall + reinstall capcat causes _resync_manifest() to write
     stored_builtin_hash = hash(NEW builtin). On next run current_builtin_hash ==
-    stored_builtin_hash so the upgrade check skips the file — but the user's
+    stored_builtin_hash so the upgrade check skips the file - but the user's
     Config/sources/active/custom/hn/source.py is still the OLD stale content.
     """
     project = tmp_path / "project"
@@ -859,5 +859,5 @@ def test_mirror_check_runs_only_once_per_batch(tmp_path, monkeypatch):
             pass
 
     assert call_count["n"] == 1, (
-        f"check_for_upgrades called {call_count['n']} times — must be exactly once per batch"
+        f"check_for_upgrades called {call_count['n']} times - must be exactly once per batch"
     )

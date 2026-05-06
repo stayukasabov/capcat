@@ -11,7 +11,7 @@ def test_bbc_in_new_system():
     """BBC must be routed through the new source system."""
     usp = UnifiedSourceProcessor()
     assert usp._is_source_in_new_system("bbc"), \
-        "BBC must be in new system — ConfigDrivenSource auto-registration failed"
+        "BBC must be in new system - ConfigDrivenSource auto-registration failed"
 
 
 def test_guardian_in_new_system():

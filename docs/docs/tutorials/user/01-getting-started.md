@@ -48,6 +48,6 @@ Open `News/hn/index.html` in your browser to browse the fetched articles.
 
 ## Next Steps
 
-- [Daily Workflow](./02-daily-workflow.html) — fetch multiple sources efficiently
-- [Interactive Mode](./03-interactive-mode.html) — no-typing TUI operation
+- [Daily Workflow](./02-daily-workflow.html) - fetch multiple sources efficiently
+- [Interactive Mode](./03-interactive-mode.html) - no-typing TUI operation
 - [Tutorials Index](/docs/tutorials/)

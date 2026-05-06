@@ -351,7 +351,7 @@ Reset the global source registry so it reflects removed sources.
 
 **Inherits from:** SourceLister
 
-Lists sources via SourceRegistry — reads the live registry at call time.
+Lists sources via SourceRegistry - reads the live registry at call time.
 
 #### Methods
 
@@ -363,7 +363,7 @@ def list_sources(self) -> List[tuple]
 
 Return ``[(source_id, display_name)]`` for every user-removable source.
 
-Builtin sources (shipped with the application) are excluded — they
+Builtin sources (shipped with the application) are excluded - they
 cannot be removed and would silently no-op if the removal were attempted.
 
 **Parameters:**

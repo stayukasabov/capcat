@@ -30,7 +30,7 @@ class TestConfigureMethod:
         # Place last_request_time in the future so the next call would need to wait
         mgr.last_request_time["example.com"] = time.time() + 4.0
         # The effective_delay should be max(0.0, 0.0, 5.0) = 5.0
-        # Reserve the slot and measure what sleep_time would be — inspect via a patched sleep
+        # Reserve the slot and measure what sleep_time would be - inspect via a patched sleep
         sleep_times = []
         with patch("capcat.core.ethical_scraping.time.sleep", side_effect=lambda s: sleep_times.append(s)):
             mgr.enforce_rate_limit("example.com", crawl_delay=0.0, min_delay=0.0)

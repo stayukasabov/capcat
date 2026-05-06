@@ -18,7 +18,7 @@ def test_handle_manage_bundles_does_not_crash():
 
     BundleService is a local import inside _handle_manage_bundles; patch at the
     source module path. find_project_root raises NoProjectError so the fallback
-    builtin bundles.yml path is used — BundleService is still patched, so no
+    builtin bundles.yml path is used - BundleService is still patched, so no
     filesystem access occurs.
     """
     mock_service = _make_mock_service(return_value=None)

@@ -30,7 +30,7 @@ matches the requested URL.
 def should_skip_url(self, url: str, title: str) -> bool
 ```
 
-Always return False — no URL is skipped in generic mode.
+Always return False - no URL is skipped in generic mode.
 
 Args:
     url: The article URL being evaluated.

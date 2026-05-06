@@ -159,7 +159,7 @@ def test_generator_falls_back_to_package_base_css(monkeypatch):
 
     gen = HTMLGenerator()
     result = gen._get_embedded_css(_Path("."))
-    assert result  # non-empty — package CSS loaded
+    assert result  # non-empty - package CSS loaded
     assert "user-base" not in result
 
 

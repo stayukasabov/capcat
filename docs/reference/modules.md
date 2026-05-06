@@ -13,11 +13,11 @@ Complete reference of all modules, classes, and functions in Capcat.
 ### Capcat
 
 - [capcat.cli](../api/capcat/cli.md) - CLI entry point for Capcat
-- [capcat.commands.add_source](../api/capcat/add_source.md) - Add-source command — interactive RSS source addition
-- [capcat.commands.fetch](../api/capcat/fetch.md) - Batch fetch command — processes multiple sources via the unified processor
-- [capcat.commands.generate_config](../api/capcat/generate_config.md) - Generate-config command — launches the interactive source config generator
+- [capcat.commands.add_source](../api/capcat/add_source.md) - Add-source command - interactive RSS source addition
+- [capcat.commands.fetch](../api/capcat/fetch.md) - Batch fetch command - processes multiple sources via the unified processor
+- [capcat.commands.generate_config](../api/capcat/generate_config.md) - Generate-config command - launches the interactive source config generator
 - [capcat.commands.init](../api/capcat/init.md) - Implementation of capcat init command
-- [capcat.commands.remove_source](../api/capcat/remove_source.md) - Remove-source command — interactive source removal with backup/undo support
+- [capcat.commands.remove_source](../api/capcat/remove_source.md) - Remove-source command - interactive source removal with backup/undo support
 - [capcat.commands.single](../api/capcat/single.md) - Single article fetch command
 - [capcat.core.article_fetcher](../api/capcat/article_fetcher.md) - Shared article fetching functionality for Capcat sources
 - [capcat.core.async_pdf_manager](../api/capcat/async_pdf_manager.md) - Asynchronous PDF download manager to prevent thread pool exhaustion
@@ -126,7 +126,7 @@ for config-driven sources in Capcat
 - [capcat.sources.builtin.custom.twitter.source](../api/capcat/source.md) - Twitter/X
 - [capcat.sources.builtin.custom.vimeo.source](../api/capcat/source.md) - Vimeo specialized source implementation
 - [capcat.sources.builtin.custom.youtube.source](../api/capcat/source.md) - YouTube specialized source implementation
-- [capcat.tui](../api/capcat/tui.md) - TUI entry point — delegates to core interactive module
+- [capcat.tui](../api/capcat/tui.md) - TUI entry point - delegates to core interactive module
 
 ### Debug
 

@@ -33,7 +33,7 @@ def _make_processor():
 # ---------------------------------------------------------------------------
 
 def test_launch_browser_suppresses_print_in_tui(capsys):
-    """In TUI mode launch_browser must not print — TUI completion screen shows it."""
+    """In TUI mode launch_browser must not print - TUI completion screen shows it."""
     proc = _make_processor()
     set_tui_active(True)
     try:
@@ -183,7 +183,7 @@ def test_process_directory_tree_html_contains_template_marker(
     )
     content = html_file.read_text(encoding="utf-8")
     assert HTMLPostProcessor._TEMPLATE_MARKER in content, (
-        "Template marker missing — incremental regeneration will not work"
+        "Template marker missing - incremental regeneration will not work"
     )
 
 
@@ -239,7 +239,7 @@ def test_comments_page_has_back_to_article_link(
 def test_comments_page_has_no_back_to_news_button(
     article_with_comments_dir: Path,
 ) -> None:
-    """comments.html must NOT have a 'Back to News' button — that was the
+    """comments.html must NOT have a 'Back to News' button - that was the
     blue abomination bug. Navigation is Back to Article only."""
     from capcat.core.html_post_processor import HTMLPostProcessor
 
@@ -285,7 +285,7 @@ def test_incremental_skips_up_to_date_file(article_dir: Path) -> None:
     mtime_after = html_file.stat().st_mtime
 
     assert mtime_before == mtime_after, (
-        "Incremental run rewrote an up-to-date file — template marker check is broken"
+        "Incremental run rewrote an up-to-date file - template marker check is broken"
     )
 
 
@@ -310,7 +310,7 @@ def test_single_article_mode_generates_html(single_article_dir: Path) -> None:
 
 
 # ---------------------------------------------------------------------------
-# _is_archive_root — canonical Source-Name_DD-MM-YYYY format
+# _is_archive_root - canonical Source-Name_DD-MM-YYYY format
 # ---------------------------------------------------------------------------
 
 class TestIsArchiveRoot:
@@ -328,7 +328,7 @@ class TestIsArchiveRoot:
 
     @pytest.fixture(autouse=True)
     def mock_registry(self, monkeypatch):
-        """Isolate from live registry — always exposes 'hn' with display_name 'Hacker News'."""
+        """Isolate from live registry - always exposes 'hn' with display_name 'Hacker News'."""
         from unittest.mock import MagicMock
         mock_reg = MagicMock()
         mock_reg.list_available_sources.return_value = ["hn"]
@@ -342,25 +342,25 @@ class TestIsArchiveRoot:
         monkeypatch.setattr(cfg_mod, "get_source_registry", lambda: mock_reg)
 
     def test_new_hyphen_format_is_recognised(self, processor, tmp_path):
-        """Hacker-News_15-03-2026 is the canonical format — must return True."""
+        """Hacker-News_15-03-2026 is the canonical format - must return True."""
         path = tmp_path / "Hacker-News_15-03-2026"
         path.mkdir()
         assert processor._is_archive_root(path) is True
 
     def test_old_underscore_format_is_not_recognised(self, processor, tmp_path):
-        """Hacker_News_15-03-2026 is the old format — must return False."""
+        """Hacker_News_15-03-2026 is the old format - must return False."""
         path = tmp_path / "Hacker_News_15-03-2026"
         path.mkdir()
         assert processor._is_archive_root(path) is False
 
     def test_sg_prefix_is_not_recognised(self, processor, tmp_path):
-        """sg_15-03-2026 is dead legacy code — must return False."""
+        """sg_15-03-2026 is dead legacy code - must return False."""
         path = tmp_path / "sg_15-03-2026"
         path.mkdir()
         assert processor._is_archive_root(path) is False
 
     def test_news_date_folder_is_recognised(self, processor, tmp_path):
-        """News_15-03-2026 is the date folder — must still return True."""
+        """News_15-03-2026 is the date folder - must still return True."""
         path = tmp_path / "News_15-03-2026"
         path.mkdir()
         assert processor._is_archive_root(path) is True

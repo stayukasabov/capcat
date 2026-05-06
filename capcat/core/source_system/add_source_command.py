@@ -344,7 +344,7 @@ class AddSourceCommand:
             bundles = []
 
         if not bundles:
-            # No bundles exist yet — skip the prompt entirely
+            # No bundles exist yet - skip the prompt entirely
             return
 
         if not self._ui.confirm_bundle_addition():
@@ -490,7 +490,7 @@ class SubprocessSourceTester:
 
         Replaces the old subprocess approach: no full article download,
         no output files created, no 60-second wait. Just an RSS HEAD +
-        GET + parse — typically completes in 2–5 seconds.
+        GET + parse - typically completes in 2-5 seconds.
 
         Shows the existing ProgressIndicator with live stage updates so
         the user always knows what is happening.
@@ -562,7 +562,7 @@ class SubprocessSourceTester:
             for root in search_roots:
                 if not root.exists():
                     continue
-                # Search both .yaml and .yml — generator saves as .yml
+                # Search both .yaml and .yml - generator saves as .yml
                 for candidate in itertools.chain(
                     root.glob("*.yaml"), root.glob("*.yml")
                 ):

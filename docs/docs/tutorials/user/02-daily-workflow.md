@@ -39,7 +39,7 @@ capcat fetch hn lb ieee --count 10 --html
 capcat catch
 ```
 
-Select "Catch articles from a bundle of sources" — no flags to remember.
+Select "Catch articles from a bundle of sources" - no flags to remember.
 
 ## With Media
 

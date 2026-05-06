@@ -34,7 +34,7 @@ class TestDrainProgressLogging:
 
         manager.stop()
 
-        assert not drained  # should time out — download never completes
+        assert not drained  # should time out - download never completes
         calls = [str(c) for c in mock_info.call_args_list]
         assert any(
             "Downloading PDFs" in c for c in calls
@@ -43,7 +43,7 @@ class TestDrainProgressLogging:
     def test_drain_does_not_repeat_log_when_state_unchanged(self):
         """
         When counts do not change between ticks, drain must NOT emit the
-        same 'Downloading PDFs' line more than once — repeated identical
+        same 'Downloading PDFs' line more than once - repeated identical
         messages look like a frozen terminal to the user.
 
         Mocks monotonic() to advance 11 seconds per call (above the 10s

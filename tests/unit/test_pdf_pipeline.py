@@ -9,7 +9,7 @@ from capcat.core.article_fetcher import _collect_pdf_links_from_soup
 
 
 # ---------------------------------------------------------------------------
-# Pass 1 PDF link collection — ancestor filter
+# Pass 1 PDF link collection - ancestor filter
 # ---------------------------------------------------------------------------
 
 class TestCollectPdfLinksAncestorFilter:

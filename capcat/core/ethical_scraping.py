@@ -170,7 +170,7 @@ class EthicalScrapingManager:
         self, domain: str, crawl_delay: float, min_delay: float = 1.0
     ):
         """
-        Enforce rate limiting with crawl delay — thread-safe via slot reservation.
+        Enforce rate limiting with crawl delay - thread-safe via slot reservation.
 
         The lock is held only while reading/updating last_request_time (microseconds).
         Sleep happens outside the lock so other domains are not blocked.

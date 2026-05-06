@@ -29,7 +29,7 @@ If run without `--url`, launches a prompt:
 Enter RSS/Atom feed URL:
 ```
 
-After fetching the feed, proposes a display name and config — you can confirm or edit before saving.
+After fetching the feed, proposes a display name and config - you can confirm or edit before saving.
 
 ## Also Available in TUI
 

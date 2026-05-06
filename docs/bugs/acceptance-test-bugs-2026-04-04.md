@@ -1,12 +1,12 @@
-# Acceptance Test Bugs — 2026-04-04
+# Acceptance Test Bugs - 2026-04-04
 
 Collected from live acceptance testing of v1.9.7 against the TESTING vault.
 
 ---
 
-## B4 — `__pycache__/*.pyc` files tracked in source config mirror
+## B4 - `__pycache__/*.pyc` files tracked in source config mirror
 
-**Severity:** Medium — causes spurious "updates available" prompts on every run after a Python version change
+**Severity:** Medium - causes spurious "updates available" prompts on every run after a Python version change
 
 **Symptom:**
 Every fetch run reports 7 "updates available" for custom sources, all pointing to compiled bytecode files:
@@ -16,10 +16,10 @@ Custom sources: twitter/__pycache__/source.cpython-314.pyc, lb/__pycache__/sourc
 These are Python bytecode cache files, not user-editable config files.
 
 **Root cause:**
-`source_config_mirror.py:153` — `_mirror_custom` uses `dest_source.rglob("*")` which recurses into all files including `__pycache__/` subdirectories. Bytecode files get registered in the manifest with their builtin hash. When Python regenerates them (different interpreter version, etc.) the hash changes, triggering the upgrade prompt.
+`source_config_mirror.py:153` - `_mirror_custom` uses `dest_source.rglob("*")` which recurses into all files including `__pycache__/` subdirectories. Bytecode files get registered in the manifest with their builtin hash. When Python regenerates them (different interpreter version, etc.) the hash changes, triggering the upgrade prompt.
 
 **Affected files:**
-- `capcat/core/source_config_mirror.py:153-160` — `_mirror_custom` rglob does not filter `__pycache__`
+- `capcat/core/source_config_mirror.py:153-160` - `_mirror_custom` rglob does not filter `__pycache__`
 
 **Expected behaviour:**
 Only user-relevant files (`.py`, `.yaml`, `.yml`, etc.) should be tracked. `__pycache__/` directories must be excluded from mirroring and hash tracking.
@@ -29,19 +29,19 @@ Run `capcat fetch hn -q` after installing with a Python version different from t
 
 ---
 
-## B5 — Update prompt fires in `-q` (quiet/non-interactive) mode, crashing with EOF
+## B5 - Update prompt fires in `-q` (quiet/non-interactive) mode, crashing with EOF
 
-**Severity:** High — any non-interactive run (background, CI, scripting) that encounters an upgrade prompt crashes with `Source config mirror failed: EOF when reading a line`
+**Severity:** High - any non-interactive run (background, CI, scripting) that encounters an upgrade prompt crashes with `Source config mirror failed: EOF when reading a line`
 
 **Symptom:**
 Running `capcat fetch hn -q` in background (no stdin) triggers the source mirror upgrade prompt. With no stdin available, `input("> ")` raises `EOFError`. The mirror fails and the fetch continues, but the upgrade is lost.
 
 **Root cause:**
-`source_config_mirror.py:98` — `_prompt` falls back to `print(message); return input("> ")` in non-TUI mode with no check for quiet mode or non-interactive stdin. `unified_source_processor.py:221` passes `tui_mode=is_tui_active()` but there is no quiet-mode flag passed to `SourceConfigMirror`. When `-q` is active, `is_tui_active()` is `False`, so `_prompt` always tries `input()` even in a non-interactive context.
+`source_config_mirror.py:98` - `_prompt` falls back to `print(message); return input("> ")` in non-TUI mode with no check for quiet mode or non-interactive stdin. `unified_source_processor.py:221` passes `tui_mode=is_tui_active()` but there is no quiet-mode flag passed to `SourceConfigMirror`. When `-q` is active, `is_tui_active()` is `False`, so `_prompt` always tries `input()` even in a non-interactive context.
 
 **Affected files:**
-- `capcat/core/source_config_mirror.py:92-98` — `_prompt` has no quiet/non-interactive guard
-- `capcat/core/unified_source_processor.py:221` — mirror constructed without quiet mode flag
+- `capcat/core/source_config_mirror.py:92-98` - `_prompt` has no quiet/non-interactive guard
+- `capcat/core/unified_source_processor.py:221` - mirror constructed without quiet mode flag
 
 **Expected behaviour:**
 In `-q` mode or when stdin is non-interactive (`not sys.stdin.isatty()`), the upgrade prompt must be skipped silently. Upgrades should either be auto-applied or deferred to the next interactive run.
@@ -53,9 +53,9 @@ In `-q` mode or when stdin is non-interactive (`not sys.stdin.isatty()`), the up
 
 ---
 
-## B2 — `processing.article_count` in `Global-settings.yaml` never reached for builtin sources
+## B2 - `processing.article_count` in `Global-settings.yaml` never reached for builtin sources
 
-**Severity:** Medium — documented global fallback is dead code in practice; no builtin source has `article_count: null`
+**Severity:** Medium - documented global fallback is dead code in practice; no builtin source has `article_count: null`
 
 **Symptom:**
 Setting `processing.article_count: 3` in `Global-settings.yaml` has no effect. Fetching HN still retrieves ~25-30 articles.
@@ -64,11 +64,11 @@ Setting `processing.article_count: 3` in `Global-settings.yaml` has no effect. F
 All builtin sources have `article_count` set in their own `config.yaml` (HN: 30). `_resolve_count` resolution chain is:
 `CLI --count > capcat.yml sources list > source config.yaml > Global-settings.yaml default`
 
-The source config.yaml value (30) is always reached before the global fallback. The global default is only reachable if a source has `article_count: null` in its config.yaml — which no builtin source does.
+The source config.yaml value (30) is always reached before the global fallback. The global default is only reachable if a source has `article_count: null` in its config.yaml - which no builtin source does.
 
 **Affected files:**
-- `capcat/sources/builtin/custom/hn/config.yaml` — sets `article_count: 30`, masking global default
-- `capcat/core/unified_source_processor.py:74-78` — global fallback unreachable for any builtin source
+- `capcat/sources/builtin/custom/hn/config.yaml` - sets `article_count: 30`, masking global default
+- `capcat/core/unified_source_processor.py:74-78` - global fallback unreachable for any builtin source
 
 **Expected behaviour:**
 `processing.article_count` in `Global-settings.yaml` should be reachable. Either:
@@ -87,26 +87,26 @@ Set `processing.article_count: 3` in `Global-settings.yaml`. Run `capcat fetch h
 | Version | 1.9.7 |
 | Source | hn |
 | Articles fetched | 25 (of 30 attempted; crawl_delay: 1.0) |
-| `processing.article_count: 3` respected | No — B2 confirmed |
-| Update prompt in `-q` mode | Yes — B5 confirmed |
-| `__pycache__` in update list | Yes — B4 confirmed |
+| `processing.article_count: 3` respected | No - B2 confirmed |
+| Update prompt in `-q` mode | Yes - B5 confirmed |
+| `__pycache__` in update list | Yes - B4 confirmed |
 | Blocked (403/anti-bot) | 2 articles |
 | JS-only pages | 1 article |
 
 ---
 
-## B7 — `create_comments_file: false` ignored — comments always written
+## B7 - `create_comments_file: false` ignored - comments always written
 
-**Severity:** Medium — config setting has no effect; vault always accumulates comments files even when disabled
+**Severity:** Medium - config setting has no effect; vault always accumulates comments files even when disabled
 
 **Symptom:**
 Setting `create_comments_file: false` in `Global-settings.yaml` has no effect. Comments files are written for every article that has a `comment_url`.
 
 **Root cause:**
-`unified_source_processor.py:487-492` — the `if` guard that triggers `fetch_comments` checks for `article.comment_url` but never checks `self.config.processing.create_comments_file`. The config field is defined in `ProcessingConfig` and loaded correctly but is never read at the point where comments fetching is decided.
+`unified_source_processor.py:487-492` - the `if` guard that triggers `fetch_comments` checks for `article.comment_url` but never checks `self.config.processing.create_comments_file`. The config field is defined in `ProcessingConfig` and loaded correctly but is never read at the point where comments fetching is decided.
 
 **Affected files:**
-- `capcat/core/unified_source_processor.py:487-492` — missing `self.config.processing.create_comments_file` guard
+- `capcat/core/unified_source_processor.py:487-492` - missing `self.config.processing.create_comments_file` guard
 
 **Fix:**
 Added `and self.config.processing.create_comments_file` to the comments block guard. Fixed in v1.9.11.
@@ -116,26 +116,26 @@ Set `create_comments_file: false` in `Global-settings.yaml`. Run `capcat fetch h
 
 ---
 
-## B8 — `download_images: false` ignored — images always downloaded
+## B8 - `download_images: false` ignored - images always downloaded
 
-**Severity:** Medium — cannot disable image downloads via config
+**Severity:** Medium - cannot disable image downloads via config
 
 **Symptom:**
 Setting `download_images: false` in `Global-settings.yaml` has no effect. Images are downloaded for all articles.
 
 **Root cause:**
 Two separate code paths both ignored the flag:
-1. `article_fetcher.py:_process_embedded_media_efficiently` — no check on `get_config().processing.download_images` before adding image links to `quick_filtered_links`
-2. `unified_media_processor.py:process_article_media` — no check before calling `image_processor.process_article_images`
+1. `article_fetcher.py:_process_embedded_media_efficiently` - no check on `get_config().processing.download_images` before adding image links to `quick_filtered_links`
+2. `unified_media_processor.py:process_article_media` - no check before calling `image_processor.process_article_images`
 
 **Fix:**
 Added `_download_images = get_config().processing.download_images` guard before the filtering loop in `article_fetcher.py`, and early return in `unified_media_processor.py`. Fixed in v1.9.12.
 
 ---
 
-## B9-B14 — Multiple processing/UI/logging config keys are dead code
+## B9-B14 - Multiple processing/UI/logging config keys are dead code
 
-**Severity:** Medium — documented, user-configurable settings have no effect
+**Severity:** Medium - documented, user-configurable settings have no effect
 
 **Dead config keys (defined in ProcessingConfig, UIConfig, or LoggingConfig but never read by the code that should act on them):**
 
@@ -158,9 +158,9 @@ Added `_download_images = get_config().processing.download_images` guard before 
 
 ---
 
-## B15 — `min_image_dimensions` never checked — `max_image_bytes` routing takes priority
+## B15 - `min_image_dimensions` never checked - `max_image_bytes` routing takes priority
 
-**Severity:** High — `min_image_dimensions` setting has no observable effect even when explicitly configured
+**Severity:** High - `min_image_dimensions` setting has no observable effect even when explicitly configured
 
 **Symptom:**
 Setting `min_image_dimensions: 5000` in `Global-settings.yaml` has no effect. Images of any pixel size are downloaded (limited only by `max_image_size_bytes`).
@@ -170,13 +170,13 @@ Setting `min_image_dimensions: 5000` in `Global-settings.yaml` has no effect. Im
 ```python
 if max_image_bytes > 0:         # ALWAYS True (default is 5242880)
     filename = _download_single_image_with_max_bytes(...)
-elif min_pixel_dimension > 0:   # UNREACHABLE — above is always True
+elif min_pixel_dimension > 0:   # UNREACHABLE - above is always True
     filename = _download_single_image_with_min_pixels(...)
 ```
 Since `max_image_size_bytes` defaults to 5242880 (non-zero), the `max_image_bytes > 0` branch is always taken. `min_pixel_dimension` is never checked.
 
 **Affected files:**
-- `capcat/core/image_processor.py:_download_images_with_checking` (lines 353-370) — exclusive branching prevents pixel filter from being applied
+- `capcat/core/image_processor.py:_download_images_with_checking` (lines 353-370) - exclusive branching prevents pixel filter from being applied
 
 **Expected behaviour:**
 Both `max_image_size_bytes` and `min_image_dimensions` should be applied as a pipeline: first reject images by byte ceiling (cheap pre-download HEAD check), then reject by pixel dimensions after download.
@@ -186,15 +186,15 @@ Set `min_image_dimensions: 5000` in `Global-settings.yaml`. Run `capcat fetch bb
 
 ---
 
-## B16 — `max_filename_length` truncates folders but not markdown filenames
+## B16 - `max_filename_length` truncates folders but not markdown filenames
 
-**Severity:** Medium — .md filenames inside article folders are not truncated
+**Severity:** Medium - .md filenames inside article folders are not truncated
 
 **Symptom:**
 Setting `max_filename_length: 15` truncates article folder names correctly but the `.md` file inside uses the full title (up to 200 chars).
 
 **Root cause:**
-`storage_manager.py:27,36` — `article_md_filename` and `comments_md_filename` hardcode `max_length=200`:
+`storage_manager.py:27,36` - `article_md_filename` and `comments_md_filename` hardcode `max_length=200`:
 ```python
 def article_md_filename(title: str) -> str:
     return sanitize_filename(title, max_length=200).replace(" ", "-") + ".md"
@@ -202,8 +202,8 @@ def article_md_filename(title: str) -> str:
 When `max_length` is explicitly passed to `sanitize_filename`, it overrides the config lookup. Folder creation goes through `sanitize_filename(title)` with no explicit max_length, so it correctly reads the config value.
 
 **Affected files:**
-- `capcat/core/storage_manager.py:27` — `article_md_filename` hardcodes `max_length=200`
-- `capcat/core/storage_manager.py:36` — `comments_md_filename` hardcodes `max_length=200`
+- `capcat/core/storage_manager.py:27` - `article_md_filename` hardcodes `max_length=200`
+- `capcat/core/storage_manager.py:36` - `comments_md_filename` hardcodes `max_length=200`
 
 **Expected behaviour:**
 Both folder names and markdown filenames should be truncated to `max_filename_length`.
@@ -213,21 +213,21 @@ Set `max_filename_length: 15`. Run `capcat fetch bbc -q`. Folder names are ≤15
 
 ---
 
-## B17 — `user_agent` setting ignored — session pool uses rotating UA strings
+## B17 - `user_agent` setting ignored - session pool uses rotating UA strings
 
-**Severity:** Medium — user cannot identify their bot or use a custom User-Agent
+**Severity:** Medium - user cannot identify their bot or use a custom User-Agent
 
 **Symptom:**
 Setting `user_agent: "TestBot/1.0"` in `Global-settings.yaml` has no effect. Verbose output shows a random Mozilla browser UA string.
 
 **Root cause:**
-`session_pool.py:92` — `_create_session` always uses `random.choice(USER_AGENTS)` instead of reading `config.network.user_agent`:
+`session_pool.py:92` - `_create_session` always uses `random.choice(USER_AGENTS)` instead of reading `config.network.user_agent`:
 ```python
 user_agent = random.choice(USER_AGENTS)  # ignores config
 ```
 
 **Affected files:**
-- `capcat/core/session_pool.py:92` — UA selection ignores `self.config.network.user_agent`
+- `capcat/core/session_pool.py:92` - UA selection ignores `self.config.network.user_agent`
 
 **Expected behaviour:**
 When `user_agent` is set to a non-default value, it should be used. When set to default (`"Capcat/2.0 (Personal news archiver)"`) the existing rotation behaviour is acceptable.
@@ -237,15 +237,15 @@ Set `user_agent: "TestBot/1.0"`. Run `capcat fetch bbc -V`. Debug log shows `Usi
 
 ---
 
-## B18 — `max_retries` ignored — session pool hardcodes `max_retries=3`
+## B18 - `max_retries` ignored - session pool hardcodes `max_retries=3`
 
-**Severity:** Low — user cannot tune retry count via config
+**Severity:** Low - user cannot tune retry count via config
 
 **Symptom:**
 Setting `max_retries: 0` in `Global-settings.yaml` has no effect. Sessions still retry 3 times on connection failure.
 
 **Root cause:**
-`session_pool.py:118` — `HTTPAdapter` is created with `max_retries=3` hardcoded:
+`session_pool.py:118` - `HTTPAdapter` is created with `max_retries=3` hardcoded:
 ```python
 adapter = requests.adapters.HTTPAdapter(
     pool_connections=self.config.network.pool_connections,
@@ -255,7 +255,7 @@ adapter = requests.adapters.HTTPAdapter(
 ```
 
 **Affected files:**
-- `capcat/core/session_pool.py:118` — `max_retries` hardcoded
+- `capcat/core/session_pool.py:118` - `max_retries` hardcoded
 
 **Expected behaviour:**
 `max_retries` should use `self.config.network.max_retries`.
@@ -265,9 +265,9 @@ Set `max_retries: 0`. Observe fetch still retries on transient failures.
 
 ---
 
-## B19 — `use_colors: false` ignored — ANSI codes always emitted
+## B19 - `use_colors: false` ignored - ANSI codes always emitted
 
-**Severity:** Medium — cannot disable color output via config; piped output contains raw escape sequences
+**Severity:** Medium - cannot disable color output via config; piped output contains raw escape sequences
 
 **Symptom:**
 Setting `use_colors: false` in `Global-settings.yaml` has no effect. Terminal and piped output still contains ANSI color escape sequences (`\033[38;5;230m` etc.).
@@ -275,11 +275,11 @@ Setting `use_colors: false` in `Global-settings.yaml` has no effect. Terminal an
 **Root cause:**
 `progress.py` hardcodes `use_colors = True` at 18+ sites. None of them reads `get_config().ui.use_colors`. Example at line 200:
 ```python
-use_colors = True  # hardcoded — never reads config
+use_colors = True  # hardcoded - never reads config
 ```
 
 **Affected files:**
-- `capcat/core/progress.py` — `use_colors = True` hardcoded throughout
+- `capcat/core/progress.py` - `use_colors = True` hardcoded throughout
 
 **Expected behaviour:**
 `use_colors: false` should suppress all ANSI escape sequences from terminal output.
@@ -289,9 +289,9 @@ Set `use_colors: false`. Run `capcat fetch bbc 2>&1 | cat`. Output still contain
 
 ---
 
-## B20 — `progress.py:1104` references removed `UIConfig.show_progress_animations`
+## B20 - `progress.py:1104` references removed `UIConfig.show_progress_animations`
 
-**Severity:** Low — dead code; `get_progress_indicator` is never called, so no runtime crash
+**Severity:** Low - dead code; `get_progress_indicator` is never called, so no runtime crash
 
 **Symptom:**
 `progress.py` function `get_progress_indicator` references `config.ui.show_progress_animations`, which was removed from `UIConfig` in v1.9.15. This would `AttributeError` if called.
@@ -300,16 +300,16 @@ Set `use_colors: false`. Run `capcat fetch bbc 2>&1 | cat`. Output still contain
 `get_progress_indicator` was not updated when `show_progress_animations` was removed from `UIConfig`.
 
 **Affected files:**
-- `capcat/core/progress.py:1104` — stale attribute reference
+- `capcat/core/progress.py:1104` - stale attribute reference
 
 **How to reproduce:**
 `python3 -c "from capcat.core.progress import get_progress_indicator; get_progress_indicator('test', 3)"` → `AttributeError`
 
 ---
 
-## B21 — `progress_spinner_style` only affects PDF spinner, not main article fetch spinner
+## B21 - `progress_spinner_style` only affects PDF spinner, not main article fetch spinner
 
-**Severity:** Low — setting has no visible effect for most users (PDF download spinner is rarely seen)
+**Severity:** Low - setting has no visible effect for most users (PDF download spinner is rarely seen)
 
 **Symptom:**
 Setting `progress_spinner_style: wave` has no visible effect on the main article fetch display. The "CATCHING ▶" activity spinner is always shown.
@@ -318,7 +318,7 @@ Setting `progress_spinner_style: wave` has no visible effect on the main article
 `get_batch_progress` in `progress.py:1109` instantiates `BatchProgress` without passing `spinner_style`. `BatchProgress` defaults to `"activity"` spinner. The config value is only passed to the PDF download `ProgressIndicator` at `article_fetcher.py:2364`.
 
 **Affected files:**
-- `capcat/core/progress.py:1127-1130` — `get_batch_progress` does not pass `spinner_style` to `BatchProgress`
+- `capcat/core/progress.py:1127-1130` - `get_batch_progress` does not pass `spinner_style` to `BatchProgress`
 
 **Expected behaviour:**
 `progress_spinner_style` should affect the main article fetch spinner.
@@ -328,9 +328,9 @@ Set `progress_spinner_style: wave`. Observe no change in spinner during fetch.
 
 
 
-## B22 — `min_image_dimensions` silently skipped for WebP images
+## B22 - `min_image_dimensions` silently skipped for WebP images
 
-**Severity:** High — the dominant image format from BBC/Guardian is WebP; the filter has no effect in practice
+**Severity:** High - the dominant image format from BBC/Guardian is WebP; the filter has no effect in practice
 
 **Symptom:**
 Setting `min_image_dimensions: 5000` downloads all WebP images regardless of their pixel dimensions. Images at 1536×864px survive when they should be rejected.
@@ -343,7 +343,7 @@ if dims is not None:   # ← webp hits this as None → check silently bypassed
 ```
 
 **Affected files:**
-- `capcat/core/image_processor.py:112-161` — `_read_image_dimensions` missing WebP (VP8, VP8L, VP8X) header parsers
+- `capcat/core/image_processor.py:112-161` - `_read_image_dimensions` missing WebP (VP8, VP8L, VP8X) header parsers
 
 **Expected behaviour:**
 All three WebP chunk variants (VP8 lossy, VP8L lossless, VP8X extended) should return correct `(width, height)` so the pixel floor filter applies.
@@ -355,11 +355,11 @@ Set `min_image_dimensions: 5000`. Run `capcat fetch bbc guardian -q`. Images app
 
 ---
 
-## B23 — capcat fetch ignores all sources after first (space-separated CLI)
+## B23 - capcat fetch ignores all sources after first (space-separated CLI)
 
 **Severity:** High
 **Symptom:** `capcat fetch bbc guardian` only fetched BBC articles. The Guardian folder was absent. All combined-source acceptance tests that used space syntax were silently single-source.
-**Root cause:** `cli.py:476` — `sources = [s.strip() for s in args[0].split(",")]` reads only `args[0]`. Additional positional args (`args[1]`, etc.) silently ignored.
+**Root cause:** `cli.py:476` - `sources = [s.strip() for s in args[0].split(",")]` reads only `args[0]`. Additional positional args (`args[1]`, etc.) silently ignored.
 **Affected files:** `capcat/cli.py`
 **Expected behaviour:** Both `capcat fetch bbc guardian` and `capcat fetch bbc,guardian` should fetch both sources.
 **How to reproduce:**
@@ -371,11 +371,11 @@ capcat fetch bbc guardian -q
 
 ---
 
-## B24 — remove_script_tags: false not observable in config-driven sources
+## B24 - remove_script_tags: false not observable in config-driven sources
 
 **Severity:** Low
 **Symptom:** Setting `remove_script_tags: false` for BBC and Guardian produced no observable `<script>` content in output markdown.
 **Root cause:** Config-driven sources use CSS content selectors targeting article body elements. These selectors do not include areas with `<script>` tags. Extracted content never contains script tags regardless of the setting.
 **Affected files:** `capcat/core/article_fetcher.py` (config-driven path)
 **Expected behaviour:** Setting is respected in code (confirmed) but has no observable effect on sources whose content selectors exclude script-bearing DOM areas.
-**Status:** Not a bug — documented limitation. Setting is only observable on generic-path sources or sources with inline scripts in the content selector target.
+**Status:** Not a bug - documented limitation. Setting is only observable on generic-path sources or sources with inline scripts in the content selector target.

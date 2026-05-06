@@ -61,7 +61,7 @@ class SourceConfigMirror:
         self._save_manifest(manifest)
         print(
             "Capcat: source configs written to Config/sources/active/ "
-            "— edit them to customise your sources."
+            "- edit them to customise your sources."
         )
 
     def check_for_upgrades(self) -> None:
@@ -94,7 +94,7 @@ class SourceConfigMirror:
         except json.JSONDecodeError as exc:
             from capcat.core.logging_config import get_logger
             get_logger(__name__).warning(
-                f"source_hashes.json is malformed — treating as empty: {exc}"
+                f"source_hashes.json is malformed - treating as empty: {exc}"
             )
             return {}
 
@@ -273,7 +273,7 @@ class SourceConfigMirror:
         for key, entry in list(manifest.items()):
             stored_builtin_hash = entry.get("builtin_hash", "")
             stored_user_hash = entry.get("user_hash", "")
-            # .py files are always app-owned — even in old manifests that predate the
+            # .py files are always app-owned - even in old manifests that predate the
             # ownership field. Without this, missing ownership defaults to "config",
             # causing changed .py files to hit the interactive prompt path and get
             # skipped silently in non-interactive (-q) mode.
@@ -283,16 +283,16 @@ class SourceConfigMirror:
                 ownership = entry.get("ownership", "config")
 
             if not stored_builtin_hash:
-                continue  # user-added source — never touch
+                continue  # user-added source - never touch
 
             builtin_file = self._builtin_file_for_key(key)
             if builtin_file is None:
-                logger.debug(f"Builtin removed for {key} — leaving user file untouched")
+                logger.debug(f"Builtin removed for {key} - leaving user file untouched")
                 continue
 
             user_file = self._resolve_user_file(key)
             if user_file is None:
-                logger.debug(f"User file absent for {key} — removing manifest entry")
+                logger.debug(f"User file absent for {key} - removing manifest entry")
                 keys_to_remove.append(key)
                 continue
 
@@ -301,7 +301,7 @@ class SourceConfigMirror:
             user_modified = current_user_hash != stored_user_hash
 
             if current_builtin_hash == stored_builtin_hash:
-                # Builtin unchanged — but for app-owned .py files, also check whether
+                # Builtin unchanged - but for app-owned .py files, also check whether
                 # the user file has drifted from the stored user_hash. This catches the
                 # reinstall scenario: _resync_manifest() writes stored_builtin_hash =
                 # current builtin, but the vault's source.py is still stale. Without
@@ -327,11 +327,11 @@ class SourceConfigMirror:
                     self._backup([(key, user_file)])
                 except OSError as exc:
                     logger.warning(
-                        f"Backup failed for {_key_display_name(key)} ({exc}) — skipping update"
+                        f"Backup failed for {_key_display_name(key)} ({exc}) - skipping update"
                     )
                     continue
                 logger.warning(
-                    f"Updated {_key_display_name(key)} (had local edits — "
+                    f"Updated {_key_display_name(key)} (had local edits - "
                     f"backup created at Config/sources/backup_*/)"
                 )
             else:
@@ -500,7 +500,7 @@ class SourceConfigMirror:
         """
         from capcat.core.logging_config import get_logger
         get_logger(__name__).debug(
-            "Capcat: source_hashes.json missing — rebuilt from current state."
+            "Capcat: source_hashes.json missing - rebuilt from current state."
         )
         manifest = {}
 

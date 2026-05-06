@@ -140,7 +140,7 @@ class TestMinImageDimensions:
         result = processor._download_single_image_with_min_pixels(
             "https://example.com/img.png", images_dir, 1, min_pixel_dimension=150
         )
-        assert result is None  # 50×50 < 150px — rejected
+        assert result is None  # 50×50 < 150px - rejected
 
     def test_image_above_min_pixels_accepted(self, tmp_path):
         """_download_single_image_simple must keep images at or above min_pixel_dimension."""
@@ -174,7 +174,7 @@ class TestMinImageDimensions:
         result = processor._download_single_image_with_min_pixels(
             "https://example.com/img.png", images_dir, 1, min_pixel_dimension=150
         )
-        assert result is not None  # 200×200 ≥ 150px — accepted
+        assert result is not None  # 200×200 ≥ 150px - accepted
 
 
 # ---------------------------------------------------------------------------
@@ -198,7 +198,7 @@ class TestMaxImageSizeBytes:
         result = processor._download_single_image_with_max_bytes(
             "https://example.com/big.jpg", images_dir, 1, max_bytes=1048576  # 1MB cap
         )
-        assert result is None  # 2MB > 1MB — rejected
+        assert result is None  # 2MB > 1MB - rejected
         session.get.assert_not_called()  # No download attempted
 
     def test_image_below_max_bytes_downloaded(self, tmp_path):
@@ -223,7 +223,7 @@ class TestMaxImageSizeBytes:
         result = processor._download_single_image_with_max_bytes(
             "https://example.com/img.jpg", images_dir, 1, max_bytes=1048576
         )
-        assert result is not None  # 50KB < 1MB — accepted
+        assert result is not None  # 50KB < 1MB - accepted
 
 
 # ---------------------------------------------------------------------------

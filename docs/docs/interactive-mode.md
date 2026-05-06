@@ -5,7 +5,7 @@ render_with_liquid: false
 
 # Interactive Mode
 
-Capcat's TUI — full operation without memorising CLI flags.
+Capcat's TUI - full operation without memorising CLI flags.
 
 ## Launch
 
@@ -44,9 +44,9 @@ Select "Catch a single article by URL" and paste a URL. Equivalent to `capcat si
 
 Submenu for source management:
 
-- **Add source** — enter an RSS/Atom URL; Capcat fetches the feed, proposes a name, and creates the config
-- **Remove source** — interactive list; supports dry-run, backup, and undo
-- **List sources** — shows all active sources with category
+- **Add source** - enter an RSS/Atom URL; Capcat fetches the feed, proposes a name, and creates the config
+- **Remove source** - interactive list; supports dry-run, backup, and undo
+- **List sources** - shows all active sources with category
 
 ## PDF Prompt
 
@@ -59,9 +59,9 @@ Download PDFs?
   Source defaults
 ```
 
-- "Yes" — download all PDFs found
-- "No" — skip PDFs for this run
-- "Source defaults" — use per-source `media.download_pdfs` setting
+- "Yes" - download all PDFs found
+- "No" - skip PDFs for this run
+- "Source defaults" - use per-source `media.download_pdfs` setting
 
 ## HTML Output
 

@@ -28,7 +28,7 @@ ruff format capcat/
 1. Fork the repo and create a branch from `main`.
 2. Add tests for any new behaviour.
 3. Ensure `pytest` and `ruff check` pass locally.
-4. Open a pull request — the CI suite must be green before merge.
+4. Open a pull request - the CI suite must be green before merge.
 
 ## Reporting bugs
 

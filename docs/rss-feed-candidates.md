@@ -2,7 +2,7 @@
 
 Feeds not currently in capcat sources, verified against robots.txt on 2026-03-24.
 
-## Clean — No robots.txt Barriers
+## Clean - No robots.txt Barriers
 
 <div class="table-container">
 <table class="centered-table">
@@ -28,7 +28,7 @@ Feeds not currently in capcat sources, verified against robots.txt on 2026-03-24
       <td>VentureBeat</td>
       <td><code>https://venturebeat.com/feed/</code></td>
       <td>AI/Tech</td>
-      <td>7–8 items, AI/enterprise focus</td>
+      <td>7-8 items, AI/enterprise focus</td>
     </tr>
     <tr>
       <td>3</td>
@@ -128,7 +128,7 @@ Unreachable from automated check (CDN blocks) but expected to work:
 </table>
 </div>
 
-## arXiv (Academic Papers — PDF Downloads)
+## arXiv (Academic Papers - PDF Downloads)
 
 Crawl-delay: 15s required. `/abs` and `/pdf` paths are allowed.
 
@@ -177,7 +177,7 @@ Crawl-delay: 15s required. `/abs` and `/pdf` paths are allowed.
 </table>
 </div>
 
-## Avoid — robots.txt Blocks AI/Bot Crawlers
+## Avoid - robots.txt Blocks AI/Bot Crawlers
 
 <div class="table-container">
 <table class="centered-table">

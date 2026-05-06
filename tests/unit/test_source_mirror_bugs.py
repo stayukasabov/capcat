@@ -1,4 +1,4 @@
-"""Regression tests for B4, B5, B1, and B6 — source config mirror bugs.
+"""Regression tests for B4, B5, B1, and B6 - source config mirror bugs.
 
 B4: __pycache__/*.pyc files must not appear in the mirror manifest.
 B5: upgrade prompt must not fire when stdin is non-interactive.
@@ -25,7 +25,7 @@ def _write_file(path: Path, content: str = "x") -> Path:
 
 
 # ---------------------------------------------------------------------------
-# B4 — __pycache__ must be excluded from manifest
+# B4 - __pycache__ must be excluded from manifest
 # ---------------------------------------------------------------------------
 
 class TestMirrorCustomExcludesPycache:
@@ -120,7 +120,7 @@ class TestMirrorCustomExcludesPycache:
 
 
 # ---------------------------------------------------------------------------
-# B5 — prompt must not fire when stdin is non-interactive
+# B5 - prompt must not fire when stdin is non-interactive
 # ---------------------------------------------------------------------------
 
 class TestPromptNonInteractive:
@@ -187,7 +187,7 @@ class TestPromptNonInteractive:
 
 
 # ---------------------------------------------------------------------------
-# B1 — declining upgrade must NOT update builtin_hash in manifest
+# B1 - declining upgrade must NOT update builtin_hash in manifest
 # ---------------------------------------------------------------------------
 
 class TestUpgradeDeclinePreservesBuiltinHash:
@@ -199,7 +199,7 @@ class TestUpgradeDeclinePreservesBuiltinHash:
 
         builtin file (v2) is newer than the vault file (v1).
         The manifest currently records the OLD builtin hash (v1).
-        user_hash matches the vault file hash (v1) — user never modified it.
+        user_hash matches the vault file hash (v1) - user never modified it.
         """
         import hashlib
 
@@ -259,7 +259,7 @@ class TestUpgradeDeclinePreservesBuiltinHash:
             manifest = mirror._load_manifest()
             manifest = mirror._step2_3_changed_builtins(manifest)
 
-        # builtin_hash updated — silent overwrite happened
+        # builtin_hash updated - silent overwrite happened
         assert manifest["custom/hn/source.py"]["builtin_hash"] == h_v2
 
     def test_accept_does_update_builtin_hash(self, tmp_path):
@@ -317,7 +317,7 @@ class TestResyncManifestBuiltinHash:
         monkeypatch.setattr(m, "_builtin_custom_dir", lambda: builtin_src.parent.parent)
         monkeypatch.setattr(m, "_builtin_config_driven_dir", lambda: tmp_path / "_empty")
         monkeypatch.setattr(m, "_builtin_bundles_dir", lambda: tmp_path / "_empty2")
-        # No manifest exists — triggers _resync_manifest
+        # No manifest exists - triggers _resync_manifest
         (tmp_path / ".capcat").mkdir(exist_ok=True)
         m.check_for_upgrades()
 
@@ -513,7 +513,7 @@ class TestConfigModifiedNonInteractive:
 
         # Scenario: builtin was at "20", user copy was also "20" (user_hash == builtin_hash).
         # User then manually changed their file to "5". Now builtin upgraded to "30".
-        # user_hash in manifest still = hash("20") — showing user HAS modified since last sync.
+        # user_hash in manifest still = hash("20") - showing user HAS modified since last sync.
         old_hash = hashlib.sha256(b"article_count: 20\n").hexdigest()
         manifest = {
             "config_driven/configs/bbc.yaml": {
@@ -655,7 +655,7 @@ class TestConfigModifiedInteractivePrompt:
 
 
 # ---------------------------------------------------------------------------
-# B6 — init_project must not pre-create source dirs; is_mirrored stays False
+# B6 - init_project must not pre-create source dirs; is_mirrored stays False
 # ---------------------------------------------------------------------------
 
 class TestInitDoesNotPreCreateSourceDirs:
@@ -669,7 +669,7 @@ class TestInitDoesNotPreCreateSourceDirs:
         init_project(tmp_path)
         sources_active = tmp_path / "Config" / "sources" / "active"
         assert not sources_active.exists(), (
-            "init_project must not pre-create Config/sources/active — "
+            "init_project must not pre-create Config/sources/active - "
             "SourceConfigMirror owns that directory"
         )
 
@@ -680,7 +680,7 @@ class TestInitDoesNotPreCreateSourceDirs:
         init_project(tmp_path)
         mirror = SourceConfigMirror(tmp_path, tui_mode=False)
         assert mirror.is_mirrored() is False, (
-            "is_mirrored() returned True after init — source YAMLs will never be copied"
+            "is_mirrored() returned True after init - source YAMLs will never be copied"
         )
 
     def test_first_mirror_runs_after_init(self, tmp_path, monkeypatch):

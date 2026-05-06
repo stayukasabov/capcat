@@ -9,7 +9,7 @@ render_with_liquid: false
 
 ## Description
 
-Add-source command — interactive RSS source addition.
+Add-source command - interactive RSS source addition.
 
 ## Functions
 

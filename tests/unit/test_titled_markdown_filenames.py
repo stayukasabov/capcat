@@ -95,7 +95,7 @@ def test_find_article_md_ignores_comments_files(tmp_path):
 
 
 def test_find_article_md_still_finds_legacy_article_md(tmp_path):
-    """article.md is also found — stem 'article' doesn't end in '-Comments'."""
+    """article.md is also found - stem 'article' doesn't end in '-Comments'."""
     (tmp_path / "article.md").write_text("content")
     result = find_article_md(tmp_path)
     assert result is not None

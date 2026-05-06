@@ -13,7 +13,7 @@ render_with_liquid: false
 capcat remove-source
 ```
 
-No arguments required — fully interactive.
+No arguments required - fully interactive.
 
 ## Interactive Flow
 

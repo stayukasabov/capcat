@@ -114,7 +114,7 @@ class YouTubeSource(BaseSource):
             body_text = template.get("body", "Visit the original link.")
             source_label = template.get("source_label", "Source URL")
 
-            # Try to extract actual video title — yt-dlp → oEmbed → article.title → placeholder
+            # Try to extract actual video title - yt-dlp → oEmbed → article.title → placeholder
             video_title = (
                 self._extract_video_title(article.url)
                 or self._fetch_oembed_title(article.url)

@@ -41,7 +41,7 @@ tests/
 
 ## Acceptance Tests (Chain F)
 
-Run after every fix merged to main — mandatory, no exceptions:
+Run after every fix merged to main - mandatory, no exceptions:
 
 ```bash
 pytest tests/acceptance/ -q
@@ -54,7 +54,7 @@ Do not push to remote until Chain F passes clean.
 Red → Green → Refactor:
 
 1. Write a failing test that describes the behaviour
-2. Run it — confirm it fails for the right reason
+2. Run it - confirm it fails for the right reason
 3. Implement the minimum code to pass
 4. Refactor
 5. All 767 unit tests must still pass

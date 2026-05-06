@@ -89,4 +89,4 @@ capcat init
 capcat add-source --url https://example.com/feed.xml
 ```
 
-Or drop a YAML file into `Config/sources/active/config_driven/configs/` — see [Source Development](/docs/source-development.html) for the format.
+Or drop a YAML file into `Config/sources/active/config_driven/configs/` - see [Source Development](/docs/source-development.html) for the format.

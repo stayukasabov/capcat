@@ -15,7 +15,7 @@ import pytest
 
 
 # ---------------------------------------------------------------------------
-# B15 — image filter pipeline
+# B15 - image filter pipeline
 # ---------------------------------------------------------------------------
 
 class TestImageFilterPipeline:
@@ -131,7 +131,7 @@ class TestImageFilterPipeline:
 
 
 # ---------------------------------------------------------------------------
-# B16 — max_filename_length applies to md filenames
+# B16 - max_filename_length applies to md filenames
 # ---------------------------------------------------------------------------
 
 class TestMaxFilenameLengthMd:
@@ -169,7 +169,7 @@ class TestMaxFilenameLengthMd:
 
 
 # ---------------------------------------------------------------------------
-# B17 — user_agent config respected
+# B17 - user_agent config respected
 # ---------------------------------------------------------------------------
 
 class TestUserAgentConfig:
@@ -194,7 +194,7 @@ class TestUserAgentConfig:
 
 
 # ---------------------------------------------------------------------------
-# B18 — max_retries config respected
+# B18 - max_retries config respected
 # ---------------------------------------------------------------------------
 
 class TestMaxRetriesConfig:
@@ -226,7 +226,7 @@ class TestMaxRetriesConfig:
 
 
 # ---------------------------------------------------------------------------
-# B20 — get_progress_indicator no longer crashes on missing attribute
+# B20 - get_progress_indicator no longer crashes on missing attribute
 # ---------------------------------------------------------------------------
 
 class TestGetProgressIndicator:
@@ -242,7 +242,7 @@ class TestGetProgressIndicator:
 
 
 # ---------------------------------------------------------------------------
-# B21 — get_batch_progress passes spinner_style to BatchProgress
+# B21 - get_batch_progress passes spinner_style to BatchProgress
 # ---------------------------------------------------------------------------
 
 class TestBatchProgressSpinnerStyle:

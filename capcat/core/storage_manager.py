@@ -16,7 +16,7 @@ from .utils import sanitize_filename
 _logger = get_logger(__name__)
 
 # ---------------------------------------------------------------------------
-# Module-level filename helpers — single source of truth for naming convention
+# Module-level filename helpers - single source of truth for naming convention
 # ---------------------------------------------------------------------------
 
 def article_md_filename(title: str) -> str:

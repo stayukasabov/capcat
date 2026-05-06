@@ -1,4 +1,4 @@
-"""Regression tests — bundle all / --all expands to source IDs, not bundle names."""
+"""Regression tests - bundle all / --all expands to source IDs, not bundle names."""
 import pytest
 from unittest.mock import patch
 

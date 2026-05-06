@@ -1,4 +1,4 @@
-"""Remove-source command — interactive source removal with backup/undo support."""
+"""Remove-source command - interactive source removal with backup/undo support."""
 from __future__ import annotations
 
 import argparse

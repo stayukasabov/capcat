@@ -229,8 +229,8 @@ def _parse_srcset(srcset: str) -> str:
     # Merge comma-split fragments that are continuations of the same URL entry.
     # Two cases require merging:
     #
-    # 1. data: URIs — the MIME payload itself contains commas.
-    # 2. CDN proxy URLs (e.g. Substack, Cloudinary) — transformation parameters
+    # 1. data: URIs - the MIME payload itself contains commas.
+    # 2. CDN proxy URLs (e.g. Substack, Cloudinary) - transformation parameters
     #    are comma-separated within the path, e.g.:
     #    "https://cdn.example.com/image/fetch/w_1456,c_limit,f_auto/..."
     #
@@ -254,7 +254,7 @@ def _parse_srcset(srcset: str) -> str:
         if not entries or starts_new or _ends_with_descriptor(entries[-1]):
             entries.append(stripped)
         else:
-            # Comma was inside the URL — re-attach preserving original spacing
+            # Comma was inside the URL - re-attach preserving original spacing
             entries[-1] += "," + part
 
     best_url = ""

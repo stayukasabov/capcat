@@ -10,7 +10,7 @@ from pathlib import Path
 
 
 GLOBAL_SETTINGS_TEMPLATE = """\
-# Global Settings — Capcat
+# Global Settings - Capcat
 # Edit this file to tune behavior for this vault.
 # All fields are optional. Defaults are shown in comments.
 # Restart capcat after editing.
@@ -113,7 +113,7 @@ network:
 
 # ─── Processing ─────────────────────────────────────────
 processing:
-  # Global fallback — articles fetched per source when no per-source count
+  # Global fallback - articles fetched per source when no per-source count
   # is set. This value is rarely reached for sources that already have
   # article_count defined in their own config.
   #
@@ -187,7 +187,7 @@ processing:
 
   # Produce hard line breaks in markdown for every <br> tag.
   # When true: <br> becomes \\ (Obsidian, GitHub, CommonMark hard break).
-  # When false: <br> becomes a plain newline — renderer controls reflowing.
+  # When false: <br> becomes a plain newline - renderer controls reflowing.
   # Advanced users: set false for cleaner paragraph flow in strict renderers.
   # Default: true
   markdown_line_breaks: true
@@ -203,7 +203,7 @@ ui:
 logging:
   # Console log verbosity. Options: DEBUG, INFO, WARNING, ERROR
   # INFO shows normal fetch progress.
-  # WARNING suppresses info messages — useful for scripted/quiet runs
+  # WARNING suppresses info messages - useful for scripted/quiet runs
   #   that need cleaner output than -q but still want error visibility.
   # DEBUG shows full request-level detail.
   # Note: -V / --verbose and -q / --quiet flags override this at runtime.
@@ -249,7 +249,7 @@ def _print_help() -> None:
         "  generate-config  Generate a YAML config\n"
         "  settings         Write Global-settings.yaml template to Config/\n"
         "  settings --force Overwrite existing Global-settings.yaml with the\n"
-        "                   latest template (preserves nothing — back up first)\n"
+        "                   latest template (preserves nothing - back up first)\n"
         "\nOptions:\n"
         "  -L <file>        Log output to file\n"
         "  -V, --verbose    Verbose output\n"
@@ -267,7 +267,7 @@ def _print_help() -> None:
 # ---------------------------------------------------------------------------
 
 def run_app(args: list) -> None:
-    """Programmatic entry point — run capcat with a pre-built argument list."""
+    """Programmatic entry point - run capcat with a pre-built argument list."""
     _dispatch(args)
 
 
@@ -727,7 +727,7 @@ def _cmd_settings(args: list[str]) -> None:
             "  Config/sources/active/hn/config.yaml  →  article_count: 10\n\n"
             "Options:\n"
             "  --force   Overwrite an existing Global-settings.yaml with the latest\n"
-            "            template. All local edits will be lost — back up the file\n"
+            "            template. All local edits will be lost - back up the file\n"
             "            first if you want to keep custom values.\n"
             "            Useful after a capcat upgrade to pick up newly added settings.\n"
         )
@@ -791,7 +791,7 @@ def _auto_init(command: str) -> None:
         from capcat.core.config import find_project_root, check_theme_upgrade, NoProjectError
         check_theme_upgrade(find_project_root())
     except NoProjectError:
-        pass  # Not in a capcat project — skip silently
+        pass  # Not in a capcat project - skip silently
     except Exception:
         import logging
         logging.getLogger("capcat.cli").debug("Theme upgrade check failed", exc_info=True)

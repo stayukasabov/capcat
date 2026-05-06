@@ -47,19 +47,19 @@ SourceRegistry  →  SourceFactory  →  Source instance
 ## Key Components
 
 ### SourceRegistry
-Auto-discovers all sources from `Config/sources/active/`. Singleton — call `get_source_registry()`.
+Auto-discovers all sources from `Config/sources/active/`. Singleton - call `get_source_registry()`.
 
 ### UnifiedSourceProcessor
 `ThreadPoolExecutor(max_workers=8)` processes articles concurrently. Calls `ArticleFetcher` and `fetch_comments()` per article.
 
 ### EthicalScrapingManager
 - Robots.txt caching (15-minute TTL)
-- `enforce_rate_limit()` — thread-safe slot reservation, used by all sources
-- `request_hn_api()` — HN-specific Firebase API wrapper with backoff
-- `request_with_backoff()` — exponential backoff for 429/503 errors
+- `enforce_rate_limit()` - thread-safe slot reservation, used by all sources
+- `request_hn_api()` - HN-specific Firebase API wrapper with backoff
+- `request_with_backoff()` - exponential backoff for 429/503 errors
 
 ### SessionPool
-`pool_connections=20, pool_maxsize=20` — shared across all workers via `get_session_pool()`.
+`pool_connections=20, pool_maxsize=20` - shared across all workers via `get_session_pool()`.
 
 ### HTMLGenerator
 Six templates: `article-with-comments.html`, `article-no-comments.html`, `comments-with-navigation.html`, `article-capcats.html`, `root-index.html`, `source-index.html`.
@@ -89,6 +89,6 @@ Capcats/                ← single-article output
 ## Design Principles
 
 - No code required to add a config-driven source
-- Rate limiting is always on — never bypassable per-source
+- Rate limiting is always on - never bypassable per-source
 - Privacy by default: usernames replaced with "Anonymous" in comment output
 - `download_files` (images) and `download_pdfs` are independent flags; `--media` sets both

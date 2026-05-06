@@ -204,7 +204,7 @@ class RemoveSourceCommand:
 
         selected_ids = self._ui.select_sources_to_remove(sources)
         if not selected_ids:
-            self._ui.show_info("No sources selected — nothing removed.")
+            self._ui.show_info("No sources selected - nothing removed.")
             return
 
         sources_info = self._source_info_provider.get_sources_info(selected_ids)
@@ -263,12 +263,12 @@ class RemoveSourceCommand:
 # ---------------------------------------------------------------------------
 
 class RegistrySourceLister(SourceLister):
-    """Lists sources via SourceRegistry — reads the live registry at call time."""
+    """Lists sources via SourceRegistry - reads the live registry at call time."""
 
     def list_sources(self) -> List[tuple]:
         """Return ``[(source_id, display_name)]`` for every user-removable source.
 
-        Builtin sources (shipped with the application) are excluded — they
+        Builtin sources (shipped with the application) are excluded - they
         cannot be removed and would silently no-op if the removal were attempted.
         """
         from capcat.core.source_system.source_registry import SourceRegistry

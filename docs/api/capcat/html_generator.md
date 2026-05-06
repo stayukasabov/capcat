@@ -291,7 +291,7 @@ def _generate_breadcrumb(self, breadcrumb_path: List[str], html_subfolder: bool 
 
 Generate breadcrumb navigation HTML.
 
-Renders 1–3 links depending on page type:
+Renders 1-3 links depending on page type:
   news.html  (source dir)      → date only (1 link)
   article.html                 → date + source (2 links)
   html/article.html            → date + source (2 links)

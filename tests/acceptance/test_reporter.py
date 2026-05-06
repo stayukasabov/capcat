@@ -12,7 +12,7 @@ def test_write_entry_appends_markdown(tmp_path):
         analysis="Exit ✓", note="",
     )
     content = (tmp_path / "session.md").read_text()
-    assert "## TEST 12 — fetch: capcat fetch hn --count 3" in content
+    assert "## TEST 12 - fetch: capcat fetch hn --count 3" in content
     assert "**Status**: PASS" in content
     assert "0 (expected 0)  ✓" in content
     assert "**Duration**: 4.2s" in content
@@ -26,7 +26,7 @@ def test_write_entry_none_expected_exit_shows_question_mark(tmp_path):
         id=57, group="remove-source", cmd="capcat remove-source",
         status="PASS", exit_code=0, expected_exit=None,
         duration=1.0, output_path=None, file_count=None,
-        analysis="exit check skipped — user judges", note="",
+        analysis="exit check skipped - user judges", note="",
     )
     content = (tmp_path / "session.md").read_text()
     assert "(expected ?)  ?" in content
@@ -66,7 +66,7 @@ def test_write_entry_empty_note_renders_dash(tmp_path):
         analysis="Exit ✓", note="",
     )
     content = (tmp_path / "session.md").read_text()
-    assert "**Note**: —" in content
+    assert "**Note**: -" in content
 
 
 def test_write_entry_fail_status(tmp_path):
@@ -121,7 +121,7 @@ def test_finalize_lists_failed_tests(tmp_path):
     r = Reporter(path)
     r.finalize(
         counts={"fetch": {"pass": 0, "fail": 1, "skip": 0}},
-        failed_tests=["TEST 25: fetch hn,bbc — Traceback in output"],
+        failed_tests=["TEST 25: fetch hn,bbc - Traceback in output"],
     )
     content = path.read_text()
     assert "### Failed Tests" in content

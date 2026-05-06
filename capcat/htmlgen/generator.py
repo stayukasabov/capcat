@@ -599,7 +599,7 @@ class ArticleHTMLGenerator:
                 html_content = self._adjust_paths_for_subfolder(html_content)
 
             # Determine if this is a comments page (must precede breadcrumb call).
-            # The third clause checks element equality — post_processor appends
+            # The third clause checks element equality - post_processor appends
             # the exact string "Comments" as breadcrumb_path[2] for comments pages.
             is_comments_page = (
                 article_title.endswith(" - Comments")
@@ -661,7 +661,7 @@ class ArticleHTMLGenerator:
                 navigation_html = ""
             elif is_comments_page:
                 # Comments page: only "Back to Article" on the LEFT using orange
-                # index-nav/index-link styling — no "Back to News" button.
+                # index-nav/index-link styling - no "Back to News" button.
                 navigation_html = """<div class="navigation-container">
             <div class="index-nav">
                 <a href="article.html" class="index-link" title="Back to the main article">
@@ -899,7 +899,7 @@ class ArticleHTMLGenerator:
     ) -> str:
         """Generate breadcrumb navigation HTML.
 
-        Renders 1–3 links depending on page type:
+        Renders 1-3 links depending on page type:
           news.html  (source dir)      → date only (1 link)
           article.html                 → date + source (2 links)
           html/article.html            → date + source (2 links)
@@ -940,7 +940,7 @@ class ArticleHTMLGenerator:
         breadcrumb_items = []
         for i, item in enumerate(show_items):
             levels_up = base_depth - i
-            # comments.html and article.html both live in html/ — same directory.
+            # comments.html and article.html both live in html/ - same directory.
             # The formula gives levels_up=1 for the article link, but that would
             # point to ../article.html (wrong directory). Override to 0.
             if is_comments and i == 2:
@@ -1117,7 +1117,7 @@ class ArticleHTMLGenerator:
                         # Determine if we're in Capcats (single article captures)
                         is_capcats = path.name.lower() == "capcats"
 
-                        # For Capcats, allow all directories — source_id matching does not apply
+                        # For Capcats, allow all directories - source_id matching does not apply
                         # For News archives, only allow directories with valid source_id
                         if not is_capcats:
                             # Skip orphaned directories for deleted or unknown sources
@@ -1159,7 +1159,7 @@ class ArticleHTMLGenerator:
                     # Determine if we're in Capcats (single article captures)
                     is_capcats = path.name.lower() == "capcats"
 
-                    # For Capcats, allow all directories — source_id matching does not apply
+                    # For Capcats, allow all directories - source_id matching does not apply
                     # For News archives, only allow directories with valid source_id
                     if not is_capcats:
                         # Skip orphaned directories for deleted or unknown sources
@@ -1505,7 +1505,7 @@ class ArticleHTMLGenerator:
         # Remove other common template-like patterns that cause issues
         content = re.sub(r"\{\{\s*[^}]+\s*\}\}", "", content)
 
-        # Strip lines containing Obsidian wikilinks — HTML has its own navigation
+        # Strip lines containing Obsidian wikilinks - HTML has its own navigation
         content = re.sub(r"^[^\S\n]*.*\[\[.*?\]\].*$", "", content, flags=re.MULTILINE)
 
         # Clean up any resulting empty lines

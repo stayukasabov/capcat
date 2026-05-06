@@ -1,4 +1,4 @@
-"""Generate-config command — launches the interactive source config generator."""
+"""Generate-config command - launches the interactive source config generator."""
 from __future__ import annotations
 
 import argparse

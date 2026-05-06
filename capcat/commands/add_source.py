@@ -1,4 +1,4 @@
-"""Add-source command — interactive RSS source addition."""
+"""Add-source command - interactive RSS source addition."""
 from __future__ import annotations
 
 

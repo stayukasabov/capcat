@@ -48,7 +48,7 @@ def _get_markdown_img_url(html: str) -> str:
 def _get_extracted_urls(html: str, base_url: str) -> list:
     """Run _extract_image_urls and return the list of URLs it would download."""
     processor = ImageProcessor()
-    img_config = {}  # default config — no srcset handling currently
+    img_config = {}  # default config - no srcset handling currently
     return processor._extract_image_urls(html, img_config, base_url)
 
 
@@ -69,7 +69,7 @@ WORDPRESS_LAZYLOAD_HTML = """
 </body></html>
 """
 
-# HTML where src is empty, srcset is placeholder — only data-srcset has real URLs
+# HTML where src is empty, srcset is placeholder - only data-srcset has real URLs
 DATA_SRCSET_ONLY_HTML = """
 <html><body>
 <img
@@ -144,7 +144,7 @@ def test_extractor_and_formatter_agree_on_url():
     extracted_urls = _get_extracted_urls(WORDPRESS_HTML, "https://example.com/")
     assert markdown_url in extracted_urls, (
         f"Markdown URL '{markdown_url}' not found in extracted URLs {extracted_urls}. "
-        "String replacement will silently fail — local image path never substituted."
+        "String replacement will silently fail - local image path never substituted."
     )
 
 

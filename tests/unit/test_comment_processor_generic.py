@@ -82,7 +82,7 @@ def test_lb_selectors_via_generic_interface():
 
 def test_lb_user_link_is_hash_no_username_stored():
     """
-    LB user_link must be '#' — no username stored in output (GDPR).
+    LB user_link must be '#' - no username stored in output (GDPR).
     LB has no comment_permalink_fn so the fallback '#' is used.
     """
     soup = BeautifulSoup(_LB_HTML, "html.parser")
