@@ -487,6 +487,20 @@ Generate documentation index.
 
 ## Functions
 
+### _escape_liquid
+
+```python
+def _escape_liquid(text: str) -> str
+```
+
+Wrap Liquid tag sequences in raw/endraw to prevent Jekyll parse errors.
+
+**Parameters:**
+
+- `text` (str)
+
+**Returns:** str
+
 ### main
 
 ```python

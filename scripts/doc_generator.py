@@ -277,6 +277,13 @@ class CodeAnalyzer:
         return complexity
 
 
+def _escape_liquid(text: str) -> str:
+    """Wrap Liquid tag sequences in raw/endraw to prevent Jekyll parse errors."""
+    if "{%" in text or "%}" in text:
+        return "{% raw %}" + text + "{% endraw %}"
+    return text
+
+
 class DocumentationGenerator:
     """Generates various types of documentation."""
 
@@ -374,7 +381,7 @@ This package contains the following modules:
         if module.docstring:
             content += f"""## Description
 
-{module.docstring}
+{_escape_liquid(module.docstring)}
 
 """
 
@@ -408,7 +415,7 @@ This package contains the following modules:
             content += f"**Inherits from:** {', '.join(cls.inheritance)}\n\n"
 
         if cls.docstring:
-            content += f"{cls.docstring}\n\n"
+            content += f"{_escape_liquid(cls.docstring)}\n\n"
 
         # Methods (include private for contributors - FOSS standard)
         if cls.methods:
@@ -440,7 +447,7 @@ This package contains the following modules:
         content += f"```python\n{signature}\n```\n\n"
 
         if func.docstring:
-            content += f"{func.docstring}\n\n"
+            content += f"{_escape_liquid(func.docstring)}\n\n"
 
         # Parameters
         if func.parameters:
