@@ -8,8 +8,6 @@ import os
 import re
 from typing import List, Optional, Tuple
 
-import requests
-
 from capcat.core.article_fetcher import NewsSourceArticleFetcher
 from capcat.core.ethical_scraping import get_ethical_manager
 from capcat.core.storage_manager import comments_md_filename
