@@ -1,3 +1,8 @@
+---
+layout: default
+render_with_liquid: false
+---
+
 # Class Diagrams
 
 ## Core Source System Classes
