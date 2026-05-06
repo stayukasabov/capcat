@@ -7,7 +7,7 @@ Uses hacker-news.firebaseio.com/v0/ for article discovery and comment fetching.
 import os
 import re
 import threading
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor
 from typing import List, Optional, Tuple
 
 from capcat.core.article_fetcher import NewsSourceArticleFetcher
