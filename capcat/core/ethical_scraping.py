@@ -293,7 +293,7 @@ class EthicalScrapingManager:
 
     _HN_API_USER_AGENT = "Capcat/2.0 (Personal news archiver; uses official HN API)"
     _HN_API_DOMAIN = "hacker-news.firebaseio.com"
-    _HN_API_MIN_DELAY = 0.15
+    _HN_API_MIN_DELAY = 0.05
 
     def request_hn_api(
         self,
@@ -302,13 +302,14 @@ class EthicalScrapingManager:
         timeout: int = 10,
         max_retries: int = 3,
         initial_delay: float = 1.0,
+        skip_rate_limit: bool = False,
     ) -> Optional[dict]:
         """
-        Make a rate-limited request to the HN Firebase API.
+        Make a request to the HN Firebase API.
 
-        Sequential only. 0.5s minimum delay between requests. Skips robots.txt
-        (Firebase API is explicitly provided for programmatic access).
-        Handles 429/503 with exponential backoff.
+        Concurrency-safe. When skip_rate_limit is True, no artificial delay
+        is added (used for concurrent comment fetching where the thread pool
+        size is the throttle). Handles 429/503 with exponential backoff.
 
         Args:
             session: Requests session
@@ -316,6 +317,7 @@ class EthicalScrapingManager:
             timeout: Request timeout in seconds
             max_retries: Maximum retry attempts on 429/503
             initial_delay: Initial backoff delay in seconds
+            skip_rate_limit: If True, skip the inter-request delay
 
         Returns:
             Parsed JSON dict, or None if the request fails after retries
@@ -323,10 +325,10 @@ class EthicalScrapingManager:
         import logging
         logger = logging.getLogger(__name__)
 
-        # Enforce rate limit (no robots.txt check for API)
-        self.enforce_rate_limit(
-            self._HN_API_DOMAIN, 0.0, min_delay=self._HN_API_MIN_DELAY
-        )
+        if not skip_rate_limit:
+            self.enforce_rate_limit(
+                self._HN_API_DOMAIN, 0.0, min_delay=self._HN_API_MIN_DELAY
+            )
 
         headers = {"User-Agent": self._HN_API_USER_AGENT}
         delay = initial_delay

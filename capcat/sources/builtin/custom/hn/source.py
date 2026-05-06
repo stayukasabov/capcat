@@ -6,6 +6,8 @@ Uses hacker-news.firebaseio.com/v0/ for article discovery and comment fetching.
 
 import os
 import re
+import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import List, Optional, Tuple
 
 from capcat.core.article_fetcher import NewsSourceArticleFetcher
@@ -32,6 +34,7 @@ class HnSource(BaseSource):
     _MAX_LINKS_PER_COMMENT = 5
     _MAX_COMMENTS_PER_ARTICLE = 200
     _MAX_COMMENT_DEPTH = 4
+    _CONCURRENT_WORKERS = 5
     _hn_compliance_message_shown = False
 
     @property
@@ -111,6 +114,16 @@ class HnSource(BaseSource):
                 f"Successfully discovered {len(articles)} articles "
                 f"for {self.config.name}"
             )
+
+            if not HnSource._hn_compliance_message_shown:
+                print(
+                    "\nUsing official Hacker News API with rate-limited "
+                    "requests to comply with site guidelines. "
+                    "This may take a few minutes.\n",
+                    flush=True,
+                )
+                HnSource._hn_compliance_message_shown = True
+
             return articles
 
         except ArticleDiscoveryError:
@@ -250,16 +263,6 @@ class HnSource(BaseSource):
             self.logger.debug(f"No comment IDs available for: {article_title}")
             comment_ids = []
 
-        # Show compliance message once per session (visible in CLI)
-        if not HnSource._hn_compliance_message_shown:
-            msg = (
-                "Using official Hacker News API with rate-limited requests "
-                "to comply with site guidelines. This may take a few minutes."
-            )
-            self.logger.info(msg)
-            print(f"\n{msg}\n", flush=True)
-            HnSource._hn_compliance_message_shown = True
-
         try:
             manager = get_ethical_manager()
 
@@ -330,73 +333,92 @@ class HnSource(BaseSource):
         manager,
         comment_ids: List[int],
         depth: int,
-        _counter: Optional[List[int]] = None,
     ) -> List[dict]:
         """
-        Recursively fetch comments from the HN Firebase API.
+        Fetch comments from the HN Firebase API using concurrent workers.
+
+        Top-level comments are fetched in parallel using a thread pool.
+        Children are fetched recursively within each worker thread.
+        Display order is preserved by processing results in submission order.
 
         Args:
             manager: EthicalScrapingManager instance
             comment_ids: List of comment IDs to fetch
             depth: Current nesting depth (0 = top-level)
-            _counter: Internal mutable counter [fetched_so_far] for cap enforcement
 
         Returns:
             Flat list of comment dicts in display order
         """
-        if _counter is None:
-            _counter = [0]
+        counter = {"n": 0}
+        lock = threading.Lock()
 
-        if depth > self._MAX_COMMENT_DEPTH:
-            return []
+        def _fetch_single(cid, d):
+            """Fetch one comment and its children. Thread-safe."""
+            with lock:
+                if counter["n"] >= self._MAX_COMMENTS_PER_ARTICLE:
+                    return []
 
-        comments = []
-
-        for i, cid in enumerate(comment_ids):
-            if _counter[0] >= self._MAX_COMMENTS_PER_ARTICLE:
-                self.logger.debug(
-                    f"Reached max comments cap ({self._MAX_COMMENTS_PER_ARTICLE})"
-                )
-                break
-
-            self.logger.debug(
-                f"Fetching comment {i + 1}/{len(comment_ids)} (depth {depth})"
-            )
+            if d > self._MAX_COMMENT_DEPTH:
+                return []
 
             item = manager.request_hn_api(
                 self.session,
                 f"{self._HN_API_BASE}/item/{cid}.json",
                 timeout=self.config.timeout,
+                skip_rate_limit=True,
             )
-
             if item is None:
-                continue
+                return []
 
-            _counter[0] += 1
+            with lock:
+                if counter["n"] >= self._MAX_COMMENTS_PER_ARTICLE:
+                    return []
+                counter["n"] += 1
 
+            result = []
             is_deleted = item.get("deleted", False)
             is_dead = item.get("dead", False)
 
             if not is_deleted and not is_dead:
                 text = self._clean_api_comment_html(item.get("text", ""))
                 if text:
-                    comments.append({
+                    result.append({
                         "id": str(cid),
                         "user": "Anonymous",
                         "user_link": (
                             f"https://news.ycombinator.com/item?id={cid}"
                         ),
                         "text": text,
-                        "level": depth,
+                        "level": d,
                     })
 
-            # Recurse into children (even for deleted parents)
+            # Recurse into children sequentially within this thread
             kids = item.get("kids", [])
-            if kids and _counter[0] < self._MAX_COMMENTS_PER_ARTICLE:
-                children = self._fetch_comment_tree(
-                    manager, kids, depth + 1, _counter,
-                )
-                comments.extend(children)
+            for kid_id in kids:
+                with lock:
+                    if counter["n"] >= self._MAX_COMMENTS_PER_ARTICLE:
+                        break
+                result.extend(_fetch_single(kid_id, d + 1))
+
+            return result
+
+        # Dispatch top-level comment IDs to the thread pool
+        comments = []
+        with ThreadPoolExecutor(
+            max_workers=self._CONCURRENT_WORKERS,
+        ) as pool:
+            futures = []
+            for cid in comment_ids:
+                with lock:
+                    if counter["n"] >= self._MAX_COMMENTS_PER_ARTICLE:
+                        break
+                futures.append(pool.submit(_fetch_single, cid, depth))
+
+            # Collect in submission order to preserve display order
+            for future in futures:
+                result = future.result()
+                if result:
+                    comments.extend(result)
 
         return comments
 

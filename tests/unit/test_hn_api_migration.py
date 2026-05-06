@@ -457,33 +457,20 @@ class TestComplianceMessage:
     def teardown_method(self):
         HnSource._hn_compliance_message_shown = False
 
-    def test_compliance_message_shown_once(self, tmp_path):
-        """Message appears on first call, not on second."""
+    def test_compliance_message_shown_once(self):
+        """Message flag is set after discover_articles, not repeated."""
         source = _make_hn_source()
         mock_manager = MagicMock()
-        mock_manager.request_hn_api.return_value = {
-            "id": 201, "by": "u", "text": "<p>Hi</p>", "type": "comment"
-        }
+        mock_manager.request_hn_api.side_effect = [
+            [100],
+            {"id": 100, "type": "story", "title": "Test", "url": "https://example.com", "kids": [201]},
+        ]
 
         with patch(
             "capcat.sources.builtin.custom.hn.source.get_ethical_manager",
             return_value=mock_manager,
-        ), patch(
-            "capcat.core.streamlined_comment_processor.create_optimized_comment_processor"
-        ) as mock_pf:
-            mock_p = MagicMock()
-            mock_p.generate_inline_comments_markdown.return_value = "# C"
-            mock_p.get_performance_metrics.return_value = {
-                "comments_processed": 1, "links_processed": 0
-            }
-            mock_pf.return_value = mock_p
-
-            source.fetch_comments(
-                comment_url="https://news.ycombinator.com/item?id=100",
-                article_title="First",
-                article_folder_path=str(tmp_path),
-                comment_ids=[201],
-            )
+        ), patch("builtins.print"):
+            source.discover_articles(count=1)
 
         assert HnSource._hn_compliance_message_shown is True
 
