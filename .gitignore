@@ -133,6 +133,7 @@ target/
 # Project Specific - Development Artifacts
 # Internal documentation and session notes
 Reports/
+.session-memory.md
 CLAUDE.md
 CLEANUP_ANALYSIS.md
 *ANALYSIS.md
