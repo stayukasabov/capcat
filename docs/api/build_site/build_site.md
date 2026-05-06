@@ -46,5 +46,5 @@ Inject favicon link into <head> if not already present.
 def build_site()
 ```
 
-Replace {% include %} directives and old HTML with actual content.
+Replace {% raw %}{% include %}{% endraw %} directives and old HTML with actual content.
 
