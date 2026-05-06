@@ -128,103 +128,6 @@ for config-driven sources in Capcat
 - [capcat.sources.builtin.custom.youtube.source](../api/capcat/source.md) - YouTube specialized source implementation
 - [capcat.tui](../api/capcat/tui.md) - TUI entry point — delegates to core interactive module
 
-### Core
-
-- [core.article_fetcher](../api/core/article_fetcher.md) - Shared article fetching functionality for Capcat sources
-- [core.circuit_breaker](../api/core/circuit_breaker.md) - Circuit Breaker pattern implementation for Capcat
-- [core.cli_recovery](../api/core/cli_recovery.md) - CLI error recovery and user guidance system
-- [core.cli_validation](../api/core/cli_validation.md) - Enhanced CLI validation and error handling for better user experience
-- [core.command_logging](../api/core/command_logging.md) - Enhanced command logging for CLI debugging and audit trail
-- [core.config](../api/core/config.md) - Configuration management for Capcat
-- [core.config.source_base](../api/core/source_base.md) - Base configuration classes for news sources
-- [core.config.source_registry](../api/core/source_registry.md) - Source Registry for managing all available news sources and their configurations
-- [core.conversion_executor](../api/core/conversion_executor.md) - Shared executor pool for HTML-to-Markdown conversion to prevent nested ThreadPoolExecutor deadlock
-- [core.design_system_compiler](../api/core/design_system_compiler.md) - Design System Compiler for Capcat HTML Generation
-
-Compiles CSS custom properties from the design system into hardcoded values
-for performance optimization and self-contained HTML generation
-- [core.downloader](../api/core/downloader.md) - Media downloader for Capcat
-- [core.enhanced_argparse](../api/core/enhanced_argparse.md) - Enhanced ArgumentParser with better error messages and validation
-- [core.error_handling](../api/core/error_handling.md) - Comprehensive error handling and recovery system for Capcat
-- [core.ethical_scraping](../api/core/ethical_scraping.md) - Ethical scraping utilities for Capcat
-- [core.exceptions](../api/core/exceptions.md) - Custom exceptions for Capcat application
-- [core.formatter](../api/core/formatter.md) - HTML to Markdown converter for Capcat
-- [core.html_generator](../api/core/html_generator.md) - HTML Generator for Capcat - Static Site Generation
-Creates self-contained HTML files from markdown content with embedded CSS and JavaScript
-- [core.html_post_processor](../api/core/html_post_processor.md) - HTML Post-Processor for Capcat Archives
-Handles post-processing HTML generation after article scraping is complete
-- [core.image_processor](../api/core/image_processor.md) - Global Image Processor for Capcat
-- [core.interactive](../api/core/interactive.md) - Interactive mode for Capcat
-- [core.logging_config](../api/core/logging_config.md) - Logging configuration for Capcat
-- [core.media_config](../api/core/media_config.md) - Media Configuration Manager for different news sources
-- [core.media_executor](../api/core/media_executor.md) - Shared executor pool for media processing to prevent nested ThreadPoolExecutor deadlock
-- [core.media_processor](../api/core/media_processor.md) - Media processing component for Capcat
-- [core.network_resilience](../api/core/network_resilience.md) - Network Resilience Patterns for Source Processing
-
-Clean architecture implementation applying SOLID principles:
-- Single Responsibility: Each class has one clear purpose
-- Open/Closed: Extensible via strategy pattern
-- Liskov Substitution: RetryStrategy implementations interchangeable
-- Interface Segregation: Small, focused interfaces
-- Dependency Inversion: Depend on abstractions not concretions
-- [core.news_source_adapter](../api/core/news_source_adapter.md) - Base NewsSourceAdapter class to eliminate code duplication across source modules
-- [core.progress](../api/core/progress.md) - Progress indicators and status reporting for Capcat
-- [core.rate_limiter](../api/core/rate_limiter.md) - Rate limiting system for Capcat to prevent overwhelming source servers
-- [core.retry](../api/core/retry.md) - Retry mechanisms with exponential backoff for Capcat
-- [core.retry_skip](../api/core/retry_skip.md) - Retry-and-Skip Logic for Network Resilience
-
-Implements intelligent retry-and-skip mechanism for sources that timeout
-or refuse connection
-- [core.session_pool](../api/core/session_pool.md) - Global session pooling for optimal network performance across all sources
-- [core.shutdown](../api/core/shutdown.md) - Graceful shutdown handling for Capcat
-- [core.source_config](../api/core/source_config.md) - Source configuration for optimized URL detection in Capcat
-- [core.source_configs](../api/core/source_configs.md) - Modular source configuration system with backward compatibility
-- [core.source_factory](../api/core/source_factory.md) - Modernized factory for creating news source adapters
-- [core.source_system.add_source_command](../api/core/add_source_command.md) - Professional implementation of the add-source command using clean architecture principles
-- [core.source_system.add_source_service](../api/core/add_source_service.md) - Service layer for the add-source command
-- [core.source_system.base_source](../api/core/base_source.md) - Abstract base class for all news sources
-- [core.source_system.bundle_manager](../api/core/bundle_manager.md)
-- [core.source_system.bundle_models](../api/core/bundle_models.md) - Data models for bundle management
-- [core.source_system.bundle_service](../api/core/bundle_service.md) - Service layer for bundle management
-- [core.source_system.bundle_ui](../api/core/bundle_ui.md) - User interface components for bundle management
-- [core.source_system.bundle_validator](../api/core/bundle_validator.md) - Bundle validation logic
-- [core.source_system.config_driven_source](../api/core/config_driven_source.md) - Config-driven source implementation
-- [core.source_system.discovery_strategies](../api/core/discovery_strategies.md) - Discovery strategy implementations for article discovery
-- [core.source_system.enhanced_remove_command](../api/core/enhanced_remove_command.md) - Enhanced remove-source command with advanced features:
-- Dry-run mode
-- Automatic backups
-- Usage analytics
-- Batch removal from file
-- Undo/restore functionality
-- [core.source_system.feed_discovery](../api/core/feed_discovery.md) - RSS/Atom feed discovery utilities
-- [core.source_system.feed_parser](../api/core/feed_parser.md) - Feed parser abstraction for RSS and Atom feeds
-- [core.source_system.performance_monitor](../api/core/performance_monitor.md) - Source performance monitoring system for the hybrid architecture
-- [core.source_system.questionary_ui](../api/core/questionary_ui.md) - User interface implementation using questionary for interactive prompts
-- [core.source_system.removal_ui](../api/core/removal_ui.md) - User interface implementation for remove-source command
-- [core.source_system.remove_source_command](../api/core/remove_source_command.md) - Professional implementation of the remove-source command using clean architecture
-- [core.source_system.remove_source_service](../api/core/remove_source_service.md) - Service layer for remove-source command
-- [core.source_system.rss_feed_introspector](../api/core/rss_feed_introspector.md)
-- [core.source_system.source_analytics](../api/core/source_analytics.md) - Source usage analytics and statistics
-- [core.source_system.source_backup_manager](../api/core/source_backup_manager.md) - Backup and restore functionality for source configurations
-- [core.source_system.source_config](../api/core/source_config.md) - Source configuration system for specialized sources
-- [core.source_system.source_config_generator](../api/core/source_config_generator.md)
-- [core.source_system.source_factory](../api/core/source_factory.md) - Source factory for creating and managing news source instances
-- [core.source_system.source_registry](../api/core/source_registry.md) - Source registry for automatic discovery and management of news sources
-- [core.source_system.validation_engine](../api/core/validation_engine.md) - Enhanced configuration validation engine for the source system
-- [core.specialized_source_manager](../api/core/specialized_source_manager.md) - Specialized Source Manager for automatic URL-based source activation
-- [core.storage_manager](../api/core/storage_manager.md) - Storage management component for Capcat
-- [core.template_renderer](../api/core/template_renderer.md) - Simple Template Renderer for Capcat
-Replaces {{placeholder}} variables with actual values from configuration
-- [core.theme_utils](../api/core/theme_utils.md) - Theme utilities for hash-based theme persistence
-- [core.timeout_config](../api/core/timeout_config.md) - Adaptive timeout configuration for Capcat
-- [core.timeout_wrapper](../api/core/timeout_wrapper.md) - Timeout wrapper utilities for preventing hanging operations
-- [core.unified_article_processor](../api/core/unified_article_processor.md) - Unified Article Processor - Universal entry point for all article processing
-- [core.unified_media_processor](../api/core/unified_media_processor.md) - Unified Media Processor Integration Layer
-- [core.unified_source_processor](../api/core/unified_source_processor.md) - Unified Source Processor for Capcat
-- [core.update_manager](../api/core/update_manager.md) - Update Manager for Capcat
-- [core.url_utils](../api/core/url_utils.md) - URL validation and normalization utilities for Capcat
-- [core.utils](../api/core/utils.md) - Core utilities for the Capcat application
-
 ### Debug
 
 - [debug.content-extraction-debugger](../api/debug/content-extraction-debugger.md) - Content Extraction Debugging Tool for Capcat
@@ -263,7 +166,6 @@ handling, and comprehensive validation
 A free and open-source tool to make people's lives easier
 - [cleanup_development_files](../api/root/cleanup_development_files.md) - Remove internal development files from git tracking
 - [cleanup_repo](../api/root/cleanup_repo.md) - Repository cleanup script: Remove unnecessary files from git tracking
-- [cli](../api/root/cli.md) - Professional CLI interface for Capcat using subcommand architecture
 - [convert_docs_to_html](../api/root/convert_docs_to_html.md) - Convert Markdown documentation to clean HTML with minimal styling
 - [convert_to_markdown](../api/root/convert_to_markdown.md)
 - [delete_h4_colon](../api/root/delete_h4_colon.md) - Delete colon after </h4> tags
@@ -324,17 +226,12 @@ Usage:
 - [sources.active.custom.lb.source](../api/sources/source.md) - Lobsters source implementation for the new source system
 - [sources.base.config_schema](../api/sources/config_schema.md) - Base configuration schema for news sources
 - [sources.base.factory](../api/sources/factory.md) - Clean factory pattern for creating news source adapters
-- [sources.specialized.medium.source](../api/sources/source.md) - Medium
-- [sources.specialized.substack.source](../api/sources/source.md) - Substack
-- [sources.specialized.twitter.source](../api/sources/source.md) - Twitter/X
-- [sources.specialized.vimeo.source](../api/sources/source.md) - Vimeo specialized source implementation
-- [sources.specialized.youtube.source](../api/sources/source.md) - YouTube specialized source implementation
 
 ## Statistics
 
-- **Total Modules**: 217
-- **Total Classes**: 404
-- **Total Functions**: 549
-- **Public Functions**: 434
-- **Documentation Coverage**: 79.1%
+- **Total Modules**: 138
+- **Total Classes**: 225
+- **Total Functions**: 364
+- **Public Functions**: 286
+- **Documentation Coverage**: 78.6%
 

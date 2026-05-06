@@ -3,23 +3,28 @@ layout: default
 render_with_liquid: false
 ---
 
-# sources.specialized.youtube.source
+# sources.active.custom.hn.source
 
-**File:** `Application/sources/specialized/youtube/source.py`
+**File:** `Application/sources/active/custom/hn/source.py`
 
 ## Description
 
-YouTube specialized source implementation.
-YouTube content is video-based and cannot be meaningfully archived as text,
-so we create placeholder articles with links to original videos.
+Hacker News source implementation for the new source system.
+Enhanced with comment functionality from V1 implementation.
+
+## Constants
+
+### _HN_SELECTORS
+
+**Value:** `{'comment_selector': '.comment-tree .athing', 'user_selector': '.hnuser', 'comment_text_selector': '.comment', 'depth_fn': _hn_depth, 'comment_permalink_fn': lambda cid: f'https://news.ycombinator.com/item?id={cid}'}`
 
 ## Classes
 
-### YouTubeSource
+### HnSource
 
 **Inherits from:** BaseSource
 
-YouTube specialized source that creates placeholder articles.
+Hacker News source implementation with comment support.
 
 #### Methods
 
@@ -35,28 +40,14 @@ def source_type(self) -> str
 
 **Returns:** str
 
-##### can_handle_url
-
-```python
-def can_handle_url(cls, url: str) -> bool
-```
-
-Check if this source can handle the given URL.
-
-**Parameters:**
-
-- `cls`
-- `url` (str)
-
-**Returns:** bool
-
 ##### discover_articles
 
 ```python
 def discover_articles(self, count: int) -> List[Article]
 ```
 
-YouTube discovery not supported without API access.
+Discover articles from Hacker News with comment URLs.
+Supports pagination for fetching >30 articles.
 
 **Parameters:**
 
@@ -65,26 +56,7 @@ YouTube discovery not supported without API access.
 
 **Returns:** List[Article]
 
-##### _extract_video_title
-
-```python
-def _extract_video_title(self, url: str) -> Optional[str]
-```
-
-Extract video title from YouTube using yt-dlp.
-
-Args:
-    url: YouTube video URL
-
-Returns:
-    Video title or None if extraction fails
-
-**Parameters:**
-
-- `self`
-- `url` (str)
-
-**Returns:** Optional[str]
+⚠️ **High complexity:** 21
 
 ##### fetch_article_content
 
@@ -92,7 +64,8 @@ Returns:
 def fetch_article_content(self, article: Article, output_dir: str, progress_callback = None) -> Tuple[bool, Optional[str]]
 ```
 
-Create placeholder article with actual video title.
+Fetch article content from Hacker News.
+Optimized to prevent conversion hangs.
 
 **Parameters:**
 
@@ -103,4 +76,81 @@ Create placeholder article with actual video title.
 
 **Returns:** Tuple[bool, Optional[str]]
 
+⚠️ **High complexity:** 11
+
+##### _validate_custom_config
+
+```python
+def _validate_custom_config(self) -> List[str]
+```
+
+Validate Hacker News-specific configuration.
+
+**Parameters:**
+
+- `self`
+
+**Returns:** List[str]
+
+##### _should_skip_custom
+
+```python
+def _should_skip_custom(self, url: str, title: str = '') -> bool
+```
+
+Custom skip logic for Hacker News.
+
+**Parameters:**
+
+- `self`
+- `url` (str)
+- `title` (str) *optional*
+
+**Returns:** bool
+
+##### fetch_comments
+
+```python
+def fetch_comments(self, comment_url: str, article_title: str, article_folder_path: str, html_mode: bool = False) -> bool
+```
+
+Fetch and save Hacker News comments using optimized streamlined processor.
+
+Args:
+    comment_url: URL to the HN comments page
+    article_title: Title of the article for logging
+    article_folder_path: Specific folder path for this article
+    html_mode: If True, generate HTML directly; if False, generate markdown
+
+Returns:
+    bool: True if comments were successfully saved, False otherwise
+
+**Parameters:**
+
+- `self`
+- `comment_url` (str)
+- `article_title` (str)
+- `article_folder_path` (str)
+- `html_mode` (bool) *optional*
+
+**Returns:** bool
+
+⚠️ **High complexity:** 14
+
+
+## Functions
+
+### _hn_depth
+
+```python
+def _hn_depth(elem) -> int
+```
+
+Extract comment depth from HN's td.ind img width attribute (40px per level).
+
+**Parameters:**
+
+- `elem`
+
+**Returns:** int
 
