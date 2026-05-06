@@ -48,8 +48,8 @@ graph TB
 
         subgraph "Custom Examples"
             HackerNews[Hacker News Source]
-            BBC[BBC Source]
-            Nature[Nature Source]
+            Lobsters[Lobsters Source]
+            Medium[Medium Source]
         end
     end
 
@@ -91,8 +91,8 @@ graph TB
     SourceLogic --> BaseSource
 
     PythonModules --> HackerNews
-    PythonModules --> BBC
-    PythonModules --> Nature
+    PythonModules --> Lobsters
+    PythonModules --> Medium
 
     %% Styling
     classDef discovery fill:#e3f2fd
@@ -107,7 +107,7 @@ graph TB
     class Factory,TypeResolver,InstanceCreator factory
     class BaseSource,GetArticles,GetContent,Validate interface
     class ConfigSchema,YAMLConfig,ConfigParser,GenericSource,InfoQ,IEEE,Mashable config
-    class CustomInterface,PythonModules,SourceLogic,HackerNews,BBC,Nature custom
+    class CustomInterface,PythonModules,SourceLogic,HackerNews,Lobsters,Medium custom
 ```
 
 ## Source Types Comparison
@@ -120,7 +120,7 @@ graph TB
 | **Maintenance** | YAML config updates | Code changes required |
 | **Comments Support** | No | Yes |
 | **Custom Logic** | No | Yes |
-| **Examples** | InfoQ, IEEE, Mashable | HN, BBC, Nature |
+| **Examples** | InfoQ, IEEE, Mashable | HN, Lobsters, Medium |
 
 ## Source Registration Process
 

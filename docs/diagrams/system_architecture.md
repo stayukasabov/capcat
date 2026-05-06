@@ -4,8 +4,8 @@
 graph TB
     subgraph "User Interface Layer"
         CLI[CLI Interface<br/>cli.py]
-        Wrapper[Bash Wrapper<br/>capcat]
-        PythonWrapper[Python Wrapper<br/>run_capcat.py]
+        TUI[Interactive TUI<br/>tui.py]
+        EntryPoint[Entry Point<br/>__main__.py]
     end
 
     subgraph "Application Layer"
@@ -49,9 +49,10 @@ graph TB
     end
 
     %% User interactions
+    EntryPoint --> CLI
+    EntryPoint --> TUI
     CLI --> Main
-    Wrapper --> Main
-    PythonWrapper --> Main
+    TUI --> Main
 
     %% Application flow
     Main --> Config
@@ -93,7 +94,7 @@ graph TB
     classDef serviceLayer fill:#fce4ec
     classDef outputLayer fill:#f1f8e9
 
-    class CLI,Wrapper,PythonWrapper uiLayer
+    class CLI,TUI,EntryPoint uiLayer
     class Main,Config,ErrorHandler,Progress appLayer
     class SourceFactory,SourceRegistry,BaseSource,ConfigDriven,CustomSources sourceLayer
     class ArticleFetcher,MediaProcessor,ContentFormatter,HTMLGenerator processLayer

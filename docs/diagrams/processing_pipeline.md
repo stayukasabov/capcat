@@ -24,7 +24,7 @@ graph LR
         CleanupHTML[HTML Cleanup]
     end
 
-    subgraph "Media Stage"
+    subgraph "Media Stage (--media flag only)"
         MediaDetection[Media Detection]
         URLExtraction[URL Extraction]
         TypeClassification[Type Classification]

@@ -27,13 +27,6 @@ graph TB
         end
     end
 
-    subgraph "Docker Environment"
-        DockerContainer[Capcat Container]
-        VolumeMount[Volume Mounts]
-        NetworkConfig[Network Configuration]
-        HealthChecks[Health Checks]
-    end
-
     subgraph "CI/CD Pipeline"
         GitRepo[Git Repository]
         GithubActions[GitHub Actions]
@@ -41,16 +34,9 @@ graph TB
         subgraph "Build Pipeline"
             LintCheck[Code Linting]
             UnitTests[Unit Tests]
-            IntegrationTests[Integration Tests]
             DocGeneration[Documentation Generation]
             PackageBuilding[Package Building]
-        end
-
-        subgraph "Deploy Pipeline"
-            Staging[Staging Environment]
-            ProductionDeploy[Production Deployment]
-            HealthValidation[Health Validation]
-            Rollback[Rollback Capability]
+            PyPIPublish[PyPI Publish]
         end
     end
 
@@ -76,31 +62,17 @@ graph TB
     ProdServer --> SystemdService
     ProdServer --> ProcessMonitor
 
-    %% Docker deployment
-    DockerContainer --> VolumeMount
-    DockerContainer --> NetworkConfig
-    DockerContainer --> HealthChecks
-    VolumeMount --> NewsDir
-    VolumeMount --> CapcatsDir
-
     %% CI/CD flow
     GitRepo --> GithubActions
     GithubActions --> LintCheck
     LintCheck --> UnitTests
-    UnitTests --> IntegrationTests
-    IntegrationTests --> DocGeneration
+    UnitTests --> DocGeneration
     DocGeneration --> PackageBuilding
-
-    PackageBuilding --> Staging
-    Staging --> ProductionDeploy
-    ProductionDeploy --> HealthValidation
-    HealthValidation --> Rollback
+    PackageBuilding --> PyPIPublish
 
     %% External dependencies
     ProdVenv --> NewsSourcesExt
-    DockerContainer --> NewsSourcesExt
     ProdServer --> NetworkExt
-    DockerContainer --> NetworkExt
     NetworkExt --> DNSExt
 
     %% Styling
@@ -113,7 +85,7 @@ graph TB
     class DevMachine,LocalVenv,LocalFiles,DevTools dev
     class ProdServer,ProdVenv,NewsDir,CapcatsDir,LogDir,ConfigDir,CronJobs,SystemdService,ProcessMonitor prod
     class DockerContainer,VolumeMount,NetworkConfig,HealthChecks docker
-    class GitRepo,GithubActions,LintCheck,UnitTests,IntegrationTests,DocGeneration,PackageBuilding,Staging,ProductionDeploy,HealthValidation,Rollback cicd
+    class GitRepo,GithubActions,LintCheck,UnitTests,DocGeneration,PackageBuilding,PyPIPublish cicd
     class NewsSourcesExt,NetworkExt,DNSExt external
 ```
 
@@ -139,22 +111,7 @@ pip install -r requirements.txt
 ./capcat bundle tech --count 10
 ```
 
-### 3. Docker Deployment
-```dockerfile
-FROM python:3.11-slim
-
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-
-COPY . .
-RUN chmod +x capcat
-
-VOLUME ["/app/output"]
-CMD ["./capcat", "bundle", "tech", "--count", "10"]
-```
-
-### 4. Systemd Service
+### 3. Systemd Service
 ```ini
 [Unit]
 Description=Capcat News Archiver
@@ -164,17 +121,17 @@ After=network.target
 Type=oneshot
 User=capcat
 WorkingDirectory=/opt/capcat
-ExecStart=/opt/capcat/venv/bin/python capcat.py bundle tech --count 30
+ExecStart=/opt/capcat/venv/bin/capcat bundle tech --count 30
 Environment=CAPCAT_OUTPUT_DIR=/var/lib/capcat/news
 
 [Install]
 WantedBy=multi-user.target
 ```
 
-### 5. Cron Job
+### 4. Cron Job
 ```bash
 # Daily news archiving at 6 AM
-0 6 * * * /opt/capcat/venv/bin/python /opt/capcat/capcat.py bundle tech --count 30
+0 6 * * * /opt/capcat/venv/bin/capcat bundle tech --count 30
 ```
 
 ## Security Considerations

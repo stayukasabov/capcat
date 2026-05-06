@@ -5,53 +5,45 @@
 ```mermaid
 classDiagram
     class BaseSource {
-        +name
-        +display_name
-        +category
-        +__init__()
-        +get_articles(count)
-        +get_article_content(url)
-        +validate()
-        +get_rate_limit()
-        +get_user_agent()
+        +config
+        +session
+        +source_type
+        +__init__(config, session)
+        +discover_articles(count)
+        +fetch_article_content(article, output_dir)
+        +fetch_comments(comment_url, ...)
     }
 
     class ConfigDrivenSource {
         +config
         +selectors
         +__init__(config)
-        +get_articles(count)
-        +get_article_content(url)
-        +validate()
+        +source_type()
+        +discover_articles(count)
+        +fetch_article_content(article, output_dir)
         -_parse_article_list(html)
         -_extract_content(html)
     }
 
-    class CustomSource {
-        +__init__()
-        +get_articles(count)
-        +get_article_content(url)
-        +get_comments(url)
-        -_custom_processing()
-    }
-
-    class HackerNewsSource {
-        +api_base
-        +__init__()
-        +get_articles(count)
-        +get_article_content(url)
-        +get_comments(url)
+    class HnSource {
+        +_HN_API_BASE
+        +_CONCURRENT_WORKERS
+        +__init__(config)
+        +source_type()
+        +discover_articles(count)
+        +fetch_article_content(article, output_dir)
+        +fetch_comments(comment_url, ...)
         -_fetch_from_api(endpoint)
-        -_process_comments(comments)
+        -_process_comment_tree(item)
     }
 
-    class BBCSource {
-        +rss_url
-        +__init__()
-        +get_articles(count)
-        +get_article_content(url)
+    class LbSource {
+        +__init__(config)
+        +source_type()
+        +discover_articles(count)
+        +fetch_article_content(article, output_dir)
+        +fetch_comments(comment_url, ...)
         -_parse_rss(xml)
-        -_extract_bbc_content(html)
     }
 
     class SourceFactory {
@@ -95,9 +87,8 @@ classDiagram
     }
 
     BaseSource <|-- ConfigDrivenSource
-    BaseSource <|-- CustomSource
-    CustomSource <|-- HackerNewsSource
-    CustomSource <|-- BBCSource
+    BaseSource <|-- HnSource
+    BaseSource <|-- LbSource
     SourceFactory --> BaseSource  : creates
     SourceFactory --> SourceRegistry  : uses
     SourceRegistry --> BaseSource  : manages
