@@ -29,7 +29,7 @@ Implements best practices:
 
 ### _HN_API_MIN_DELAY
 
-**Value:** `0.5`
+**Value:** `0.05`
 
 ## Classes
 
@@ -209,14 +209,14 @@ Raises:
 ##### request_hn_api
 
 ```python
-def request_hn_api(self, session: requests.Session, url: str, timeout: int = 10, max_retries: int = 3, initial_delay: float = 1.0) -> Optional[dict]
+def request_hn_api(self, session: requests.Session, url: str, timeout: int = 10, max_retries: int = 3, initial_delay: float = 1.0, skip_rate_limit: bool = False) -> Optional[dict]
 ```
 
-Make a rate-limited request to the HN Firebase API.
+Make a request to the HN Firebase API.
 
-Sequential only. 0.5s minimum delay between requests. Skips robots.txt
-(Firebase API is explicitly provided for programmatic access).
-Handles 429/503 with exponential backoff.
+Concurrency-safe. When skip_rate_limit is True, no artificial delay
+is added (used for concurrent comment fetching where the thread pool
+size is the throttle). Handles 429/503 with exponential backoff.
 
 Args:
     session: Requests session
@@ -224,6 +224,7 @@ Args:
     timeout: Request timeout in seconds
     max_retries: Maximum retry attempts on 429/503
     initial_delay: Initial backoff delay in seconds
+    skip_rate_limit: If True, skip the inter-request delay
 
 Returns:
     Parsed JSON dict, or None if the request fails after retries
@@ -236,6 +237,7 @@ Returns:
 - `timeout` (int) *optional*
 - `max_retries` (int) *optional*
 - `initial_delay` (float) *optional*
+- `skip_rate_limit` (bool) *optional*
 
 **Returns:** Optional[dict]
 

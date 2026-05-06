@@ -22,6 +22,18 @@ Uses hacker-news.firebaseio.com/v0/ for article discovery and comment fetching.
 
 **Value:** `5`
 
+### _MAX_COMMENTS_PER_ARTICLE
+
+**Value:** `200`
+
+### _MAX_COMMENT_DEPTH
+
+**Value:** `4`
+
+### _CONCURRENT_WORKERS
+
+**Value:** `5`
+
 ## Classes
 
 ### HnSource
@@ -66,7 +78,7 @@ for each story sequentially with rate limiting.
 
 **Returns:** List[Article]
 
-⚠️ **High complexity:** 13
+⚠️ **High complexity:** 14
 
 ##### fetch_article_content
 
@@ -157,7 +169,11 @@ Returns:
 def _fetch_comment_tree(self, manager, comment_ids: List[int], depth: int) -> List[dict]
 ```
 
-Recursively fetch comments from the HN Firebase API.
+Fetch comments from the HN Firebase API using concurrent workers.
+
+Top-level comments are fetched in parallel using a thread pool.
+Children are fetched recursively within each worker thread.
+Display order is preserved by processing results in submission order.
 
 Args:
     manager: EthicalScrapingManager instance
@@ -175,6 +191,8 @@ Returns:
 - `depth` (int)
 
 **Returns:** List[dict]
+
+⚠️ **High complexity:** 14
 
 ##### _clean_api_comment_html
 
@@ -204,4 +222,19 @@ Returns:
 
 ⚠️ **High complexity:** 12
 
+
+## Functions
+
+### _fetch_single
+
+```python
+def _fetch_single(cid, d)
+```
+
+Fetch one comment and its children. Thread-safe.
+
+**Parameters:**
+
+- `cid`
+- `d`
 
