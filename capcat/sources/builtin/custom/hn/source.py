@@ -30,6 +30,8 @@ class HnSource(BaseSource):
 
     _HN_API_BASE = "https://hacker-news.firebaseio.com/v0"
     _MAX_LINKS_PER_COMMENT = 5
+    _MAX_COMMENTS_PER_ARTICLE = 200
+    _MAX_COMMENT_DEPTH = 4
     _hn_compliance_message_shown = False
 
     @property
@@ -248,12 +250,14 @@ class HnSource(BaseSource):
             self.logger.debug(f"No comment IDs available for: {article_title}")
             comment_ids = []
 
-        # Show compliance message once per session
+        # Show compliance message once per session (visible in CLI)
         if not HnSource._hn_compliance_message_shown:
-            self.logger.info(
-                "Using Hacker News API with rate-limited requests "
+            msg = (
+                "Using official Hacker News API with rate-limited requests "
                 "to comply with site guidelines. This may take a few minutes."
             )
+            self.logger.info(msg)
+            print(f"\n{msg}\n", flush=True)
             HnSource._hn_compliance_message_shown = True
 
         try:
@@ -326,6 +330,7 @@ class HnSource(BaseSource):
         manager,
         comment_ids: List[int],
         depth: int,
+        _counter: Optional[List[int]] = None,
     ) -> List[dict]:
         """
         Recursively fetch comments from the HN Firebase API.
@@ -334,13 +339,26 @@ class HnSource(BaseSource):
             manager: EthicalScrapingManager instance
             comment_ids: List of comment IDs to fetch
             depth: Current nesting depth (0 = top-level)
+            _counter: Internal mutable counter [fetched_so_far] for cap enforcement
 
         Returns:
             Flat list of comment dicts in display order
         """
+        if _counter is None:
+            _counter = [0]
+
+        if depth > self._MAX_COMMENT_DEPTH:
+            return []
+
         comments = []
 
         for i, cid in enumerate(comment_ids):
+            if _counter[0] >= self._MAX_COMMENTS_PER_ARTICLE:
+                self.logger.debug(
+                    f"Reached max comments cap ({self._MAX_COMMENTS_PER_ARTICLE})"
+                )
+                break
+
             self.logger.debug(
                 f"Fetching comment {i + 1}/{len(comment_ids)} (depth {depth})"
             )
@@ -353,6 +371,8 @@ class HnSource(BaseSource):
 
             if item is None:
                 continue
+
+            _counter[0] += 1
 
             is_deleted = item.get("deleted", False)
             is_dead = item.get("dead", False)
@@ -372,8 +392,10 @@ class HnSource(BaseSource):
 
             # Recurse into children (even for deleted parents)
             kids = item.get("kids", [])
-            if kids:
-                children = self._fetch_comment_tree(manager, kids, depth + 1)
+            if kids and _counter[0] < self._MAX_COMMENTS_PER_ARTICLE:
+                children = self._fetch_comment_tree(
+                    manager, kids, depth + 1, _counter,
+                )
                 comments.extend(children)
 
         return comments

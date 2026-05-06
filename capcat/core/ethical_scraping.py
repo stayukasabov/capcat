@@ -293,7 +293,7 @@ class EthicalScrapingManager:
 
     _HN_API_USER_AGENT = "Capcat/2.0 (Personal news archiver; uses official HN API)"
     _HN_API_DOMAIN = "hacker-news.firebaseio.com"
-    _HN_API_MIN_DELAY = 0.5
+    _HN_API_MIN_DELAY = 0.15
 
     def request_hn_api(
         self,
