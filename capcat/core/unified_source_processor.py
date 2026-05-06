@@ -596,8 +596,12 @@ class UnifiedSourceProcessor:
                         self.logger.info(
                             f"Fetching comments for: {article.title}"
                         )
+                        _comment_kwargs = {}
+                        if getattr(article, "comment_ids", None):
+                            _comment_kwargs["comment_ids"] = article.comment_ids
                         comments_written = source.fetch_comments(
-                            article.comment_url, article.title, article_path
+                            article.comment_url, article.title, article_path,
+                            **_comment_kwargs,
                         )
                         if comments_written:
                             comments_md = find_comments_md(Path(article_path))
