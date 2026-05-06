@@ -51,6 +51,15 @@ class HnSource(BaseSource):
         try:
             self.logger.info("Fetching top stories from official Hacker News API")
 
+            if not HnSource._hn_compliance_message_shown:
+                print(
+                    "\nUsing official Hacker News API with rate-limited "
+                    "requests to comply with site guidelines. "
+                    "This may take a few minutes.\n",
+                    flush=True,
+                )
+                HnSource._hn_compliance_message_shown = True
+
             manager = get_ethical_manager()
 
             story_ids = manager.request_hn_api(
@@ -114,15 +123,6 @@ class HnSource(BaseSource):
                 f"Successfully discovered {len(articles)} articles "
                 f"for {self.config.name}"
             )
-
-            if not HnSource._hn_compliance_message_shown:
-                print(
-                    "\nUsing official Hacker News API with rate-limited "
-                    "requests to comply with site guidelines. "
-                    "This may take a few minutes.\n",
-                    flush=True,
-                )
-                HnSource._hn_compliance_message_shown = True
 
             return articles
 
