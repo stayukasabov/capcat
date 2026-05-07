@@ -53,6 +53,47 @@ def test_single_html_calls_process_directory_tree(tmp_path: Path) -> None:
     assert str(fake_folder) == str(called_path) or called_path is not None
 
 
+def test_find_latest_index_html_returns_capcats_article(tmp_path: Path) -> None:
+    """_find_latest_index_html must return a Capcats article.html when it is
+    newer than any batch News index.html.
+
+    Regression test: the glob was '*/*/html/article.html' (two levels) but the
+    actual Capcats structure is one level deep: 'date-slug/html/article.html'.
+    The mismatched glob caused the function to always return a stale News
+    index instead of the freshly-generated single-article HTML.
+    """
+    import time
+    from unittest.mock import patch
+
+    # Build a fake vault tree
+    news_dir = tmp_path / "News"
+    capcats_dir = tmp_path / "Capcats"
+
+    # Old batch index
+    news_date = news_dir / "News_07-05-2026"
+    news_date.mkdir(parents=True)
+    batch_index = news_date / "index.html"
+    batch_index.write_text("<html>batch</html>")
+
+    # Ensure article.html mtime is strictly newer
+    time.sleep(0.01)
+
+    # Single article - one level deep in Capcats
+    article_dir = capcats_dir / "08-05-2026-my-article" / "html"
+    article_dir.mkdir(parents=True)
+    article_html = article_dir / "article.html"
+    article_html.write_text("<html>article</html>")
+
+    with patch("capcat.core.config.get_news_dir", return_value=news_dir), \
+         patch("capcat.core.config.get_capcats_dir", return_value=capcats_dir):
+        from capcat.core.interactive import _find_latest_index_html
+        result = _find_latest_index_html()
+
+    assert result is not None
+    assert "article.html" in result, f"Expected Capcats article.html, got: {result}"
+    assert "News" not in result, f"Got stale News index instead of Capcats article: {result}"
+
+
 def test_single_html_does_not_call_generate_html_file(tmp_path: Path) -> None:
     """generate_html_file must never be called - it does not exist on
     HTMLGenerator. Calling it raises AttributeError in production."""

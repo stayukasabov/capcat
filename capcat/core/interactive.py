@@ -799,9 +799,9 @@ def _find_latest_index_html() -> "str | None":
             if index.exists():
                 candidates.append((index.stat().st_mtime, str(index.resolve())))
 
-        # Single articles: Capcats/source_date/article/html/article.html
+        # Single articles: Capcats/date-slug/html/article.html
         capcats_dir = get_capcats_dir()
-        for article_html in capcats_dir.glob("*/*/html/article.html"):
+        for article_html in capcats_dir.glob("*/html/article.html"):
             candidates.append(
                 (article_html.stat().st_mtime, str(article_html.resolve()))
             )

@@ -112,7 +112,8 @@ def test_find_latest_index_html_finds_single_article(tmp_path):
     news_tmp = tmp_path / "News"
     news_tmp.mkdir()
     capcats_tmp = tmp_path / "Capcats"
-    article_html = capcats_tmp / "InfoQ_24-03-2026" / "My Article" / "html" / "article.html"
+    # Single articles are one level deep: Capcats/<date-slug>/html/article.html
+    article_html = capcats_tmp / "24-03-2026-my-article" / "html" / "article.html"
     article_html.parent.mkdir(parents=True)
     article_html.write_text("<html/>")
 
@@ -123,7 +124,7 @@ def test_find_latest_index_html_finds_single_article(tmp_path):
 
     assert result is not None
     assert "article.html" in result
-    assert "InfoQ_24-03-2026" in result
+    assert "24-03-2026-my-article" in result
 
 
 def test_find_latest_index_html_prefers_newer(tmp_path):
@@ -139,8 +140,8 @@ def test_find_latest_index_html_prefers_newer(tmp_path):
     (date_dir / "index.html").write_text("<html/>")
     time.sleep(0.01)
 
-    # Create a newer single article
-    article_html = capcats_tmp / "InfoQ_24-03-2026" / "My Article" / "html" / "article.html"
+    # Create a newer single article - one level deep: Capcats/<date-slug>/html/article.html
+    article_html = capcats_tmp / "24-03-2026-my-article" / "html" / "article.html"
     article_html.parent.mkdir(parents=True)
     article_html.write_text("<html/>")
 
