@@ -48,6 +48,20 @@ news.ycombinator.com for discovery or comments.
 
 #### Methods
 
+##### _hn_cfg
+
+```python
+def _hn_cfg(self, key: str, default)
+```
+
+Read a parameter from the hn: block in config.yaml, falling back to default.
+
+**Parameters:**
+
+- `self`
+- `key` (str)
+- `default`
+
 ##### source_type
 
 ```python
