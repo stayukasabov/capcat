@@ -396,13 +396,12 @@ transition: background 1s ease, box-shadow 0.3s ease;
 }
 
 .hero-demo {
-  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
   width: 656px;
   max-width: 100%;
   margin: 0 auto;
   background: #000;
-  overflow: hidden;
+  clip-path: inset(0 round var(--radius-lg));
 }
 
 .hero-demo__player {
