@@ -10,7 +10,7 @@ from capcat.core.source_system.base_source import SourceConfig
 
 def _make_hn_source(hn_overrides=None):
     """Build an HnSource with optional hn: config block."""
-    from Config.sources.active.custom.hn.source import HnSource
+    from capcat.sources.builtin.custom.hn.source import HnSource
 
     custom = {
         "display_name": "Hacker News",
