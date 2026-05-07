@@ -2403,16 +2403,19 @@ class ArticleFetcher(ABC):
         self, base_folder: str, base_title: str
     ) -> str:
         """
-        Get folder name - always returns base_title to allow overwrite.
-        When user runs repeatedly, content is replaced instead of
-        creating duplicates.
+        Get a folder name that does not collide with an existing folder in
+        base_folder. If base_title is free, returns it unchanged. If it is
+        already taken, appends -2, -3, ... until a free name is found.
+        This allows the same URL to be fetched from two different sources
+        (or twice from the same source) without one overwriting the other.
         """
         try:
-            # ALWAYS use the original name (allow overwrite)
-            # This prevents _2, _3 numbered folders when re-running
-            # fetch/bundle
-            return base_title
-
+            candidate = base_title
+            counter = 2
+            while os.path.exists(os.path.join(base_folder, candidate)):
+                candidate = f"{base_title}-{counter}"
+                counter += 1
+            return candidate
         except Exception as e:
             self.logger.debug(f"Error getting folder name: {e}")
             return base_title
