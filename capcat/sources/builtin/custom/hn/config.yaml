@@ -37,3 +37,30 @@ template:
     has_comments: true
     comments_url: "comments.html"
     comments_text: "View Comments"
+
+# ─── Hacker News API tuning ─────────────────────────────────────────────────
+# These settings control how the HN Firebase API is used.
+# Changes take effect immediately on the next run - no restart needed.
+hn:
+
+  # Maximum comments fetched per article.
+  # Each comment is one API request. Higher values give more complete threads
+  # but increase fetch time. Default: 200. Range: 10-500.
+  max_comments_per_article: 200
+
+  # How deep to follow reply chains.
+  # 1 = top-level comments only. 4 = up to 4 levels of nesting.
+  # Deeper values fetch more context but add more API requests.
+  # Default: 4. Range: 1-8.
+  max_comment_depth: 4
+
+  # Parallel workers for comment fetching.
+  # More workers fetch comments faster but use more CPU and network.
+  # Keep at 5 or below to stay within HN API rate limits.
+  # Default: 5. Range: 1-10.
+  concurrent_workers: 5
+
+  # Maximum hyperlinks kept per comment.
+  # Excess links are stripped to keep comment text readable.
+  # Default: 5. Range: 1-20.
+  max_links_per_comment: 5
