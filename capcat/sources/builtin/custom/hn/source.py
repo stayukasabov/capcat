@@ -37,6 +37,11 @@ class HnSource(BaseSource):
     _CONCURRENT_WORKERS = 5
     _hn_compliance_message_shown = False
 
+    def _hn_cfg(self, key: str, default):
+        """Read a parameter from the hn: block in config.yaml, falling back to default."""
+        hn_block = (self.config.custom_config or {}).get("hn", {})
+        return hn_block.get(key, default)
+
     @property
     def source_type(self) -> str:
         return "custom"
@@ -355,10 +360,10 @@ class HnSource(BaseSource):
         def _fetch_single(cid, d):
             """Fetch one comment and its children. Thread-safe."""
             with lock:
-                if counter["n"] >= self._MAX_COMMENTS_PER_ARTICLE:
+                if counter["n"] >= self._hn_cfg("max_comments_per_article", self._MAX_COMMENTS_PER_ARTICLE):
                     return []
 
-            if d > self._MAX_COMMENT_DEPTH:
+            if d > self._hn_cfg("max_comment_depth", self._MAX_COMMENT_DEPTH):
                 return []
 
             item = manager.request_hn_api(
@@ -371,7 +376,7 @@ class HnSource(BaseSource):
                 return []
 
             with lock:
-                if counter["n"] >= self._MAX_COMMENTS_PER_ARTICLE:
+                if counter["n"] >= self._hn_cfg("max_comments_per_article", self._MAX_COMMENTS_PER_ARTICLE):
                     return []
                 counter["n"] += 1
 
@@ -396,7 +401,7 @@ class HnSource(BaseSource):
             kids = item.get("kids", [])
             for kid_id in kids:
                 with lock:
-                    if counter["n"] >= self._MAX_COMMENTS_PER_ARTICLE:
+                    if counter["n"] >= self._hn_cfg("max_comments_per_article", self._MAX_COMMENTS_PER_ARTICLE):
                         break
                 result.extend(_fetch_single(kid_id, d + 1))
 
@@ -405,12 +410,12 @@ class HnSource(BaseSource):
         # Dispatch top-level comment IDs to the thread pool
         comments = []
         with ThreadPoolExecutor(
-            max_workers=self._CONCURRENT_WORKERS,
+            max_workers=self._hn_cfg("concurrent_workers", self._CONCURRENT_WORKERS),
         ) as pool:
             futures = []
             for cid in comment_ids:
                 with lock:
-                    if counter["n"] >= self._MAX_COMMENTS_PER_ARTICLE:
+                    if counter["n"] >= self._hn_cfg("max_comments_per_article", self._MAX_COMMENTS_PER_ARTICLE):
                         break
                 futures.append(pool.submit(_fetch_single, cid, depth))
 
@@ -453,7 +458,7 @@ class HnSource(BaseSource):
         # Convert remaining links to markdown (up to limit)
         links_processed = 0
         for link in soup.find_all("a", href=True):
-            if links_processed >= self._MAX_LINKS_PER_COMMENT:
+            if links_processed >= self._hn_cfg("max_links_per_comment", self._MAX_LINKS_PER_COMMENT):
                 link.decompose()
                 continue
 
