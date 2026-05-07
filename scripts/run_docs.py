@@ -13,23 +13,23 @@ from pathlib import Path
 
 def run_command(command, description):
     """Run a command and report status."""
-    print(f"\n🔄 {description}...")
+    print(f"\n{description}...")
     start_time = time.time()
 
     result = os.system(command)
     duration = time.time() - start_time
 
     if result == 0:
-        print(f"✅ {description} completed in {duration:.1f}s")
+        print(f"{description} completed in {duration:.1f}s")
         return True
     else:
-        print(f"❌ {description} failed after {duration:.1f}s")
+        print(f"{description} failed after {duration:.1f}s")
         return False
 
 
 def main():
     """Main documentation generation runner."""
-    print("📚 Capcat Documentation Generator")
+    print("Capcat Documentation Generator")
     print("=" * 50)
 
     # Ensure we're in the right directory
@@ -52,21 +52,16 @@ def main():
         success_count += 1
 
     # Summary
-    print("\n📊 Documentation Generation Summary")
+    print("\nDocumentation Generation Summary")
     print("=" * 50)
     print(f"Tasks completed: {success_count}/{total_tasks}")
 
     if success_count == total_tasks:
-        print("🎉 All documentation generated successfully!")
-        print(f"\n📁 Documentation available in: {docs_dir}")
-        print("\n🚀 Quick start:")
-        print(f"   - Open {docs_dir}/index.md for the main documentation index")
-        print(f"   - Browse {docs_dir}/README.md for the project overview")
-        print(f"   - Check {docs_dir}/api/ for detailed API documentation")
-        print(f"   - View {docs_dir}/architecture/ for system design")
+        print("All documentation generated successfully.")
+        print(f"\nDocumentation available in: {docs_dir}")
     else:
         failed_tasks = total_tasks - success_count
-        print(f"⚠️ {failed_tasks} task(s) failed. Check the output above for details.")
+        print(f"{failed_tasks} task(s) failed. Check the output above for details.")
 
     # Generate documentation manifest
     manifest_path = docs_dir / "manifest.txt"
@@ -86,7 +81,7 @@ Generated Documentation:
         f.write(f"\nTotal files: {len(list(docs_dir.rglob('*')))}\n")
         f.write(f"Documentation size: {get_directory_size(docs_dir):.1f} MB\n")
 
-    print(f"\n📄 Documentation manifest created: {manifest_path}")
+    print(f"\nDocumentation manifest created: {manifest_path}")
 
     return 0 if success_count == total_tasks else 1
 
