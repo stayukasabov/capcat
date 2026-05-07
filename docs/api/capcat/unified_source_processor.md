@@ -56,46 +56,6 @@ def __init__(self, project_root: Optional[Path] = None)
 - `self`
 - `project_root` (Optional[Path]) *optional*
 
-##### clear_url_cache
-
-```python
-def clear_url_cache(cls)
-```
-
-Clear the URL cache for a new processing session.
-
-**Parameters:**
-
-- `cls`
-
-##### is_url_processed
-
-```python
-def is_url_processed(cls, url: str) -> bool
-```
-
-Check if a URL has already been processed.
-
-**Parameters:**
-
-- `cls`
-- `url` (str)
-
-**Returns:** bool
-
-##### mark_url_processed
-
-```python
-def mark_url_processed(cls, url: str)
-```
-
-Mark a URL as processed.
-
-**Parameters:**
-
-- `cls`
-- `url` (str)
-
 ##### _is_source_in_new_system
 
 ```python
@@ -206,7 +166,7 @@ Process articles using the new source system with parallel execution.
 - `verbose` (bool)
 - `download_pdfs` (bool) *optional*
 
-⚠️ **High complexity:** 16
+⚠️ **High complexity:** 13
 
 ##### _process_single_article_new_system
 

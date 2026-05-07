@@ -578,9 +578,11 @@ Get the next available index to avoid duplicate folder numbering.
 def _get_unique_folder_name(self, base_folder: str, base_title: str) -> str
 ```
 
-Get folder name - always returns base_title to allow overwrite.
-When user runs repeatedly, content is replaced instead of
-creating duplicates.
+Get a folder name that does not collide with an existing folder in
+base_folder. If base_title is free, returns it unchanged. If it is
+already taken, appends -2, -3, ... until a free name is found.
+This allows the same URL to be fetched from two different sources
+(or twice from the same source) without one overwriting the other.
 
 **Parameters:**
 
