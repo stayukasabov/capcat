@@ -422,6 +422,14 @@ transition: background 1s ease, box-shadow 0.3s ease;
   --plyr-color-main: var(--accent-primary);
 }
 
+/* Round Plyr's inner containers to match the player wrapper */
+.hero-demo__player .plyr,
+.hero-demo__player .plyr__video-embed,
+.hero-demo__player iframe {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
 /* ====================================
    PROBLEM GRID
    ================================== */
