@@ -21,7 +21,7 @@ git checkout -b feat/my-feature
 - Imperative mood: `add`, `fix`, `remove`, `update`, not `added` or `adds`
 - Prefix: `feat:`, `fix:`, `test:`, `refactor:`, `docs:`, `bump:`
 - Keep subject line under 72 characters
-- No Claude Code attribution footers (`Co-Authored-By`, `🤖 Generated with`)
+
 
 Examples:
 ```
@@ -76,32 +76,4 @@ Credential helper (set once per machine):
 git config --global credential.helper osxkeychain
 ```
 
-## VPS Deployment (rsync)
 
-The `id_ed25519` SSH key is for `stayux-vps` (`orinz@172.104.146.194`), not GitHub.
-
-Sync the repo to the VPS for Ubuntu/pipx testing:
-
-```bash
-rsync -avz --exclude='.git' --exclude='venv/' --exclude='__pycache__/' \
-  ~/capcat/ orinz@172.104.146.194:~/capcat/
-```
-
-Or using the SSH alias:
-```bash
-rsync -avz --exclude='.git' --exclude='venv/' --exclude='__pycache__/' \
-  ~/capcat/ stayux-vps:~/capcat/
-```
-
-After syncing, test on VPS:
-```bash
-ssh stayux-vps
-pipx install --editable ~/capcat/
-capcat --version
-```
-
-## Working with the Synology Symlink
-
-The repo is symlinked: `~/capcat` → Synology Drive path.
-
-Always use `~/capcat/` in bash commands - never the raw Synology path.
