@@ -396,17 +396,18 @@ transition: background 1s ease, box-shadow 0.3s ease;
 }
 
 .hero-demo {
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
   width: 656px;
   max-width: 100%;
   margin: 0 auto;
   background: #000;
-  clip-path: inset(0 round var(--radius-lg));
 }
 
 .hero-demo__player {
   aspect-ratio: 16 / 9;
   width: 100%;
+  clip-path: inset(0 round var(--radius-lg));
 }
 
 @media (min-width: 900px) {
