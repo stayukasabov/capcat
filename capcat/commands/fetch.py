@@ -6,10 +6,7 @@ import os
 from typing import Dict, List, Tuple
 
 from capcat.core.shutdown import GracefulShutdown
-from capcat.core.unified_source_processor import (
-    UnifiedSourceProcessor,
-    process_source_articles,
-)
+from capcat.core.unified_source_processor import process_source_articles
 from capcat.core.source_system.base_source import SourceError
 
 
@@ -34,9 +31,6 @@ def process_sources(
     Returns:
         Dict with keys 'successful' (list), 'failed' (list of tuples), 'total'.
     """
-    UnifiedSourceProcessor.clear_url_cache()
-    logger.debug("Cleared URL deduplication cache for new session")
-
     successful_sources: List[str] = []
     failed_sources: List[Tuple[str, str]] = []
     is_batch = len(sources) > 1

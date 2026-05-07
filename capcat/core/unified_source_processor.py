@@ -176,9 +176,6 @@ class UnifiedSourceProcessor:
     Eliminates code duplication while preserving source-specific functionality.
     """
 
-    # Class-level URL cache for cross-source deduplication
-    _processed_urls = set()
-
     def __init__(self, project_root: Optional[Path] = None):
         self.logger = get_logger(__name__)
         self.config = get_config()
@@ -192,21 +189,6 @@ class UnifiedSourceProcessor:
             except Exception as e:
                 self.logger.debug(f"New source system not yet ready: {e}")
                 self.new_source_factory = None
-
-    @classmethod
-    def clear_url_cache(cls):
-        """Clear the URL cache for a new processing session."""
-        cls._processed_urls.clear()
-
-    @classmethod
-    def is_url_processed(cls, url: str) -> bool:
-        """Check if a URL has already been processed."""
-        return url in cls._processed_urls
-
-    @classmethod
-    def mark_url_processed(cls, url: str):
-        """Mark a URL as processed."""
-        cls._processed_urls.add(url)
 
     def _is_source_in_new_system(self, source_name: str) -> bool:
         """Check if source is available in the new source system."""
@@ -422,26 +404,10 @@ class UnifiedSourceProcessor:
         download_pdfs: bool = False,
     ):
         """Process articles using the new source system with parallel execution."""
-        # Filter out duplicate URLs
-        filtered_articles = []
-        duplicate_count = 0
-
-        for i, article in enumerate(articles, 1):
-            if self.is_url_processed(article.url):
-                duplicate_count += 1
-                self.logger.info(f"Skipping duplicate URL: {article.url}")
-                continue
-
-            self.mark_url_processed(article.url)
-            filtered_articles.append((i, article))
-
-        if duplicate_count > 0:
-            self.logger.info(f"Skipped {duplicate_count} duplicate articles")
+        filtered_articles = list(enumerate(articles, 1))
 
         if not filtered_articles:
-            self.logger.warning(
-                "No new articles to process after deduplication"
-            )
+            self.logger.warning("No articles to process")
             return
 
         # Configure parallel processing
