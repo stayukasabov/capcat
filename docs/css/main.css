@@ -401,20 +401,20 @@ transition: background 1s ease, box-shadow 0.3s ease;
   width: 656px;
   max-width: 100%;
   margin: 0 auto;
-  overflow: hidden;
   background: #000;
-  transform: translateZ(0); /* force GPU layer, prevents subpixel bleed at border-radius */
+}
+
+.hero-demo__player {
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
 }
 
 @media (min-width: 900px) {
   .hero-demo {
     width: 900px;
   }
-}
-
-.hero-demo__player {
-  aspect-ratio: 16 / 9;
-  width: 100%;
 }
 
 /* Override Plyr accent colour with brand orange */
