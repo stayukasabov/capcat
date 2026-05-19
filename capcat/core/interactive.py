@@ -73,7 +73,7 @@ def start_interactive_mode():
     while True:
         print_logo(menu_lines=9)
         with suppress_logging():
-            prompt_text = "  What would you like me to do?" if first_run else "  Select an option:"
+            prompt_text = "What would you like me to do?" if first_run else "Select an option:"
             action = questionary.select(
                 prompt_text,
                 choices=[
@@ -87,7 +87,7 @@ def start_interactive_mode():
                 style=custom_style,
                 qmark="",
                 pointer="▶",
-                instruction="\n   (Use arrow keys to navigate)",
+                instruction="\n(Use arrow keys to navigate)",
             ).ask()
 
         first_run = False
@@ -106,7 +106,7 @@ def start_interactive_mode():
         }
         # Move cursor up one line and clear it, then print our message
         print('\033[F\033[K', end='')
-        print(f"  Selected option: {action_names.get(action, action)}")
+        print(f"Selected option: {action_names.get(action, action)}")
 
         if action == 'bundle':
             _handle_bundle_flow()
@@ -125,7 +125,7 @@ def _handle_manage_sources_flow():
         print_logo(menu_lines=10)
         with suppress_logging():
             action = questionary.select(
-                "  Source Management - Select an option:",
+                "Source Management - Select an option:",
                 choices=[
                     questionary.Choice("Add New Source from RSS Feed", "add_rss"),
                     questionary.Choice("Remove Existing Sources", "remove"),
@@ -138,7 +138,7 @@ def _handle_manage_sources_flow():
                 style=custom_style,
                 qmark="",
                 pointer="▶",
-                instruction="\n   (Use arrow keys to navigate)",
+                instruction="\n(Use arrow keys to navigate)",
             ).ask()
 
         if not action or action == 'back':
@@ -158,16 +158,16 @@ def _handle_manage_sources_flow():
 
 def _handle_add_source_from_rss():
     """Handle adding a new source from RSS feed."""
-    print("  (Use Ctrl+C to go back)")
+    print("(Use Ctrl+C to go back)")
     with suppress_logging():
         url = questionary.text(
-            "  Enter the RSS feed URL:",
+            "Enter the RSS feed URL:",
             style=custom_style,
             qmark="",
         ).ask()
 
     if not url:
-        print("  No URL provided. Returning to menu.")
+        print("No URL provided. Returning to menu.")
         return
 
     # Call the existing add_source function from cli
@@ -195,7 +195,7 @@ def _handle_generate_config():
 
     with suppress_logging():
         confirm = questionary.confirm(
-            "  Continue?",
+            "Continue?",
             default=True,
             style=custom_style,
             qmark="",
@@ -281,13 +281,13 @@ def _handle_list_sources():
     registry = get_source_registry()
 
     if not sources:
-        print("\n  No sources available.")
-        input("\n  Press Enter to continue...")
+        print("\nNo sources available.")
+        input("\nPress Enter to continue...")
         return
 
     # Build sorted choice list with a Back option
     sorted_choices = sorted(sources.items(), key=lambda kv: kv[1])
-    choices = [questionary.Choice(f"  {display_name}", sid) for sid, display_name in sorted_choices]
+    choices = [questionary.Choice(display_name, sid) for sid, display_name in sorted_choices]
     choices.append(questionary.Separator())
     choices.append(questionary.Choice("Back to Source Management", "back"))
 
@@ -295,12 +295,12 @@ def _handle_list_sources():
         print_logo(menu_lines=len(choices) + 3)
         with suppress_logging():
             selected = questionary.select(
-                "  Browse sources (select to view details):",
+                "Browse sources (select to view details):",
                 choices=choices,
                 style=custom_style,
                 qmark="",
                 pointer="▶",
-                instruction="\n   (Use arrow keys, Enter to view details)",
+                instruction="\n(Use arrow keys, Enter to view details)",
             ).ask()
 
         if not selected or selected == 'back':
@@ -313,38 +313,38 @@ def _handle_list_sources():
 def _show_source_detail(source_id, config):
     """Display detailed information about a source and offer to edit article_count."""
     print("\n" + "─" * 70)
-    print("\033[38;5;202m  Source Details\033[0m")
+    print("\033[38;5;202mSource Details\033[0m")
     print("─" * 70)
 
     if not config:
-        print(f"\n  Source '{source_id}' not found in registry.")
-        input("\n  Press Enter to continue...")
+        print(f"\nSource '{source_id}' not found in registry.")
+        input("\nPress Enter to continue...")
         return
 
     # Display core information
-    print(f"\n  \033[1mID:\033[0m              {source_id}")
-    print(f"  \033[1mName:\033[0m            {getattr(config, 'display_name', 'N/A')}")
-    print(f"  \033[1mCategory:\033[0m        {getattr(config, 'category', 'N/A')}")
-    print(f"  \033[1marticle_count:\033[0m   {getattr(config, 'article_count', 'N/A')}")
+    print(f"\n\033[1mID:\033[0m              {source_id}")
+    print(f"\033[1mName:\033[0m            {getattr(config, 'display_name', 'N/A')}")
+    print(f"\033[1mCategory:\033[0m        {getattr(config, 'category', 'N/A')}")
+    print(f"\033[1marticle_count:\033[0m   {getattr(config, 'article_count', 'N/A')}")
 
     if hasattr(config, 'base_url'):
-        print(f"  \033[1mBase URL:\033[0m        {config.base_url}")
+        print(f"\033[1mBase URL:\033[0m        {config.base_url}")
 
     if hasattr(config, 'discovery') and hasattr(config.discovery, 'method'):
-        print(f"  \033[1mDiscovery:\033[0m       {config.discovery.method}")
+        print(f"\033[1mDiscovery:\033[0m       {config.discovery.method}")
         if config.discovery.method == 'rss' and hasattr(config.discovery, 'rss_urls'):
             rss_urls = config.discovery.rss_urls
             if hasattr(rss_urls, 'primary'):
-                print(f"  \033[1mRSS Feed:\033[0m        {rss_urls.primary}")
+                print(f"\033[1mRSS Feed:\033[0m        {rss_urls.primary}")
 
     source_type = "Config-driven (YAML)" if hasattr(config, 'article_selectors') else "Custom (Python)"
-    print(f"  \033[1mType:\033[0m            {source_type}")
+    print(f"\033[1mType:\033[0m            {source_type}")
 
     print("\n" + "─" * 70)
 
     with suppress_logging():
         action = questionary.select(
-            "  Options:",
+            "Options:",
             choices=[
                 questionary.Choice("Edit article count", "edit"),
                 questionary.Choice("Back", "back"),
@@ -368,7 +368,7 @@ def _edit_source_count(source_id, config):
     while True:
         with suppress_logging():
             raw = questionary.text(
-                f"  New article count (current: {current_count}):",
+                f"New article count (current: {current_count}):",
                 default=str(current_count),
                 style=custom_style,
                 qmark="",
@@ -383,13 +383,13 @@ def _edit_source_count(source_id, config):
                 raise ValueError
             break
         except ValueError:
-            print("  Invalid value - must be a positive integer.")
+            print("Invalid value - must be a positive integer.")
 
     try:
         project_root = find_project_root()
     except NoProjectError:
-        print("  Could not locate project root. Cannot write config.")
-        input("\n  Press Enter to continue...")
+        print("Could not locate project root. Cannot write config.")
+        input("\nPress Enter to continue...")
         return
 
     # Find userspace YAML path - config-driven sources
@@ -411,8 +411,8 @@ def _edit_source_count(source_id, config):
             mirror._mirror_config_driven(manifest)
             mirror._save_manifest(manifest)
         except Exception as e:
-            print(f"  Could not mirror source config: {e}")
-            input("\n  Press Enter to continue...")
+            print(f"Could not mirror source config: {e}")
+            input("\nPress Enter to continue...")
             return
 
     # Try custom source path if not found
@@ -424,8 +424,8 @@ def _edit_source_count(source_id, config):
             yaml_file = custom_yaml
 
     if not yaml_file.exists():
-        print(f"  Config file not found for '{source_id}'. Checked config-driven and custom paths.")
-        input("\n  Press Enter to continue...")
+        print(f"Config file not found for '{source_id}'. Checked config-driven and custom paths.")
+        input("\nPress Enter to continue...")
         return
 
     existing_text = yaml_file.read_text(encoding="utf-8")
@@ -445,7 +445,7 @@ def _edit_source_count(source_id, config):
 
     yaml_file.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
-    print(f"\n  article_count updated to {new_count} for '{source_id}'.")
+    print(f"\narticle_count updated to {new_count} for '{source_id}'.")
     input("\n  Press Enter to continue...")
 
 
@@ -461,12 +461,12 @@ def _handle_test_source():
     print_logo(menu_lines=len(source_choices) + 3)
     with suppress_logging():
         source_id = questionary.select(
-            "  Select source to test:",
+            "Select source to test:",
             choices=source_choices,
             style=custom_style,
             qmark="",
             pointer="▶",
-            instruction="\n   (Use arrow keys to navigate)",
+            instruction="\n(Use arrow keys to navigate)",
         ).ask()
 
     if not source_id or source_id == 'back':
@@ -530,12 +530,12 @@ def _handle_bundle_flow():
     print_logo(menu_lines=len(bundle_choices) + 3)
     with suppress_logging():
         bundle = questionary.select(
-            "  Select a news bundle and hit Enter for activation.",
+            "Select a news bundle and hit Enter for activation.",
             choices=bundle_choices,
             style=custom_style,
             qmark="",
             pointer="▶",
-            instruction="\n   (Use arrow keys to navigate)",
+            instruction="\n(Use arrow keys to navigate)",
         ).ask()
 
     if bundle is None or bundle == 'back':
@@ -556,12 +556,12 @@ def _handle_fetch_flow():
     print_logo(menu_lines=len(source_choices) + 3)
     with suppress_logging():
         selected_sources = questionary.checkbox(
-            "  Select sources (Space to select, Enter to confirm):",
+            "Select sources (Space to select, Enter to confirm):",
             choices=source_choices,
             style=custom_style,
             qmark="",
             pointer="▶",
-            instruction="\n   (Use Space to select multiple sources, Enter to confirm)",
+            instruction="\n(Use Space to select multiple sources, Enter to confirm)",
         ).ask()
 
     if selected_sources is None or 'back' in selected_sources:
@@ -582,12 +582,12 @@ def _handle_single_source_flow():
     print_logo(menu_lines=len(source_choices) + 3)
     with suppress_logging():
         source = questionary.select(
-            "  Select a source and hit Enter for activation.",
+            "Select a source and hit Enter for activation.",
             choices=source_choices,
             style=custom_style,
             qmark="",
             pointer="▶",
-            instruction="\n   (Use arrow keys to navigate)",
+            instruction="\n(Use arrow keys to navigate)",
         ).ask()
 
     if source is None or source == 'back':
@@ -600,10 +600,10 @@ def _handle_single_source_flow():
 def _handle_single_url_flow():
     """Handles the logic for the single URL flow."""
     print_logo(menu_lines=4)
-    print("  (Use Ctrl+C to go to the Main Menu)")
+    print("(Use Ctrl+C to go to the Main Menu)")
     with suppress_logging():
         url = questionary.text(
-            "  Please enter the article URL:",
+            "Please enter the article URL:",
             style=custom_style,
             qmark="",
         ).ask()
@@ -616,7 +616,7 @@ def _handle_single_url_flow():
     else:
         with suppress_logging():
             repeat = questionary.confirm(
-                "  No URL entered. Would you like to try again?",
+                "No URL entered. Would you like to try again?",
                 default=True,
                 style=custom_style,
                 qmark="",
@@ -629,7 +629,7 @@ def _prompt_for_html(action, selection):
     print_logo(menu_lines=8)
     with suppress_logging():
         response = questionary.select(
-            "  Generate HTML for web browsing?",
+            "Generate HTML for web browsing?",
             choices=[
                 questionary.Choice("Yes", "yes"),
                 questionary.Choice("No", "no"),
@@ -639,7 +639,7 @@ def _prompt_for_html(action, selection):
             style=custom_style,
             qmark="",
             pointer="▶",
-            instruction="\n   (Use arrow keys to navigate)",
+            instruction="\n(Use arrow keys to navigate)",
         ).ask()
 
     if response is None or response == 'back':
@@ -680,15 +680,15 @@ def _confirm_and_execute(action, selection, generate_html):
         args.append('--html')
 
     print(
-        "  PDFs can be enabled or limited per source in source YAML files:\n"
-        "    media:\n"
-        "      download_pdfs: true\n"
-        "      max_pdf_size_mb: 10    # optional - overrides global limit\n"
-        "  See Config/sources/ for details.\n"
+        "PDFs can be enabled or limited per source in source YAML files:\n"
+        "  media:\n"
+        "    download_pdfs: true\n"
+        "    max_pdf_size_mb: 10    # optional - overrides global limit\n"
+        "See Config/sources/ for details.\n"
     )
     with suppress_logging():
         pdf_choice = questionary.select(
-            "  Download attached PDFs?",
+            "Download attached PDFs?",
             choices=[
                 questionary.Choice("Yes - download PDFs for all sources", "yes"),
                 questionary.Choice("No - skip PDFs for all sources", "no"),
@@ -697,7 +697,7 @@ def _confirm_and_execute(action, selection, generate_html):
             style=custom_style,
             qmark="",
             pointer="▶",
-            instruction="\n   (Use arrow keys to navigate)",
+            instruction="\n(Use arrow keys to navigate)",
         ).ask()
     if pdf_choice == "yes":
         args.append('--pdfs')
@@ -736,32 +736,32 @@ def _show_completion_screen(generate_html: bool, success: bool, fetch_result=Non
     """
     print_logo()
     status_label = "Done" if success else "Completed with errors"
-    print(f"\n  {status_label}")
+    print(f"\n{status_label}")
 
     if fetch_result is not None:
         saved = fetch_result.saved
         total_skipped = sum(n for _, n in fetch_result.skipped)
         if saved > 0 or total_skipped > 0:
             if total_skipped == 0:
-                print(f"\n  {saved} saved")
+                print(f"\n{saved} saved")
             else:
                 parts = ", ".join(
                     f"{n} {r}" for r, n in fetch_result.skipped
                 )
-                print(f"\n  {saved} saved, {total_skipped} skipped ({parts})")
+                print(f"\n{saved} saved, {total_skipped} skipped ({parts})")
 
     if generate_html:
         html_path = _find_latest_index_html()
         if html_path:
-            print(f"\n  HTML index: file://{html_path}")
+            print(f"\nHTML index: file://{html_path}")
         else:
-            print("\n  HTML index: not found")
+            print("\nHTML index: not found")
 
     print()
 
     with suppress_logging():
         choice = questionary.select(
-            "  What would you like to do next?",
+            "What would you like to do next?",
             choices=[
                 questionary.Choice("Back to Main Menu", "menu"),
                 questionary.Choice("Exit", "exit"),
@@ -769,7 +769,7 @@ def _show_completion_screen(generate_html: bool, success: bool, fetch_result=Non
             style=custom_style,
             qmark="",
             pointer="▶",
-            instruction="\n   (Use arrow keys to navigate)",
+            instruction="\n(Use arrow keys to navigate)",
         ).ask()
 
     if not choice or choice == "exit":
