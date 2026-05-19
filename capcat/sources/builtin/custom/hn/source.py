@@ -59,7 +59,7 @@ class HnSource(BaseSource):
             if not HnSource._hn_compliance_message_shown:
                 print(
                     "\nUsing official Hacker News API with rate-limited "
-                    "requests to comply with site guidelines. "
+                    "requests to comply with site guidelines.\n"
                     "This may take a few minutes.\n",
                     flush=True,
                 )

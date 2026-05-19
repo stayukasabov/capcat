@@ -290,9 +290,9 @@ class ProgressIndicator:
                     progress_bar = self._create_progress_bar(percentage)
                     # Show count only if show_count is True
                     if self.show_count:
-                        status = f"{dice_char}{spinner_char} \033[38;5;166m {self.message.upper()}\033[0m {progress_bar} \033[38;5;166m {self.current}/{self.total} ({percentage:.1f}%)\033[0m"
+                        status = f"{dice_char}{spinner_char}\033[38;5;166m {self.message.upper()}\033[0m  {progress_bar} \033[38;5;166m {self.current}/{self.total} ({percentage:.1f}%)\033[0m"
                     else:
-                        status = f"{dice_char}{spinner_char} \033[38;5;166m {self.message.upper()}\033[0m {progress_bar} \033[38;5;166m ({percentage:.1f}%)\033[0m"
+                        status = f"{dice_char}{spinner_char}\033[38;5;166m {self.message.upper()}\033[0m  {progress_bar} \033[38;5;166m ({percentage:.1f}%)\033[0m"
                 else:
                     status = f"{dice_char}{spinner_char} \033[38;5;166m{self.message.upper()}...\033[0m"
 
@@ -535,7 +535,7 @@ class BatchProgress:
             if len(operation_display) > 20:
                 operation_display = operation_display[:20] + "..."
 
-            status = f"{dice_char}{spinner_char} \033[38;5;166m {operation_display}\033[0m {progress_bar} \033[38;5;166m {current_item}/{self.total_items} ({total_progress:.1f}%){stage_info}\033[0m"
+            status = f"{dice_char}{spinner_char}\033[38;5;166m {operation_display}\033[0m  {progress_bar} \033[38;5;166m {current_item}/{self.total_items} ({total_progress:.1f}%){stage_info}\033[0m"
 
             # Clear line and write status - ensure clean display
             if sys.stdout.isatty():
@@ -718,7 +718,7 @@ class BatchProgress:
             print(main_message)
 
             # Print summary on next line
-            print(f"\033[38;5;166m CATCHING ▶\033[0m {summary.upper()}")
+            print(f"\033[38;5;166mCATCHING ▶\033[0m {summary.upper()}")
         else:
             # In quiet mode, only show essential information
             if self.failed > 0:
@@ -851,7 +851,7 @@ class BatchProgress:
             if len(operation_display) > 20:
                 operation_display = operation_display[:20] + "..."
 
-            status = f"{dice_char}{spinner_char} \033[38;5;166m {operation_display}\033[0m {progress_bar} \033[38;5;166m {current_item}/{self.total_items} ({total_progress:.1f}%){stage_info}\033[0m"
+            status = f"{dice_char}{spinner_char}\033[38;5;166m {operation_display}\033[0m  {progress_bar} \033[38;5;166m {current_item}/{self.total_items} ({total_progress:.1f}%){stage_info}\033[0m"
 
             # Clear line and write status - ensure clean display
             if sys.stdout.isatty():
