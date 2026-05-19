@@ -73,7 +73,7 @@ def start_interactive_mode():
     while True:
         print_logo(menu_lines=9)
         with suppress_logging():
-            prompt_text = "What would you like me to do?" if first_run else "Select an option:"
+            prompt_text = "  What would you like me to do?" if first_run else "  Select an option:"
             action = questionary.select(
                 prompt_text,
                 choices=[
@@ -87,7 +87,7 @@ def start_interactive_mode():
                 style=custom_style,
                 qmark="",
                 pointer="▶",
-                instruction="\n(Use arrow keys to navigate)",
+                instruction="\n   (Use arrow keys to navigate)",
             ).ask()
 
         first_run = False
@@ -125,7 +125,7 @@ def _handle_manage_sources_flow():
         print_logo(menu_lines=10)
         with suppress_logging():
             action = questionary.select(
-                "Source Management - Select an option:",
+                "  Source Management - Select an option:",
                 choices=[
                     questionary.Choice("Add New Source from RSS Feed", "add_rss"),
                     questionary.Choice("Remove Existing Sources", "remove"),
@@ -138,7 +138,7 @@ def _handle_manage_sources_flow():
                 style=custom_style,
                 qmark="",
                 pointer="▶",
-                instruction="\n(Use arrow keys to navigate)",
+                instruction="\n   (Use arrow keys to navigate)",
             ).ask()
 
         if not action or action == 'back':
@@ -161,7 +161,7 @@ def _handle_add_source_from_rss():
     print("(Use Ctrl+C to go back)")
     with suppress_logging():
         url = questionary.text(
-            "Enter the RSS feed URL:",
+            "  Enter the RSS feed URL:",
             style=custom_style,
             qmark="",
         ).ask()
@@ -195,7 +195,7 @@ def _handle_generate_config():
 
     with suppress_logging():
         confirm = questionary.confirm(
-            "Continue?",
+            "  Continue?",
             default=True,
             style=custom_style,
             qmark="",
@@ -295,12 +295,12 @@ def _handle_list_sources():
         print_logo(menu_lines=len(choices) + 3)
         with suppress_logging():
             selected = questionary.select(
-                "Browse sources (select to view details):",
+                "  Browse sources (select to view details):",
                 choices=choices,
                 style=custom_style,
                 qmark="",
                 pointer="▶",
-                instruction="\n(Use arrow keys, Enter to view details)",
+                instruction="\n   (Use arrow keys, Enter to view details)",
             ).ask()
 
         if not selected or selected == 'back':
@@ -344,7 +344,7 @@ def _show_source_detail(source_id, config):
 
     with suppress_logging():
         action = questionary.select(
-            "Options:",
+            "  Options:",
             choices=[
                 questionary.Choice("Edit article count", "edit"),
                 questionary.Choice("Back", "back"),
@@ -368,7 +368,7 @@ def _edit_source_count(source_id, config):
     while True:
         with suppress_logging():
             raw = questionary.text(
-                f"New article count (current: {current_count}):",
+                f"  New article count (current: {current_count}):",
                 default=str(current_count),
                 style=custom_style,
                 qmark="",
@@ -461,12 +461,12 @@ def _handle_test_source():
     print_logo(menu_lines=len(source_choices) + 3)
     with suppress_logging():
         source_id = questionary.select(
-            "Select source to test:",
+            "  Select source to test:",
             choices=source_choices,
             style=custom_style,
             qmark="",
             pointer="▶",
-            instruction="\n(Use arrow keys to navigate)",
+            instruction="\n   (Use arrow keys to navigate)",
         ).ask()
 
     if not source_id or source_id == 'back':
@@ -530,12 +530,12 @@ def _handle_bundle_flow():
     print_logo(menu_lines=len(bundle_choices) + 3)
     with suppress_logging():
         bundle = questionary.select(
-            "Select a news bundle and hit Enter for activation.",
+            "  Select a news bundle and hit Enter for activation.",
             choices=bundle_choices,
             style=custom_style,
             qmark="",
             pointer="▶",
-            instruction="\n(Use arrow keys to navigate)",
+            instruction="\n   (Use arrow keys to navigate)",
         ).ask()
 
     if bundle is None or bundle == 'back':
@@ -556,12 +556,12 @@ def _handle_fetch_flow():
     print_logo(menu_lines=len(source_choices) + 3)
     with suppress_logging():
         selected_sources = questionary.checkbox(
-            "Select sources (Space to select, Enter to confirm):",
+            "  Select sources (Space to select, Enter to confirm):",
             choices=source_choices,
             style=custom_style,
             qmark="",
             pointer="▶",
-            instruction="\n(Use Space to select multiple sources, Enter to confirm)",
+            instruction="\n   (Use Space to select multiple sources, Enter to confirm)",
         ).ask()
 
     if selected_sources is None or 'back' in selected_sources:
@@ -582,12 +582,12 @@ def _handle_single_source_flow():
     print_logo(menu_lines=len(source_choices) + 3)
     with suppress_logging():
         source = questionary.select(
-            "Select a source and hit Enter for activation.",
+            "  Select a source and hit Enter for activation.",
             choices=source_choices,
             style=custom_style,
             qmark="",
             pointer="▶",
-            instruction="\n(Use arrow keys to navigate)",
+            instruction="\n   (Use arrow keys to navigate)",
         ).ask()
 
     if source is None or source == 'back':
@@ -603,7 +603,7 @@ def _handle_single_url_flow():
     print("(Use Ctrl+C to go to the Main Menu)")
     with suppress_logging():
         url = questionary.text(
-            "Please enter the article URL:",
+            "  Please enter the article URL:",
             style=custom_style,
             qmark="",
         ).ask()
@@ -616,7 +616,7 @@ def _handle_single_url_flow():
     else:
         with suppress_logging():
             repeat = questionary.confirm(
-                "No URL entered. Would you like to try again?",
+                "  No URL entered. Would you like to try again?",
                 default=True,
                 style=custom_style,
                 qmark="",
@@ -629,7 +629,7 @@ def _prompt_for_html(action, selection):
     print_logo(menu_lines=8)
     with suppress_logging():
         response = questionary.select(
-            "Generate HTML for web browsing?",
+            "  Generate HTML for web browsing?",
             choices=[
                 questionary.Choice("Yes", "yes"),
                 questionary.Choice("No", "no"),
@@ -639,7 +639,7 @@ def _prompt_for_html(action, selection):
             style=custom_style,
             qmark="",
             pointer="▶",
-            instruction="\n(Use arrow keys to navigate)",
+            instruction="\n   (Use arrow keys to navigate)",
         ).ask()
 
     if response is None or response == 'back':
@@ -688,7 +688,7 @@ def _confirm_and_execute(action, selection, generate_html):
     )
     with suppress_logging():
         pdf_choice = questionary.select(
-            "Download attached PDFs?",
+            "  Download attached PDFs?",
             choices=[
                 questionary.Choice("Yes - download PDFs for all sources", "yes"),
                 questionary.Choice("No - skip PDFs for all sources", "no"),
@@ -697,7 +697,7 @@ def _confirm_and_execute(action, selection, generate_html):
             style=custom_style,
             qmark="",
             pointer="▶",
-            instruction="\n(Use arrow keys to navigate)",
+            instruction="\n   (Use arrow keys to navigate)",
         ).ask()
     if pdf_choice == "yes":
         args.append('--pdfs')
@@ -761,7 +761,7 @@ def _show_completion_screen(generate_html: bool, success: bool, fetch_result=Non
 
     with suppress_logging():
         choice = questionary.select(
-            "What would you like to do next?",
+            "  What would you like to do next?",
             choices=[
                 questionary.Choice("Back to Main Menu", "menu"),
                 questionary.Choice("Exit", "exit"),
@@ -769,7 +769,7 @@ def _show_completion_screen(generate_html: bool, success: bool, fetch_result=Non
             style=custom_style,
             qmark="",
             pointer="▶",
-            instruction="\n(Use arrow keys to navigate)",
+            instruction="\n   (Use arrow keys to navigate)",
         ).ask()
 
     if not choice or choice == "exit":
