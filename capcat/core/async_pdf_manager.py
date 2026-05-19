@@ -17,6 +17,7 @@ import requests
 
 from .logging_config import get_logger
 from .config import PdfConfig
+from .progress import ProgressIndicator
 
 
 def pdf_exceeds_size_limit(url: str, session, max_bytes: int) -> bool:
@@ -303,30 +304,45 @@ class AsyncPDFManager:
         Used after all articles are processed to drain pending PDF downloads
         before the batch command returns.
 
-        Logs an INFO progress message only when the download counts change,
-        so the terminal does not display repeated identical lines.
+        Shows a ProgressIndicator while draining. No output when already idle.
         """
         import time as _time
+
         deadline = _time.monotonic() + timeout
-        last_logged_state = None
-        while _time.monotonic() < deadline:
-            with self._lock:
-                queue_empty = self.download_queue.empty()
-                active_count = len(self.active_downloads)
-                queued_count = self.download_queue.qsize()
-                completed_count = len(self.completed_downloads)
-            if queue_empty and active_count == 0:
-                return True
-            state = (active_count, queued_count, completed_count)
-            if state != last_logged_state:
-                self.logger.info(
-                    "Downloading PDFs: %d active, %d queued, %d completed",
-                    active_count,
-                    queued_count,
-                    completed_count,
-                )
-                last_logged_state = state
-            _time.sleep(0.1)
+
+        # First check: already idle - return immediately, no indicator
+        with self._lock:
+            queue_empty = self.download_queue.empty()
+            active_count = len(self.active_downloads)
+            queued_count = self.download_queue.qsize()
+            completed_count = len(self.completed_downloads)
+
+        if queue_empty and active_count == 0:
+            return True
+
+        total = active_count + queued_count + completed_count
+        indicator = ProgressIndicator("Downloading PDFs", total=total)
+        indicator.start()
+
+        try:
+            while _time.monotonic() < deadline:
+                with self._lock:
+                    queue_empty = self.download_queue.empty()
+                    active_count = len(self.active_downloads)
+                    completed_count = len(self.completed_downloads)
+
+                if queue_empty and active_count == 0:
+                    indicator.current = total
+                    indicator.stop()
+                    return True
+
+                indicator.current = completed_count
+                _time.sleep(0.1)
+        except Exception:
+            indicator.stop()
+            raise
+
+        indicator.error("PDF downloads timed out")
         return False
 
     def get_status(self) -> Dict:
