@@ -651,20 +651,20 @@ def _prompt_for_html(action, selection):
 def _confirm_and_execute(action, selection, generate_html):
     """Prints a summary and executes the command by calling run_app directly."""
     from capcat.core.tui_context import is_tui_active, reset_fetch_results, get_fetch_result
-    summary = f"Action: {action}\n"
+    summary = f"   Action: {action}\n"
     if action == 'bundle':
-        summary += f"Bundle: {selection}\n"
+        summary += f"   Bundle: {selection}\n"
     elif action == 'fetch':
-        summary += f"Sources: {', '.join(selection)}\n"
+        summary += f"   Sources: {', '.join(selection)}\n"
     elif action == 'single':
-        summary += f"URL: {selection}\n"
+        summary += f"   URL: {selection}\n"
 
-    summary += f"Generate HTML: {generate_html}\n"
+    summary += f"   Generate HTML: {generate_html}\n"
 
-    print("--------------------")
-    print("SUMMARY")
+    print("   --------------------")
+    print("   SUMMARY")
     print(summary)
-    print("--------------------\n")
+    print("   --------------------\n")
 
     # Construct the argument list for run_app
     args = [action]
@@ -680,11 +680,11 @@ def _confirm_and_execute(action, selection, generate_html):
         args.append('--html')
 
     print(
-        "PDFs can be enabled or limited per source in source YAML files:\n"
-        "  media:\n"
-        "    download_pdfs: true\n"
-        "    max_pdf_size_mb: 10    # optional - overrides global limit\n"
-        "See Config/sources/ for details.\n"
+        "   PDFs can be enabled or limited per source in source YAML files:\n"
+        "     media:\n"
+        "       download_pdfs: true\n"
+        "       max_pdf_size_mb: 10    # optional - overrides global limit\n"
+        "   See Config/sources/ for details.\n"
     )
     with suppress_logging():
         pdf_choice = questionary.select(
