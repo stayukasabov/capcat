@@ -200,13 +200,13 @@ class ProgressIndicator:
         dice_char = "\033[1;91m◐\033[0m"
 
         if success_message:
-            print(f"{dice_char}{success_message.upper()}")
+            print(f"{dice_char} {success_message.upper()}")
         elif self.total and self.current > 0:
             print(
-                f"{dice_char}{self.message.upper()} ({self.current}/{self.total} COMPLETED)"
+                f"{dice_char} {self.message.upper()} ({self.current}/{self.total} COMPLETED)"
             )
         else:
-            print(f"{dice_char}{self.message.upper()} COMPLETED")
+            print(f"{dice_char} {self.message.upper()} COMPLETED")
 
     def update(self, increment: int = 1, status_message: Optional[str] = None):
         """Update progress counter and optionally change status message."""
@@ -229,7 +229,7 @@ class ProgressIndicator:
         self._show_cursor()
 
         dice_char = "\033[1;31m◒\033[0m"
-        print(f"{dice_char}{error_message.upper()}")
+        print(f"{dice_char} {error_message.upper()}")
 
     def _create_progress_bar(self, percentage: float, width: int = 8) -> str:
         """Create a visual progress bar with loading animation."""
