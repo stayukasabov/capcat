@@ -231,7 +231,7 @@ class ProgressIndicator:
         dice_char = "\033[1;31m◒\033[0m"
         print(f"{dice_char} {error_message.upper()}")
 
-    def _create_progress_bar(self, percentage: float, width: int = 8) -> str:
+    def _create_progress_bar(self, percentage: float, width: int = 6) -> str:
         """Create a visual progress bar with loading animation."""
         filled = int(width * percentage / 100)
         remaining = width - filled
