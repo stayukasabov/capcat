@@ -736,26 +736,26 @@ def _show_completion_screen(generate_html: bool, success: bool, fetch_result=Non
     """
     print_logo()
     status_label = "Done" if success else "Completed with errors"
-    print(f"\n{status_label}")
+    print(f"\n   {status_label}")
 
     if fetch_result is not None:
         saved = fetch_result.saved
         total_skipped = sum(n for _, n in fetch_result.skipped)
         if saved > 0 or total_skipped > 0:
             if total_skipped == 0:
-                print(f"\n{saved} saved")
+                print(f"\n   {saved} saved")
             else:
                 parts = ", ".join(
                     f"{n} {r}" for r, n in fetch_result.skipped
                 )
-                print(f"\n{saved} saved, {total_skipped} skipped ({parts})")
+                print(f"\n   {saved} saved, {total_skipped} skipped ({parts})")
 
     if generate_html:
         html_path = _find_latest_index_html()
         if html_path:
-            print(f"\nHTML index: file://{html_path}")
+            print(f"\n   HTML index: file://{html_path}")
         else:
-            print("\nHTML index: not found")
+            print("\n   HTML index: not found")
 
     print()
 
