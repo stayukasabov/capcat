@@ -6,7 +6,6 @@ placeholder articles with links to original posts.
 """
 
 import os
-import re
 from typing import List, Optional, Tuple
 
 from capcat.core.source_system.base_source import (

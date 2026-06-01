@@ -135,7 +135,7 @@ def scrape_single_article(
     """
     from datetime import datetime
 
-    from capcat.core.config import find_project_root, NoProjectError
+    from capcat.core.config import find_project_root
     from capcat.core.logging_config import get_logger
     from capcat.core.source_config import detect_source
     from capcat.core.source_system.source_registry import get_source_registry, reset_source_registry
