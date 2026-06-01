@@ -86,6 +86,39 @@ def get_global_update_mode() -> bool:
     return _GLOBAL_UPDATE_MODE
 
 
+def _append_orphan_images(content: str, article_folder_path: str) -> str:
+    """Append downloaded images that have no references in the markdown.
+
+    When content extraction drops ``<img>`` tags (e.g. images inside sections
+    that ``html_to_markdown`` filters out), images land in the ``images/``
+    folder but the markdown has no ``![…](…)`` references.  This function
+    detects the gap and appends an *Article Images* section so the reader
+    can still see the downloaded pictures.
+    """
+    import re as _re
+
+    if _re.search(r"!\[.*?\]\(.*?\)", content):
+        return content
+
+    images_folder = os.path.join(article_folder_path, "images")
+    if not os.path.isdir(images_folder):
+        return content
+
+    _IMG_EXTS = (".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg")
+    image_files = sorted(
+        f for f in os.listdir(images_folder) if f.lower().endswith(_IMG_EXTS)
+    )
+    if not image_files:
+        return content
+
+    section = "\n\n## Article Images\n\n"
+    for img_file in image_files:
+        name = os.path.splitext(img_file)[0].replace("_", " ").title()
+        section += f"![{name}](images/{img_file})\n\n"
+
+    return content + section
+
+
 def convert_html_with_timeout(
     html_content: str,
     url: str,
@@ -1180,6 +1213,11 @@ class ArticleFetcher(ABC):
             updated_article_content += media_warning
         updated_article_content += "---\n\n"
         updated_article_content += markdown_content
+
+        # Append orphan images that were downloaded but lost during conversion
+        updated_article_content = _append_orphan_images(
+            updated_article_content, article_folder_path
+        )
 
         with open(filename, "w", encoding="utf-8") as f:
             f.write(updated_article_content)
