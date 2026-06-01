@@ -4,6 +4,13 @@ from __future__ import annotations
 import os
 from typing import Optional, Tuple
 
+try:
+    from capcat.core.source_config_mirror import SourceConfigMirror
+    MIRROR_AVAILABLE = True
+except ImportError:
+    SourceConfigMirror = None  # type: ignore[assignment,misc]
+    MIRROR_AVAILABLE = False
+
 
 def _rename_to_dated(article_folder: str, date_str: str) -> str:
     """Rename article_folder to '<date_str>-<name>' in its parent directory.
@@ -128,11 +135,28 @@ def scrape_single_article(
     """
     from datetime import datetime
 
+    from capcat.core.config import find_project_root, NoProjectError
     from capcat.core.logging_config import get_logger
     from capcat.core.source_config import detect_source
-    from capcat.core.source_system.source_registry import get_source_registry
+    from capcat.core.source_system.source_registry import get_source_registry, reset_source_registry
+    from capcat.core.tui_context import is_tui_active
 
     logger = get_logger(__name__)
+
+    # Ensure userspace source files are up to date before URL routing.
+    # Without this, an outdated Config/sources/active/custom/twitter/source.py
+    # (e.g. with old substring-match logic) overrides the installed fixed version.
+    if MIRROR_AVAILABLE:
+        try:
+            project_root = find_project_root()
+            mirror = SourceConfigMirror(project_root, tui_mode=is_tui_active())
+            if not mirror.is_mirrored():
+                mirror.run_first_mirror()
+            else:
+                mirror.check_for_upgrades()
+            reset_source_registry()
+        except Exception:
+            pass
 
     if get_source_registry().can_handle_url(url):
         logger.info(f"Attempting specialized source for URL: {url}")
