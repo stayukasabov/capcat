@@ -30,14 +30,15 @@ class TwitterSource(BaseSource):
     @classmethod
     def can_handle_url(cls, url: str) -> bool:
         """Check if this source can handle the given URL."""
-        twitter_patterns = [
-            r"twitter\.com",
-            r"x\.com",
-        ]
-        return any(
-            re.search(pattern, url, re.IGNORECASE)
-            for pattern in twitter_patterns
-        )
+        from urllib.parse import urlparse
+        try:
+            netloc = urlparse(url).netloc.lower().split(':')[0]
+            return (
+                netloc == 'x.com' or netloc.endswith('.x.com') or
+                netloc == 'twitter.com' or netloc.endswith('.twitter.com')
+            )
+        except Exception:
+            return False
 
     def discover_articles(self, count: int) -> List[Article]:
         """

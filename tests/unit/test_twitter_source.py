@@ -65,3 +65,27 @@ def test_twitter_no_md_at_output_dir_root(twitter_source, tmp_path):
     twitter_source.fetch_article_content(article, str(tmp_path))
 
     assert not (tmp_path / "X.com-post.md").exists()
+
+
+class TestCanHandleUrl:
+    def test_matches_x_com(self):
+        assert TwitterSource.can_handle_url("https://x.com/user/status/123") is True
+
+    def test_matches_www_x_com(self):
+        assert TwitterSource.can_handle_url("https://www.x.com/user/status/123") is True
+
+    def test_matches_twitter_com(self):
+        assert TwitterSource.can_handle_url("https://twitter.com/user/status/123") is True
+
+    def test_matches_www_twitter_com(self):
+        assert TwitterSource.can_handle_url("https://www.twitter.com/user/status/123") is True
+
+    def test_rejects_domain_ending_in_x_com(self):
+        """stayux.com contains 'x.com' as substring - must NOT match."""
+        assert TwitterSource.can_handle_url("https://stayux.com/works/capcat-cli/") is False
+
+    def test_rejects_other_domain_with_x_com_substring(self):
+        assert TwitterSource.can_handle_url("https://proxcom.io/article") is False
+
+    def test_rejects_unrelated_url(self):
+        assert TwitterSource.can_handle_url("https://example.com/page") is False
