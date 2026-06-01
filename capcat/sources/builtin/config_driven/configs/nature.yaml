@@ -77,6 +77,8 @@ image_processing:
     - "header img"
     - "footer img"
     - ".sidebar img"
+  # Maximum image file size in MB. Images larger than this are skipped.
+  max_image_size_mb: 5
 
 # Per-source PDF settings. download_pdfs overrides Global-settings.yaml.
 # max_pdf_size_mb overrides global pdf.max_pdf_size_bytes if set.

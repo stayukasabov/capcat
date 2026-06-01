@@ -61,3 +61,5 @@ image_processing:
     - "nav img"
     - "header img"
     - "footer img"
+  # Maximum image file size in MB. Images larger than this are skipped.
+  max_image_size_mb: 5

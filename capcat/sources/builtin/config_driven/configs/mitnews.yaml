@@ -70,6 +70,8 @@ image_processing:
 
   # Optional: minimum image size (bytes) to filter small icons/thumbnails
   min_image_size: 10240  # 10KB minimum
+  # Maximum image file size in MB. Images larger than this are skipped.
+  max_image_size_mb: 5
 
   # URL transformations to get full-size images
   url_transforms:

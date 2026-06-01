@@ -216,7 +216,8 @@ def generate_config() -> Dict:
         )
         config['image_processing'] = {
             'selectors': image_selectors,
-            'skip_selectors': skip_selectors
+            'skip_selectors': skip_selectors,
+            'max_image_size_mb': 5,
         }
 
     # Template configuration

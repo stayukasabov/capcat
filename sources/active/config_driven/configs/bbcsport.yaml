@@ -68,3 +68,5 @@ image_processing:
     - "nav img"
     - ".gs-c-promo-logo img"
     - ".icon img"
+  # Maximum image file size in MB. Images larger than this are skipped.
+  max_image_size_mb: 5

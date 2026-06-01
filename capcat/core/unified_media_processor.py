@@ -58,11 +58,20 @@ class UnifiedMediaProcessor:
             # Process images using modular ImageProcessor
             cfg = get_config().processing
             image_processor = get_image_processor(session)
+
+            # Per-source max_image_size_mb overrides global default
+            img_cfg = source_config.get("image_processing", {})
+            per_source_mb = img_cfg.get("max_image_size_mb")
+            if per_source_mb is not None:
+                max_image_bytes = int(per_source_mb) * 1024 * 1024
+            else:
+                max_image_bytes = cfg.max_image_size_bytes
+
             url_mapping = image_processor.process_article_images(
                 html_content, source_config, url, article_folder,
                 article_url=url,
                 min_pixel_dimension=cfg.min_image_dimensions,
-                max_image_bytes=cfg.max_image_size_bytes,
+                max_image_bytes=max_image_bytes,
             )
 
             # Process image embedding based on content structure

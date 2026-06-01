@@ -51,6 +51,7 @@ class SourceConfigGenerator:
             "image_processing:\n"
             "  allow_extensionless: true   # keep true for CDN URLs without .jpg extension\n"
             "  max_images: 10              # maximum images to download per article\n"
+            "  max_image_size_mb: 5        # skip images larger than this (MB)\n"
             "  # Uncomment to restrict which img tags are used:\n"
             "  # selectors:\n"
             "  #   - article img\n"

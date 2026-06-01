@@ -72,6 +72,8 @@ image_processing:
     - "nav img"
     - ".logo img"
     - ".icon img"
+  # Maximum image file size in MB. Images larger than this are skipped.
+  max_image_size_mb: 5
 
 # Template configuration for HTML generation
 template:
