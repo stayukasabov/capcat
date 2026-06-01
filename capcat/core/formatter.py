@@ -115,6 +115,35 @@ def format_comment_paragraphs(comment_text: str) -> str:
     return formatted_text.strip()
 
 
+def _preserve_button_images(soup):
+    """Extract images from buttons before button removal destroys them.
+
+    Many sites wrap content images in <button> for lightbox functionality.
+    This preserves images at their original position while removing buttons.
+    """
+    buttons_with_images = []
+    for button in soup.find_all('button'):
+        images = button.find_all('img')
+        if images:
+            buttons_with_images.append((button, images))
+
+    # Process buttons with images - extract images, remove buttons
+    for button, images in buttons_with_images:
+        # Insert images right before the button
+        for img in images:
+            # Extract the image (removes it from button)
+            img.extract()
+            # Insert before the button
+            button.insert_before(img)
+
+        # Now remove the empty button
+        button.decompose()
+
+    # Remove all remaining buttons (those without images)
+    for button in soup.find_all('button'):
+        button.decompose()
+
+
 def html_to_markdown(html_content: str, base_url: str = None) -> str:
     """Convert HTML content to clean markdown format."""
     try:
@@ -125,9 +154,12 @@ def html_to_markdown(html_content: str, base_url: str = None) -> str:
         if base_url:
             soup.base_url = base_url
 
+        # Preserve images from buttons before removing buttons
+        _preserve_button_images(soup)
+
         # Remove elements based on config flags
         cfg = get_config().processing
-        _remove = ["header", "footer", "aside", "button", "script"]
+        _remove = ["header", "footer", "aside", "script"]
         if cfg.remove_style_tags:
             _remove.append("style")
         if cfg.remove_nav_tags:
