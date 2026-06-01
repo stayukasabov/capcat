@@ -335,6 +335,18 @@ def _is_float(s: str) -> bool:
         return False
 
 
+def _alt_from_src(src: str) -> str:
+    """Derive a human-readable alt text from an image filename."""
+    if not src:
+        return "image"
+    import os
+    basename = os.path.splitext(os.path.basename(src.split("?")[0]))[0]
+    # Strip trailing hashes (e.g. "Photo_abc123" -> "Photo")
+    basename = re.sub(r"_[a-f0-9]{8,}$", "", basename)
+    # Convert underscores/hyphens to spaces and title-case
+    return re.sub(r"[-_]+", " ", basename).strip() or "image"
+
+
 def _process_images(soup):
     """Process img tags to ensure proper Markdown syntax, filtering out broken images."""
     images = soup.find_all("img")
@@ -365,7 +377,7 @@ def _process_images(soup):
         if not src:
             src = img.get("data-lazy", "")
 
-        alt = img.get("alt", "image")
+        alt = img.get("alt") or _alt_from_src(src)
         if src:
             # Handle Next.js optimized images by extracting the real URL
             if src.startswith("/_next/image?url="):
@@ -802,12 +814,13 @@ def _convert_element(element, depth=0, max_depth=50) -> str:
         # Basic table support - preserve structure
         markdown = _convert_table_element(element, children_content)
     elif element.name == "div":
-        # For divs, preserve content but be smarter about spacing
+        # For divs, preserve content with consistent spacing at any depth.
+        # Without wrapping newlines, heading trailing \n\n gets stripped and
+        # the next sibling's text merges directly onto the heading line.
         content = children_content.strip()
         if content:
-            # Only add spacing if this div contains significant content
             if element.get_text().strip():
-                markdown = f"\n{content}\n" if depth == 0 else content
+                markdown = f"\n{content}\n"
             else:
                 markdown = content
         else:

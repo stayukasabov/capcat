@@ -204,9 +204,7 @@ def download_file(
                 size_mb = int(content_length) / (1024 * 1024)
 
                 if file_type == "image" and not media_enabled:
-                    max_size_mb = (
-                        3  # 3MB limit for images when --media flag is NOT used
-                    )
+                    max_size_mb = config.processing.max_image_size_bytes / (1024 * 1024)
                     if size_mb > max_size_mb:
                         logger.debug(
                             f"Skipping large image: {file_url} ({size_mb:.1f}MB)"
