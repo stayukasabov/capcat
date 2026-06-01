@@ -27,10 +27,11 @@ article_selectors:
 # CSS selectors to extract article content.
 content_selectors:
 - '[data-component="text-block"]'
-- article
-- .article-body
-- .post-content
-- main
+- 'main article'
+- 'article'
+- '.article-body'
+- 'main'
+- '.post-content'
 
 # Template configuration for HTML output.
 template:

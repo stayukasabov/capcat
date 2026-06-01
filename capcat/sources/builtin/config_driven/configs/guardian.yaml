@@ -34,8 +34,9 @@ article_selectors:
 content_selectors:
   - ".article-body-commercial-selector"
   - ".article-body-viewer-selector"
-  - "div[class*='dcr-'] p"
-  - "article p"
+  - ".content__main-column"
+  - "article"
+  - "div[class*='dcr-']"
   - ".content__article-body"
 
 # URL patterns to skip during article discovery (follows robots.txt guidelines).

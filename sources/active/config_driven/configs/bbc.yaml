@@ -22,10 +22,11 @@ article_selectors:
 # Content extraction selectors
 content_selectors:
 - '[data-component="text-block"]'
-- article
-- .article-body
-- .post-content
-- main
+- 'main article'
+- 'article'
+- '.article-body'
+- 'main'
+- '.post-content'
 
 # Template configuration
 template:

@@ -169,12 +169,48 @@ class StreamlinedCommentProcessor:
 
         self.performance_metrics["links_processed"] += links_processed
 
-        # Extract and clean text
-        text = comment_elem.get_text()
+        # Extract paragraphs from nested <p> structure.
+        # HN uses unclosed <p> tags which html.parser nests (p > p > p).
+        # Using get_text() on the parent concatenates all text without
+        # paragraph breaks.  Instead, collect direct text from the commtext
+        # element and each <p> descendant independently.
+        commtext = comment_elem.select_one(".commtext")
+        if commtext is None:
+            commtext = comment_elem
 
-        # Minimal text cleanup
-        lines = [line.strip() for line in text.splitlines() if line.strip()]
-        return "\n\n".join(lines)
+        from bs4 import NavigableString
+
+        def _direct_text(elem):
+            """Get only the immediate text of an element, not from nested <p> children."""
+            parts = []
+            for child in elem.children:
+                if isinstance(child, NavigableString):
+                    s = child.strip()
+                    if s:
+                        parts.append(s)
+                elif child.name and child.name != "p":
+                    s = child.get_text().strip()
+                    if s:
+                        parts.append(s)
+            return " ".join(parts) if parts else ""
+
+        paragraphs = []
+        # Leading text of the commtext element (before first <p>)
+        lead = _direct_text(commtext)
+        if lead:
+            paragraphs.append(lead)
+        # Each <p> descendant contributes one paragraph (direct text only)
+        for p_tag in commtext.find_all("p"):
+            t = _direct_text(p_tag)
+            if t:
+                paragraphs.append(t)
+
+        if not paragraphs:
+            text = comment_elem.get_text()
+            lines = [line.strip() for line in text.splitlines() if line.strip()]
+            return "\n\n".join(lines)
+
+        return "\n\n".join(paragraphs)
 
     def generate_inline_comments_markdown(
         self,
