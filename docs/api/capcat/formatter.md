@@ -64,6 +64,21 @@ Returns:
 
 **Returns:** str
 
+### _preserve_button_images
+
+```python
+def _preserve_button_images(soup)
+```
+
+Extract images from buttons before button removal destroys them.
+
+Many sites wrap content images in <button> for lightbox functionality.
+This preserves images at their original position while removing buttons.
+
+**Parameters:**
+
+- `soup`
+
 ### html_to_markdown
 
 ```python
@@ -116,6 +131,20 @@ Return True if s can be parsed as a float.
 
 **Returns:** bool
 
+### _alt_from_src
+
+```python
+def _alt_from_src(src: str) -> str
+```
+
+Derive a human-readable alt text from an image filename.
+
+**Parameters:**
+
+- `src` (str)
+
+**Returns:** str
+
 ### _process_images
 
 ```python
@@ -128,7 +157,7 @@ Process img tags to ensure proper Markdown syntax, filtering out broken images.
 
 - `soup`
 
-⚠️ **High complexity:** 15
+⚠️ **High complexity:** 16
 
 ### _is_broken_image_url
 

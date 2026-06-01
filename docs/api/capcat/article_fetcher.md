@@ -28,6 +28,10 @@ code duplication between source-specific implementations.
 
 **Value:** `update_mode`
 
+### _IMG_EXTS
+
+**Value:** `('.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg')`
+
 ## Classes
 
 ### ArticleFetcher
@@ -943,6 +947,27 @@ def get_global_update_mode() -> bool
 Get the global update mode flag.
 
 **Returns:** bool
+
+### _append_orphan_images
+
+```python
+def _append_orphan_images(content: str, article_folder_path: str) -> str
+```
+
+Append downloaded images that have no references in the markdown.
+
+When content extraction drops ``<img>`` tags (e.g. images inside sections
+that ``html_to_markdown`` filters out), images land in the ``images/``
+folder but the markdown has no ``![…](…)`` references.  This function
+detects the gap and appends an *Article Images* section so the reader
+can still see the downloaded pictures.
+
+**Parameters:**
+
+- `content` (str)
+- `article_folder_path` (str)
+
+**Returns:** str
 
 ### convert_html_with_timeout
 

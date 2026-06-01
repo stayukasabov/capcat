@@ -11,6 +11,16 @@ render_with_liquid: false
 
 Single article fetch command.
 
+## Constants
+
+### MIRROR_AVAILABLE
+
+**Value:** `True`
+
+### MIRROR_AVAILABLE
+
+**Value:** `False`
+
 ## Classes
 
 ### GenericArticleFetcher
@@ -128,5 +138,5 @@ Returns:
 
 **Returns:** Tuple[bool, Optional[str]]
 
-⚠️ **High complexity:** 15
+⚠️ **High complexity:** 18
 

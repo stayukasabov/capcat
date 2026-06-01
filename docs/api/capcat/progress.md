@@ -127,7 +127,7 @@ Stop with error message.
 ##### _create_progress_bar
 
 ```python
-def _create_progress_bar(self, percentage: float, width: int = 8) -> str
+def _create_progress_bar(self, percentage: float, width: int = 6) -> str
 ```
 
 Create a visual progress bar with loading animation.

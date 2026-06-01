@@ -25,6 +25,9 @@ content_selectors:
   - ".article-body"
   - "article .content"
 
+image_processing:
+  max_image_size_mb: 5
+
 media:
   download_pdfs: false
   max_pdf_size_mb: 10
@@ -92,6 +95,7 @@ Check the output in `News/mysource/` for content, media, and any errors in the l
 | `rate_limit` | no | Seconds between requests (default: 1.0) |
 | `article_selectors` | yes | CSS selectors for article links |
 | `content_selectors` | yes | CSS selectors for article body |
+| `image_processing.max_image_size_mb` | no | Per-source image size cap in MB (default: 5) |
 | `media.download_pdfs` | no | Override global PDF setting |
 | `media.max_pdf_size_mb` | no | Per-source PDF size cap |
 

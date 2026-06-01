@@ -62,11 +62,15 @@ article_selectors:
 content_selectors:
   - "article .body"
 
+image_processing:
+  max_image_size_mb: 5    # skip images larger than 5MB
+
 media:
   download_pdfs: false
   max_pdf_size_mb: 10
 ```
 
+`image_processing.max_image_size_mb` overrides the global `processing.max_image_size_bytes` for that source.
 `media.download_pdfs` and `media.max_pdf_size_mb` override the global PDF settings for that source.
 
 ## Media Flags
