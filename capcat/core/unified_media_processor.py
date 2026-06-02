@@ -142,7 +142,6 @@ class UnifiedMediaProcessor:
 
         from .downloader import download_file
 
-        url_patterns = img_cfg.get("url_patterns", [])
         downloaded = 0
 
         for alt_text, img_url in matches:
