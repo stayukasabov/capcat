@@ -477,10 +477,34 @@ class HnSource(BaseSource):
             link.replace_with(f"[{link_text}]({href})")
             links_processed += 1
 
-        # Extract text, split by paragraphs
+        # Extract text, split by paragraphs.
+        # HN uses unclosed <p> tags which html.parser nests (p > p > p).
+        # Using p.get_text() on a nested <p> concatenates all descendant text,
+        # producing cascading suffix duplication. Instead, extract only the
+        # immediate text of each element (skipping nested <p> children).
+        from bs4 import NavigableString
+
+        def _direct_text(elem):
+            """Get only the immediate text of an element, not from nested <p>."""
+            parts = []
+            for child in elem.children:
+                if isinstance(child, NavigableString):
+                    s = child.strip()
+                    if s:
+                        parts.append(s)
+                elif child.name and child.name != "p":
+                    s = child.get_text().strip()
+                    if s:
+                        parts.append(s)
+            return " ".join(parts) if parts else ""
+
         paragraphs = []
+        # Leading text before first <p>
+        lead = _direct_text(soup)
+        if lead:
+            paragraphs.append(lead)
         for p in soup.find_all("p"):
-            text = p.get_text().strip()
+            text = _direct_text(p)
             if text:
                 paragraphs.append(text)
 

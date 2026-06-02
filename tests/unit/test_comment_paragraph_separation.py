@@ -110,6 +110,55 @@ class TestParagraphSeparation:
         assert "[this link](https://example.com)" in paragraphs[0]
 
 
+class TestHNApiCommentParagraphs:
+    """HN API path (_clean_api_comment_html) must also avoid duplication."""
+
+    def _clean(self, html: str) -> str:
+        """Call _clean_api_comment_html on the HN source."""
+        from unittest.mock import MagicMock
+        from capcat.sources.builtin.custom.hn.source import HnSource
+        src = HnSource.__new__(HnSource)
+        src.config = MagicMock()
+        src.config.custom_config = {"hn": {}}
+        return src._clean_api_comment_html(html)
+
+    def test_nested_p_no_cascading_suffix(self):
+        """Nested <p> from API must not produce cascading suffix duplication."""
+        html = (
+            'First paragraph.'
+            '<p>Second paragraph.'
+            '<p>Third paragraph.</p></p>'
+        )
+        result = self._clean(html)
+        paragraphs = [p.strip() for p in result.split("\n\n") if p.strip()]
+        assert len(paragraphs) == 3
+        assert paragraphs[0] == "First paragraph."
+        assert paragraphs[1] == "Second paragraph."
+        assert paragraphs[2] == "Third paragraph."
+
+    def test_api_comment_with_link_in_nested_p(self):
+        """Links inside nested <p> must appear only once."""
+        html = (
+            'Intro text.'
+            '<p>Middle text.'
+            '<p><a href="https://example.com">https://example.com</a></p></p>'
+        )
+        result = self._clean(html)
+        paragraphs = [p.strip() for p in result.split("\n\n") if p.strip()]
+        assert len(paragraphs) == 3
+        assert "example.com" not in paragraphs[0]
+        assert "example.com" not in paragraphs[1]
+        assert "example.com" in paragraphs[2]
+
+    def test_api_comment_single_paragraph(self):
+        """API comment with no <p> tags is a single paragraph."""
+        html = 'Just a plain comment with no paragraphs.'
+        result = self._clean(html)
+        paragraphs = [p.strip() for p in result.split("\n\n") if p.strip()]
+        assert len(paragraphs) == 1
+        assert paragraphs[0] == "Just a plain comment with no paragraphs."
+
+
 class TestContentSelectorBreadth:
     """BBC and Guardian content selectors must include image containers."""
 
