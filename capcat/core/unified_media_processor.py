@@ -5,6 +5,7 @@ Clean, DRY interface using modular ImageProcessor.
 """
 
 import os
+import re
 
 import requests
 import yaml
@@ -67,6 +68,18 @@ class UnifiedMediaProcessor:
             else:
                 max_image_bytes = cfg.max_image_size_bytes
 
+            # Phase 1: Download images already referenced inline in markdown.
+            # This handles sources (Guardian, BBC) where content selectors
+            # capture images that produce ![alt](url) during conversion.
+            # These URLs may differ from what image_processing selectors
+            # find on the full page, so we download them directly first.
+            content = UnifiedMediaProcessor._download_inline_images(
+                content, article_folder, session, img_cfg, max_image_bytes
+            )
+
+            # Phase 2: Discover and download additional images from the full
+            # page HTML using image_processing selectors. This catches images
+            # that are outside the content selector scope.
             url_mapping = image_processor.process_article_images(
                 html_content, source_config, url, article_folder,
                 article_url=url,
@@ -105,6 +118,53 @@ class UnifiedMediaProcessor:
         except Exception as e:
             logger.error(f"Media processing error: {e}")
             return content
+
+    @staticmethod
+    def _download_inline_images(
+        content: str,
+        article_folder: str,
+        session: requests.Session,
+        img_cfg: dict,
+        max_image_bytes: int,
+    ) -> str:
+        """Download images already referenced inline in markdown content.
+
+        Scans for ![alt](url) patterns, downloads each remote image, and
+        replaces the URL with a local path. This ensures images captured by
+        content selectors (e.g. Guardian, BBC) are downloaded even when
+        image_processing selectors find different URLs on the full page.
+        """
+        logger = get_logger(__name__)
+        inline_pattern = re.compile(r'!\[([^\]]*)\]\((https?://[^)]+)\)')
+        matches = inline_pattern.findall(content)
+        if not matches:
+            return content
+
+        from .downloader import download_file
+
+        url_patterns = img_cfg.get("url_patterns", [])
+        downloaded = 0
+
+        for alt_text, img_url in matches:
+            # Skip URLs that are already local
+            if img_url.startswith(("images/", "files/", "./")):
+                continue
+
+            try:
+                local_path = download_file(
+                    img_url, article_folder, "image", False
+                )
+                if local_path:
+                    content = content.replace(img_url, local_path)
+                    downloaded += 1
+            except Exception as exc:
+                logger.debug(f"Inline image download failed {img_url}: {exc}")
+
+        if downloaded:
+            logger.debug(
+                f"Downloaded {downloaded} inline images from markdown content"
+            )
+        return content
 
     @staticmethod
     def _insert_images_into_markdown(content: str, url_mapping: dict) -> str:
