@@ -234,7 +234,7 @@ Returns:
 
 **Returns:** str
 
-⚠️ **High complexity:** 12
+⚠️ **High complexity:** 19
 
 
 ## Functions
@@ -251,4 +251,16 @@ Fetch one comment and its children. Thread-safe.
 
 - `cid`
 - `d`
+
+### _direct_text
+
+```python
+def _direct_text(elem)
+```
+
+Get only the immediate text of an element, not from nested <p>.
+
+**Parameters:**
+
+- `elem`
 

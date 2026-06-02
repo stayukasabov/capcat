@@ -108,6 +108,8 @@ Streamlined comment text processing with minimal link handling.
 
 **Returns:** str
 
+⚠️ **High complexity:** 21
+
 ##### generate_inline_comments_markdown
 
 ```python
@@ -185,4 +187,16 @@ Returns:
 - `max_comments` (int) *optional*
 
 **Returns:** StreamlinedCommentProcessor
+
+### _direct_text
+
+```python
+def _direct_text(elem)
+```
+
+Get only the immediate text of an element, not from nested <p> children.
+
+**Parameters:**
+
+- `elem`
 
