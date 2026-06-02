@@ -25,8 +25,9 @@ article_selectors:
 - h3 a[href*="/news/"]
 
 # CSS selectors to extract article content.
+# Comma selector grabs text and image blocks together so images appear inline.
 content_selectors:
-- '[data-component="text-block"]'
+- '[data-component="text-block"], [data-component="image-block"]'
 - 'main article'
 - 'article'
 - '.article-body'

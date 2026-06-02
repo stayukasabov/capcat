@@ -113,13 +113,35 @@ class TestParagraphSeparation:
 class TestContentSelectorBreadth:
     """BBC and Guardian content selectors must include image containers."""
 
+    def test_bbc_first_selector_captures_images(self):
+        """BBC first selector must grab both text and image blocks."""
+        import yaml
+
+        with open("sources/active/config_driven/configs/bbc.yaml") as f:
+            cfg = yaml.safe_load(f)
+        first = cfg["content_selectors"][0]
+
+        # Simulate BBC article structure
+        html = (
+            '<div data-component="text-block"><p>Paragraph one.</p></div>'
+            '<div data-component="image-block"><figure><img src="photo.jpg"></figure></div>'
+            '<div data-component="text-block"><p>Paragraph two.</p></div>'
+        )
+        soup = BeautifulSoup(html, "html.parser")
+        elements = soup.select(first)
+
+        # Must find text AND image blocks
+        has_text = any("text-block" in str(e.get("data-component", "")) for e in elements)
+        has_img = any("image-block" in str(e.get("data-component", "")) for e in elements)
+        assert has_text, f"Selector {first!r} missed text-block elements"
+        assert has_img, f"Selector {first!r} missed image-block elements"
+
     def test_bbc_selectors_include_article(self):
         import yaml
 
         with open("sources/active/config_driven/configs/bbc.yaml") as f:
             cfg = yaml.safe_load(f)
         selectors = cfg["content_selectors"]
-        # Must have a broad selector that captures images alongside text
         has_broad = any(
             s in ("article", "main article", "main")
             for s in selectors
@@ -137,3 +159,18 @@ class TestContentSelectorBreadth:
             for s in selectors
         )
         assert has_broad, f"Guardian selectors too narrow for images: {selectors}"
+
+    def test_combined_selector_preserves_document_order(self):
+        """Images between text blocks must appear between paragraphs in extraction."""
+        html = (
+            '<div data-component="text-block"><p>Before image.</p></div>'
+            '<div data-component="image-block"><figure><img src="mid.jpg" alt="mid"></figure></div>'
+            '<div data-component="text-block"><p>After image.</p></div>'
+        )
+        soup = BeautifulSoup(html, "html.parser")
+        elements = soup.select(
+            '[data-component="text-block"], [data-component="image-block"]'
+        )
+        # Elements must be in document order: text, image, text
+        types = [e.get("data-component") for e in elements]
+        assert types == ["text-block", "image-block", "text-block"]
