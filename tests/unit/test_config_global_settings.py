@@ -9,7 +9,7 @@ from capcat.core.config import (
 class TestPdfConfig:
     def test_defaults(self):
         cfg = PdfConfig()
-        assert cfg.max_pdf_size_bytes == 20_971_520
+        assert cfg.max_pdf_size_bytes == 31_457_280
         assert cfg.max_pdf_per_article == 10
 
     def test_custom_values(self):
@@ -26,7 +26,7 @@ class TestFetchNewsConfigPdf:
 
     def test_pdf_defaults(self):
         cfg = FetchNewsConfig()
-        assert cfg.pdf.max_pdf_size_bytes == 20_971_520
+        assert cfg.pdf.max_pdf_size_bytes == 31_457_280
 
     def test_from_dict_preserves_pdf(self):
         data = {"pdf": {"max_pdf_size_bytes": 5_000_000, "max_pdf_per_article": 3}}
@@ -42,7 +42,7 @@ class TestFetchNewsConfigPdf:
 
     def test_from_dict_empty_pdf_uses_defaults(self):
         cfg = FetchNewsConfig.from_dict({})
-        assert cfg.pdf.max_pdf_size_bytes == 20_971_520
+        assert cfg.pdf.max_pdf_size_bytes == 31_457_280
 
     def test_from_dict_ui_preserved(self):
         """from_dict() must not silently drop ui section."""

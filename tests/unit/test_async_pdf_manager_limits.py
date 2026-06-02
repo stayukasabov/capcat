@@ -61,7 +61,7 @@ class TestInitializePdfManager:
         import capcat.core.async_pdf_manager as apm
         apm._global_pdf_manager = None
         mgr = get_pdf_manager()
-        assert mgr.pdf_config.max_pdf_size_bytes == 20_971_520
+        assert mgr.pdf_config.max_pdf_size_bytes == 31_457_280
 
 
 class TestCountCap:

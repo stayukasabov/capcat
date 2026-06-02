@@ -271,8 +271,26 @@ def run_app(args: list) -> None:
     _dispatch(args)
 
 
+def _raise_fd_limit() -> None:
+    """Raise the OS file descriptor soft limit to prevent 'Too many open files'.
+
+    Multiple thread pools (article workers, PDF manager, media executor,
+    conversion executor) open many files and sockets concurrently.
+    The macOS default soft limit of 256 is easily exhausted.
+    """
+    try:
+        import resource
+        soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
+        target = min(4096, hard)
+        if soft < target:
+            resource.setrlimit(resource.RLIMIT_NOFILE, (target, hard))
+    except Exception:
+        pass
+
+
 def main() -> None:
     """Main entry point.  Routes to TUI or CLI dispatch."""
+    _raise_fd_limit()
     args = sys.argv[1:]
     if args and args[0] == "catch":
         _auto_init("catch")

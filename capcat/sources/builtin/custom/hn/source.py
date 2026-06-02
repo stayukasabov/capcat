@@ -308,6 +308,10 @@ class HnSource(BaseSource):
                 f"for: {article_title}"
             )
 
+            if not comments:
+                self.logger.debug(f"No comments found for: {article_title}, skipping file write")
+                return False
+
             try:
                 with open(filename, "w", encoding="utf-8") as f:
                     f.write(content)

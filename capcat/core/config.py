@@ -106,7 +106,7 @@ class LoggingConfig:
 class PdfConfig:
     """PDF download configuration settings."""
 
-    max_pdf_size_bytes: int = 20_971_520  # 20MB
+    max_pdf_size_bytes: int = 31_457_280  # 30MB
     max_pdf_per_article: int = 10
     global_deduplication: bool = False  # Prevent same PDF URL from being downloaded multiple times across articles
 
