@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Design Spec: User Themes Copy on Init + Upgrade Prompt</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / <a href="../superpowers/index.html">superpowers</a> / specs</div>
+<h1>Design Spec: User Themes Copy on Init + Upgrade Prompt</h1>
+<br>
+<strong>Date:</strong> 2026-03-17
+<strong>Status:</strong> Approved
+<br>
+<h2>Problem</h2>
+<br>
+<code>capcat init</code> creates <code>Config/themes/</code> but leaves it empty. The HTML generator always reads CSS from the package&#x27;s <code>capcat/themes/</code> directory and never checks <code>Config/themes/</code>. Users have no way to customise the visual output.
+<br>
+<h2>Intended UX</h2>
+<br>
+<ol>
+<li><code>capcat init</code> → copies <code>base.css</code> + <code>design-system.css</code> from package into <code>Config/themes/</code>, writes version marker</li>
+<li>All subsequent runs → generator reads from <code>Config/themes/</code> first, falls back to package if absent or on any error</li>
+<li>After <code>pipx upgrade capcat</code> / <code>pipx reinstall capcat</code> / <code>pip install --upgrade capcat</code> → on next run, capcat detects version mismatch and prompts:</li>
+</ol>
+<p>   &gt; &quot;Capcat themes updated in vX.Y.Z. Overwrite your Config/themes/? [Y/n]&quot;</p>
+<ul>
+<li><strong>Y (default)</strong> → recopy + update version marker</li>
+<li><strong>N</strong> → update version marker only (user keeps their CSS, no re-prompt until next upgrade)</li>
+</ul>
+<br>
+<h2>Scope</h2>
+<br>
+<p>Copied to <code>Config/themes/</code> on init:</p>
+<ul>
+<li><code>base.css</code></li>
+<li><code>design-system.css</code></li>
+<li><code>Space-Grotesk/</code> directory (all <code>.woff</code> / <code>.woff2</code> files) — user can swap font files in place or rewrite <code>@font-face</code> declarations in <code>design-system.css</code> to point to their own fonts</li>
+</ul>
+<br>
+<p>Not copied (package-owned, not user-overridable):</p>
+<ul>
+<li><code>js/capcat.js</code> — referenced via absolute package path in the generator</li>
+<li><code>DS-logic.md</code> — developer reference only</li>
+</ul>
+<br>
+<p>The upgrade prompt and version marker apply to the entire <code>Config/themes/</code> contents. Answering Y recopies all three (CSS files + font directory).</p>
+<br>
+<h2>Components</h2>
+<br>
+<h3>1. <code>capcat/commands/init.py</code></h3>
+<br>
+<ul>
+<li>After <code>config_dir / &quot;themes&quot;</code> mkdir, copy <code>base.css</code>, <code>design-system.css</code>, and <code>Space-Grotesk/</code> from <code>Path(__file__).parent.parent / &quot;themes&quot;</code> into <code>Config/themes/</code></li>
+<li>Write <code>Config/themes/.capcat-version</code> containing the value from <code>from capcat import __version__</code></li>
+<li><code>--reinit</code> path: never touch <code>Config/themes/</code> — user-owned. <code>check_theme_upgrade()</code> is never called from within <code>init_project()</code>; it is CLI-level only</li>
+</ul>
+<br>
+<h3>2. <code>capcat/core/config/__init__.py</code> — new helper</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">check_theme_upgrade</span><span class="p">(</span><span class="n">project_root</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<ul>
+<li>Import version as <code>from capcat import __version__</code> (not from <code>capcat.core.config</code> which has its own <code>__version__ = &quot;2.0.0&quot;</code>)</li>
+<li>Reads <code>Config/themes/.capcat-version</code></li>
+<li>If <code>Config/themes/</code> does not exist → silent no-op (uninitialised project)</li>
+<li>If <code>.capcat-version</code> is absent or version differs from <code>__version__</code> → prompt user</li>
+<li><strong>Y</strong> → recopy <code>base.css</code>, <code>design-system.css</code>, and <code>Space-Grotesk/</code> from package + write new version marker</li>
+<li><strong>N</strong> → write new version marker only (suppress until next upgrade)</li>
+</ul>
+<br>
+<h3>3. <code>capcat/core/html_generator.py</code></h3>
+<br>
+<strong><code>_get_embedded_css()</code> and <code>_get_embedded_assets_for_template()</code>:</strong>
+<br>
+<p>Both methods already compute <code>app_dir = Path(__file__).parent.parent.absolute()</code> (package path). Add a second lookup at that same point:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="c1"># Try user Config/themes/ first</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">project_root</span> <span class="o">=</span> <span class="n">find_project_root</span><span class="p">()</span>
+    <span class="n">user_css</span> <span class="o">=</span> <span class="n">project_root</span> <span class="o">/</span> <span class="s2">&quot;Config&quot;</span> <span class="o">/</span> <span class="s2">&quot;themes&quot;</span> <span class="o">/</span> <span class="s2">&quot;base.css&quot;</span>
+    <span class="n">base_css_path</span> <span class="o">=</span> <span class="n">user_css</span> <span class="k">if</span> <span class="n">user_css</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="k">else</span> <span class="n">app_dir</span> <span class="o">/</span> <span class="s2">&quot;themes&quot;</span> <span class="o">/</span> <span class="s2">&quot;base.css&quot;</span>
+<span class="k">except</span> <span class="n">NoProjectError</span><span class="p">:</span>
+    <span class="n">base_css_path</span> <span class="o">=</span> <span class="n">app_dir</span> <span class="o">/</span> <span class="s2">&quot;themes&quot;</span> <span class="o">/</span> <span class="s2">&quot;base.css&quot;</span>
+</pre></div>
+
+<br>
+<p>Per-file fallback: if a file does not exist in <code>Config/themes/</code>, fall back to the package copy for that individual file. A missing file in an existing <code>Config/themes/</code> directory is not an error — it falls back silently per file.</p>
+<br>
+<strong><code>DesignSystemCompiler</code> constructor:</strong>
+<br>
+<code>html_generator.py</code> instantiates <code>DesignSystemCompiler()</code> with no arguments at line ~39. <code>DesignSystemCompiler.__init__</code> hard-codes <code>self.themes_dir = themes_dir or Path(__file__).parent.parent / &quot;themes&quot;</code>. To make <code>design-system.css</code> user-overridable:
+<br>
+<ul>
+<li>Resolve user themes dir once in <code>HTMLGenerator.__init__()</code> via <code>find_project_root()</code> (catch <code>NoProjectError</code>)</li>
+<li>Pass the resolved dir to <code>DesignSystemCompiler(themes_dir=user_themes_dir)</code> if <code>user_themes_dir / &quot;design-system.css&quot;</code> exists; otherwise pass nothing (keeps package default)</li>
+</ul>
+<br>
+<h3>4. <code>capcat/cli.py</code></h3>
+<br>
+<p>In the pre-dispatch block (after <code>_auto_init()</code> but before command dispatch):</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_project_root</span><span class="p">,</span> <span class="n">check_theme_upgrade</span><span class="p">,</span> <span class="n">NoProjectError</span>
+    <span class="n">check_theme_upgrade</span><span class="p">(</span><span class="n">find_project_root</span><span class="p">())</span>
+<span class="k">except</span> <span class="n">NoProjectError</span><span class="p">:</span>
+    <span class="k">pass</span>  <span class="c1"># Not in a capcat project — skip silently</span>
+</pre></div>
+
+<br>
+<p>Skip for commands that do not require a project: <code>init</code>, <code>help</code>, <code>version</code>. <code>check_theme_upgrade()</code> is never called from <code>init_project()</code> itself — only from the CLI dispatch layer.</p>
+<br>
+<h2>Data Flow</h2>
+<br>
+<div class="ascii-art">capcat init
+  └─ copy capcat/themes/{base,design-system}.css → Config/themes/
+  └─ write Config/themes/.capcat-version = &quot;1.0.42&quot;  (from capcat.__version__)
+
+capcat fetch hn
+  ├─ cli.py: find_project_root() → check_theme_upgrade() → &quot;1.0.42&quot; == &quot;1.0.42&quot; → no-op
+  ├─ HTMLGenerator.__init__: resolves user_themes_dir = Config/themes/
+  ├─ DesignSystemCompiler(themes_dir=Config/themes/) → reads user design-system.css
+  └─ _get_embedded_css(): Config/themes/base.css exists → embeds it
+
+pip install --upgrade capcat  (now 1.0.50)
+
+capcat fetch hn
+  ├─ cli.py: check_theme_upgrade() → &quot;1.0.42&quot; ≠ &quot;1.0.50&quot;
+  │   → prompt → Y → recopy + write &quot;1.0.50&quot;
+  │         or → N → write &quot;1.0.50&quot; (suppress next run)
+  └─ html_generator: embeds updated (or preserved) user CSS
+</div>
+<br>
+<h2>Error Handling</h2>
+<br>
+<ul>
+<li><code>NoProjectError</code> anywhere → catch, fall back to package themes silently</li>
+<li>File read error on any <code>Config/themes/</code> file → log warning, fall back to package copy for that file</li>
+<li>Missing <code>.capcat-version</code> in existing <code>Config/themes/</code> → treat as version mismatch, prompt</li>
+<li>Interrupted <code>capcat init</code> (directory exists, file missing) → per-file fallback in generator; <code>check_theme_upgrade()</code> will re-prompt on next run (<code>.capcat-version</code> absent = mismatch)</li>
+</ul>
+<br>
+<h2>Testing (<code>tests/unit/test_user_themes.py</code>)</h2>
+<br>
+<ul>
+<li><code>init_project()</code> copies <code>base.css</code> and <code>design-system.css</code> to <code>Config/themes/</code></li>
+<li><code>init_project()</code> writes <code>.capcat-version</code> matching <code>capcat.__version__</code></li>
+<li><code>init_project(reinit=True)</code> does not touch <code>Config/themes/</code></li>
+<li><code>check_theme_upgrade()</code>: version match → no prompt, no file changes</li>
+<li><code>check_theme_upgrade()</code>: version mismatch + Y → files recopied, <code>.capcat-version</code> updated</li>
+<li><code>check_theme_upgrade()</code>: version mismatch + N → files unchanged, <code>.capcat-version</code> updated to current version (suppresses re-prompt)</li>
+<li><code>check_theme_upgrade()</code>: <code>.capcat-version</code> absent in existing <code>Config/themes/</code> → treated as mismatch, prompts</li>
+<li><code>check_theme_upgrade()</code>: <code>Config/themes/</code> absent → no-op, no exception</li>
+<li><code>_get_embedded_css()</code>: <code>Config/themes/base.css</code> exists → embeds user file</li>
+<li><code>_get_embedded_css()</code>: <code>Config/themes/base.css</code> absent, dir exists → falls back to package file</li>
+<li><code>_get_embedded_css()</code>: <code>NoProjectError</code> → falls back to package file</li>
+<li><code>DesignSystemCompiler</code> receives user <code>themes_dir</code> when <code>Config/themes/design-system.css</code> exists</li>
+<li><code>DesignSystemCompiler</code> receives package <code>themes_dir</code> when <code>Config/themes/design-system.css</code> absent</li>
+</ul>
+<br>
+<h2>Files Changed</h2>
+<br>
+<p>&lt;div class=&quot;table-container&quot;&gt;</p>
+<p>&lt;table class=&quot;centered-table&quot;&gt;</p>
+<p>  &lt;thead&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;th&gt;File&lt;/th&gt;</p>
+<p>      &lt;th&gt;Change&lt;/th&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>  &lt;/thead&gt;</p>
+<p>  &lt;tbody&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/commands/init.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Copy &lt;code&gt;base.css&lt;/code&gt; + &lt;code&gt;design-system.css&lt;/code&gt; + write &lt;code&gt;.capcat-version&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/core/config/__init__.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Add &lt;code&gt;check_theme_upgrade()&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/core/html_generator.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Per-file priority check in CSS methods; pass user &lt;code&gt;themes_dir&lt;/code&gt; to &lt;code&gt;DesignSystemCompiler&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/core/design_system_compiler.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Accept optional &lt;code&gt;themes_dir&lt;/code&gt; parameter (already supports it — verify)&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/cli.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Call &lt;code&gt;check_theme_upgrade(find_project_root())&lt;/code&gt; pre-dispatch&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;tests/unit/test_user_themes.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;New regression tests (all cases above)&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>  &lt;/tbody&gt;</p>
+<p>&lt;/table&gt;</p>
+<p>&lt;/div&gt;</p>
+<br>
+<h2>Constraints</h2>
+<br>
+<ul>
+<li>Never overwrite <code>Config/themes/</code> on <code>--reinit</code></li>
+<li>Fall back to package themes silently on any per-file error — never break generation</li>
+<li>Prompt only once per version bump (N answer updates version marker to suppress re-prompt)</li>
+<li><code>check_theme_upgrade()</code> is CLI-level only — never called from <code>init_project()</code></li>
+<li><code>base.css</code>, <code>design-system.css</code>, and <code>Space-Grotesk/</code> fonts are user-overridable; JS remains package-owned</li>
+<li>Version comparisons always use <code>from capcat import __version__</code> (not <code>capcat.core.config.__version__</code>)</li>
+</ul>
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

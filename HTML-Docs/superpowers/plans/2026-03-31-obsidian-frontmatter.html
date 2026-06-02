@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Obsidian YAML Frontmatter Implementation Plan</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / <a href="../superpowers/index.html">superpowers</a> / plans</div>
+<h1>Obsidian YAML Frontmatter Implementation Plan</h1>
+<br>
+<p>&gt; <strong>For agentic workers:</strong> REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (<code>- [ ]</code>) syntax for tracking.</p>
+<br>
+<strong>Goal:</strong> Prepend valid YAML frontmatter to every <code>article.md</code> and <code>comments.md</code> Capcat produces so the output is queryable in Obsidian via Dataview and filterable in graph view.
+<br>
+<strong>Architecture:</strong> Add <code>inject_frontmatter(md_path, metadata)</code> to <code>storage_manager.py</code> (mirrors <code>inject_comments_wikilink</code> pattern). Wire it in <code>unified_source_processor._process_single_article_new_system</code> — after <code>inject_comments_wikilink</code> so frontmatter ends up as the absolute first block. <code>streamlined_comment_processor.py</code> is NOT modified: it only builds strings, never writes files. File writing for comments happens inside each source&#x27;s <code>fetch_comments()</code>, coordinated by <code>unified_source_processor</code>. Uses PyYAML (already a project dependency).
+<br>
+<strong>Tech Stack:</strong> Python 3, PyYAML (already in requirements)
+<br>
+<hr>
+<br>
+<h2>Call order (critical)</h2>
+<br>
+<pre><code>1. source.fetch_article_content()  →  article.md written (raw content)
+2. inject_comments_wikilink()       →  → [[comments|Comments]] prepended/appended
+3. inject_frontmatter()             →  ---frontmatter--- prepended (pushes wikilink below it)
+</code></pre>
+<br>
+<p>Final file structure:</p>
+<pre><code>---
+title: &quot;...&quot;
+...
+---
+
+→ [[My-Article-Comments|Comments]]
+
+# Article content
+...
+
+→ [[My-Article-Comments|Comments]]
+</code></pre>
+<br>
+<p>For articles without comments, step 2 is skipped; step 3 still runs.</p>
+<br>
+<hr>
+<br>
+<h2>File Structure</h2>
+<br>
+<p>| File | Change |</p>
+<p>|---|---|</p>
+<p>| <code>capcat/core/storage_manager.py</code> | Add <code>inject_frontmatter(md_path, metadata)</code> module-level function |</p>
+<p>| <code>capcat/core/unified_source_processor.py</code> | Add two metadata helpers; wire <code>inject_frontmatter</code> for article + comments |</p>
+<p>| <code>tests/unit/test_obsidian_wikilinks.py</code> | Add tests for <code>inject_frontmatter</code> and integration wiring |</p>
+<br>
+<hr>
+<br>
+<h3>Task 1: <code>inject_frontmatter</code> in <code>storage_manager.py</code></h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>capcat/core/storage_manager.py</code></li>
+<li>Test: <code>tests/unit/test_obsidian_wikilinks.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Write the failing tests</strong></li>
+</ul>
+<br>
+<p>Append to <code>tests/unit/test_obsidian_wikilinks.py</code>:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># inject_frontmatter tests</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.storage_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">inject_frontmatter</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">_yaml</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_frontmatter_prepended_to_plain_article</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;inject_frontmatter prepends --- block before existing content.&quot;&quot;&quot;</span>
+    <span class="n">md</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;My-Article.md&quot;</span>
+    <span class="n">md</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;# My Article</span><span class="se">\n\n</span><span class="s2">Body.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+    <span class="n">inject_frontmatter</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">md</span><span class="p">),</span> <span class="p">{</span><span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;My Article&quot;</span><span class="p">,</span> <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;https://example.com&quot;</span><span class="p">})</span>
+    <span class="n">content</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">content</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;---</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="s2">&quot;title:&quot;</span> <span class="ow">in</span> <span class="n">content</span>
+    <span class="k">assert</span> <span class="s2">&quot;# My Article&quot;</span> <span class="ow">in</span> <span class="n">content</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_frontmatter_is_valid_yaml</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The block between the --- delimiters parses as valid YAML.&quot;&quot;&quot;</span>
+    <span class="n">md</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;My-Article.md&quot;</span>
+    <span class="n">md</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;# My Article</span><span class="se">\n\n</span><span class="s2">Body.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+    <span class="n">inject_frontmatter</span><span class="p">(</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">md</span><span class="p">),</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;My Article: A Test&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;https://example.com/article&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;Hacker News&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;source_code&quot;</span><span class="p">:</span> <span class="s2">&quot;hn&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;tech&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;captured&quot;</span><span class="p">:</span> <span class="s2">&quot;2026-03-31&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;tags&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;hn&quot;</span><span class="p">,</span> <span class="s2">&quot;tech&quot;</span><span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+    <span class="n">content</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+    <span class="n">end</span> <span class="o">=</span> <span class="n">lines</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;---&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">parsed</span> <span class="o">=</span> <span class="n">_yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="n">end</span><span class="p">]))</span>
+    <span class="k">assert</span> <span class="n">parsed</span><span class="p">[</span><span class="s2">&quot;title&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;My Article: A Test&quot;</span>
+    <span class="k">assert</span> <span class="n">parsed</span><span class="p">[</span><span class="s2">&quot;source_code&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;hn&quot;</span>
+    <span class="k">assert</span> <span class="s2">&quot;hn&quot;</span> <span class="ow">in</span> <span class="n">parsed</span><span class="p">[</span><span class="s2">&quot;tags&quot;</span><span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_frontmatter_omits_none_date</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;When date is None it must not appear in the frontmatter.&quot;&quot;&quot;</span>
+    <span class="n">md</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;My-Article.md&quot;</span>
+    <span class="n">md</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;# My Article</span><span class="se">\n\n</span><span class="s2">Body.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+    <span class="n">inject_frontmatter</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">md</span><span class="p">),</span> <span class="p">{</span><span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;My Article&quot;</span><span class="p">,</span> <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;https://x.com&quot;</span><span class="p">,</span> <span class="s2">&quot;date&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">})</span>
+    <span class="n">content</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="s2">&quot;date:&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">content</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_frontmatter_idempotent</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calling inject_frontmatter twice does not double the --- block.&quot;&quot;&quot;</span>
+    <span class="n">md</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;My-Article.md&quot;</span>
+    <span class="n">md</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;# My Article</span><span class="se">\n\n</span><span class="s2">Body.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+    <span class="n">meta</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;My Article&quot;</span><span class="p">,</span> <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;https://x.com&quot;</span><span class="p">}</span>
+    <span class="n">inject_frontmatter</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">md</span><span class="p">),</span> <span class="n">meta</span><span class="p">)</span>
+    <span class="n">inject_frontmatter</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">md</span><span class="p">),</span> <span class="n">meta</span><span class="p">)</span>
+    <span class="n">content</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+    <span class="c1"># Exactly two lines that are solely &#39;---&#39;</span>
+    <span class="n">fence_lines</span> <span class="o">=</span> <span class="p">[</span><span class="n">l</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">content</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span> <span class="k">if</span> <span class="n">l</span> <span class="o">==</span> <span class="s2">&quot;---&quot;</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">fence_lines</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_frontmatter_above_wikilink</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Frontmatter is the first block even when wikilink was injected first.&quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.storage_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">inject_comments_wikilink</span>
+    <span class="n">_make_article</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="s2">&quot;My-Article&quot;</span><span class="p">,</span> <span class="s2">&quot;# My Article</span><span class="se">\n\n</span><span class="s2">Body.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">inject_comments_wikilink</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">),</span> <span class="s2">&quot;My-Article-Comments&quot;</span><span class="p">)</span>
+    <span class="n">article_md</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;My-Article.md&quot;</span>
+    <span class="n">inject_frontmatter</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">article_md</span><span class="p">),</span> <span class="p">{</span><span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;My Article&quot;</span><span class="p">,</span> <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;https://x.com&quot;</span><span class="p">})</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="n">article_md</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+    <span class="c1"># Line 0 must be the opening fence</span>
+    <span class="k">assert</span> <span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;---&quot;</span>
+    <span class="c1"># Wikilink must appear somewhere after the closing fence</span>
+    <span class="n">content</span> <span class="o">=</span> <span class="n">article_md</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+    <span class="n">closing</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;---</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">wikilink_pos</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;→ [[My-Article-Comments|Comments]]&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">wikilink_pos</span> <span class="o">&gt;</span> <span class="n">closing</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_frontmatter_returns_false_if_file_missing</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns False gracefully when the target file does not exist.&quot;&quot;&quot;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">inject_frontmatter</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;nonexistent.md&quot;</span><span class="p">),</span> <span class="p">{</span><span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;x&quot;</span><span class="p">})</span>
+    <span class="k">assert</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">False</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Run tests to verify they fail</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate
+pytest<span class="w"> </span>tests/unit/test_obsidian_wikilinks.py<span class="w"> </span>-k<span class="w"> </span><span class="s2">&quot;frontmatter&quot;</span><span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: all 6 FAIL with <code>ImportError: cannot import name &#x27;inject_frontmatter&#x27;</code></p>
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Implement <code>inject_frontmatter</code> in <code>storage_manager.py</code></strong></li>
+</ul>
+<br>
+<p>Add immediately after <code>inject_comments_wikilink</code> (after line 90), before <code>class StorageManager:</code>:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">inject_frontmatter</span><span class="p">(</span><span class="n">md_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Prepend YAML frontmatter to a markdown file.</span>
+
+<span class="sd">    Idempotent: if the file already starts with &#39;---&#39;, returns True without</span>
+<span class="sd">    modifying. Omits any key whose value is None. Returns False on any error</span>
+<span class="sd">    without raising.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">md_path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+            <span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;inject_frontmatter: file not found: </span><span class="si">{</span><span class="n">md_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="n">content</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">content</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;---&quot;</span><span class="p">):</span>
+            <span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Frontmatter already present: </span><span class="si">{</span><span class="n">md_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="n">clean</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">metadata</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
+        <span class="n">fm</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">clean</span><span class="p">,</span> <span class="n">default_flow_style</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">allow_unicode</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                       <span class="n">sort_keys</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;---</span><span class="se">\n</span><span class="si">{</span><span class="n">fm</span><span class="si">}</span><span class="s2">---</span><span class="se">\n\n</span><span class="si">{</span><span class="n">content</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;inject_frontmatter failed for </span><span class="si">{</span><span class="n">md_path</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Run tests to verify they pass</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate
+pytest<span class="w"> </span>tests/unit/test_obsidian_wikilinks.py<span class="w"> </span>-k<span class="w"> </span><span class="s2">&quot;frontmatter&quot;</span><span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: all 6 PASS</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 5: Run the full wikilinks test file</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate
+pytest<span class="w"> </span>tests/unit/test_obsidian_wikilinks.py<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: all tests PASS</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 6: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat
+git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>feat/obsidian-frontmatter
+git<span class="w"> </span>add<span class="w"> </span>capcat/core/storage_manager.py<span class="w"> </span>tests/unit/test_obsidian_wikilinks.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: add inject_frontmatter to storage_manager&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h3>Task 2: Wire frontmatter into <code>unified_source_processor.py</code></h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>capcat/core/unified_source_processor.py</code></li>
+<li>Test: <code>tests/unit/test_obsidian_wikilinks.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 7: Write the failing integration tests</strong></li>
+</ul>
+<br>
+<p>Append to <code>tests/unit/test_obsidian_wikilinks.py</code>:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Frontmatter wiring integration tests</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_article_gets_frontmatter_after_processing</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;After _process_single_article_new_system, article.md has YAML frontmatter.&quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">unittest.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">MagicMock</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.unified_source_processor</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnifiedSourceProcessor</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">_yaml</span>
+
+    <span class="n">_make_article</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="s2">&quot;My-Article&quot;</span><span class="p">,</span> <span class="s2">&quot;# My Article</span><span class="se">\n\n</span><span class="s2">Body.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">source</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+    <span class="n">source</span><span class="o">.</span><span class="n">fetch_article_content</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">))</span>
+    <span class="n">source</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">has_comments</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">source</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;hn&quot;</span>
+    <span class="n">source</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">display_name</span> <span class="o">=</span> <span class="s2">&quot;Hacker News&quot;</span>
+    <span class="n">source</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">category</span> <span class="o">=</span> <span class="s2">&quot;tech&quot;</span>
+
+    <span class="n">article</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+    <span class="n">article</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;My Article&quot;</span>
+    <span class="n">article</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://example.com/article&quot;</span>
+    <span class="n">article</span><span class="o">.</span><span class="n">comment_url</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">article</span><span class="o">.</span><span class="n">published_date</span> <span class="o">=</span> <span class="s2">&quot;2026-03-28&quot;</span>
+    <span class="n">article</span><span class="o">.</span><span class="n">tags</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">usp</span> <span class="o">=</span> <span class="n">UnifiedSourceProcessor</span><span class="p">()</span>
+    <span class="n">usp</span><span class="o">.</span><span class="n">_process_single_article_new_system</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">article</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">),</span> <span class="n">download_files</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">content</span> <span class="o">=</span> <span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;My-Article.md&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">content</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;---</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+    <span class="n">end</span> <span class="o">=</span> <span class="n">lines</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;---&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">fm</span> <span class="o">=</span> <span class="n">_yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="n">end</span><span class="p">]))</span>
+    <span class="k">assert</span> <span class="n">fm</span><span class="p">[</span><span class="s2">&quot;source_code&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;hn&quot;</span>
+    <span class="k">assert</span> <span class="n">fm</span><span class="p">[</span><span class="s2">&quot;category&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;tech&quot;</span>
+    <span class="k">assert</span> <span class="n">fm</span><span class="p">[</span><span class="s2">&quot;title&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;My Article&quot;</span>
+    <span class="k">assert</span> <span class="n">fm</span><span class="p">[</span><span class="s2">&quot;url&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;https://example.com/article&quot;</span>
+    <span class="k">assert</span> <span class="s2">&quot;captured&quot;</span> <span class="ow">in</span> <span class="n">fm</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_article_frontmatter_omits_none_date</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;When published_date is None, &#39;date&#39; key is absent from frontmatter.&quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">unittest.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">MagicMock</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.unified_source_processor</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnifiedSourceProcessor</span>
+
+    <span class="n">_make_article</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="s2">&quot;My-Article&quot;</span><span class="p">,</span> <span class="s2">&quot;# My Article</span><span class="se">\n\n</span><span class="s2">Body.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">source</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+    <span class="n">source</span><span class="o">.</span><span class="n">fetch_article_content</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">))</span>
+    <span class="n">source</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">has_comments</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">source</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;lb&quot;</span>
+    <span class="n">source</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">display_name</span> <span class="o">=</span> <span class="s2">&quot;Lobsters&quot;</span>
+    <span class="n">source</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">category</span> <span class="o">=</span> <span class="s2">&quot;tech&quot;</span>
+
+    <span class="n">article</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+    <span class="n">article</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;My Article&quot;</span>
+    <span class="n">article</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://lobste.rs/s/abc&quot;</span>
+    <span class="n">article</span><span class="o">.</span><span class="n">comment_url</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">article</span><span class="o">.</span><span class="n">published_date</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">article</span><span class="o">.</span><span class="n">tags</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">usp</span> <span class="o">=</span> <span class="n">UnifiedSourceProcessor</span><span class="p">()</span>
+    <span class="n">usp</span><span class="o">.</span><span class="n">_process_single_article_new_system</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">article</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">),</span> <span class="n">download_files</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">content</span> <span class="o">=</span> <span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;My-Article.md&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="s2">&quot;date:&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">content</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_comments_get_frontmatter_after_processing</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Comments.md gets YAML frontmatter with comments tag and source_code.&quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">unittest.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">MagicMock</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.unified_source_processor</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnifiedSourceProcessor</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">_yaml</span>
+
+    <span class="n">_make_article</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="s2">&quot;My-Article&quot;</span><span class="p">,</span> <span class="s2">&quot;# My Article</span><span class="se">\n\n</span><span class="s2">Body.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">_write_comments_file</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="s2">&quot;My-Article&quot;</span><span class="p">)</span>
+
+    <span class="n">source</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+    <span class="n">source</span><span class="o">.</span><span class="n">fetch_article_content</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">))</span>
+    <span class="n">source</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">has_comments</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">source</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;hn&quot;</span>
+    <span class="n">source</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">display_name</span> <span class="o">=</span> <span class="s2">&quot;Hacker News&quot;</span>
+    <span class="n">source</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">category</span> <span class="o">=</span> <span class="s2">&quot;tech&quot;</span>
+    <span class="n">source</span><span class="o">.</span><span class="n">fetch_comments</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="n">article</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+    <span class="n">article</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;My Article&quot;</span>
+    <span class="n">article</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://news.ycombinator.com/item?id=123&quot;</span>
+    <span class="n">article</span><span class="o">.</span><span class="n">comment_url</span> <span class="o">=</span> <span class="s2">&quot;https://news.ycombinator.com/item?id=123&quot;</span>
+    <span class="n">article</span><span class="o">.</span><span class="n">published_date</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">article</span><span class="o">.</span><span class="n">tags</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">usp</span> <span class="o">=</span> <span class="n">UnifiedSourceProcessor</span><span class="p">()</span>
+    <span class="n">usp</span><span class="o">.</span><span class="n">_process_single_article_new_system</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">article</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">),</span> <span class="n">download_files</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">content</span> <span class="o">=</span> <span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;My-Article-Comments.md&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">content</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;---</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+    <span class="n">end</span> <span class="o">=</span> <span class="n">lines</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;---&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">fm</span> <span class="o">=</span> <span class="n">_yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="n">end</span><span class="p">]))</span>
+    <span class="k">assert</span> <span class="s2">&quot;comments&quot;</span> <span class="ow">in</span> <span class="n">fm</span><span class="p">[</span><span class="s2">&quot;tags&quot;</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">fm</span><span class="p">[</span><span class="s2">&quot;source_code&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;hn&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_frontmatter_above_wikilink_in_integration</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;After full processing, frontmatter is above the wikilink in article.md.&quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">unittest.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">MagicMock</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.unified_source_processor</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnifiedSourceProcessor</span>
+
+    <span class="n">_make_article</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="s2">&quot;My-Article&quot;</span><span class="p">,</span> <span class="s2">&quot;# My Article</span><span class="se">\n\n</span><span class="s2">Body.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">_write_comments_file</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="s2">&quot;My-Article&quot;</span><span class="p">)</span>
+
+    <span class="n">source</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+    <span class="n">source</span><span class="o">.</span><span class="n">fetch_article_content</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">))</span>
+    <span class="n">source</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">has_comments</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">source</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;hn&quot;</span>
+    <span class="n">source</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">display_name</span> <span class="o">=</span> <span class="s2">&quot;Hacker News&quot;</span>
+    <span class="n">source</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">category</span> <span class="o">=</span> <span class="s2">&quot;tech&quot;</span>
+    <span class="n">source</span><span class="o">.</span><span class="n">fetch_comments</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="n">article</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+    <span class="n">article</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;My Article&quot;</span>
+    <span class="n">article</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://example.com&quot;</span>
+    <span class="n">article</span><span class="o">.</span><span class="n">comment_url</span> <span class="o">=</span> <span class="s2">&quot;https://example.com/comments&quot;</span>
+    <span class="n">article</span><span class="o">.</span><span class="n">published_date</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">article</span><span class="o">.</span><span class="n">tags</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">usp</span> <span class="o">=</span> <span class="n">UnifiedSourceProcessor</span><span class="p">()</span>
+    <span class="n">usp</span><span class="o">.</span><span class="n">_process_single_article_new_system</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">article</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">),</span> <span class="n">download_files</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">content</span> <span class="o">=</span> <span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;My-Article.md&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">content</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;---</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">closing_fence</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;---</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">wikilink_pos</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;→ [[&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">wikilink_pos</span> <span class="o">&gt;</span> <span class="n">closing_fence</span><span class="p">,</span> <span class="s2">&quot;Wikilink must appear after closing --- fence&quot;</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 8: Run tests to verify they fail</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate
+pytest<span class="w"> </span>tests/unit/test_obsidian_wikilinks.py<span class="w"> </span>-k<span class="w"> </span><span class="s2">&quot;frontmatter_after or frontmatter_omits or comments_get or above_wikilink_in&quot;</span><span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: 4 tests FAIL</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 9: Update the import line in <code>unified_source_processor.py</code></strong></li>
+</ul>
+<br>
+<p>Find line 25:</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.storage_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_comments_md</span><span class="p">,</span> <span class="n">inject_comments_wikilink</span>
+</pre></div>
+
+<br>
+<p>Replace with:</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.storage_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_article_md</span><span class="p">,</span> <span class="n">find_comments_md</span><span class="p">,</span> <span class="n">inject_comments_wikilink</span><span class="p">,</span> <span class="n">inject_frontmatter</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 10: Add <code>datetime</code> import and two metadata helpers</strong></li>
+</ul>
+<br>
+<p>At the top of <code>unified_source_processor.py</code>, add to the existing imports block:</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">date</span> <span class="k">as</span> <span class="n">_date</span>
+</pre></div>
+
+<br>
+<p>Then add these two private functions immediately before <code>class UnifiedSourceProcessor</code> (find it with <code>grep -n &quot;^class UnifiedSourceProcessor&quot; capcat/core/unified_source_processor.py</code>):</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_build_article_metadata</span><span class="p">(</span><span class="n">article</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build frontmatter metadata dict for an article.&quot;&quot;&quot;</span>
+    <span class="n">tags</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">([</span><span class="n">source</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">source</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">category</span><span class="p">]))</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="n">article</span><span class="o">.</span><span class="n">title</span><span class="p">,</span>
+        <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="n">article</span><span class="o">.</span><span class="n">url</span><span class="p">,</span>
+        <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="n">source</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">display_name</span><span class="p">,</span>
+        <span class="s2">&quot;source_code&quot;</span><span class="p">:</span> <span class="n">source</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+        <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="n">source</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">category</span><span class="p">,</span>
+        <span class="s2">&quot;date&quot;</span><span class="p">:</span> <span class="n">article</span><span class="o">.</span><span class="n">published_date</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s2">&quot;captured&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">_date</span><span class="o">.</span><span class="n">today</span><span class="p">()),</span>
+        <span class="s2">&quot;tags&quot;</span><span class="p">:</span> <span class="n">tags</span><span class="p">,</span>
+    <span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_build_comments_metadata</span><span class="p">(</span><span class="n">article</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build frontmatter metadata dict for a comments file.&quot;&quot;&quot;</span>
+    <span class="n">tags</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">([</span><span class="s2">&quot;comments&quot;</span><span class="p">,</span> <span class="n">source</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">name</span><span class="p">]))</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Comments: </span><span class="si">{</span><span class="n">article</span><span class="o">.</span><span class="n">title</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;article_url&quot;</span><span class="p">:</span> <span class="n">article</span><span class="o">.</span><span class="n">url</span><span class="p">,</span>
+        <span class="s2">&quot;source_code&quot;</span><span class="p">:</span> <span class="n">source</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+        <span class="s2">&quot;captured&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">_date</span><span class="o">.</span><span class="n">today</span><span class="p">()),</span>
+        <span class="s2">&quot;tags&quot;</span><span class="p">:</span> <span class="n">tags</span><span class="p">,</span>
+    <span class="p">}</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 11: Wire injection calls in <code>_process_single_article_new_system</code></strong></li>
+</ul>
+<br>
+<p>Read lines 427–479 to confirm the exact structure. The section looks like:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">try</span><span class="p">:</span>
+            <span class="n">success</span><span class="p">,</span> <span class="n">article_path</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">fetch_article_content</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+
+            <span class="c1"># Process comments if available and supported</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">success</span>
+                <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">article</span><span class="p">,</span> <span class="s2">&quot;comment_url&quot;</span><span class="p">)</span>
+                <span class="ow">and</span> <span class="n">article</span><span class="o">.</span><span class="n">comment_url</span>
+            <span class="p">):</span>
+                <span class="o">...</span>
+                <span class="k">if</span> <span class="n">supports_comments</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="s2">&quot;fetch_comments&quot;</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">comments_written</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">fetch_comments</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">comments_written</span><span class="p">:</span>
+                            <span class="o">...</span><span class="n">inject_comments_wikilink</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">comment_error</span><span class="p">:</span>
+                        <span class="o">...</span>
+
+            <span class="k">return</span> <span class="n">success</span>
+</pre></div>
+
+<br>
+<p>Make two precise changes:</p>
+<br>
+<strong>Change A</strong> — add <code>comments_written = False</code> on the line immediately after <code>success, article_path = source.fetch_article_content(...)</code> (after the closing <code>)</code> of that call, before the blank line):
+<br>
+<div class="highlight"><pre><span></span><span class="n">success</span><span class="p">,</span> <span class="n">article_path</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">fetch_article_content</span><span class="p">(</span>
+                <span class="n">article</span><span class="p">,</span> <span class="n">base_dir</span><span class="p">,</span> <span class="n">progress_callback</span><span class="p">,</span>
+                <span class="n">download_files</span><span class="o">=</span><span class="n">download_files</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">comments_written</span> <span class="o">=</span> <span class="kc">False</span>   <span class="c1"># ← ADD THIS LINE</span>
+</pre></div>
+
+<br>
+<strong>Change B</strong> — replace <code>return success</code> (currently the last line before the outer <code>except</code>) with:
+<br>
+<div class="highlight"><pre><span></span><span class="c1"># Inject YAML frontmatter — article always, comments if written</span>
+            <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
+                <span class="n">article_md</span> <span class="o">=</span> <span class="n">find_article_md</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">article_path</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">article_md</span><span class="p">:</span>
+                    <span class="n">inject_frontmatter</span><span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">article_md</span><span class="p">),</span>
+                        <span class="n">_build_article_metadata</span><span class="p">(</span><span class="n">article</span><span class="p">,</span> <span class="n">source</span><span class="p">),</span>
+                    <span class="p">)</span>
+                <span class="k">if</span> <span class="n">comments_written</span><span class="p">:</span>
+                    <span class="n">comments_md</span> <span class="o">=</span> <span class="n">find_comments_md</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">article_path</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="n">comments_md</span><span class="p">:</span>
+                        <span class="n">inject_frontmatter</span><span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">comments_md</span><span class="p">),</span>
+                            <span class="n">_build_comments_metadata</span><span class="p">(</span><span class="n">article</span><span class="p">,</span> <span class="n">source</span><span class="p">),</span>
+                        <span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">success</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 12: Run the new integration tests</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate
+pytest<span class="w"> </span>tests/unit/test_obsidian_wikilinks.py<span class="w"> </span>-k<span class="w"> </span><span class="s2">&quot;frontmatter_after or frontmatter_omits or comments_get or above_wikilink_in&quot;</span><span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: 4 PASS</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 13: Run the full wikilinks test file</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate
+pytest<span class="w"> </span>tests/unit/test_obsidian_wikilinks.py<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: all tests PASS</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 14: Run the full unit test suite</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-q
+</pre></div>
+
+<br>
+<p>Expected: all tests pass, zero failures</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 15: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat
+git<span class="w"> </span>add<span class="w"> </span>capcat/core/unified_source_processor.py<span class="w"> </span>tests/unit/test_obsidian_wikilinks.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: wire inject_frontmatter into article and comments processing&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h3>Task 3: Version bump, merge, release</h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>capcat/__init__.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 16: Bump minor version</strong></li>
+</ul>
+<br>
+<p>In <code>capcat/__init__.py</code>, change:</p>
+<div class="highlight"><pre><span></span><span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;1.6.8&quot;</span>
+</pre></div>
+
+<p>to:</p>
+<div class="highlight"><pre><span></span><span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;1.7.0&quot;</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 17: Final test suite run</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-q
+</pre></div>
+
+<br>
+<p>Expected: all tests pass</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 18: Commit, merge, tag, push</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat
+git<span class="w"> </span>add<span class="w"> </span>capcat/__init__.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;bump: version to 1.7.0&quot;</span>
+git<span class="w"> </span>checkout<span class="w"> </span>main
+git<span class="w"> </span>merge<span class="w"> </span>feat/obsidian-frontmatter
+git<span class="w"> </span>tag<span class="w"> </span>v1.7.0
+git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>main<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>v1.7.0
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 19: Verify PyPI release (~2 min after push)</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>pipx<span class="w"> </span>upgrade<span class="w"> </span>capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>capcat<span class="w"> </span>--version
+</pre></div>
+
+<br>
+<p>Expected: <code>capcat 1.7.0</code></p>
+<br>
+<hr>
+<br>
+<h3>Task 4: End-to-end verification</h3>
+<br>
+<ul>
+<li>[ ] <strong>Step 20: Run a single HN article and inspect output</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate
+capcat<span class="w"> </span>fetch<span class="w"> </span>hn<span class="w"> </span>--count<span class="w"> </span><span class="m">1</span><span class="w"> </span>--output<span class="w"> </span>/tmp/capcat-fm-test
+head<span class="w"> </span>-15<span class="w"> </span>/tmp/capcat-fm-test/**/*.md
+</pre></div>
+
+<br>
+<p>Expected: file opens with:</p>
+<pre><code>---
+title: &#x27;...&#x27;
+url: &#x27;...&#x27;
+source: Hacker News
+source_code: hn
+category: tech
+captured: &#x27;2026-...&#x27;
+tags:
+- hn
+- tech
+---
+</code></pre>
+<br>
+<code>date:</code> is present only if HN provided a publication date for that article.
+<br>
+<ul>
+<li>[ ] <strong>Step 21: Verify Dataview works in Obsidian</strong></li>
+</ul>
+<br>
+<p>Point an Obsidian vault at the output folder. Create a note containing:</p>
+<br>
+<pre><code>TABLE source, date, url FROM &quot;&quot;
+SORT captured DESC
+</code></pre>
+<br>
+<p>Expected: table lists the archived article with correct metadata columns.</p>
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Config YAML — Property Inventory</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / <a href="../superpowers/index.html">superpowers</a> / specs</div>
+<h1>User Config YAML — Property Inventory</h1>
+<br>
+<strong>Date:</strong> 2026-04-02
+<strong>Status:</strong> Brainstorming / Scoping
+<strong>Context:</strong> Design of a user-editable YAML config with documented fields for post-install tuning, vault-centric with user-level defaults fallback.
+<br>
+<hr>
+<br>
+<h2>Config Hierarchy (existing)</h2>
+<br>
+<pre><code>Config/capcat.yml              — Vault-level (primary, per-vault)
+~/.config/capcat/config.yml   — User-level (machine-wide defaults)
+/etc/capcat/config.yml        — System-level (rarely used)
+</code></pre>
+<br>
+<p>Vault config overrides user config. User config overrides system defaults.</p>
+<br>
+<hr>
+<br>
+<h2>Group 1 — Already wired through ConfigManager</h2>
+<br>
+<p>Already functional if placed in <code>Config/capcat.yml</code>. No code changes needed — only YAML template generation and inline documentation.</p>
+<br>
+<h3><code>network:</code></h3>
+<br>
+<p>| Field | Default | Description |</p>
+<p>|---|---|---|</p>
+<p>| <code>connect_timeout</code> | <code>10</code> | TCP connection timeout (seconds) |</p>
+<p>| <code>read_timeout</code> | <code>30</code> | HTTP response body timeout (seconds) |</p>
+<p>| <code>media_download_timeout</code> | <code>60</code> | Image/PDF download timeout (seconds) |</p>
+<p>| <code>head_request_timeout</code> | <code>10</code> | HEAD request timeout for link checking (seconds) |</p>
+<p>| <code>max_retries</code> | <code>3</code> | Retry attempts on network failure |</p>
+<p>| <code>retry_delay</code> | <code>1.0</code> | Base delay between retries (seconds) |</p>
+<p>| <code>user_agent</code> | <code>&quot;Capcat/2.0 (Personal news archiver)&quot;</code> | HTTP User-Agent header |</p>
+<p>| <code>pool_connections</code> | <code>20</code> | Connection pool size |</p>
+<p>| <code>pool_maxsize</code> | <code>20</code> | Max concurrent connections |</p>
+<br>
+<h3><code>processing:</code></h3>
+<br>
+<p>| Field | Default | Description |</p>
+<p>|---|---|---|</p>
+<p>| <code>max_workers</code> | <code>8</code> | Concurrent article fetchers |</p>
+<p>| <code>max_filename_length</code> | <code>100</code> | Max characters in vault filenames |</p>
+<p>| <code>download_images</code> | <code>true</code> | Embed images locally |</p>
+<p>| <code>download_videos</code> | <code>false</code> | Download video files |</p>
+<p>| <code>download_audio</code> | <code>false</code> | Download audio files |</p>
+<p>| <code>download_documents</code> | <code>false</code> | Download generic documents |</p>
+<p>| <code>remove_script_tags</code> | <code>true</code> | Strip <code>&lt;script&gt;</code> from HTML before conversion |</p>
+<p>| <code>remove_style_tags</code> | <code>true</code> | Strip <code>&lt;style&gt;</code> from HTML before conversion |</p>
+<p>| <code>remove_nav_tags</code> | <code>true</code> | Strip <code>&lt;nav&gt;</code> from HTML before conversion |</p>
+<p>| <code>create_comments_file</code> | <code>true</code> | Fetch and save comments alongside articles |</p>
+<p>| <code>markdown_line_breaks</code> | <code>true</code> | Preserve line breaks in markdown output |</p>
+<br>
+<h3><code>ui:</code></h3>
+<br>
+<p>| Field | Default | Options |</p>
+<p>|---|---|---|</p>
+<p>| <code>progress_spinner_style</code> | <code>&quot;dots&quot;</code> | <code>dots</code>, <code>wave</code>, <code>loading</code>, <code>pulse</code>, <code>bounce</code>, <code>modern</code> |</p>
+<p>| <code>batch_spinner_style</code> | <code>&quot;activity&quot;</code> | <code>activity</code>, <code>progress</code>, <code>pulse</code>, <code>wave</code>, <code>dots</code>, <code>scan</code> |</p>
+<p>| <code>progress_bar_width</code> | <code>25</code> | Width in characters |</p>
+<p>| <code>show_progress_animations</code> | <code>true</code> | — |</p>
+<p>| <code>use_emojis</code> | <code>true</code> | — |</p>
+<p>| <code>use_colors</code> | <code>true</code> | — |</p>
+<p>| <code>show_detailed_progress</code> | <code>false</code> | — |</p>
+<br>
+<h3><code>logging:</code></h3>
+<br>
+<p>| Field | Default | Description |</p>
+<p>|---|---|---|</p>
+<p>| <code>default_level</code> | <code>&quot;INFO&quot;</code> | <code>DEBUG</code>, <code>INFO</code>, <code>WARNING</code>, <code>ERROR</code> |</p>
+<p>| <code>console_level</code> | <code>&quot;INFO&quot;</code> | Log level for terminal output |</p>
+<p>| <code>file_level</code> | <code>&quot;DEBUG&quot;</code> | Log level written to log file |</p>
+<p>| <code>max_log_file_size</code> | <code>10485760</code> | Log rotation threshold (bytes, default 10MB) |</p>
+<p>| <code>log_file_backup_count</code> | <code>5</code> | Number of rotated log files to keep |</p>
+<p>| <code>include_timestamps</code> | <code>true</code> | — |</p>
+<p>| <code>use_colors</code> | <code>true</code> | Colorized log output |</p>
+<br>
+<hr>
+<br>
+<h2>Group 2 — In <code>constants.py</code>, not yet plumbed through ConfigManager</h2>
+<br>
+<p>Defined as module-level constants. Need to be added to a dataclass and consumed from config instead.</p>
+<br>
+<strong>Source:</strong> <code>capcat/core/constants.py</code>
+<br>
+<p>| Constant | Default | Target section | Description |</p>
+<p>|---|---|---|---|</p>
+<p>| <code>DEFAULT_ARTICLE_COUNT</code> | <code>30</code> | <code>processing:</code> | Articles fetched per source per run |</p>
+<p>| <code>DEFAULT_MAX_IMAGES</code> | <code>20</code> | <code>processing:</code> | Max images per article (normal mode) |</p>
+<p>| <code>MIN_IMAGE_DIMENSIONS</code> | <code>150</code> | <code>processing:</code> | Skip images smaller than N pixels (width/height) |</p>
+<p>| <code>MAX_IMAGE_SIZE_BYTES</code> | <code>5242880</code> | <code>processing:</code> | Skip images larger than N bytes (default 5MB) |</p>
+<p>| <code>DEFAULT_CRAWL_DELAY</code> | <code>1.0</code> | <code>network:</code> | Global rate limit floor (seconds between requests) |</p>
+<p>| <code>ROBOTS_CACHE_TTL_MINUTES</code> | <code>15</code> | <code>network:</code> | How long to cache robots.txt responses |</p>
+<p>| <code>CONVERSION_TIMEOUT_SECONDS</code> | <code>30</code> | <code>processing:</code> | HTML→Markdown conversion timeout (seconds) |</p>
+<br>
+<hr>
+<br>
+<h2>Group 3 — Hardcoded in specific files (require extraction)</h2>
+<br>
+<p>| Location | Value | Suggested field |</p>
+<p>|---|---|---|</p>
+<p>| <code>capcat/core/async_pdf_manager.py</code> | <code>max_workers=4</code> | <code>processing.pdf_workers</code> |</p>
+<p>| <code>capcat/core/conversion_executor.py</code> | <code>max_workers=4</code> | <code>processing.conversion_workers</code> |</p>
+<br>
+<hr>
+<br>
+<h2>Group 4 — New fields (require config support + enforcement code)</h2>
+<br>
+<p>These do not exist anywhere in the codebase yet. Both config entry and enforcement logic need to be written.</p>
+<br>
+<p>| Field | Suggested default | Description |</p>
+<p>|---|---|---|</p>
+<p>| <code>max_pdf_size_bytes</code> | <code>52428800</code> (50MB) | Skip PDF downloads larger than N bytes |</p>
+<p>| <code>max_pdf_per_article</code> | <code>10</code> | Cap how many PDFs to queue per article |</p>
+<br>
+<p>Enforcement point for both: <code>capcat/core/async_pdf_manager.py</code> — <code>extract_and_queue_pdf_links</code> and/or the download worker.</p>
+<br>
+<hr>
+<br>
+<h2>Effort Summary</h2>
+<br>
+<p>| Group | Fields | Effort |</p>
+<p>|---|---|---|</p>
+<p>| Already wired, needs YAML template | ~28 fields | Low |</p>
+<p>| <code>constants.py</code> → ConfigManager | 7 fields | Medium |</p>
+<p>| Hardcoded extractions | 2 fields | Medium |</p>
+<p>| New fields (PDF limits) | 2 fields | High |</p>
+<p>| <strong>Total</strong> | <strong>~39 fields</strong> | — |</p>
+<br>
+<hr>
+<br>
+<h2>Open Scope Questions</h2>
+<br>
+<ul>
+<li>[ ] Which groups are in scope for v1?</li>
+<li>All without Group 3</li>
+<li>[ ] Should <code>capcat generate-config</code> produce the annotated vault-level template?</li>
+<li>Yes</li>
+<li>[ ] Should the user-level config (<code>~/.config/capcat/config.yml</code>) be auto-generated on <code>capcat init</code>?</li>
+<li>Yes</li>
+<li>[ ] Per-source article count overrides — separate from global default?</li>
+<li>Clarify?</li>
+</ul>
+<br>
+<p>In general all (whitout a Group 3) have to be exposed as Global-settings.yaml in Vault and User directory for manual editing with clear explainatory comments and examples. </p>
+<p>We should start with the higher effort PDF limits.</p>
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

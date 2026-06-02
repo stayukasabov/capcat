@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Bug Fixes Implementation Plan</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / <a href="../superpowers/index.html">superpowers</a> / plans</div>
+<h1>PDF Bug Fixes Implementation Plan</h1>
+<br>
+<p>&gt; <strong>For agentic workers:</strong> REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (<code>- [ ]</code>) syntax for tracking.</p>
+<br>
+<strong>Goal:</strong> Fix three bugs: placeholder links in saved markdown are never updated after async PDF downloads complete; updated links use absolute paths; PDF download bar overflows when articles have many PDFs.
+<br>
+<strong>Architecture:</strong> Bug 1+2 are in the async PDF manager pipeline — fix by tracking queued URLs per article folder in <code>AsyncPDFManager</code> so the update thread waits on actual completion events instead of a 2-second sleep, and by converting absolute paths to relative before writing. Bug 3 is a CSS + HTML generator fix — add <code>flex-wrap: wrap</code> to the download bar and remove the <code>&amp;nbsp;·&amp;nbsp;</code> separator that dangles when links wrap to the next row.
+<br>
+<strong>Tech Stack:</strong> Python 3, <code>requests</code>, <code>pytest</code>, <code>unittest.mock</code>, CSS
+<br>
+<hr>
+<br>
+<h2>File Structure</h2>
+<br>
+<ul>
+<li><strong>Modify:</strong> <code>capcat/core/async_pdf_manager.py</code> — add <code>_queued_by_folder</code> dict to track queued URLs per folder; add <code>get_queued_urls_for_folder()</code>; fix absolute → relative path in <code>update_article_with_completed_downloads</code></li>
+<li><strong>Modify:</strong> <code>capcat/core/article_fetcher.py</code> — <code>_schedule_pdf_link_updates</code> calls <code>wait_for_downloads</code> instead of <code>sleep(2)</code></li>
+<li><strong>Modify:</strong> <code>capcat/themes/base.css</code> — add <code>flex-wrap: wrap; row-gap: 0.4rem;</code> to <code>.pdf-download-bar</code>; add <code>white-space: nowrap</code> to <code>.pdf-download-bar a</code>; fix <code>line-height: 0.85rem</code> → <code>line-height: 1.4</code></li>
+<li><strong>Modify:</strong> <code>capcat/htmlgen/generator.py</code> — replace <code>&quot; &amp;nbsp;·&amp;nbsp; &quot;.join(...)</code> with <code>&quot; &quot;.join(...)</code></li>
+<li><strong>Create:</strong> <code>tests/unit/test_async_pdf_manager_bugs.py</code> — regression tests for B1 + B2</li>
+<li><strong>Modify:</strong> <code>tests/unit/test_htmlgen/test_generator_article.py</code> — add regression tests for B3</li>
+</ul>
+<br>
+<hr>
+<br>
+<h3>Task 0: Create the fix branch</h3>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Create branch</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>fix/pdf-bug-fixes
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h3>Task 1: Regression tests for B1 (stale placeholder) and B2 (absolute path)</h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Create: <code>tests/unit/test_async_pdf_manager_bugs.py</code></li>
+</ul>
+<br>
+<p>These tests must FAIL before the fix.</p>
+<br>
+<p>Context you need:</p>
+<ul>
+<li><code>AsyncPDFManager</code> is in <code>capcat/core/async_pdf_manager.py</code></li>
+<li><code>get_pdf_manager()</code> returns the singleton; tests should instantiate <code>AsyncPDFManager</code> directly to avoid global state</li>
+<li><code>extract_and_queue_pdf_links(markdown_content, folder_path)</code> → <code>(updated_markdown, count)</code></li>
+<li><code>update_article_with_completed_downloads(markdown_file_path)</code> reads and rewrites the file</li>
+<li><code>_download_pdf</code> sets <code>self.completed_downloads[url] = local_path</code> (absolute path from <code>download_file</code>)</li>
+<li><code>wait_for_downloads(urls, timeout)</code> waits on completion events</li>
+<li><code>_schedule_pdf_link_updates</code> in <code>article_fetcher.py</code> calls <code>time.sleep(2)</code> then <code>update_article_with_completed_downloads</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Create the test file</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="c1"># tests/unit/test_async_pdf_manager_bugs.py</span>
+<span class="c1">#!/usr/bin/env python3</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Regression tests for async PDF manager bugs:</span>
+<span class="sd">B1 — placeholder links never updated when downloads take &gt;2 seconds</span>
+<span class="sd">B2 — updated links use absolute paths instead of relative</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">threading</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">unittest.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">patch</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.async_pdf_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">AsyncPDFManager</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestStalePlaceholderUpdate</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;B1 — update_article_with_completed_downloads is called before downloads finish.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_placeholder_updated_when_download_completes_after_2s</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Placeholder must be replaced even when the PDF download takes &gt;2 seconds.</span>
+
+<span class="sd">        Current broken behaviour: the update thread sleeps 2s, checks completed_downloads</span>
+<span class="sd">        (empty), and exits — placeholder stays in the markdown forever.</span>
+
+<span class="sd">        Fixed behaviour: the update thread waits for actual download completion before</span>
+<span class="sd">        calling update_article_with_completed_downloads.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">manager</span> <span class="o">=</span> <span class="n">AsyncPDFManager</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">manager</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">article_folder</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;article&quot;</span>
+            <span class="n">article_folder</span><span class="o">.</span><span class="n">mkdir</span><span class="p">()</span>
+            <span class="n">files_dir</span> <span class="o">=</span> <span class="n">article_folder</span> <span class="o">/</span> <span class="s2">&quot;files&quot;</span>
+            <span class="n">files_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">()</span>
+
+            <span class="n">pdf_url</span> <span class="o">=</span> <span class="s2">&quot;https://example.com/paper.pdf&quot;</span>
+
+            <span class="c1"># Simulate: manager has queued this URL for this article folder</span>
+            <span class="n">manager</span><span class="o">.</span><span class="n">extract_and_queue_pdf_links</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;[Paper](</span><span class="si">{</span><span class="n">pdf_url</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">article_folder</span><span class="p">)</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Write the article markdown with the placeholder</span>
+            <span class="n">md_path</span> <span class="o">=</span> <span class="n">article_folder</span> <span class="o">/</span> <span class="s2">&quot;Article.md&quot;</span>
+            <span class="n">md_path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;[Paper](files/downloading_paper.pdf)</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Simulate a slow download: complete it after 3 seconds</span>
+            <span class="n">expected_local</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">files_dir</span> <span class="o">/</span> <span class="s2">&quot;paper.pdf&quot;</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">files_dir</span> <span class="o">/</span> <span class="s2">&quot;paper.pdf&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_bytes</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;%PDF&quot;</span><span class="p">)</span>
+
+            <span class="k">def</span><span class="w"> </span><span class="nf">complete_after_delay</span><span class="p">():</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.3</span><span class="p">)</span>
+                <span class="k">with</span> <span class="n">manager</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
+                    <span class="n">manager</span><span class="o">.</span><span class="n">completed_downloads</span><span class="p">[</span><span class="n">pdf_url</span><span class="p">]</span> <span class="o">=</span> <span class="n">expected_local</span>
+                    <span class="k">if</span> <span class="n">pdf_url</span> <span class="ow">in</span> <span class="n">manager</span><span class="o">.</span><span class="n">active_downloads</span><span class="p">:</span>
+                        <span class="n">manager</span><span class="o">.</span><span class="n">active_downloads</span><span class="p">[</span><span class="n">pdf_url</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
+                        <span class="k">del</span> <span class="n">manager</span><span class="o">.</span><span class="n">active_downloads</span><span class="p">[</span><span class="n">pdf_url</span><span class="p">]</span>
+
+            <span class="n">t</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">complete_after_delay</span><span class="p">)</span>
+            <span class="n">t</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+            <span class="n">t</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+
+            <span class="c1"># wait_for_downloads should pick up the completed event</span>
+            <span class="n">queued</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_queued_urls_for_folder</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">article_folder</span><span class="p">))</span>
+            <span class="k">assert</span> <span class="n">pdf_url</span> <span class="ow">in</span> <span class="n">queued</span><span class="p">,</span> <span class="s2">&quot;URL should be tracked as queued for this folder&quot;</span>
+
+            <span class="n">manager</span><span class="o">.</span><span class="n">wait_for_downloads</span><span class="p">([</span><span class="n">pdf_url</span><span class="p">],</span> <span class="n">timeout</span><span class="o">=</span><span class="mf">5.0</span><span class="p">)</span>
+            <span class="n">manager</span><span class="o">.</span><span class="n">update_article_with_completed_downloads</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">md_path</span><span class="p">))</span>
+
+            <span class="n">updated</span> <span class="o">=</span> <span class="n">md_path</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
+            <span class="k">assert</span> <span class="s2">&quot;files/downloading_paper.pdf&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">updated</span><span class="p">,</span> <span class="p">(</span>
+                <span class="s2">&quot;Placeholder must be replaced after download completes&quot;</span>
+            <span class="p">)</span>
+            <span class="k">assert</span> <span class="s2">&quot;paper.pdf&quot;</span> <span class="ow">in</span> <span class="n">updated</span><span class="p">,</span> <span class="p">(</span>
+                <span class="s2">&quot;Updated markdown must contain the actual filename&quot;</span>
+            <span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">manager</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_get_queued_urls_for_folder_returns_queued_urls</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        get_queued_urls_for_folder must return the URLs queued for a given folder</span>
+<span class="sd">        and remove them from internal tracking (to avoid memory leak).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">manager</span> <span class="o">=</span> <span class="n">AsyncPDFManager</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">manager</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">folder</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;article&quot;</span>
+            <span class="n">folder</span><span class="o">.</span><span class="n">mkdir</span><span class="p">()</span>
+
+            <span class="n">manager</span><span class="o">.</span><span class="n">extract_and_queue_pdf_links</span><span class="p">(</span>
+                <span class="s2">&quot;[A](https://x.com/a.pdf) [B](https://x.com/b.pdf)&quot;</span><span class="p">,</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">folder</span><span class="p">),</span>
+            <span class="p">)</span>
+
+            <span class="n">urls</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_queued_urls_for_folder</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">folder</span><span class="p">))</span>
+            <span class="k">assert</span> <span class="s2">&quot;https://x.com/a.pdf&quot;</span> <span class="ow">in</span> <span class="n">urls</span>
+            <span class="k">assert</span> <span class="s2">&quot;https://x.com/b.pdf&quot;</span> <span class="ow">in</span> <span class="n">urls</span>
+
+            <span class="c1"># Second call must return empty (cleaned up)</span>
+            <span class="n">urls2</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_queued_urls_for_folder</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">folder</span><span class="p">))</span>
+            <span class="k">assert</span> <span class="n">urls2</span> <span class="o">==</span> <span class="p">[],</span> <span class="s2">&quot;Queued URLs must be removed after retrieval&quot;</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">manager</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestAbsolutePathInUpdatedMarkdown</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;B2 — update_article_with_completed_downloads writes absolute paths.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_updated_link_uses_relative_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        When a placeholder is replaced with a completed download path,</span>
+<span class="sd">        the written link must be relative to the markdown file, not absolute.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">manager</span> <span class="o">=</span> <span class="n">AsyncPDFManager</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">manager</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">article_folder</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;article&quot;</span>
+            <span class="n">article_folder</span><span class="o">.</span><span class="n">mkdir</span><span class="p">()</span>
+            <span class="n">files_dir</span> <span class="o">=</span> <span class="n">article_folder</span> <span class="o">/</span> <span class="s2">&quot;files&quot;</span>
+            <span class="n">files_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">()</span>
+
+            <span class="n">pdf_url</span> <span class="o">=</span> <span class="s2">&quot;https://example.com/paper.pdf&quot;</span>
+            <span class="n">absolute_local</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">files_dir</span> <span class="o">/</span> <span class="s2">&quot;paper.pdf&quot;</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">files_dir</span> <span class="o">/</span> <span class="s2">&quot;paper.pdf&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_bytes</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;%PDF&quot;</span><span class="p">)</span>
+
+            <span class="k">with</span> <span class="n">manager</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
+                <span class="n">manager</span><span class="o">.</span><span class="n">completed_downloads</span><span class="p">[</span><span class="n">pdf_url</span><span class="p">]</span> <span class="o">=</span> <span class="n">absolute_local</span>
+
+            <span class="n">md_path</span> <span class="o">=</span> <span class="n">article_folder</span> <span class="o">/</span> <span class="s2">&quot;Article.md&quot;</span>
+            <span class="n">md_path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;[Paper](files/downloading_paper.pdf)</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="n">manager</span><span class="o">.</span><span class="n">update_article_with_completed_downloads</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">md_path</span><span class="p">))</span>
+
+            <span class="n">updated</span> <span class="o">=</span> <span class="n">md_path</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
+            <span class="k">assert</span> <span class="n">absolute_local</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">updated</span><span class="p">,</span> <span class="p">(</span>
+                <span class="s2">&quot;Absolute path must not appear in updated markdown&quot;</span>
+            <span class="p">)</span>
+            <span class="k">assert</span> <span class="s2">&quot;files/paper.pdf&quot;</span> <span class="ow">in</span> <span class="n">updated</span><span class="p">,</span> <span class="p">(</span>
+                <span class="s2">&quot;Relative path must be written instead of absolute path&quot;</span>
+            <span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">manager</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_relative_path_is_relative_to_markdown_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The relative path must be relative to the directory containing the markdown file,</span>
+<span class="sd">        not to the project root or any other anchor.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">manager</span> <span class="o">=</span> <span class="n">AsyncPDFManager</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">manager</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">article_folder</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;article&quot;</span>
+            <span class="n">article_folder</span><span class="o">.</span><span class="n">mkdir</span><span class="p">()</span>
+            <span class="n">files_dir</span> <span class="o">=</span> <span class="n">article_folder</span> <span class="o">/</span> <span class="s2">&quot;files&quot;</span>
+            <span class="n">files_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">()</span>
+
+            <span class="n">pdf_url</span> <span class="o">=</span> <span class="s2">&quot;https://example.com/report.pdf&quot;</span>
+            <span class="n">absolute_local</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">files_dir</span> <span class="o">/</span> <span class="s2">&quot;report.pdf&quot;</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">files_dir</span> <span class="o">/</span> <span class="s2">&quot;report.pdf&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_bytes</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;%PDF&quot;</span><span class="p">)</span>
+
+            <span class="k">with</span> <span class="n">manager</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
+                <span class="n">manager</span><span class="o">.</span><span class="n">completed_downloads</span><span class="p">[</span><span class="n">pdf_url</span><span class="p">]</span> <span class="o">=</span> <span class="n">absolute_local</span>
+
+            <span class="n">md_path</span> <span class="o">=</span> <span class="n">article_folder</span> <span class="o">/</span> <span class="s2">&quot;Article.md&quot;</span>
+            <span class="n">md_path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;[Report](files/downloading_report.pdf)</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="n">manager</span><span class="o">.</span><span class="n">update_article_with_completed_downloads</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">md_path</span><span class="p">))</span>
+
+            <span class="n">updated</span> <span class="o">=</span> <span class="n">md_path</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
+            <span class="c1"># Compute expected relative path from markdown&#39;s parent dir</span>
+            <span class="n">expected_relative</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span>
+                <span class="n">absolute_local</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">article_folder</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">assert</span> <span class="n">expected_relative</span> <span class="ow">in</span> <span class="n">updated</span><span class="p">,</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Expected relative path &#39;</span><span class="si">{</span><span class="n">expected_relative</span><span class="si">}</span><span class="s2">&#39; not found in: </span><span class="si">{</span><span class="n">updated</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">manager</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Run tests to verify they fail</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_async_pdf_manager_bugs.py<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected:</p>
+<ul>
+<li><code>test_get_queued_urls_for_folder_returns_queued_urls</code> — FAIL: <code>AttributeError: &#x27;AsyncPDFManager&#x27; has no attribute &#x27;get_queued_urls_for_folder&#x27;</code></li>
+<li><code>test_updated_link_uses_relative_path</code> — FAIL: absolute path appears in markdown</li>
+<li><code>test_relative_path_is_relative_to_markdown_dir</code> — FAIL: same</li>
+<li><code>test_placeholder_updated_when_download_completes_after_2s</code> — may FAIL or PASS depending on timing</li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Commit the failing tests</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>tests/unit/test_async_pdf_manager_bugs.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;test: add regression tests for async PDF manager stale placeholder and absolute path bugs&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h3>Task 2: Fix B1 — track queued URLs per folder and wait on completion</h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>capcat/core/async_pdf_manager.py:29-44</code> (constructor) and <code>:75-126</code> (<code>extract_and_queue_pdf_links</code>)</li>
+<li>Modify: <code>capcat/core/article_fetcher.py:1386-1413</code> (<code>_schedule_pdf_link_updates</code>)</li>
+</ul>
+<br>
+<p>Context:</p>
+<ul>
+<li><code>AsyncPDFManager.__init__</code> already has a <code>self._lock</code>. Add <code>self._queued_by_folder: Dict[str, List[str]] = {}</code> there.</li>
+<li><code>extract_and_queue_pdf_links</code> already collects <code>seen_urls</code>. After all links are processed, store them: <code>with self._lock: self._queued_by_folder[article_folder_path] = list(seen_urls)</code>.</li>
+<li><code>get_queued_urls_for_folder</code> pops the list to clean up automatically.</li>
+<li>In <code>article_fetcher.py</code>, <code>_schedule_pdf_link_updates</code> spawns a thread with <code>time.sleep(2)</code>. Replace the sleep with <code>wait_for_downloads(queued_urls, timeout=120)</code>.</li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Add <code>_queued_by_folder</code> and <code>get_queued_urls_for_folder</code> to <code>AsyncPDFManager</code></strong></li>
+</ul>
+<br>
+<p>In <code>__init__</code> (around line 44), after <code>self._lock = threading.Lock()</code>, add:</p>
+<div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">_queued_by_folder</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+</pre></div>
+
+<br>
+<p>At the end of <code>extract_and_queue_pdf_links</code> (after <code>return updated_content, queued_count</code>, but before the return — i.e., after the regex substitution, before the return statement):</p>
+<br>
+<p>Replace the existing return block:</p>
+<div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">queued_count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Queued </span><span class="si">{</span><span class="n">queued_count</span><span class="si">}</span><span class="s2"> PDF downloads for background processing&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">updated_content</span><span class="p">,</span> <span class="n">queued_count</span>
+</pre></div>
+
+<p>with:</p>
+<div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">queued_count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Queued </span><span class="si">{</span><span class="n">queued_count</span><span class="si">}</span><span class="s2"> PDF downloads for background processing&quot;</span><span class="p">)</span>
+            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_queued_by_folder</span><span class="p">[</span><span class="n">article_folder_path</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">seen_urls</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">updated_content</span><span class="p">,</span> <span class="n">queued_count</span>
+</pre></div>
+
+<br>
+<p>Add the new method after <code>extract_and_queue_pdf_links</code> (around line 128):</p>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">get_queued_urls_for_folder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">folder_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return and remove the queued PDF URLs for a given article folder.&quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_queued_by_folder</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">folder_path</span><span class="p">,</span> <span class="p">[])</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Update <code>_schedule_pdf_link_updates</code> in <code>article_fetcher.py</code></strong></li>
+</ul>
+<br>
+<p>Find <code>_schedule_pdf_link_updates</code> (around line 1386). The inner <code>update_pdf_links</code> function currently does:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">update_pdf_links</span><span class="p">():</span>
+                <span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+                <span class="c1"># Give a brief delay for any immediate downloads</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+                <span class="n">article_md</span> <span class="o">=</span> <span class="n">find_article_md</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">article_folder_path</span><span class="p">))</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">article_md</span><span class="p">:</span>
+                    <span class="k">return</span>
+                <span class="n">pdf_manager</span><span class="o">.</span><span class="n">update_article_with_completed_downloads</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">article_md</span><span class="p">))</span>
+</pre></div>
+
+<br>
+<p>Replace it with:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">update_pdf_links</span><span class="p">():</span>
+                <span class="n">pdf_manager</span> <span class="o">=</span> <span class="n">get_pdf_manager</span><span class="p">()</span>
+                <span class="n">queued_urls</span> <span class="o">=</span> <span class="n">pdf_manager</span><span class="o">.</span><span class="n">get_queued_urls_for_folder</span><span class="p">(</span><span class="n">article_folder_path</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">queued_urls</span><span class="p">:</span>
+                    <span class="n">pdf_manager</span><span class="o">.</span><span class="n">wait_for_downloads</span><span class="p">(</span><span class="n">queued_urls</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">120</span><span class="p">)</span>
+                <span class="n">article_md</span> <span class="o">=</span> <span class="n">find_article_md</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">article_folder_path</span><span class="p">))</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">article_md</span><span class="p">:</span>
+                    <span class="k">return</span>
+                <span class="n">pdf_manager</span><span class="o">.</span><span class="n">update_article_with_completed_downloads</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">article_md</span><span class="p">))</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Run the regression tests</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_async_pdf_manager_bugs.py::TestStalePlaceholderUpdate<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: both tests PASS.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Run the full unit suite</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-q
+</pre></div>
+
+<br>
+<p>Expected: all tests pass.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 5: Run ruff</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>ruff<span class="w"> </span>check<span class="w"> </span>capcat/core/async_pdf_manager.py<span class="w"> </span>capcat/core/article_fetcher.py
+</pre></div>
+
+<br>
+<p>Expected: no errors.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 6: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>capcat/core/async_pdf_manager.py<span class="w"> </span>capcat/core/article_fetcher.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;fix: wait for actual PDF download completion before updating markdown placeholders&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h3>Task 3: Fix B2 — write relative paths in updated markdown links</h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>capcat/core/async_pdf_manager.py</code> — <code>update_article_with_completed_downloads</code> method (around line 128-171)</li>
+</ul>
+<br>
+<p>Context:</p>
+<ul>
+<li>The <code>replace_placeholder</code> inner function currently returns <code>f&quot;<a href="{local_path}">{text}</a>&quot;</code> where <code>local_path</code> is an absolute path stored in <code>self.completed_downloads[url]</code></li>
+<li><code>markdown_file_path</code> is the argument — its parent directory is the anchor for the relative path</li>
+<li>Fix: <code>relative = os.path.relpath(local_path, os.path.dirname(markdown_file_path))</code> then use <code>relative</code> in the return value</li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Fix <code>replace_placeholder</code> in <code>update_article_with_completed_downloads</code></strong></li>
+</ul>
+<br>
+<p>Find the <code>replace_placeholder</code> inner function (around line 144). The current return for a matched completed download is:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="n">updated</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">text</span><span class="si">}</span><span class="s2">](</span><span class="si">{</span><span class="n">local_path</span><span class="si">}</span><span class="s2">)&quot;</span>
+</pre></div>
+
+<br>
+<p>Replace with:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="n">updated</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="n">relative</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span>
+                            <span class="n">local_path</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">markdown_file_path</span><span class="p">)</span>
+                        <span class="p">)</span>
+                        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">text</span><span class="si">}</span><span class="s2">](</span><span class="si">{</span><span class="n">relative</span><span class="si">}</span><span class="s2">)&quot;</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Run the absolute-path regression tests</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_async_pdf_manager_bugs.py::TestAbsolutePathInUpdatedMarkdown<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: both tests PASS.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Run the full unit suite</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-q
+</pre></div>
+
+<br>
+<p>Expected: all pass.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>capcat/core/async_pdf_manager.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;fix: write relative paths when updating PDF placeholder links in markdown&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h3>Task 4: Regression test for B3 — PDF bar overflow</h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>tests/unit/test_htmlgen/test_generator_article.py</code></li>
+</ul>
+<br>
+<p>Context:</p>
+<ul>
+<li><code>test_generator_article.py</code> already exists. Read it before adding tests to follow the existing test patterns.</li>
+<li>The PDF bar is generated in <code>capcat/htmlgen/generator.py</code> <code>generate_article_html_from_template</code> (around line 688-701). It scans <code>&lt;article_folder&gt;/files/*.pdf</code>.</li>
+<li>The bar HTML is a <code>&lt;div class=&quot;pdf-download-bar&quot;&gt;</code> containing links.</li>
+<li>The CSS is in <code>capcat/themes/base.css</code>.</li>
+<li>To test the HTML output: call <code>generate_article_html_from_template</code> with a mocked article folder that has a <code>files/</code> subdirectory containing multiple PDFs, then assert the bar HTML does NOT contain <code>&amp;nbsp;·&amp;nbsp;</code>.</li>
+<li>To test the CSS: read <code>base.css</code> and assert it contains <code>flex-wrap: wrap</code> in the <code>.pdf-download-bar</code> block.</li>
+</ul>
+<br>
+<p>Read <code>tests/unit/test_htmlgen/test_generator_article.py</code> first to understand the test setup pattern, then add these two test methods to the existing test class (or create a new class at the bottom of the file):</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">TestPdfDownloadBarRendering</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;B3 — PDF download bar must wrap properly when there are many PDFs.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_pdf_bar_uses_space_separator_not_middot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The PDF download bar must NOT use &amp;nbsp;·&amp;nbsp; as link separator.</span>
+<span class="sd">        That separator dangles at the start of a new line when links wrap.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.htmlgen.generator</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTMLGenerator</span>
+
+        <span class="c1"># Create a mock article folder with multiple PDFs</span>
+        <span class="n">article_folder</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;TestArticle&quot;</span>
+        <span class="n">article_folder</span><span class="o">.</span><span class="n">mkdir</span><span class="p">()</span>
+        <span class="n">files_dir</span> <span class="o">=</span> <span class="n">article_folder</span> <span class="o">/</span> <span class="s2">&quot;files&quot;</span>
+        <span class="n">files_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+            <span class="p">(</span><span class="n">files_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;paper</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">.pdf&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_bytes</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;%PDF&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Create a minimal markdown file</span>
+        <span class="n">md_path</span> <span class="o">=</span> <span class="n">article_folder</span> <span class="o">/</span> <span class="s2">&quot;TestArticle.md&quot;</span>
+        <span class="n">md_path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;# TestArticle</span><span class="se">\n\n</span><span class="s2">Content.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">generator</span> <span class="o">=</span> <span class="n">HTMLGenerator</span><span class="p">()</span>
+        <span class="n">html</span> <span class="o">=</span> <span class="n">generator</span><span class="o">.</span><span class="n">generate_article_html_from_template</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">md_path</span><span class="p">))</span>
+
+        <span class="k">assert</span> <span class="s2">&quot;&amp;nbsp;·&amp;nbsp;&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">html</span><span class="p">,</span> <span class="p">(</span>
+            <span class="s2">&quot;PDF bar must not use &amp;nbsp;·&amp;nbsp; separator — it dangles on line wrap&quot;</span>
+        <span class="p">)</span>
+        <span class="k">assert</span> <span class="s1">&#39;class=&quot;pdf-download-bar&quot;&#39;</span> <span class="ow">in</span> <span class="n">html</span><span class="p">,</span> <span class="p">(</span>
+            <span class="s2">&quot;PDF download bar must be present when files/*.pdf exist&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_pdf_bar_css_has_flex_wrap</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        base.css must include flex-wrap: wrap in .pdf-download-bar so the bar</span>
+<span class="sd">        wraps gracefully when there are many PDF links.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+        <span class="n">css_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parents</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">/</span> <span class="s2">&quot;capcat&quot;</span> <span class="o">/</span> <span class="s2">&quot;themes&quot;</span> <span class="o">/</span> <span class="s2">&quot;base.css&quot;</span>
+        <span class="n">css</span> <span class="o">=</span> <span class="n">css_path</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
+
+        <span class="c1"># Find the .pdf-download-bar block</span>
+        <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span>
+            <span class="sa">r</span><span class="s1">&#39;\.pdf-download-bar\s*\{([^}]+)\}&#39;</span><span class="p">,</span> <span class="n">css</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span>
+        <span class="p">)</span>
+        <span class="k">assert</span> <span class="n">match</span><span class="p">,</span> <span class="s2">&quot;.pdf-download-bar block not found in base.css&quot;</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="s2">&quot;flex-wrap&quot;</span> <span class="ow">in</span> <span class="n">block</span><span class="p">,</span> <span class="p">(</span>
+            <span class="s2">&quot;flex-wrap must be set in .pdf-download-bar to prevent overflow&quot;</span>
+        <span class="p">)</span>
+        <span class="k">assert</span> <span class="s2">&quot;wrap&quot;</span> <span class="ow">in</span> <span class="n">block</span><span class="p">,</span> <span class="p">(</span>
+            <span class="s2">&quot;flex-wrap value must include &#39;wrap&#39;&quot;</span>
+        <span class="p">)</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Read <code>tests/unit/test_htmlgen/test_generator_article.py</code></strong> to understand the existing test structure and <code>HTMLGenerator</code> instantiation pattern.</li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Add the two test methods</strong> to the file (new <code>TestPdfDownloadBarRendering</code> class at the bottom).</li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Run to verify they fail</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_htmlgen/test_generator_article.py::TestPdfDownloadBarRendering<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected:</p>
+<ul>
+<li><code>test_pdf_bar_uses_space_separator_not_middot</code> — FAIL: <code>&amp;nbsp;·&amp;nbsp;</code> IS present</li>
+<li><code>test_pdf_bar_css_has_flex_wrap</code> — FAIL: <code>flex-wrap</code> not found in <code>.pdf-download-bar</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Commit the failing tests</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>tests/unit/test_htmlgen/test_generator_article.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;test: add regression tests for PDF bar overflow and separator&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h3>Task 5: Fix B3 — CSS flex-wrap and generator separator</h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>capcat/themes/base.css:561-588</code> (<code>.pdf-download-bar</code> block)</li>
+<li>Modify: <code>capcat/htmlgen/generator.py:692</code> (link separator)</li>
+</ul>
+<br>
+<strong>CSS changes</strong> (<code>base.css</code>):
+<br>
+<p>Find the <code>.pdf-download-bar</code> block (line 561). Replace it with:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="c">/* PDF download bar — shown below the H1 title when a local PDF exists */</span>
+<span class="p">.</span><span class="nc">pdf-download-bar</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">display</span><span class="p">:</span><span class="w"> </span><span class="kc">flex</span><span class="p">;</span>
+<span class="w">  </span><span class="k">flex-wrap</span><span class="p">:</span><span class="w"> </span><span class="kc">wrap</span><span class="p">;</span>
+<span class="w">  </span><span class="k">align-items</span><span class="p">:</span><span class="w"> </span><span class="kc">baseline</span><span class="p">;</span>
+<span class="w">  </span><span class="k">gap</span><span class="p">:</span><span class="w"> </span><span class="mf">0.5</span><span class="kt">rem</span><span class="w"> </span><span class="mf">0.75</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">  </span><span class="k">margin</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="mf">1.25</span><span class="kt">rem</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="k">padding</span><span class="p">:</span><span class="w"> </span><span class="mf">0.75</span><span class="kt">rem</span><span class="w"> </span><span class="mi">1</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">  </span><span class="k">font-size</span><span class="p">:</span><span class="w"> </span><span class="mf">0.85</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">  </span><span class="k">line-height</span><span class="p">:</span><span class="w"> </span><span class="mf">1.4</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+
+<br>
+<p>Changes from original:</p>
+<ul>
+<li>Added <code>flex-wrap: wrap</code> — allows links to wrap to next row</li>
+<li>Changed <code>align-items: center</code> → <code>align-items: baseline</code> — keeps label aligned with first row of links when wrapped</li>
+<li>Changed <code>gap: 0.5rem</code> → <code>gap: 0.5rem 0.75rem</code> (row-gap col-gap) — adds vertical gap between rows</li>
+<li>Changed <code>line-height: 0.85rem</code> → <code>line-height: 1.4</code> — <code>0.85rem</code> was wrong (same as font-size = no line spacing)</li>
+<li>Changed <code>padding: 1rem 1rem</code> → <code>padding: 0.75rem 1rem</code> — slightly tighter</li>
+</ul>
+<br>
+<p>Also add <code>white-space: nowrap</code> to <code>.pdf-download-bar a</code> (find the existing rule around line 580):</p>
+<br>
+<div class="highlight"><pre><span></span><span class="p">.</span><span class="nc">pdf-download-bar</span><span class="w"> </span><span class="nt">a</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="nf">var</span><span class="p">(</span><span class="nv">--link-color</span><span class="p">);</span>
+<span class="w">  </span><span class="k">text-decoration</span><span class="p">:</span><span class="w"> </span><span class="kc">none</span><span class="p">;</span>
+<span class="w">  </span><span class="k">white-space</span><span class="p">:</span><span class="w"> </span><span class="kc">nowrap</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+
+<br>
+<strong>Generator change</strong> (<code>generator.py</code>):
+<br>
+<p>Find line 692:</p>
+<div class="highlight"><pre><span></span><span class="n">links</span> <span class="o">=</span> <span class="s2">&quot; &amp;nbsp;·&amp;nbsp; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+</pre></div>
+
+<p>Replace with:</p>
+<div class="highlight"><pre><span></span><span class="n">links</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Apply the CSS changes to <code>base.css</code></strong></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Apply the generator change to <code>generator.py</code></strong></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Run the regression tests</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_htmlgen/test_generator_article.py::TestPdfDownloadBarRendering<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: both tests PASS.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Run the full unit suite</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-q
+</pre></div>
+
+<br>
+<p>Expected: all tests pass.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 5: Run ruff</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>ruff<span class="w"> </span>check<span class="w"> </span>capcat/htmlgen/generator.py
+</pre></div>
+
+<br>
+<p>Expected: no errors.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 6: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>capcat/themes/base.css<span class="w"> </span>capcat/htmlgen/generator.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;fix: add flex-wrap to PDF download bar and remove dangling separator&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h3>Task 6: Version bump to 1.8.4 and release</h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>capcat/__init__.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Bump version</strong></li>
+</ul>
+<br>
+<p>Change <code>__version__ = &quot;1.8.3&quot;</code> to <code>__version__ = &quot;1.8.4&quot;</code> in <code>capcat/__init__.py</code>.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Commit version bump</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>capcat/__init__.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;bump: version to 1.8.4&quot;</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Merge to main</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>checkout<span class="w"> </span>main<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>merge<span class="w"> </span>fix/pdf-bug-fixes
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Push main and tag</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>main<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>tag<span class="w"> </span>v1.8.4<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>v1.8.4
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 5: Regenerate API docs</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>python3<span class="w"> </span>scripts/generate_api_docs.py
+git<span class="w"> </span>add<span class="w"> </span>docs/api/<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;docs: regenerate API docs for v1.8.4&quot;</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>main
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 6: Verify PyPI (after ~2 min)</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>pipx<span class="w"> </span>upgrade<span class="w"> </span>capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>capcat<span class="w"> </span>--version
+</pre></div>
+
+<br>
+<p>Expected: <code>capcat 1.8.4</code></p>
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

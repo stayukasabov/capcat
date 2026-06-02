@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Architecture Roadmap</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / architecture</div>
+<h1>Architecture Roadmap</h1>
+<br>
+<p>Planned refactors that are documented but not yet scheduled. Each entry captures the motivation, the current state, and the target design so the work can be picked up without re-investigating.</p>
+<br>
+<hr>
+<br>
+<h2>HTML Generation Refactor</h2>
+<br>
+<strong>Status:</strong> Not started
+<strong>Priority:</strong> High - affects developer experience for every new source
+<strong>Trigger:</strong> When adding a 3rd custom source with HTML output, or when <code>html_generator.py</code> needs modification for any reason
+<br>
+<h3>Problem</h3>
+<br>
+<code>capcat/core/html_generator.py</code> (1,828 lines) is a monolith with source knowledge embedded via directory-name string matching. Adding a source requires finding every if/elif chain and inserting a new branch. No enforced interface means source-specific logic can be added anywhere in the file.
+<br>
+<h3>Existing Work</h3>
+<br>
+<code>capcat/htmlgen/</code> was built as the correct replacement and is archived, not deleted. It provides:
+<br>
+<ul>
+<li><code>BaseHTMLGenerator</code> (ABC) with four abstract methods that each source must implement: <code>count_comments</code>, <code>should_show_comment_link</code>, <code>matches_directory_pattern</code>, <code>generate_breadcrumb</code></li>
+<li><code>HTMLGeneratorFactory</code> with a registry pattern - generators register themselves at module load; the factory detects the source from a directory name and instantiates the right generator</li>
+<li><code>HnGenerator</code>, <code>LbGenerator</code>, <code>LessWrongGenerator</code> - source-specific subclasses, each in their own file under <code>capcat/htmlgen/&lt;source&gt;/</code></li>
+</ul>
+<br>
+<h3>Gap</h3>
+<br>
+<code>htmlgen/</code> uses Jinja2 directly and is not connected to <code>TemplateRenderer</code> + <code>DesignSystemCompiler</code> (the live template system that reads <code>Config/themes/design-system.css</code>). The <code>HnGenerator</code> and <code>LbGenerator</code> are missing a <code>generate_directory_index</code> implementation (stub only).
+<br>
+<h3>Target Design</h3>
+<br>
+<ol>
+<li>Reconnect <code>BaseHTMLGenerator</code> to <code>TemplateRenderer</code> and <code>DesignSystemCompiler</code> - replace the Jinja2 fallback with the same template pipeline used in <code>html_generator.py</code></li>
+<li>Complete <code>generate_directory_index</code> in the base class (common logic, no source-specific branches)</li>
+<li>Implement <code>generate_article_page</code> and <code>generate_comments_page</code> in the base class using the template system; source subclasses override only what differs</li>
+<li>Wire <code>html_post_processor.py</code> to use <code>HTMLGeneratorFactory.detect_source_from_directory()</code> → <code>HTMLGeneratorFactory.create_generator()</code> instead of the monolithic <code>HTMLGenerator</code></li>
+<li>Delete <code>capcat/core/html_generator.py</code> once all tests pass against the new system</li>
+</ol>
+<br>
+<h3>Files</h3>
+<br>
+<p>&lt;div class=&quot;table-container&quot;&gt;</p>
+<p>&lt;table class=&quot;centered-table&quot;&gt;</p>
+<p>  &lt;thead&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;th&gt;File&lt;/th&gt;</p>
+<p>      &lt;th&gt;Action&lt;/th&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>  &lt;/thead&gt;</p>
+<p>  &lt;tbody&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/htmlgen/base/base_generator.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Connect to &lt;code&gt;TemplateRenderer&lt;/code&gt; + &lt;code&gt;DesignSystemCompiler&lt;/code&gt;; complete directory index&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/htmlgen/hn/generator.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Review and complete&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/htmlgen/lb/generator.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Review and complete&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/htmlgen/lesswrong/generator.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Review - LessWrong has no fetch path; keep renderer only&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/core/html_post_processor.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Switch from &lt;code&gt;HTMLGenerator&lt;/code&gt; to &lt;code&gt;HTMLGeneratorFactory&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/core/article_fetcher.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Switch from &lt;code&gt;HTMLGenerator&lt;/code&gt; to &lt;code&gt;HTMLGeneratorFactory&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/core/html_generator.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Delete after switchover&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>  &lt;/tbody&gt;</p>
+<p>&lt;/table&gt;</p>
+<p>&lt;/div&gt;</p>
+<br>
+<h3>Before Starting</h3>
+<br>
+<p>Run the brainstorming skill. This refactor touches the full HTML output pipeline and requires a spec before implementation. The <code>htmlgen/</code> code is the design intent - read it before proposing anything.</p>
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

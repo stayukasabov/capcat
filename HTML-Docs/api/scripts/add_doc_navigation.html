@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>scripts.add_doc_navigation</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / <a href="../api/index.html">api</a> / scripts</div>
+<h1>scripts.add_doc_navigation</h1>
+<br>
+<strong>File:</strong> <code>Application/scripts/add_doc_navigation.py</code>
+<br>
+<h2>Description</h2>
+<br>
+<p>Add chapter navigation links to documentation HTML files.</p>
+<p>Inserts navigation directly into HTML for better SEO and non-JS support.</p>
+<br>
+<h2>Constants</h2>
+<br>
+<h3>NAVIGATION_MAP</h3>
+<br>
+<strong>Value:</strong> <code>{&#x27;quick-start.html&#x27;: {&#x27;next&#x27;: {&#x27;url&#x27;: &#x27;configuration.html&#x27;, &#x27;title&#x27;: &#x27;Configuration&#x27;}}, &#x27;configuration.html&#x27;: {&#x27;next&#x27;: {&#x27;url&#x27;: &#x27;interactive-mode.html&#x27;, &#x27;title&#x27;: &#x27;Interactive Mode&#x27;}}, &#x27;interactive-mode.html&#x27;: {&#x27;next&#x27;: {&#x27;url&#x27;: &#x27;source-management-menu.html&#x27;, &#x27;title&#x27;: &#x27;Source Management&#x27;}}, &#x27;source-management-menu.html&#x27;: {&#x27;next&#x27;: {&#x27;url&#x27;: &#x27;source-development.html&#x27;, &#x27;title&#x27;: &#x27;Source Development&#x27;}}, &#x27;source-development.html&#x27;: {&#x27;next&#x27;: {&#x27;url&#x27;: &#x27;architecture.html&#x27;, &#x27;title&#x27;: &#x27;Architecture Overview&#x27;}}, &#x27;architecture.html&#x27;: {&#x27;next&#x27;: {&#x27;url&#x27;: &#x27;DIAGRAMS_INDEX.html&#x27;, &#x27;title&#x27;: &#x27;Architecture Diagrams&#x27;}}, &#x27;DIAGRAMS_INDEX.html&#x27;: {&#x27;next&#x27;: {&#x27;url&#x27;: &#x27;api-reference.html&#x27;, &#x27;title&#x27;: &#x27;API Reference&#x27;}}, &#x27;api-reference.html&#x27;: {&#x27;next&#x27;: {&#x27;url&#x27;: &#x27;testing.html&#x27;, &#x27;title&#x27;: &#x27;Testing Guide&#x27;}}, &#x27;testing.html&#x27;: {&#x27;next&#x27;: {&#x27;url&#x27;: &#x27;deployment.html&#x27;, &#x27;title&#x27;: &#x27;Deployment Guide&#x27;}}, &#x27;deployment.html&#x27;: {&#x27;next&#x27;: {&#x27;url&#x27;: &#x27;ethical-scraping.html&#x27;, &#x27;title&#x27;: &#x27;Ethical Scraping Guidelines&#x27;}}, &#x27;ethical-scraping.html&#x27;: {&#x27;next&#x27;: {&#x27;url&#x27;: &#x27;dependencies.html&#x27;, &#x27;title&#x27;: &#x27;Dependency Management&#x27;}}, &#x27;dependencies.html&#x27;: {&#x27;next&#x27;: {&#x27;url&#x27;: &#x27;dependency-management.html&#x27;, &#x27;title&#x27;: &#x27;Advanced Dependency Management&#x27;}}, &#x27;tutorials/user/index.html&#x27;: {&#x27;next&#x27;: {&#x27;url&#x27;: &#x27;01-getting-started.html&#x27;, &#x27;title&#x27;: &#x27;Tutorial 1: Getting Started&#x27;}}, &#x27;tutorials/user/01-getting-started.html&#x27;: {&#x27;next&#x27;: {&#x27;url&#x27;: &#x27;02-daily-workflow.html&#x27;, &#x27;title&#x27;: &#x27;Tutorial 2: Daily Workflow&#x27;}}, &#x27;tutorials/user/02-daily-workflow.html&#x27;: {&#x27;next&#x27;: {&#x27;url&#x27;: &#x27;03-interactive-mode.html&#x27;, &#x27;title&#x27;: &#x27;Tutorial 3: Interactive Mode&#x27;}}, &#x27;tutorials/user/03-interactive-mode.html&#x27;: {&#x27;next&#x27;: {&#x27;url&#x27;: &#x27;04-managing-sources.html&#x27;, &#x27;title&#x27;: &#x27;Tutorial 4: Managing Sources&#x27;}}, &#x27;tutorials/user/04-managing-sources.html&#x27;: {&#x27;next&#x27;: {&#x27;url&#x27;: &#x27;05-bundles.html&#x27;, &#x27;title&#x27;: &#x27;Tutorial 5: Working with Bundles&#x27;}}, &#x27;tutorials/user/05-bundles.html&#x27;: {&#x27;next&#x27;: {&#x27;url&#x27;: &#x27;06-customizing-output.html&#x27;, &#x27;title&#x27;: &#x27;Tutorial 6: Customizing Output&#x27;}}, &#x27;tutorials/01-cli-commands-exhaustive.html&#x27;: {&#x27;next&#x27;: {&#x27;url&#x27;: &#x27;02-interactive-mode-exhaustive.html&#x27;, &#x27;title&#x27;: &#x27;Tutorial 2: Interactive Mode (Exhaustive)&#x27;}}, &#x27;tutorials/02-interactive-mode-exhaustive.html&#x27;: {&#x27;next&#x27;: {&#x27;url&#x27;: &#x27;03-configuration-exhaustive.html&#x27;, &#x27;title&#x27;: &#x27;Tutorial 3: Configuration (Exhaustive)&#x27;}}, &#x27;tutorials/03-configuration-exhaustive.html&#x27;: {&#x27;next&#x27;: {&#x27;url&#x27;: &#x27;04-source-system-exhaustive.html&#x27;, &#x27;title&#x27;: &#x27;Tutorial 4: Source System (Exhaustive)&#x27;}}, &#x27;tutorials/04-source-system-exhaustive.html&#x27;: {&#x27;next&#x27;: {&#x27;url&#x27;: &#x27;05-api-functions-exhaustive.html&#x27;, &#x27;title&#x27;: &#x27;Tutorial 5: API Functions (Exhaustive)&#x27;}}, &#x27;feature-add-source.html&#x27;: {&#x27;next&#x27;: {&#x27;url&#x27;: &#x27;feature-remove-source.html&#x27;, &#x27;title&#x27;: &#x27;Remove Source Feature&#x27;}}, &#x27;feature-remove-source.html&#x27;: {&#x27;next&#x27;: {&#x27;url&#x27;: &#x27;remove-source-advanced-features.html&#x27;, &#x27;title&#x27;: &#x27;Advanced Remove Source Features&#x27;}}, &#x27;architecture/index.html&#x27;: {&#x27;next&#x27;: {&#x27;url&#x27;: &#x27;system.html&#x27;, &#x27;title&#x27;: &#x27;System Architecture&#x27;}}, &#x27;architecture/system.html&#x27;: {&#x27;next&#x27;: {&#x27;url&#x27;: &#x27;components.html&#x27;, &#x27;title&#x27;: &#x27;Component Architecture&#x27;}}, &#x27;diagrams/index.html&#x27;: {&#x27;next&#x27;: {&#x27;url&#x27;: &#x27;system_architecture.html&#x27;, &#x27;title&#x27;: &#x27;System Architecture Diagram&#x27;}}, &#x27;diagrams/system_architecture.html&#x27;: {&#x27;next&#x27;: {&#x27;url&#x27;: &#x27;data_flow.html&#x27;, &#x27;title&#x27;: &#x27;Data Flow Diagram&#x27;}}, &#x27;diagrams/data_flow.html&#x27;: {&#x27;next&#x27;: {&#x27;url&#x27;: &#x27;processing_pipeline.html&#x27;, &#x27;title&#x27;: &#x27;Processing Pipeline Diagram&#x27;}}, &#x27;diagrams/processing_pipeline.html&#x27;: {&#x27;next&#x27;: {&#x27;url&#x27;: &#x27;source_system.html&#x27;, &#x27;title&#x27;: &#x27;Source System Diagram&#x27;}}, &#x27;diagrams/source_system.html&#x27;: {&#x27;next&#x27;: {&#x27;url&#x27;: &#x27;class_diagrams.html&#x27;, &#x27;title&#x27;: &#x27;Class Diagrams&#x27;}}, &#x27;diagrams/class_diagrams.html&#x27;: {&#x27;next&#x27;: {&#x27;url&#x27;: &#x27;deployment.html&#x27;, &#x27;title&#x27;: &#x27;Deployment Diagram&#x27;}}, &#x27;development/index.html&#x27;: {&#x27;next&#x27;: {&#x27;url&#x27;: &#x27;01-architecture-logic.html&#x27;, &#x27;title&#x27;: &#x27;Architecture Logic&#x27;}}, &#x27;development/01-architecture-logic.html&#x27;: {&#x27;next&#x27;: {&#x27;url&#x27;: &#x27;02-team-onboarding.html&#x27;, &#x27;title&#x27;: &#x27;Team Onboarding&#x27;}}, &#x27;developer/index.html&#x27;: {&#x27;next&#x27;: {&#x27;url&#x27;: &#x27;guide.html&#x27;, &#x27;title&#x27;: &#x27;Developer Guide&#x27;}}}</code>
+<br>
+<h2>Functions</h2>
+<br>
+<h3>generate_navigation_html</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">generate_navigation_html</span><span class="p">(</span><span class="n">next_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">next_title</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+
+<br>
+<p>Generate the HTML for chapter navigation.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>next_url</code> (str)</li>
+<li><code>next_title</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> str
+<br>
+<h3>get_relative_path</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">get_relative_path</span><span class="p">(</span><span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+
+<br>
+<p>Get the relative path from docs directory.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>file_path</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> str
+<br>
+<h3>remove_existing_navigation</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">remove_existing_navigation</span><span class="p">(</span><span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+
+<br>
+<p>Remove any existing chapter navigation from HTML.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>content</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> str
+<br>
+<h3>add_navigation_to_file</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">add_navigation_to_file</span><span class="p">(</span><span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">docs_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Add navigation to a single HTML file.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>file_path</code> (Path)</li>
+<li><code>docs_dir</code> (Path)</li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h3>main</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span>
+</pre></div>
+
+<br>
+<p>Process all documentation HTML files.</p>
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

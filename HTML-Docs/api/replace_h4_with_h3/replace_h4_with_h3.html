@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>replace_h4_with_h3</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / <a href="../api/index.html">api</a> / replace_h4_with_h3</div>
+<h1>replace_h4_with_h3</h1>
+<br>
+<strong>File:</strong> <code>Application/replace_h4_with_h3.py</code>
+<br>
+<h2>Description</h2>
+<br>
+<p>H4 to H3 Tag Replacement Script</p>
+<hr>
+<p>Replaces all &lt;h4&gt; tags with &lt;h3&gt; tags in HTML files within website/docs/</p>
+<br>
+<p>Requirements Analysis:</p>
+<ol>
+<li>Only replace h4 tags with h3 tags - no new content</li>
+<li>Preserve all attributes (class, id, style, etc.)</li>
+<li>Handle both opening and closing tags</li>
+<li>Process all HTML files in website/docs/ recursively</li>
+<li>Maintain exact formatting and content</li>
+</ol>
+<br>
+<p>Edge Cases Handled:</p>
+<ul>
+<li>Tags with attributes: &lt;h4 class=&quot;foo&quot; id=&quot;bar&quot;&gt;</li>
+<li>Self-closing or malformed tags (though rare for h4)</li>
+<li>Tags spanning multiple lines</li>
+<li>Nested content within h4 tags</li>
+<li>Mixed case tags (HTML is case-insensitive)</li>
+</ul>
+<br>
+<p>Implementation Strategy:</p>
+<ul>
+<li>Use regex for precise tag replacement (faster than HTML parser for simple replacements)</li>
+<li>Process files in-place with backup option</li>
+<li>Track all changes for verification</li>
+<li>Dry-run mode for safety</li>
+</ul>
+<br>
+<p>Trade-offs:</p>
+<ol>
+<li>Regex vs HTML Parser:</li>
+<ul>
+<li>Regex: Faster, simpler, preserves exact formatting</li>
+</ol>
+<ul>
+<li>Parser: More robust for malformed HTML, but may reformat</li>
+<li>Choice: Regex (preserves formatting, sufficient for well-formed HTML)</li>
+</ul>
+<br>
+<ol>
+<li>In-place vs New Files:</li>
+<ul>
+<li>In-place: Simpler, saves space</li>
+</ol>
+<ul>
+<li>New files: Safer, allows comparison</li>
+<li>Choice: In-place with backup option</li>
+</ul>
+<br>
+<h2>Constants</h2>
+<br>
+<h3>OPENING_TAG_PATTERN</h3>
+<br>
+<strong>Value:</strong> <code>re.compile(&#x27;&lt;h4((?:\\s+[^&gt;]<em>)?)&gt;&#x27;, re.IGNORECASE)</code>
+<br>
+<h3>CLOSING_TAG_PATTERN</h3>
+<br>
+<strong>Value:</strong> <code>re.compile(&#x27;&lt;/h4&gt;&#x27;, re.IGNORECASE)</code>
+<br>
+<h2>Classes</h2>
+<br>
+<h3>H4ToH3Replacer</h3>
+<br>
+<p>Handles replacement of h4 tags with h3 tags in HTML files.</p>
+<br>
+<h4>Methods</h4>
+<br>
+<h5>__init__</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">backup</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<p>Initialize the replacer.</p>
+<br>
+<p>Args:</p>
+<p>    base_dir: Base directory to search for HTML files</p>
+<p>    dry_run: If True, only report changes without modifying files</p>
+<p>    backup: If True, create backup files before modification</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>base_dir</code> (str)</li>
+<li><code>dry_run</code> (bool) </em>optional<em></li>
+<li><code>backup</code> (bool) </em>optional*</li>
+</ul>
+<br>
+<h5>find_html_files</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">find_html_files</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span>
+</pre></div>
+
+<br>
+<p>Recursively find all HTML files in the base directory.</p>
+<br>
+<p>Returns:</p>
+<p>    List of Path objects for HTML files</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<strong>Returns:</strong> List[Path]
+<br>
+<h5>replace_tags_in_content</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">replace_tags_in_content</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
+</pre></div>
+
+<br>
+<p>Replace h4 tags with h3 tags in the given content.</p>
+<br>
+<p>Args:</p>
+<p>    content: HTML content as string</p>
+<br>
+<p>Returns:</p>
+<p>    Tuple of (modified_content, opening_tags_count, closing_tags_count)</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>content</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> Tuple[str, int, int]
+<br>
+<h5>process_file</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">process_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Process a single HTML file.</p>
+<br>
+<p>Args:</p>
+<p>    file_path: Path to the HTML file</p>
+<br>
+<p>Returns:</p>
+<p>    True if file was modified, False otherwise</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>file_path</code> (Path)</li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h5>run</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span>
+</pre></div>
+
+<br>
+<p>Run the replacement process on all HTML files.</p>
+<br>
+<p>Returns:</p>
+<p>    Dictionary containing processing statistics</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<strong>Returns:</strong> Dict
+<br>
+<h5>print_summary</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">print_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<p>Print summary of the replacement process.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<h2>Functions</h2>
+<br>
+<h3>main</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span>
+</pre></div>
+
+<br>
+<p>Main entry point for the script.</p>
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

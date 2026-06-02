@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Design Spec: Titled Markdown Filenames</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / <a href="../superpowers/index.html">superpowers</a> / specs</div>
+<h1>Design Spec: Titled Markdown Filenames</h1>
+<br>
+<strong>Date:</strong> 2026-03-17
+<strong>Status:</strong> Approved
+<br>
+<h2>Problem</h2>
+<br>
+<p>Capcat writes all article content to <code>article.md</code> and all comments to <code>comments.md</code>, regardless of the article title. The actual title exists only in the parent folder name (truncated for filesystem safety). In Obsidian graph view, every article node appears as <code>article</code> — making the graph useless for browsing a large archive.</p>
+<br>
+<h2>Goal</h2>
+<br>
+<p>Use the article title as the markdown filename so Obsidian graph view shows real article titles. HTML generation must not be affected.</p>
+<br>
+<h2>Naming Convention</h2>
+<br>
+<strong>Article markdown:</strong>
+<pre><code>What-makes-Intel-Optane-stand-out.md
+</code></pre>
+<br>
+<strong>Comments markdown:</strong>
+<pre><code>What-makes-Intel-Optane-stand-out-Comments.md
+</code></pre>
+<br>
+<ul>
+<li>Same sanitization as the folder (<code>sanitize_filename()</code> from <code>capcat/core/utils.py</code>)</li>
+<li>Character limit: <strong>200 chars for the base stem</strong> (title without extension). The <code>-Comments</code> suffix is appended after truncation, so the full comments filename may be up to 209 chars — still within all OS per-filename limits (255 bytes).</li>
+<li>Folder stays capped at 100 chars for Windows MAX_PATH safety (intermediate path segment)</li>
+<li>Markdown filename is the leaf node — has ~85 chars of Windows headroom above the folder</li>
+<li><code>-Comments</code> is a reserved suffix; no article title may end in <code>-Comments</code> after sanitization (sanitize_filename strips special chars making collision impossible in practice)</li>
+<li>HTML output filenames (<code>article.html</code>, <code>comments.html</code>) and all generated links are <strong>unchanged</strong></li>
+</ul>
+<br>
+<h2>Components</h2>
+<br>
+<h3>1. <code>capcat/core/storage_manager.py</code> — new helpers</h3>
+<br>
+<p>Two write helpers and two discovery helpers. All other components import from here — single source of truth for the naming convention.</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">article_md_filename</span><span class="p">(</span><span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return sanitized markdown filename for an article (e.g. &#39;My-Title.md&#39;).</span>
+
+<span class="sd">    The base stem is truncated at 200 chars before adding the extension.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">sanitize_filename</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.md&quot;</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">comments_md_filename</span><span class="p">(</span><span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return sanitized markdown filename for comments (e.g. &#39;My-Title-Comments.md&#39;).</span>
+
+<span class="sd">    The base stem is truncated at 200 chars; &#39;-Comments.md&#39; is appended after truncation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">sanitize_filename</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;-Comments.md&quot;</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">find_article_md</span><span class="p">(</span><span class="n">folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Path | None&quot;</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the article markdown path in folder, or None if absent.</span>
+
+<span class="sd">    Non-recursive: only searches direct children of folder.</span>
+<span class="sd">    Returns the first .md file whose stem does not end in &#39;-Comments&#39;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">next</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">folder</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.md&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">p</span><span class="o">.</span><span class="n">stem</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;-Comments&quot;</span><span class="p">)),</span>
+        <span class="kc">None</span>
+    <span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">find_comments_md</span><span class="p">(</span><span class="n">folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Path | None&quot;</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the comments markdown path in folder, or None if absent.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">next</span><span class="p">(</span><span class="n">folder</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*-Comments.md&quot;</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<strong>Error handling:</strong> <code>find_article_md</code> and <code>find_comments_md</code> return <code>None</code> on empty folders or missing files — callers guard with <code>if path is not None</code> before reading. <code>find_article_md</code> uses non-recursive glob so stray <code>.md</code> files in <code>images/</code> or other subdirectories are not matched.
+<br>
+<h3>2. Write sites — pass title, call helper</h3>
+<br>
+<p>Every write site already has the article title in scope. Replace the hardcoded string with the helper call.</p>
+<br>
+<code>save_article_content(article_folder_path, content)</code> in <code>storage_manager.py</code> gains a required <code>title: str</code> parameter — all call sites pass the title they already hold.
+<br>
+<p>&lt;div class=&quot;table-container&quot;&gt;</p>
+<p>&lt;table class=&quot;centered-table&quot;&gt;</p>
+<p>  &lt;thead&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;th&gt;File&lt;/th&gt;</p>
+<p>      &lt;th&gt;Lines&lt;/th&gt;</p>
+<p>      &lt;th&gt;Current&lt;/th&gt;</p>
+<p>      &lt;th&gt;Change&lt;/th&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>  &lt;/thead&gt;</p>
+<p>  &lt;tbody&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/core/storage_manager.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;70&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;&quot;article.md&quot;&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;article_md_filename(title)&lt;/code&gt; — add &lt;code&gt;title&lt;/code&gt; param to &lt;code&gt;save_article_content&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/core/article_fetcher.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;523, 578, 1021, 2650&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;&quot;article.md&quot;&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;article_md_filename(title)&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/core/news_source_adapter.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;479, 754&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;&quot;article.md&quot;&lt;/code&gt; / &lt;code&gt;&quot;comments.md&quot;&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;both helpers&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/sources/specialized/twitter/source.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;70&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;&quot;article.md&quot;&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;article_md_filename(title)&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/sources/specialized/substack/source.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;300, 490, 649&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;&quot;article.md&quot;&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;article_md_filename(title)&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/sources/specialized/vimeo/source.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;150&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;&quot;article.md&quot;&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;article_md_filename(title)&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/sources/specialized/medium/source.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;260, 440, 575&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;&quot;article.md&quot;&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;article_md_filename(title)&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/sources/specialized/youtube/source.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;118&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;&quot;article.md&quot;&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;article_md_filename(title)&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/sources/builtin/custom/lb/source.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;680&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;&quot;comments.md&quot;&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;comments_md_filename(title)&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/sources/builtin/custom/hn/source.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;357&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;&quot;comments.md&quot;&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;comments_md_filename(title)&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>  &lt;/tbody&gt;</p>
+<p>&lt;/table&gt;</p>
+<p>&lt;/div&gt;</p>
+<br>
+<h3>3. Read/discovery sites — replace hardcoded names with helpers</h3>
+<br>
+<p>All callers import <code>find_article_md</code> and <code>find_comments_md</code> from <code>capcat.core.storage_manager</code>.</p>
+<br>
+<strong><code>capcat/core/html_generator.py</code></strong>
+<br>
+<p>&lt;div class=&quot;table-container&quot;&gt;</p>
+<p>&lt;table class=&quot;centered-table&quot;&gt;</p>
+<p>  &lt;thead&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;th&gt;Line&lt;/th&gt;</p>
+<p>      &lt;th&gt;Current&lt;/th&gt;</p>
+<p>      &lt;th&gt;Change&lt;/th&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>  &lt;/thead&gt;</p>
+<p>  &lt;tbody&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;618&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;article_dir / &quot;comments.md&quot;&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;find_comments_md(article_dir)&lt;/code&gt; — guards template variant selection (&lt;code&gt;article-with-comments&lt;/code&gt; vs &lt;code&gt;article-no-comments&lt;/code&gt;)&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;700&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;article_dir / &quot;article.md&quot;&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;find_article_md(article_dir)&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;1056&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;(item / &quot;article.md&quot;).exists()&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;find_article_md(item) is not None&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;1058&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;(item / &quot;comments.md&quot;).exists()&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;find_comments_md(item) is not None&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;1059&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;item / &quot;comments.md&quot;&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;find_comments_md(item)&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;1107&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;len(list(item.glob(&quot;*<em>/article.md&quot;)))&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;sum(1 for d in item.rglob(&quot;</em>&quot;) if d.is_dir() and find_article_md(d) is not None)&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;1332, 1416&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;article_dir / &quot;comments.md&quot;&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;find_comments_md(article_dir)&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;1337&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;article_path.name == &quot;comments.md&quot;&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;article_path.stem.endswith(&quot;-Comments&quot;)&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>  &lt;/tbody&gt;</p>
+<p>&lt;/table&gt;</p>
+<p>&lt;/div&gt;</p>
+<br>
+<strong><code>capcat/core/html_post_processor.py</code></strong>
+<br>
+<p>&lt;div class=&quot;table-container&quot;&gt;</p>
+<p>&lt;table class=&quot;centered-table&quot;&gt;</p>
+<p>  &lt;thead&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;th&gt;Line&lt;/th&gt;</p>
+<p>      &lt;th&gt;Current&lt;/th&gt;</p>
+<p>      &lt;th&gt;Change&lt;/th&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>  &lt;/thead&gt;</p>
+<p>  &lt;tbody&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;161&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;article_dir / &quot;article.md&quot;&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;find_article_md(article_dir)&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;168&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;article_dir / &quot;comments.md&quot;&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;find_comments_md(article_dir)&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;182–183&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;(directory / &quot;article.md&quot;).exists() or (directory / &quot;comments.md&quot;).exists()&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;find_article_md(directory) is not None or find_comments_md(directory) is not None&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;279&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;article_dir / &quot;article.md&quot;&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;find_article_md(article_dir)&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;308&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;article_dir / &quot;comments.md&quot;&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;find_comments_md(article_dir)&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;359&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;(directory / &quot;article.md&quot;).exists()&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;find_article_md(directory) is not None&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;382&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;(item / &quot;article.md&quot;).exists()&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;find_article_md(item) is not None&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>  &lt;/tbody&gt;</p>
+<p>&lt;/table&gt;</p>
+<p>&lt;/div&gt;</p>
+<br>
+<strong><code>capcat/core/unified_article_processor.py</code></strong>
+<br>
+<p>&lt;div class=&quot;table-container&quot;&gt;</p>
+<p>&lt;table class=&quot;centered-table&quot;&gt;</p>
+<p>  &lt;thead&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;th&gt;Line&lt;/th&gt;</p>
+<p>      &lt;th&gt;Current&lt;/th&gt;</p>
+<p>      &lt;th&gt;Change&lt;/th&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>  &lt;/thead&gt;</p>
+<p>  &lt;tbody&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;290, 326&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;os.path.join(article_folder, &quot;article.md&quot;)&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;find_article_md(Path(article_folder))&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>  &lt;/tbody&gt;</p>
+<p>&lt;/table&gt;</p>
+<p>&lt;/div&gt;</p>
+<br>
+<strong><code>capcat/core/article_fetcher.py</code></strong>
+<br>
+<p>&lt;div class=&quot;table-container&quot;&gt;</p>
+<p>&lt;table class=&quot;centered-table&quot;&gt;</p>
+<p>  &lt;thead&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;th&gt;Line&lt;/th&gt;</p>
+<p>      &lt;th&gt;Current&lt;/th&gt;</p>
+<p>      &lt;th&gt;Change&lt;/th&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>  &lt;/thead&gt;</p>
+<p>  &lt;tbody&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;2507&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;os.path.join(article_folder, &quot;article.md&quot;)&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;find_article_md(Path(article_folder))&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>  &lt;/tbody&gt;</p>
+<p>&lt;/table&gt;</p>
+<p>&lt;/div&gt;</p>
+<br>
+<h2>Data Flow</h2>
+<br>
+<div class="ascii-art">capcat fetch hn
+  └─ article_fetcher: title = &quot;What makes Intel Optane stand out&quot;
+      └─ storage_manager.create_article_folder(base, title) → folder &quot;What-makes-Intel-Optane-stand-out/&quot;
+      └─ storage_manager.save_article_content(folder, content, title)
+          └─ filename = article_md_filename(title) → &quot;What-makes-Intel-Optane-stand-out.md&quot;
+      └─ hn/source.py saves comments:
+          └─ filename = comments_md_filename(title) → &quot;What-makes-Intel-Optane-stand-out-Comments.md&quot;
+
+capcat fetch hn  (HTML generation)
+  └─ html_generator._generate_directory_listing(path)
+      └─ find_article_md(item) → &quot;What-makes-Intel-Optane-stand-out.md&quot; (not None → it&#x27;s an article)
+      └─ find_comments_md(item) → &quot;What-makes-Intel-Optane-stand-out-Comments.md&quot; (not None → has comments)
+      └─ href = &quot;item.name/html/article.html&quot;  ← unchanged
+</div>
+<br>
+<h2>Error Handling</h2>
+<br>
+<ul>
+<li><code>find_article_md</code> / <code>find_comments_md</code> return <code>None</code> — all callers must null-check before reading</li>
+<li>If a folder contains multiple <code><em>.md</code> files not ending in <code>-Comments</code> (possible from manual edits): <code>find_article_md</code> returns the first match alphabetically; no error raised</li>
+<li><code>save_article_content</code> gains a required <code>title</code> parameter — any call site that cannot provide a title is a bug and must be fixed before merging</li>
+</ul>
+<br>
+<h2>Migration</h2>
+<br>
+<strong>Forward-only.</strong> Existing <code>article.md</code> / <code>comments.md</code> files on disk are not renamed. After the change, <code>find_article_md</code> will not match the old filenames — those folders will appear to have no article to the generator.
+<br>
+<strong>Re-fetching</strong> any source regenerates both the markdown files (with new names) and the HTML. Users who want titled filenames on old content simply re-fetch.
+<br>
+<strong>No mixed-state ambiguity:</strong> the discovery helpers match only the new convention. Old folders silently produce no output until re-fetched. This is documented behaviour, not silent corruption.
+<br>
+<h2>Testing (<code>tests/unit/test_titled_markdown_filenames.py</code>)</h2>
+<br>
+<ul>
+<li><code>article_md_filename(&quot;My Title&quot;)</code> → <code>&quot;My-Title.md&quot;</code></li>
+<li><code>article_md_filename(&quot;A&quot; </em> 250)</code> → stem truncated at 200 chars, result ends in <code>.md</code></li>
+<li><code>comments_md_filename(&quot;My Title&quot;)</code> → <code>&quot;My-Title-Comments.md&quot;</code></li>
+<li><code>comments_md_filename(&quot;A&quot; <em> 250)</code> → stem truncated at 200 chars, result ends in <code>-Comments.md</code></li>
+<li><code>find_article_md(folder)</code> returns path when titled <code>.md</code> exists</li>
+<li><code>find_article_md(folder)</code> returns <code>None</code> when folder is empty</li>
+<li><code>find_article_md(folder)</code> ignores <code></em>-Comments.md</code> files</li>
+<li><code>find_comments_md(folder)</code> returns path when <code>*-Comments.md</code> exists</li>
+<li><code>find_comments_md(folder)</code> returns <code>None</code> when absent</li>
+<li><code>storage_manager.save_article_content(folder, content, title)</code> writes to titled filename</li>
+<li>HTML generator discovers article folder via <code>find_article_md</code> (listing shows article)</li>
+<li>HTML generator counts comments via <code>find_comments_md</code> (comment count correct)</li>
+<li>HTML generator selects <code>article-with-comments</code> template when <code>find_comments_md</code> returns a path</li>
+<li>Post-processor <code>_is_article_directory</code> returns True when titled <code>.md</code> exists</li>
+</ul>
+<br>
+<h2>Files Changed</h2>
+<br>
+<p>&lt;div class=&quot;table-container&quot;&gt;</p>
+<p>&lt;table class=&quot;centered-table&quot;&gt;</p>
+<p>  &lt;thead&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;th&gt;File&lt;/th&gt;</p>
+<p>      &lt;th&gt;Change&lt;/th&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>  &lt;/thead&gt;</p>
+<p>  &lt;tbody&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/core/storage_manager.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Add 4 helpers; update &lt;code&gt;save_article_content&lt;/code&gt; to accept &lt;code&gt;title&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/core/article_fetcher.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;4 write sites + 2 read sites&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/core/news_source_adapter.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;2 write sites&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/core/html_generator.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;9 read/discovery sites&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/core/html_post_processor.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;7 read/discovery sites&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/core/unified_article_processor.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;2 read sites&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/sources/specialized/twitter/source.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;1 write site&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/sources/specialized/substack/source.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;3 write sites&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/sources/specialized/vimeo/source.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;1 write site&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/sources/specialized/medium/source.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;3 write sites&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/sources/specialized/youtube/source.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;1 write site&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/sources/builtin/custom/lb/source.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;1 write site&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/sources/builtin/custom/hn/source.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;1 write site&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;tests/unit/test_titled_markdown_filenames.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;New test file&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>  &lt;/tbody&gt;</p>
+<p>&lt;/table&gt;</p>
+<p>&lt;/div&gt;</p>
+<br>
+<h2>Constraints</h2>
+<br>
+<ul>
+<li>HTML output filenames (<code>article.html</code>, <code>comments.html</code>) and all generated links unchanged</li>
+<li><code>sanitize_filename()</code> unchanged — reused with <code>max_length=200</code> for the stem</li>
+<li>No migration of existing files — forward-only; old <code>article.md</code> folders are invisible to generator until re-fetched</li>
+<li><code>-Comments</code> is a reserved suffix appended after stem truncation</li>
+<li><code>find_article_md</code> / <code>find_comments_md</code> are the single source of truth for discovery — no other code constructs these paths directly</li>
+</ul>
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>capcat.core.retry_skip</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / <a href="../api/index.html">api</a> / capcat</div>
+<h1>capcat.core.retry_skip</h1>
+<br>
+<strong>File:</strong> <code>Application/capcat/core/retry_skip.py</code>
+<br>
+<h2>Description</h2>
+<br>
+<p>Retry-and-Skip Logic for Network Resilience</p>
+<br>
+<p>Implements intelligent retry-and-skip mechanism for sources that timeout</p>
+<p>or refuse connection. After N failed attempts, sources are skipped</p>
+<p>(not endlessly retried) to maintain batch processing momentum.</p>
+<br>
+<p>GREEN PHASE - Minimal Implementation</p>
+<p>This is the minimal code needed to pass all TDD tests.</p>
+<p>Refactoring will be applied in the REFACTOR phase.</p>
+<br>
+<h2>Classes</h2>
+<br>
+<h3>RetrySkipManager</h3>
+<br>
+<p>Manages retry-and-skip logic for source processing.</p>
+<br>
+<p>GREEN PHASE: Minimal implementation to pass tests.</p>
+<br>
+<h4>Methods</h4>
+<br>
+<h5>__init__</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_retries</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<p>Initialize retry-skip manager.</p>
+<br>
+<p>Args:</p>
+<p>    max_retries: Maximum retry attempts before skipping</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>max_retries</code> (int) <em>optional</em></li>
+</ul>
+<br>
+<h5>execute_with_retry_skip</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">execute_with_retry_skip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operation</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">operation_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">source_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;unknown&#39;</span><span class="p">,</span> <span class="n">retryable_exceptions</span><span class="p">:</span> <span class="n">Tuple</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span>
+</pre></div>
+
+<br>
+<p>Execute operation with retry-skip logic.</p>
+<br>
+<p>Args:</p>
+<p>    operation: Callable to execute</p>
+<p>    operation_name: Name for logging</p>
+<p>    source_name: Source identifier</p>
+<p>    retryable_exceptions: Exceptions that trigger retry</p>
+<br>
+<p>Returns:</p>
+<p>    Operation result or None if skipped</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>operation</code> (Callable)</li>
+<li><code>operation_name</code> (str)</li>
+<li><code>source_name</code> (str) <em>optional</em></li>
+<li><code>retryable_exceptions</code> (Tuple) <em>optional</em></li>
+</ul>
+<br>
+<strong>Returns:</strong> Optional[Any]
+<br>
+<h5>execute_with_url_fallbacks</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">execute_with_url_fallbacks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">urls</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">fetch_function</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Any</span><span class="p">],</span> <span class="n">source_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;unknown&#39;</span><span class="p">,</span> <span class="n">max_retries_per_url</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span>
+</pre></div>
+
+<br>
+<p>Try multiple URLs with retry logic before skipping.</p>
+<br>
+<p>Args:</p>
+<p>    urls: List of URLs to try</p>
+<p>    fetch_function: Function to fetch from URL</p>
+<p>    source_name: Source identifier</p>
+<p>    max_retries_per_url: Retries per URL</p>
+<br>
+<p>Returns:</p>
+<p>    Fetch result or None if all URLs exhausted</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>urls</code> (List[str])</li>
+<li><code>fetch_function</code> (Callable[[str], Any])</li>
+<li><code>source_name</code> (str) <em>optional</em></li>
+<li><code>max_retries_per_url</code> (int) <em>optional</em></li>
+</ul>
+<br>
+<strong>Returns:</strong> Optional[Any]
+<br>
+<h5>get_skip_summary</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">get_skip_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
+</pre></div>
+
+<br>
+<p>Get summary of skipped sources.</p>
+<br>
+<p>Returns:</p>
+<p>    Dictionary with skip information</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<strong>Returns:</strong> Dict[str, Any]
+<br>
+<h5>reset</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<p>Reset skip tracking.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<h2>Functions</h2>
+<br>
+<h3>get_retry_skip_manager</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">get_retry_skip_manager</span><span class="p">(</span><span class="n">max_retries</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RetrySkipManager</span>
+</pre></div>
+
+<br>
+<p>Get global retry-skip manager instance.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>max_retries</code> (int) <em>optional</em></li>
+</ul>
+<br>
+<strong>Returns:</strong> RetrySkipManager
+<br>
+<h3>reset_retry_skip_manager</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">reset_retry_skip_manager</span><span class="p">()</span>
+</pre></div>
+
+<br>
+<p>Reset global retry-skip manager.</p>
+<br>
+<h3>operation</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">operation</span><span class="p">()</span>
+</pre></div>
+
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

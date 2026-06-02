@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>capcat.core.ethical_scraping</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / <a href="../api/index.html">api</a> / capcat</div>
+<h1>capcat.core.ethical_scraping</h1>
+<br>
+<strong>File:</strong> <code>Application/capcat/core/ethical_scraping.py</code>
+<br>
+<h2>Description</h2>
+<br>
+<p>Ethical scraping utilities for Capcat.</p>
+<br>
+<p>Implements best practices:</p>
+<ol>
+<li>Robots.txt caching with 15-minute TTL</li>
+<li>429/503 error handling with exponential backoff</li>
+<li>Rate limiting enforcement</li>
+<li>Path validation against robots.txt</li>
+</ol>
+<br>
+<h2>Classes</h2>
+<br>
+<h3>RobotsTxtCache</h3>
+<br>
+<p>Cache entry for robots.txt.</p>
+<br>
+<h3>EthicalScrapingManager</h3>
+<br>
+<p>Manages ethical scraping compliance.</p>
+<br>
+<p>Features:</p>
+<ul>
+<li>Robots.txt caching (15-minute TTL)</li>
+<li>Crawl delay enforcement</li>
+<li>429/503 exponential backoff</li>
+<li>Path validation</li>
+</ul>
+<br>
+<h4>Methods</h4>
+<br>
+<h5>__init__</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_agent</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Capcat/2.0&#39;</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<p>Initialize ethical scraping manager.</p>
+<br>
+<p>Args:</p>
+<p>    user_agent: User agent string for requests</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>user_agent</code> (str) <em>optional</em></li>
+</ul>
+<br>
+<h5>configure</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">configure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">crawl_delay</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">robots_cache_ttl_minutes</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Update rate-limiting parameters on the singleton after config is loaded.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>crawl_delay</code> (float)</li>
+<li><code>robots_cache_ttl_minutes</code> (int)</li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h5>get_robots_txt</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">get_robots_txt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">RobotFileParser</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
+</pre></div>
+
+<br>
+<p>Fetch and parse robots.txt with caching.</p>
+<br>
+<p>Args:</p>
+<p>    base_url: Base URL of the site</p>
+<p>    timeout: Request timeout in seconds</p>
+<br>
+<p>Returns:</p>
+<p>    Tuple of (RobotFileParser, crawl_delay)</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>base_url</code> (str)</li>
+<li><code>timeout</code> (int) <em>optional</em></li>
+</ul>
+<br>
+<strong>Returns:</strong> Tuple[RobotFileParser, float]
+<br>
+<h5>_extract_crawl_delay</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_extract_crawl_delay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">:</span> <span class="n">RobotFileParser</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span>
+</pre></div>
+
+<br>
+<p>Extract crawl delay from robots.txt parser.</p>
+<br>
+<p>Args:</p>
+<p>    parser: RobotFileParser instance</p>
+<br>
+<p>Returns:</p>
+<p>    Crawl delay in seconds (0.0 if not specified)</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>parser</code> (RobotFileParser)</li>
+</ul>
+<br>
+<strong>Returns:</strong> float
+<br>
+<h5>can_fetch</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">can_fetch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span>
+</pre></div>
+
+<br>
+<p>Check if URL can be fetched according to robots.txt.</p>
+<br>
+<p>Args:</p>
+<p>    url: URL to check</p>
+<br>
+<p>Returns:</p>
+<p>    Tuple of (allowed, reason)</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>url</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> Tuple[bool, str]
+<br>
+<h5>enforce_rate_limit</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">enforce_rate_limit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">crawl_delay</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">min_delay</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<p>Enforce rate limiting with crawl delay - thread-safe via slot reservation.</p>
+<br>
+<p>The lock is held only while reading/updating last_request_time (microseconds).</p>
+<p>Sleep happens outside the lock so other domains are not blocked.</p>
+<p>Each thread reserves its firing slot so the next thread queues correctly.</p>
+<br>
+<p>Args:</p>
+<p>    domain: Domain being accessed</p>
+<p>    crawl_delay: Required crawl delay from robots.txt</p>
+<p>    min_delay: Minimum delay even if robots.txt doesn&#x27;t specify</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>domain</code> (str)</li>
+<li><code>crawl_delay</code> (float)</li>
+<li><code>min_delay</code> (float) <em>optional</em></li>
+</ul>
+<br>
+<h5>request_with_backoff</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">request_with_backoff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">:</span> <span class="n">requests</span><span class="o">.</span><span class="n">Session</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="n">max_retries</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">initial_delay</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">requests</span><span class="o">.</span><span class="n">Response</span>
+</pre></div>
+
+<br>
+<p>Make HTTP request with exponential backoff for 429/503 errors.</p>
+<br>
+<p>Args:</p>
+<p>    session: Requests session</p>
+<p>    url: URL to fetch</p>
+<p>    method: HTTP method (GET, POST, etc.)</p>
+<p>    max_retries: Maximum number of retries</p>
+<p>    initial_delay: Initial retry delay in seconds</p>
+<p>    <strong>kwargs: Additional arguments for requests</p>
+<br>
+<p>Returns:</p>
+<p>    Response object</p>
+<br>
+<p>Raises:</p>
+<p>    requests.RequestException: If all retries fail</p>
+<br>
+</strong>Parameters:*<em>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>session</code> (requests.Session)</li>
+<li><code>url</code> (str)</li>
+<li><code>method</code> (str) </em>optional<em></li>
+<li><code>max_retries</code> (int) </em>optional<em></li>
+<li><code>initial_delay</code> (float) </em>optional<em></li>
+</ul>
+<br>
+<strong>Returns:</strong> requests.Response
+<br>
+<p>⚠️ <strong>High complexity:</strong> 12</p>
+<br>
+<h5>validate_source_config</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">validate_source_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">rate_limit</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span>
+</pre></div>
+
+<br>
+<p>Validate source configuration against robots.txt.</p>
+<br>
+<p>Args:</p>
+<p>    base_url: Base URL of the source</p>
+<p>    rate_limit: Configured rate limit in seconds</p>
+<br>
+<p>Returns:</p>
+<p>    Tuple of (valid, message)</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>base_url</code> (str)</li>
+<li><code>rate_limit</code> (float)</li>
+</ul>
+<br>
+<strong>Returns:</strong> Tuple[bool, str]
+<br>
+<h5>get_cache_stats</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">get_cache_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">any</span><span class="p">]</span>
+</pre></div>
+
+<br>
+<p>Get statistics about robots.txt cache.</p>
+<br>
+<p>Returns:</p>
+<p>    Dictionary with cache statistics</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<strong>Returns:</strong> Dict[str, any]
+<br>
+<h5>clear_stale_cache</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">clear_stale_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<p>Remove stale entries from robots.txt cache.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<h2>Functions</h2>
+<br>
+<h3>get_ethical_manager</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">get_ethical_manager</span><span class="p">(</span><span class="n">user_agent</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Capcat/2.0&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EthicalScrapingManager</span>
+</pre></div>
+
+<br>
+<p>Get or create global ethical scraping manager.</p>
+<br>
+<p>Args:</p>
+<p>    user_agent: User agent string</p>
+<br>
+<p>Returns:</p>
+<p>    EthicalScrapingManager instance</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>user_agent</code> (str) </em>optional*</li>
+</ul>
+<br>
+<strong>Returns:</strong> EthicalScrapingManager
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

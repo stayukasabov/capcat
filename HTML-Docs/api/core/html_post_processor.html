@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>core.html_post_processor</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / <a href="../api/index.html">api</a> / core</div>
+<h1>core.html_post_processor</h1>
+<br>
+<strong>File:</strong> <code>Application/core/html_post_processor.py</code>
+<br>
+<h2>Description</h2>
+<br>
+<p>HTML Post-Processor for Capcat Archives</p>
+<p>Handles post-processing HTML generation after article scraping is complete.</p>
+<p>Creates directory indices, article pages, and manages the complete web view system.</p>
+<br>
+<h2>Classes</h2>
+<br>
+<h3>HTMLPostProcessor</h3>
+<br>
+<p>Post-processing HTML generation system.</p>
+<p>Handles directory traversal, index generation, and browser launching.</p>
+<br>
+<h4>Methods</h4>
+<br>
+<h5>__init__</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<h5>process_directory_tree</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">process_directory_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">incremental</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">is_single_article</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+
+<br>
+<p>Process an entire directory tree and generate HTML files.</p>
+<br>
+<p>Args:</p>
+<p>    root_path: Root directory path to process</p>
+<p>    incremental: If True, only process changed/missing articles</p>
+<p>    is_single_article: If True, skip directory index creation (for single command)</p>
+<br>
+<p>Returns:</p>
+<p>    URL of the main index page or article.html for single articles</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>root_path</code> (str)</li>
+<li><code>incremental</code> (bool) <em>optional</em></li>
+<li><code>is_single_article</code> (bool) <em>optional</em></li>
+</ul>
+<br>
+<strong>Returns:</strong> str
+<br>
+<h5>_process_article_files</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_process_article_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">incremental</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Process article.md and comments.md files with intelligent caching.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>root_path</code> (Path)</li>
+<li><code>incremental</code> (bool) <em>optional</em></li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h5>_should_process_article</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_should_process_article</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">article_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Determine if article should be processed based on intelligent caching.</p>
+<br>
+<p>Returns True if:</p>
+<ul>
+<li>HTML files don&#x27;t exist, OR</li>
+<li>Source files are newer than HTML files</li>
+</ul>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>article_dir</code> (Path)</li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h5>_is_article_directory</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_is_article_directory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Check if directory contains article content.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>directory</code> (Path)</li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h5>_get_source_config</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_get_source_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">article_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span>
+</pre></div>
+
+<br>
+<p>Get source configuration if it has template metadata.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>article_dir</code> (Path)</li>
+</ul>
+<br>
+<strong>Returns:</strong> Optional[Dict]
+<br>
+<h5>_process_article_directory</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_process_article_directory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">article_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">progress</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Process a single article directory to generate HTML files.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>article_dir</code> (Path)</li>
+<li><code>progress</code> <em>optional</em></li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h5>_generate_directory_indices</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_generate_directory_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Generate index.html files for all directories.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>root_path</code> (Path)</li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h5>_should_have_index</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_should_have_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Determine if directory should have an index.html file.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>directory</code> (Path)</li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h5>_create_directory_index</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_create_directory_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Create news.html for a specific directory.</p>
+<br>
+<p>Skip news.html for Capcats single article directories since they only</p>
+<p>contain one article and index.html is sufficient.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>directory</code> (Path)</li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h5>_is_capcats_single_article</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_is_capcats_single_article</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Check if directory is a Capcats single article capture.</p>
+<br>
+<p>Returns True if:</p>
+<ul>
+<li>Parent directory is named &quot;Capcats&quot;</li>
+<li>This indicates a single article capture, not a News archive</li>
+</ul>
+<br>
+<p>Examples:</p>
+<p>    Capcats/Sam-Altman-Article/ -&gt; True (skip news.html)</p>
+<p>    Capcats/InfoQ_26-10-2025/ -&gt; True (skip news.html)</p>
+<p>    News_26-10-2025/BBC_26-10-2025/ -&gt; False (keep news.html)</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>directory</code> (Path)</li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h5>_create_main_index</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_create_main_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">index_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Create the main index.html at the root level.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>root_path</code> (Path)</li>
+<li><code>index_path</code> (Path)</li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h5>_build_breadcrumb_path</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_build_breadcrumb_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+</pre></div>
+
+<br>
+<p>Build breadcrumb navigation path for a given directory.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>current_path</code> (Path)</li>
+</ul>
+<br>
+<strong>Returns:</strong> List[str]
+<br>
+<h5>_is_archive_root</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_is_archive_root</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Check if path is an archive root directory.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>path</code> (Path)</li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h5>_detect_output_mode</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_detect_output_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+
+<br>
+<p>Detect output mode based on directory structure.</p>
+<br>
+<p>Args:</p>
+<p>    path: Path to check (article directory or any path in the tree)</p>
+<br>
+<p>Returns:</p>
+<p>    &#x27;batch&#x27; for standard news archive structure</p>
+<p>    &#x27;custom&#x27; for custom --output directories</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>path</code> (Path)</li>
+</ul>
+<br>
+<strong>Returns:</strong> str
+<br>
+<h5>_get_index_filename</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_get_index_filename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_mode</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+
+<br>
+<p>Get the appropriate index filename based on output mode.</p>
+<br>
+<p>Args:</p>
+<p>    output_mode: Either &#x27;batch&#x27; or &#x27;custom&#x27;</p>
+<br>
+<p>Returns:</p>
+<p>    &#x27;news.html&#x27; for batch mode</p>
+<p>    &#x27;index.html&#x27; for custom mode or unknown modes</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>output_mode</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> str
+<br>
+<h5>_extract_title_from_markdown</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_extract_title_from_markdown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">markdown_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+
+<br>
+<p>Extract the article title from the markdown file&#x27;s H1 heading.</p>
+<p>Falls back to using the folder name if no H1 is found.</p>
+<br>
+<p>Args:</p>
+<p>    markdown_path: Path to the markdown file</p>
+<br>
+<p>Returns:</p>
+<p>    The article title string</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>markdown_path</code> (Path)</li>
+</ul>
+<br>
+<strong>Returns:</strong> str
+<br>
+<h5>_write_html_file</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_write_html_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Write HTML content to file.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>file_path</code> (Path)</li>
+<li><code>content</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h5>launch_browser</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">launch_browser</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Display URL for browser opening (platform-agnostic approach).</p>
+<br>
+<p>Args:</p>
+<p>    index_url: File URL to the main index</p>
+<br>
+<p>Returns:</p>
+<p>    True if URL was displayed successfully</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>index_url</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h2>Functions</h2>
+<br>
+<h3>process_html_generation</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">process_html_generation</span><span class="p">(</span><span class="n">directory_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">incremental</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">is_single_article</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+</pre></div>
+
+<br>
+<p>Convenience function to process HTML generation for a directory.</p>
+<br>
+<p>Args:</p>
+<p>    directory_path: Path to the directory to process</p>
+<p>    incremental: If True, only process recently modified files (default: True)</p>
+<p>    is_single_article: If True, skip directory index creation (for single command)</p>
+<br>
+<p>Returns:</p>
+<p>    URL of the generated index page or article.html, or None if failed</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>directory_path</code> (str)</li>
+<li><code>incremental</code> (bool) <em>optional</em></li>
+<li><code>is_single_article</code> (bool) <em>optional</em></li>
+</ul>
+<br>
+<strong>Returns:</strong> Optional[str]
+<br>
+<h3>launch_web_view</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">launch_web_view</span><span class="p">(</span><span class="n">directory_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">incremental</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">is_single_article</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Generate HTML files and display browser URL for a directory.</p>
+<br>
+<p>Args:</p>
+<p>    directory_path: Path to the directory to process</p>
+<p>    incremental: If True, only process recently modified files (default: True)</p>
+<p>    is_single_article: If True, skip directory index creation (for single command)</p>
+<br>
+<p>Returns:</p>
+<p>    True if successful, False otherwise</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>directory_path</code> (str)</li>
+<li><code>incremental</code> (bool) <em>optional</em></li>
+<li><code>is_single_article</code> (bool) <em>optional</em></li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

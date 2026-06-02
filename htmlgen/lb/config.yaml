@@ -1,0 +1,74 @@
+# HTML Generation Configuration for Lobsters
+# Compartmentalized configuration for source-specific behavior
+
+source_id: "lb"
+display_name: "Lobsters"
+
+# Comment handling configuration
+comments:
+  enabled: true
+  pattern: '\*\*Anonymous\*\*\s*\(\[profile\]\([^)]*\)\)'  # Lobsters markdown format: **Anonymous** ([profile](URL))
+  conditional_display: true  # Only show comment links when comments exist
+  no_comments_message: "No comments found for this article at the moment."
+  count_threshold: 1
+
+# Navigation configuration
+navigation:
+  breadcrumb_style: "technical"
+  show_source_link: true
+  date_format: "YYYY-MM-DD"
+  back_to_news_text: "Back to News"
+  view_comments_text: "View Comments"
+  back_to_article_text: "Back to Article"
+
+# Layout configuration
+layout:
+  template_set: "base"  # Use base templates
+  custom_css_classes:
+    - "lobsters-style"
+    - "tech-focused"
+    - "community-driven"
+  # Custom templates can be added in htmlgen/lb/templates/ to override base templates
+
+# Directory pattern matching
+directory_patterns:
+  - "lobsters"
+  - "lb_"
+  - "Lobsters"
+
+# Bundle configuration
+bundle:
+  category: "tech"
+  priority: 2  # Second priority in tech bundle (after HN)
+
+# Metadata configuration
+meta:
+  description_source: "first_paragraph"
+  show_read_time: true
+  show_tags: true
+  show_publish_date: true
+  author_display: "username"
+  social_sharing: false
+
+# Content processing configuration
+content:
+  remove_ads: true
+  clean_tracking: true
+  preserve_images: true
+  image_optimization: "none"
+  code_highlighting: true
+  math_rendering: false
+
+# Advanced configuration
+advanced:
+  cache_strategy: "template"
+  rate_limiting:
+    enabled: false
+
+  # Lobsters-specific processing
+  preprocessing_hooks:
+    - "clean_lobsters_metadata"
+    - "normalize_tech_terminology"
+
+  postprocessing_hooks:
+    - "enhance_code_formatting"

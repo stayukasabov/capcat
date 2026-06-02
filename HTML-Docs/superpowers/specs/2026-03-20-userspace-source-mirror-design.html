@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Userspace Source Config Mirror — Design Spec</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / <a href="../superpowers/index.html">superpowers</a> / specs</div>
+<h1>Userspace Source Config Mirror — Design Spec</h1>
+<br>
+<strong>Date:</strong> 2026-03-20
+<strong>Status:</strong> Approved
+<br>
+<hr>
+<br>
+<h2>Problem</h2>
+<br>
+<p>Builtin source configs live inside the installed package. Users cannot edit them without modifying the package installation, and edits are silently lost on upgrade. <code>capcat add-source</code> also writes to the installed package dir, making user-added sources upgrade-unsafe. There is no accessible, stable place for users to manage their sources, custom source configs, or bundle definitions.</p>
+<br>
+<hr>
+<br>
+<h2>Goal</h2>
+<br>
+<p>Make <code>Config/sources/active/</code> the single live source of truth for all source management after a project&#x27;s first fetch. The installed package becomes read-only initial truth only. All CLI/TUI source commands (<code>add-source</code>, <code>remove-source</code>, <code>list</code>, enable/disable, bundle management) operate on userspace exclusively.</p>
+<br>
+<code>Config/themes/</code> is unaffected — this feature touches only <code>Config/sources/</code>.
+<br>
+<hr>
+<br>
+<h2>Core Principle</h2>
+<br>
+<strong>Installed package = initial truth. <code>Config/sources/active/</code> = live truth.</strong>
+<br>
+<hr>
+<br>
+<h2>Three Mirroring Domains</h2>
+<br>
+<p>&lt;div class=&quot;table-container&quot;&gt;</p>
+<p>&lt;table class=&quot;centered-table&quot;&gt;</p>
+<p>  &lt;thead&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;th&gt;Domain&lt;/th&gt;</p>
+<p>      &lt;th&gt;Builtin location&lt;/th&gt;</p>
+<p>      &lt;th&gt;User mirror location&lt;/th&gt;</p>
+<p>      &lt;th&gt;What gets copied&lt;/th&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>  &lt;/thead&gt;</p>
+<p>  &lt;tbody&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;<strong>config_driven</strong>&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/sources/builtin/config_driven/configs/&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;Config/sources/active/config_driven/configs/&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;All &lt;code&gt;.yaml&lt;/code&gt;, &lt;code&gt;.yml&lt;/code&gt;, &lt;code&gt;.json&lt;/code&gt; files (no &lt;code&gt;.disabled&lt;/code&gt;)&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;<strong>custom</strong>&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/sources/builtin/custom/&lt;name&gt;/&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;Config/sources/active/custom/&lt;name&gt;/&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Entire directory: &lt;code&gt;config.yaml&lt;/code&gt; + &lt;code&gt;source.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;<strong>bundles</strong>&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/sources/builtin/<em>.yml&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;Config/sources/active/bundles/&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;All &lt;code&gt;</em>.yml&lt;/code&gt; files at builtin root (&lt;code&gt;bundles.yml&lt;/code&gt;, &lt;code&gt;news_sources.yml&lt;/code&gt;, &lt;code&gt;tech_sources.yml&lt;/code&gt;, &lt;code&gt;business_sources.yml&lt;/code&gt;, &lt;code&gt;science_sources.yml&lt;/code&gt;)&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>  &lt;/tbody&gt;</p>
+<p>&lt;/table&gt;</p>
+<p>&lt;/div&gt;</p>
+<br>
+<hr>
+<br>
+<h2>Terminology</h2>
+<br>
+<ul>
+<li><strong>source_id</strong>: stem of a config_driven filename. For normal files: <code>Path(filename).stem</code> (e.g. <code>bbc.yaml</code> → <code>bbc</code>). For disabled files: strip <code>.disabled</code> first — <code>Path(Path(filename).stem).stem</code> (e.g. <code>skysports.yaml.disabled</code> → <code>skysports</code>).</li>
+<li><strong>active builtin files</strong>: files in the builtin location that are not <code>.disabled</code>. For config_driven: extensions <code>.yaml</code>, <code>.yml</code>, <code>.json</code>. For custom: any file in the source subdirectory. For bundles: all <code><em>.yml</code> files at <code>capcat/sources/builtin/</code> root.</li>
+<li><strong>manifest key</strong>: a relative path string used as the hash manifest key. Format: <code>&quot;&lt;domain&gt;/&lt;relative-path&gt;&quot;</code>. Examples: <code>&quot;config_driven/configs/bbc.yaml&quot;</code>, <code>&quot;custom/hn/config.yaml&quot;</code>, <code>&quot;custom/hn/source.py&quot;</code>, <code>&quot;bundles/bundles.yml&quot;</code>. This flat-key approach handles multi-file entries (custom sources) consistently.</li>
+<li><strong>hash computation</strong>: SHA-256 of raw file bytes. Consistent across all domains.</li>
+<li><strong>tui_mode</strong>: bool, read from <code>capcat.core.tui_context.is_tui_active()</code> at the call site. Controls prompt style throughout.</li>
+</ul>
+<br>
+<hr>
+<br>
+<h2>Flows</h2>
+<br>
+<h3>1. First-run mirror (triggered on first <code>capcat fetch</code>)</h3>
+<br>
+<strong>Condition:</strong> <code>Config/sources/active/</code> does not contain any of the three domain subdirectories.
+<br>
+<strong>Steps:</strong>
+<ol>
+<li>Create <code>Config/sources/active/config_driven/configs/</code>, <code>Config/sources/active/custom/</code>, <code>Config/sources/active/bundles/</code></li>
+<li>Copy all three domains:</li>
+<ul>
+<li><strong>config_driven</strong>: copy all <code>.yaml</code>, <code>.yml</code>, <code>.json</code> files (no <code>.disabled</code>) from <code>capcat/sources/builtin/config_driven/configs/</code> → <code>Config/sources/active/config_driven/configs/</code></li>
+</ol>
+<ul>
+<li><strong>custom</strong>: for each subdirectory in <code>capcat/sources/builtin/custom/</code> (e.g. <code>hn/</code>, <code>lb/</code>): copy the entire directory to <code>Config/sources/active/custom/&lt;name&gt;/</code> including <code>config.yaml</code> and <code>source.py</code></li>
+<li><strong>bundles</strong>: copy all <code></em>.yml</code> files from <code>capcat/sources/builtin/</code> root → <code>Config/sources/active/bundles/</code></li>
+</ul>
+<ol>
+<li>Compute SHA-256 hash (raw bytes) of every copied file; write initial manifest to <code>.capcat/source_hashes.json</code> with both <code>builtin_hash</code> and <code>user_hash</code> set to that SHA-256 hash (files are identical at this point)</li>
+<li>Print/display: <code>&quot;Capcat: source configs written to Config/sources/active/ — edit them to customise your sources.&quot;</code></li>
+<li>Registry discovers custom sources from <code>Config/sources/active/custom/</code> (no registry change needed — <code>_discover_custom_sources()</code> already scans <code>_user_path / &quot;custom&quot;</code>). Bundle service reads from <code>Config/sources/active/bundles/bundles.yml</code> (see Components section).</li>
+</ol>
+<br>
+<strong>Error handling:</strong> If any domain copy fails, log a warning and continue fetch using builtins for that domain. Never block a fetch.
+<br>
+<hr>
+<br>
+<h3>2. Upgrade diff (every <code>capcat fetch</code> after mirror exists)</h3>
+<br>
+<strong>Condition:</strong> <code>Config/sources/active/</code> exists with at least one domain subdirectory.
+<br>
+<strong>Edge case — manifest missing:</strong> If any domain dir exists but <code>.capcat/source_hashes.json</code> is absent: re-sync. For each file currently in any user mirror location, compute its SHA-256 and set both <code>builtin_hash</code> and <code>user_hash</code> to that value. For user-added files with no builtin counterpart, set <code>builtin_hash: &quot;&quot;</code>. Write the rebuilt manifest. Log: <code>&quot;Capcat: source_hashes.json missing — rebuilt from current state.&quot;</code> Do not overwrite any user files.
+<br>
+<strong>Step 1 — Detect new items (all domains)</strong>
+<br>
+<p>For each domain, collect manifest keys present in builtins but absent from the user mirror:</p>
+<ul>
+<li><strong>config_driven</strong>: source_ids in <code>builtin/config_driven/configs/</code> but absent from <code>Config/sources/active/config_driven/configs/</code></li>
+<li><strong>custom</strong>: subdirectory names in <code>builtin/custom/</code> but absent from <code>Config/sources/active/custom/</code></li>
+<li><strong>bundles</strong>: <code><em>.yml</code> filenames at <code>builtin/</code> root but absent from <code>Config/sources/active/bundles/</code></li>
+</ul>
+<br>
+<p>If any new items found, prompt once (CLI: print + input; TUI: <code>questionary.confirm</code>):</p>
+<pre><code>Capcat: X new item(s) available:
+  Sources: guardian, ieee
+  Custom sources: (none)
+  Bundles: science_sources.yml
+Add to your configuration? [Y/n]
+</code></pre>
+<ul>
+<li><strong>Yes:</strong> copy new items to user mirror, add manifest entries</li>
+<li><strong>No:</strong> do nothing, no manifest update; prompt recurs on every fetch until items are added</li>
+</ul>
+<br>
+<strong>Step 2 — Detect changed builtins (all domains)</strong>
+<br>
+<p>Iterate over every manifest key with <code>builtin_hash != &quot;&quot;</code> that has a builtin counterpart:</p>
+<br>
+<p>For each manifest key:</p>
+<ul>
+<li>Compute <code>current_builtin_hash</code> = SHA-256 (raw bytes) of the builtin file</li>
+<li>Locate the user file:</li>
+<li>For <code>config_driven</code> keys: check <code>&lt;source_id&gt;.yaml</code>, <code>&lt;source_id&gt;.yaml.disabled</code>, <code>&lt;source_id&gt;.yml</code>, <code>&lt;source_id&gt;.json</code> in order; use first found</li>
+<li>For <code>custom</code> and <code>bundles</code> keys: the path is explicit (e.g. <code>custom/hn/source.py</code>) — check directly</li>
+<li>If user file not found (manually deleted): remove manifest entry, log debug notice, skip</li>
+<li>Compute <code>current_user_hash</code> = SHA-256 (raw bytes) of the found user file</li>
+<li>Load <code>stored_builtin_hash</code> and <code>stored_user_hash</code> from manifest</li>
+</ul>
+<br>
+<p>&lt;div class=&quot;table-container&quot;&gt;</p>
+<p>&lt;table class=&quot;centered-table&quot;&gt;</p>
+<p>  &lt;thead&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;th&gt;Condition&lt;/th&gt;</p>
+<p>      &lt;th&gt;Meaning&lt;/th&gt;</p>
+<p>      &lt;th&gt;Action&lt;/th&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>  &lt;/thead&gt;</p>
+<p>  &lt;tbody&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;current_builtin_hash == stored_builtin_hash&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Builtin unchanged&lt;/td&gt;</p>
+<p>      &lt;td&gt;Skip&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;current_builtin_hash != stored_builtin_hash&lt;/code&gt; AND &lt;code&gt;current_user_hash != stored_user_hash&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Builtin changed, user modified&lt;/td&gt;</p>
+<p>      &lt;td&gt;Skip silently — preserve user changes&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;current_builtin_hash != stored_builtin_hash&lt;/code&gt; AND &lt;code&gt;current_user_hash == stored_user_hash&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Builtin changed, user unmodified&lt;/td&gt;</p>
+<p>      &lt;td&gt;Offer override (Step 3)&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>  &lt;/tbody&gt;</p>
+<p>&lt;/table&gt;</p>
+<p>&lt;/div&gt;</p>
+<br>
+<p>The &quot;user file absent&quot; early-exit precedes this table. It does not reach the table.</p>
+<br>
+<strong>Note on disabled config_driven sources:</strong> Enable/disable renames <code>&lt;source_id&gt;.yaml</code> ↔ <code>&lt;source_id&gt;.yaml.disabled</code>. The ordered lookup above handles this. Manifest is not modified by enable/disable.
+<br>
+<strong>Note on builtin removal:</strong> If a manifest key has no current builtin counterpart, do nothing to user file. Log debug notice.
+<br>
+<strong>Step 3 — Offer override for unmodified changed items</strong>
+<br>
+<p>Collect all manifest keys satisfying the third condition. Group by domain for clarity in the prompt:</p>
+<pre><code>Capcat: X item(s) have updates available:
+  Sources: bbc, mashable
+  Custom sources: hn/config.yaml
+  Bundles: bundles.yml
+Override with new defaults? Your files are unmodified.
+Backup will be created at Config/sources/backup_YYYY-MM-DD/. [Y/n]
+</code></pre>
+<p>(CLI: print + input; TUI: <code>questionary.confirm</code>)</p>
+<br>
+<ul>
+<li><strong>Yes:</strong></li>
+</ul>
+<ol>
+<li>Create <code>Config/sources/backup_YYYY-MM-DD/</code>. If exists, use <code>backup_YYYY-MM-DD-2</code>, <code>-3</code>, etc.</li>
+<li>Copy each affected user file into the backup dir (reuse the resolved path from Step 2 — do not reconstruct as <code>&lt;source_id&gt;.yaml</code>)</li>
+<li>Write new builtin content to the resolved user file path (preserves disabled state and original extension)</li>
+<li>Update manifest: set <code>builtin_hash</code> and <code>user_hash</code> to <code>current_builtin_hash</code> for each overridden key</li>
+<ul>
+<li><strong>No:</strong> do nothing to user files; update stored <code>builtin_hash</code> to <code>current_builtin_hash</code> for each declined key (prevents re-prompting for the same builtin version)</li>
+</ul>
+</ol>
+<br>
+<strong>Error handling:</strong> If backup creation fails, abort override entirely. Warn user. Never overwrite without a successful backup.
+<br>
+<hr>
+<br>
+<h3>3. Source management commands</h3>
+<br>
+<p>After mirror exists, all commands operate on userspace exclusively:</p>
+<br>
+<p>&lt;div class=&quot;table-container&quot;&gt;</p>
+<p>&lt;table class=&quot;centered-table&quot;&gt;</p>
+<p>  &lt;thead&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;th&gt;Command&lt;/th&gt;</p>
+<p>      &lt;th&gt;Current behaviour&lt;/th&gt;</p>
+<p>      &lt;th&gt;New behaviour&lt;/th&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>  &lt;/thead&gt;</p>
+<p>  &lt;tbody&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat add-source&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;writes to installed package&lt;/td&gt;</p>
+<p>      &lt;td&gt;writes to &lt;code&gt;Config/sources/active/config_driven/configs/&lt;/code&gt;; creates dir if absent; adds manifest entry with &lt;code&gt;builtin_hash: &quot;&quot;&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat remove-source&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;removes from installed package&lt;/td&gt;</p>
+<p>      &lt;td&gt;removes from &lt;code&gt;Config/sources/active/config_driven/configs/&lt;/code&gt;; removes manifest entry. Existing &lt;code&gt;EnhancedRemoveCommand&lt;/code&gt; / &lt;code&gt;SourceBackupManager&lt;/code&gt; / &lt;code&gt;QuestionaryRemovalUI&lt;/code&gt; retained — only target path changes.&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat list&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;reads installed package&lt;/td&gt;</p>
+<p>      &lt;td&gt;reads &lt;code&gt;Config/sources/active/config_driven/configs/&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;enable/disable&lt;/td&gt;</p>
+<p>      &lt;td&gt;renames in installed package&lt;/td&gt;</p>
+<p>      &lt;td&gt;renames &lt;code&gt;&lt;source_id&gt;.yaml&lt;/code&gt; ↔ &lt;code&gt;&lt;source_id&gt;.yaml.disabled&lt;/code&gt; in &lt;code&gt;Config/sources/active/config_driven/configs/&lt;/code&gt;; does not modify manifest&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;bundle management&lt;/td&gt;</p>
+<p>      &lt;td&gt;reads/writes &lt;code&gt;builtin/bundles.yml&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;reads/writes &lt;code&gt;Config/sources/active/bundles/bundles.yml&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>  &lt;/tbody&gt;</p>
+<p>&lt;/table&gt;</p>
+<p>&lt;/div&gt;</p>
+<br>
+<strong><code>add-source</code> before first mirror:</strong> If run before <code>capcat fetch</code>, <code>add-source</code> creates <code>Config/sources/active/config_driven/configs/</code> and writes the file. On next fetch, the first-run mirror condition (<code>&quot;directory absent&quot;</code>) is false — upgrade diff runs instead and prompts for all builtins as new sources. This is intentional.
+<br>
+<strong><code>add-source</code> manifest entry:</strong> <code>builtin_hash: &quot;&quot;</code> (no builtin counterpart), <code>user_hash</code> = SHA-256 of the written file. Manifest key: <code>&quot;config_driven/configs/&lt;filename&gt;&quot;</code>.
+<br>
+<strong><code>remove-source</code> manifest cleanup:</strong> Remove the manifest key after successful removal. If a mirrored builtin source is removed, it reappears in the new-source prompt on next fetch. Intentional.
+<br>
+<hr>
+<br>
+<h2>Hash Manifest</h2>
+<br>
+<p>Location: <code>.capcat/source_hashes.json</code></p>
+<br>
+<p>Keys are relative paths from the builtin root, prefixed by domain. This flat format handles multi-file entries (custom sources) without nesting.</p>
+<br>
+<div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;config_driven/configs/bbc.yaml&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;builtin_hash&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sha256-of-builtin-bbc.yaml&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;user_hash&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sha256-of-user-bbc.yaml&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;config_driven/configs/mashable.yml&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;builtin_hash&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sha256-of-builtin-mashable.yml&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;user_hash&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sha256-of-user-mashable.yml&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;custom/hn/config.yaml&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;builtin_hash&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sha256-of-builtin-hn-config.yaml&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;user_hash&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sha256-of-user-hn-config.yaml&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;custom/hn/source.py&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;builtin_hash&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sha256-of-builtin-hn-source.py&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;user_hash&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sha256-of-user-hn-source.py&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;bundles/bundles.yml&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;builtin_hash&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sha256-of-builtin-bundles.yml&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;user_hash&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sha256-of-user-bundles.yml&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;config_driven/configs/my-custom-source.yaml&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;builtin_hash&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;user_hash&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sha256-of-user-added-source&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+<br>
+<ul>
+<li><code>builtin_hash: &quot;&quot;</code> = user-added, no builtin counterpart</li>
+<li><code>current_user_hash == stored_user_hash</code> → unmodified → safe to offer override</li>
+<li><code>current_user_hash != stored_user_hash</code> → user-edited → never touch</li>
+</ul>
+<br>
+<p>Updated on: first-run mirror, manifest re-sync, new item addition, accepted override, declined override (<code>builtin_hash</code> only), removal (entry deleted).</p>
+<br>
+<hr>
+<br>
+<h2>File Layout</h2>
+<br>
+<pre><code>Config/
+  sources/
+    active/                                       ← _user_path (registry root)
+      config_driven/
+        configs/                                  ← registry reads here (config-driven sources)
+          bbc.yaml
+          guardian.yaml
+          mashable.yml
+          iq.yaml
+          skysports.yaml.disabled
+          my-custom-source.yaml                   ← user-added via add-source
+          ...
+      custom/                                     ← registry reads here (custom sources)
+        hn/
+          config.yaml
+          source.py
+        lb/
+          config.yaml
+          source.py
+      bundles/                                    ← bundle definitions
+        bundles.yml
+        news_sources.yml
+        tech_sources.yml
+        business_sources.yml
+        science_sources.yml
+    backup_2026-03-20/                            ← created on accepted override
+      config_driven-configs-bbc.yaml             ← manifest key with / replaced by -
+      custom-hn-config.yaml
+      bundles-bundles.yml
+    backup_2026-03-20-2/                          ← second backup same day
+  themes/                                         ← unchanged
+
+.capcat/
+  source_hashes.json                              ← hash manifest
+  state.json
+  cache/
+  registry/
+</code></pre>
+<br>
+<hr>
+<br>
+<h2>Components</h2>
+<br>
+<h3>New: <code>capcat/core/source_config_mirror.py</code> — <code>SourceConfigMirror</code></h3>
+<br>
+<strong>Constructor:</strong> <code>SourceConfigMirror(project_root: Path, tui_mode: bool)</code>
+<br>
+<strong>Public methods:</strong>
+<ul>
+<li><code>is_mirrored() -&gt; bool</code> — any domain dir exists under <code>Config/sources/active/</code></li>
+<li><code>run_first_mirror()</code> — copy all three domains, write manifest, print message</li>
+<li><code>check_for_upgrades()</code> — diff all domains, prompt, apply</li>
+</ul>
+<br>
+<strong>Private methods:</strong>
+<ul>
+<li><code>_compute_hash(path: Path) -&gt; str</code> — SHA-256 of raw bytes</li>
+<li><code>_load_manifest() -&gt; dict</code> — read <code>.capcat/source_hashes.json</code>; return <code>{}</code> if absent</li>
+<li><code>_save_manifest(manifest: dict)</code> — write <code>.capcat/source_hashes.json</code>; creates <code>.capcat/</code> with <code>mkdir(parents=True, exist_ok=True)</code> before writing</li>
+<li><code>_backup(keys: list[str]) -&gt; Path</code> — copy affected user files to timestamped dir with counter suffix on collision; raise <code>OSError</code> on failure. Backup filename derivation: replace every <code>/</code> in the manifest key with <code>-</code> (e.g. <code>config_driven/configs/bbc.yaml</code> → <code>config_driven-configs-bbc.yaml</code>; <code>custom/hn/config.yaml</code> → <code>custom-hn-config.yaml</code>; <code>bundles/bundles.yml</code> → <code>bundles-bundles.yml</code>). This rule is collision-free across all three domains. The caller (<code>check_for_upgrades</code>) catches the <code>OSError</code>, prints a user-facing warning, and aborts the override — never touching any user file.</li>
+<li><code>_builtin_config_driven_dir() -&gt; Path</code> — <code>Path(__file__).parent.parent / &quot;sources&quot; / &quot;builtin&quot; / &quot;config_driven&quot; / &quot;configs&quot;</code></li>
+<li><code>_user_config_driven_dir() -&gt; Path</code> — <code>project_root / &quot;Config&quot; / &quot;sources&quot; / &quot;active&quot; / &quot;config_driven&quot; / &quot;configs&quot;</code></li>
+<li><code>_builtin_custom_dir() -&gt; Path</code> — <code>Path(__file__).parent.parent / &quot;sources&quot; / &quot;builtin&quot; / &quot;custom&quot;</code></li>
+<li><code>_user_custom_dir() -&gt; Path</code> — <code>project_root / &quot;Config&quot; / &quot;sources&quot; / &quot;active&quot; / &quot;custom&quot;</code></li>
+<li><code>_builtin_bundles_dir() -&gt; Path</code> — <code>Path(__file__).parent.parent / &quot;sources&quot; / &quot;builtin&quot;</code> (root <code></em>.yml</code> files)</li>
+<li><code>_user_bundles_dir() -&gt; Path</code> — <code>project_root / &quot;Config&quot; / &quot;sources&quot; / &quot;active&quot; / &quot;bundles&quot;</code></li>
+</ul>
+<br>
+<strong>Call site:</strong> <code>unified_source_processor.py</code> — at start of <code>_process_with_new_system()</code>, before article discovery. Pass <code>tui_mode=is_tui_active()</code>.
+<br>
+<h3>Modified: <code>capcat/core/source_system/source_registry.py</code> — minimal change required</h3>
+<br>
+<code>SourceRegistry.__init__</code> already sets <code>_user_path = project_root / &quot;Config&quot; / &quot;sources&quot; / &quot;active&quot;</code> when <code>project_root</code> is provided (existing code, no change needed there).
+<br>
+<strong>Change required:</strong> <code>get_source_registry()</code> currently constructs <code>SourceRegistry()</code> with no arguments and caches it in <code>_global_registry</code>. Update it to accept <code>project_root: Path = None</code>. <strong>Singleton invalidation strategy:</strong> when <code>project_root</code> is <code>None</code>, return the cached singleton as before (backward-compatible). When <code>project_root</code> is non-None, always construct and return a fresh <code>SourceRegistry(project_root=project_root)</code> — do not cache or use the cached instance. This avoids stale-singleton bugs without requiring explicit cache resets at call sites.
+<br>
+<code>_discover_custom_sources()</code> registers modules under a fixed name <code>f&quot;sources.custom.{source_name}.source&quot;</code>. Since <code>discover_sources()</code> clears <code>_sources</code> and <code>_configs</code> at the start, and the loader explicitly overwrites <code>sys.modules[module_name]</code> before executing the file, the user-pass registration correctly overwrites the builtin-pass registration. User custom source files take effect.
+<br>
+<h3>Modified: <code>capcat/core/source_system/source_factory.py</code> — minimal change required</h3>
+<br>
+<code>get_source_factory()</code> currently constructs <code>SourceFactory()</code> with no registry and caches it in <code>_global_factory</code>. Update to accept <code>project_root: Path = None</code>. Apply the same singleton strategy: when <code>project_root</code> is <code>None</code>, return the cached singleton; when non-None, always construct and return a fresh <code>SourceFactory(registry=get_source_registry(project_root=project_root))</code>.
+<br>
+<h3>Modified: <code>capcat/core/unified_source_processor.py</code> — minimal change required</h3>
+<br>
+<code>UnifiedSourceProcessor.__init__</code> calls <code>get_source_factory()</code> with no arguments. Update to accept <code>project_root: Path = None</code> and pass it to <code>get_source_factory(project_root=project_root)</code>.
+<br>
+<strong>Call site chain:</strong> <code>SourceConfigMirror</code> is called from <code>_process_with_new_system()</code> with the project root already known at that point. That same <code>project_root</code> must be passed to <code>UnifiedSourceProcessor</code> at construction time, which propagates it to the factory and registry.
+<br>
+<p>The <code>cli.py</code> <code>list</code> command constructs <code>SourceRegistry()</code> directly (no project root) — update to <code>SourceRegistry(project_root=Path.cwd())</code> or pass the resolved project root.</p>
+<br>
+<h3>Modified: <code>capcat/core/source_system/bundle_service.py</code></h3>
+<br>
+<code>get_available_bundles()</code> gains an optional <code>project_root: Path = None</code> parameter. When provided and <code>project_root / &quot;Config&quot; / &quot;sources&quot; / &quot;active&quot; / &quot;bundles&quot; / &quot;bundles.yml&quot;</code> exists, read from there; otherwise fall back to the installed package builtin. Signature: <code>def get_available_bundles(project_root: Path = None) -&gt; dict</code>.
+<br>
+<p>Call sites that must be updated to pass <code>project_root</code>:</p>
+<ul>
+<li><code>cli.py</code> (two call sites) — pass current working directory or resolved project root</li>
+<li><code>update_manager.py</code> — <code>UpdateManager</code> receives project root at construction; pass it through to the call</li>
+<li><code>interactive.py</code> — pass project root (already available as a module-level constant or via the same mechanism used by <code>SourceConfigMirror</code>)</li>
+</ul>
+<br>
+<code>BundleService</code> is already constructed with an explicit path in <code>interactive.py:719</code> — currently hardcoded incorrectly to <code>capcat/sources/active/bundles.yml</code> (package-relative, not project-relative). Update to <code>project_root / &quot;Config&quot; / &quot;sources&quot; / &quot;active&quot; / &quot;bundles&quot; / &quot;bundles.yml&quot;</code>, falling back to the builtin path if the user file does not exist. <code>BundleManager</code> already accepts a path string — no structural change to <code>BundleService</code> needed.
+<br>
+<h3>Modified: <code>add_source_service.py</code>, <code>remove_source_command.py</code> / <code>enhanced_remove_command.py</code></h3>
+<br>
+<ul>
+<li><code>add_source_service.py</code>: redirect write target to <code>Config/sources/active/config_driven/configs/</code>; write manifest entry</li>
+<li><code>remove_source_command.py</code> / <code>enhanced_remove_command.py</code>: redirect delete target; remove manifest entry. Existing <code>SourceBackupManager</code> / <code>QuestionaryRemovalUI</code> retained unchanged.</li>
+</ul>
+<br>
+<hr>
+<br>
+<h2>Out of Scope</h2>
+<br>
+<ul>
+<li>Merging or diffing YAML/Python content at field/line level — file-level hash only</li>
+<li>Per-item granular prompts — batched by domain</li>
+<li>Syncing user-added sources back to builtins</li>
+<li>Mirroring <code>specialized/</code> sources (twitter, youtube, medium, vimeo, substack) — these are utility sources, not user-configurable</li>
+<li>Any changes to <code>Config/themes/</code></li>
+</ul>
+<br>
+<hr>
+<br>
+<h2>Success Criteria</h2>
+<br>
+<ol>
+<li>Fresh project: first <code>capcat fetch</code> creates all three domain dirs under <code>Config/sources/active/</code> and copies all active builtins; <code>.disabled</code> files not copied; manifest written</li>
+<li><code>capcat add-source</code> writes to <code>Config/sources/active/config_driven/configs/</code>; manifest entry has <code>builtin_hash: &quot;&quot;</code></li>
+<li>Bundle commands read/write <code>Config/sources/active/bundles/bundles.yml</code>; fall back to installed package if user file absent</li>
+<li>Upgrade diff correctly handles new items, changed-unmodified (offer override with backup), changed-modified (skip), absent user file (remove manifest entry)</li>
+<li>Override backup created before any write; aborted if backup fails; same-day collision uses counter suffix</li>
+<li>New unit tests cover:</li>
+<ul>
+<li>First-run mirror: all three domains copied, no <code>.disabled</code>, manifest written</li>
+</ol>
+<ul>
+<li>config_driven upgrade: new source prompt, changed+unmodified override, changed+modified skip</li>
+<li>custom upgrade: <code>config.yaml</code> changed+unmodified → offered; <code>source.py</code> changed+unmodified → offered independently</li>
+<li>bundles upgrade: <code>bundles.yml</code> changed+unmodified → offered</li>
+<li>Manifest missing: rebuilt, no overwrites</li>
+<li>User file manually deleted: manifest entry removed, not re-copied</li>
+<li>Backup collision: counter suffix</li>
+<li><code>add-source</code> before first mirror: dir created, file written, <code>builtin_hash: &quot;&quot;</code></li>
+<li><code>remove-source</code>: file deleted, manifest entry removed, source reappears in new-source prompt</li>
+<li>Disabled source (<code>.yaml.disabled</code>) participates in upgrade diff hash comparison</li>
+<li>Builtin removed from package: user file untouched, debug log only</li>
+<li>TUI mode: prompts use <code>questionary.confirm</code>; CLI mode: use print + input</li>
+</ul>
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Player Hero Implementation Plan</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / <a href="../superpowers/index.html">superpowers</a> / plans</div>
+<h1>YouTube Player Hero Implementation Plan</h1>
+<br>
+<p>&gt; <strong>For agentic workers:</strong> REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (<code>- [ ]</code>) syntax for tracking.</p>
+<br>
+<strong>Goal:</strong> Replace the CLI demo block in <code>docs/index.html</code> with a Plyr-based custom YouTube player.
+<br>
+<strong>Architecture:</strong> Swap the static <code>&lt;pre class=&quot;code-demo&quot;&gt;</code> block inside <code>.hero-demo</code> with a Plyr YouTube embed div. Add Plyr CSS to <code>&lt;head&gt;</code>, add Plyr JS before <code>&lt;/body&gt;</code>, initialize in <code>main.js</code>. Update <code>.hero-demo</code> CSS to remove padding/background that fights the video — use an aspect-ratio wrapper so the player is responsive at 16:9. No new JS files; no npm; CDN only.
+<br>
+<strong>Tech Stack:</strong> HTML, CSS, vanilla JS, Plyr 3.7.8 (CDN)
+<br>
+<hr>
+<br>
+<h2>File Structure</h2>
+<br>
+<p>| File | Change |</p>
+<p>|------|--------|</p>
+<p>| <code>docs/index.html</code> | Add Plyr CSS to <code>&lt;head&gt;</code>; replace hero-demo inner block; add Plyr JS before <code>&lt;/body&gt;</code> |</p>
+<p>| <code>docs/css/main.css</code> | Update <code>.hero-demo</code> — remove padding/bg, add aspect-ratio wrapper; remove <code>.code-demo</code> rule |</p>
+<p>| <code>docs/js/main.js</code> | Add Plyr initialization |</p>
+<br>
+<hr>
+<br>
+<h3>Task 1: Add Plyr CSS to <code>&lt;head&gt;</code></h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>docs/index.html</code> (in <code>&lt;head&gt;</code>)</li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Add Plyr stylesheet</strong></li>
+</ul>
+<br>
+<p>In <code>docs/index.html</code>, after the last existing <code>&lt;link&gt;</code> tag in <code>&lt;head&gt;</code> (before <code>&lt;/head&gt;</code>), add:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;https://cdn.plyr.io/3.7.8/plyr.css&quot;</span> <span class="p">/&gt;</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Verify no syntax errors</strong></li>
+</ul>
+<br>
+<p>Open <code>docs/index.html</code> in a browser locally (file://) or run:</p>
+<br>
+<div class="highlight"><pre><span></span>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from html.parser import HTMLParser; p = HTMLParser(); p.feed(open(&#39;docs/index.html&#39;).read()); print(&#39;OK&#39;)&quot;</span>
+</pre></div>
+
+<br>
+<p>Expected: <code>OK</code></p>
+<br>
+<hr>
+<br>
+<h3>Task 2: Replace hero-demo inner block</h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>docs/index.html</code> (hero section)</li>
+</ul>
+<br>
+<p>The block to replace is approximately lines 103–114:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">span</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;demo-heading&quot;</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;visually-hidden&quot;</span><span class="p">&gt;</span>Example command-line usage<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;hero-demo&quot;</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">pre</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;code-demo&quot;</span> <span class="na">role</span><span class="o">=</span><span class="s">&quot;region&quot;</span> <span class="na">aria-labelledby</span><span class="o">=</span><span class="s">&quot;demo-heading&quot;</span><span class="p">&gt;&lt;</span><span class="nt">code</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;language-bash&quot;</span><span class="p">&gt;</span>$ ./capcat bundle tech --count 30
+Fetching from 3 sources in bundle &#39;tech&#39;
+◯ STARTING HACKER NEWS (30 ITEMS)
+◯ STARTING LOBSTERS (30 ITEMS)
+◯ STARTING IEEE SPECTRUM (30 ITEMS)
+✓ 90 articles saved successfully
+Saved to: ../News/news_2025-11-24/<span class="p">&lt;/</span><span class="nt">code</span><span class="p">&gt;&lt;/</span><span class="nt">pre</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Replace with Plyr embed</strong></li>
+</ul>
+<br>
+<p>Replace the entire block above with:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;hero-demo&quot;</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;hero-demo__player&quot;</span>
+       <span class="na">data-plyr-provider</span><span class="o">=</span><span class="s">&quot;youtube&quot;</span>
+       <span class="na">data-plyr-embed-id</span><span class="o">=</span><span class="s">&quot;dQw4w9WgXcQ&quot;</span><span class="p">&gt;</span>
+  <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+</pre></div>
+
+<br>
+<p>The <code>id=&quot;demo-heading&quot;</code> span and <code>aria-labelledby</code> are no longer needed — the player has its own accessible title from YouTube. Remove them.</p>
+<br>
+<hr>
+<br>
+<h3>Task 3: Update <code>.hero-demo</code> CSS</h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>docs/css/main.css</code></li>
+</ul>
+<br>
+<p>Current <code>.hero-demo</code> rule (≈ lines 397–404):</p>
+<br>
+<div class="highlight"><pre><span></span><span class="p">.</span><span class="nc">hero-demo</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">background-color</span><span class="p">:</span><span class="w"> </span><span class="mh">#ffffff</span><span class="p">;</span>
+<span class="w">  </span><span class="k">border-radius</span><span class="p">:</span><span class="w"> </span><span class="nf">var</span><span class="p">(</span><span class="nv">--radius-lg</span><span class="p">);</span>
+<span class="w">  </span><span class="k">padding</span><span class="p">:</span><span class="w"> </span><span class="nf">var</span><span class="p">(</span><span class="nv">--space-lg</span><span class="p">);</span>
+<span class="w">  </span><span class="k">box-shadow</span><span class="p">:</span><span class="w"> </span><span class="nf">var</span><span class="p">(</span><span class="nv">--shadow-lg</span><span class="p">);</span>
+<span class="w">  </span><span class="k">max-width</span><span class="p">:</span><span class="w"> </span><span class="nf">var</span><span class="p">(</span><span class="nv">--measure-optimal</span><span class="p">);</span>
+<span class="w">  </span><span class="k">margin</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="kc">auto</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+
+<br>
+<p>Current <code>.code-demo</code> rule (≈ lines 406–412) — no longer needed.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Replace <code>.hero-demo</code> and remove <code>.code-demo</code></strong></li>
+</ul>
+<br>
+<p>Replace the <code>.hero-demo</code> rule with:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="p">.</span><span class="nc">hero-demo</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">border-radius</span><span class="p">:</span><span class="w"> </span><span class="nf">var</span><span class="p">(</span><span class="nv">--radius-lg</span><span class="p">);</span>
+<span class="w">  </span><span class="k">box-shadow</span><span class="p">:</span><span class="w"> </span><span class="nf">var</span><span class="p">(</span><span class="nv">--shadow-lg</span><span class="p">);</span>
+<span class="w">  </span><span class="k">max-width</span><span class="p">:</span><span class="w"> </span><span class="nf">var</span><span class="p">(</span><span class="nv">--measure-optimal</span><span class="p">);</span>
+<span class="w">  </span><span class="k">margin</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="kc">auto</span><span class="p">;</span>
+<span class="w">  </span><span class="k">overflow</span><span class="p">:</span><span class="w"> </span><span class="kc">hidden</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="p">.</span><span class="nc">hero-demo__player</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">aspect-ratio</span><span class="p">:</span><span class="w"> </span><span class="mi">16</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">9</span><span class="p">;</span>
+<span class="w">  </span><span class="k">width</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="kt">%</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+
+<br>
+<p>Delete the entire <code>.code-demo</code> rule block that follows.</p>
+<br>
+<p>Also check for the responsive override (≈ line 1227):</p>
+<br>
+<div class="highlight"><pre><span></span><span class="c">/* around line 1227 — if it targets .hero-demo padding, remove it */</span>
+</pre></div>
+
+<br>
+<p>If that override only adjusted padding on <code>.hero-demo</code>, delete it. If it sets max-width or layout, keep it.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 5: Verify layout locally</strong></li>
+</ul>
+<br>
+<p>Open <code>docs/index.html</code> in a browser. The hero section should show a 16:9 black rectangle (player shell) where the CLI block was.</p>
+<br>
+<hr>
+<br>
+<h3>Task 4: Add Plyr JS and initialize</h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>docs/index.html</code> (before <code>&lt;/body&gt;</code>)</li>
+<li>Modify: <code>docs/js/main.js</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 6: Add Plyr script tag</strong></li>
+</ul>
+<br>
+<p>In <code>docs/index.html</code>, after the existing script tags (jQuery, GSAP, main.js) and before <code>&lt;/body&gt;</code>, add:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;https://cdn.plyr.io/3.7.8/plyr.js&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</pre></div>
+
+<br>
+<p>The order must be: jQuery → GSAP → main.js → plyr.js (Plyr has no jQuery dependency; order relative to main.js doesn&#x27;t matter).</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 7: Initialize Plyr in main.js</strong></li>
+</ul>
+<br>
+<p>In <code>docs/js/main.js</code>, append at the end of the file:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="c1">// YouTube player</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">querySelector</span><span class="p">(</span><span class="s1">&#39;[data-plyr-provider=&quot;youtube&quot;]&#39;</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="ow">new</span><span class="w"> </span><span class="nx">Plyr</span><span class="p">(</span><span class="s1">&#39;[data-plyr-provider=&quot;youtube&quot;]&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">controls</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;play-large&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;play&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;progress&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;current-time&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;mute&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;volume&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;fullscreen&#39;</span><span class="p">],</span>
+<span class="w">        </span><span class="nx">youtube</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">noCookie</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="nx">rel</span><span class="o">:</span><span class="w"> </span><span class="mf">0</span><span class="p">,</span><span class="w"> </span><span class="nx">showinfo</span><span class="o">:</span><span class="w"> </span><span class="mf">0</span><span class="p">,</span><span class="w"> </span><span class="nx">modestbranding</span><span class="o">:</span><span class="w"> </span><span class="mf">1</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="p">}</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 8: Test player in browser</strong></li>
+</ul>
+<br>
+<p>Open <code>docs/index.html</code> locally. The Plyr player should render with custom controls. Click play — the YouTube video should load (requires internet). Confirm no JS console errors.</p>
+<br>
+<hr>
+<br>
+<h3>Task 5: Commit and push</h3>
+<br>
+<ul>
+<li>[ ] <strong>Step 9: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat
+git<span class="w"> </span>add<span class="w"> </span>docs/index.html<span class="w"> </span>docs/css/main.css<span class="w"> </span>docs/js/main.js
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: replace CLI demo with Plyr YouTube player in hero section&quot;</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 10: Push and verify on capcat.org</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>main
+</pre></div>
+
+<br>
+<p>Wait ~60 seconds for GitHub Pages to rebuild, then open <code>https://capcat.org</code> and confirm the player renders in the hero section.</p>
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

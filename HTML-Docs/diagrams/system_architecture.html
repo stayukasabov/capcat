@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Architecture</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / diagrams</div>
+<h1>System Architecture</h1>
+<br>
+<div class="mermaid">graph TB
+    subgraph "User Interface Layer"
+        CLI[CLI Interface<br/>cli.py]
+        Wrapper[Bash Wrapper<br/>capcat]
+        PythonWrapper[Python Wrapper<br/>run_capcat.py]
+    end
+
+    subgraph "Application Layer"
+        Main[Main Application<br/>capcat.py]
+        Config[Configuration<br/>core.config]
+        ErrorHandler[Error Handling<br/>core.error_handling]
+        Progress[Progress Tracking<br/>core.progress]
+    end
+
+    subgraph "Source Management"
+        SourceFactory[Source Factory<br/>core.source_system.source_factory]
+        SourceRegistry[Source Registry<br/>core.source_system.source_registry]
+        BaseSource[Base Source<br/>core.source_system.base_source]
+
+        subgraph "Source Types"
+            ConfigDriven[Config-Driven Sources<br/>YAML-based]
+            CustomSources[Custom Sources<br/>Python-based]
+        end
+    end
+
+    subgraph "Processing Pipeline"
+        ArticleFetcher[Article Fetcher<br/>core.article_fetcher]
+        MediaProcessor[Media Processor<br/>core.unified_media_processor]
+        ContentFormatter[Content Formatter<br/>core.formatter]
+        HTMLGenerator[HTML Generator<br/>htmlgen/]
+    end
+
+    subgraph "Core Services"
+        SessionPool[Session Pool<br/>core.session_pool]
+        ImageProcessor[Image Processor<br/>core.image_processor]
+        Downloader[Media Downloader<br/>core.downloader]
+        Utils[Utilities<br/>core.utils]
+    end
+
+    subgraph "Output Layer"
+        FileSystem[File System]
+        MarkdownFiles[Markdown Files]
+        MediaFiles[Media Files]
+        HTMLFiles[HTML Files]
+        Logging[Log Files]
+    end
+
+    %% User interactions
+    CLI --> Main
+    Wrapper --> Main
+    PythonWrapper --> Main
+
+    %% Application flow
+    Main --> Config
+    Main --> ErrorHandler
+    Main --> Progress
+    Main --> SourceFactory
+
+    %% Source management
+    SourceFactory --> SourceRegistry
+    SourceRegistry --> BaseSource
+    BaseSource --> ConfigDriven
+    BaseSource --> CustomSources
+
+    %% Processing flow
+    SourceFactory --> ArticleFetcher
+    ArticleFetcher --> MediaProcessor
+    MediaProcessor --> ContentFormatter
+    ContentFormatter --> HTMLGenerator
+
+    %% Core services
+    ArticleFetcher --> SessionPool
+    MediaProcessor --> ImageProcessor
+    MediaProcessor --> Downloader
+    ArticleFetcher --> Utils
+    MediaProcessor --> Utils
+
+    %% Output
+    ContentFormatter --> MarkdownFiles
+    MediaProcessor --> MediaFiles
+    HTMLGenerator --> HTMLFiles
+    ErrorHandler --> Logging
+    Progress --> Logging
+
+    %% Styling
+    classDef uiLayer fill:#e1f5fe
+    classDef appLayer fill:#f3e5f5
+    classDef sourceLayer fill:#e8f5e8
+    classDef processLayer fill:#fff3e0
+    classDef serviceLayer fill:#fce4ec
+    classDef outputLayer fill:#f1f8e9
+
+    class CLI,Wrapper,PythonWrapper uiLayer
+    class Main,Config,ErrorHandler,Progress appLayer
+    class SourceFactory,SourceRegistry,BaseSource,ConfigDriven,CustomSources sourceLayer
+    class ArticleFetcher,MediaProcessor,ContentFormatter,HTMLGenerator processLayer
+    class SessionPool,ImageProcessor,Downloader,Utils serviceLayer
+    class FileSystem,MarkdownFiles,MediaFiles,HTMLFiles,Logging outputLayer
+</div>
+<br>
+<h2>Component Relationships</h2>
+<br>
+<ul>
+<li><strong>UI Layer</strong>: Entry points for user interaction</li>
+<li><strong>Application Layer</strong>: Core application logic and coordination</li>
+<li><strong>Source Management</strong>: Modular source system with auto-discovery</li>
+<li><strong>Processing Pipeline</strong>: Article content processing workflow</li>
+<li><strong>Core Services</strong>: Shared utilities and services</li>
+<li><strong>Output Layer</strong>: File system operations and data persistence</li>
+</ul>
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

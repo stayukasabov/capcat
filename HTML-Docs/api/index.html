@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Api</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a></div>
+<h1>Api</h1>
+<h2>Subdirectories</h2>
+<ul>
+<li><a href="Config/index.html">Config</a></li>
+<li><a href="Video/index.html">Video</a></li>
+<li><a href="__version__/index.html">  Version  </a></li>
+<li><a href="add_jekyll_frontmatter/index.html">Add Jekyll Frontmatter</a></li>
+<li><a href="analyze_hn_pdf_patterns/index.html">Analyze Hn Pdf Patterns</a></li>
+<li><a href="analyze_hn_pdfs_simple/index.html">Analyze Hn Pdfs Simple</a></li>
+<li><a href="build/index.html">Build</a></li>
+<li><a href="build_site/index.html">Build Site</a></li>
+<li><a href="capcat/index.html">Capcat</a></li>
+<li><a href="capcat_legacy/index.html">Capcat Legacy</a></li>
+<li><a href="cleanup_development_files/index.html">Cleanup Development Files</a></li>
+<li><a href="cleanup_repo/index.html">Cleanup Repo</a></li>
+<li><a href="cli/index.html">Cli</a></li>
+<li><a href="convert_docs_to_html/index.html">Convert Docs To Html</a></li>
+<li><a href="convert_to_markdown/index.html">Convert To Markdown</a></li>
+<li><a href="core/index.html">Core</a></li>
+<li><a href="debug/index.html">Debug</a></li>
+<li><a href="debug_pdf_stalling/index.html">Debug Pdf Stalling</a></li>
+<li><a href="delete_h4_colon/index.html">Delete H4 Colon</a></li>
+<li><a href="fix_ascii_formatting/index.html">Fix Ascii Formatting</a></li>
+<li><a href="fix_breadcrumbs/index.html">Fix Breadcrumbs</a></li>
+<li><a href="fix_colon_formatting/index.html">Fix Colon Formatting</a></li>
+<li><a href="fix_ethical_scraping_links/index.html">Fix Ethical Scraping Links</a></li>
+<li><a href="fix_footer_typo/index.html">Fix Footer Typo</a></li>
+<li><a href="fix_mismatched_tags/index.html">Fix Mismatched Tags</a></li>
+<li><a href="fix_sources_in_docs/index.html">Fix Sources In Docs</a></li>
+<li><a href="htmlgen/index.html">Htmlgen</a></li>
+<li><a href="legacy/index.html">Legacy</a></li>
+<li><a href="quick_cli_fix/index.html">Quick Cli Fix</a></li>
+<li><a href="remove_br_tags/index.html">Remove Br Tags</a></li>
+<li><a href="remove_hr_tags/index.html">Remove Hr Tags</a></li>
+<li><a href="replace_h4_with_h3/index.html">Replace H4 With H3</a></li>
+<li><a href="replace_strong_tags/index.html">Replace Strong Tags</a></li>
+<li><a href="replace_strong_with_h4/index.html">Replace Strong With H4</a></li>
+<li><a href="run_capcat/index.html">Run Capcat</a></li>
+<li><a href="scripts/index.html">Scripts</a></li>
+<li><a href="sources/index.html">Sources</a></li>
+<li><a href="update_html_includes/index.html">Update Html Includes</a></li>
+<li><a href="update_html_jekyll/index.html">Update Html Jekyll</a></li>
+<li><a href="update_includes/index.html">Update Includes</a></li>
+</ul>
+<h2>Documents</h2>
+<ul>
+<li><a href="README.html">Readme</a></li>
+</ul>
+
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>scripts.setup_dependencies</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / <a href="../api/index.html">api</a> / scripts</div>
+<h1>scripts.setup_dependencies</h1>
+<br>
+<strong>File:</strong> <code>Application/scripts/setup_dependencies.py</code>
+<br>
+<h2>Description</h2>
+<br>
+<p>Automated Dependency Setup and Repair Script for Capcat</p>
+<br>
+<p>This script provides robust virtual environment management with:</p>
+<ul>
+<li>Intelligent venv validation and repair</li>
+<li>Dependency verification and installation</li>
+<li>Path corruption detection and fixing</li>
+<li>Fallback mechanisms for common issues</li>
+<li>Comprehensive logging and diagnostics</li>
+</ul>
+<br>
+<p>Usage:</p>
+<p>    python3 scripts/setup_dependencies.py [options]</p>
+<br>
+<p>Options:</p>
+<p>    --force-rebuild    Force complete venv rebuild</p>
+<p>    --check-only       Only validate, don&#x27;t install/repair</p>
+<p>    --verbose         Enable detailed logging</p>
+<p>    --requirements     Custom requirements file path</p>
+<br>
+<h2>Constants</h2>
+<br>
+<h3>RED</h3>
+<br>
+<strong>Value:</strong> <code>&#x27;\x1b[0;31m&#x27;</code>
+<br>
+<h3>GREEN</h3>
+<br>
+<strong>Value:</strong> <code>&#x27;\x1b[38;5;157m&#x27;</code>
+<br>
+<h3>YELLOW</h3>
+<br>
+<strong>Value:</strong> <code>&#x27;\x1b[38;5;166m&#x27;</code>
+<br>
+<h3>BLUE</h3>
+<br>
+<strong>Value:</strong> <code>&#x27;\x1b[0;34m&#x27;</code>
+<br>
+<h3>CYAN</h3>
+<br>
+<strong>Value:</strong> <code>&#x27;\x1b[0;36m&#x27;</code>
+<br>
+<h3>NC</h3>
+<br>
+<strong>Value:</strong> <code>&#x27;\x1b[0m&#x27;</code>
+<br>
+<h2>Classes</h2>
+<br>
+<h3>Colors</h3>
+<br>
+<p>ANSI color codes for terminal output.</p>
+<br>
+<h3>DependencyManager</h3>
+<br>
+<p>Comprehensive dependency management system for Capcat.</p>
+<br>
+<p>Handles virtual environment creation, validation, repair,</p>
+<p>and dependency installation with robust error handling.</p>
+<br>
+<h4>Methods</h4>
+<br>
+<h5>__init__</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<p>Initialize dependency manager.</p>
+<br>
+<p>Args:</p>
+<p>    base_path: Application base directory (auto-detected if None)</p>
+<p>    verbose: Enable detailed logging</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>base_path</code> (Optional[Path]) <em>optional</em></li>
+<li><code>verbose</code> (bool) <em>optional</em></li>
+</ul>
+<br>
+<h5>log</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Colors</span><span class="o">.</span><span class="n">GREEN</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;INFO&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Print colored log message.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>message</code> (str)</li>
+<li><code>color</code> (str) <em>optional</em></li>
+<li><code>prefix</code> (str) <em>optional</em></li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h5>log_verbose</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">log_verbose</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Print verbose log message if verbose mode enabled.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>message</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h5>log_error</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">log_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Print error message.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>message</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h5>log_warning</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">log_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Print warning message.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>message</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h5>log_success</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">log_success</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Print success message.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>message</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h5>check_python_version</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">check_python_version</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Verify Python version meets requirements.</p>
+<br>
+<p>Returns:</p>
+<p>    True if Python version is acceptable</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h5>detect_venv_corruption</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">detect_venv_corruption</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span>
+</pre></div>
+
+<br>
+<p>Detect various types of virtual environment corruption.</p>
+<br>
+<p>Returns:</p>
+<p>    Tuple of (is_corrupted, list_of_issues)</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<strong>Returns:</strong> Tuple[bool, List[str]]
+<br>
+<p>⚠️ <strong>High complexity:</strong> 13</p>
+<br>
+<h5>rebuild_venv</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">rebuild_venv</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Completely rebuild the virtual environment.</p>
+<br>
+<p>Returns:</p>
+<p>    True if rebuild successful</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h5>get_required_packages</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">get_required_packages</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+</pre></div>
+
+<br>
+<p>Parse requirements.txt and return list of required packages.</p>
+<br>
+<p>Returns:</p>
+<p>    List of package names (without version specifiers)</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<strong>Returns:</strong> List[str]
+<br>
+<h5>validate_dependencies</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">validate_dependencies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">python_exe</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span>
+</pre></div>
+
+<br>
+<p>Validate that all required dependencies are installed and importable.</p>
+<br>
+<p>Args:</p>
+<p>    python_exe: Path to Python executable to test</p>
+<br>
+<p>Returns:</p>
+<p>    Tuple of (all_valid, list_of_missing_packages)</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>python_exe</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> Tuple[bool, List[str]]
+<br>
+<h5>upgrade_pip</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">upgrade_pip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">python_exe</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Upgrade pip to latest version silently.</p>
+<br>
+<p>Args:</p>
+<p>    python_exe: Path to Python executable</p>
+<br>
+<p>Returns:</p>
+<p>    True if upgrade successful or already latest</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>python_exe</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h5>install_dependencies</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">install_dependencies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">python_exe</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Install dependencies using pip.</p>
+<br>
+<p>Args:</p>
+<p>    python_exe: Path to Python executable</p>
+<p>    force: Force reinstallation even if packages exist</p>
+<br>
+<p>Returns:</p>
+<p>    True if installation successful</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>python_exe</code> (str)</li>
+<li><code>force</code> (bool) <em>optional</em></li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h5>_update_dependency_cache</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_update_dependency_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">python_exe</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Update dependency validation cache.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>python_exe</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h5>get_python_executable</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">get_python_executable</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+
+<br>
+<p>Get the best available Python executable.</p>
+<br>
+<p>Returns:</p>
+<p>    Path to Python executable (venv or system fallback)</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<strong>Returns:</strong> str
+<br>
+<h5>setup_dependencies</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">setup_dependencies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force_rebuild</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">check_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Main method to setup and validate dependencies.</p>
+<br>
+<p>Args:</p>
+<p>    force_rebuild: Force complete venv rebuild</p>
+<p>    check_only: Only validate, don&#x27;t install/repair</p>
+<br>
+<p>Returns:</p>
+<p>    True if dependencies are ready</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>force_rebuild</code> (bool) <em>optional</em></li>
+<li><code>check_only</code> (bool) <em>optional</em></li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h2>Functions</h2>
+<br>
+<h3>main</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span>
+</pre></div>
+
+<br>
+<p>CLI entry point for dependency setup script.</p>
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

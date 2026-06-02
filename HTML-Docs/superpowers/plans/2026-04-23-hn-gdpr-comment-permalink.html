@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HN GDPR Comment Permalink Implementation Plan</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / <a href="../superpowers/index.html">superpowers</a> / plans</div>
+<h1>HN GDPR Comment Permalink Implementation Plan</h1>
+<br>
+<p>&gt; <strong>For agentic workers:</strong> REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (<code>- [ ]</code>) syntax for tracking.</p>
+<br>
+<strong>Goal:</strong> Replace HN user profile URLs (which encode the username) with comment permalinks, so no personal data is stored in capcat output files while still allowing comment validation.
+<br>
+<strong>Architecture:</strong> Two files change. <code>streamlined_comment_processor.py</code> stops accepting or using <code>profile_url_fn</code> and instead uses the already-extracted <code>comment_id</code> to build a comment permalink (<code>https://news.ycombinator.com/item?id={comment_id}</code>). <code>hn/source.py</code> removes <code>profile_url_fn</code> from <code>_HN_SELECTORS</code>. The markdown/HTML label changes from &quot;profile&quot; to &quot;comment&quot;. No username is read, stored, or written anywhere in the output.
+<br>
+<strong>Tech Stack:</strong> Python 3, BeautifulSoup4, pytest
+<br>
+<hr>
+<br>
+<h2>Files</h2>
+<br>
+<ul>
+<li>Modify: <code>capcat/core/streamlined_comment_processor.py</code></li>
+<li><code>process_comments_flattened</code>: remove <code>profile_url_fn</code> parameter</li>
+<li><code>_extract_comment_data_fast</code>: remove <code>profile_url_fn</code> parameter; derive <code>user_link</code> from <code>comment_id</code> instead</li>
+<li><code>generate_inline_comments_markdown</code>: change label <code>(profile)</code> to <code>(comment)</code></li>
+<li><code>generate_inline_comments_html</code>: change label <code>(profile)</code> to <code>(comment)</code></li>
+<li>Modify: <code>capcat/sources/builtin/custom/hn/source.py</code></li>
+<li>Remove <code>profile_url_fn</code> key from <code>_HN_SELECTORS</code></li>
+<li>Test: <code>tests/unit/test_hn_comment_gdpr.py</code> (new file)</li>
+</ul>
+<br>
+<hr>
+<br>
+<h3>Task 1: Failing tests — comment permalink replaces profile URL</h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Create: <code>tests/unit/test_hn_comment_gdpr.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Write the failing tests</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;GDPR regression: HN comment output must not contain usernames in any URL or text.&quot;&quot;&quot;</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bs4</span><span class="w"> </span><span class="kn">import</span> <span class="n">BeautifulSoup</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.streamlined_comment_processor</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_optimized_comment_processor</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_make_hn_soup</span><span class="p">(</span><span class="n">comment_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">username</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BeautifulSoup</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Minimal HN comment page HTML with one comment.&quot;&quot;&quot;</span>
+    <span class="n">html</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    &lt;table class=&quot;comment-tree&quot;&gt;</span>
+<span class="s2">      &lt;tr class=&quot;athing comtr&quot; id=&quot;</span><span class="si">{</span><span class="n">comment_id</span><span class="si">}</span><span class="s2">&quot;&gt;</span>
+<span class="s2">        &lt;td&gt;</span>
+<span class="s2">          &lt;table&gt;</span>
+<span class="s2">            &lt;tr&gt;</span>
+<span class="s2">              &lt;td class=&quot;ind&quot;&gt;&lt;img width=&quot;0&quot;&gt;&lt;/td&gt;</span>
+<span class="s2">              &lt;td class=&quot;votelinks&quot;&gt;&lt;/td&gt;</span>
+<span class="s2">              &lt;td class=&quot;default&quot;&gt;</span>
+<span class="s2">                &lt;div class=&quot;comment-head&quot;&gt;</span>
+<span class="s2">                  &lt;a href=&quot;user?id=</span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s2">&quot; class=&quot;hnuser&quot;&gt;</span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s2">&lt;/a&gt;</span>
+<span class="s2">                &lt;/div&gt;</span>
+<span class="s2">                &lt;div class=&quot;comment&quot;&gt;&lt;p&gt;</span><span class="si">{</span><span class="n">text</span><span class="si">}</span><span class="s2">&lt;/p&gt;&lt;/div&gt;</span>
+<span class="s2">              &lt;/td&gt;</span>
+<span class="s2">            &lt;/tr&gt;</span>
+<span class="s2">          &lt;/table&gt;</span>
+<span class="s2">        &lt;/td&gt;</span>
+<span class="s2">      &lt;/tr&gt;</span>
+<span class="s2">    &lt;/table&gt;</span>
+<span class="s2">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">html</span><span class="p">,</span> <span class="s2">&quot;html.parser&quot;</span><span class="p">)</span>
+
+
+<span class="n">_HN_SELECTORS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;comment_selector&quot;</span><span class="p">:</span> <span class="s2">&quot;.comment-tree .athing&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;user_selector&quot;</span><span class="p">:</span> <span class="s2">&quot;.hnuser&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;comment_text_selector&quot;</span><span class="p">:</span> <span class="s2">&quot;.comment&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestCommentPermalinkReplacesProfileUrl</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_user_link_is_hn_item_permalink</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;user_link must be a comment permalink, not a user profile URL.&quot;&quot;&quot;</span>
+        <span class="n">soup</span> <span class="o">=</span> <span class="n">_make_hn_soup</span><span class="p">(</span><span class="s2">&quot;43000001&quot;</span><span class="p">,</span> <span class="s2">&quot;seizethecheese&quot;</span><span class="p">,</span> <span class="s2">&quot;Great point.&quot;</span><span class="p">)</span>
+        <span class="n">processor</span> <span class="o">=</span> <span class="n">create_optimized_comment_processor</span><span class="p">(</span><span class="n">max_comments</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="n">comments</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">process_comments_flattened</span><span class="p">(</span><span class="n">soup</span><span class="p">,</span> <span class="o">**</span><span class="n">_HN_SELECTORS</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">comments</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+        <span class="n">link</span> <span class="o">=</span> <span class="n">comments</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;user_link&quot;</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="s2">&quot;news.ycombinator.com/item?id=43000001&quot;</span> <span class="ow">in</span> <span class="n">link</span><span class="p">,</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;user_link must be comment permalink, got: </span><span class="si">{</span><span class="n">link</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_username_not_in_user_link</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Username must not appear anywhere in user_link.&quot;&quot;&quot;</span>
+        <span class="n">soup</span> <span class="o">=</span> <span class="n">_make_hn_soup</span><span class="p">(</span><span class="s2">&quot;43000002&quot;</span><span class="p">,</span> <span class="s2">&quot;seizethecheese&quot;</span><span class="p">,</span> <span class="s2">&quot;Interesting.&quot;</span><span class="p">)</span>
+        <span class="n">processor</span> <span class="o">=</span> <span class="n">create_optimized_comment_processor</span><span class="p">(</span><span class="n">max_comments</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="n">comments</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">process_comments_flattened</span><span class="p">(</span><span class="n">soup</span><span class="p">,</span> <span class="o">**</span><span class="n">_HN_SELECTORS</span><span class="p">)</span>
+        <span class="n">link</span> <span class="o">=</span> <span class="n">comments</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;user_link&quot;</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="s2">&quot;seizethecheese&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">link</span><span class="p">,</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Username must not be stored in user_link, got: </span><span class="si">{</span><span class="n">link</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_user_display_name_is_anonymous</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Display name must be Anonymous, not the real username.&quot;&quot;&quot;</span>
+        <span class="n">soup</span> <span class="o">=</span> <span class="n">_make_hn_soup</span><span class="p">(</span><span class="s2">&quot;43000003&quot;</span><span class="p">,</span> <span class="s2">&quot;seizethecheese&quot;</span><span class="p">,</span> <span class="s2">&quot;Hello.&quot;</span><span class="p">)</span>
+        <span class="n">processor</span> <span class="o">=</span> <span class="n">create_optimized_comment_processor</span><span class="p">(</span><span class="n">max_comments</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="n">comments</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">process_comments_flattened</span><span class="p">(</span><span class="n">soup</span><span class="p">,</span> <span class="o">**</span><span class="n">_HN_SELECTORS</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">comments</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;user&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Anonymous&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_markdown_output_uses_comment_label</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Markdown output must use &#39;(comment)&#39; label, not &#39;(profile)&#39;.&quot;&quot;&quot;</span>
+        <span class="n">soup</span> <span class="o">=</span> <span class="n">_make_hn_soup</span><span class="p">(</span><span class="s2">&quot;43000004&quot;</span><span class="p">,</span> <span class="s2">&quot;seizethecheese&quot;</span><span class="p">,</span> <span class="s2">&quot;Test comment.&quot;</span><span class="p">)</span>
+        <span class="n">processor</span> <span class="o">=</span> <span class="n">create_optimized_comment_processor</span><span class="p">(</span><span class="n">max_comments</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="n">comments</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">process_comments_flattened</span><span class="p">(</span><span class="n">soup</span><span class="p">,</span> <span class="o">**</span><span class="n">_HN_SELECTORS</span><span class="p">)</span>
+        <span class="n">md</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">generate_inline_comments_markdown</span><span class="p">(</span>
+            <span class="n">comments</span><span class="p">,</span> <span class="s2">&quot;Test Article&quot;</span><span class="p">,</span> <span class="s2">&quot;https://news.ycombinator.com/item?id=99&quot;</span><span class="p">,</span> <span class="kc">None</span>
+        <span class="p">)</span>
+        <span class="k">assert</span> <span class="s2">&quot;(comment)&quot;</span> <span class="ow">in</span> <span class="n">md</span><span class="p">,</span> <span class="s2">&quot;Markdown must use &#39;(comment)&#39; label&quot;</span>
+        <span class="k">assert</span> <span class="s2">&quot;(profile)&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">md</span><span class="p">,</span> <span class="s2">&quot;Markdown must not use &#39;(profile)&#39; label&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_markdown_output_contains_no_username</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Username must not appear anywhere in the markdown output.&quot;&quot;&quot;</span>
+        <span class="n">soup</span> <span class="o">=</span> <span class="n">_make_hn_soup</span><span class="p">(</span><span class="s2">&quot;43000005&quot;</span><span class="p">,</span> <span class="s2">&quot;seizethecheese&quot;</span><span class="p">,</span> <span class="s2">&quot;A comment.&quot;</span><span class="p">)</span>
+        <span class="n">processor</span> <span class="o">=</span> <span class="n">create_optimized_comment_processor</span><span class="p">(</span><span class="n">max_comments</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="n">comments</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">process_comments_flattened</span><span class="p">(</span><span class="n">soup</span><span class="p">,</span> <span class="o">**</span><span class="n">_HN_SELECTORS</span><span class="p">)</span>
+        <span class="n">md</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">generate_inline_comments_markdown</span><span class="p">(</span>
+            <span class="n">comments</span><span class="p">,</span> <span class="s2">&quot;Test Article&quot;</span><span class="p">,</span> <span class="s2">&quot;https://news.ycombinator.com/item?id=99&quot;</span><span class="p">,</span> <span class="kc">None</span>
+        <span class="p">)</span>
+        <span class="k">assert</span> <span class="s2">&quot;seizethecheese&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">md</span><span class="p">,</span> <span class="p">(</span>
+            <span class="s2">&quot;Username must not appear anywhere in markdown output&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_html_output_uses_comment_label</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;HTML output must use &#39;comment&#39; link text, not &#39;profile&#39;.&quot;&quot;&quot;</span>
+        <span class="n">soup</span> <span class="o">=</span> <span class="n">_make_hn_soup</span><span class="p">(</span><span class="s2">&quot;43000006&quot;</span><span class="p">,</span> <span class="s2">&quot;seizethecheese&quot;</span><span class="p">,</span> <span class="s2">&quot;HTML test.&quot;</span><span class="p">)</span>
+        <span class="n">processor</span> <span class="o">=</span> <span class="n">create_optimized_comment_processor</span><span class="p">(</span><span class="n">max_comments</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="n">comments</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">process_comments_flattened</span><span class="p">(</span><span class="n">soup</span><span class="p">,</span> <span class="o">**</span><span class="n">_HN_SELECTORS</span><span class="p">)</span>
+        <span class="n">html</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">generate_inline_comments_html</span><span class="p">(</span>
+            <span class="n">comments</span><span class="p">,</span> <span class="s2">&quot;Test Article&quot;</span><span class="p">,</span> <span class="s2">&quot;https://news.ycombinator.com/item?id=99&quot;</span>
+        <span class="p">)</span>
+        <span class="k">assert</span> <span class="s2">&quot;comment&quot;</span> <span class="ow">in</span> <span class="n">html</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="s2">&quot;profile&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">html</span><span class="p">,</span> <span class="s2">&quot;HTML must not use &#39;profile&#39; label&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_html_output_contains_no_username</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Username must not appear anywhere in the HTML output.&quot;&quot;&quot;</span>
+        <span class="n">soup</span> <span class="o">=</span> <span class="n">_make_hn_soup</span><span class="p">(</span><span class="s2">&quot;43000007&quot;</span><span class="p">,</span> <span class="s2">&quot;seizethecheese&quot;</span><span class="p">,</span> <span class="s2">&quot;Another.&quot;</span><span class="p">)</span>
+        <span class="n">processor</span> <span class="o">=</span> <span class="n">create_optimized_comment_processor</span><span class="p">(</span><span class="n">max_comments</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="n">comments</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">process_comments_flattened</span><span class="p">(</span><span class="n">soup</span><span class="p">,</span> <span class="o">**</span><span class="n">_HN_SELECTORS</span><span class="p">)</span>
+        <span class="n">html</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">generate_inline_comments_html</span><span class="p">(</span>
+            <span class="n">comments</span><span class="p">,</span> <span class="s2">&quot;Test Article&quot;</span><span class="p">,</span> <span class="s2">&quot;https://news.ycombinator.com/item?id=99&quot;</span>
+        <span class="p">)</span>
+        <span class="k">assert</span> <span class="s2">&quot;seizethecheese&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">html</span><span class="p">,</span> <span class="p">(</span>
+            <span class="s2">&quot;Username must not appear anywhere in HTML output&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_process_comments_accepts_no_profile_url_fn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;process_comments_flattened must not require or accept profile_url_fn.&quot;&quot;&quot;</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.streamlined_comment_processor</span><span class="w"> </span><span class="kn">import</span> <span class="n">StreamlinedCommentProcessor</span>
+        <span class="n">sig</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">StreamlinedCommentProcessor</span><span class="o">.</span><span class="n">process_comments_flattened</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="s2">&quot;profile_url_fn&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="p">(</span>
+            <span class="s2">&quot;profile_url_fn must be removed from process_comments_flattened signature&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_hn_selectors_has_no_profile_url_fn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_HN_SELECTORS in hn/source.py must not contain profile_url_fn.&quot;&quot;&quot;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.sources.builtin.custom.hn.source</span><span class="w"> </span><span class="kn">import</span> <span class="n">_HN_SELECTORS</span>
+        <span class="k">assert</span> <span class="s2">&quot;profile_url_fn&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_HN_SELECTORS</span><span class="p">,</span> <span class="p">(</span>
+            <span class="s2">&quot;_HN_SELECTORS must not contain profile_url_fn&quot;</span>
+        <span class="p">)</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Run tests to verify they fail</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_hn_comment_gdpr.py<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: all 9 tests FAIL (most with <code>AssertionError</code> because the current code uses profile URLs).</p>
+<br>
+<hr>
+<br>
+<h3>Task 2: Implement — remove profile_url_fn, use comment permalink</h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>capcat/core/streamlined_comment_processor.py</code></li>
+<li>Modify: <code>capcat/sources/builtin/custom/hn/source.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Update <code>_extract_comment_data_fast</code> to use comment_id for user_link</strong></li>
+</ul>
+<br>
+<p>In <code>capcat/core/streamlined_comment_processor.py</code>, replace lines 80-122 with:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_extract_comment_data_fast</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">comment_elem</span><span class="p">,</span>
+    <span class="n">user_selector</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">comment_text_selector</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">depth_fn</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fast comment data extraction without deep processing.</span>
+<span class="sd">    username is never stored — user_link uses the comment&#39;s own HN permalink.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">comment_id</span> <span class="o">=</span> <span class="n">comment_elem</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">comment_id</span><span class="p">:</span>
+        <span class="n">user_link</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;https://news.ycombinator.com/item?id=</span><span class="si">{</span><span class="n">comment_id</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">user_link</span> <span class="o">=</span> <span class="s2">&quot;#&quot;</span>
+
+    <span class="n">comment_text_elem</span> <span class="o">=</span> <span class="n">comment_elem</span><span class="o">.</span><span class="n">select_one</span><span class="p">(</span><span class="n">comment_text_selector</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">comment_text_elem</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="n">comment_text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_comment_text_streamlined</span><span class="p">(</span><span class="n">comment_text_elem</span><span class="p">)</span>
+
+    <span class="n">depth</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">depth_fn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">depth</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">depth_fn</span><span class="p">(</span><span class="n">comment_elem</span><span class="p">))</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+            <span class="n">depth</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">comment_id</span><span class="p">,</span>
+        <span class="s2">&quot;user&quot;</span><span class="p">:</span> <span class="s2">&quot;Anonymous&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;user_link&quot;</span><span class="p">:</span> <span class="n">user_link</span><span class="p">,</span>
+        <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">comment_text</span><span class="p">,</span>
+        <span class="s2">&quot;level&quot;</span><span class="p">:</span> <span class="n">depth</span><span class="p">,</span>
+    <span class="p">}</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Remove <code>profile_url_fn</code> from <code>process_comments_flattened</code> signature and call site</strong></li>
+</ul>
+<br>
+<p>In <code>capcat/core/streamlined_comment_processor.py</code>, replace the <code>process_comments_flattened</code> method signature and body (lines 32-78):</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">process_comments_flattened</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">soup</span><span class="p">:</span> <span class="n">BeautifulSoup</span><span class="p">,</span>
+    <span class="n">comment_selector</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">user_selector</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;.hnuser&quot;</span><span class="p">,</span>
+    <span class="n">comment_text_selector</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;.comment&quot;</span><span class="p">,</span>
+    <span class="n">depth_fn</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Process comments preserving nesting depth.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        soup: BeautifulSoup object of the comments page</span>
+<span class="sd">        comment_selector: CSS selector for comment elements</span>
+<span class="sd">        user_selector: CSS selector for user information</span>
+<span class="sd">        comment_text_selector: CSS selector for comment text</span>
+<span class="sd">        depth_fn: Optional callable(element) -&gt; int returning nesting depth.</span>
+<span class="sd">                  If None, all comments get level=0.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        List of comment dicts with &#39;level&#39; field reflecting nesting depth.</span>
+<span class="sd">        &#39;user&#39; is always &#39;Anonymous&#39;; &#39;user_link&#39; is a comment permalink.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">comments</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">comment_elements</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">comment_selector</span><span class="p">)</span>
+    <span class="n">comment_elements</span> <span class="o">=</span> <span class="n">comment_elements</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">max_comments</span><span class="p">]</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">comment_elements</span><span class="p">)</span><span class="si">}</span><span class="s2"> comments&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">comment_elem</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">comment_elements</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">comment_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_comment_data_fast</span><span class="p">(</span>
+                <span class="n">comment_elem</span><span class="p">,</span>
+                <span class="n">user_selector</span><span class="p">,</span>
+                <span class="n">comment_text_selector</span><span class="p">,</span>
+                <span class="n">idx</span><span class="p">,</span>
+                <span class="n">depth_fn</span><span class="o">=</span><span class="n">depth_fn</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">comment_data</span> <span class="ow">and</span> <span class="n">comment_data</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]:</span>
+                <span class="n">comments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">comment_data</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Skipping problematic comment </span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">continue</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">performance_metrics</span><span class="p">[</span><span class="s2">&quot;comments_processed&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">comments</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">comments</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 5: Update markdown label from &quot;profile&quot; to &quot;comment&quot;</strong></li>
+</ul>
+<br>
+<p>In <code>generate_inline_comments_markdown</code> (line 208), change:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="n">md_content</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">**</span><span class="si">{</span><span class="n">comment</span><span class="p">[</span><span class="s1">&#39;user&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">** ([profile](</span><span class="si">{</span><span class="n">comment</span><span class="p">[</span><span class="s1">&#39;user_link&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">))</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+</pre></div>
+
+<br>
+<p>to:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="n">md_content</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">**</span><span class="si">{</span><span class="n">comment</span><span class="p">[</span><span class="s1">&#39;user&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">** ([comment](</span><span class="si">{</span><span class="n">comment</span><span class="p">[</span><span class="s1">&#39;user_link&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">))</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 6: Update HTML label from &quot;profile&quot; to &quot;comment&quot;</strong></li>
+</ul>
+<br>
+<p>In <code>generate_inline_comments_html</code> (line 267), change:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{comment[&#39;user_link&#39;]}</span><span class="s2">&quot;</span> <span class="n">target</span><span class="o">=</span><span class="s2">&quot;_blank&quot;</span> <span class="n">rel</span><span class="o">=</span><span class="s2">&quot;noopener noreferrer&quot;</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;profile-link&quot;</span><span class="o">&gt;</span><span class="p">(</span><span class="n">profile</span><span class="p">)</span><span class="o">&lt;/</span><span class="n">a</span><span class="o">&gt;</span>
+</pre></div>
+
+<br>
+<p>to:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{comment[&#39;user_link&#39;]}</span><span class="s2">&quot;</span> <span class="n">target</span><span class="o">=</span><span class="s2">&quot;_blank&quot;</span> <span class="n">rel</span><span class="o">=</span><span class="s2">&quot;noopener noreferrer&quot;</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;comment-link&quot;</span><span class="o">&gt;</span><span class="p">(</span><span class="n">comment</span><span class="p">)</span><span class="o">&lt;/</span><span class="n">a</span><span class="o">&gt;</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 7: Remove <code>profile_url_fn</code> from <code>_HN_SELECTORS</code> in <code>hn/source.py</code></strong></li>
+</ul>
+<br>
+<p>In <code>capcat/sources/builtin/custom/hn/source.py</code>, replace <code>_HN_SELECTORS</code>:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="n">_HN_SELECTORS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;comment_selector&quot;</span><span class="p">:</span> <span class="s2">&quot;.comment-tree .athing&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;user_selector&quot;</span><span class="p">:</span> <span class="s2">&quot;.hnuser&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;comment_text_selector&quot;</span><span class="p">:</span> <span class="s2">&quot;.comment&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;depth_fn&quot;</span><span class="p">:</span> <span class="n">_hn_depth</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 8: Run tests to verify they pass</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_hn_comment_gdpr.py<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: all 9 tests PASS.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 9: Run full suite to check for regressions</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-q
+</pre></div>
+
+<br>
+<p>Expected: all tests pass.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 10: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>git<span class="w"> </span>add<span class="w"> </span>capcat/core/streamlined_comment_processor.py<span class="w"> </span><span class="se">\</span>
+<span class="w">        </span>capcat/sources/builtin/custom/hn/source.py<span class="w"> </span><span class="se">\</span>
+<span class="w">        </span>tests/unit/test_hn_comment_gdpr.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;fix: replace HN user profile URLs with comment permalinks (GDPR)&quot;</span>
+</pre></div>
+
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

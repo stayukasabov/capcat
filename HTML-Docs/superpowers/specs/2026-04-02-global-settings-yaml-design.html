@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global-Settings YAML — Design Spec</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / <a href="../superpowers/index.html">superpowers</a> / specs</div>
+<h1>Global-Settings YAML — Design Spec</h1>
+<br>
+<strong>Date:</strong> 2026-04-02
+<strong>Status:</strong> Draft
+<strong>Scope:</strong> Vault-centric user configuration via annotated YAML file
+<br>
+<hr>
+<br>
+<h2>Goal</h2>
+<br>
+<p>Expose all tunable capcat settings as a human-editable <code>Global-settings.yaml</code> file in the vault directory, with a user-level fallback at <code>~/.config/capcat/Global-settings.yaml</code>. Every field is documented with inline comments, default values, and examples. Starts with PDF limit enforcement (highest user value), then surfaces all existing settings.</p>
+<br>
+<hr>
+<br>
+<h2>Architecture</h2>
+<br>
+<p>Two files, one per scope level:</p>
+<br>
+<pre><code>Config/
+  capcat.yml              — sources, bundles (existing, CLI-managed, unchanged)
+  Global-settings.yaml    — all tunable settings (human-edited, new)
+
+~/.config/capcat/
+  Global-settings.yaml    — user-level defaults (auto-created by capcat init, new)
+</code></pre>
+<br>
+<p>Config load order (lowest → highest priority):</p>
+<br>
+<pre><code>dataclass defaults
+  ↑
+~/.config/capcat/Global-settings.yaml   (user-level, unconditional pass)
+  ↑
+Config/Global-settings.yaml             (vault-level, unconditional pass)
+  ↑
+CAPCAT_* environment variables
+  ↑
+CLI flags
+</code></pre>
+<br>
+<code>capcat.yml</code> is loaded separately for sources/bundles only and never participates in settings resolution. CLI arguments and flags are preserved exactly as-is — they always win.
+<br>
+<strong>Merge semantics:</strong> key-level merging, not section replacement. If vault-level sets only <code>pdf.max_pdf_size_bytes</code>, all other user-level values remain active. Each key overrides its counterpart independently.
+<br>
+<strong><code>article_count</code> resolution:</strong> <code>ProcessingConfig.article_count</code> (default 30) is the global default. To make this fallback work, <code>SourceConfig.article_count</code> default must change from <code>30</code> to <code>None</code>. <code>_resolve_count</code> in <code>capcat/core/unified_source_processor.py</code> then falls back to <code>config.processing.article_count</code> when the per-source value is <code>None</code>.
+<br>
+<strong><code>max_filename_length</code>:</strong> the correct authoritative default is 100. <code>constants.py:MAX_FILENAME_LENGTH = 255</code> is the filesystem hard limit, not the opinionated capcat cap. After migration, 100 is the only default.
+<br>
+<hr>
+<br>
+<h2>File Format</h2>
+<br>
+<p>Annotated YAML. Every field present, commented with description, default, and example where non-obvious. Fields are optional — omitting a field uses the dataclass default.</p>
+<br>
+<div class="ascii-art"># Global Settings — Capcat
+# Edit this file to tune behavior for this vault.
+# All fields are optional. Defaults are shown in comments.
+# Restart capcat after editing.
+
+# ─── PDF Downloads ──────────────────────────────────────
+pdf:
+  # Skip PDF files larger than this size in bytes.
+  # Default: 20971520 (20MB). Examples: 10485760 = 10MB, 52428800 = 50MB
+  max_pdf_size_bytes: 20971520
+
+  # Maximum number of PDFs queued per article.
+  # Default: 10
+  max_pdf_per_article: 10
+
+# ─── Network ────────────────────────────────────────────
+network:
+  # TCP connection timeout in seconds. Increase for slow servers.
+  # Default: 10
+  connect_timeout: 10
+
+  # HTTP response body read timeout in seconds.
+  # Default: 30
+  read_timeout: 30
+
+  # Image and PDF download timeout in seconds.
+  # Default: 60
+  media_download_timeout: 60
+
+  # HEAD request timeout for link checking in seconds.
+  # Default: 10
+  head_request_timeout: 10
+
+  # Retry attempts on network failure.
+  # Default: 3
+  max_retries: 3
+
+  # Base delay between retries in seconds.
+  # Default: 1.0
+  retry_delay: 1.0
+
+  # Minimum seconds between requests to the same domain.
+  # Passed to EthicalScrapingManager.configure() at startup.
+  # Default: 1.0
+  crawl_delay: 1.0
+
+  # How long to cache robots.txt responses in minutes.
+  # Passed to EthicalScrapingManager.configure() at startup.
+  # Default: 15
+  robots_cache_ttl_minutes: 15
+
+  # HTTP User-Agent header sent with all requests.
+  # Default: &quot;Capcat/2.0 (Personal news archiver)&quot;
+  user_agent: &quot;Capcat/2.0 (Personal news archiver)&quot;
+
+  # HTTP connection pool size.
+  # Default: 20
+  pool_connections: 20
+
+  # Maximum concurrent connections.
+  # Default: 20
+  pool_maxsize: 20
+
+# ─── Processing ─────────────────────────────────────────
+processing:
+  # Default articles fetched per source per run.
+  # Per-source article_count in each source&#x27;s config.yaml overrides this.
+  # Default: 30
+  article_count: 30
+
+  # Concurrent article fetcher workers.
+  # Default: 8
+  max_workers: 8
+
+  # HTML to Markdown conversion timeout in seconds.
+  # Default: 30
+  conversion_timeout: 30
+
+  # Maximum images downloaded per article (normal mode).
+  # Default: 20
+  max_images: 20
+
+  # Maximum images downloaded per article when --media flag is active.
+  # Default: 1000
+  max_images_media_mode: 1000
+
+  # Skip images smaller than this in pixels (width and height).
+  # Default: 150
+  min_image_dimensions: 150
+
+  # Skip images larger than this in bytes.
+  # Default: 5242880 (5MB). Example: 1048576 = 1MB
+  max_image_size_bytes: 5242880
+
+  # Maximum characters in vault filenames.
+  # Default: 100
+  max_filename_length: 100
+
+  # Download and embed images locally.
+  # Default: true
+  download_images: true
+
+  # Download video files.
+  # Default: false
+  download_videos: false
+
+  # Download audio files.
+  # Default: false
+  download_audio: false
+
+  # Download generic document files.
+  # Default: false
+  download_documents: false
+
+  # Fetch and save comments alongside articles.
+  # Default: true
+  create_comments_file: true
+
+  # Strip &lt;script&gt; tags from HTML before conversion.
+  # Default: true
+  remove_script_tags: true
+
+  # Strip &lt;style&gt; tags from HTML before conversion.
+  # Default: true
+  remove_style_tags: true
+
+  # Strip &lt;nav&gt; tags from HTML before conversion.
+  # Default: true
+  remove_nav_tags: true
+
+  # Preserve line breaks in markdown output.
+  # Default: true
+  markdown_line_breaks: true
+
+# ─── UI ─────────────────────────────────────────────────
+ui:
+  # Spinner style for article progress.
+  # Options: dots, wave, loading, pulse, bounce, modern
+  # Default: dots
+  progress_spinner_style: dots
+
+  # Spinner style for batch operations.
+  # Options: activity, progress, pulse, wave, dots, scan
+  # Default: activity
+  batch_spinner_style: activity
+
+  # Progress bar width in characters.
+  # Default: 25
+  progress_bar_width: 25
+
+  # Show animated progress indicators.
+  # Default: true
+  show_progress_animations: true
+
+  # Use emoji in output.
+  # Default: true
+  use_emojis: true
+
+  # Use colors in terminal output.
+  # Default: true
+  use_colors: true
+
+  # Show per-article detail during fetch.
+  # Default: false
+  show_detailed_progress: false
+
+# ─── Logging ────────────────────────────────────────────
+logging:
+  # Log level for all output. Options: DEBUG, INFO, WARNING, ERROR
+  # Default: INFO
+  default_level: INFO
+
+  # Log level for terminal output.
+  # Default: INFO
+  console_level: INFO
+
+  # Log level written to log file.
+  # Default: DEBUG
+  file_level: DEBUG
+
+  # Maximum log file size before rotation in bytes.
+  # Default: 10485760 (10MB)
+  max_log_file_size: 10485760
+
+  # Number of rotated log files to keep.
+  # Default: 5
+  log_file_backup_count: 5
+
+  # Include timestamps in log output.
+  # Default: true
+  include_timestamps: true
+
+  # Include module names in log output.
+  # Default: true
+  include_module_names: true
+
+  # Auto-create log directory if it does not exist.
+  # Default: true
+  auto_create_log_dir: true
+
+  # Colorize log output.
+  # Default: true
+  use_colors: true
+</div>
+<br>
+<hr>
+<br>
+<h2>Code Changes</h2>
+<br>
+<h3><code>capcat/core/config.py</code></h3>
+<br>
+<strong>New dataclass:</strong>
+<br>
+<div class="highlight"><pre><span></span><span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PdfConfig</span><span class="p">:</span>
+    <span class="n">max_pdf_size_bytes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20_971_520</span>   <span class="c1"># 20MB</span>
+    <span class="n">max_pdf_per_article</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span>
+</pre></div>
+
+<br>
+<strong>New fields on <code>ProcessingConfig</code>:</strong>
+<ul>
+<li><code>article_count: int = 30</code></li>
+<li><code>max_images: int = 20</code></li>
+<li><code>max_images_media_mode: int = 1000</code></li>
+<li><code>min_image_dimensions: int = 150</code></li>
+<li><code>max_image_size_bytes: int = 5_242_880</code></li>
+<li><code>conversion_timeout: int = 30</code></li>
+<li><code>max_filename_length</code> already present at default 100 — no change</li>
+</ul>
+<br>
+<strong>New fields on <code>NetworkConfig</code>:</strong>
+<ul>
+<li><code>crawl_delay: float = 1.0</code></li>
+<li><code>robots_cache_ttl_minutes: int = 15</code></li>
+</ul>
+<br>
+<strong><code>FetchNewsConfig</code>:</strong> add <code>pdf: PdfConfig = None</code>, initialize in <code>__post_init__</code>.
+<br>
+<strong><code>from_dict()</code> fix:</strong> <code>from_dict()</code> currently constructs <code>NetworkConfig</code>, <code>ProcessingConfig</code>, <code>LoggingConfig</code> but silently drops both <code>ui</code> and <code>pdf</code> sections. Fix: add construction of <code>UIConfig</code> and <code>PdfConfig</code> alongside the existing three. All sub-config construction must filter incoming dicts to known fields to prevent <code>TypeError</code> on unknown keys:
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_filter_fields</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="n">known</span> <span class="o">=</span> <span class="p">{</span><span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">fields</span><span class="p">(</span><span class="bp">cls</span><span class="p">)}</span>
+    <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">known</span><span class="p">}</span>
+</pre></div>
+
+<br>
+<p>Apply <code>_filter_fields</code> before every sub-config constructor call in <code>from_dict()</code>.</p>
+<br>
+<strong>New <code>_load_settings_file(path: Path)</code> method on <code>ConfigManager</code>:</strong>
+<br>
+<p>This is a new method (does not replace or modify <code>_merge_config_data</code>):</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_load_settings_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">return</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span> <span class="ow">or</span> <span class="p">{}</span>
+    <span class="c1"># sources/bundles are valid in capcat.yml — silently ignore here</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;sources&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;bundles&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="c1"># Filter each section to known fields before merging</span>
+    <span class="k">for</span> <span class="n">section_name</span><span class="p">,</span> <span class="n">section_data</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="bp">cls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_section_to_class</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">section_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">cls</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">section_data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">section_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">_filter_fields</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">section_data</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_merge_config_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<code>_section_to_class</code> is a dict mapping section key → dataclass:
+<code>{&quot;network&quot;: NetworkConfig, &quot;processing&quot;: ProcessingConfig, &quot;ui&quot;: UIConfig, &quot;logging&quot;: LoggingConfig, &quot;pdf&quot;: PdfConfig}</code>
+<br>
+<p>Called twice in <code>load_config()</code> — user-level path first, vault-level second. Exact placement: <strong>after</strong> <code>self._config = FetchNewsConfig()</code> (the defaults reset) and <strong>before</strong> the <code>if config_file:</code> branch. This ensures:</p>
+<ul>
+<li>Settings are applied on top of fresh defaults, not stale state</li>
+<li>Global-settings files are loaded regardless of whether <code>--config</code> is used</li>
+<li>Not re-loaded on subsequent calls (gated by the <code>_config_loaded</code> guard above)</li>
+</ul>
+<br>
+<strong>Ordering dependency:</strong> <code>FetchNewsConfig</code> must have <code>pdf: PdfConfig = None</code> (initialized in <code>__post_init__</code>) before <code>_load_settings_file</code> is wired — otherwise <code>_merge_config_data</code> will log &quot;Unknown config section: pdf&quot; and drop all pdf values.
+<br>
+<h3><code>capcat/core/constants.py</code></h3>
+<br>
+<p>Remove these constants and update all consumers. For constants with no active importers, delete only.</p>
+<br>
+<p>| Constant | Active importer | Action |</p>
+<p>|---|---|---|</p>
+<p>| <code>DEFAULT_ARTICLE_COUNT</code> | None | Delete only |</p>
+<p>| <code>DEFAULT_MAX_IMAGES</code> | Check consumers | → <code>config.processing.max_images</code> |</p>
+<p>| <code>MEDIA_FLAG_MAX_IMAGES</code> | Check consumers | → <code>config.processing.max_images_media_mode</code> |</p>
+<p>| <code>MIN_IMAGE_DIMENSIONS</code> | Check consumers | → <code>config.processing.min_image_dimensions</code> |</p>
+<p>| <code>MAX_IMAGE_SIZE_BYTES</code> | Check consumers | → <code>config.processing.max_image_size_bytes</code> |</p>
+<p>| <code>MAX_FILENAME_LENGTH</code> | Check consumers | → <code>config.processing.max_filename_length</code> (correct default: 100) |</p>
+<p>| <code>DEFAULT_CRAWL_DELAY</code> | None | Delete only |</p>
+<p>| <code>ROBOTS_CACHE_TTL_MINUTES</code> | None | Delete only |</p>
+<p>| <code>CONVERSION_TIMEOUT_SECONDS</code> | <code>article_fetcher.py</code> (default arg) | See note below |</p>
+<br>
+<strong>Note on <code>CONVERSION_TIMEOUT_SECONDS</code> in <code>article_fetcher.py</code>:</strong> used as a default argument value in <code>convert_html_with_timeout(timeout: int = CONVERSION_TIMEOUT_SECONDS)</code>. Python evaluates default arguments at import time — a live config read cannot be placed there. Change the default to <code>None</code> and resolve inside the function body:
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">convert_html_with_timeout</span><span class="p">(</span><span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">timeout</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">timeout</span> <span class="o">=</span> <span class="n">get_config</span><span class="p">()</span><span class="o">.</span><span class="n">processing</span><span class="o">.</span><span class="n">conversion_timeout</span>
+    <span class="o">...</span>
+</pre></div>
+
+<br>
+<strong>Stale duplicate:</strong> a copy of <code>constants.py</code> exists at <code>/Users/xmac/capcat/core/constants.py</code> (outside the <code>capcat/</code> package). This file is not part of the installed package. Verify no consumer imports from <code>core.constants</code> (vs <code>capcat.core.constants</code>) — if found, fix the import. Delete the stale copy.
+<br>
+<h3><code>capcat/core/ethical_scraping.py</code></h3>
+<br>
+<p>Add <code>self.crawl_delay: float = 1.0</code> to <code>EthicalScrapingManager.__init__</code> (after <code>self.last_request_time</code>). This ensures <code>enforce_rate_limit</code> can reference <code>self.crawl_delay</code> safely before <code>configure()</code> is called.</p>
+<br>
+<p>Add a <code>configure(crawl_delay: float, robots_cache_ttl_minutes: int)</code> method to <code>EthicalScrapingManager</code>. This method updates <code>self.crawl_delay</code> and <code>self.cache_ttl</code> on the already-constructed singleton:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">configure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">crawl_delay</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">robots_cache_ttl_minutes</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">crawl_delay</span> <span class="o">=</span> <span class="n">crawl_delay</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">cache_ttl</span> <span class="o">=</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">minutes</span><span class="o">=</span><span class="n">robots_cache_ttl_minutes</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<code>__init__</code> keeps its existing hardcoded defaults (<code>1.0</code> and <code>15</code>) — these are the fallback if <code>configure()</code> is never called.
+<br>
+<strong>Wiring <code>crawl_delay</code> into <code>enforce_rate_limit</code>:</strong> <code>enforce_rate_limit</code> currently has signature <code>(self, domain, crawl_delay, min_delay=1.0)</code>. Change the body to use <code>self.crawl_delay</code> as an additional floor:
+<br>
+<div class="highlight"><pre><span></span><span class="n">effective_delay</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">crawl_delay</span><span class="p">,</span> <span class="n">min_delay</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">crawl_delay</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<p>This means calls that pass an explicit <code>min_delay</code> still respect it, and the configured <code>self.crawl_delay</code> acts as the global minimum. No call-site changes needed.</p>
+<br>
+<code>article_fetcher.py</code> calls <code>get_ethical_manager().configure(config.network.crawl_delay, config.network.robots_cache_ttl_minutes)</code> once at startup before any fetching begins.
+<br>
+<h3><code>capcat/core/async_pdf_manager.py</code></h3>
+<br>
+<strong>Singleton seeding:</strong> add <code>initialize_pdf_manager(pdf_config: PdfConfig)</code> that creates and caches the global singleton with the given config. <code>get_pdf_manager()</code> falls back to <code>PdfConfig()</code> defaults if called before initialization.
+<br>
+<code>AsyncPDFManager.__init__</code> accepts <code>pdf_config: PdfConfig = None</code>. Defaults to <code>PdfConfig()</code> if not provided. Add <code>self._check_session = requests.Session()</code> to <code>__init__</code> for use in the size pre-flight check.
+<br>
+<strong>Count enforcement</strong> — <code>extract_and_queue_pdf_links</code>: stop queuing after <code>pdf_config.max_pdf_per_article</code> URLs per article. Log a debug message when the cap is hit.
+<br>
+<strong>Size enforcement</strong> — insert the following check at the start of <code>_download_pdf</code>, <strong>before</strong> the <code>download_file(...)</code> call:
+<br>
+<div class="highlight"><pre><span></span><span class="c1"># Pre-flight size check</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">head</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_session</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">allow_redirects</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">content_length</span> <span class="o">=</span> <span class="n">head</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Content-Length&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">content_length</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">content_length</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">pdf_config</span><span class="o">.</span><span class="n">max_pdf_size_bytes</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Skipping PDF (too large: </span><span class="si">%d</span><span class="s2"> bytes): </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">content_length</span><span class="p">),</span> <span class="n">url</span><span class="p">)</span>
+        <span class="k">return</span>
+<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+    <span class="k">pass</span>  <span class="c1"># If HEAD fails, allow the download to proceed</span>
+</pre></div>
+
+<br>
+<p>This replaces the existing <code>_check_pdf_size_and_prompt()</code> interactive prompt. The interactive prompt is removed — size gating is now silent and config-driven.</p>
+<br>
+<strong>Direct-PDF URL path:</strong> <code>article_fetcher.py</code> has a second call site for <code>_check_pdf_size_and_prompt</code> — the direct-PDF URL path (<code>is_direct_pdf_url</code> check in <code>fetch_article_content</code>). This path bypasses <code>AsyncPDFManager</code> entirely. A shared helper is needed for both paths.
+<br>
+<strong>Circular import warning:</strong> <code>async_pdf_manager</code> already imports from <code>downloader</code> via deferred import to avoid cycles. <code>article_fetcher</code> imports <code>get_pdf_manager</code> from <code>async_pdf_manager</code>. Importing from <code>article_fetcher</code> inside <code>async_pdf_manager</code> would create a cycle. The helper must live in <code>async_pdf_manager.py</code> and be imported by <code>article_fetcher</code>, not the other way.
+<br>
+<p>Define the helper as a module-level function in <code>async_pdf_manager.py</code>:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">pdf_exceeds_size_limit</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">max_bytes</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">head</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">allow_redirects</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">content_length</span> <span class="o">=</span> <span class="n">head</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Content-Length&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">content_length</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">content_length</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">max_bytes</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">return</span> <span class="kc">False</span>
+</pre></div>
+
+<br>
+<ul>
+<li><code>AsyncPDFManager._download_pdf</code> calls <code>pdf_exceeds_size_limit(url, self._check_session, self.pdf_config.max_pdf_size_bytes)</code></li>
+<li><code>article_fetcher.py</code> imports <code>pdf_exceeds_size_limit</code> from <code>async_pdf_manager</code> and calls it in the direct-PDF URL path: <code>pdf_exceeds_size_limit(url, self.session, config.pdf.max_pdf_size_bytes)</code></li>
+</ul>
+<br>
+<p>Both paths use the same helper and the same configured limit. <code>_check_pdf_size_and_prompt</code> is deleted.</p>
+<br>
+<h3><code>capcat/core/article_fetcher.py</code></h3>
+<br>
+<ul>
+<li>Call <code>initialize_pdf_manager(config.pdf)</code> once at fetcher startup</li>
+<li>Call <code>get_ethical_manager().configure(config.network.crawl_delay, config.network.robots_cache_ttl_minutes)</code> once at fetcher startup</li>
+<li>Remove <code>LARGE_PDF_THRESHOLD_MB</code> constant and all calls to <code>_check_pdf_size_and_prompt()</code></li>
+<li>Change <code>convert_html_with_timeout</code> default arg from <code>CONVERSION_TIMEOUT_SECONDS</code> to <code>None</code> (resolves from config inside body)</li>
+</ul>
+<br>
+<h3><code>capcat/core/unified_source_processor.py</code></h3>
+<br>
+<ul>
+<li>Change <code>SourceConfig.article_count</code> default from <code>30</code> to <code>None</code> (in <code>capcat/core/source_system/base_source.py</code> or wherever <code>SourceConfig</code> is defined — read the file first)</li>
+<li>In <code>SourceConfig.__post_init__</code>, the existing guard <code>if self.article_count &lt;= 0: raise ValueError(...)</code> must be updated to <code>if self.article_count is not None and self.article_count &lt;= 0:</code> — otherwise <code>None</code> raises <code>TypeError</code> at construction</li>
+<li>In <code>_resolve_count</code>, after checking <code>cli_count</code>, fall back to <code>source_config.article_count</code> if not <code>None</code>, else <code>config.processing.article_count</code></li>
+</ul>
+<br>
+<h3><code>capcat/core/source_system/source_registry.py</code></h3>
+<br>
+<code>source_registry.py</code> constructs <code>SourceConfig</code> with explicit <code>article_count</code> fallbacks at two call sites:
+<br>
+<div class="highlight"><pre><span></span><span class="n">article_count</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;article_count&quot;</span><span class="p">,</span> <span class="mi">30</span><span class="p">)),</span>      <span class="c1"># line ~173</span>
+<span class="n">article_count</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">config_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;article_count&quot;</span><span class="p">,</span> <span class="mi">30</span><span class="p">)),</span> <span class="c1"># line ~251</span>
+</pre></div>
+
+<br>
+<p>Both bypass the dataclass default entirely. Change both to omit the fallback:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="n">article_count</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;article_count&quot;</span><span class="p">))</span> <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;article_count&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+</pre></div>
+
+<br>
+<p>Or more simply:</p>
+<div class="highlight"><pre><span></span><span class="n">_raw</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;article_count&quot;</span><span class="p">)</span>
+<span class="n">article_count</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">_raw</span><span class="p">)</span> <span class="k">if</span> <span class="n">_raw</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+</pre></div>
+
+<br>
+<p>Without this change, <code>None</code> never propagates and <code>config.processing.article_count</code> is never reached in <code>_resolve_count</code>.</p>
+<br>
+<h3><code>capcat/cli.py</code></h3>
+<br>
+<strong>New <code>capcat settings</code> command</strong> (independent of the existing <code>generate-config</code> command — do not modify <code>generate-config</code>):
+<br>
+<p>Writes <code>Config/Global-settings.yaml</code> in the current vault directory using the full annotated template. If file exists: print warning and exit. Accept <code>--force</code> to overwrite.</p>
+<br>
+<p>Wire into <code>_dispatch()</code>:</p>
+<div class="highlight"><pre><span></span><span class="k">elif</span> <span class="n">command</span> <span class="o">==</span> <span class="s2">&quot;settings&quot;</span><span class="p">:</span>
+    <span class="n">_cmd_settings</span><span class="p">(</span><span class="n">rest</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<p>Add <code>settings</code> to <code>_print_help()</code> usage listing.</p>
+<br>
+<strong><code>init</code> command — <code>_cmd_init()</code> pseudocode:</strong>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_cmd_init</span><span class="p">(</span><span class="n">reinit</span><span class="p">,</span> <span class="o">...</span><span class="p">):</span>
+    <span class="n">init_project</span><span class="p">(</span><span class="n">reinit</span><span class="o">=</span><span class="n">reinit</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">reinit</span><span class="p">:</span>
+        <span class="n">user_settings</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;.config&quot;</span> <span class="o">/</span> <span class="s2">&quot;capcat&quot;</span> <span class="o">/</span> <span class="s2">&quot;Global-settings.yaml&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">user_settings</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">user_settings</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">user_settings</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">GLOBAL_SETTINGS_TEMPLATE</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<code>reinit=True</code> skips the user-level file write. <code>GLOBAL_SETTINGS_TEMPLATE</code> is the full annotated YAML string defined as a constant in <code>cli.py</code> (same template used by <code>capcat settings</code>).
+<br>
+<hr>
+<br>
+<h2>Files Changed</h2>
+<br>
+<p>| File | Change |</p>
+<p>|---|---|</p>
+<p>| <code>capcat/core/config.py</code> | New <code>PdfConfig</code>; 9 new fields; fix <code>from_dict()</code> for <code>ui</code> + <code>pdf</code>; new <code>_load_settings_file()</code>; <code>_section_to_class</code> map; load user + vault <code>Global-settings.yaml</code> unconditionally |</p>
+<p>| <code>capcat/core/constants.py</code> | Remove 9 constants; update active consumers; delete stale <code>/Users/xmac/capcat/core/constants.py</code> duplicate |</p>
+<p>| <code>capcat/core/ethical_scraping.py</code> | Add <code>configure(crawl_delay, robots_cache_ttl_minutes)</code> method |</p>
+<p>| <code>capcat/core/async_pdf_manager.py</code> | New <code>PdfConfig</code> param; <code>self._check_session</code>; <code>initialize_pdf_manager()</code>; count cap in <code>extract_and_queue_pdf_links</code>; HEAD size check before <code>download_file</code> in <code>_download_pdf</code> |</p>
+<p>| <code>capcat/core/article_fetcher.py</code> | Call <code>initialize_pdf_manager</code> + <code>configure</code> at startup; remove <code>LARGE_PDF_THRESHOLD_MB</code> + prompt; fix <code>conversion_timeout</code> default arg |</p>
+<p>| <code>capcat/core/unified_source_processor.py</code> | <code>_resolve_count</code> fallback to <code>config.processing.article_count</code> |</p>
+<p>| <code>capcat/core/source_system/base_source.py</code> | <code>SourceConfig.article_count</code> default → <code>None</code>; update <code>__post_init__</code> guard |</p>
+<p>| <code>capcat/core/source_system/source_registry.py</code> | Remove hardcoded <code>30</code> fallback at two <code>article_count</code> call sites |</p>
+<p>| <code>capcat/cli.py</code> | New <code>capcat settings</code> command; <code>_cmd_init()</code> writes user-level template on first init; <code>GLOBAL_SETTINGS_TEMPLATE</code> constant |</p>
+<p>| <code>tests/unit/test_config_global_settings.py</code> | Load/merge order; vault overrides user; missing file handled; <code>sources</code>/<code>bundles</code> silenced; unknown keys ignored; <code>from_dict()</code> with extra keys |</p>
+<p>| <code>tests/unit/test_async_pdf_manager_limits.py</code> | Size skip with <code>Content-Length</code>; no <code>Content-Length</code> allows download; HEAD failure allows download; count cap; singleton wiring via <code>initialize_pdf_manager</code> |</p>
+<br>
+<hr>
+<br>
+<h2>Out of Scope</h2>
+<br>
+<ul>
+<li>Group 3: hardcoded worker counts in <code>async_pdf_manager.py</code> and <code>conversion_executor.py</code></li>
+<li>Per-source timeout overrides (<code>SOURCE_TIMEOUTS</code> dict)</li>
+<li>Media selector configuration</li>
+</ul>
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

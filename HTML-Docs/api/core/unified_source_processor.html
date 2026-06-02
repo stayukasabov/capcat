@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>core.unified_source_processor</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / <a href="../api/index.html">api</a> / core</div>
+<h1>core.unified_source_processor</h1>
+<br>
+<strong>File:</strong> <code>Application/core/unified_source_processor.py</code>
+<br>
+<h2>Description</h2>
+<br>
+<p>Unified Source Processor for Capcat.</p>
+<p>This eliminates the 46+ duplicate process_<em>_articles functions by providing</p>
+<p>a single, configurable processor that works with all sources.</p>
+<br>
+<p>Follows DRY principle while maintaining source-specific optimizations.</p>
+<br>
+<h2>Constants</h2>
+<br>
+<h3>NEW_SOURCE_SYSTEM_AVAILABLE</h3>
+<br>
+<strong>Value:</strong> <code>True</code>
+<br>
+<h3>NEW_SOURCE_SYSTEM_AVAILABLE</h3>
+<br>
+<strong>Value:</strong> <code>False</code>
+<br>
+<h2>Classes</h2>
+<br>
+<h3>UnifiedSourceProcessor</h3>
+<br>
+<p>Unified processor for all news sources.</p>
+<p>Eliminates code duplication while preserving source-specific functionality.</p>
+<br>
+<h4>Methods</h4>
+<br>
+<h5>__init__</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<h5>clear_url_cache</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">clear_url_cache</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<p>Clear the URL cache for a new processing session.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>cls</code></li>
+</ul>
+<br>
+<h5>is_url_processed</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">is_url_processed</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Check if a URL has already been processed.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>cls</code></li>
+<li><code>url</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h5>mark_url_processed</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">mark_url_processed</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<p>Mark a URL as processed.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>cls</code></li>
+<li><code>url</code> (str)</li>
+</ul>
+<br>
+<h5>_is_source_in_new_system</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_is_source_in_new_system</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Check if source is available in the new source system.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>source_name</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h5>process_source_articles</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">process_source_articles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">quiet</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">download_files</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">batch_mode</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Universal article processing function that replaces all 46+ process_</em>_articles functions.</p>
+<br>
+<p>Args:</p>
+<p>    source_name: The source identifier (e.g., &#x27;hn&#x27;, &#x27;bbc&#x27;, &#x27;cnn&#x27;)</p>
+<p>    count: Number of articles to fetch</p>
+<p>    quiet: Suppress progress output</p>
+<p>    verbose: Enable verbose logging</p>
+<p>    download_files: Enable media file downloads</p>
+<p>    batch_mode: Whether processing multiple sources (affects retry messages)</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>source_name</code> (str)</li>
+<li><code>count</code> (int)</li>
+<li><code>output_dir</code> (str)</li>
+<li><code>quiet</code> (bool) <em>optional</em></li>
+<li><code>verbose</code> (bool) <em>optional</em></li>
+<li><code>download_files</code> (bool) <em>optional</em></li>
+<li><code>batch_mode</code> (bool) <em>optional</em></li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h5>_get_articles</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_get_articles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">source_config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]</span>
+</pre></div>
+
+<br>
+<p>Get articles using either custom scraping function or generic adapter.</p>
+<br>
+<p>Returns:</p>
+<p>    List of (title, url, comment_url) tuples</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>source_name</code> (str)</li>
+<li><code>source_config</code> (dict)</li>
+<li><code>count</code> (int)</li>
+</ul>
+<br>
+<strong>Returns:</strong> List[Tuple[str, str, Optional[str]]]
+<br>
+<h5>_get_articles_custom</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_get_articles_custom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">source_config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]</span>
+</pre></div>
+
+<br>
+<p>Get articles using custom scraping function.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>source_name</code> (str)</li>
+<li><code>source_config</code> (dict)</li>
+<li><code>count</code> (int)</li>
+</ul>
+<br>
+<strong>Returns:</strong> List[Tuple[str, str, Optional[str]]]
+<br>
+<h5>_get_articles_generic</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_get_articles_generic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">source_config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]</span>
+</pre></div>
+
+<br>
+<p>Get articles using generic configuration-driven adapter.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>source_name</code> (str)</li>
+<li><code>source_config</code> (dict)</li>
+<li><code>count</code> (int)</li>
+</ul>
+<br>
+<strong>Returns:</strong> List[Tuple[str, str, Optional[str]]]
+<br>
+<h5>_process_articles_parallel</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_process_articles_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">source_config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">articles</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">],</span> <span class="n">base_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">download_files</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">quiet</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Process articles in parallel using ThreadPoolExecutor.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>source_name</code> (str)</li>
+<li><code>source_config</code> (dict)</li>
+<li><code>articles</code> (List[Tuple])</li>
+<li><code>base_dir</code> (str)</li>
+<li><code>download_files</code> (bool)</li>
+<li><code>quiet</code> (bool)</li>
+<li><code>verbose</code> (bool)</li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<p>⚠️ <strong>High complexity:</strong> 16</p>
+<br>
+<h5>_process_single_article</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_process_single_article</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">source_config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">article_info</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">base_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">download_files</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">progress_tracker</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Process a single article with progress reporting.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>source_name</code> (str)</li>
+<li><code>source_config</code> (dict)</li>
+<li><code>article_info</code> (tuple)</li>
+<li><code>base_dir</code> (str)</li>
+<li><code>download_files</code> (bool)</li>
+<li><code>progress_tracker</code> <em>optional</em></li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h5>_process_article_custom</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_process_article_custom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">source_config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">article_info</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">base_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">download_files</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">progress_callback</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="kc">None</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Process article using source-specific functions.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>source_name</code> (str)</li>
+<li><code>source_config</code> (dict)</li>
+<li><code>article_info</code> (tuple)</li>
+<li><code>base_dir</code> (str)</li>
+<li><code>download_files</code> (bool)</li>
+<li><code>progress_callback</code> (Optional[Callable[[float, str], None]]) <em>optional</em></li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h5>_process_with_new_system</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_process_with_new_system</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">quiet</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">download_files</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">batch_mode</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Process articles using the new source system.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>source_name</code> (str)</li>
+<li><code>count</code> (int)</li>
+<li><code>output_dir</code> (str)</li>
+<li><code>quiet</code> (bool) <em>optional</em></li>
+<li><code>verbose</code> (bool) <em>optional</em></li>
+<li><code>download_files</code> (bool) <em>optional</em></li>
+<li><code>batch_mode</code> (bool) <em>optional</em></li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h5>_process_articles_with_new_system</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_process_articles_with_new_system</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">articles</span><span class="p">,</span> <span class="n">base_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">download_files</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">quiet</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<p>Process articles using the new source system with parallel execution.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>source</code></li>
+<li><code>articles</code></li>
+<li><code>base_dir</code> (str)</li>
+<li><code>download_files</code> (bool)</li>
+<li><code>quiet</code> (bool)</li>
+<li><code>verbose</code> (bool)</li>
+</ul>
+<br>
+<p>⚠️ <strong>High complexity:</strong> 14</p>
+<br>
+<h5>_process_single_article_new_system</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_process_single_article_new_system</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">article</span><span class="p">,</span> <span class="n">base_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">download_files</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">progress_tracker</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Process a single article using the new source system.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>source</code></li>
+<li><code>article</code></li>
+<li><code>base_dir</code> (str)</li>
+<li><code>download_files</code> (bool)</li>
+<li><code>progress_tracker</code> <em>optional</em></li>
+<li><code>index</code> (int) <em>optional</em></li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<p>⚠️ <strong>High complexity:</strong> 14</p>
+<br>
+<h5>_process_article_generic</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_process_article_generic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">source_config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">article_info</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">base_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">download_files</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">progress_callback</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="kc">None</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Process article using generic configuration-driven approach.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>source_name</code> (str)</li>
+<li><code>source_config</code> (dict)</li>
+<li><code>article_info</code> (tuple)</li>
+<li><code>base_dir</code> (str)</li>
+<li><code>download_files</code> (bool)</li>
+<li><code>progress_callback</code> (Optional[Callable[[float, str], None]]) <em>optional</em></li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h2>Functions</h2>
+<br>
+<h3>get_unified_processor</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">get_unified_processor</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">UnifiedSourceProcessor</span>
+</pre></div>
+
+<br>
+<p>Get global unified processor instance.</p>
+<br>
+<strong>Returns:</strong> UnifiedSourceProcessor
+<br>
+<h3>process_source_articles</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">process_source_articles</span><span class="p">(</span><span class="n">source_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">quiet</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">download_files</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">batch_mode</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Convenience function to process articles from any source.</p>
+<p>This replaces all 46+ individual process_<em>_articles functions.</p>
+<br>
+<p>Args:</p>
+<p>    source_name: The source identifier (e.g., &#x27;hn&#x27;, &#x27;bbc&#x27;, &#x27;cnn&#x27;)</p>
+<p>    count: Number of articles to fetch</p>
+<p>    quiet: Suppress progress output</p>
+<p>    verbose: Enable verbose logging</p>
+<p>    download_files: Enable media file downloads</p>
+<p>    batch_mode: Whether processing multiple sources (affects retry messages)</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>source_name</code> (str)</li>
+<li><code>count</code> (int)</li>
+<li><code>output_dir</code> (str)</li>
+<li><code>quiet</code> (bool) </em>optional<em></li>
+<li><code>verbose</code> (bool) </em>optional<em></li>
+<li><code>download_files</code> (bool) </em>optional<em></li>
+<li><code>batch_mode</code> (bool) </em>optional*</li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h3>progress_callback</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">progress_callback</span><span class="p">(</span><span class="n">progress</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">stage</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>progress</code> (float)</li>
+<li><code>stage</code> (str)</li>
+</ul>
+<br>
+<h3>progress_callback</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">progress_callback</span><span class="p">(</span><span class="n">progress</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">stage</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>progress</code> (float)</li>
+<li><code>stage</code> (str)</li>
+</ul>
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

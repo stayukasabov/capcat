@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceptance Test Bugs - 2026-04-13</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / bugs</div>
+<h1>Acceptance Test Bugs - 2026-04-13</h1>
+<h2>Feature tested: media: config section (4-level hierarchy)</h2>
+<br>
+<hr>
+<br>
+<h2>B1 - Source mirror upgrade permanently suppressed after non-interactive run</h2>
+<br>
+<strong>Severity:</strong> Medium
+<br>
+<strong>Symptom:</strong> <code>--pdfs</code> CLI flag produces 0 PDFs when the vault has a stale <code>hn/source.py</code> mirror. The vault mirror is missing <code>download_pdfs</code> parameter added in v1.9.22. Even after running <code>capcat fetch hn --pdfs -q</code> multiple times, the mirror never updates.
+<br>
+<strong>Root cause:</strong> <code>capcat/core/source_config_mirror.py</code>, <code>_step2_3_changed_builtins</code>, else branch (line ~329):
+<br>
+<div class="highlight"><pre><span></span><span class="k">else</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">new_builtin_hash</span> <span class="ow">in</span> <span class="n">override_candidates</span><span class="p">:</span>
+        <span class="n">manifest</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;builtin_hash&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_builtin_hash</span>
+</pre></div>
+
+<br>
+<p>When the upgrade prompt runs non-interactively (<code>-q</code>, background task, stdin not a tty), <code>self._prompt()</code> returns <code>&#x27;n&#x27;</code> silently. The code then hits the <code>else</code> branch, which updates <code>manifest.builtin_hash</code> to the new builtin hash WITHOUT updating the vault file. On the next run, <code>current_builtin_hash == stored_builtin_hash</code> so no upgrade is detected or offered - ever.</p>
+<br>
+<strong>Affected files:</strong>
+<ul>
+<li><code>capcat/core/source_config_mirror.py</code> - <code>_step2_3_changed_builtins</code></li>
+</ul>
+<br>
+<strong>Expected behaviour:</strong> When user declines (or prompt is silently skipped), <code>manifest.builtin_hash</code> must NOT be updated. The next interactive run should re-offer the upgrade. Only after the user accepts and the file is actually overwritten should the hash be updated.
+<br>
+<strong>How to reproduce:</strong>
+<ol>
+<li>Create a fresh test vault: <code>cd ~/Desktop/TESTING &amp;&amp; capcat settings --force</code></li>
+<li>Run <code>capcat fetch hn -q</code> (non-interactive, triggers silent decline)</li>
+<li>Run <code>grep builtin_hash ~/Desktop/TESTING/.capcat/source_hashes.json</code>  </li>
+</ol>
+<p>   - <code>builtin_hash</code> now equals hash of new installed package, vault file still old</p>
+<ol>
+<li>Run <code>capcat fetch hn --pdfs -q</code>  </li>
+</ol>
+<p>   - 0 PDFs despite <code>--pdfs</code> flag  </p>
+<ol>
+<li>Run <code>diff ~/Desktop/TESTING/Config/sources/active/custom/hn/source.py ~/.local/pipx/venvs/capcat/lib/python3.14/site-packages/capcat/sources/builtin/custom/hn/source.py</code>  </li>
+</ol>
+<p>   - diff shows <code>download_pdfs</code> missing in vault but present in installed package</p>
+<br>
+<strong>Note:</strong> The <code>--pdfs</code> regression is caused entirely by this mirror bug, not by the new <code>_resolve_media</code> logic. The 4-level media config feature tests (A-D) all pass correctly.
+<br>
+<hr>
+<br>
+<h2>Test results summary</h2>
+<br>
+<p>| Test | Setting | Expected | Actual | Status |</p>
+<p>|------|---------|----------|--------|--------|</p>
+<p>| A | <code>media.download_images: false</code> in Global-settings.yaml | 0 images in bbc+guardian articles | 0 images | PASS |</p>
+<p>| B | <code>media.download_pdfs: true</code> in Global-settings.yaml | PDFs auto-downloaded for hn without <code>--pdfs</code> | 7 PDFs downloaded | PASS |</p>
+<p>| C | <code>media.download_pdfs: true</code> in source <code>config.yaml</code> (hn) | hn downloads PDFs, no global flag needed | 3 PDFs downloaded | PASS |</p>
+<p>| D | <code>capcat.yml</code> source entry <code>media.download_pdfs: true</code> for hn | hn gets PDFs, bbc does not | hn: 2 PDFs, bbc: 0 | PASS |</p>
+<p>| E | <code>--pdfs</code> CLI flag | PDFs downloaded via CLI override | 0 PDFs (stale vault mirror) | FAIL - B1 |</p>
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

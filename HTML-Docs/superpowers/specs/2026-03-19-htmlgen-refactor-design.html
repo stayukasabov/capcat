@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML Generation Refactor — Design Spec</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / <a href="../superpowers/index.html">superpowers</a> / specs</div>
+<h1>HTML Generation Refactor — Design Spec</h1>
+<br>
+<strong>Date:</strong> 2026-03-19
+<strong>Status:</strong> Approved
+<strong>Approach:</strong> TDD Red → Green → Refactor, no parallel path, delete old file at end
+<br>
+<hr>
+<br>
+<h2>Problem</h2>
+<br>
+<code>capcat/core/html_generator.py</code> is 1,836 lines. It is a single class with private helpers,
+<p>string-matched template logic, and navigation assembly all mixed together. Every change risks</p>
+<p>unintended side-effects. The file must be read in full to understand any single feature.</p>
+<br>
+<hr>
+<br>
+<h2>Scope</h2>
+<br>
+<p>Replace <code>HTMLGenerator</code> with a clean <code>capcat/htmlgen/</code> module. Output HTML must be</p>
+<strong>byte-for-byte identical</strong> to the current output. No behaviour changes in this refactor.
+<br>
+<p>Out of scope: source-specific subclasses (<code>HnGenerator</code> etc.). No source currently requires</p>
+<p>custom HTML generation logic — all sources share the same template path. The factory</p>
+<p>extensibility point is included for future use but no subclasses are written now.</p>
+<br>
+<hr>
+<br>
+<h2>Current Interface (what call sites use)</h2>
+<br>
+<p>Two call sites: <code>html_post_processor.py</code> and <code>article_fetcher.py</code>.</p>
+<br>
+<h3>Methods called from <code>html_post_processor.py</code></h3>
+<br>
+<div class="highlight"><pre><span></span><span class="c1"># Line 32 — construction</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">html_generator</span> <span class="o">=</span> <span class="n">HTMLGenerator</span><span class="p">()</span>
+
+<span class="c1"># Line 292, 322 — article and comments HTML generation</span>
+<span class="n">html_content</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">html_generator</span><span class="o">.</span><span class="n">generate_article_html_from_template</span><span class="p">(</span>
+    <span class="nb">str</span><span class="p">(</span><span class="n">article_md</span><span class="p">),</span>          <span class="c1"># markdown_path: str</span>
+    <span class="n">article_title</span><span class="p">,</span>             <span class="c1"># article_title: str</span>
+    <span class="n">breadcrumb</span><span class="p">,</span>                <span class="c1"># breadcrumb_path: List[str]</span>
+    <span class="n">source_config</span><span class="p">,</span>             <span class="c1"># source_config: Dict[str, Any]</span>
+    <span class="n">html_subfolder</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>       <span class="c1"># html_subfolder: bool</span>
+    <span class="n">index_filename</span><span class="o">=</span><span class="n">index_filename</span><span class="p">,</span>
+    <span class="n">is_single_article</span><span class="o">=...</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Line 399 — title cleaning (calls private method by convention; keep underscore name)</span>
+<span class="n">title</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">html_generator</span><span class="o">.</span><span class="n">_clean_title_for_display</span><span class="p">(</span><span class="n">directory</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+<span class="c1"># Line 401, 463 — directory index generation</span>
+<span class="n">html_content</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">html_generator</span><span class="o">.</span><span class="n">generate_directory_index</span><span class="p">(</span>
+    <span class="nb">str</span><span class="p">(</span><span class="n">directory</span><span class="p">),</span>   <span class="c1"># directory_path: str</span>
+    <span class="n">title</span><span class="p">,</span>            <span class="c1"># title: str</span>
+    <span class="n">breadcrumb</span><span class="p">,</span>       <span class="c1"># breadcrumb_path: List[str]</span>
+<span class="p">)</span>
+</pre></div>
+
+<br>
+<h3>Methods called from <code>article_fetcher.py</code></h3>
+<br>
+<div class="highlight"><pre><span></span><span class="c1"># Lines 2516-2520 — legacy single-article path</span>
+<span class="n">html_gen</span> <span class="o">=</span> <span class="n">HTMLGenerator</span><span class="p">()</span>
+<span class="n">html_gen</span><span class="o">.</span><span class="n">generate_article_html</span><span class="p">(</span><span class="n">markdown_path</span><span class="o">=</span><span class="n">md_path</span><span class="p">,</span> <span class="n">output_dir</span><span class="o">=</span><span class="n">article_folder</span><span class="p">,</span> <span class="n">theme</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<strong>Note:</strong> The <code>generate_article_html</code> call in <code>article_fetcher.py</code> passes <code>output_dir</code> and
+<code>theme</code> keyword arguments that do not exist in <code>HTMLGenerator.generate_article_html</code>&#x27;s
+<p>signature. This call is already broken/silently wrong. During Phase 3 switchover, replace</p>
+<p>it with a correct call to <code>generate_article_html_from_template</code> using the same parameters</p>
+<p>as <code>html_post_processor.py</code> uses.</p>
+<br>
+<h3>Existing tests that import <code>html_generator</code> (must be updated in Phase 3)</h3>
+<br>
+<p>Five test files import <code>from capcat.core.html_generator import HTMLGenerator</code>:</p>
+<ul>
+<li><code>tests/unit/test_html_generator_api.py</code></li>
+<li><code>tests/unit/test_breadcrumb.py</code></li>
+<li><code>tests/unit/test_user_themes.py</code></li>
+<li><code>tests/unit/test_single_html.py</code></li>
+<li><code>tests/unit/test_titled_markdown_filenames.py</code></li>
+</ul>
+<br>
+<p>All five must have their imports updated to <code>from capcat.htmlgen import ArticleHTMLGenerator</code></p>
+<p>(or <code>HTMLGeneratorFactory</code>) before Phase 4 can succeed.</p>
+<br>
+<hr>
+<br>
+<h2>Target Architecture</h2>
+<br>
+<pre><code>capcat/htmlgen/
+    __init__.py          → exports ArticleHTMLGenerator, HTMLGeneratorFactory
+    generator.py         → ArticleHTMLGenerator (replaces HTMLGenerator)
+    factory.py           → HTMLGeneratorFactory (registry, extensibility point)
+</code></pre>
+<br>
+<h3><code>ArticleHTMLGenerator</code></h3>
+<br>
+<p>Single class. Owns:</p>
+<ul>
+<li><code>generate_article_html_from_template()</code> — full pipeline: read md → clean → convert →</li>
+</ul>
+<p>  transform → breadcrumb → navigation → render via TemplateRenderer</p>
+<ul>
+<li><code>generate_directory_index()</code> — determine root vs source level, render via TemplateRenderer</li>
+<li><code>_clean_title_for_display()</code> — strip date suffix, normalise hyphens. Underscore prefix</li>
+</ul>
+<p>  preserved intentionally: call site uses <code>self.html_generator._clean_title_for_display()</code></p>
+<p>  and the convention is maintained in the new class.</p>
+<br>
+<p>All private helpers migrated verbatim from <code>html_generator.py</code>:</p>
+<ul>
+<li><code>_generate_breadcrumb()</code>, <code>_generate_directory_listing()</code>, <code>_generate_index_navigation()</code></li>
+<li><code>_generate_comments_navigation()</code>, <code>_create_navigation_container()</code></li>
+<li><code>_count_comments()</code>, <code>_clean_markdown_content()</code>, <code>_remove_grey_placeholder_images()</code></li>
+<li><code>_remove_image_anchor_wrappers()</code>, <code>_remove_headerlink_anchors()</code></li>
+<li><code>_remove_duplicate_h1_title()</code>, <code>_wrap_source_url_in_div()</code></li>
+<li><code>_adjust_paths_for_subfolder()</code>, <code>_get_article_title_from_markdown()</code></li>
+<li><code>_generate_error_page()</code></li>
+</ul>
+<br>
+<p>Dependencies: <code>TemplateRenderer</code>, <code>DesignSystemCompiler</code> (via TemplateRenderer), <code>markdown</code></p>
+<p>processor, <code>find_comments_md</code> from <code>storage_manager</code>.</p>
+<br>
+<h3><code>HTMLGeneratorFactory</code></h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">HTMLGeneratorFactory</span><span class="p">:</span>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">ArticleHTMLGenerator</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ArticleHTMLGenerator</span><span class="p">()</span>
+</pre></div>
+
+<br>
+<p>Minimal for now. Registry pattern (subclass registration) added when first source-specific</p>
+<p>generator is needed.</p>
+<br>
+<hr>
+<br>
+<h2>TDD Plan</h2>
+<br>
+<h3>Phase 1 — Red (write failing tests)</h3>
+<br>
+<p>Location: <code>tests/unit/test_htmlgen/</code></p>
+<br>
+<strong><code>test_generator_article.py</code></strong>
+<br>
+<p>All tests use <code>tmp_path</code> (pytest fixture) to create real markdown files on disk.</p>
+<br>
+<ul>
+<li><code>test_generate_article_html_returns_html_string</code> — result is str, contains <code>&lt;html</code>, <code>&lt;body</code></li>
+<li><code>test_generate_article_html_embeds_title</code> — <code>&lt;title&gt;</code> tag contains article_title</li>
+<li><code>test_generate_article_html_comments_page_has_back_to_article_nav</code></li>
+</ul>
+<p>  — markdown_path contains &quot;comments&quot;; assert result contains <code>class=&quot;index-link&quot;</code> and</p>
+<p>  <code>href=&quot;article.html&quot;</code>. Tests structural navigation marker, not template wording.</p>
+<ul>
+<li><code>test_generate_article_html_single_article_has_no_navigation</code></li>
+</ul>
+<p>  — <code>is_single_article=True</code>; assert <code>&quot;navigation-container&quot;</code> not in result</p>
+<ul>
+<li><code>test_generate_article_html_with_comments_md_shows_comments_button</code></li>
+</ul>
+<p>  — Fixture: <code>tmp_path/article.md</code> + <code>tmp_path/article-Comments.md</code>. Assert</p>
+<p>  <code>&quot;comments-link&quot;</code> in result.</p>
+<ul>
+<li><code>test_generate_article_html_without_comments_md_hides_comments_button</code></li>
+</ul>
+<p>  — Fixture: <code>tmp_path/article.md</code> only (no Comments file). Assert</p>
+<p>  <code>&quot;comments-link&quot;</code> not in result.</p>
+<br>
+<p>Fixture layout for comments-related tests:</p>
+<pre><code>tmp_path/
+    My-Title.md          # article markdown (markdown_path points here)
+    My-Title-Comments.md # present or absent depending on test
+</code></pre>
+<code>find_comments_md</code> searches the parent directory of markdown_path — pointing markdown_path
+<p>at <code>tmp_path/My-Title.md</code> means it searches <code>tmp_path/</code>. No mocking needed.</p>
+<br>
+<strong><code>test_generator_directory.py</code></strong>
+<br>
+<ul>
+<li><code>test_generate_directory_index_returns_html_string</code></li>
+</ul>
+<p>  — result is str, contains <code>&lt;html</code></p>
+<ul>
+<li><code>test_generate_directory_index_root_level_title_in_result</code></li>
+</ul>
+<p>  — directory named <code>News_19-03-2026</code>, title <code>&quot;News Archive&quot;</code>;</p>
+<p>  assert title string appears in result. Both templates are identical; distinction is in</p>
+<p>  generated content, not template CSS class. Title injection verifies the root path ran.</p>
+<ul>
+<li><code>test_generate_directory_index_source_level_title_in_result</code></li>
+</ul>
+<p>  — directory named <code>Hacker-News_19-03-2026</code>, title <code>&quot;Hacker News&quot;</code>;</p>
+<p>  assert title string appears in result.</p>
+<ul>
+<li><code>test_clean_title_for_display_strips_date_suffix</code></li>
+</ul>
+<p>  — <code>_clean_title_for_display(&quot;Hacker-News_19-03-2026&quot;)</code> → does not contain <code>&quot;19-03-2026&quot;</code></p>
+<ul>
+<li><code>test_clean_title_for_display_normalises_hyphens</code></li>
+</ul>
+<p>  — <code>_clean_title_for_display(&quot;Hacker-News_19-03-2026&quot;)</code> → contains <code>&quot;Hacker News&quot;</code></p>
+<br>
+<strong><code>test_factory.py</code></strong>
+<br>
+<ul>
+<li><code>test_factory_create_returns_article_html_generator</code></li>
+<li><code>test_factory_create_returns_new_instance_each_call</code></li>
+</ul>
+<br>
+<h3>Phase 2 — Green (implement)</h3>
+<br>
+<p>Build <code>capcat/htmlgen/generator.py</code> and <code>factory.py</code>. New tests must pass.</p>
+<p>No changes to any existing file in this phase.</p>
+<br>
+<h3>Phase 3 — Switch call sites</h3>
+<br>
+<ul>
+<li><code>html_post_processor.py</code>: replace import and <code>HTMLGenerator()</code> with</li>
+</ul>
+<p>  <code>HTMLGeneratorFactory.create()</code></p>
+<ul>
+<li><code>article_fetcher.py</code>: replace import and broken <code>generate_article_html()</code> call</li>
+</ul>
+<p>  with correct <code>generate_article_html_from_template()</code> call</p>
+<ul>
+<li>Update all 5 existing test files that import <code>html_generator</code> to import from <code>htmlgen</code></li>
+<li>Run full test suite — all tests green before proceeding to Phase 4</li>
+</ul>
+<br>
+<h3>Phase 4 — Delete</h3>
+<br>
+<p>Remove <code>capcat/core/html_generator.py</code>. Run full test suite. All tests green. Done.</p>
+<br>
+<hr>
+<br>
+<h2>Error Handling</h2>
+<br>
+<p>Generator raises no exceptions to callers. All errors return an error-page HTML string</p>
+<p>via <code>_generate_error_page()</code>, matching current behaviour.</p>
+<br>
+<hr>
+<br>
+<h2>Files Changed</h2>
+<br>
+<p>&lt;div class=&quot;table-container&quot;&gt;</p>
+<p>&lt;table class=&quot;centered-table&quot;&gt;</p>
+<p>  &lt;thead&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;th&gt;File&lt;/th&gt;</p>
+<p>      &lt;th&gt;Action&lt;/th&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>  &lt;/thead&gt;</p>
+<p>  &lt;tbody&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/htmlgen/__init__.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Create&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/htmlgen/generator.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Create — &lt;code&gt;ArticleHTMLGenerator&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/htmlgen/factory.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Create — &lt;code&gt;HTMLGeneratorFactory&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;tests/unit/test_htmlgen/__init__.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Create&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;tests/unit/test_htmlgen/test_generator_article.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Create&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;tests/unit/test_htmlgen/test_generator_directory.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Create&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;tests/unit/test_htmlgen/test_factory.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Create&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/core/html_post_processor.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Modify — switch import and construction&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/core/article_fetcher.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Modify — fix broken call, switch import&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;tests/unit/test_html_generator_api.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Modify — update import&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;tests/unit/test_breadcrumb.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Modify — update import&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;tests/unit/test_user_themes.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Modify — update import&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;tests/unit/test_single_html.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Modify — update import&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;tests/unit/test_titled_markdown_filenames.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Modify — update import&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/core/html_generator.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Delete&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>  &lt;/tbody&gt;</p>
+<p>&lt;/table&gt;</p>
+<p>&lt;/div&gt;</p>
+<br>
+<hr>
+<br>
+<h2>Success Criteria</h2>
+<br>
+<ol>
+<li>All existing unit tests pass after switchover (count ≥ 199)</li>
+<li>New tests in <code>tests/unit/test_htmlgen/</code> cover the public interface</li>
+<li><code>capcat/core/html_generator.py</code> does not exist</li>
+<li><code>capcat fetch hackernews --html</code> runs to completion without error</li>
+</ol>
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

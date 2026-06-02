@@ -54,6 +54,9 @@ class AsyncPDFManager:
         self.completed_downloads: Dict[str, str] = {}  # url -> local_path
         self.failed_downloads: Set[str] = set()
 
+        # Global deduplication tracking
+        self._global_seen_urls: Set[str] = set()
+
         # Background thread management
         self.executor: Optional[ThreadPoolExecutor] = None
         self.shutdown_event = threading.Event()
@@ -113,6 +116,17 @@ class AsyncPDFManager:
 
             if link_url in seen_urls or not is_pdf_url(link_url):
                 return match.group(0)  # Keep original
+
+            # Check global deduplication
+            if self.pdf_config.global_deduplication:
+                with self._lock:
+                    if link_url in self._global_seen_urls:
+                        # URL already processed globally, create reference to shared download
+                        shared_filename = os.path.basename(urlparse(link_url).path)
+                        return f"[{text}](files/shared_{shared_filename})"
+                    else:
+                        # Mark as globally seen
+                        self._global_seen_urls.add(link_url)
 
             seen_urls.add(link_url)
 

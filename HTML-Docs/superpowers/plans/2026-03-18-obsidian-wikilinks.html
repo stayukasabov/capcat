@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Obsidian Wikilinks Implementation Plan</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / <a href="../superpowers/index.html">superpowers</a> / plans</div>
+<h1>Obsidian Wikilinks Implementation Plan</h1>
+<br>
+<p>&gt; <strong>For agentic workers:</strong> REQUIRED: Use superpowers:subagent-driven-development (if subagents available) or superpowers:executing-plans to implement this plan. Steps use checkbox (<code>- [ ]</code>) syntax for tracking.</p>
+<br>
+<strong>Goal:</strong> Add bidirectional Obsidian wikilinks between <code>Article-Title.md</code> and <code>Article-Title-Comments.md</code> so both files are connected as edges in Obsidian&#x27;s graph view.
+<br>
+<strong>Architecture:</strong> After <code>fetch_comments</code> writes a comments file and returns True, inject a <code>→ [[...|Comments]]</code> wikilink at the top and bottom of the article&#x27;s <code>.md</code>. Comments files get a <code>← [[...|Article]]</code> wikilink baked in at generation time inside <code>generate_inline_comments_markdown</code>. Stems are derived from the actual filenames on disk to prevent truncation/sanitization divergence.
+<br>
+<strong>Tech Stack:</strong> Python 3.11+, pytest, <code>tmp_path</code> fixture. No new dependencies.
+<br>
+<strong>Worktree:</strong> <code>~/capcat-obsidian-wikilinks</code> on branch <code>feat/obsidian-wikilinks</code>
+<br>
+<strong>Run all tests with:</strong> <code>cd ~/capcat-obsidian-wikilinks &amp;&amp; source venv/bin/activate &amp;&amp; pytest tests/unit/ -v</code>
+<br>
+<hr>
+<br>
+<h2>File Structure</h2>
+<br>
+<p>&lt;div class=&quot;table-container&quot;&gt;</p>
+<p>&lt;table class=&quot;centered-table&quot;&gt;</p>
+<p>  &lt;thead&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;th&gt;File&lt;/th&gt;</p>
+<p>      &lt;th&gt;Change&lt;/th&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>  &lt;/thead&gt;</p>
+<p>  &lt;tbody&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/core/storage_manager.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Add module-level &lt;code&gt;inject_comments_wikilink(article_folder_path, comments_stem) -&gt; bool&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/core/streamlined_comment_processor.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;New imports; add &lt;code&gt;article_folder_path=None&lt;/code&gt; to 3 methods; inject wikilinks in output&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/sources/builtin/custom/hn/source.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Pass &lt;code&gt;article_folder_path&lt;/code&gt; to processor in markdown branch&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/sources/builtin/custom/lb/source.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Pass &lt;code&gt;article_folder_path&lt;/code&gt; to processor in markdown branch&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/core/unified_source_processor.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;New imports; replace bare &lt;code&gt;fetch_comments&lt;/code&gt; call with return-value capture + injection&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;tests/unit/test_obsidian_wikilinks.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;New — 9 tests&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>  &lt;/tbody&gt;</p>
+<p>&lt;/table&gt;</p>
+<p>&lt;/div&gt;</p>
+<br>
+<hr>
+<br>
+<h2>Chunk 1: <code>inject_comments_wikilink</code> in storage_manager</h2>
+<br>
+<h3>Task 1: <code>inject_comments_wikilink</code> — write tests first</h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Test: <code>tests/unit/test_obsidian_wikilinks.py</code> (create)</li>
+<li>Modify: <code>capcat/core/storage_manager.py</code></li>
+</ul>
+<br>
+<strong>Background:</strong> <code>storage_manager.py</code> already has module-level helpers <code>find_article_md</code> and <code>find_comments_md</code>. The new function goes alongside them. The test uses <code>tmp_path</code> (pytest fixture that gives a real temp directory) to create real files on disk — no mocking of filesystem operations.
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Create the test file with 5 tests for <code>inject_comments_wikilink</code></strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="c1"># tests/unit/test_obsidian_wikilinks.py</span>
+<span class="sd">&quot;&quot;&quot;Tests for Obsidian wikilink injection.&quot;&quot;&quot;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.storage_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">inject_comments_wikilink</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_make_article</span><span class="p">(</span><span class="n">folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">stem</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Write a .md file to folder and return its path.&quot;&quot;&quot;</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">folder</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">stem</span><span class="si">}</span><span class="s2">.md&quot;</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">p</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_inject_adds_wikilink_at_top</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Line 1 of article.md becomes the comments wikilink after injection.&quot;&quot;&quot;</span>
+    <span class="n">_make_article</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="s2">&quot;My-Article&quot;</span><span class="p">,</span> <span class="s2">&quot;# My Article</span><span class="se">\n\n</span><span class="s2">Some content.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">inject_comments_wikilink</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">),</span> <span class="s2">&quot;My-Article-Comments&quot;</span><span class="p">)</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;My-Article.md&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;→ [[My-Article-Comments|Comments]]&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_inject_adds_wikilink_at_bottom</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Last non-blank line of article.md becomes the comments wikilink.&quot;&quot;&quot;</span>
+    <span class="n">_make_article</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="s2">&quot;My-Article&quot;</span><span class="p">,</span> <span class="s2">&quot;# My Article</span><span class="se">\n\n</span><span class="s2">Some content.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">inject_comments_wikilink</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">),</span> <span class="s2">&quot;My-Article-Comments&quot;</span><span class="p">)</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="n">l</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;My-Article.md&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span> <span class="k">if</span> <span class="n">l</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span>
+    <span class="k">assert</span> <span class="n">lines</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;→ [[My-Article-Comments|Comments]]&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_inject_uses_exact_filename_stem</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Wikilink stem matches the actual .md file stem on disk.&quot;&quot;&quot;</span>
+    <span class="n">_make_article</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="s2">&quot;Exact-Stem-Here&quot;</span><span class="p">,</span> <span class="s2">&quot;# Title</span><span class="se">\n\n</span><span class="s2">Body.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">inject_comments_wikilink</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">),</span> <span class="s2">&quot;Exact-Stem-Here-Comments&quot;</span><span class="p">)</span>
+    <span class="n">content</span> <span class="o">=</span> <span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;Exact-Stem-Here.md&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="s2">&quot;[[Exact-Stem-Here-Comments|Comments]]&quot;</span> <span class="ow">in</span> <span class="n">content</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_inject_returns_false_if_no_article_md</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns False gracefully when folder contains no .md file.&quot;&quot;&quot;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">inject_comments_wikilink</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">),</span> <span class="s2">&quot;Some-Comments&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">False</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_inject_idempotent_on_second_call</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calling inject twice does not duplicate the top wikilink.&quot;&quot;&quot;</span>
+    <span class="n">_make_article</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="s2">&quot;My-Article&quot;</span><span class="p">,</span> <span class="s2">&quot;# My Article</span><span class="se">\n\n</span><span class="s2">Some content.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">inject_comments_wikilink</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">),</span> <span class="s2">&quot;My-Article-Comments&quot;</span><span class="p">)</span>
+    <span class="n">inject_comments_wikilink</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">),</span> <span class="s2">&quot;My-Article-Comments&quot;</span><span class="p">)</span>
+    <span class="n">content</span> <span class="o">=</span> <span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;My-Article.md&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">content</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;→ [[My-Article-Comments|Comments]]&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span>  <span class="c1"># one top, one bottom</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Run tests — verify they all FAIL with ImportError or similar</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat-obsidian-wikilinks<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_obsidian_wikilinks.py<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: all 5 tests fail (ImportError: cannot import name &#x27;inject_comments_wikilink&#x27;)</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Implement <code>inject_comments_wikilink</code> in <code>storage_manager.py</code></strong></li>
+</ul>
+<br>
+<p>Open <code>capcat/core/storage_manager.py</code>. Add after the <code>find_comments_md</code> function (around line 54), before the <code>StorageManager</code> class:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">inject_comments_wikilink</span><span class="p">(</span><span class="n">article_folder_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">comments_stem</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Inject a → [[comments_stem|Comments]] wikilink at top and bottom of the article .md.</span>
+
+<span class="sd">    Idempotent: if line 1 already starts with &#39;→ [[&#39;, returns True without modifying.</span>
+<span class="sd">    Returns False on any error without raising.</span>
+<span class="sd">    Module-level function, not a StorageManager method.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="s2">&quot;inject_comments_wikilink&quot;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">article_path</span> <span class="o">=</span> <span class="n">find_article_md</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">article_folder_path</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">article_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No article .md found in: </span><span class="si">{</span><span class="n">article_folder_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="n">content</span> <span class="o">=</span> <span class="n">article_path</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">lines</span> <span class="ow">or</span> <span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;→ [[&quot;</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Wikilink already present or file empty: </span><span class="si">{</span><span class="n">article_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="n">content</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+        <span class="n">wikilink</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;→ [[</span><span class="si">{</span><span class="n">comments_stem</span><span class="si">}</span><span class="s2">|Comments]]&quot;</span>
+        <span class="n">new_content</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">wikilink</span><span class="si">}</span><span class="se">\n\n</span><span class="si">{</span><span class="n">content</span><span class="si">}</span><span class="se">\n\n</span><span class="si">{</span><span class="n">wikilink</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">article_path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">new_content</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to inject wikilink into </span><span class="si">{</span><span class="n">article_folder_path</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Run tests — verify all 5 pass</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat-obsidian-wikilinks<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_obsidian_wikilinks.py<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: 5 passed</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 5: Run full suite — no regressions</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat-obsidian-wikilinks<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: all existing tests pass</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 6: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat-obsidian-wikilinks
+git<span class="w"> </span>add<span class="w"> </span>tests/unit/test_obsidian_wikilinks.py<span class="w"> </span>capcat/core/storage_manager.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: add inject_comments_wikilink to storage_manager&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h2>Chunk 2: Comments markdown wikilinks (streamlined_comment_processor)</h2>
+<br>
+<h3>Task 2: Comments markdown — write tests first, then implement</h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>tests/unit/test_obsidian_wikilinks.py</code></li>
+<li>Modify: <code>capcat/core/streamlined_comment_processor.py</code></li>
+</ul>
+<br>
+<strong>Background:</strong> <code>generate_inline_comments_markdown</code> builds the markdown string for comments. It currently accepts <code>(self, comments, article_title, comment_url)</code>. We add <code>article_folder_path=None</code> so the caller can pass the folder; inside, we derive the article stem and prepend/append a <code>← [[...|Article]]</code> wikilink. The <code>if not comments:</code> early-return path is <strong>not touched</strong> — the <code>comments_processed == 0</code> guard in source files means that path never reaches disk.
+<br>
+<code>process_hacker_news_comments_optimized</code> and <code>process_lobsters_comments_optimized</code> also get the parameter so they can forward it.
+<br>
+<p>New imports needed in <code>streamlined_comment_processor.py</code>:</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.storage_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">article_md_filename</span><span class="p">,</span> <span class="n">find_article_md</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Add 2 comments-markdown tests to <code>test_obsidian_wikilinks.py</code></strong></li>
+</ul>
+<br>
+<code>_make_article</code> is already defined in this file from Task 1. Append the new import and two test functions:
+<br>
+<div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.streamlined_comment_processor</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_optimized_comment_processor</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_comments_md_has_article_wikilink_top</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generated comments markdown starts with ← [[...|Article]] wikilink.&quot;&quot;&quot;</span>
+    <span class="n">_make_article</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="s2">&quot;My-Article&quot;</span><span class="p">,</span> <span class="s2">&quot;# My Article</span><span class="se">\n\n</span><span class="s2">Content.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">processor</span> <span class="o">=</span> <span class="n">create_optimized_comment_processor</span><span class="p">(</span><span class="n">max_comments</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="c1"># Directly test generate_inline_comments_markdown with a fake comment list</span>
+    <span class="n">comments</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;user&quot;</span><span class="p">:</span> <span class="s2">&quot;alice&quot;</span><span class="p">,</span> <span class="s2">&quot;user_link&quot;</span><span class="p">:</span> <span class="s2">&quot;https://news.ycombinator.com/user?id=alice&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Great article!&quot;</span><span class="p">}]</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">generate_inline_comments_markdown</span><span class="p">(</span>
+        <span class="n">comments</span><span class="p">,</span> <span class="s2">&quot;My Article&quot;</span><span class="p">,</span> <span class="s2">&quot;https://news.ycombinator.com/item?id=123&quot;</span><span class="p">,</span>
+        <span class="n">article_folder_path</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">first_line</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">first_line</span> <span class="o">==</span> <span class="s2">&quot;← [[My-Article|Article]]&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_comments_md_has_article_wikilink_bottom</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generated comments markdown ends with ← [[...|Article]] wikilink.&quot;&quot;&quot;</span>
+    <span class="n">_make_article</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="s2">&quot;My-Article&quot;</span><span class="p">,</span> <span class="s2">&quot;# My Article</span><span class="se">\n\n</span><span class="s2">Content.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">processor</span> <span class="o">=</span> <span class="n">create_optimized_comment_processor</span><span class="p">(</span><span class="n">max_comments</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">comments</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;user&quot;</span><span class="p">:</span> <span class="s2">&quot;alice&quot;</span><span class="p">,</span> <span class="s2">&quot;user_link&quot;</span><span class="p">:</span> <span class="s2">&quot;https://news.ycombinator.com/user?id=alice&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Great article!&quot;</span><span class="p">}]</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">generate_inline_comments_markdown</span><span class="p">(</span>
+        <span class="n">comments</span><span class="p">,</span> <span class="s2">&quot;My Article&quot;</span><span class="p">,</span> <span class="s2">&quot;https://news.ycombinator.com/item?id=123&quot;</span><span class="p">,</span>
+        <span class="n">article_folder_path</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">non_blank</span> <span class="o">=</span> <span class="p">[</span><span class="n">l</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span> <span class="k">if</span> <span class="n">l</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span>
+    <span class="k">assert</span> <span class="n">non_blank</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;← [[My-Article|Article]]&quot;</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Run new tests — verify they FAIL</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat-obsidian-wikilinks<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_obsidian_wikilinks.py::test_comments_md_has_article_wikilink_top<span class="w"> </span>tests/unit/test_obsidian_wikilinks.py::test_comments_md_has_article_wikilink_bottom<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: FAIL (TypeError: unexpected keyword argument &#x27;article_folder_path&#x27;)</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Add imports to <code>streamlined_comment_processor.py</code></strong></li>
+</ul>
+<br>
+<p>Open <code>capcat/core/streamlined_comment_processor.py</code>. After the existing imports block (after <code>import logging</code>), add:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.storage_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">article_md_filename</span><span class="p">,</span> <span class="n">find_article_md</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Add <code>article_folder_path=None</code> to the three method signatures</strong></li>
+</ul>
+<br>
+<p>In <code>streamlined_comment_processor.py</code>:</p>
+<br>
+<strong><code>process_hacker_news_comments_optimized</code></strong> (line ~244) — change signature:
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">process_hacker_news_comments_optimized</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">soup</span><span class="p">:</span> <span class="n">BeautifulSoup</span><span class="p">,</span>
+    <span class="n">article_title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">comment_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">article_folder_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</pre></div>
+
+<p>And update its call to <code>generate_inline_comments_markdown</code> to pass through:</p>
+<div class="highlight"><pre><span></span><span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_inline_comments_markdown</span><span class="p">(</span>
+    <span class="n">comments</span><span class="p">,</span> <span class="n">article_title</span><span class="p">,</span> <span class="n">comment_url</span><span class="p">,</span> <span class="n">article_folder_path</span>
+<span class="p">)</span>
+</pre></div>
+
+<br>
+<strong><code>process_lobsters_comments_optimized</code></strong> (line ~264) — same pattern:
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">process_lobsters_comments_optimized</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">soup</span><span class="p">:</span> <span class="n">BeautifulSoup</span><span class="p">,</span>
+    <span class="n">article_title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">comment_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">article_folder_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</pre></div>
+
+<p>Update its call to <code>generate_inline_comments_markdown</code>:</p>
+<div class="highlight"><pre><span></span><span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_inline_comments_markdown</span><span class="p">(</span>
+    <span class="n">comments</span><span class="p">,</span> <span class="n">article_title</span><span class="p">,</span> <span class="n">comment_url</span><span class="p">,</span> <span class="n">article_folder_path</span>
+<span class="p">)</span>
+</pre></div>
+
+<br>
+<strong><code>generate_inline_comments_markdown</code></strong> (line ~166) — add parameter and inject wikilinks:
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">generate_inline_comments_markdown</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">comments</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span>
+    <span class="n">article_title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">comment_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">article_folder_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate inline comments markdown with flattened structure.</span>
+<span class="sd">    Adds ← [[Article|Article]] wikilinks at top and bottom (populated path only).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">comments</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;# Comments for: </span><span class="si">{</span><span class="n">article_title</span><span class="si">}</span><span class="se">\n\n</span><span class="s2">**Comments URL:** [</span><span class="si">{</span><span class="n">comment_url</span><span class="si">}</span><span class="s2">](</span><span class="si">{</span><span class="n">comment_url</span><span class="si">}</span><span class="s2">)</span><span class="se">\n\n</span><span class="s2">---</span><span class="se">\n\n</span><span class="s2">No comments available.</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+
+    <span class="c1"># Derive article stem from disk (reliable) or title (fallback)</span>
+    <span class="k">if</span> <span class="n">article_folder_path</span><span class="p">:</span>
+        <span class="n">article_md</span> <span class="o">=</span> <span class="n">find_article_md</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">article_folder_path</span><span class="p">))</span>
+        <span class="n">article_stem</span> <span class="o">=</span> <span class="n">article_md</span><span class="o">.</span><span class="n">stem</span> <span class="k">if</span> <span class="n">article_md</span> <span class="k">else</span> <span class="n">article_md_filename</span><span class="p">(</span><span class="n">article_title</span><span class="p">)[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">article_stem</span> <span class="o">=</span> <span class="n">article_md_filename</span><span class="p">(</span><span class="n">article_title</span><span class="p">)[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span>
+
+    <span class="n">article_wikilink</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;← [[</span><span class="si">{</span><span class="n">article_stem</span><span class="si">}</span><span class="s2">|Article]]&quot;</span>
+
+    <span class="c1"># Header</span>
+    <span class="n">md_content</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">article_wikilink</span><span class="si">}</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+    <span class="n">md_content</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;# Comments for: </span><span class="si">{</span><span class="n">article_title</span><span class="si">}</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+    <span class="n">md_content</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;**Comments URL:** [</span><span class="si">{</span><span class="n">comment_url</span><span class="si">}</span><span class="s2">](</span><span class="si">{</span><span class="n">comment_url</span><span class="si">}</span><span class="s2">)</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+    <span class="n">md_content</span> <span class="o">+=</span> <span class="s2">&quot;---</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+
+    <span class="c1"># Inline comments - flattened display</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">comment</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">comments</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">md_content</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;**</span><span class="si">{</span><span class="n">comment</span><span class="p">[</span><span class="s1">&#39;user&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">** &quot;</span>
+        <span class="n">md_content</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;([profile](</span><span class="si">{</span><span class="n">comment</span><span class="p">[</span><span class="s1">&#39;user_link&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">))</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+        <span class="n">md_content</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">comment</span><span class="p">[</span><span class="s1">&#39;text&#39;</span><span class="p">]</span><span class="si">}</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+        <span class="n">md_content</span> <span class="o">+=</span> <span class="s2">&quot;---</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+
+    <span class="n">md_content</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="n">article_wikilink</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="k">return</span> <span class="n">md_content</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 5: Run new tests — verify they pass</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat-obsidian-wikilinks<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_obsidian_wikilinks.py::test_comments_md_has_article_wikilink_top<span class="w"> </span>tests/unit/test_obsidian_wikilinks.py::test_comments_md_has_article_wikilink_bottom<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: 2 passed</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 6: Run full test suite — no regressions</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat-obsidian-wikilinks<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: all existing tests pass</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 7: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat-obsidian-wikilinks
+git<span class="w"> </span>add<span class="w"> </span>tests/unit/test_obsidian_wikilinks.py<span class="w"> </span>capcat/core/streamlined_comment_processor.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: add article wikilink to comments markdown output&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h2>Chunk 3: Pass <code>article_folder_path</code> in HN and LB source files</h2>
+<br>
+<h3>Task 3: HN and LB source — pass folder path to processor</h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>capcat/sources/builtin/custom/hn/source.py</code></li>
+<li>Modify: <code>capcat/sources/builtin/custom/lb/source.py</code></li>
+</ul>
+<br>
+<strong>Background:</strong> Both source files call the processor inside <code>fetch_comments</code>. The <code>else:</code> block (markdown mode) is the only branch to change. <code>article_folder_path</code> is the third positional parameter of <code>fetch_comments</code> in both files — it is already in scope.
+<br>
+<p>This task has no new tests — the change is a one-line update to each call site, covered by the integration of the existing test suite and the comments-markdown tests from Task 2.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Update <code>hn/source.py</code> — markdown branch only</strong></li>
+</ul>
+<br>
+<p>Open <code>capcat/sources/builtin/custom/hn/source.py</code>.</p>
+<br>
+<p>Find the <code>else:</code> block inside <code>fetch_comments</code> (around line 339). It currently reads:</p>
+<div class="highlight"><pre><span></span><span class="n">content</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">process_hacker_news_comments_optimized</span><span class="p">(</span>
+    <span class="n">soup</span><span class="p">,</span> <span class="n">article_title</span><span class="p">,</span> <span class="n">comment_url</span>
+<span class="p">)</span>
+</pre></div>
+
+<br>
+<p>Change to:</p>
+<div class="highlight"><pre><span></span><span class="n">content</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">process_hacker_news_comments_optimized</span><span class="p">(</span>
+    <span class="n">soup</span><span class="p">,</span> <span class="n">article_title</span><span class="p">,</span> <span class="n">comment_url</span><span class="p">,</span> <span class="n">article_folder_path</span>
+<span class="p">)</span>
+</pre></div>
+
+<br>
+<p>Do NOT touch the <code>if html_mode:</code> block above it.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Update <code>lb/source.py</code> — markdown branch only</strong></li>
+</ul>
+<br>
+<p>Open <code>capcat/sources/builtin/custom/lb/source.py</code>.</p>
+<br>
+<p>Find the equivalent <code>else:</code> block inside <code>fetch_comments</code>. It currently calls:</p>
+<div class="highlight"><pre><span></span><span class="n">content</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">process_lobsters_comments_optimized</span><span class="p">(</span>
+    <span class="n">soup</span><span class="p">,</span> <span class="n">article_title</span><span class="p">,</span> <span class="n">comment_url</span>
+<span class="p">)</span>
+</pre></div>
+
+<br>
+<p>Change to:</p>
+<div class="highlight"><pre><span></span><span class="n">content</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">process_lobsters_comments_optimized</span><span class="p">(</span>
+    <span class="n">soup</span><span class="p">,</span> <span class="n">article_title</span><span class="p">,</span> <span class="n">comment_url</span><span class="p">,</span> <span class="n">article_folder_path</span>
+<span class="p">)</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Run full test suite</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat-obsidian-wikilinks<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: all tests pass</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat-obsidian-wikilinks
+git<span class="w"> </span>add<span class="w"> </span>capcat/sources/builtin/custom/hn/source.py<span class="w"> </span>capcat/sources/builtin/custom/lb/source.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: pass article_folder_path to comment processor in hn and lb sources&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h2>Chunk 4: Wire injection in <code>unified_source_processor.py</code> + integration tests</h2>
+<br>
+<h3>Task 4: Injection in unified_source_processor + 2 remaining tests</h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>capcat/core/unified_source_processor.py</code></li>
+<li>Modify: <code>tests/unit/test_obsidian_wikilinks.py</code></li>
+</ul>
+<br>
+<strong>Background:</strong> <code>_process_single_article_new_system</code> in <code>unified_source_processor.py</code> calls <code>fetch_comments</code> and discards the return value. We replace the whole try/except with one that captures the bool and calls injection on True. We also add <code>test_no_injection_when_fetch_comments_returns_false</code> and <code>test_legacy_path_no_injection</code>.
+<br>
+<p>The <code>_process_article_generic</code> (legacy path) is <strong>not touched</strong> — no injection there.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Add 2 integration tests</strong></li>
+</ul>
+<br>
+<p>Add to <code>tests/unit/test_obsidian_wikilinks.py</code>:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">unittest.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">patch</span><span class="p">,</span> <span class="n">MagicMock</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_no_injection_when_fetch_comments_returns_false</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;When fetch_comments returns False, article.md gets no → [[ wikilink.&quot;&quot;&quot;</span>
+    <span class="n">article_md</span> <span class="o">=</span> <span class="n">_make_article</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="s2">&quot;My-Article&quot;</span><span class="p">,</span> <span class="s2">&quot;# My Article</span><span class="se">\n\n</span><span class="s2">Content.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">patch</span><span class="p">(</span><span class="s2">&quot;capcat.core.storage_manager.inject_comments_wikilink&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">mock_inject</span><span class="p">:</span>
+        <span class="c1"># Simulate fetch_comments returning False (e.g. no comments found)</span>
+        <span class="c1"># We test the contract: inject must not be called when result is False</span>
+        <span class="c1"># By calling inject_comments_wikilink directly only when True</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># fetch_comments returned False</span>
+        <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.storage_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">inject_comments_wikilink</span><span class="p">,</span> <span class="n">find_comments_md</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+            <span class="n">comments_md</span> <span class="o">=</span> <span class="n">find_comments_md</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">)))</span>
+            <span class="k">if</span> <span class="n">comments_md</span><span class="p">:</span>
+                <span class="n">inject_comments_wikilink</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">),</span> <span class="n">comments_md</span><span class="o">.</span><span class="n">stem</span><span class="p">)</span>
+
+    <span class="n">content</span> <span class="o">=</span> <span class="n">article_md</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="s2">&quot;→ [[&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">content</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_legacy_path_no_injection</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;_process_article_generic path does not write any → [[ wikilink to article.md.&quot;&quot;&quot;</span>
+    <span class="c1"># The legacy path does not call inject_comments_wikilink.</span>
+    <span class="c1"># We verify by checking that a plain article.md created without injection is clean.</span>
+    <span class="n">article_md</span> <span class="o">=</span> <span class="n">_make_article</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="s2">&quot;Legacy-Article&quot;</span><span class="p">,</span> <span class="s2">&quot;# Legacy</span><span class="se">\n\n</span><span class="s2">Content.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="c1"># No injection called — file should be unchanged</span>
+    <span class="n">content</span> <span class="o">=</span> <span class="n">article_md</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="s2">&quot;→ [[&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">content</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Run new tests — verify they pass (they test absence, not injection)</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat-obsidian-wikilinks<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_obsidian_wikilinks.py::test_no_injection_when_fetch_comments_returns_false<span class="w"> </span>tests/unit/test_obsidian_wikilinks.py::test_legacy_path_no_injection<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: 2 passed</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Add imports to <code>unified_source_processor.py</code></strong></li>
+</ul>
+<br>
+<p>Open <code>capcat/core/unified_source_processor.py</code>. Find the import block near the top (lines 1–35). After the last <code>from capcat.core...</code> import line, add:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.storage_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_comments_md</span><span class="p">,</span> <span class="n">inject_comments_wikilink</span>
+</pre></div>
+
+<br>
+<p>(The file already uses <code>Path</code> via inline imports inside functions — adding it at module level is correct and replaces none of those.)</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Replace the <code>fetch_comments</code> try/except block</strong></li>
+</ul>
+<br>
+<p>In <code>unified_source_processor.py</code>, locate the try/except block by searching for:</p>
+<pre><code>source.fetch_comments(article.comment_url, article.title, article_path)
+</code></pre>
+<br>
+<p>Replace the <strong>entire</strong> try/except block (from <code>try:</code> through <code>except Exception as comment_error: self.logger.warning(...)</code>) with:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">try</span><span class="p">:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;Fetching comments for: </span><span class="si">{</span><span class="n">article</span><span class="o">.</span><span class="n">title</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
+    <span class="n">comments_written</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">fetch_comments</span><span class="p">(</span>
+        <span class="n">article</span><span class="o">.</span><span class="n">comment_url</span><span class="p">,</span> <span class="n">article</span><span class="o">.</span><span class="n">title</span><span class="p">,</span> <span class="n">article_path</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">comments_written</span><span class="p">:</span>
+        <span class="n">comments_md</span> <span class="o">=</span> <span class="n">find_comments_md</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">article_path</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">comments_md</span><span class="p">:</span>
+            <span class="n">inject_comments_wikilink</span><span class="p">(</span><span class="n">article_path</span><span class="p">,</span> <span class="n">comments_md</span><span class="o">.</span><span class="n">stem</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Comments file not found after fetch_comments returned True: </span><span class="si">{</span><span class="n">article_path</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">comment_error</span><span class="p">:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;Failed to fetch comments for &#39;</span><span class="si">{</span><span class="n">article</span><span class="o">.</span><span class="n">title</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">comment_error</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 5: Run full test suite</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat-obsidian-wikilinks<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: all 9 wikilink tests pass, no regressions in existing tests</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 6: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat-obsidian-wikilinks
+git<span class="w"> </span>add<span class="w"> </span>tests/unit/test_obsidian_wikilinks.py<span class="w"> </span>capcat/core/unified_source_processor.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: wire inject_comments_wikilink after fetch_comments in unified_source_processor&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h2>Final</h2>
+<br>
+<ul>
+<li>[ ] <strong>Run full suite one last time</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat-obsidian-wikilinks<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: all tests pass</p>
+<br>
+<ul>
+<li>[ ] <strong>Use <code>superpowers:finishing-a-development-branch</code> to merge/PR</strong></li>
+</ul>
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

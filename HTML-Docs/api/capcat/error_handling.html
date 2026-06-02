@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>capcat.core.error_handling</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / <a href="../api/index.html">api</a> / capcat</div>
+<h1>capcat.core.error_handling</h1>
+<br>
+<strong>File:</strong> <code>Application/capcat/core/error_handling.py</code>
+<br>
+<h2>Description</h2>
+<br>
+<p>Comprehensive error handling and recovery system for Capcat.</p>
+<br>
+<p>This module provides:</p>
+<ul>
+<li>Custom exception classes for different error types</li>
+<li>Dependency validation and auto-recovery</li>
+<li>Retry mechanisms with exponential backoff</li>
+<li>Error correlation and monitoring</li>
+<li>Graceful degradation strategies</li>
+</ul>
+<br>
+<h2>Constants</h2>
+<br>
+<h3>HAS_REQUESTS</h3>
+<br>
+<strong>Value:</strong> <code>True</code>
+<br>
+<h3>HAS_YAML</h3>
+<br>
+<strong>Value:</strong> <code>True</code>
+<br>
+<h3>HAS_BS4</h3>
+<br>
+<strong>Value:</strong> <code>True</code>
+<br>
+<h3>LOW</h3>
+<br>
+<strong>Value:</strong> <code>&#x27;low&#x27;</code>
+<br>
+<h3>MEDIUM</h3>
+<br>
+<strong>Value:</strong> <code>&#x27;medium&#x27;</code>
+<br>
+<h3>HIGH</h3>
+<br>
+<strong>Value:</strong> <code>&#x27;high&#x27;</code>
+<br>
+<h3>CRITICAL</h3>
+<br>
+<strong>Value:</strong> <code>&#x27;critical&#x27;</code>
+<br>
+<h3>DEPENDENCY</h3>
+<br>
+<strong>Value:</strong> <code>&#x27;dependency&#x27;</code>
+<br>
+<h3>NETWORK</h3>
+<br>
+<strong>Value:</strong> <code>&#x27;network&#x27;</code>
+<br>
+<h3>FILE_SYSTEM</h3>
+<br>
+<strong>Value:</strong> <code>&#x27;file_system&#x27;</code>
+<br>
+<h3>CONFIGURATION</h3>
+<br>
+<strong>Value:</strong> <code>&#x27;configuration&#x27;</code>
+<br>
+<h3>SOURCE_PROCESSING</h3>
+<br>
+<strong>Value:</strong> <code>&#x27;source_processing&#x27;</code>
+<br>
+<h3>MEDIA_DOWNLOAD</h3>
+<br>
+<strong>Value:</strong> <code>&#x27;media_download&#x27;</code>
+<br>
+<h3>VALIDATION</h3>
+<br>
+<strong>Value:</strong> <code>&#x27;validation&#x27;</code>
+<br>
+<h3>RUNTIME</h3>
+<br>
+<strong>Value:</strong> <code>&#x27;runtime&#x27;</code>
+<br>
+<h3>REQUIRED_PACKAGES</h3>
+<br>
+<strong>Value:</strong> <code>{&#x27;requests&#x27;: &#x27;2.25.0&#x27;, &#x27;beautifulsoup4&#x27;: &#x27;4.9.0&#x27;, &#x27;PyYAML&#x27;: &#x27;5.4.0&#x27;, &#x27;markdownify&#x27;: &#x27;0.11.0&#x27;, &#x27;markdown&#x27;: &#x27;3.5.0&#x27;, &#x27;pygments&#x27;: &#x27;2.16.0&#x27;, &#x27;charset_normalizer&#x27;: &#x27;3.0.0&#x27;}</code>
+<br>
+<h3>HAS_REQUESTS</h3>
+<br>
+<strong>Value:</strong> <code>False</code>
+<br>
+<h3>HAS_YAML</h3>
+<br>
+<strong>Value:</strong> <code>False</code>
+<br>
+<h3>HAS_BS4</h3>
+<br>
+<strong>Value:</strong> <code>False</code>
+<br>
+<h2>Classes</h2>
+<br>
+<h3>ErrorSeverity</h3>
+<br>
+<strong>Inherits from:</strong> Enum
+<br>
+<p>Error severity levels for categorization and handling.</p>
+<br>
+<h3>ErrorCategory</h3>
+<br>
+<strong>Inherits from:</strong> Enum
+<br>
+<p>Error categories for classification and handling strategies.</p>
+<br>
+<h3>ErrorContext</h3>
+<br>
+<p>Context information for error analysis and correlation.</p>
+<br>
+<h3>CapcatError</h3>
+<br>
+<strong>Inherits from:</strong> Exception
+<br>
+<p>Base exception for all Capcat-specific errors.</p>
+<br>
+<h4>Methods</h4>
+<br>
+<h5>__init__</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">category</span><span class="p">:</span> <span class="n">ErrorCategory</span> <span class="o">=</span> <span class="n">ErrorCategory</span><span class="o">.</span><span class="n">RUNTIME</span><span class="p">,</span> <span class="n">severity</span><span class="p">:</span> <span class="n">ErrorSeverity</span> <span class="o">=</span> <span class="n">ErrorSeverity</span><span class="o">.</span><span class="n">MEDIUM</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ErrorContext</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">recoverable</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">original_error</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="ne">Exception</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>message</code> (str)</li>
+<li><code>category</code> (ErrorCategory) <em>optional</em></li>
+<li><code>severity</code> (ErrorSeverity) <em>optional</em></li>
+<li><code>context</code> (Optional[ErrorContext]) <em>optional</em></li>
+<li><code>recoverable</code> (bool) <em>optional</em></li>
+<li><code>original_error</code> (Optional[Exception]) <em>optional</em></li>
+</ul>
+<br>
+<h5>to_dict</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
+</pre></div>
+
+<br>
+<p>Convert error to dictionary for logging/monitoring.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<strong>Returns:</strong> Dict[str, Any]
+<br>
+<h3>DependencyError</h3>
+<br>
+<strong>Inherits from:</strong> CapcatError
+<br>
+<p>Raised when required dependencies are missing or corrupted.</p>
+<br>
+<h4>Methods</h4>
+<br>
+<h5>__init__</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dependency_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>message</code> (str)</li>
+<li><code>dependency_name</code> (str)</li>
+</ul>
+<br>
+<h3>NetworkError</h3>
+<br>
+<strong>Inherits from:</strong> CapcatError
+<br>
+<p>Raised for network-related issues.</p>
+<br>
+<h4>Methods</h4>
+<br>
+<h5>__init__</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">status_code</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>message</code> (str)</li>
+<li><code>status_code</code> (Optional[int]) <em>optional</em></li>
+</ul>
+<br>
+<h3>SourceProcessingError</h3>
+<br>
+<strong>Inherits from:</strong> CapcatError
+<br>
+<p>Raised during source-specific processing errors.</p>
+<br>
+<h4>Methods</h4>
+<br>
+<h5>__init__</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">source_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>message</code> (str)</li>
+<li><code>source_id</code> (str)</li>
+</ul>
+<br>
+<h3>ConfigurationError</h3>
+<br>
+<strong>Inherits from:</strong> CapcatError
+<br>
+<p>Raised for configuration-related errors.</p>
+<br>
+<h4>Methods</h4>
+<br>
+<h5>__init__</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>message</code> (str)</li>
+<li><code>config_file</code> (Optional[str]) <em>optional</em></li>
+</ul>
+<br>
+<h3>MediaDownloadError</h3>
+<br>
+<strong>Inherits from:</strong> CapcatError
+<br>
+<p>Raised during media download failures.</p>
+<br>
+<h4>Methods</h4>
+<br>
+<h5>__init__</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">media_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>message</code> (str)</li>
+<li><code>media_url</code> (str)</li>
+</ul>
+<br>
+<h3>DependencyValidator</h3>
+<br>
+<p>Validates and manages application dependencies.</p>
+<br>
+<h4>Methods</h4>
+<br>
+<h5>__init__</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">venv_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>venv_path</code> (Optional[Path]) <em>optional</em></li>
+</ul>
+<br>
+<h5>validate_environment</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">validate_environment</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span>
+</pre></div>
+
+<br>
+<p>Validate the virtual environment and dependencies.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<strong>Returns:</strong> Dict[str, bool]
+<br>
+<h5>_check_venv_exists</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_check_venv_exists</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Check if virtual environment exists.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h5>_check_venv_activated</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_check_venv_activated</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Check if virtual environment is activated.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h5>_check_dependencies</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_check_dependencies</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Check if all required dependencies are available.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h5>auto_repair</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">auto_repair</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Attempt to automatically repair dependency issues.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h5>_recreate_venv</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_recreate_venv</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<p>Recreate the virtual environment.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<h5>_reinstall_dependencies</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_reinstall_dependencies</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<p>Reinstall all dependencies.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<h3>RetryStrategy</h3>
+<br>
+<p>Implements retry logic with exponential backoff and circuit breaker.</p>
+<br>
+<h4>Methods</h4>
+<br>
+<h5>__init__</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_retries</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">base_delay</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">max_delay</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">60.0</span><span class="p">,</span> <span class="n">exponential_base</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">jitter</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>max_retries</code> (int) <em>optional</em></li>
+<li><code>base_delay</code> (float) <em>optional</em></li>
+<li><code>max_delay</code> (float) <em>optional</em></li>
+<li><code>exponential_base</code> (float) <em>optional</em></li>
+<li><code>jitter</code> (bool) <em>optional</em></li>
+</ul>
+<br>
+<h5>get_delay</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">get_delay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attempt</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span>
+</pre></div>
+
+<br>
+<p>Calculate delay for the given attempt.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>attempt</code> (int)</li>
+</ul>
+<br>
+<strong>Returns:</strong> float
+<br>
+<h3>ErrorMonitor</h3>
+<br>
+<p>Monitors and correlates errors for analysis and alerting.</p>
+<br>
+<h4>Methods</h4>
+<br>
+<h5>__init__</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<h5>record_error</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">record_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span> <span class="n">CapcatError</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<p>Record an error for monitoring and analysis.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>error</code> (CapcatError)</li>
+</ul>
+<br>
+<h5>get_error_summary</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">get_error_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
+</pre></div>
+
+<br>
+<p>Get a summary of recorded errors.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<strong>Returns:</strong> Dict[str, Any]
+<br>
+<h3>ErrorHandler</h3>
+<br>
+<p>Main error handling orchestrator.</p>
+<br>
+<h4>Methods</h4>
+<br>
+<h5>__init__</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<h5>handle_startup_error</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">handle_startup_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span> <span class="ne">Exception</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Handle errors during application startup.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>error</code> (Exception)</li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h5>handle_runtime_error</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">handle_runtime_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ErrorContext</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Handle runtime errors with appropriate recovery strategies.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>error</code> (Exception)</li>
+<li><code>context</code> (Optional[ErrorContext]) <em>optional</em></li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h2>Functions</h2>
+<br>
+<h3>with_retry</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">with_retry</span><span class="p">(</span><span class="n">max_retries</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">retry_on</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="ne">Exception</span><span class="p">],</span> <span class="nb">tuple</span><span class="p">]</span> <span class="o">=</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">strategy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">RetryStrategy</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<p>Decorator that adds retry logic to functions.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>max_retries</code> (int) <em>optional</em></li>
+<li><code>retry_on</code> (Union[Type[Exception], tuple]) <em>optional</em></li>
+<li><code>strategy</code> (Optional[RetryStrategy]) <em>optional</em></li>
+</ul>
+<br>
+<h3>handle_error</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">handle_error</span><span class="p">(</span><span class="n">error</span><span class="p">:</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ErrorContext</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Global error handling function.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>error</code> (Exception)</li>
+<li><code>context</code> (Optional[ErrorContext]) <em>optional</em></li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h3>get_error_monitor</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">get_error_monitor</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">ErrorMonitor</span>
+</pre></div>
+
+<br>
+<p>Get the global error monitor instance.</p>
+<br>
+<strong>Returns:</strong> ErrorMonitor
+<br>
+<h3>validate_dependencies</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">validate_dependencies</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Validate application dependencies.</p>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h3>startup_check</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">startup_check</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Perform startup validation and auto-repair if needed.</p>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h3>decorator</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">decorator</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span>
+</pre></div>
+
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>func</code> (Callable)</li>
+</ul>
+<br>
+<strong>Returns:</strong> Callable
+<br>
+<h3>wrapper</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">wrapper</span><span class="p">()</span>
+</pre></div>
+
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Breadcrumb Phase 1: Folder Naming Standardisation</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / <a href="../superpowers/index.html">superpowers</a> / specs</div>
+<h1>Breadcrumb Phase 1: Folder Naming Standardisation</h1>
+<br>
+<strong>Date:</strong> 2026-03-15
+<strong>Scope:</strong> Fix inconsistent source folder naming so all folders follow <code>Source-Name_DD-MM-YYYY</code>
+<br>
+<hr>
+<br>
+<h2>Problem</h2>
+<br>
+<code>get_source_folder_name</code> uses <code>display_name.replace(&#x27; &#x27;, &#x27;_&#x27;)</code>, producing <code>Hacker_News_DD-MM-YYYY</code>.
+<p>The canonical format is <code>Hacker-News_DD-MM-YYYY</code> — hyphens as word separators, underscore before the date only.</p>
+<br>
+<p>This creates two downstream problems:</p>
+<br>
+<ol>
+<li><code>extract_source_id</code> in <code>html_generator.py</code> mirrors the same <code>replace(&#x27; &#x27;, &#x27;_&#x27;)</code> logic to do the reverse mapping — so it will fail to identify source folders once they use hyphens.</li>
+<li><code>_is_archive_root</code> in <code>html_post_processor.py</code> has a dead source-folder branch (space suffix instead of underscore), plus a dead <code>sg_</code> prefix check from a removed source.</li>
+</ol>
+<br>
+<hr>
+<br>
+<h2>Canonical Folder Format</h2>
+<br>
+<pre><code>Source-Name_DD-MM-YYYY        ← source folder (inside date folder)
+News_DD-MM-YYYY               ← date folder (parent)
+</code></pre>
+<br>
+<p>Examples: <code>Hacker-News_15-03-2026</code>, <code>BBC-News_15-03-2026</code>, <code>Al-Jazeera_15-03-2026</code></p>
+<br>
+<hr>
+<br>
+<h2>Changes</h2>
+<br>
+<h3>1. <code>capcat/core/utils.py</code> — <code>get_source_folder_name</code></h3>
+<br>
+<p>Change <code>replace(&#x27; &#x27;, &#x27;_&#x27;)</code> → <code>replace(&#x27; &#x27;, &#x27;-&#x27;)</code> in both code paths:</p>
+<br>
+<ul>
+<li>Registry path: <code>config.display_name.replace(&#x27; &#x27;, &#x27;-&#x27;)</code></li>
+<li>Legacy fallback path: <code>display_name.replace(&#x27; &#x27;, &#x27;-&#x27;)</code></li>
+</ul>
+<br>
+<p>Result: &quot;Hacker News&quot; → <code>Hacker-News</code>, &quot;BBC News&quot; → <code>BBC-News</code>, &quot;Al Jazeera&quot; → <code>Al-Jazeera</code></p>
+<br>
+<h3>2. <code>capcat/core/html_generator.py</code> — <code>extract_source_id</code> (line 943)</h3>
+<br>
+<p>Change <code>config.display_name.replace(&#x27; &#x27;, &#x27;_&#x27;)</code> → <code>config.display_name.replace(&#x27; &#x27;, &#x27;-&#x27;)</code></p>
+<br>
+<p>Must mirror the same logic as <code>get_source_folder_name</code> exactly. Also update the function docstring to reflect the new canonical format (<code>Hacker-News_DD-MM-YYYY</code>, not <code>Hacker_News_DD-MM-YYYY</code>).</p>
+<br>
+<h3>3. <code>capcat/core/html_post_processor.py</code> — <code>_is_archive_root</code></h3>
+<br>
+<p>Three changes:</p>
+<br>
+<p>a) Remove <code>&quot;sg_&quot;</code> from <code>startswith((&quot;news_&quot;, &quot;sg_&quot;))</code> → becomes <code>startswith(&quot;news_&quot;)</code></p>
+<br>
+<p>b) Fix the dead source-folder branch (line 517): change space suffix to underscore suffix:</p>
+<ul>
+<li>Before: <code>if name.startswith(f&quot;{folder_name.lower()} &quot;):</code></li>
+<li>After: <code>if name.startswith(f&quot;{folder_name.lower()}_&quot;):</code></li>
+</ul>
+<br>
+<p>c) Update the docstring comment to reflect one standard: <code>Source-Name_DD-MM-YYYY</code> only, remove <code>sg_DD-MM-YYYY</code> reference.</p>
+<br>
+<h3>4. <code>capcat/core/html_generator.py</code> — <code>sg_<em></code> comments (lines ~1020 and ~1062)</h3>
+<br>
+<p>Replace the comment <code># For Capcats, allow all directories (sg_</em> captures don&#x27;t have source_id)</code> with <code># For Capcats, allow all directories — source_id matching does not apply</code> in both locations. Preserves the intent (Capcats bypass orphan filtering) without the dead <code>sg_*</code> reference.</p>
+<br>
+<hr>
+<br>
+<h2>Acceptable Regression</h2>
+<br>
+<p>Existing folders on disk created with the old <code>Hacker_News_DD-MM-YYYY</code> format will no longer be recognised by <code>_is_archive_root</code> or matched by <code>extract_source_id</code>. This is intentional — one standard, no backwards compatibility. Old folders must be renamed or regenerated.</p>
+<br>
+<hr>
+<br>
+<h2>Post-Fix <code>_build_breadcrumb_path</code> Output</h2>
+<br>
+<p>After this fix, <code>_build_breadcrumb_path</code> on a path inside <code>Hacker-News_15-03-2026</code> returns:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="p">[</span><span class="s2">&quot;News 15-03-2026&quot;</span><span class="p">,</span> <span class="s2">&quot;Hacker-News 15-03-2026&quot;</span><span class="p">,</span> <span class="s2">&quot;article-dir-name&quot;</span><span class="p">]</span>
+</pre></div>
+
+<br>
+<p>(<code>_build_breadcrumb_path</code> does <code>path.name.replace(&quot;_&quot;, &quot; &quot;)</code> — hyphens are preserved.)</p>
+<br>
+<p>The breadcrumb renderer receives <code>breadcrumb_path[:2]</code>:</p>
+<ul>
+<li><code>[0]</code> = <code>&quot;News 15-03-2026&quot;</code> — date folder, date still in <code>DD-MM-YYYY</code> form with hyphens</li>
+<li><code>[1]</code> = <code>&quot;Hacker-News 15-03-2026&quot;</code> — source folder with trailing date and internal hyphens</li>
+</ul>
+<br>
+<p>Phase 2 will reformat these into &quot;News 15 March 2026&quot; and &quot;Hacker News&quot; respectively. Phase 1 does not touch the renderer.</p>
+<br>
+<hr>
+<br>
+<h2>TDD Order</h2>
+<br>
+<ol>
+<li>Failing test: <code>get_source_folder_name(&#x27;hn&#x27;)</code> returns <code>&quot;Hacker-News&quot;</code> (hyphen, not underscore)</li>
+<ul>
+<li>Precondition: <code>hn</code> must be registered in the source registry (it is, via <code>capcat/sources/builtin/custom/hn/</code>)</li>
+</ul>
+</ol>
+<br>
+<ol>
+<li>Failing test: <code>_is_archive_root</code> with a mock registry returning <code>[&#x27;hn&#x27;]</code> with display_name <code>&quot;Hacker News&quot;</code>:</li>
+<ul>
+<li>Returns <code>True</code> for <code>Path(&quot;Hacker-News_15-03-2026&quot;)</code></li>
+</ol>
+<ul>
+<li>Returns <code>False</code> for <code>Path(&quot;sg_15-03-2026&quot;)</code></li>
+<li>Returns <code>False</code> for <code>Path(&quot;Hacker_News_15-03-2026&quot;)</code> (old underscore format)</li>
+</ul>
+<br>
+<ol>
+<li>Verify both fail</li>
+<li>Implement all changes</li>
+<li>Verify both pass</li>
+</ol>
+<br>
+<hr>
+<br>
+<h2>Out of Scope</h2>
+<br>
+<p>Phase 2 (tracked separately): breadcrumb HTML rendering — enforce &quot;News D Month YYYY&quot; for Level 0, clean source name for Level 1, article title link for Level 2 (comments only).</p>
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

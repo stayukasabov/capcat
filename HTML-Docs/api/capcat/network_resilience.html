@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>capcat.core.network_resilience</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / <a href="../api/index.html">api</a> / capcat</div>
+<h1>capcat.core.network_resilience</h1>
+<br>
+<strong>File:</strong> <code>Application/capcat/core/network_resilience.py</code>
+<br>
+<h2>Description</h2>
+<br>
+<p>Network Resilience Patterns for Source Processing</p>
+<br>
+<p>Clean architecture implementation applying SOLID principles:</p>
+<ul>
+<li>Single Responsibility: Each class has one clear purpose</li>
+<li>Open/Closed: Extensible via strategy pattern</li>
+<li>Liskov Substitution: RetryStrategy implementations interchangeable</li>
+<li>Interface Segregation: Small, focused interfaces</li>
+<li>Dependency Inversion: Depend on abstractions not concretions</li>
+</ul>
+<br>
+<h2>Constants</h2>
+<br>
+<h3>RETRY</h3>
+<br>
+<strong>Value:</strong> <code>&#x27;retry&#x27;</code>
+<br>
+<h3>SKIP</h3>
+<br>
+<strong>Value:</strong> <code>&#x27;skip&#x27;</code>
+<br>
+<h3>SUCCESS</h3>
+<br>
+<strong>Value:</strong> <code>&#x27;success&#x27;</code>
+<br>
+<h2>Classes</h2>
+<br>
+<h3>RetryDecision</h3>
+<br>
+<strong>Inherits from:</strong> Enum
+<br>
+<p>Enum representing retry decisions.</p>
+<br>
+<h3>RetryAttempt</h3>
+<br>
+<p>Data class representing a retry attempt.</p>
+<br>
+<h4>Methods</h4>
+<br>
+<h5>is_first_attempt</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">is_first_attempt</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Check if this is the first attempt.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h5>is_last_attempt</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">is_last_attempt</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Check if this is the last attempt.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h5>attempts_remaining</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">attempts_remaining</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span>
+</pre></div>
+
+<br>
+<p>Get number of attempts remaining.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<strong>Returns:</strong> int
+<br>
+<h3>RetryStrategy</h3>
+<br>
+<strong>Inherits from:</strong> ABC
+<br>
+<p>Abstract base class for retry strategies.</p>
+<br>
+<p>Single Responsibility: Defines retry decision logic.</p>
+<p>Open/Closed: New strategies can be added without modifying existing code.</p>
+<br>
+<h4>Methods</h4>
+<br>
+<h5>should_retry</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">should_retry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attempt</span><span class="p">:</span> <span class="n">RetryAttempt</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RetryDecision</span>
+</pre></div>
+
+<br>
+<p>Determine if an operation should be retried.</p>
+<br>
+<p>Args:</p>
+<p>    attempt: Information about the current attempt</p>
+<br>
+<p>Returns:</p>
+<p>    RetryDecision indicating next action</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>attempt</code> (RetryAttempt)</li>
+</ul>
+<br>
+<strong>Returns:</strong> RetryDecision
+<br>
+<h5>get_delay</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">get_delay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attempt</span><span class="p">:</span> <span class="n">RetryAttempt</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span>
+</pre></div>
+
+<br>
+<p>Calculate delay before next retry.</p>
+<br>
+<p>Args:</p>
+<p>    attempt: Information about the current attempt</p>
+<br>
+<p>Returns:</p>
+<p>    Delay in seconds</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>attempt</code> (RetryAttempt)</li>
+</ul>
+<br>
+<strong>Returns:</strong> float
+<br>
+<h3>ExponentialBackoffStrategy</h3>
+<br>
+<strong>Inherits from:</strong> RetryStrategy
+<br>
+<p>Exponential backoff retry strategy.</p>
+<br>
+<p>Single Responsibility: Implements exponential backoff timing.</p>
+<br>
+<h4>Methods</h4>
+<br>
+<h5>__init__</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_delay</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">max_delay</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">60.0</span><span class="p">,</span> <span class="n">exponential_base</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">jitter</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<p>Initialize exponential backoff strategy.</p>
+<br>
+<p>Args:</p>
+<p>    base_delay: Base delay in seconds</p>
+<p>    max_delay: Maximum delay in seconds</p>
+<p>    exponential_base: Base for exponential calculation</p>
+<p>    jitter: Whether to add random jitter</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>base_delay</code> (float) <em>optional</em></li>
+<li><code>max_delay</code> (float) <em>optional</em></li>
+<li><code>exponential_base</code> (float) <em>optional</em></li>
+<li><code>jitter</code> (bool) <em>optional</em></li>
+</ul>
+<br>
+<h5>should_retry</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">should_retry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attempt</span><span class="p">:</span> <span class="n">RetryAttempt</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RetryDecision</span>
+</pre></div>
+
+<br>
+<p>Determine if should retry based on attempt count.</p>
+<br>
+<p>Args:</p>
+<p>    attempt: Current attempt information</p>
+<br>
+<p>Returns:</p>
+<p>    RETRY if attempts remaining, SKIP otherwise</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>attempt</code> (RetryAttempt)</li>
+</ul>
+<br>
+<strong>Returns:</strong> RetryDecision
+<br>
+<h5>get_delay</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">get_delay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attempt</span><span class="p">:</span> <span class="n">RetryAttempt</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span>
+</pre></div>
+
+<br>
+<p>Calculate exponential backoff delay.</p>
+<br>
+<p>Args:</p>
+<p>    attempt: Current attempt information</p>
+<br>
+<p>Returns:</p>
+<p>    Delay in seconds with exponential backoff</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>attempt</code> (RetryAttempt)</li>
+</ul>
+<br>
+<strong>Returns:</strong> float
+<br>
+<h3>ErrorClassifier</h3>
+<br>
+<p>Classifies errors as retryable or non-retryable.</p>
+<br>
+<p>Single Responsibility: Error classification logic.</p>
+<br>
+<h4>Methods</h4>
+<br>
+<h5>__init__</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">retryable_exceptions</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="ne">Exception</span><span class="p">],</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<p>Initialize error classifier.</p>
+<br>
+<p>Args:</p>
+<p>    retryable_exceptions: Tuple of exception types to retry</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>retryable_exceptions</code> (Tuple[Type[Exception], ...]) <em>optional</em></li>
+</ul>
+<br>
+<h5>is_retryable</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">is_retryable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span> <span class="ne">Exception</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Check if error is retryable.</p>
+<br>
+<p>Args:</p>
+<p>    error: Exception to classify</p>
+<br>
+<p>Returns:</p>
+<p>    True if retryable, False otherwise</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>error</code> (Exception)</li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h5>get_error_type</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">get_error_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span> <span class="ne">Exception</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+
+<br>
+<p>Get human-readable error type.</p>
+<br>
+<p>Args:</p>
+<p>    error: Exception to classify</p>
+<br>
+<p>Returns:</p>
+<p>    Error type string</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>error</code> (Exception)</li>
+</ul>
+<br>
+<strong>Returns:</strong> str
+<br>
+<h3>RetryLogger</h3>
+<br>
+<p>Handles logging for retry operations.</p>
+<br>
+<p>Single Responsibility: Logging logic separation.</p>
+<br>
+<h4>Methods</h4>
+<br>
+<h5>__init__</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logger_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="vm">__name__</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<p>Initialize retry logger.</p>
+<br>
+<p>Args:</p>
+<p>    logger_name: Name for logger instance</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>logger_name</code> (str) <em>optional</em></li>
+</ul>
+<br>
+<h5>log_attempt</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">log_attempt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attempt</span><span class="p">:</span> <span class="n">RetryAttempt</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<p>Log retry attempt.</p>
+<br>
+<p>Args:</p>
+<p>    attempt: Attempt information</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>attempt</code> (RetryAttempt)</li>
+</ul>
+<br>
+<h5>log_skip</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">log_skip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operation_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">attempts</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">error_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<p>Log skip decision.</p>
+<br>
+<p>Args:</p>
+<p>    operation_name: Name of operation being skipped</p>
+<p>    attempts: Number of attempts made</p>
+<p>    error_type: Type of error that caused skip</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>operation_name</code> (str)</li>
+<li><code>attempts</code> (int)</li>
+<li><code>error_type</code> (str)</li>
+</ul>
+<br>
+<h5>log_success</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">log_success</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operation_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">attempt_number</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<p>Log successful retry.</p>
+<br>
+<p>Args:</p>
+<p>    operation_name: Name of operation that succeeded</p>
+<p>    attempt_number: Attempt number that succeeded</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>operation_name</code> (str)</li>
+<li><code>attempt_number</code> (int)</li>
+</ul>
+<br>
+<h3>SkipRecord</h3>
+<br>
+<p>Record of a skipped operation.</p>
+<br>
+<h3>SkipTracker</h3>
+<br>
+<p>Tracks skipped operations for reporting.</p>
+<br>
+<p>Single Responsibility: Skip tracking and reporting.</p>
+<br>
+<h4>Methods</h4>
+<br>
+<h5>__init__</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<p>Initialize skip tracker.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<h5>record_skip</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">record_skip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">operation_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">reason</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">attempts</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">error_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<p>Record a skipped operation.</p>
+<br>
+<p>Args:</p>
+<p>    source_name: Source identifier</p>
+<p>    operation_name: Operation name</p>
+<p>    reason: Reason for skip</p>
+<p>    attempts: Number of attempts made</p>
+<p>    error_type: Type of error</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>source_name</code> (str)</li>
+<li><code>operation_name</code> (str)</li>
+<li><code>reason</code> (str)</li>
+<li><code>attempts</code> (int)</li>
+<li><code>error_type</code> (str)</li>
+</ul>
+<br>
+<h5>get_summary</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">get_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
+</pre></div>
+
+<br>
+<p>Get summary of skipped operations.</p>
+<br>
+<p>Returns:</p>
+<p>    Dictionary with skip summary</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<strong>Returns:</strong> Dict[str, Any]
+<br>
+<h5>reset</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<p>Reset skip tracking.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<h3>RetryExecutor</h3>
+<br>
+<p>Executes operations with retry logic.</p>
+<br>
+<p>Single Responsibility: Orchestrates retry execution.</p>
+<p>Dependency Inversion: Depends on abstractions (RetryStrategy, etc.)</p>
+<br>
+<h4>Methods</h4>
+<br>
+<h5>__init__</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">strategy</span><span class="p">:</span> <span class="n">RetryStrategy</span><span class="p">,</span> <span class="n">error_classifier</span><span class="p">:</span> <span class="n">ErrorClassifier</span><span class="p">,</span> <span class="n">logger</span><span class="p">:</span> <span class="n">RetryLogger</span><span class="p">,</span> <span class="n">skip_tracker</span><span class="p">:</span> <span class="n">SkipTracker</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<p>Initialize retry executor.</p>
+<br>
+<p>Args:</p>
+<p>    strategy: Retry strategy to use</p>
+<p>    error_classifier: Error classifier</p>
+<p>    logger: Retry logger</p>
+<p>    skip_tracker: Skip tracker</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>strategy</code> (RetryStrategy)</li>
+<li><code>error_classifier</code> (ErrorClassifier)</li>
+<li><code>logger</code> (RetryLogger)</li>
+<li><code>skip_tracker</code> (SkipTracker)</li>
+</ul>
+<br>
+<h5>execute</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operation</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="n">Any</span><span class="p">],</span> <span class="n">operation_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">source_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">max_attempts</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span>
+</pre></div>
+
+<br>
+<p>Execute operation with retry logic.</p>
+<br>
+<p>Args:</p>
+<p>    operation: Callable to execute</p>
+<p>    operation_name: Name for logging</p>
+<p>    source_name: Source identifier</p>
+<p>    max_attempts: Maximum retry attempts</p>
+<br>
+<p>Returns:</p>
+<p>    Operation result or None if skipped</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>operation</code> (Callable[[], Any])</li>
+<li><code>operation_name</code> (str)</li>
+<li><code>source_name</code> (str)</li>
+<li><code>max_attempts</code> (int) <em>optional</em></li>
+</ul>
+<br>
+<strong>Returns:</strong> Optional[Any]
+<br>
+<h3>URLFallbackExecutor</h3>
+<br>
+<p>Executes operations with URL fallback logic.</p>
+<br>
+<p>Single Responsibility: URL fallback orchestration.</p>
+<br>
+<h4>Methods</h4>
+<br>
+<h5>__init__</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">retry_executor</span><span class="p">:</span> <span class="n">RetryExecutor</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<p>Initialize URL fallback executor.</p>
+<br>
+<p>Args:</p>
+<p>    retry_executor: Retry executor to use</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>retry_executor</code> (RetryExecutor)</li>
+</ul>
+<br>
+<h5>execute_with_fallbacks</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">execute_with_fallbacks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">urls</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">fetch_function</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Any</span><span class="p">],</span> <span class="n">source_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">max_retries_per_url</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span>
+</pre></div>
+
+<br>
+<p>Try multiple URLs with retry logic.</p>
+<br>
+<p>Args:</p>
+<p>    urls: List of URLs to try</p>
+<p>    fetch_function: Function to fetch from URL</p>
+<p>    source_name: Source identifier</p>
+<p>    max_retries_per_url: Retries per URL</p>
+<br>
+<p>Returns:</p>
+<p>    Fetch result or None if all URLs exhausted</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>urls</code> (List[str])</li>
+<li><code>fetch_function</code> (Callable[[str], Any])</li>
+<li><code>source_name</code> (str)</li>
+<li><code>max_retries_per_url</code> (int) <em>optional</em></li>
+</ul>
+<br>
+<strong>Returns:</strong> Optional[Any]
+<br>
+<h2>Functions</h2>
+<br>
+<h3>create_retry_executor</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">create_retry_executor</span><span class="p">(</span><span class="n">max_retries</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RetryExecutor</span>
+</pre></div>
+
+<br>
+<p>Create a retry executor with default configuration.</p>
+<br>
+<p>Factory pattern for clean object creation.</p>
+<br>
+<p>Args:</p>
+<p>    max_retries: Maximum retry attempts</p>
+<br>
+<p>Returns:</p>
+<p>    Configured RetryExecutor instance</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>max_retries</code> (int) <em>optional</em></li>
+</ul>
+<br>
+<strong>Returns:</strong> RetryExecutor
+<br>
+<h3>get_retry_executor</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">get_retry_executor</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">RetryExecutor</span>
+</pre></div>
+
+<br>
+<p>Get global retry executor instance.</p>
+<br>
+<strong>Returns:</strong> RetryExecutor
+<br>
+<h3>get_skip_tracker</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">get_skip_tracker</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">SkipTracker</span>
+</pre></div>
+
+<br>
+<p>Get global skip tracker instance.</p>
+<br>
+<strong>Returns:</strong> SkipTracker
+<br>
+<h3>reset_retry_state</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">reset_retry_state</span><span class="p">()</span>
+</pre></div>
+
+<br>
+<p>Reset global retry state.</p>
+<br>
+<h3>operation</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">operation</span><span class="p">()</span>
+</pre></div>
+
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

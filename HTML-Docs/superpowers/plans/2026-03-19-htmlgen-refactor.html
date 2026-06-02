@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML Generation Refactor Implementation Plan</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / <a href="../superpowers/index.html">superpowers</a> / plans</div>
+<h1>HTML Generation Refactor Implementation Plan</h1>
+<br>
+<p>&gt; <strong>For agentic workers:</strong> REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (<code>- [ ]</code>) syntax for tracking.</p>
+<br>
+<strong>Goal:</strong> Replace <code>capcat/core/html_generator.py</code> (1,836-line monolith) with a clean <code>capcat/htmlgen/</code> module, migrating all call sites and deleting the old file.
+<br>
+<strong>Architecture:</strong> <code>ArticleHTMLGenerator</code> in <code>capcat/htmlgen/generator.py</code> owns all HTML generation logic (verbatim migration of public methods + private helpers from <code>html_generator.py</code>). <code>HTMLGeneratorFactory</code> in <code>capcat/htmlgen/factory.py</code> is the single construction point. Both call sites (<code>html_post_processor.py</code> and <code>article_fetcher.py</code>) are switched to use the factory. The old file is deleted once all tests pass.
+<br>
+<strong>Tech Stack:</strong> Python 3, pytest, <code>capcat.core.template_renderer.TemplateRenderer</code>, <code>capcat.core.design_system_compiler.DesignSystemCompiler</code>, <code>markdown</code> library, <code>capcat.core.storage_manager.find_comments_md</code>
+<br>
+<hr>
+<br>
+<h2>File Map</h2>
+<br>
+<p>&lt;div class=&quot;table-container&quot;&gt;</p>
+<p>&lt;table class=&quot;centered-table&quot;&gt;</p>
+<p>  &lt;thead&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;th&gt;File&lt;/th&gt;</p>
+<p>      &lt;th&gt;Action&lt;/th&gt;</p>
+<p>      &lt;th&gt;Responsibility&lt;/th&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>  &lt;/thead&gt;</p>
+<p>  &lt;tbody&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/htmlgen/__init__.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Create&lt;/td&gt;</p>
+<p>      &lt;td&gt;Re-exports &lt;code&gt;ArticleHTMLGenerator&lt;/code&gt;, &lt;code&gt;HTMLGeneratorFactory&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/htmlgen/generator.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Create&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;ArticleHTMLGenerator&lt;/code&gt; — all HTML generation logic&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/htmlgen/factory.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Create&lt;/td&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;HTMLGeneratorFactory.create()&lt;/code&gt; — construction point&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;tests/unit/test_htmlgen/__init__.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Create&lt;/td&gt;</p>
+<p>      &lt;td&gt;Makes directory a package&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;tests/unit/test_htmlgen/test_generator_article.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Create&lt;/td&gt;</p>
+<p>      &lt;td&gt;Article + comments page generation tests&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;tests/unit/test_htmlgen/test_generator_directory.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Create&lt;/td&gt;</p>
+<p>      &lt;td&gt;Directory index + title cleaning tests&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;tests/unit/test_htmlgen/test_factory.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Create&lt;/td&gt;</p>
+<p>      &lt;td&gt;Factory construction tests&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/core/html_post_processor.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Modify&lt;/td&gt;</p>
+<p>      &lt;td&gt;Switch import + construction to &lt;code&gt;HTMLGeneratorFactory&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/core/article_fetcher.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Modify&lt;/td&gt;</p>
+<p>      &lt;td&gt;Fix broken call + switch import&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;tests/unit/test_html_generator_api.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Modify&lt;/td&gt;</p>
+<p>      &lt;td&gt;Update import to &lt;code&gt;htmlgen&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;tests/unit/test_breadcrumb.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Modify&lt;/td&gt;</p>
+<p>      &lt;td&gt;Update import to &lt;code&gt;htmlgen&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;tests/unit/test_user_themes.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Modify&lt;/td&gt;</p>
+<p>      &lt;td&gt;Update import to &lt;code&gt;htmlgen&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;tests/unit/test_single_html.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Modify&lt;/td&gt;</p>
+<p>      &lt;td&gt;Update import to &lt;code&gt;htmlgen&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;tests/unit/test_titled_markdown_filenames.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Modify&lt;/td&gt;</p>
+<p>      &lt;td&gt;Update import to &lt;code&gt;htmlgen&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/core/html_generator.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Delete&lt;/td&gt;</p>
+<p>      &lt;td&gt;Gone after all tests pass&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>  &lt;/tbody&gt;</p>
+<p>&lt;/table&gt;</p>
+<p>&lt;/div&gt;</p>
+<br>
+<hr>
+<br>
+<h2>Reference: Spec</h2>
+<br>
+<code>docs/superpowers/specs/2026-03-19-htmlgen-refactor-design.md</code>
+<br>
+<hr>
+<br>
+<h2>Phase 1 — Red: Write Failing Tests</h2>
+<br>
+<h3>Task 1: Test infrastructure</h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Create: <code>tests/unit/test_htmlgen/__init__.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] Create the empty <code>__init__.py</code> so pytest discovers the directory</li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>mkdir<span class="w"> </span>-p<span class="w"> </span>~/capcat/tests/unit/test_htmlgen
+touch<span class="w"> </span>~/capcat/tests/unit/test_htmlgen/__init__.py
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] Verify pytest discovers it (no tests yet, just checking)</li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_htmlgen/<span class="w"> </span>-v
+</pre></div>
+
+<p>Expected: <code>no tests ran</code> — no errors.</p>
+<br>
+<ul>
+<li>[ ] Commit</li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>git<span class="w"> </span>add<span class="w"> </span>tests/unit/test_htmlgen/__init__.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;test: add test_htmlgen package directory&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h3>Task 2: Failing tests for article HTML generation</h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Create: <code>tests/unit/test_htmlgen/test_generator_article.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] Write the failing tests</li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Tests for ArticleHTMLGenerator article/comments page generation.&quot;&quot;&quot;</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+
+
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">article_md</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Minimal article markdown file.&quot;&quot;&quot;</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;My-Title.md&quot;</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;# My Title</span><span class="se">\n\n</span><span class="s2">Some content.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">f</span>
+
+
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">article_with_comments</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Article markdown with a sibling Comments file.&quot;&quot;&quot;</span>
+    <span class="n">article</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;My-Title.md&quot;</span>
+    <span class="n">article</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;# My Title</span><span class="se">\n\n</span><span class="s2">Some content.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">comments</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;My-Title-Comments.md&quot;</span>
+    <span class="n">comments</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;# Comments</span><span class="se">\n\n</span><span class="s2">- User: good post</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">article</span>
+
+
+<span class="n">SOURCE_CONFIG</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;template&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;variant&quot;</span><span class="p">:</span> <span class="s2">&quot;article-no-comments&quot;</span><span class="p">}}</span>
+<span class="n">BREADCRUMB</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;News_19-03-2026&quot;</span><span class="p">,</span> <span class="s2">&quot;Hacker-News_19-03-2026&quot;</span><span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_generate_article_html_returns_html_string</span><span class="p">(</span><span class="n">article_md</span><span class="p">):</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.htmlgen</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArticleHTMLGenerator</span>
+    <span class="n">gen</span> <span class="o">=</span> <span class="n">ArticleHTMLGenerator</span><span class="p">()</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">generate_article_html_from_template</span><span class="p">(</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">article_md</span><span class="p">),</span> <span class="s2">&quot;My Title&quot;</span><span class="p">,</span> <span class="n">BREADCRUMB</span><span class="p">,</span> <span class="n">SOURCE_CONFIG</span><span class="p">,</span>
+        <span class="n">html_subfolder</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="s2">&quot;&lt;html&quot;</span> <span class="ow">in</span> <span class="n">result</span>
+    <span class="k">assert</span> <span class="s2">&quot;&lt;body&quot;</span> <span class="ow">in</span> <span class="n">result</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_generate_article_html_embeds_title</span><span class="p">(</span><span class="n">article_md</span><span class="p">):</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.htmlgen</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArticleHTMLGenerator</span>
+    <span class="n">gen</span> <span class="o">=</span> <span class="n">ArticleHTMLGenerator</span><span class="p">()</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">generate_article_html_from_template</span><span class="p">(</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">article_md</span><span class="p">),</span> <span class="s2">&quot;My Title&quot;</span><span class="p">,</span> <span class="n">BREADCRUMB</span><span class="p">,</span> <span class="n">SOURCE_CONFIG</span><span class="p">,</span>
+        <span class="n">html_subfolder</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">assert</span> <span class="s2">&quot;My Title&quot;</span> <span class="ow">in</span> <span class="n">result</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_generate_article_html_comments_page_has_back_to_article_nav</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">):</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.htmlgen</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArticleHTMLGenerator</span>
+    <span class="n">comments_md</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;My-Title-Comments.md&quot;</span>
+    <span class="n">comments_md</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;# Comments</span><span class="se">\n\n</span><span class="s2">- User: nice</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">gen</span> <span class="o">=</span> <span class="n">ArticleHTMLGenerator</span><span class="p">()</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">generate_article_html_from_template</span><span class="p">(</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">comments_md</span><span class="p">),</span> <span class="s2">&quot;My Title - Comments&quot;</span><span class="p">,</span>
+        <span class="n">BREADCRUMB</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;My Title&quot;</span><span class="p">],</span>
+        <span class="p">{</span><span class="s2">&quot;template&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;variant&quot;</span><span class="p">:</span> <span class="s2">&quot;comments-with-navigation&quot;</span><span class="p">}},</span>
+        <span class="n">html_subfolder</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">assert</span> <span class="s1">&#39;class=&quot;index-link&quot;&#39;</span> <span class="ow">in</span> <span class="n">result</span>
+    <span class="k">assert</span> <span class="s1">&#39;href=&quot;article.html&quot;&#39;</span> <span class="ow">in</span> <span class="n">result</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_generate_article_html_single_article_has_no_navigation</span><span class="p">(</span><span class="n">article_md</span><span class="p">):</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.htmlgen</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArticleHTMLGenerator</span>
+    <span class="n">gen</span> <span class="o">=</span> <span class="n">ArticleHTMLGenerator</span><span class="p">()</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">generate_article_html_from_template</span><span class="p">(</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">article_md</span><span class="p">),</span> <span class="s2">&quot;My Title&quot;</span><span class="p">,</span> <span class="n">BREADCRUMB</span><span class="p">,</span> <span class="n">SOURCE_CONFIG</span><span class="p">,</span>
+        <span class="n">html_subfolder</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">is_single_article</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">assert</span> <span class="s2">&quot;navigation-container&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">result</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_generate_article_html_with_comments_md_shows_comments_button</span><span class="p">(</span><span class="n">article_with_comments</span><span class="p">):</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.htmlgen</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArticleHTMLGenerator</span>
+    <span class="n">gen</span> <span class="o">=</span> <span class="n">ArticleHTMLGenerator</span><span class="p">()</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">generate_article_html_from_template</span><span class="p">(</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">article_with_comments</span><span class="p">),</span> <span class="s2">&quot;My Title&quot;</span><span class="p">,</span> <span class="n">BREADCRUMB</span><span class="p">,</span>
+        <span class="p">{</span><span class="s2">&quot;template&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;variant&quot;</span><span class="p">:</span> <span class="s2">&quot;article-with-comments&quot;</span><span class="p">}},</span>
+        <span class="n">html_subfolder</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">assert</span> <span class="s2">&quot;comments-link&quot;</span> <span class="ow">in</span> <span class="n">result</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_generate_article_html_without_comments_md_hides_comments_button</span><span class="p">(</span><span class="n">article_md</span><span class="p">):</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.htmlgen</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArticleHTMLGenerator</span>
+    <span class="n">gen</span> <span class="o">=</span> <span class="n">ArticleHTMLGenerator</span><span class="p">()</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">generate_article_html_from_template</span><span class="p">(</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">article_md</span><span class="p">),</span> <span class="s2">&quot;My Title&quot;</span><span class="p">,</span> <span class="n">BREADCRUMB</span><span class="p">,</span> <span class="n">SOURCE_CONFIG</span><span class="p">,</span>
+        <span class="n">html_subfolder</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">assert</span> <span class="s2">&quot;comments-link&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">result</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] Run and confirm all fail with <code>ImportError</code> (module not yet built)</li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_htmlgen/test_generator_article.py<span class="w"> </span>-v
+</pre></div>
+
+<p>Expected: all 6 tests FAIL with <code>ModuleNotFoundError: No module named &#x27;capcat.htmlgen&#x27;</code></p>
+<br>
+<ul>
+<li>[ ] Commit</li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>git<span class="w"> </span>add<span class="w"> </span>tests/unit/test_htmlgen/test_generator_article.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;test(red): failing tests for ArticleHTMLGenerator article generation&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h3>Task 3: Failing tests for directory index generation</h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Create: <code>tests/unit/test_htmlgen/test_generator_directory.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] Write the failing tests</li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Tests for ArticleHTMLGenerator directory index generation and title cleaning.&quot;&quot;&quot;</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_generate_directory_index_returns_html_string</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.htmlgen</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArticleHTMLGenerator</span>
+    <span class="n">gen</span> <span class="o">=</span> <span class="n">ArticleHTMLGenerator</span><span class="p">()</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">generate_directory_index</span><span class="p">(</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">),</span> <span class="s2">&quot;Test Directory&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;News_19-03-2026&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="s2">&quot;&lt;html&quot;</span> <span class="ow">in</span> <span class="n">result</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_generate_directory_index_root_level_title_in_result</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.htmlgen</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArticleHTMLGenerator</span>
+    <span class="c1"># Root-level directory: name starts with News_</span>
+    <span class="n">root_dir</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;News_19-03-2026&quot;</span>
+    <span class="n">root_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">()</span>
+    <span class="n">gen</span> <span class="o">=</span> <span class="n">ArticleHTMLGenerator</span><span class="p">()</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">generate_directory_index</span><span class="p">(</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">root_dir</span><span class="p">),</span> <span class="s2">&quot;News Archive&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;News_19-03-2026&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="k">assert</span> <span class="s2">&quot;News Archive&quot;</span> <span class="ow">in</span> <span class="n">result</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_generate_directory_index_source_level_title_in_result</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.htmlgen</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArticleHTMLGenerator</span>
+    <span class="n">source_dir</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;Hacker-News_19-03-2026&quot;</span>
+    <span class="n">source_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">()</span>
+    <span class="n">gen</span> <span class="o">=</span> <span class="n">ArticleHTMLGenerator</span><span class="p">()</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">generate_directory_index</span><span class="p">(</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">source_dir</span><span class="p">),</span> <span class="s2">&quot;Hacker News&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;News_19-03-2026&quot;</span><span class="p">,</span> <span class="s2">&quot;Hacker-News_19-03-2026&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="k">assert</span> <span class="s2">&quot;Hacker News&quot;</span> <span class="ow">in</span> <span class="n">result</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_clean_title_for_display_strips_date_suffix</span><span class="p">():</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.htmlgen</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArticleHTMLGenerator</span>
+    <span class="n">gen</span> <span class="o">=</span> <span class="n">ArticleHTMLGenerator</span><span class="p">()</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">_clean_title_for_display</span><span class="p">(</span><span class="s2">&quot;Hacker-News_19-03-2026&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="s2">&quot;19-03-2026&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">result</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_clean_title_for_display_normalises_hyphens</span><span class="p">():</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.htmlgen</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArticleHTMLGenerator</span>
+    <span class="n">gen</span> <span class="o">=</span> <span class="n">ArticleHTMLGenerator</span><span class="p">()</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">_clean_title_for_display</span><span class="p">(</span><span class="s2">&quot;Hacker-News_19-03-2026&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="s2">&quot;Hacker News&quot;</span> <span class="ow">in</span> <span class="n">result</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] Run and confirm all fail</li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_htmlgen/test_generator_directory.py<span class="w"> </span>-v
+</pre></div>
+
+<p>Expected: all 5 tests FAIL with <code>ModuleNotFoundError</code></p>
+<br>
+<ul>
+<li>[ ] Commit</li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>git<span class="w"> </span>add<span class="w"> </span>tests/unit/test_htmlgen/test_generator_directory.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;test(red): failing tests for directory index generation and title cleaning&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h3>Task 4: Failing tests for factory</h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Create: <code>tests/unit/test_htmlgen/test_factory.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] Write the failing tests</li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Tests for HTMLGeneratorFactory.&quot;&quot;&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_factory_create_returns_article_html_generator</span><span class="p">():</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.htmlgen</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTMLGeneratorFactory</span><span class="p">,</span> <span class="n">ArticleHTMLGenerator</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">HTMLGeneratorFactory</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">ArticleHTMLGenerator</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_factory_create_returns_new_instance_each_call</span><span class="p">():</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.htmlgen</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTMLGeneratorFactory</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">HTMLGeneratorFactory</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">HTMLGeneratorFactory</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="n">a</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">b</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] Run and confirm both fail</li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_htmlgen/test_factory.py<span class="w"> </span>-v
+</pre></div>
+
+<p>Expected: both FAIL with <code>ModuleNotFoundError</code></p>
+<br>
+<ul>
+<li>[ ] Commit</li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>git<span class="w"> </span>add<span class="w"> </span>tests/unit/test_htmlgen/test_factory.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;test(red): failing tests for HTMLGeneratorFactory&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h2>Phase 2 — Green: Build <code>capcat/htmlgen/</code></h2>
+<br>
+<h3>Task 5: Create <code>capcat/htmlgen/generator.py</code></h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Create: <code>capcat/htmlgen/__init__.py</code></li>
+<li>Create: <code>capcat/htmlgen/generator.py</code></li>
+</ul>
+<br>
+<strong>How to do this correctly:</strong> <code>ArticleHTMLGenerator</code> is a verbatim copy of <code>HTMLGenerator</code>
+<p>from <code>capcat/core/html_generator.py</code> — same <code>__init__</code>, same methods, same helpers.</p>
+<p>The only changes are:</p>
+<ol>
+<li>Class name: <code>HTMLGenerator</code> → <code>ArticleHTMLGenerator</code></li>
+<li>Any internal string references to the old class name in docstrings (optional cleanup)</li>
+</ol>
+<br>
+<p>Do NOT reimagine the logic. Copy it exactly.</p>
+<br>
+<ul>
+<li>[ ] Create <code>capcat/htmlgen/__init__.py</code> — minimal version (factory added in Task 6)</li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;HTML generation module for Capcat.&quot;&quot;&quot;</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">capcat.htmlgen.generator</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArticleHTMLGenerator</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ArticleHTMLGenerator&quot;</span><span class="p">]</span>
+</pre></div>
+
+<br>
+<strong>Important:</strong> Do NOT add <code>HTMLGeneratorFactory</code> here yet — <code>factory.py</code> does not exist
+<p>until Task 6. Adding it now will break the Task 5 green run with <code>ModuleNotFoundError</code>.</p>
+<br>
+<ul>
+<li>[ ] Copy <code>capcat/core/html_generator.py</code> to <code>capcat/htmlgen/generator.py</code></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>cp<span class="w"> </span>~/capcat/capcat/core/html_generator.py<span class="w"> </span>~/capcat/capcat/htmlgen/generator.py
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] In <code>capcat/htmlgen/generator.py</code>: rename the class</li>
+</ul>
+<br>
+<p>Replace the class declaration at the top:</p>
+<div class="highlight"><pre><span></span><span class="c1"># Old:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">HTMLGenerator</span><span class="p">:</span>
+
+<span class="c1"># New:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ArticleHTMLGenerator</span><span class="p">:</span>
+</pre></div>
+
+<br>
+<p>That is the only change to the class body. The <code>__init__</code> and all methods stay verbatim.</p>
+<br>
+<ul>
+<li>[ ] Run the new tests — they should now pass</li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_htmlgen/<span class="w"> </span>-v
+</pre></div>
+
+<p>Expected: all 13 tests PASS.</p>
+<br>
+<ul>
+<li>[ ] Run the full suite to confirm nothing regressed</li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-q
+</pre></div>
+
+<p>Expected: ≥199 passed, 0 failed. (The 5 existing test files still import the old module — that is expected and fine at this stage.)</p>
+<br>
+<ul>
+<li>[ ] Commit</li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>git<span class="w"> </span>add<span class="w"> </span>capcat/htmlgen/__init__.py<span class="w"> </span>capcat/htmlgen/generator.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat(green): add ArticleHTMLGenerator — verbatim migration from HTMLGenerator&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h3>Task 6: Create <code>capcat/htmlgen/factory.py</code></h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Create: <code>capcat/htmlgen/factory.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] Write <code>factory.py</code></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Factory for creating ArticleHTMLGenerator instances.&quot;&quot;&quot;</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">capcat.htmlgen.generator</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArticleHTMLGenerator</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">HTMLGeneratorFactory</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Construction point for HTML generators.</span>
+
+<span class="sd">    Minimal now. Registry pattern for source-specific subclasses</span>
+<span class="sd">    added when the first source requires custom HTML logic.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">ArticleHTMLGenerator</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a new ArticleHTMLGenerator instance.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">ArticleHTMLGenerator</span><span class="p">()</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] Update <code>capcat/htmlgen/__init__.py</code> to also export <code>HTMLGeneratorFactory</code></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;HTML generation module for Capcat.&quot;&quot;&quot;</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">capcat.htmlgen.generator</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArticleHTMLGenerator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">capcat.htmlgen.factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTMLGeneratorFactory</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ArticleHTMLGenerator&quot;</span><span class="p">,</span> <span class="s2">&quot;HTMLGeneratorFactory&quot;</span><span class="p">]</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] Run all new tests</li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_htmlgen/<span class="w"> </span>-v
+</pre></div>
+
+<p>Expected: all 13 PASS.</p>
+<br>
+<ul>
+<li>[ ] Run full suite</li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-q
+</pre></div>
+
+<p>Expected: ≥199 passed, 0 failed.</p>
+<br>
+<ul>
+<li>[ ] Commit</li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>git<span class="w"> </span>add<span class="w"> </span>capcat/htmlgen/factory.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat(green): add HTMLGeneratorFactory&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h2>Phase 3 — Switch Call Sites</h2>
+<br>
+<h3>Task 7: Switch <code>html_post_processor.py</code></h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>capcat/core/html_post_processor.py:17</code> (import)</li>
+<li>Modify: <code>capcat/core/html_post_processor.py:32</code> (construction)</li>
+</ul>
+<br>
+<ul>
+<li>[ ] Replace the import at line 17</li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="c1"># Remove:</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.html_generator</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTMLGenerator</span>
+
+<span class="c1"># Add:</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">capcat.htmlgen</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTMLGeneratorFactory</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] Replace the construction at line 32</li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="c1"># Remove:</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">html_generator</span> <span class="o">=</span> <span class="n">HTMLGenerator</span><span class="p">()</span>
+
+<span class="c1"># Add:</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">html_generator</span> <span class="o">=</span> <span class="n">HTMLGeneratorFactory</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
+</pre></div>
+
+<br>
+<p>No other changes — all method calls on <code>self.html_generator</code> remain identical since</p>
+<code>ArticleHTMLGenerator</code> exposes the same interface as <code>HTMLGenerator</code>.
+<br>
+<ul>
+<li>[ ] Run full test suite</li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-q
+</pre></div>
+
+<p>Expected: ≥199 passed, 0 failed.</p>
+<br>
+<ul>
+<li>[ ] Commit</li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>git<span class="w"> </span>add<span class="w"> </span>capcat/core/html_post_processor.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;refactor: switch html_post_processor to HTMLGeneratorFactory&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h3>Task 8: Fix and switch <code>article_fetcher.py</code></h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>capcat/core/article_fetcher.py:2516-2525</code></li>
+</ul>
+<br>
+<p>The existing call (lines 2519-2522) passes <code>output_dir</code> and <code>theme</code> kwargs that do not</p>
+<p>exist in <code>generate_article_html</code>&#x27;s signature — it has been silently broken. Replace the</p>
+<p>entire block with a correct call to <code>generate_article_html_from_template</code>.</p>
+<br>
+<ul>
+<li>[ ] Read the surrounding context to understand what variables are available</li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>sed<span class="w"> </span>-n<span class="w"> </span><span class="s1">&#39;2490,2530p&#39;</span><span class="w"> </span>~/capcat/capcat/core/article_fetcher.py
+</pre></div>
+
+<p>Look for: <code>md_path</code>, <code>article_folder</code>, <code>title</code>, <code>article_title</code> — the markdown path and</p>
+<p>title that were set earlier in the same method.</p>
+<br>
+<ul>
+<li>[ ] Replace the broken block (lines 2516-2522)</li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="c1"># Remove:</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.html_generator</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTMLGenerator</span>
+<span class="n">html_gen</span> <span class="o">=</span> <span class="n">HTMLGenerator</span><span class="p">()</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">html_gen</span><span class="o">.</span><span class="n">generate_article_html</span><span class="p">(</span>
+        <span class="n">markdown_path</span><span class="o">=</span><span class="n">md_path</span><span class="p">,</span>
+        <span class="n">output_dir</span><span class="o">=</span><span class="n">article_folder</span><span class="p">,</span>
+        <span class="n">theme</span><span class="o">=</span><span class="kc">None</span>  <span class="c1"># Use default theme</span>
+    <span class="p">)</span>
+<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;HTML generation failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">, skipping HTML output&quot;</span><span class="p">)</span>
+
+<span class="c1"># Add:</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">capcat.htmlgen</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTMLGeneratorFactory</span>
+<span class="n">html_gen</span> <span class="o">=</span> <span class="n">HTMLGeneratorFactory</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">html_gen</span><span class="o">.</span><span class="n">generate_article_html_from_template</span><span class="p">(</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">md_path</span><span class="p">),</span>
+        <span class="n">title</span><span class="p">,</span>
+        <span class="p">[],</span>   <span class="c1"># no breadcrumb for PDF single-article path</span>
+        <span class="p">{</span><span class="s2">&quot;template&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;variant&quot;</span><span class="p">:</span> <span class="s2">&quot;article-no-comments&quot;</span><span class="p">}},</span>
+        <span class="n">html_subfolder</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">is_single_article</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;HTML generation failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">, skipping HTML output&quot;</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<strong>Note on variables:</strong> After reading the context in the first step above, adjust variable
+<p>names (<code>md_path</code>, <code>title</code>) to match whatever the actual local variable names are at that</p>
+<p>point in the method.</p>
+<br>
+<ul>
+<li>[ ] Run full test suite</li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-q
+</pre></div>
+
+<p>Expected: ≥199 passed, 0 failed.</p>
+<br>
+<ul>
+<li>[ ] Commit</li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>git<span class="w"> </span>add<span class="w"> </span>capcat/core/article_fetcher.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;fix: switch article_fetcher PDF path to HTMLGeneratorFactory, fix broken call&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h3>Task 9: Update the 5 existing test files</h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>tests/unit/test_html_generator_api.py</code></li>
+<li>Modify: <code>tests/unit/test_breadcrumb.py</code></li>
+<li>Modify: <code>tests/unit/test_user_themes.py</code></li>
+<li>Modify: <code>tests/unit/test_single_html.py</code></li>
+<li>Modify: <code>tests/unit/test_titled_markdown_filenames.py</code></li>
+</ul>
+<br>
+<p>Import locations vary by file:</p>
+<br>
+<p>&lt;div class=&quot;table-container&quot;&gt;</p>
+<p>&lt;table class=&quot;centered-table&quot;&gt;</p>
+<p>  &lt;thead&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;th&gt;File&lt;/th&gt;</p>
+<p>      &lt;th&gt;Import location&lt;/th&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>  &lt;/thead&gt;</p>
+<p>  &lt;tbody&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;test_html_generator_api.py:21&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Inside &lt;code&gt;@pytest.fixture&lt;/code&gt; function body&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;test_breadcrumb.py:22&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Inside &lt;code&gt;@pytest.fixture&lt;/code&gt; function body&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;test_user_themes.py:128&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Module level&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;test_titled_markdown_filenames.py:110&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Module level&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;test_single_html.py:76&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Inside a test function body (function-scoped import)&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>  &lt;/tbody&gt;</p>
+<p>&lt;/table&gt;</p>
+<p>&lt;/div&gt;</p>
+<br>
+<p>The replacement in all cases:</p>
+<div class="highlight"><pre><span></span><span class="c1"># Remove:</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.html_generator</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTMLGenerator</span>
+
+<span class="c1"># Add:</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">capcat.htmlgen</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArticleHTMLGenerator</span> <span class="k">as</span> <span class="n">HTMLGenerator</span>
+</pre></div>
+
+<br>
+<strong>Critical for <code>test_single_html.py</code>:</strong> The import at line 76 is <strong>inside a function body</strong>.
+<p>Replace it in-place at line 76. Do NOT add a module-level import at the top of the file —</p>
+<p>that would leave the old in-function import still present, and <code>html_generator.py</code> deletion</p>
+<p>in Task 10 would then fail. One import line replaced, same scope, nothing else changes.</p>
+<br>
+<p>Using <code>as HTMLGenerator</code> alias means all <code>HTMLGenerator()</code> constructions and method calls</p>
+<p>in each file continue to work unchanged.</p>
+<br>
+<ul>
+<li>[ ] Run full test suite after updating all 5</li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-q
+</pre></div>
+
+<p>Expected: ≥199 passed, 0 failed.</p>
+<br>
+<ul>
+<li>[ ] Commit</li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>git<span class="w"> </span>add<span class="w"> </span>tests/unit/test_html_generator_api.py<span class="w"> </span><span class="se">\</span>
+<span class="w">        </span>tests/unit/test_breadcrumb.py<span class="w"> </span><span class="se">\</span>
+<span class="w">        </span>tests/unit/test_user_themes.py<span class="w"> </span><span class="se">\</span>
+<span class="w">        </span>tests/unit/test_single_html.py<span class="w"> </span><span class="se">\</span>
+<span class="w">        </span>tests/unit/test_titled_markdown_filenames.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;refactor: update test imports from html_generator to htmlgen&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h2>Phase 4 — Delete</h2>
+<br>
+<h3>Task 10: Delete <code>html_generator.py</code> and verify</h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Delete: <code>capcat/core/html_generator.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] Delete the file</li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>rm<span class="w"> </span>~/capcat/capcat/core/html_generator.py
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] Run full test suite</li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-q
+</pre></div>
+
+<p>Expected: ≥199 passed, 0 failed. If any test fails with <code>ModuleNotFoundError: html_generator</code>,</p>
+<p>there is a remaining import that was missed — grep for it:</p>
+<div class="highlight"><pre><span></span>grep<span class="w"> </span>-r<span class="w"> </span><span class="s2">&quot;html_generator&quot;</span><span class="w"> </span>~/capcat/capcat/<span class="w"> </span>~/capcat/tests/<span class="w"> </span>--include<span class="o">=</span><span class="s2">&quot;*.py&quot;</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] Smoke test: run a real fetch with HTML output</li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>capcat<span class="w"> </span>fetch<span class="w"> </span>hackernews<span class="w"> </span>--html
+</pre></div>
+
+<p>Expected: completes without error, generates HTML files.</p>
+<br>
+<ul>
+<li>[ ] Commit</li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>git<span class="w"> </span>add<span class="w"> </span>-A
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;refactor: delete html_generator.py — replaced by capcat/htmlgen/&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h2>Final: PR and Release</h2>
+<br>
+<ul>
+<li>[ ] Push branch and open PR</li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>push<span class="w"> </span>-u<span class="w"> </span>origin<span class="w"> </span>&lt;branch-name&gt;
+gh<span class="w"> </span>pr<span class="w"> </span>create<span class="w"> </span>--title<span class="w"> </span><span class="s2">&quot;refactor: replace html_generator.py with capcat/htmlgen/ module&quot;</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] Merge and bump version (minor — architectural change)</li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>gh<span class="w"> </span>pr<span class="w"> </span>merge<span class="w"> </span>--merge<span class="w"> </span>--delete-branch
+<span class="c1"># bump capcat/__init__.py to next minor version</span>
+<span class="c1"># tag and push</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h2>Checklist Summary</h2>
+<br>
+<ul>
+<li>[ ] Task 1: Test infrastructure (<code>__init__.py</code>)</li>
+<li>[ ] Task 2: Red — article generation tests (6 tests)</li>
+<li>[ ] Task 3: Red — directory index tests (5 tests)</li>
+<li>[ ] Task 4: Red — factory tests (2 tests)</li>
+<li>[ ] Task 5: Green — <code>generator.py</code> (all 13 new tests pass)</li>
+<li>[ ] Task 6: Green — <code>factory.py</code></li>
+<li>[ ] Task 7: Switch <code>html_post_processor.py</code></li>
+<li>[ ] Task 8: Fix + switch <code>article_fetcher.py</code></li>
+<li>[ ] Task 9: Update 5 existing test imports</li>
+<li>[ ] Task 10: Delete <code>html_generator.py</code>, smoke test, final commit</li>
+</ul>
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

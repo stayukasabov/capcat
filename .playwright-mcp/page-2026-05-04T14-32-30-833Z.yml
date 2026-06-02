@@ -1,0 +1,1523 @@
+- generic [active] [ref=e1]:
+  - link "Skip to main content" [ref=e2] [cursor=pointer]:
+    - /url: "#main"
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - link "Design.dev design.dev" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - img "Design.dev" [ref=e6]
+        - generic [ref=e7]: design.dev
+      - navigation [ref=e8]:
+        - link "Tools" [ref=e9] [cursor=pointer]:
+          - /url: /tools/
+        - link "AI" [ref=e10] [cursor=pointer]:
+          - /url: /ai/
+        - link "Guides" [ref=e11] [cursor=pointer]:
+          - /url: /guides/
+        - link "Icons" [ref=e12] [cursor=pointer]:
+          - /url: /free-icons/
+        - link "Sponsor" [ref=e13] [cursor=pointer]:
+          - /url: /sponsor/
+  - navigation "Breadcrumb" [ref=e16]:
+    - link "Home" [ref=e17] [cursor=pointer]:
+      - /url: /
+    - generic [ref=e18]: /
+    - link "Guides" [ref=e19] [cursor=pointer]:
+      - /url: /guides/
+    - generic [ref=e20]: /
+    - generic [ref=e21]: Web Typography Complete Guide
+  - region "CodeRabbit - AI Code Reviews" [ref=e22]:
+    - link "CodeRabbit Cut code review time in half AI-powered reviews for teams who move fast Try for Free →" [ref=e23] [cursor=pointer]:
+      - /url: https://coderabbit.link/design-dev
+      - generic [ref=e24]:
+        - img "CodeRabbit" [ref=e26]
+        - generic [ref=e27]:
+          - generic [ref=e28]: Cut code review time in half
+          - generic [ref=e29]: AI-powered reviews for teams who move fast
+        - generic [ref=e31]: Try for Free →
+  - main [ref=e32]:
+    - generic [ref=e33]:
+      - complementary [ref=e34]:
+        - heading "Contents" [level=3] [ref=e35]
+        - navigation [ref=e36]:
+          - list [ref=e37]:
+            - listitem [ref=e38]:
+              - link "Introduction" [ref=e39] [cursor=pointer]:
+                - /url: "#introduction"
+            - listitem [ref=e40]:
+              - link "Type Scale" [ref=e41] [cursor=pointer]:
+                - /url: "#type-scale"
+            - listitem [ref=e42]:
+              - link "Typography Hierarchy" [ref=e43] [cursor=pointer]:
+                - /url: "#hierarchy"
+            - listitem [ref=e44]:
+              - link "Font Properties" [ref=e45] [cursor=pointer]:
+                - /url: "#font-properties"
+            - listitem [ref=e46]:
+              - link "Spacing & Rhythm" [ref=e47] [cursor=pointer]:
+                - /url: "#spacing"
+            - listitem [ref=e48]:
+              - link "Font Pairing" [ref=e49] [cursor=pointer]:
+                - /url: "#font-pairing"
+            - listitem [ref=e50]:
+              - link "Web Fonts" [ref=e51] [cursor=pointer]:
+                - /url: "#web-fonts"
+            - listitem [ref=e52]:
+              - link "Variable Fonts" [ref=e53] [cursor=pointer]:
+                - /url: "#variable-fonts"
+            - listitem [ref=e54]:
+              - link "Font Loading" [ref=e55] [cursor=pointer]:
+                - /url: "#font-loading"
+            - listitem [ref=e56]:
+              - link "Responsive Typography" [ref=e57] [cursor=pointer]:
+                - /url: "#responsive"
+            - listitem [ref=e58]:
+              - link "Accessibility" [ref=e59] [cursor=pointer]:
+                - /url: "#accessibility"
+            - listitem [ref=e60]:
+              - link "Best Practices" [ref=e61] [cursor=pointer]:
+                - /url: "#best-practices"
+      - generic [ref=e62]:
+        - generic [ref=e63]:
+          - heading "Typography for Web Design" [level=1] [ref=e64]
+          - paragraph [ref=e65]: Complete guide to web typography. Learn type scales, hierarchy, font selection and pairing, spacing, web fonts, variable fonts, responsive typography, and accessibility best practices.
+        - generic [ref=e66]:
+          - heading "Introduction" [level=2] [ref=e67]
+          - paragraph [ref=e68]: Typography is the art and technique of arranging type to make written language legible, readable, and appealing. On the web, good typography creates hierarchy, establishes tone, and guides users through content.
+          - heading "Core Typography Concepts" [level=3] [ref=e69]
+          - generic [ref=e70]:
+            - generic [ref=e71]:
+              - heading "Legibility" [level=4] [ref=e72]
+              - paragraph [ref=e73]: How easily individual characters can be distinguished
+              - code [ref=e74]: Character recognition
+            - generic [ref=e75]:
+              - heading "Readability" [level=4] [ref=e76]
+              - paragraph [ref=e77]: How easily text can be read and understood
+              - code [ref=e78]: Content comprehension
+            - generic [ref=e79]:
+              - heading "Hierarchy" [level=4] [ref=e80]
+              - paragraph [ref=e81]: Visual order and importance of text elements
+              - code [ref=e82]: Content structure
+            - generic [ref=e83]:
+              - heading "Consistency" [level=4] [ref=e84]
+              - paragraph [ref=e85]: Uniform typography patterns throughout design
+              - code [ref=e86]: Design system
+          - paragraph [ref=e88]:
+            - strong [ref=e89]: "Key Principle:"
+            - text: Typography should be invisible-users should read your content without noticing the typography itself. Good typography serves the content, never overshadows it.
+        - generic [ref=e90]:
+          - heading "Type Scale" [level=2] [ref=e91]
+          - paragraph [ref=e92]: A type scale is a progression of font sizes that creates visual hierarchy and consistency. Common scales use mathematical ratios.
+          - heading "Common Type Scale Ratios" [level=3] [ref=e93]
+          - table [ref=e94]:
+            - rowgroup [ref=e95]:
+              - row "Scale Name Ratio Example (16px base) Use Case" [ref=e96]:
+                - columnheader "Scale Name" [ref=e97]
+                - columnheader "Ratio" [ref=e98]
+                - columnheader "Example (16px base)" [ref=e99]
+                - columnheader "Use Case" [ref=e100]
+            - rowgroup [ref=e101]:
+              - row "Minor Second 1.067 16, 17, 18, 19, 21, 22, 24 Subtle, tight spacing" [ref=e102]:
+                - cell "Minor Second" [ref=e103]
+                - cell "1.067" [ref=e104]
+                - cell "16, 17, 18, 19, 21, 22, 24" [ref=e105]
+                - cell "Subtle, tight spacing" [ref=e106]
+              - row "Major Second 1.125 16, 18, 20, 23, 26, 29, 33 Conservative designs" [ref=e107]:
+                - cell "Major Second" [ref=e108]
+                - cell "1.125" [ref=e109]
+                - cell "16, 18, 20, 23, 26, 29, 33" [ref=e110]
+                - cell "Conservative designs" [ref=e111]
+              - row "Minor Third 1.2 16, 19, 23, 28, 33, 40, 48 Most versatile, common choice" [ref=e112]:
+                - cell "Minor Third" [ref=e113]
+                - cell "1.2" [ref=e114]
+                - cell "16, 19, 23, 28, 33, 40, 48" [ref=e115]
+                - cell "Most versatile, common choice" [ref=e116]
+              - row "Major Third 1.25 16, 20, 25, 31, 39, 49, 61 Clear hierarchy" [ref=e117]:
+                - cell "Major Third" [ref=e118]
+                - cell "1.25" [ref=e119]
+                - cell "16, 20, 25, 31, 39, 49, 61" [ref=e120]
+                - cell "Clear hierarchy" [ref=e121]
+              - row "Perfect Fourth 1.333 16, 21, 28, 37, 50, 67, 89 Bold, dramatic" [ref=e122]:
+                - cell "Perfect Fourth" [ref=e123]
+                - cell "1.333" [ref=e124]
+                - cell "16, 21, 28, 37, 50, 67, 89" [ref=e125]
+                - cell "Bold, dramatic" [ref=e126]
+              - row "Augmented Fourth 1.414 16, 23, 32, 45, 64, 91, 128 Very bold" [ref=e127]:
+                - cell "Augmented Fourth" [ref=e128]
+                - cell "1.414" [ref=e129]
+                - cell "16, 23, 32, 45, 64, 91, 128" [ref=e130]
+                - cell "Very bold" [ref=e131]
+              - row "Perfect Fifth 1.5 16, 24, 36, 54, 81, 122, 183 Strong contrast" [ref=e132]:
+                - cell "Perfect Fifth" [ref=e133]
+                - cell "1.5" [ref=e134]
+                - cell "16, 24, 36, 54, 81, 122, 183" [ref=e135]
+                - cell "Strong contrast" [ref=e136]
+              - row "Golden Ratio 1.618 16, 26, 42, 68, 110, 178, 288 Classic, harmonious" [ref=e137]:
+                - cell "Golden Ratio" [ref=e138]
+                - cell "1.618" [ref=e139]
+                - cell "16, 26, 42, 68, 110, 178, 288" [ref=e140]
+                - cell "Classic, harmonious" [ref=e141]
+          - heading "Creating Your Type Scale" [level=3] [ref=e142]
+          - table [ref=e143]:
+            - rowgroup [ref=e144]:
+              - row "Step Description Example" [ref=e145]:
+                - columnheader "Step" [ref=e146]
+                - columnheader "Description" [ref=e147]
+                - columnheader "Example" [ref=e148]
+            - rowgroup [ref=e149]:
+              - 'row "1. Choose base size Start with body text size (typically 16-18px) font-size: 16px;" [ref=e150]':
+                - cell "1. Choose base size" [ref=e151]
+                - cell "Start with body text size (typically 16-18px)" [ref=e152]
+                - 'cell "font-size: 16px;" [ref=e153]':
+                  - code [ref=e154]: "font-size: 16px;"
+              - row "2. Select ratio Pick a ratio that fits your design style 1.25 (Major Third)" [ref=e155]:
+                - cell "2. Select ratio" [ref=e156]
+                - cell "Pick a ratio that fits your design style" [ref=e157]
+                - cell "1.25 (Major Third)" [ref=e158]
+              - row "3. Calculate sizes Multiply base by ratio for each step up 16 × 1.25 = 20px" [ref=e159]:
+                - cell "3. Calculate sizes" [ref=e160]
+                - cell "Multiply base by ratio for each step up" [ref=e161]
+                - cell "16 × 1.25 = 20px" [ref=e162]
+              - row "4. Define scale Create 6-8 sizes from smallest to largest 12, 14, 16, 20, 25, 31, 39, 49" [ref=e163]:
+                - cell "4. Define scale" [ref=e164]
+                - cell "Create 6-8 sizes from smallest to largest" [ref=e165]
+                - cell "12, 14, 16, 20, 25, 31, 39, 49" [ref=e166]
+              - row "5. Name sizes Use semantic names or numbers xs, sm, base, lg, xl, 2xl, 3xl, 4xl" [ref=e167]:
+                - cell "5. Name sizes" [ref=e168]
+                - cell "Use semantic names or numbers" [ref=e169]
+                - cell "xs, sm, base, lg, xl, 2xl, 3xl, 4xl" [ref=e170]
+          - paragraph [ref=e172]:
+            - strong [ref=e173]: "Tip:"
+            - text: Use tools like
+            - link "Modular Scale" [ref=e174] [cursor=pointer]:
+              - /url: https://www.modularscale.com/
+            - text: or
+            - link "Type Scale" [ref=e175] [cursor=pointer]:
+              - /url: https://type-scale.com/
+            - text: to calculate and preview your scale.
+        - generic [ref=e176]:
+          - heading "Typography Hierarchy" [level=2] [ref=e177]
+          - paragraph [ref=e178]: Hierarchy guides readers through content by establishing importance and relationships between elements.
+          - heading "Heading Levels" [level=3] [ref=e179]
+          - table [ref=e180]:
+            - rowgroup [ref=e181]:
+              - row "Element Typical Size Weight Usage" [ref=e182]:
+                - columnheader "Element" [ref=e183]
+                - columnheader "Typical Size" [ref=e184]
+                - columnheader "Weight" [ref=e185]
+                - columnheader "Usage" [ref=e186]
+            - rowgroup [ref=e187]:
+              - row "<h1> 32-48px (2-3em) 700-900 Page title, one per page" [ref=e188]:
+                - cell "<h1>" [ref=e189]:
+                  - code [ref=e190]: <h1>
+                - cell "32-48px (2-3em)" [ref=e191]
+                - cell "700-900" [ref=e192]
+                - cell "Page title, one per page" [ref=e193]
+              - row "<h2> 24-32px (1.5-2em) 600-800 Major sections" [ref=e194]:
+                - cell "<h2>" [ref=e195]:
+                  - code [ref=e196]: <h2>
+                - cell "24-32px (1.5-2em)" [ref=e197]
+                - cell "600-800" [ref=e198]
+                - cell "Major sections" [ref=e199]
+              - row "<h3> 20-24px (1.25-1.5em) 600-700 Subsections" [ref=e200]:
+                - cell "<h3>" [ref=e201]:
+                  - code [ref=e202]: <h3>
+                - cell "20-24px (1.25-1.5em)" [ref=e203]
+                - cell "600-700" [ref=e204]
+                - cell "Subsections" [ref=e205]
+              - row "<h4> 18-20px (1.125-1.25em) 600-700 Sub-subsections" [ref=e206]:
+                - cell "<h4>" [ref=e207]:
+                  - code [ref=e208]: <h4>
+                - cell "18-20px (1.125-1.25em)" [ref=e209]
+                - cell "600-700" [ref=e210]
+                - cell "Sub-subsections" [ref=e211]
+              - row "<h5> 16-18px (1-1.125em) 600 Minor headings" [ref=e212]:
+                - cell "<h5>" [ref=e213]:
+                  - code [ref=e214]: <h5>
+                - cell "16-18px (1-1.125em)" [ref=e215]
+                - cell "600" [ref=e216]
+                - cell "Minor headings" [ref=e217]
+              - row "<h6> 14-16px (0.875-1em) 600 Smallest headings" [ref=e218]:
+                - cell "<h6>" [ref=e219]:
+                  - code [ref=e220]: <h6>
+                - cell "14-16px (0.875-1em)" [ref=e221]
+                - cell "600" [ref=e222]
+                - cell "Smallest headings" [ref=e223]
+          - heading "Body Text Styles" [level=3] [ref=e224]
+          - table [ref=e225]:
+            - rowgroup [ref=e226]:
+              - row "Element Size Weight Usage" [ref=e227]:
+                - columnheader "Element" [ref=e228]
+                - columnheader "Size" [ref=e229]
+                - columnheader "Weight" [ref=e230]
+                - columnheader "Usage" [ref=e231]
+            - rowgroup [ref=e232]:
+              - row "Body Large 18-20px 400 Lead paragraphs, introductions" [ref=e233]:
+                - cell "Body Large" [ref=e234]
+                - cell "18-20px" [ref=e235]
+                - cell "400" [ref=e236]
+                - cell "Lead paragraphs, introductions" [ref=e237]
+              - row "Body 16-18px 400 Main content, default text" [ref=e238]:
+                - cell "Body" [ref=e239]
+                - cell "16-18px" [ref=e240]
+                - cell "400" [ref=e241]
+                - cell "Main content, default text" [ref=e242]
+              - row "Body Small 14-16px 400 Secondary content, captions" [ref=e243]:
+                - cell "Body Small" [ref=e244]
+                - cell "14-16px" [ref=e245]
+                - cell "400" [ref=e246]
+                - cell "Secondary content, captions" [ref=e247]
+              - row "Label 12-14px 500-600 Form labels, UI labels" [ref=e248]:
+                - cell "Label" [ref=e249]
+                - cell "12-14px" [ref=e250]
+                - cell "500-600" [ref=e251]
+                - cell "Form labels, UI labels" [ref=e252]
+              - row "Caption 12-14px 400 Image captions, footnotes" [ref=e253]:
+                - cell "Caption" [ref=e254]
+                - cell "12-14px" [ref=e255]
+                - cell "400" [ref=e256]
+                - cell "Image captions, footnotes" [ref=e257]
+              - row "Overline 10-12px 600-700 (uppercase) Eyebrows, categories" [ref=e258]:
+                - cell "Overline" [ref=e259]
+                - cell "10-12px" [ref=e260]
+                - cell "600-700 (uppercase)" [ref=e261]
+                - cell "Eyebrows, categories" [ref=e262]
+          - heading "Creating Hierarchy" [level=3] [ref=e263]
+          - table [ref=e264]:
+            - rowgroup [ref=e265]:
+              - row "Technique How It Works CSS Example" [ref=e266]:
+                - columnheader "Technique" [ref=e267]
+                - columnheader "How It Works" [ref=e268]
+                - columnheader "CSS Example" [ref=e269]
+            - rowgroup [ref=e270]:
+              - 'row "Size Larger text draws more attention font-size: 2em;" [ref=e271]':
+                - cell "Size" [ref=e272]
+                - cell "Larger text draws more attention" [ref=e273]
+                - 'cell "font-size: 2em;" [ref=e274]':
+                  - code [ref=e275]: "font-size: 2em;"
+              - 'row "Weight Bolder text appears more important font-weight: 700;" [ref=e276]':
+                - cell "Weight" [ref=e277]
+                - cell "Bolder text appears more important" [ref=e278]
+                - 'cell "font-weight: 700;" [ref=e279]':
+                  - code [ref=e280]: "font-weight: 700;"
+              - 'row "Color Higher contrast = more prominence color: #000; opacity: 0.9;" [ref=e281]':
+                - cell "Color" [ref=e282]
+                - cell "Higher contrast = more prominence" [ref=e283]
+                - 'cell "color: #000; opacity: 0.9;" [ref=e284]':
+                  - code [ref=e285]: "color: #000; opacity: 0.9;"
+              - 'row "Spacing More space around = more importance margin: 2em 0 1em;" [ref=e286]':
+                - cell "Spacing" [ref=e287]
+                - cell "More space around = more importance" [ref=e288]
+                - 'cell "margin: 2em 0 1em;" [ref=e289]':
+                  - code [ref=e290]: "margin: 2em 0 1em;"
+              - 'row "Case Uppercase for emphasis (sparingly) text-transform: uppercase;" [ref=e291]':
+                - cell "Case" [ref=e292]
+                - cell "Uppercase for emphasis (sparingly)" [ref=e293]
+                - 'cell "text-transform: uppercase;" [ref=e294]':
+                  - code [ref=e295]: "text-transform: uppercase;"
+              - 'row "Style Italic for emphasis or distinction font-style: italic;" [ref=e296]':
+                - cell "Style" [ref=e297]
+                - cell "Italic for emphasis or distinction" [ref=e298]
+                - 'cell "font-style: italic;" [ref=e299]':
+                  - code [ref=e300]: "font-style: italic;"
+        - generic [ref=e301]:
+          - heading "Font Properties" [level=2] [ref=e302]
+          - paragraph [ref=e303]: Understanding CSS font properties is essential for controlling typography.
+          - heading "Font Size" [level=3] [ref=e304]
+          - table [ref=e305]:
+            - rowgroup [ref=e306]:
+              - row "Unit Description Example Best For" [ref=e307]:
+                - columnheader "Unit" [ref=e308]
+                - columnheader "Description" [ref=e309]
+                - columnheader "Example" [ref=e310]
+                - columnheader "Best For" [ref=e311]
+            - rowgroup [ref=e312]:
+              - 'row "px Absolute pixels font-size: 16px; Precise control (not recommended for body text)" [ref=e313]':
+                - cell "px" [ref=e314]:
+                  - code [ref=e315]: px
+                - cell "Absolute pixels" [ref=e316]
+                - 'cell "font-size: 16px;" [ref=e317]':
+                  - code [ref=e318]: "font-size: 16px;"
+                - cell "Precise control (not recommended for body text)" [ref=e319]
+              - 'row "em Relative to parent font size font-size: 1.5em; Component-scoped typography" [ref=e320]':
+                - cell "em" [ref=e321]:
+                  - code [ref=e322]: em
+                - cell "Relative to parent font size" [ref=e323]
+                - 'cell "font-size: 1.5em;" [ref=e324]':
+                  - code [ref=e325]: "font-size: 1.5em;"
+                - cell "Component-scoped typography" [ref=e326]
+              - 'row "rem Relative to root font size font-size: 1.5rem; Most flexible, recommended" [ref=e327]':
+                - cell "rem" [ref=e328]:
+                  - code [ref=e329]: rem
+                - cell "Relative to root font size" [ref=e330]
+                - 'cell "font-size: 1.5rem;" [ref=e331]':
+                  - code [ref=e332]: "font-size: 1.5rem;"
+                - cell "Most flexible, recommended" [ref=e333]
+              - 'row "% Percentage of parent font-size: 150%; Proportional scaling" [ref=e334]':
+                - cell "%" [ref=e335]:
+                  - code [ref=e336]: "%"
+                - cell "Percentage of parent" [ref=e337]
+                - 'cell "font-size: 150%;" [ref=e338]':
+                  - code [ref=e339]: "font-size: 150%;"
+                - cell "Proportional scaling" [ref=e340]
+              - 'row "vw/vh Viewport width/height font-size: 5vw; Fluid typography" [ref=e341]':
+                - cell "vw/vh" [ref=e342]:
+                  - code [ref=e343]: vw/vh
+                - cell "Viewport width/height" [ref=e344]
+                - 'cell "font-size: 5vw;" [ref=e345]':
+                  - code [ref=e346]: "font-size: 5vw;"
+                - cell "Fluid typography" [ref=e347]
+              - 'row "clamp() Responsive between min and max font-size: clamp(1rem, 2.5vw, 2rem); Responsive typography without media queries" [ref=e348]':
+                - cell "clamp()" [ref=e349]:
+                  - code [ref=e350]: clamp()
+                - cell "Responsive between min and max" [ref=e351]
+                - 'cell "font-size: clamp(1rem, 2.5vw, 2rem);" [ref=e352]':
+                  - code [ref=e353]: "font-size: clamp(1rem, 2.5vw, 2rem);"
+                - cell "Responsive typography without media queries" [ref=e354]
+          - heading "Font Weight" [level=3] [ref=e355]
+          - table [ref=e356]:
+            - rowgroup [ref=e357]:
+              - row "Value Name Common Use" [ref=e358]:
+                - columnheader "Value" [ref=e359]
+                - columnheader "Name" [ref=e360]
+                - columnheader "Common Use" [ref=e361]
+            - rowgroup [ref=e362]:
+              - row "100 Thin Large display text only" [ref=e363]:
+                - cell "100" [ref=e364]
+                - cell "Thin" [ref=e365]
+                - cell "Large display text only" [ref=e366]
+              - row "200 Extra Light Large display text" [ref=e367]:
+                - cell "200" [ref=e368]
+                - cell "Extra Light" [ref=e369]
+                - cell "Large display text" [ref=e370]
+              - row "300 Light Large body text, quotes" [ref=e371]:
+                - cell "300" [ref=e372]
+                - cell "Light" [ref=e373]
+                - cell "Large body text, quotes" [ref=e374]
+              - row "400 Normal/Regular Body text default" [ref=e375]:
+                - cell "400" [ref=e376]
+                - cell "Normal/Regular" [ref=e377]
+                - cell "Body text default" [ref=e378]
+              - row "500 Medium Emphasis, labels, UI text" [ref=e379]:
+                - cell "500" [ref=e380]
+                - cell "Medium" [ref=e381]
+                - cell "Emphasis, labels, UI text" [ref=e382]
+              - row "600 Semi Bold Subheadings, strong emphasis" [ref=e383]:
+                - cell "600" [ref=e384]
+                - cell "Semi Bold" [ref=e385]
+                - cell "Subheadings, strong emphasis" [ref=e386]
+              - row "700 Bold Headings, strong importance" [ref=e387]:
+                - cell "700" [ref=e388]
+                - cell "Bold" [ref=e389]
+                - cell "Headings, strong importance" [ref=e390]
+              - row "800 Extra Bold Display headings" [ref=e391]:
+                - cell "800" [ref=e392]
+                - cell "Extra Bold" [ref=e393]
+                - cell "Display headings" [ref=e394]
+              - row "900 Black Extra heavy display text" [ref=e395]:
+                - cell "900" [ref=e396]
+                - cell "Black" [ref=e397]
+                - cell "Extra heavy display text" [ref=e398]
+          - heading "Other Font Properties" [level=3] [ref=e399]
+          - table [ref=e400]:
+            - rowgroup [ref=e401]:
+              - row "Property Values Description" [ref=e402]:
+                - columnheader "Property" [ref=e403]
+                - columnheader "Values" [ref=e404]
+                - columnheader "Description" [ref=e405]
+            - rowgroup [ref=e406]:
+              - row "font-style normal, italic, oblique Text slant style" [ref=e407]:
+                - cell "font-style" [ref=e408]:
+                  - code [ref=e409]: font-style
+                - cell "normal, italic, oblique" [ref=e410]
+                - cell "Text slant style" [ref=e411]
+              - row "font-variant normal, small-caps Typographic variants" [ref=e412]:
+                - cell "font-variant" [ref=e413]:
+                  - code [ref=e414]: font-variant
+                - cell "normal, small-caps" [ref=e415]
+                - cell "Typographic variants" [ref=e416]
+              - row "font-stretch condensed, normal, expanded Character width (variable fonts)" [ref=e417]:
+                - cell "font-stretch" [ref=e418]:
+                  - code [ref=e419]: font-stretch
+                - cell "condensed, normal, expanded" [ref=e420]
+                - cell "Character width (variable fonts)" [ref=e421]
+              - row "text-transform uppercase, lowercase, capitalize Case transformation" [ref=e422]:
+                - cell "text-transform" [ref=e423]:
+                  - code [ref=e424]: text-transform
+                - cell "uppercase, lowercase, capitalize" [ref=e425]
+                - cell "Case transformation" [ref=e426]
+              - row "text-decoration underline, line-through, overline Text decoration lines" [ref=e427]:
+                - cell "text-decoration" [ref=e428]:
+                  - code [ref=e429]: text-decoration
+                - cell "underline, line-through, overline" [ref=e430]
+                - cell "Text decoration lines" [ref=e431]
+              - row "font-feature-settings OpenType features Advanced font features (ligatures, etc.)" [ref=e432]:
+                - cell "font-feature-settings" [ref=e433]:
+                  - code [ref=e434]: font-feature-settings
+                - cell "OpenType features" [ref=e435]
+                - cell "Advanced font features (ligatures, etc.)" [ref=e436]
+        - generic [ref=e437]:
+          - heading "Spacing & Vertical Rhythm" [level=2] [ref=e438]
+          - paragraph [ref=e439]: Proper spacing creates readability and visual harmony in typography.
+          - heading "Line Height (Leading)" [level=3] [ref=e440]
+          - table [ref=e441]:
+            - rowgroup [ref=e442]:
+              - row "Text Type Recommended Line Height CSS Example Reason" [ref=e443]:
+                - columnheader "Text Type" [ref=e444]
+                - columnheader "Recommended Line Height" [ref=e445]
+                - columnheader "CSS Example" [ref=e446]
+                - columnheader "Reason" [ref=e447]
+            - rowgroup [ref=e448]:
+              - 'row "Body text (16-18px) 1.5-1.6 line-height: 1.5; Optimal readability for paragraphs" [ref=e449]':
+                - cell "Body text (16-18px)" [ref=e450]
+                - cell "1.5-1.6" [ref=e451]
+                - 'cell "line-height: 1.5;" [ref=e452]':
+                  - code [ref=e453]: "line-height: 1.5;"
+                - cell "Optimal readability for paragraphs" [ref=e454]
+              - 'row "Large body (20px+) 1.4-1.5 line-height: 1.45; Slightly tighter for larger text" [ref=e455]':
+                - cell "Large body (20px+)" [ref=e456]
+                - cell "1.4-1.5" [ref=e457]
+                - 'cell "line-height: 1.45;" [ref=e458]':
+                  - code [ref=e459]: "line-height: 1.45;"
+                - cell "Slightly tighter for larger text" [ref=e460]
+              - 'row "Small text (14px-) 1.6-1.8 line-height: 1.7; More space for legibility" [ref=e461]':
+                - cell "Small text (14px-)" [ref=e462]
+                - cell "1.6-1.8" [ref=e463]
+                - 'cell "line-height: 1.7;" [ref=e464]':
+                  - code [ref=e465]: "line-height: 1.7;"
+                - cell "More space for legibility" [ref=e466]
+              - 'row "Headings (large) 1.1-1.3 line-height: 1.2; Tighter for visual impact" [ref=e467]':
+                - cell "Headings (large)" [ref=e468]
+                - cell "1.1-1.3" [ref=e469]
+                - 'cell "line-height: 1.2;" [ref=e470]':
+                  - code [ref=e471]: "line-height: 1.2;"
+                - cell "Tighter for visual impact" [ref=e472]
+              - 'row "Display text (huge) 1.0-1.1 line-height: 1.05; Very tight for hero text" [ref=e473]':
+                - cell "Display text (huge)" [ref=e474]
+                - cell "1.0-1.1" [ref=e475]
+                - 'cell "line-height: 1.05;" [ref=e476]':
+                  - code [ref=e477]: "line-height: 1.05;"
+                - cell "Very tight for hero text" [ref=e478]
+              - 'row "Buttons/UI 1.0 line-height: 1; Precise vertical centering" [ref=e479]':
+                - cell "Buttons/UI" [ref=e480]
+                - cell "1.0" [ref=e481]
+                - 'cell "line-height: 1;" [ref=e482]':
+                  - code [ref=e483]: "line-height: 1;"
+                - cell "Precise vertical centering" [ref=e484]
+          - heading "Letter Spacing (Tracking)" [level=3] [ref=e485]
+          - table [ref=e486]:
+            - rowgroup [ref=e487]:
+              - row "Use Case Value CSS Example" [ref=e488]:
+                - columnheader "Use Case" [ref=e489]
+                - columnheader "Value" [ref=e490]
+                - columnheader "CSS Example" [ref=e491]
+            - rowgroup [ref=e492]:
+              - 'row "Body text 0 letter-spacing: 0;" [ref=e493]':
+                - cell "Body text" [ref=e494]
+                - cell "0" [ref=e495]
+                - 'cell "letter-spacing: 0;" [ref=e496]':
+                  - code [ref=e497]: "letter-spacing: 0;"
+              - 'row "Large headings -0.02em to -0.04em letter-spacing: -0.02em;" [ref=e498]':
+                - cell "Large headings" [ref=e499]
+                - cell "-0.02em to -0.04em" [ref=e500]
+                - 'cell "letter-spacing: -0.02em;" [ref=e501]':
+                  - code [ref=e502]: "letter-spacing: -0.02em;"
+              - 'row "Small caps 0.05em to 0.1em letter-spacing: 0.05em;" [ref=e503]':
+                - cell "Small caps" [ref=e504]
+                - cell "0.05em to 0.1em" [ref=e505]
+                - 'cell "letter-spacing: 0.05em;" [ref=e506]':
+                  - code [ref=e507]: "letter-spacing: 0.05em;"
+              - 'row "All caps 0.05em to 0.15em letter-spacing: 0.1em;" [ref=e508]':
+                - cell "All caps" [ref=e509]
+                - cell "0.05em to 0.15em" [ref=e510]
+                - 'cell "letter-spacing: 0.1em;" [ref=e511]':
+                  - code [ref=e512]: "letter-spacing: 0.1em;"
+              - 'row "Small text (captions) 0.01em to 0.02em letter-spacing: 0.015em;" [ref=e513]':
+                - cell "Small text (captions)" [ref=e514]
+                - cell "0.01em to 0.02em" [ref=e515]
+                - 'cell "letter-spacing: 0.015em;" [ref=e516]':
+                  - code [ref=e517]: "letter-spacing: 0.015em;"
+          - heading "Measure (Line Length)" [level=3] [ref=e518]
+          - table [ref=e519]:
+            - rowgroup [ref=e520]:
+              - row "Metric Ideal Range CSS Example" [ref=e521]:
+                - columnheader "Metric" [ref=e522]
+                - columnheader "Ideal Range" [ref=e523]
+                - columnheader "CSS Example" [ref=e524]
+            - rowgroup [ref=e525]:
+              - 'row "Characters per line 45-75 (optimal: 66) max-width: 65ch;" [ref=e526]':
+                - cell "Characters per line" [ref=e527]
+                - 'cell "45-75 (optimal: 66)" [ref=e528]'
+                - 'cell "max-width: 65ch;" [ref=e529]':
+                  - code [ref=e530]: "max-width: 65ch;"
+              - 'row "Words per line 8-12 words max-width: 600px;" [ref=e531]':
+                - cell "Words per line" [ref=e532]
+                - cell "8-12 words" [ref=e533]
+                - 'cell "max-width: 600px;" [ref=e534]':
+                  - code [ref=e535]: "max-width: 600px;"
+              - 'row "Wide content 75-90 characters max-width: 75ch;" [ref=e536]':
+                - cell "Wide content" [ref=e537]
+                - cell "75-90 characters" [ref=e538]
+                - 'cell "max-width: 75ch;" [ref=e539]':
+                  - code [ref=e540]: "max-width: 75ch;"
+              - 'row "Narrow content 35-45 characters max-width: 40ch;" [ref=e541]':
+                - cell "Narrow content" [ref=e542]
+                - cell "35-45 characters" [ref=e543]
+                - 'cell "max-width: 40ch;" [ref=e544]':
+                  - code [ref=e545]: "max-width: 40ch;"
+          - heading "Paragraph Spacing" [level=3] [ref=e546]
+          - table [ref=e547]:
+            - rowgroup [ref=e548]:
+              - row "Element Top Margin Bottom Margin CSS Example" [ref=e549]:
+                - columnheader "Element" [ref=e550]
+                - columnheader "Top Margin" [ref=e551]
+                - columnheader "Bottom Margin" [ref=e552]
+                - columnheader "CSS Example" [ref=e553]
+            - rowgroup [ref=e554]:
+              - 'row "Paragraphs 0 1em - 1.5em p { margin: 0 0 1.25em; }" [ref=e555]':
+                - cell "Paragraphs" [ref=e556]
+                - cell "0" [ref=e557]
+                - cell "1em - 1.5em" [ref=e558]
+                - 'cell "p { margin: 0 0 1.25em; }" [ref=e559]':
+                  - code [ref=e560]: "p { margin: 0 0 1.25em; }"
+              - 'row "Headings 1.5em - 2em 0.5em - 1em h2 { margin: 2em 0 0.75em; }" [ref=e561]':
+                - cell "Headings" [ref=e562]
+                - cell "1.5em - 2em" [ref=e563]
+                - cell "0.5em - 1em" [ref=e564]
+                - 'cell "h2 { margin: 2em 0 0.75em; }" [ref=e565]':
+                  - code [ref=e566]: "h2 { margin: 2em 0 0.75em; }"
+              - 'row "Lists 0 1em - 1.5em ul { margin: 0 0 1.5em; }" [ref=e567]':
+                - cell "Lists" [ref=e568]
+                - cell "0" [ref=e569]
+                - cell "1em - 1.5em" [ref=e570]
+                - 'cell "ul { margin: 0 0 1.5em; }" [ref=e571]':
+                  - code [ref=e572]: "ul { margin: 0 0 1.5em; }"
+              - 'row "List items 0 0.25em - 0.5em li { margin-bottom: 0.5em; }" [ref=e573]':
+                - cell "List items" [ref=e574]
+                - cell "0" [ref=e575]
+                - cell "0.25em - 0.5em" [ref=e576]
+                - 'cell "li { margin-bottom: 0.5em; }" [ref=e577]':
+                  - code [ref=e578]: "li { margin-bottom: 0.5em; }"
+          - paragraph [ref=e580]:
+            - strong [ref=e581]: "Rule of Thumb:"
+            - text: Use
+            - code [ref=e582]: ch
+            - text: units for max-width on text containers (1ch = width of the "0" character). This ensures consistent line lengths regardless of font choice.
+        - generic [ref=e583]:
+          - heading "Font Pairing" [level=2] [ref=e584]
+          - paragraph [ref=e585]: Combining fonts effectively creates contrast and hierarchy while maintaining harmony.
+          - heading "Font Pairing Principles" [level=3] [ref=e586]
+          - table [ref=e587]:
+            - rowgroup [ref=e588]:
+              - row "Principle Description Example" [ref=e589]:
+                - columnheader "Principle" [ref=e590]
+                - columnheader "Description" [ref=e591]
+                - columnheader "Example" [ref=e592]
+            - rowgroup [ref=e593]:
+              - row "Contrast Pair fonts with distinct characteristics Serif heading + Sans-serif body" [ref=e594]:
+                - cell "Contrast" [ref=e595]
+                - cell "Pair fonts with distinct characteristics" [ref=e596]
+                - cell "Serif heading + Sans-serif body" [ref=e597]
+              - row "Harmony Fonts should share similar proportions or mood Both geometric or both humanist" [ref=e598]:
+                - cell "Harmony" [ref=e599]
+                - cell "Fonts should share similar proportions or mood" [ref=e600]
+                - cell "Both geometric or both humanist" [ref=e601]
+              - row "Limit pairs Use 2-3 font families maximum One for headings, one for body" [ref=e602]:
+                - cell "Limit pairs" [ref=e603]
+                - cell "Use 2-3 font families maximum" [ref=e604]
+                - cell "One for headings, one for body" [ref=e605]
+              - row "Same font family Use different weights and styles Roboto Light + Roboto Bold" [ref=e606]:
+                - cell "Same font family" [ref=e607]
+                - cell "Use different weights and styles" [ref=e608]
+                - cell "Roboto Light + Roboto Bold" [ref=e609]
+              - row "Superfamilies Use fonts designed to work together Merriweather + Merriweather Sans" [ref=e610]:
+                - cell "Superfamilies" [ref=e611]
+                - cell "Use fonts designed to work together" [ref=e612]
+                - cell "Merriweather + Merriweather Sans" [ref=e613]
+          - heading "Classic Font Combinations" [level=3] [ref=e614]
+          - table [ref=e615]:
+            - rowgroup [ref=e616]:
+              - row "Headings Body Style Use Case" [ref=e617]:
+                - columnheader "Headings" [ref=e618]
+                - columnheader "Body" [ref=e619]
+                - columnheader "Style" [ref=e620]
+                - columnheader "Use Case" [ref=e621]
+            - rowgroup [ref=e622]:
+              - row "Playfair Display Source Sans Pro Elegant, editorial Magazines, blogs" [ref=e623]:
+                - cell "Playfair Display" [ref=e624]
+                - cell "Source Sans Pro" [ref=e625]
+                - cell "Elegant, editorial" [ref=e626]
+                - cell "Magazines, blogs" [ref=e627]
+              - row "Montserrat Merriweather Modern, readable Business, professional" [ref=e628]:
+                - cell "Montserrat" [ref=e629]
+                - cell "Merriweather" [ref=e630]
+                - cell "Modern, readable" [ref=e631]
+                - cell "Business, professional" [ref=e632]
+              - row "Oswald Lato Bold, contemporary Marketing, landing pages" [ref=e633]:
+                - cell "Oswald" [ref=e634]
+                - cell "Lato" [ref=e635]
+                - cell "Bold, contemporary" [ref=e636]
+                - cell "Marketing, landing pages" [ref=e637]
+              - row "Raleway Open Sans Clean, minimalist Tech, startups" [ref=e638]:
+                - cell "Raleway" [ref=e639]
+                - cell "Open Sans" [ref=e640]
+                - cell "Clean, minimalist" [ref=e641]
+                - cell "Tech, startups" [ref=e642]
+              - row "Poppins Inter Geometric, modern Apps, dashboards" [ref=e643]:
+                - cell "Poppins" [ref=e644]
+                - cell "Inter" [ref=e645]
+                - cell "Geometric, modern" [ref=e646]
+                - cell "Apps, dashboards" [ref=e647]
+              - row "Crimson Text Work Sans Classic, bookish Publishing, academia" [ref=e648]:
+                - cell "Crimson Text" [ref=e649]
+                - cell "Work Sans" [ref=e650]
+                - cell "Classic, bookish" [ref=e651]
+                - cell "Publishing, academia" [ref=e652]
+              - row "Space Grotesk Space Mono Tech, futuristic Developer tools" [ref=e653]:
+                - cell "Space Grotesk" [ref=e654]
+                - cell "Space Mono" [ref=e655]
+                - cell "Tech, futuristic" [ref=e656]
+                - cell "Developer tools" [ref=e657]
+          - heading "Font Classification" [level=3] [ref=e658]
+          - table [ref=e659]:
+            - rowgroup [ref=e660]:
+              - row "Category Characteristics Examples Best For" [ref=e661]:
+                - columnheader "Category" [ref=e662]
+                - columnheader "Characteristics" [ref=e663]
+                - columnheader "Examples" [ref=e664]
+                - columnheader "Best For" [ref=e665]
+            - rowgroup [ref=e666]:
+              - row "Serif Small lines at letter ends, traditional Georgia, Times, Merriweather Long-form reading, print feel" [ref=e667]:
+                - cell "Serif" [ref=e668]
+                - cell "Small lines at letter ends, traditional" [ref=e669]
+                - cell "Georgia, Times, Merriweather" [ref=e670]
+                - cell "Long-form reading, print feel" [ref=e671]
+              - row "Sans Serif Clean, no decorative strokes Arial, Helvetica, Inter UI, screens, modern designs" [ref=e672]:
+                - cell "Sans Serif" [ref=e673]
+                - cell "Clean, no decorative strokes" [ref=e674]
+                - cell "Arial, Helvetica, Inter" [ref=e675]
+                - cell "UI, screens, modern designs" [ref=e676]
+              - row "Slab Serif Thick, blocky serifs Rockwell, Courier, Roboto Slab Headings, mechanical feel" [ref=e677]:
+                - cell "Slab Serif" [ref=e678]
+                - cell "Thick, blocky serifs" [ref=e679]
+                - cell "Rockwell, Courier, Roboto Slab" [ref=e680]
+                - cell "Headings, mechanical feel" [ref=e681]
+              - row "Monospace Fixed-width characters Courier, Consolas, Fira Code Code, technical content" [ref=e682]:
+                - cell "Monospace" [ref=e683]
+                - cell "Fixed-width characters" [ref=e684]
+                - cell "Courier, Consolas, Fira Code" [ref=e685]
+                - cell "Code, technical content" [ref=e686]
+              - row "Display Decorative, attention-grabbing Lobster, Bebas Neue Headings, logos (use sparingly)" [ref=e687]:
+                - cell "Display" [ref=e688]
+                - cell "Decorative, attention-grabbing" [ref=e689]
+                - cell "Lobster, Bebas Neue" [ref=e690]
+                - cell "Headings, logos (use sparingly)" [ref=e691]
+              - row "Handwriting Script or casual writing style Pacifico, Dancing Script Accents, signatures" [ref=e692]:
+                - cell "Handwriting" [ref=e693]
+                - cell "Script or casual writing style" [ref=e694]
+                - cell "Pacifico, Dancing Script" [ref=e695]
+                - cell "Accents, signatures" [ref=e696]
+        - generic [ref=e697]:
+          - heading "Web Fonts" [level=2] [ref=e698]
+          - paragraph [ref=e699]: Web fonts allow you to use custom typefaces beyond system fonts. Understanding loading and implementation is crucial.
+          - heading "Font Sources" [level=3] [ref=e700]
+          - table [ref=e701]:
+            - rowgroup [ref=e702]:
+              - row "Source Pros Cons Best For" [ref=e703]:
+                - columnheader "Source" [ref=e704]
+                - columnheader "Pros" [ref=e705]
+                - columnheader "Cons" [ref=e706]
+                - columnheader "Best For" [ref=e707]
+            - rowgroup [ref=e708]:
+              - row "Google Fonts Free, easy, CDN-hosted, variable fonts Privacy concerns, limited selection Most projects, quick starts" [ref=e709]:
+                - cell "Google Fonts" [ref=e710]
+                - cell "Free, easy, CDN-hosted, variable fonts" [ref=e711]
+                - cell "Privacy concerns, limited selection" [ref=e712]
+                - cell "Most projects, quick starts" [ref=e713]
+              - row "Adobe Fonts High quality, large library, sync to desktop Requires Creative Cloud subscription Professional design work" [ref=e714]:
+                - cell "Adobe Fonts" [ref=e715]
+                - cell "High quality, large library, sync to desktop" [ref=e716]
+                - cell "Requires Creative Cloud subscription" [ref=e717]
+                - cell "Professional design work" [ref=e718]
+              - row "Self-hosted Full control, privacy, performance tuning More setup, need to manage updates Production apps, GDPR compliance" [ref=e719]:
+                - cell "Self-hosted" [ref=e720]
+                - cell "Full control, privacy, performance tuning" [ref=e721]
+                - cell "More setup, need to manage updates" [ref=e722]
+                - cell "Production apps, GDPR compliance" [ref=e723]
+              - row "System fonts Zero load time, familiar to users Limited variety, platform differences Performance-critical apps" [ref=e724]:
+                - cell "System fonts" [ref=e725]
+                - cell "Zero load time, familiar to users" [ref=e726]
+                - cell "Limited variety, platform differences" [ref=e727]
+                - cell "Performance-critical apps" [ref=e728]
+              - row "Font marketplaces Unique typefaces, commercial licenses Cost, licensing complexity Branding, unique identity" [ref=e729]:
+                - cell "Font marketplaces" [ref=e730]
+                - cell "Unique typefaces, commercial licenses" [ref=e731]
+                - cell "Cost, licensing complexity" [ref=e732]
+                - cell "Branding, unique identity" [ref=e733]
+          - heading "@font-face Syntax" [level=3] [ref=e734]
+          - table [ref=e735]:
+            - rowgroup [ref=e736]:
+              - row "Property Description Example" [ref=e737]:
+                - columnheader "Property" [ref=e738]
+                - columnheader "Description" [ref=e739]
+                - columnheader "Example" [ref=e740]
+            - rowgroup [ref=e741]:
+              - 'row "font-family Name you''ll use to reference the font font-family: ''My Font'';" [ref=e742]':
+                - cell "font-family" [ref=e743]:
+                  - code [ref=e744]: font-family
+                - cell "Name you'll use to reference the font" [ref=e745]
+                - 'cell "font-family: ''My Font'';" [ref=e746]':
+                  - code [ref=e747]: "font-family: 'My Font';"
+              - 'row "src Path to font files (woff2, woff, ttf) src: url(''font.woff2'') format(''woff2'');" [ref=e748]':
+                - cell "src" [ref=e749]:
+                  - code [ref=e750]: src
+                - cell "Path to font files (woff2, woff, ttf)" [ref=e751]
+                - 'cell "src: url(''font.woff2'') format(''woff2'');" [ref=e752]':
+                  - code [ref=e753]: "src: url('font.woff2') format('woff2');"
+              - 'row "font-weight Weight this file represents font-weight: 400;" [ref=e754]':
+                - cell "font-weight" [ref=e755]:
+                  - code [ref=e756]: font-weight
+                - cell "Weight this file represents" [ref=e757]
+                - 'cell "font-weight: 400;" [ref=e758]':
+                  - code [ref=e759]: "font-weight: 400;"
+              - 'row "font-style Style this file represents font-style: normal;" [ref=e760]':
+                - cell "font-style" [ref=e761]:
+                  - code [ref=e762]: font-style
+                - cell "Style this file represents" [ref=e763]
+                - 'cell "font-style: normal;" [ref=e764]':
+                  - code [ref=e765]: "font-style: normal;"
+              - 'row "font-display How font loads (swap, block, fallback, optional) font-display: swap;" [ref=e766]':
+                - cell "font-display" [ref=e767]:
+                  - code [ref=e768]: font-display
+                - cell "How font loads (swap, block, fallback, optional)" [ref=e769]
+                - 'cell "font-display: swap;" [ref=e770]':
+                  - code [ref=e771]: "font-display: swap;"
+              - 'row "unicode-range Character range to use this font for unicode-range: U+0000-00FF;" [ref=e772]':
+                - cell "unicode-range" [ref=e773]:
+                  - code [ref=e774]: unicode-range
+                - cell "Character range to use this font for" [ref=e775]
+                - 'cell "unicode-range: U+0000-00FF;" [ref=e776]':
+                  - code [ref=e777]: "unicode-range: U+0000-00FF;"
+          - heading "Font File Formats" [level=3] [ref=e778]
+          - table [ref=e779]:
+            - rowgroup [ref=e780]:
+              - row "Format Browser Support File Size Recommendation" [ref=e781]:
+                - columnheader "Format" [ref=e782]
+                - columnheader "Browser Support" [ref=e783]
+                - columnheader "File Size" [ref=e784]
+                - columnheader "Recommendation" [ref=e785]
+            - rowgroup [ref=e786]:
+              - row "WOFF2 All modern browsers (96%+) Smallest (30% smaller than WOFF) ✓ Use first, best compression" [ref=e787]:
+                - cell "WOFF2" [ref=e788]
+                - cell "All modern browsers (96%+)" [ref=e789]
+                - cell "Smallest (30% smaller than WOFF)" [ref=e790]
+                - cell "✓ Use first, best compression" [ref=e791]
+              - row "WOFF All browsers (98%+) Small ✓ Use as fallback for old browsers" [ref=e792]:
+                - cell "WOFF" [ref=e793]
+                - cell "All browsers (98%+)" [ref=e794]
+                - cell "Small" [ref=e795]
+                - cell "✓ Use as fallback for old browsers" [ref=e796]
+              - row "TTF/OTF Universal Large, uncompressed Use for development only" [ref=e797]:
+                - cell "TTF/OTF" [ref=e798]
+                - cell "Universal" [ref=e799]
+                - cell "Large, uncompressed" [ref=e800]
+                - cell "Use for development only" [ref=e801]
+              - row "EOT IE 6-11 only Large Obsolete, skip unless supporting IE" [ref=e802]:
+                - cell "EOT" [ref=e803]
+                - cell "IE 6-11 only" [ref=e804]
+                - cell "Large" [ref=e805]
+                - cell "Obsolete, skip unless supporting IE" [ref=e806]
+              - row "SVG Legacy Safari Very large Obsolete, not recommended" [ref=e807]:
+                - cell "SVG" [ref=e808]
+                - cell "Legacy Safari" [ref=e809]
+                - cell "Very large" [ref=e810]
+                - cell "Obsolete, not recommended" [ref=e811]
+          - heading "System Font Stack" [level=3] [ref=e812]
+          - table [ref=e813]:
+            - rowgroup [ref=e814]:
+              - row "Stack Type CSS" [ref=e815]:
+                - columnheader "Stack Type" [ref=e816]
+                - columnheader "CSS" [ref=e817]
+            - rowgroup [ref=e818]:
+              - 'row "System UI font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif;" [ref=e819]':
+                - cell "System UI" [ref=e820]
+                - 'cell "font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif;" [ref=e821]':
+                  - code [ref=e822]: "font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif;"
+              - 'row "Serif font-family: Georgia, Cambria, \"Times New Roman\", Times, serif;" [ref=e823]':
+                - cell "Serif" [ref=e824]
+                - 'cell "font-family: Georgia, Cambria, \"Times New Roman\", Times, serif;" [ref=e825]':
+                  - code [ref=e826]: "font-family: Georgia, Cambria, \"Times New Roman\", Times, serif;"
+              - 'row "Sans Serif font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Arial, sans-serif;" [ref=e827]':
+                - cell "Sans Serif" [ref=e828]
+                - 'cell "font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Arial, sans-serif;" [ref=e829]':
+                  - code [ref=e830]: "font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Arial, sans-serif;"
+              - 'row "Monospace font-family: \"SF Mono\", Monaco, \"Cascadia Code\", \"Courier New\", monospace;" [ref=e831]':
+                - cell "Monospace" [ref=e832]
+                - 'cell "font-family: \"SF Mono\", Monaco, \"Cascadia Code\", \"Courier New\", monospace;" [ref=e833]':
+                  - code [ref=e834]: "font-family: \"SF Mono\", Monaco, \"Cascadia Code\", \"Courier New\", monospace;"
+        - generic [ref=e835]:
+          - heading "Variable Fonts" [level=2] [ref=e836]
+          - paragraph [ref=e837]: Variable fonts contain multiple variations in a single file, offering flexibility and better performance.
+          - heading "Variable Font Axes" [level=3] [ref=e838]
+          - table [ref=e839]:
+            - rowgroup [ref=e840]:
+              - row "Axis CSS Property Description Typical Range" [ref=e841]:
+                - columnheader "Axis" [ref=e842]
+                - columnheader "CSS Property" [ref=e843]
+                - columnheader "Description" [ref=e844]
+                - columnheader "Typical Range" [ref=e845]
+            - rowgroup [ref=e846]:
+              - row "Weight font-weight Thickness of strokes 100-900" [ref=e847]:
+                - cell "Weight" [ref=e848]
+                - cell "font-weight" [ref=e849]:
+                  - code [ref=e850]: font-weight
+                - cell "Thickness of strokes" [ref=e851]
+                - cell "100-900" [ref=e852]
+              - row "Width font-stretch Horizontal compression/expansion 50%-200%" [ref=e853]:
+                - cell "Width" [ref=e854]
+                - cell "font-stretch" [ref=e855]:
+                  - code [ref=e856]: font-stretch
+                - cell "Horizontal compression/expansion" [ref=e857]
+                - cell "50%-200%" [ref=e858]
+              - 'row "Slant font-style: oblique [angle] Angle of text slant -20deg to 20deg" [ref=e859]':
+                - cell "Slant" [ref=e860]
+                - 'cell "font-style: oblique [angle]" [ref=e861]':
+                  - code [ref=e862]: "font-style: oblique [angle]"
+                - cell "Angle of text slant" [ref=e863]
+                - cell "-20deg to 20deg" [ref=e864]
+              - row "Optical Size font-optical-sizing Optimizations for different sizes 6pt-72pt" [ref=e865]:
+                - cell "Optical Size" [ref=e866]
+                - cell "font-optical-sizing" [ref=e867]:
+                  - code [ref=e868]: font-optical-sizing
+                - cell "Optimizations for different sizes" [ref=e869]
+                - cell "6pt-72pt" [ref=e870]
+              - 'row "Italic font-style: italic Upright to italic 0-1" [ref=e871]':
+                - cell "Italic" [ref=e872]
+                - 'cell "font-style: italic" [ref=e873]':
+                  - code [ref=e874]: "font-style: italic"
+                - cell "Upright to italic" [ref=e875]
+                - cell "0-1" [ref=e876]
+          - heading "Custom Axes (font-variation-settings)" [level=3] [ref=e877]
+          - table [ref=e878]:
+            - rowgroup [ref=e879]:
+              - row "Example Axis Tag CSS" [ref=e880]:
+                - columnheader "Example Axis" [ref=e881]
+                - columnheader "Tag" [ref=e882]
+                - columnheader "CSS" [ref=e883]
+            - rowgroup [ref=e884]:
+              - 'row "Grade GRAD font-variation-settings: ''GRAD'' 50;" [ref=e885]':
+                - cell "Grade" [ref=e886]
+                - cell "GRAD" [ref=e887]
+                - 'cell "font-variation-settings: ''GRAD'' 50;" [ref=e888]':
+                  - code [ref=e889]: "font-variation-settings: 'GRAD' 50;"
+              - 'row "Casual CASL font-variation-settings: ''CASL'' 1;" [ref=e890]':
+                - cell "Casual" [ref=e891]
+                - cell "CASL" [ref=e892]
+                - 'cell "font-variation-settings: ''CASL'' 1;" [ref=e893]':
+                  - code [ref=e894]: "font-variation-settings: 'CASL' 1;"
+              - 'row "Cursive CRSV font-variation-settings: ''CRSV'' 0.5;" [ref=e895]':
+                - cell "Cursive" [ref=e896]
+                - cell "CRSV" [ref=e897]
+                - 'cell "font-variation-settings: ''CRSV'' 0.5;" [ref=e898]':
+                  - code [ref=e899]: "font-variation-settings: 'CRSV' 0.5;"
+              - 'row "Monospace MONO font-variation-settings: ''MONO'' 1;" [ref=e900]':
+                - cell "Monospace" [ref=e901]
+                - cell "MONO" [ref=e902]
+                - 'cell "font-variation-settings: ''MONO'' 1;" [ref=e903]':
+                  - code [ref=e904]: "font-variation-settings: 'MONO' 1;"
+          - heading "Variable Font Benefits" [level=3] [ref=e905]
+          - table [ref=e906]:
+            - rowgroup [ref=e907]:
+              - row "Benefit Description Example" [ref=e908]:
+                - columnheader "Benefit" [ref=e909]
+                - columnheader "Description" [ref=e910]
+                - columnheader "Example" [ref=e911]
+            - rowgroup [ref=e912]:
+              - 'row "File size One file instead of multiple weights Inter: 1 variable file vs 18 static files" [ref=e913]':
+                - cell "File size" [ref=e914]
+                - cell "One file instead of multiple weights" [ref=e915]
+                - 'cell "Inter: 1 variable file vs 18 static files" [ref=e916]'
+              - 'row "Flexibility Any value on axis, not just predefined weights font-weight: 450; (not just 400 or 500)" [ref=e917]':
+                - cell "Flexibility" [ref=e918]
+                - cell "Any value on axis, not just predefined weights" [ref=e919]
+                - 'cell "font-weight: 450; (not just 400 or 500)" [ref=e920]':
+                  - code [ref=e921]: "font-weight: 450;"
+                  - text: (not just 400 or 500)
+              - row "Animation Smooth transitions between variations Animate weight on hover" [ref=e922]:
+                - cell "Animation" [ref=e923]
+                - cell "Smooth transitions between variations" [ref=e924]
+                - cell "Animate weight on hover" [ref=e925]
+              - row "Responsive Adjust font characteristics at different sizes Optical sizing for better legibility" [ref=e926]:
+                - cell "Responsive" [ref=e927]
+                - cell "Adjust font characteristics at different sizes" [ref=e928]
+                - cell "Optical sizing for better legibility" [ref=e929]
+          - heading "Popular Variable Fonts" [level=3] [ref=e930]
+          - table [ref=e931]:
+            - rowgroup [ref=e932]:
+              - row "Font Axes Source Best For" [ref=e933]:
+                - columnheader "Font" [ref=e934]
+                - columnheader "Axes" [ref=e935]
+                - columnheader "Source" [ref=e936]
+                - columnheader "Best For" [ref=e937]
+            - rowgroup [ref=e938]:
+              - row "Inter Weight, Slant Google Fonts UI, body text" [ref=e939]:
+                - cell "Inter" [ref=e940]
+                - cell "Weight, Slant" [ref=e941]
+                - cell "Google Fonts" [ref=e942]
+                - cell "UI, body text" [ref=e943]
+              - row "Roboto Flex Weight, Width, Optical Size, Grade Google Fonts Versatile, UI" [ref=e944]:
+                - cell "Roboto Flex" [ref=e945]
+                - cell "Weight, Width, Optical Size, Grade" [ref=e946]
+                - cell "Google Fonts" [ref=e947]
+                - cell "Versatile, UI" [ref=e948]
+              - row "Source Sans 3 Weight, Width Adobe Fonts Body text, professional" [ref=e949]:
+                - cell "Source Sans 3" [ref=e950]
+                - cell "Weight, Width" [ref=e951]
+                - cell "Adobe Fonts" [ref=e952]
+                - cell "Body text, professional" [ref=e953]
+              - row "Recursive Weight, Slant, Casual, Monospace Google Fonts Code, playful designs" [ref=e954]:
+                - cell "Recursive" [ref=e955]
+                - cell "Weight, Slant, Casual, Monospace" [ref=e956]
+                - cell "Google Fonts" [ref=e957]
+                - cell "Code, playful designs" [ref=e958]
+              - row "Amstelvar 14 axes Google Fonts Experimentation, display" [ref=e959]:
+                - cell "Amstelvar" [ref=e960]
+                - cell "14 axes" [ref=e961]
+                - cell "Google Fonts" [ref=e962]
+                - cell "Experimentation, display" [ref=e963]
+          - paragraph [ref=e965]:
+            - strong [ref=e966]: "Browser Support:"
+            - text: Variable fonts are supported in all modern browsers (95%+). Always provide a fallback for older browsers.
+        - generic [ref=e967]:
+          - heading "Font Loading Strategies" [level=2] [ref=e968]
+          - paragraph [ref=e969]: How fonts load affects performance and user experience. Choose the right strategy for your use case.
+          - heading "font-display Values" [level=3] [ref=e970]
+          - table [ref=e971]:
+            - rowgroup [ref=e972]:
+              - row "Value Behavior Use Case Trade-offs" [ref=e973]:
+                - columnheader "Value" [ref=e974]
+                - columnheader "Behavior" [ref=e975]
+                - columnheader "Use Case" [ref=e976]
+                - columnheader "Trade-offs" [ref=e977]
+            - rowgroup [ref=e978]:
+              - row "swap Show fallback immediately, swap when loaded Most websites (recommended) Brief flash of unstyled text (FOUT)" [ref=e979]:
+                - cell "swap" [ref=e980]:
+                  - code [ref=e981]: swap
+                - cell "Show fallback immediately, swap when loaded" [ref=e982]
+                - cell "Most websites (recommended)" [ref=e983]
+                - cell "Brief flash of unstyled text (FOUT)" [ref=e984]
+              - row "block Hide text briefly (~3s), then show font or fallback Icon fonts, critical branding Invisible text delay (FOIT)" [ref=e985]:
+                - cell "block" [ref=e986]:
+                  - code [ref=e987]: block
+                - cell "Hide text briefly (~3s), then show font or fallback" [ref=e988]
+                - cell "Icon fonts, critical branding" [ref=e989]
+                - cell "Invisible text delay (FOIT)" [ref=e990]
+              - row "fallback Very brief hide (~100ms), swap if loaded within 3s Balance between swap and block May not swap if slow connection" [ref=e991]:
+                - cell "fallback" [ref=e992]:
+                  - code [ref=e993]: fallback
+                - cell "Very brief hide (~100ms), swap if loaded within 3s" [ref=e994]
+                - cell "Balance between swap and block" [ref=e995]
+                - cell "May not swap if slow connection" [ref=e996]
+              - row "optional Very brief hide, browser decides whether to swap Performance-critical, fonts are enhancement Font may not load on slow connections" [ref=e997]:
+                - cell "optional" [ref=e998]:
+                  - code [ref=e999]: optional
+                - cell "Very brief hide, browser decides whether to swap" [ref=e1000]
+                - cell "Performance-critical, fonts are enhancement" [ref=e1001]
+                - cell "Font may not load on slow connections" [ref=e1002]
+              - row "auto Browser chooses (usually similar to block) Default, not recommended Unpredictable behavior" [ref=e1003]:
+                - cell "auto" [ref=e1004]:
+                  - code [ref=e1005]: auto
+                - cell "Browser chooses (usually similar to block)" [ref=e1006]
+                - cell "Default, not recommended" [ref=e1007]
+                - cell "Unpredictable behavior" [ref=e1008]
+          - heading "Loading Strategies" [level=3] [ref=e1009]
+          - table [ref=e1010]:
+            - rowgroup [ref=e1011]:
+              - row "Strategy Implementation When to Use" [ref=e1012]:
+                - columnheader "Strategy" [ref=e1013]
+                - columnheader "Implementation" [ref=e1014]
+                - columnheader "When to Use" [ref=e1015]
+            - rowgroup [ref=e1016]:
+              - row "Preload critical fonts <link rel=\"preload\" href=\"font.woff2\" as=\"font\" crossorigin> Above-the-fold text, critical headings" [ref=e1017]:
+                - cell "Preload critical fonts" [ref=e1018]
+                - cell "<link rel=\"preload\" href=\"font.woff2\" as=\"font\" crossorigin>" [ref=e1019]:
+                  - code [ref=e1020]: <link rel="preload" href="font.woff2" as="font" crossorigin>
+                - cell "Above-the-fold text, critical headings" [ref=e1021]
+              - row "Subset fonts Include only needed characters/glyphs Reduce file size, faster loading" [ref=e1022]:
+                - cell "Subset fonts" [ref=e1023]
+                - cell "Include only needed characters/glyphs" [ref=e1024]
+                - cell "Reduce file size, faster loading" [ref=e1025]
+              - row "Font loading API document.fonts.load('16px My Font') Advanced control, custom loading UI" [ref=e1026]:
+                - cell "Font loading API" [ref=e1027]
+                - cell "document.fonts.load('16px My Font')" [ref=e1028]:
+                  - code [ref=e1029]: document.fonts.load('16px My Font')
+                - cell "Advanced control, custom loading UI" [ref=e1030]
+              - row "CDN with cache Use Google Fonts CDN or similar Quick implementation, shared cache" [ref=e1031]:
+                - cell "CDN with cache" [ref=e1032]
+                - cell "Use Google Fonts CDN or similar" [ref=e1033]
+                - cell "Quick implementation, shared cache" [ref=e1034]
+              - row "Self-host with caching Host fonts locally with long cache headers Best performance, privacy, control" [ref=e1035]:
+                - cell "Self-host with caching" [ref=e1036]
+                - cell "Host fonts locally with long cache headers" [ref=e1037]
+                - cell "Best performance, privacy, control" [ref=e1038]
+          - heading "Performance Optimization" [level=3] [ref=e1039]
+          - table [ref=e1040]:
+            - rowgroup [ref=e1041]:
+              - row "Technique How It Helps Implementation" [ref=e1042]:
+                - columnheader "Technique" [ref=e1043]
+                - columnheader "How It Helps" [ref=e1044]
+                - columnheader "Implementation" [ref=e1045]
+            - rowgroup [ref=e1046]:
+              - row "Limit font weights Fewer files to download Use only 2-3 weights (400, 600, 700)" [ref=e1047]:
+                - cell "Limit font weights" [ref=e1048]
+                - cell "Fewer files to download" [ref=e1049]
+                - cell "Use only 2-3 weights (400, 600, 700)" [ref=e1050]
+              - 'row "Use WOFF2 only Smallest file size, modern browsers src: url(''font.woff2'') format(''woff2'');" [ref=e1051]':
+                - cell "Use WOFF2 only" [ref=e1052]
+                - cell "Smallest file size, modern browsers" [ref=e1053]
+                - 'cell "src: url(''font.woff2'') format(''woff2'');" [ref=e1054]':
+                  - code [ref=e1055]: "src: url('font.woff2') format('woff2');"
+              - 'row "Unicode subsetting Remove unused characters Tools: glyphhanger, Font Squirrel" [ref=e1056]':
+                - cell "Unicode subsetting" [ref=e1057]
+                - cell "Remove unused characters" [ref=e1058]
+                - 'cell "Tools: glyphhanger, Font Squirrel" [ref=e1059]'
+              - row "Optimize fallback fonts Reduce layout shift Match x-height, width with size-adjust" [ref=e1060]:
+                - cell "Optimize fallback fonts" [ref=e1061]
+                - cell "Reduce layout shift" [ref=e1062]
+                - cell "Match x-height, width with size-adjust" [ref=e1063]
+              - row "Use variable fonts One file instead of multiple Replace multiple static weights" [ref=e1064]:
+                - cell "Use variable fonts" [ref=e1065]
+                - cell "One file instead of multiple" [ref=e1066]
+                - cell "Replace multiple static weights" [ref=e1067]
+              - row "Lazy load fonts Load fonts when needed Load display fonts for below-fold content later" [ref=e1068]:
+                - cell "Lazy load fonts" [ref=e1069]
+                - cell "Load fonts when needed" [ref=e1070]
+                - cell "Load display fonts for below-fold content later" [ref=e1071]
+          - paragraph [ref=e1073]:
+            - strong [ref=e1074]: "Best Practice:"
+            - text: Use
+            - code [ref=e1075]: "font-display: swap"
+            - text: for most cases. Preload your most critical font file. Self-host fonts when possible for better performance and privacy.
+        - generic [ref=e1076]:
+          - heading "Responsive Typography" [level=2] [ref=e1077]
+          - paragraph [ref=e1078]: Typography should adapt to different screen sizes and reading contexts.
+          - heading "Responsive Font Sizing Techniques" [level=3] [ref=e1079]
+          - table [ref=e1080]:
+            - rowgroup [ref=e1081]:
+              - row "Technique CSS Example Pros Cons" [ref=e1082]:
+                - columnheader "Technique" [ref=e1083]
+                - columnheader "CSS Example" [ref=e1084]
+                - columnheader "Pros" [ref=e1085]
+                - columnheader "Cons" [ref=e1086]
+            - rowgroup [ref=e1087]:
+              - 'row "Media queries @media (min-width: 768px) { h1 { font-size: 3rem; } } Precise control, reliable More code, breakpoint-dependent" [ref=e1088]':
+                - cell "Media queries" [ref=e1089]
+                - 'cell "@media (min-width: 768px) { h1 { font-size: 3rem; } }" [ref=e1090]':
+                  - code [ref=e1091]: "@media (min-width: 768px) { h1 { font-size: 3rem; } }"
+                - cell "Precise control, reliable" [ref=e1092]
+                - cell "More code, breakpoint-dependent" [ref=e1093]
+              - 'row "Viewport units font-size: 5vw; Fluid scaling Can be too small/large, accessibility issues" [ref=e1094]':
+                - cell "Viewport units" [ref=e1095]
+                - 'cell "font-size: 5vw;" [ref=e1096]':
+                  - code [ref=e1097]: "font-size: 5vw;"
+                - cell "Fluid scaling" [ref=e1098]
+                - cell "Can be too small/large, accessibility issues" [ref=e1099]
+              - 'row "clamp() font-size: clamp(1rem, 2.5vw, 3rem); Fluid with limits, no media queries needed Requires modern browser" [ref=e1100]':
+                - cell "clamp()" [ref=e1101]
+                - 'cell "font-size: clamp(1rem, 2.5vw, 3rem);" [ref=e1102]':
+                  - code [ref=e1103]: "font-size: clamp(1rem, 2.5vw, 3rem);"
+                - cell "Fluid with limits, no media queries needed" [ref=e1104]
+                - cell "Requires modern browser" [ref=e1105]
+              - 'row "calc() + vw font-size: calc(1rem + 1vw); Fluid with base size No max/min constraints" [ref=e1106]':
+                - cell "calc() + vw" [ref=e1107]
+                - 'cell "font-size: calc(1rem + 1vw);" [ref=e1108]':
+                  - code [ref=e1109]: "font-size: calc(1rem + 1vw);"
+                - cell "Fluid with base size" [ref=e1110]
+                - cell "No max/min constraints" [ref=e1111]
+              - 'row "Container queries @container (min-width: 400px) { ... } Component-based responsive Newer, limited support" [ref=e1112]':
+                - cell "Container queries" [ref=e1113]
+                - 'cell "@container (min-width: 400px) { ... }" [ref=e1114]':
+                  - code [ref=e1115]: "@container (min-width: 400px) { ... }"
+                - cell "Component-based responsive" [ref=e1116]
+                - cell "Newer, limited support" [ref=e1117]
+          - heading "Fluid Typography Formula" [level=3] [ref=e1118]
+          - table [ref=e1119]:
+            - rowgroup [ref=e1120]:
+              - row "Use Case clamp() Example Result" [ref=e1121]:
+                - columnheader "Use Case" [ref=e1122]
+                - columnheader "clamp() Example" [ref=e1123]
+                - columnheader "Result" [ref=e1124]
+            - rowgroup [ref=e1125]:
+              - 'row "Body text font-size: clamp(1rem, 0.875rem + 0.5vw, 1.125rem); 16px → 18px (scales between)" [ref=e1126]':
+                - cell "Body text" [ref=e1127]
+                - 'cell "font-size: clamp(1rem, 0.875rem + 0.5vw, 1.125rem);" [ref=e1128]':
+                  - code [ref=e1129]: "font-size: clamp(1rem, 0.875rem + 0.5vw, 1.125rem);"
+                - cell "16px → 18px (scales between)" [ref=e1130]
+              - 'row "H1 heading font-size: clamp(2rem, 1.5rem + 2vw, 4rem); 32px → 64px" [ref=e1131]':
+                - cell "H1 heading" [ref=e1132]
+                - 'cell "font-size: clamp(2rem, 1.5rem + 2vw, 4rem);" [ref=e1133]':
+                  - code [ref=e1134]: "font-size: clamp(2rem, 1.5rem + 2vw, 4rem);"
+                - cell "32px → 64px" [ref=e1135]
+              - 'row "H2 heading font-size: clamp(1.5rem, 1.25rem + 1.5vw, 3rem); 24px → 48px" [ref=e1136]':
+                - cell "H2 heading" [ref=e1137]
+                - 'cell "font-size: clamp(1.5rem, 1.25rem + 1.5vw, 3rem);" [ref=e1138]':
+                  - code [ref=e1139]: "font-size: clamp(1.5rem, 1.25rem + 1.5vw, 3rem);"
+                - cell "24px → 48px" [ref=e1140]
+              - 'row "Small text font-size: clamp(0.875rem, 0.875rem + 0.25vw, 1rem); 14px → 16px" [ref=e1141]':
+                - cell "Small text" [ref=e1142]
+                - 'cell "font-size: clamp(0.875rem, 0.875rem + 0.25vw, 1rem);" [ref=e1143]':
+                  - code [ref=e1144]: "font-size: clamp(0.875rem, 0.875rem + 0.25vw, 1rem);"
+                - cell "14px → 16px" [ref=e1145]
+          - heading "Responsive Spacing" [level=3] [ref=e1146]
+          - table [ref=e1147]:
+            - rowgroup [ref=e1148]:
+              - row "Property Mobile Desktop Fluid Example" [ref=e1149]:
+                - columnheader "Property" [ref=e1150]
+                - columnheader "Mobile" [ref=e1151]
+                - columnheader "Desktop" [ref=e1152]
+                - columnheader "Fluid Example" [ref=e1153]
+            - rowgroup [ref=e1154]:
+              - row "Line height 1.6-1.8 1.5-1.6 Usually fixed value" [ref=e1155]:
+                - cell "Line height" [ref=e1156]
+                - cell "1.6-1.8" [ref=e1157]
+                - cell "1.5-1.6" [ref=e1158]
+                - cell "Usually fixed value" [ref=e1159]
+              - 'row "Paragraph spacing 1.25em 1.5em margin-bottom: clamp(1.25rem, 1rem + 1vw, 1.5rem);" [ref=e1160]':
+                - cell "Paragraph spacing" [ref=e1161]
+                - cell "1.25em" [ref=e1162]
+                - cell "1.5em" [ref=e1163]
+                - 'cell "margin-bottom: clamp(1.25rem, 1rem + 1vw, 1.5rem);" [ref=e1164]':
+                  - code [ref=e1165]: "margin-bottom: clamp(1.25rem, 1rem + 1vw, 1.5rem);"
+              - 'row "Heading spacing 1.5em top 2em top margin-top: clamp(1.5rem, 1rem + 2vw, 2.5rem);" [ref=e1166]':
+                - cell "Heading spacing" [ref=e1167]
+                - cell "1.5em top" [ref=e1168]
+                - cell "2em top" [ref=e1169]
+                - 'cell "margin-top: clamp(1.5rem, 1rem + 2vw, 2.5rem);" [ref=e1170]':
+                  - code [ref=e1171]: "margin-top: clamp(1.5rem, 1rem + 2vw, 2.5rem);"
+              - 'row "Max width 100% 65ch max-width: min(65ch, 100%);" [ref=e1172]':
+                - cell "Max width" [ref=e1173]
+                - cell "100%" [ref=e1174]
+                - cell "65ch" [ref=e1175]
+                - 'cell "max-width: min(65ch, 100%);" [ref=e1176]':
+                  - code [ref=e1177]: "max-width: min(65ch, 100%);"
+          - heading "Mobile Typography Considerations" [level=3] [ref=e1178]
+          - table [ref=e1179]:
+            - rowgroup [ref=e1180]:
+              - row "Consideration Recommendation Why" [ref=e1181]:
+                - columnheader "Consideration" [ref=e1182]
+                - columnheader "Recommendation" [ref=e1183]
+                - columnheader "Why" [ref=e1184]
+            - rowgroup [ref=e1185]:
+              - row "Minimum font size 16px for body text Prevents mobile zoom on form inputs" [ref=e1186]:
+                - cell "Minimum font size" [ref=e1187]
+                - cell "16px for body text" [ref=e1188]
+                - cell "Prevents mobile zoom on form inputs" [ref=e1189]
+              - row "Line length 45-60 characters Shorter lines for narrow screens" [ref=e1190]:
+                - cell "Line length" [ref=e1191]
+                - cell "45-60 characters" [ref=e1192]
+                - cell "Shorter lines for narrow screens" [ref=e1193]
+              - row "Tap targets 44-48px minimum Easy tapping for links in text" [ref=e1194]:
+                - cell "Tap targets" [ref=e1195]
+                - cell "44-48px minimum" [ref=e1196]
+                - cell "Easy tapping for links in text" [ref=e1197]
+              - row "Line height Slightly larger (1.6-1.8) Easier reading on small screens" [ref=e1198]:
+                - cell "Line height" [ref=e1199]
+                - cell "Slightly larger (1.6-1.8)" [ref=e1200]
+                - cell "Easier reading on small screens" [ref=e1201]
+              - row "Font weight Avoid very light weights Harder to read on small screens" [ref=e1202]:
+                - cell "Font weight" [ref=e1203]
+                - cell "Avoid very light weights" [ref=e1204]
+                - cell "Harder to read on small screens" [ref=e1205]
+        - generic [ref=e1206]:
+          - heading "Typography Accessibility" [level=2] [ref=e1207]
+          - paragraph [ref=e1208]: Accessible typography ensures content is readable for all users, including those with visual impairments.
+          - heading "Minimum Requirements" [level=3] [ref=e1209]
+          - table [ref=e1210]:
+            - rowgroup [ref=e1211]:
+              - row "Requirement WCAG Level Guideline" [ref=e1212]:
+                - columnheader "Requirement" [ref=e1213]
+                - columnheader "WCAG Level" [ref=e1214]
+                - columnheader "Guideline" [ref=e1215]
+            - rowgroup [ref=e1216]:
+              - row "Minimum font size AA 16px for body text (14px acceptable for large sites)" [ref=e1217]:
+                - cell "Minimum font size" [ref=e1218]
+                - cell "AA" [ref=e1219]
+                - cell "16px for body text (14px acceptable for large sites)" [ref=e1220]
+              - row "Color contrast (normal text) AA 4.5:1 ratio minimum" [ref=e1221]:
+                - cell "Color contrast (normal text)" [ref=e1222]
+                - cell "AA" [ref=e1223]
+                - cell "4.5:1 ratio minimum" [ref=e1224]
+              - row "Color contrast (large text) AA 3:1 ratio (18px+ or 14px+ bold)" [ref=e1225]:
+                - cell "Color contrast (large text)" [ref=e1226]
+                - cell "AA" [ref=e1227]
+                - cell "3:1 ratio (18px+ or 14px+ bold)" [ref=e1228]
+              - row "Color contrast (enhanced) AAA 7:1 for normal, 4.5:1 for large" [ref=e1229]:
+                - cell "Color contrast (enhanced)" [ref=e1230]
+                - cell "AAA" [ref=e1231]
+                - cell "7:1 for normal, 4.5:1 for large" [ref=e1232]
+              - row "Text resize AA Text must scale up to 200% without loss of content" [ref=e1233]:
+                - cell "Text resize" [ref=e1234]
+                - cell "AA" [ref=e1235]
+                - cell "Text must scale up to 200% without loss of content" [ref=e1236]
+              - row "Line spacing AA At least 1.5 for paragraphs" [ref=e1237]:
+                - cell "Line spacing" [ref=e1238]
+                - cell "AA" [ref=e1239]
+                - cell "At least 1.5 for paragraphs" [ref=e1240]
+              - row "Paragraph spacing AA At least 2× font size" [ref=e1241]:
+                - cell "Paragraph spacing" [ref=e1242]
+                - cell "AA" [ref=e1243]
+                - cell "At least 2× font size" [ref=e1244]
+          - heading "Readable Typography Checklist" [level=3] [ref=e1245]
+          - table [ref=e1246]:
+            - rowgroup [ref=e1247]:
+              - row "Aspect Guideline Why It Matters" [ref=e1248]:
+                - columnheader "Aspect" [ref=e1249]
+                - columnheader "Guideline" [ref=e1250]
+                - columnheader "Why It Matters" [ref=e1251]
+            - rowgroup [ref=e1252]:
+              - row "Font size 16px minimum for body Prevents mobile zoom, readable for most users" [ref=e1253]:
+                - cell "Font size" [ref=e1254]
+                - cell "16px minimum for body" [ref=e1255]
+                - cell "Prevents mobile zoom, readable for most users" [ref=e1256]
+              - row "Line height 1.5-1.6 for body text Easier to track lines, helps dyslexic readers" [ref=e1257]:
+                - cell "Line height" [ref=e1258]
+                - cell "1.5-1.6 for body text" [ref=e1259]
+                - cell "Easier to track lines, helps dyslexic readers" [ref=e1260]
+              - row "Line length 45-75 characters Optimal reading comfort, reduces eye strain" [ref=e1261]:
+                - cell "Line length" [ref=e1262]
+                - cell "45-75 characters" [ref=e1263]
+                - cell "Optimal reading comfort, reduces eye strain" [ref=e1264]
+              - row "Alignment Left-aligned (for LTR languages) Easier to find next line, helps dyslexic readers" [ref=e1265]:
+                - cell "Alignment" [ref=e1266]
+                - cell "Left-aligned (for LTR languages)" [ref=e1267]
+                - cell "Easier to find next line, helps dyslexic readers" [ref=e1268]
+              - row "Justification Avoid full justification Uneven spacing creates \"rivers\" that hinder reading" [ref=e1269]:
+                - cell "Justification" [ref=e1270]
+                - cell "Avoid full justification" [ref=e1271]
+                - cell "Uneven spacing creates \"rivers\" that hinder reading" [ref=e1272]
+              - row "All caps Use sparingly, never for long text Harder to read, loses word shape recognition" [ref=e1273]:
+                - cell "All caps" [ref=e1274]
+                - cell "Use sparingly, never for long text" [ref=e1275]
+                - cell "Harder to read, loses word shape recognition" [ref=e1276]
+              - row "Italics Short phrases only Extended italics harder to read" [ref=e1277]:
+                - cell "Italics" [ref=e1278]
+                - cell "Short phrases only" [ref=e1279]
+                - cell "Extended italics harder to read" [ref=e1280]
+              - row "Link underlines Underline or clear visual distinction Color alone insufficient for color-blind users" [ref=e1281]:
+                - cell "Link underlines" [ref=e1282]
+                - cell "Underline or clear visual distinction" [ref=e1283]
+                - cell "Color alone insufficient for color-blind users" [ref=e1284]
+          - heading "Dyslexia-Friendly Typography" [level=3] [ref=e1285]
+          - table [ref=e1286]:
+            - rowgroup [ref=e1287]:
+              - row "Guideline Recommendation" [ref=e1288]:
+                - columnheader "Guideline" [ref=e1289]
+                - columnheader "Recommendation" [ref=e1290]
+            - rowgroup [ref=e1291]:
+              - row "Font choice Sans-serif fonts with distinct letterforms (Verdana, Arial, Comic Sans)" [ref=e1292]:
+                - cell "Font choice" [ref=e1293]
+                - cell "Sans-serif fonts with distinct letterforms (Verdana, Arial, Comic Sans)" [ref=e1294]
+              - 'row "Letter spacing Slightly increased: letter-spacing: 0.12em;" [ref=e1295]':
+                - cell "Letter spacing" [ref=e1296]
+                - 'cell "Slightly increased: letter-spacing: 0.12em;" [ref=e1297]':
+                  - text: "Slightly increased:"
+                  - code [ref=e1298]: "letter-spacing: 0.12em;"
+              - 'row "Word spacing Slightly increased: word-spacing: 0.16em;" [ref=e1299]':
+                - cell "Word spacing" [ref=e1300]
+                - 'cell "Slightly increased: word-spacing: 0.16em;" [ref=e1301]':
+                  - text: "Slightly increased:"
+                  - code [ref=e1302]: "word-spacing: 0.16em;"
+              - row "Line height 1.5-1.8 (more generous)" [ref=e1303]:
+                - cell "Line height" [ref=e1304]
+                - cell "1.5-1.8 (more generous)" [ref=e1305]
+              - row "Paragraph spacing 1.5-2× line height" [ref=e1306]:
+                - cell "Paragraph spacing" [ref=e1307]
+                - cell "1.5-2× line height" [ref=e1308]
+              - row "Text alignment Left-aligned, ragged right (never justified)" [ref=e1309]:
+                - cell "Text alignment" [ref=e1310]
+                - cell "Left-aligned, ragged right (never justified)" [ref=e1311]
+              - row "Line length 60-70 characters (slightly shorter)" [ref=e1312]:
+                - cell "Line length" [ref=e1313]
+                - cell "60-70 characters (slightly shorter)" [ref=e1314]
+          - paragraph [ref=e1316]:
+            - strong [ref=e1317]: "Accessibility Tip:"
+            - text: Never rely on color alone to convey meaning. Always use additional cues like font weight, underlines, or icons. Test your typography with actual users who have visual impairments.
+        - generic [ref=e1318]:
+          - heading "Best Practices & Common Mistakes" [level=2] [ref=e1319]
+          - heading "Do's" [level=3] [ref=e1320]
+          - generic [ref=e1321]:
+            - generic [ref=e1322]:
+              - heading "✓ Use rem for font sizes" [level=4] [ref=e1323]
+              - paragraph [ref=e1324]: Respects user preferences, scales consistently
+              - code [ref=e1325]: "font-size: 1.5rem;"
+            - generic [ref=e1326]:
+              - heading "✓ Establish type scale" [level=4] [ref=e1327]
+              - paragraph [ref=e1328]: Creates consistent, harmonious hierarchy
+              - code [ref=e1329]: 16, 20, 25, 31, 39, 49
+            - generic [ref=e1330]:
+              - heading "✓ Limit font families" [level=4] [ref=e1331]
+              - paragraph [ref=e1332]: 2-3 max for cohesive design
+              - code [ref=e1333]: One for headings, one for body
+            - generic [ref=e1334]:
+              - 'heading "✓ Use font-display: swap" [level=4] [ref=e1335]'
+              - paragraph [ref=e1336]: Shows content immediately with fallback
+              - code [ref=e1337]: "font-display: swap;"
+            - generic [ref=e1338]:
+              - heading "✓ Test at different sizes" [level=4] [ref=e1339]
+              - paragraph [ref=e1340]: Ensure readability on all devices
+              - code [ref=e1341]: Mobile, tablet, desktop
+            - generic [ref=e1342]:
+              - heading "✓ Check color contrast" [level=4] [ref=e1343]
+              - paragraph [ref=e1344]: Minimum 4.5:1 for body text
+              - code [ref=e1345]: Use contrast checker tool
+            - generic [ref=e1346]:
+              - heading "✓ Set max-width on text" [level=4] [ref=e1347]
+              - paragraph [ref=e1348]: Optimal line length for readability
+              - code [ref=e1349]: "max-width: 65ch;"
+            - generic [ref=e1350]:
+              - heading "✓ Use system fonts when appropriate" [level=4] [ref=e1351]
+              - paragraph [ref=e1352]: Zero load time, better performance
+              - code [ref=e1353]: "-apple-system, BlinkMacSystemFont"
+          - heading "Don'ts" [level=3] [ref=e1354]
+          - generic [ref=e1355]:
+            - generic [ref=e1356]:
+              - heading "✗ Don't use px for font sizes" [level=4] [ref=e1357]
+              - paragraph [ref=e1358]: Doesn't respect user preferences
+              - paragraph [ref=e1359]:
+                - strong [ref=e1360]: "Instead:"
+                - text: Use rem or em
+            - generic [ref=e1361]:
+              - heading "✗ Don't use too many fonts" [level=4] [ref=e1362]
+              - paragraph [ref=e1363]: Slows loading, creates visual chaos
+              - paragraph [ref=e1364]:
+                - strong [ref=e1365]: "Instead:"
+                - text: Limit to 2-3 families
+            - generic [ref=e1366]:
+              - 'heading "✗ Don''t use font-weight: normal/bold" [level=4] [ref=e1367]'
+              - paragraph [ref=e1368]: Vague, depends on browser defaults
+              - paragraph [ref=e1369]:
+                - strong [ref=e1370]: "Instead:"
+                - text: Use numeric values (400, 700)
+            - generic [ref=e1371]:
+              - heading "✗ Don't justify body text" [level=4] [ref=e1372]
+              - paragraph [ref=e1373]: Creates uneven spacing, rivers of white
+              - paragraph [ref=e1374]:
+                - strong [ref=e1375]: "Instead:"
+                - text: Left-align for readability
+            - generic [ref=e1376]:
+              - heading "✗ Don't use long lines" [level=4] [ref=e1377]
+              - paragraph [ref=e1378]: Hard to track, eye strain
+              - paragraph [ref=e1379]:
+                - strong [ref=e1380]: "Instead:"
+                - text: 45-75 characters per line
+            - generic [ref=e1381]:
+              - heading "✗ Don't use font size < 16px" [level=4] [ref=e1382]
+              - paragraph [ref=e1383]: Hard to read, triggers mobile zoom
+              - paragraph [ref=e1384]:
+                - strong [ref=e1385]: "Instead:"
+                - text: 16px minimum for body
+            - generic [ref=e1386]:
+              - heading "✗ Don't use all caps for long text" [level=4] [ref=e1387]
+              - paragraph [ref=e1388]: Significantly harder to read
+              - paragraph [ref=e1389]:
+                - strong [ref=e1390]: "Instead:"
+                - text: Use for short labels only
+            - generic [ref=e1391]:
+              - heading "✗ Don't rely on color alone" [level=4] [ref=e1392]
+              - paragraph [ref=e1393]: Excludes color-blind users
+              - paragraph [ref=e1394]:
+                - strong [ref=e1395]: "Instead:"
+                - text: Add underlines, icons, or weight
+            - generic [ref=e1396]:
+              - heading "✗ Don't use tight line-height on body" [level=4] [ref=e1397]
+              - paragraph [ref=e1398]: Lines too close together
+              - paragraph [ref=e1399]:
+                - strong [ref=e1400]: "Instead:"
+                - text: Use 1.5-1.6 for paragraphs
+            - generic [ref=e1401]:
+              - heading "✗ Don't load unnecessary font weights" [level=4] [ref=e1402]
+              - paragraph [ref=e1403]: Slows page load
+              - paragraph [ref=e1404]:
+                - strong [ref=e1405]: "Instead:"
+                - text: Load only weights you use
+          - paragraph [ref=e1407]:
+            - strong [ref=e1408]: "Golden Rule:"
+            - text: Typography should be invisible. When done right, users focus on content, not the type itself. Prioritize readability over creativity.
+        - generic [ref=e1409]:
+          - heading "Related Resources" [level=3] [ref=e1410]
+          - generic [ref=e1411]:
+            - link "Clamp Generator Generate fluid typography with clamp() function" [ref=e1412] [cursor=pointer]:
+              - /url: /tools/clamp-generator/
+              - heading "Clamp Generator" [level=4] [ref=e1413]
+              - paragraph [ref=e1414]: Generate fluid typography with clamp() function
+            - link "Design Systems Guide Build consistent design systems with tokens" [ref=e1415] [cursor=pointer]:
+              - /url: /guides/design-systems/
+              - heading "Design Systems Guide" [level=4] [ref=e1416]
+              - paragraph [ref=e1417]: Build consistent design systems with tokens
+    - generic [ref=e1421]:
+      - heading "Get the Weekly Drop" [level=2] [ref=e1422]
+      - paragraph [ref=e1423]:
+        - text: Weekly front-end tools, tips, and resources.
+        - text: Plus a free icon pack to get you started.
+      - paragraph [ref=e1424]: No spam. Unsubscribe anytime.
+  - contentinfo [ref=e1425]:
+    - generic [ref=e1426]:
+      - generic [ref=e1427]:
+        - generic [ref=e1428]:
+          - img "Design.dev" [ref=e1429]
+          - paragraph [ref=e1430]: Free web design & development tools and weekly newsletter.
+        - generic [ref=e1431]:
+          - heading "Popular" [level=4] [ref=e1432]
+          - list [ref=e1433]:
+            - listitem [ref=e1434]:
+              - link "Cursor Rules" [ref=e1435] [cursor=pointer]:
+                - /url: /ai/cursor-rules-generator/
+            - listitem [ref=e1436]:
+              - link "Claude Skills" [ref=e1437] [cursor=pointer]:
+                - /url: /ai/claude-skills-generator/
+            - listitem [ref=e1438]:
+              - link "CSS Grid Mapper" [ref=e1439] [cursor=pointer]:
+                - /url: /tools/grid-area-mapper/
+            - listitem [ref=e1440]:
+              - link "Shadow Generator" [ref=e1441] [cursor=pointer]:
+                - /url: /tools/box-shadow-generator/
+            - listitem [ref=e1442]:
+              - link "Image Optimizer" [ref=e1443] [cursor=pointer]:
+                - /url: /tools/image-optimizer/
+            - listitem [ref=e1444]:
+              - link "View All →" [ref=e1445] [cursor=pointer]:
+                - /url: /tools/
+        - generic [ref=e1446]:
+          - heading "Resources" [level=4] [ref=e1447]
+          - list [ref=e1448]:
+            - listitem [ref=e1449]:
+              - link "CSS.dev" [ref=e1450] [cursor=pointer]:
+                - /url: https://css.dev/
+            - listitem [ref=e1451]:
+              - link "Web Developer" [ref=e1452] [cursor=pointer]:
+                - /url: https://webdeveloper.com/
+            - listitem [ref=e1453]:
+              - link "Authentic Jobs" [ref=e1454] [cursor=pointer]:
+                - /url: https://authenticjobs.com/
+            - listitem [ref=e1455]:
+              - link "Web Reference" [ref=e1456] [cursor=pointer]:
+                - /url: https://webreference.com/
+            - listitem [ref=e1457]:
+              - link "Web Design Stack" [ref=e1458] [cursor=pointer]:
+                - /url: https://webdesignstack.com/
+            - listitem [ref=e1459]:
+              - link "View All →" [ref=e1460] [cursor=pointer]:
+                - /url: /resources/
+        - generic [ref=e1461]:
+          - heading "Company" [level=4] [ref=e1462]
+          - list [ref=e1463]:
+            - listitem [ref=e1464]:
+              - link "Sponsor" [ref=e1465] [cursor=pointer]:
+                - /url: /sponsor/
+            - listitem [ref=e1466]:
+              - link "Privacy" [ref=e1467] [cursor=pointer]:
+                - /url: /privacy/
+            - listitem [ref=e1468]:
+              - link "Terms" [ref=e1469] [cursor=pointer]:
+                - /url: /terms/
+      - paragraph [ref=e1471]: © 2026 design.dev - All rights reserved

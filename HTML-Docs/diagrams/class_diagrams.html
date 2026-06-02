@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class Diagrams</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / diagrams</div>
+<h1>Class Diagrams</h1>
+<br>
+<h2>Core Source System Classes</h2>
+<br>
+<div class="mermaid">classDiagram
+    class BaseSource {
+        +name
+        +display_name
+        +category
+        +__init__()
+        +get_articles(count)
+        +get_article_content(url)
+        +validate()
+        +get_rate_limit()
+        +get_user_agent()
+    }
+
+    class ConfigDrivenSource {
+        +config
+        +selectors
+        +__init__(config)
+        +get_articles(count)
+        +get_article_content(url)
+        +validate()
+        -_parse_article_list(html)
+        -_extract_content(html)
+    }
+
+    class CustomSource {
+        +__init__()
+        +get_articles(count)
+        +get_article_content(url)
+        +get_comments(url)
+        -_custom_processing()
+    }
+
+    class HackerNewsSource {
+        +api_base
+        +__init__()
+        +get_articles(count)
+        +get_article_content(url)
+        +get_comments(url)
+        -_fetch_from_api(endpoint)
+        -_process_comments(comments)
+    }
+
+    class BBCSource {
+        +rss_url
+        +__init__()
+        +get_articles(count)
+        +get_article_content(url)
+        -_parse_rss(xml)
+        -_extract_bbc_content(html)
+    }
+
+    class SourceFactory {
+        +registry
+        +__init__(registry)
+        +create_source(name)
+        +get_available_sources()
+        +validate_source(name)
+        -_resolve_source_type(name)
+    }
+
+    class SourceRegistry {
+        +sources
+        +__init__()
+        +register_source(metadata)
+        +get_source_metadata(name)
+        +list_sources()
+        +discover_sources()
+        -_load_config_driven_sources()
+        -_load_custom_sources()
+    }
+
+    class Article {
+        +title
+        +url
+        +content
+        +author
+        +published_date
+        +source
+        +metadata
+        +comments
+        +media_urls
+    }
+
+    class Comment {
+        +author
+        +content
+        +timestamp
+        +replies
+        +score
+    }
+
+    BaseSource <|-- ConfigDrivenSource
+    BaseSource <|-- CustomSource
+    CustomSource <|-- HackerNewsSource
+    CustomSource <|-- BBCSource
+    SourceFactory --> BaseSource  : creates
+    SourceFactory --> SourceRegistry  : uses
+    SourceRegistry --> BaseSource  : manages
+    BaseSource --> Article  : produces
+    Article --> Comment  : contains
+</div>
+<br>
+<h2>Media Processing Classes</h2>
+<br>
+<div class="mermaid">classDiagram
+    class UnifiedMediaProcessor {
+        +session
+        +output_dir
+        +download_media
+        +__init__(session, output_dir, download_media)
+        +process_article_media(article)
+        +download_images(urls)
+        +download_media_files(urls)
+        -_detect_media_type(url)
+        -_organize_media_files()
+    }
+
+    class ImageProcessor {
+        +max_size
+        +quality
+        +__init__(max_size, quality)
+        +process_image(file_path)
+        +resize_image(image)
+        +optimize_image(image)
+        +convert_format(image)
+        -_validate_image(file_path)
+    }
+
+    class MediaDownloader {
+        +session
+        +timeout
+        +retry_count
+        +__init__(session, timeout, retry_count)
+        +download_file(url)
+        +get_file_info(url)
+        +validate_download(file_path)
+        -_create_directories(path)
+        -_handle_download_error(error)
+    }
+
+    class ContentFormatter {
+        +markdown_options
+        +__init__(options)
+        +html_to_markdown(html)
+        +process_images(content)
+        +update_links(content)
+        +clean_html(html)
+        -_convert_tables(html)
+        -_handle_code_blocks(html)
+    }
+
+    UnifiedMediaProcessor --> ImageProcessor  : uses
+    UnifiedMediaProcessor --> MediaDownloader  : uses
+    UnifiedMediaProcessor --> ContentFormatter  : uses
+    ImageProcessor --> PIL  : uses
+    MediaDownloader --> requests  : uses
+    ContentFormatter --> BeautifulSoup  : uses
+</div>
+<br>
+<h2>HTML Generation Classes</h2>
+<br>
+<div class="mermaid">classDiagram
+    class BaseHTMLGenerator {
+        +template_dir
+        +theme
+        +__init__(template_dir, theme)
+        +generate_html(article)
+        +load_template(name)
+        +render_template(template)
+        -_prepare_context(article)
+        -_copy_assets(output_dir)
+    }
+
+    class ArticleHTMLGenerator {
+        +source_config
+        +__init__(template_dir, theme, source_config)
+        +generate_html(article)
+        +generate_index(articles)
+        -_generate_navigation(articles)
+        -_process_article_content(content)
+    }
+
+    class CommentHTMLGenerator {
+        +comment_template
+        +__init__(template_dir, theme)
+        +render_comments(comments)
+        +render_comment_tree(comment)
+        -_anonymize_usernames(comments)
+        -_format_timestamps(comments)
+    }
+
+    class ThemeManager {
+        +themes_dir
+        +current_theme
+        +__init__(themes_dir, default_theme)
+        +load_theme(name)
+        +get_css_files(theme)
+        +get_js_files(theme)
+        +validate_theme(name)
+        -_copy_theme_assets(theme)
+    }
+
+    BaseHTMLGenerator <|-- ArticleHTMLGenerator
+    ArticleHTMLGenerator --> CommentHTMLGenerator  : uses
+    BaseHTMLGenerator --> ThemeManager  : uses
+    ThemeManager --> Jinja2  : uses
+</div>
+<br>
+<h2>Configuration Classes</h2>
+<br>
+<div class="mermaid">classDiagram
+    class ConfigManager {
+        +config_file
+        +config_data
+        +__init__(config_file)
+        +load_config()
+        +get_setting(key)
+        +update_setting(key)
+        +save_config()
+        +validate_config()
+        -_merge_configs(base)
+        -_expand_environment_variables(config)
+    }
+
+    class SourceConfig {
+        +name
+        +display_name
+        +base_url
+        +category
+        +selectors
+        +rate_limit
+        +__init__(config_dict)
+        +validate()
+        +to_dict()
+        -_validate_selectors()
+        -_validate_urls()
+    }
+
+    class CLIConfig {
+        +args
+        +__init__(args)
+        +get_sources()
+        +get_output_dir()
+        +get_count()
+        +should_download_media()
+        +should_generate_html()
+        +get_log_level()
+    }
+
+    ConfigManager --> SourceConfig  : creates
+    CLIConfig --> ConfigManager  : uses
+</div>
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

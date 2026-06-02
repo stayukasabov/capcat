@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>core.news_source_adapter</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / <a href="../api/index.html">api</a> / core</div>
+<h1>core.news_source_adapter</h1>
+<br>
+<strong>File:</strong> <code>Application/core/news_source_adapter.py</code>
+<br>
+<h2>Description</h2>
+<br>
+<p>Base NewsSourceAdapter class to eliminate code duplication across source modules.</p>
+<p>Provides a configuration-driven approach for news source scraping.</p>
+<br>
+<h2>Classes</h2>
+<br>
+<h3>NewsSourceAdapter</h3>
+<br>
+<strong>Inherits from:</strong> ABC
+<br>
+<p>Base class for news source adapters.</p>
+<p>Eliminates code duplication by providing common functionality.</p>
+<br>
+<h4>Methods</h4>
+<br>
+<h5>__init__</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_config</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span>
+</pre></div>
+
+<br>
+<p>Initialize with source-specific configuration.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>source_config</code> (Dict[str, Any])</li>
+</ul>
+<br>
+<h5>_create_article_fetcher</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_create_article_fetcher</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NewsSourceArticleFetcher&#39;</span>
+</pre></div>
+
+<br>
+<p>Create source-specific article fetcher.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<strong>Returns:</strong> &#x27;NewsSourceArticleFetcher&#x27;
+<br>
+<h5>scrape_articles</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">scrape_articles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]</span>
+</pre></div>
+
+<br>
+<p>Scrape articles from the news source with comprehensive error handling.</p>
+<br>
+<p>Args:</p>
+<p>    count: Number of articles to scrape</p>
+<br>
+<p>Returns:</p>
+<p>    List of tuples containing (title, url, comment_url) for each article</p>
+<br>
+<p>Error Handling:</p>
+<ul>
+<li>Network timeouts and connection errors</li>
+<li>HTTP status errors (403, 404, 500, etc.)</li>
+<li>HTML parsing errors</li>
+<li>Graceful degradation for missing elements</li>
+</ul>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>count</code> (int) <em>optional</em></li>
+</ul>
+<br>
+<strong>Returns:</strong> List[Tuple[str, str, Optional[str]]]
+<br>
+<p>⚠️ <strong>High complexity:</strong> 19</p>
+<br>
+<h5>_extract_article_from_element</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_extract_article_from_element</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">,</span> <span class="n">processed_urls</span><span class="p">:</span> <span class="nb">set</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]</span>
+</pre></div>
+
+<br>
+<p>Extract article information from HTML element.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>element</code></li>
+<li><code>processed_urls</code> (set)</li>
+</ul>
+<br>
+<strong>Returns:</strong> Optional[Tuple[str, str, Optional[str]]]
+<br>
+<h5>_extract_title</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_extract_title</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">,</span> <span class="n">link_elem</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+
+<br>
+<p>Extract article title from element.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>element</code></li>
+<li><code>link_elem</code></li>
+</ul>
+<br>
+<strong>Returns:</strong> str
+<br>
+<h5>_extract_comment_url</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_extract_comment_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+</pre></div>
+
+<br>
+<p>Extract comment URL from the article element for sources with comments.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>element</code></li>
+</ul>
+<br>
+<strong>Returns:</strong> Optional[str]
+<br>
+<p>⚠️ <strong>High complexity:</strong> 25</p>
+<br>
+<h5>_should_skip_url</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_should_skip_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Check if URL should be skipped based on configuration.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>url</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h5>fetch_article_content</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">fetch_article_content</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">base_folder</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">progress_callback</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="kc">None</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span>
+</pre></div>
+
+<br>
+<p>Fetch article content using the article fetcher.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>title</code> (str)</li>
+<li><code>url</code> (str)</li>
+<li><code>index</code> (int)</li>
+<li><code>base_folder</code> (str)</li>
+<li><code>progress_callback</code> (Optional[Callable[[float, str], None]]) <em>optional</em></li>
+</ul>
+<br>
+<strong>Returns:</strong> Tuple[bool, str, str]
+<br>
+<h5>process_article</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">process_article</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">base_folder</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">comment_url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">download_files</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">progress_callback</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="kc">None</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Process a single article - unified interface for the optimized system.</p>
+<br>
+<p>Args:</p>
+<p>    title: Article title</p>
+<p>    url: Article URL</p>
+<p>    index: Article index number</p>
+<p>    base_folder: Base directory to save article</p>
+<p>    comment_url: Optional comment URL for sources with comments</p>
+<p>    download_files: Whether to download media files</p>
+<p>    progress_callback: Optional callback for progress updates (progress, stage_description)</p>
+<br>
+<p>Returns:</p>
+<p>    bool: True if article was processed successfully</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>title</code> (str)</li>
+<li><code>url</code> (str)</li>
+<li><code>index</code> (int)</li>
+<li><code>base_folder</code> (str)</li>
+<li><code>comment_url</code> (str) <em>optional</em></li>
+<li><code>download_files</code> (bool) <em>optional</em></li>
+<li><code>progress_callback</code> (Optional[Callable[[float, str], None]]) <em>optional</em></li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h5>_process_comments</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_process_comments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">comment_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">base_folder</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">article_folder_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Process comments for an article by delegating to source-specific implementation.</p>
+<br>
+<p>Args:</p>
+<p>    comment_url: URL to fetch comments from</p>
+<p>    title: Article title</p>
+<p>    index: Article index number</p>
+<p>    base_folder: Base directory</p>
+<p>    article_folder_path: Path to the article folder</p>
+<br>
+<p>Returns:</p>
+<p>    bool: True if comments were processed successfully</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>comment_url</code> (str)</li>
+<li><code>title</code> (str)</li>
+<li><code>index</code> (int)</li>
+<li><code>base_folder</code> (str)</li>
+<li><code>article_folder_path</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h5>_create_comment_placeholder</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_create_comment_placeholder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">article_folder_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Create a placeholder comments.md file for sources without comment support.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>title</code> (str)</li>
+<li><code>article_folder_path</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h3>NewsSourceArticleFetcher</h3>
+<br>
+<strong>Inherits from:</strong> ArticleFetcher
+<br>
+<p>Configurable article fetcher that works with any news source.</p>
+<br>
+<h4>Methods</h4>
+<br>
+<h5>__init__</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_config</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">session</span><span class="p">:</span> <span class="n">requests</span><span class="o">.</span><span class="n">Session</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>source_config</code> (Dict[str, Any])</li>
+<li><code>session</code> (requests.Session)</li>
+</ul>
+<br>
+<h5>should_skip_url</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">should_skip_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Skip URLs based on source configuration.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>url</code> (str)</li>
+<li><code>title</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h5>_fetch_web_content</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_fetch_web_content</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">base_folder</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">progress_callback</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<p>Override to extract content using configured selectors.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>title</code> (str)</li>
+<li><code>url</code> (str)</li>
+<li><code>index</code> (int)</li>
+<li><code>base_folder</code> (str)</li>
+<li><code>progress_callback</code> <em>optional</em></li>
+</ul>
+<br>
+<p>⚠️ <strong>High complexity:</strong> 67</p>
+<br>
+<h5>_cleanup_empty_images_folder</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_cleanup_empty_images_folder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">article_folder_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Remove images folder if it exists but is empty.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>article_folder_path</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h5>_fallback_image_detection</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_fallback_image_detection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">full_page_html</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">existing_images</span><span class="p">:</span> <span class="nb">set</span><span class="p">,</span> <span class="n">article_folder_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">base_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<p>Fallback image detection system that scans the entire page for images</p>
+<p>when the primary extraction method finds few images.</p>
+<br>
+<p>Args:</p>
+<p>    full_page_html: Original full page HTML before article extraction</p>
+<p>    existing_images: Set of image URLs already found by primary method</p>
+<p>    article_folder_path: Path to save downloaded images</p>
+<p>    base_url: Base URL for resolving relative image paths</p>
+<br>
+<p>Returns:</p>
+<p>    List of additional image URLs found and downloaded</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>full_page_html</code> (str)</li>
+<li><code>existing_images</code> (set)</li>
+<li><code>article_folder_path</code> (str)</li>
+<li><code>base_url</code> (str)</li>
+</ul>
+<br>
+<p>⚠️ <strong>High complexity:</strong> 19</p>
+<br>
+<h5>_should_skip_image</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_should_skip_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_tag</span><span class="p">,</span> <span class="n">img_src</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ui_patterns</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Determine if an image should be skipped based on UI element patterns.</p>
+<br>
+<p>Args:</p>
+<p>    img_tag: BeautifulSoup img tag</p>
+<p>    img_src: Image source URL</p>
+<p>    ui_patterns: Dictionary of patterns to match against</p>
+<br>
+<p>Returns:</p>
+<p>    True if image should be skipped (is likely a UI element)</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>img_tag</code></li>
+<li><code>img_src</code> (str)</li>
+<li><code>ui_patterns</code> (dict)</li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<p>⚠️ <strong>High complexity:</strong> 11</p>
+<br>
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

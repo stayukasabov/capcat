@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArXiv PDF Accept-Header Fix Implementation Plan</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / <a href="../superpowers/index.html">superpowers</a> / plans</div>
+<h1>ArXiv PDF Accept-Header Fix Implementation Plan</h1>
+<br>
+<p>&gt; <strong>For agentic workers:</strong> REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (<code>- [ ]</code>) syntax for tracking.</p>
+<br>
+<strong>Goal:</strong> Fix <code>download_file</code> so ArXiv (and any content-negotiating server) serves the actual PDF instead of an HTML landing page.
+<br>
+<strong>Architecture:</strong> <code>download_file</code> in <code>capcat/core/downloader.py</code> uses a shared module-level <code>requests.Session</code> with only <code>User-Agent</code> set. ArXiv inspects the <code>Accept</code> header to decide whether to serve a PDF or redirect to an HTML abstract page. The fix adds <code>Accept: application/pdf, application/octet-stream, <em>/</em></code> as a per-request header on the HEAD and GET calls inside <code>download_file</code>, only when <code>file_type == &quot;document&quot;</code>. The module-level session is unchanged — this avoids side effects on image/audio/video downloads.
+<br>
+<strong>Tech Stack:</strong> Python 3, <code>requests</code>, <code>pytest</code>, <code>unittest.mock</code>
+<br>
+<hr>
+<br>
+<h2>File Structure</h2>
+<br>
+<ul>
+<li><strong>Modify:</strong> <code>capcat/core/downloader.py</code> — add <code>doc_headers</code> dict used in HEAD and GET inside <code>download_file</code> when <code>file_type == &quot;document&quot;</code></li>
+<li><strong>Create:</strong> <code>tests/unit/test_downloader_arxiv.py</code> — regression test: mock session returns <code>text/html</code> for HEAD without Accept header, returns <code>application/pdf</code> with Accept header</li>
+</ul>
+<br>
+<hr>
+<br>
+<h3>Task 1: Regression test — document download fails when server returns text/html on HEAD</h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Create: <code>tests/unit/test_downloader_arxiv.py</code></li>
+</ul>
+<br>
+<p>Context: <code>download_file</code> is in <code>capcat/core/downloader.py</code>. It uses the module-level <code>session</code> object. Tests must mock <code>capcat.core.downloader.session</code> (not <code>requests.Session</code>), because the module already has a reference to the session instance at import time.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Create the test file</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="c1"># tests/unit/test_downloader_arxiv.py</span>
+<span class="c1">#!/usr/bin/env python3</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Regression test: download_file must send Accept: application/pdf for document</span>
+<span class="sd">downloads so content-negotiating servers (e.g. ArXiv) serve PDF, not HTML.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">unittest.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">MagicMock</span><span class="p">,</span> <span class="n">patch</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_make_head_response</span><span class="p">(</span><span class="n">content_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">status_code</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">200</span><span class="p">):</span>
+    <span class="n">resp</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+    <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span> <span class="o">=</span> <span class="n">status_code</span>
+    <span class="n">resp</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;content-type&quot;</span><span class="p">:</span> <span class="n">content_type</span><span class="p">}</span>
+    <span class="n">resp</span><span class="o">.</span><span class="n">raise_for_status</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">resp</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_make_get_response</span><span class="p">(</span><span class="n">content_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">status_code</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">200</span><span class="p">):</span>
+    <span class="n">resp</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+    <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span> <span class="o">=</span> <span class="n">status_code</span>
+    <span class="n">resp</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;content-type&quot;</span><span class="p">:</span> <span class="n">content_type</span><span class="p">,</span> <span class="s2">&quot;content-length&quot;</span><span class="p">:</span> <span class="s2">&quot;1024&quot;</span><span class="p">}</span>
+    <span class="n">resp</span><span class="o">.</span><span class="n">raise_for_status</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+    <span class="n">resp</span><span class="o">.</span><span class="n">iter_content</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">(</span><span class="n">return_value</span><span class="o">=</span><span class="p">[</span><span class="sa">b</span><span class="s2">&quot;%PDF-1.4 test&quot;</span><span class="p">])</span>
+    <span class="n">resp</span><span class="o">.</span><span class="fm">__enter__</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">(</span><span class="n">return_value</span><span class="o">=</span><span class="n">resp</span><span class="p">)</span>
+    <span class="n">resp</span><span class="o">.</span><span class="fm">__exit__</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">(</span><span class="n">return_value</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">resp</span><span class="o">.</span><span class="n">close</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">resp</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestDocumentDownloadAcceptHeader</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;download_file must pass Accept: application/pdf for document type.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_head_request_includes_accept_pdf_for_document</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        When file_type == &#39;document&#39;, HEAD request must include</span>
+<span class="sd">        Accept: application/pdf so ArXiv serves PDF not HTML.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">head_resp</span> <span class="o">=</span> <span class="n">_make_head_response</span><span class="p">(</span><span class="s2">&quot;application/pdf&quot;</span><span class="p">)</span>
+        <span class="n">get_resp</span> <span class="o">=</span> <span class="n">_make_get_response</span><span class="p">(</span><span class="s2">&quot;application/pdf&quot;</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">patch</span><span class="p">(</span><span class="s2">&quot;capcat.core.downloader.session&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">mock_session</span><span class="p">:</span>
+            <span class="n">mock_session</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="n">head_resp</span>
+            <span class="n">mock_session</span><span class="o">.</span><span class="n">get</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="n">get_resp</span>
+
+            <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.downloader</span><span class="w"> </span><span class="kn">import</span> <span class="n">download_file</span>
+
+            <span class="n">download_file</span><span class="p">(</span>
+                <span class="s2">&quot;https://arxiv.org/pdf/1808.00823.pdf&quot;</span><span class="p">,</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">),</span>
+                <span class="s2">&quot;document&quot;</span><span class="p">,</span>
+                <span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">head_call_kwargs</span> <span class="o">=</span> <span class="n">mock_session</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">call_args</span>
+            <span class="n">headers_sent</span> <span class="o">=</span> <span class="n">head_call_kwargs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;headers&quot;</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="k">assert</span> <span class="s2">&quot;Accept&quot;</span> <span class="ow">in</span> <span class="n">headers_sent</span><span class="p">,</span> <span class="p">(</span>
+                <span class="s2">&quot;HEAD request for document must include Accept header&quot;</span>
+            <span class="p">)</span>
+            <span class="k">assert</span> <span class="s2">&quot;application/pdf&quot;</span> <span class="ow">in</span> <span class="n">headers_sent</span><span class="p">[</span><span class="s2">&quot;Accept&quot;</span><span class="p">],</span> <span class="p">(</span>
+                <span class="s2">&quot;Accept header must include application/pdf&quot;</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_get_request_includes_accept_pdf_for_document</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        When file_type == &#39;document&#39;, GET request must include</span>
+<span class="sd">        Accept: application/pdf.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">head_resp</span> <span class="o">=</span> <span class="n">_make_head_response</span><span class="p">(</span><span class="s2">&quot;application/pdf&quot;</span><span class="p">)</span>
+        <span class="n">get_resp</span> <span class="o">=</span> <span class="n">_make_get_response</span><span class="p">(</span><span class="s2">&quot;application/pdf&quot;</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">patch</span><span class="p">(</span><span class="s2">&quot;capcat.core.downloader.session&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">mock_session</span><span class="p">:</span>
+            <span class="n">mock_session</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="n">head_resp</span>
+            <span class="n">mock_session</span><span class="o">.</span><span class="n">get</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="n">get_resp</span>
+
+            <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.downloader</span><span class="w"> </span><span class="kn">import</span> <span class="n">download_file</span>
+
+            <span class="n">download_file</span><span class="p">(</span>
+                <span class="s2">&quot;https://arxiv.org/pdf/1808.00823.pdf&quot;</span><span class="p">,</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">),</span>
+                <span class="s2">&quot;document&quot;</span><span class="p">,</span>
+                <span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">get_call_kwargs</span> <span class="o">=</span> <span class="n">mock_session</span><span class="o">.</span><span class="n">get</span><span class="o">.</span><span class="n">call_args</span>
+            <span class="n">headers_sent</span> <span class="o">=</span> <span class="n">get_call_kwargs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;headers&quot;</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="k">assert</span> <span class="s2">&quot;Accept&quot;</span> <span class="ow">in</span> <span class="n">headers_sent</span><span class="p">,</span> <span class="p">(</span>
+                <span class="s2">&quot;GET request for document must include Accept header&quot;</span>
+            <span class="p">)</span>
+            <span class="k">assert</span> <span class="s2">&quot;application/pdf&quot;</span> <span class="ow">in</span> <span class="n">headers_sent</span><span class="p">[</span><span class="s2">&quot;Accept&quot;</span><span class="p">],</span> <span class="p">(</span>
+                <span class="s2">&quot;Accept header must include application/pdf&quot;</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_html_content_type_from_head_causes_skip_without_accept</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Without Accept header, ArXiv returns text/html → download_file returns None.</span>
+<span class="sd">        This is the regression we are fixing: with the fix applied, the HEAD</span>
+<span class="sd">        request WILL include Accept and ArXiv will return application/pdf.</span>
+<span class="sd">        This test documents the old broken behaviour using a direct mock.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Simulate old behaviour: server returns text/html (bot detection)</span>
+        <span class="n">head_resp</span> <span class="o">=</span> <span class="n">_make_head_response</span><span class="p">(</span><span class="s2">&quot;text/html&quot;</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">patch</span><span class="p">(</span><span class="s2">&quot;capcat.core.downloader.session&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">mock_session</span><span class="p">:</span>
+            <span class="n">mock_session</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="n">head_resp</span>
+
+            <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.downloader</span><span class="w"> </span><span class="kn">import</span> <span class="n">download_file</span>
+
+            <span class="n">result</span> <span class="o">=</span> <span class="n">download_file</span><span class="p">(</span>
+                <span class="s2">&quot;https://arxiv.org/pdf/1808.00823.pdf&quot;</span><span class="p">,</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">),</span>
+                <span class="s2">&quot;document&quot;</span><span class="p">,</span>
+                <span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="c1"># If server still returns text/html despite Accept header, skip gracefully</span>
+            <span class="k">assert</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_image_head_does_not_include_accept_pdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Accept: application/pdf must NOT be sent for image downloads — only documents.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">head_resp</span> <span class="o">=</span> <span class="n">_make_head_response</span><span class="p">(</span><span class="s2">&quot;image/jpeg&quot;</span><span class="p">)</span>
+        <span class="n">get_resp</span> <span class="o">=</span> <span class="n">_make_get_response</span><span class="p">(</span><span class="s2">&quot;image/jpeg&quot;</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">patch</span><span class="p">(</span><span class="s2">&quot;capcat.core.downloader.session&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">mock_session</span><span class="p">:</span>
+            <span class="n">mock_session</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="n">head_resp</span>
+            <span class="n">mock_session</span><span class="o">.</span><span class="n">get</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="n">get_resp</span>
+
+            <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.downloader</span><span class="w"> </span><span class="kn">import</span> <span class="n">download_file</span>
+
+            <span class="n">download_file</span><span class="p">(</span>
+                <span class="s2">&quot;https://example.com/photo.jpg&quot;</span><span class="p">,</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">),</span>
+                <span class="s2">&quot;image&quot;</span><span class="p">,</span>
+                <span class="kc">False</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">head_call_kwargs</span> <span class="o">=</span> <span class="n">mock_session</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">call_args</span>
+            <span class="n">headers_sent</span> <span class="o">=</span> <span class="n">head_call_kwargs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;headers&quot;</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="c1"># Either no headers key, or no Accept with application/pdf</span>
+            <span class="n">accept</span> <span class="o">=</span> <span class="n">headers_sent</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Accept&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="s2">&quot;application/pdf&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">accept</span><span class="p">,</span> <span class="p">(</span>
+                <span class="s2">&quot;image downloads must not send Accept: application/pdf&quot;</span>
+            <span class="p">)</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Run tests to verify they fail</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_downloader_arxiv.py<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: <code>test_head_request_includes_accept_pdf_for_document</code> FAILS — <code>AssertionError: HEAD request for document must include Accept header</code></p>
+<code>test_get_request_includes_accept_pdf_for_document</code> FAILS similarly.
+<code>test_html_content_type_from_head_causes_skip_without_accept</code> PASSES (existing behaviour).
+<code>test_image_head_does_not_include_accept_pdf</code> PASSES (no regression).
+<br>
+<hr>
+<br>
+<h3>Task 2: Implement — add Accept header for document HEAD and GET requests</h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>capcat/core/downloader.py:178-239</code></li>
+</ul>
+<br>
+<p>The <code>download_file</code> function already handles <code>file_type == &quot;document&quot;</code> for path routing (line ~170). Add a <code>doc_headers</code> dict at the top of the function body and pass it to <code>session.head()</code> and <code>session.get()</code> only for document type.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Read the current download_file signature and HEAD/GET calls</strong></li>
+</ul>
+<br>
+<p>Open <code>capcat/core/downloader.py</code> and locate <code>download_file</code> (line 147). Find:</p>
+<ul>
+<li><code>session.head(file_url, timeout=...)</code> — around line 180</li>
+<li><code>session.get(file_url, timeout=..., stream=True)</code> — around line 225</li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Add doc_headers and pass to session.head and session.get</strong></li>
+</ul>
+<br>
+<p>After the <code>files_folder</code> assignment block (around line 171, after the <code>else: files_folder = ...</code> line), add:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="c1"># For document downloads, send Accept header so content-negotiating</span>
+        <span class="c1"># servers (e.g. ArXiv) return the actual file instead of an HTML page.</span>
+        <span class="n">request_headers</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">file_type</span> <span class="o">==</span> <span class="s2">&quot;document&quot;</span><span class="p">:</span>
+            <span class="n">request_headers</span><span class="p">[</span><span class="s2">&quot;Accept&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;application/pdf, application/octet-stream, */*&quot;</span>
+</pre></div>
+
+<br>
+<p>Then change the HEAD call from:</p>
+<div class="highlight"><pre><span></span><span class="n">head_response</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">head</span><span class="p">(</span>
+                <span class="n">file_url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">head_request_timeout</span>
+            <span class="p">)</span>
+</pre></div>
+
+<p>to:</p>
+<div class="highlight"><pre><span></span><span class="n">head_response</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">head</span><span class="p">(</span>
+                <span class="n">file_url</span><span class="p">,</span>
+                <span class="n">timeout</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">head_request_timeout</span><span class="p">,</span>
+                <span class="n">headers</span><span class="o">=</span><span class="n">request_headers</span><span class="p">,</span>
+            <span class="p">)</span>
+</pre></div>
+
+<br>
+<p>And change the GET call from:</p>
+<div class="highlight"><pre><span></span><span class="n">response</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="n">file_url</span><span class="p">,</span>
+                <span class="n">timeout</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">media_download_timeout</span><span class="p">,</span>
+                <span class="n">stream</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+</pre></div>
+
+<p>to:</p>
+<div class="highlight"><pre><span></span><span class="n">response</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="n">file_url</span><span class="p">,</span>
+                <span class="n">timeout</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">media_download_timeout</span><span class="p">,</span>
+                <span class="n">stream</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">headers</span><span class="o">=</span><span class="n">request_headers</span><span class="p">,</span>
+            <span class="p">)</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Run the regression tests to verify they pass</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_downloader_arxiv.py<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: all 4 tests PASS.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Run the full unit suite to check for regressions</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-q
+</pre></div>
+
+<br>
+<p>Expected: all tests pass, no failures introduced.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 5: Run ruff lint check</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>ruff<span class="w"> </span>check<span class="w"> </span>capcat/core/downloader.py
+</pre></div>
+
+<br>
+<p>Expected: no errors.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 6: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>capcat/core/downloader.py<span class="w"> </span>tests/unit/test_downloader_arxiv.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;fix: send Accept: application/pdf for document downloads to fix ArXiv PDF retrieval&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h3>Task 3: Version bump and release</h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>capcat/__init__.py</code> — bump patch version</li>
+</ul>
+<br>
+<p>Per <code>context-engineering/git.md</code>: every fix pushed to main must be followed immediately by a version bump + tag push to trigger PyPI publish.</p>
+<br>
+<p>Current version after previous session: <code>1.8.2</code> → bump to <code>1.8.3</code>.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Bump version in capcat/__init__.py</strong></li>
+</ul>
+<br>
+<p>Change:</p>
+<div class="highlight"><pre><span></span><span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;1.8.2&quot;</span>
+</pre></div>
+
+<p>to:</p>
+<div class="highlight"><pre><span></span><span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;1.8.3&quot;</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Commit version bump</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>capcat/__init__.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;bump: version to 1.8.3&quot;</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Merge fix branch to main</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>checkout<span class="w"> </span>main<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>merge<span class="w"> </span>fix/arxiv-pdf-accept-header
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Push main and tag</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>main<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>tag<span class="w"> </span>v1.8.3<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>v1.8.3
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 5: Regenerate API docs</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>python3<span class="w"> </span>scripts/generate_api_docs.py
+git<span class="w"> </span>add<span class="w"> </span>docs/api/<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;docs: regenerate API docs for v1.8.3&quot;</span>
+git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>main
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 6: Verify PyPI publish (after ~2 minutes)</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>pipx<span class="w"> </span>upgrade<span class="w"> </span>capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>capcat<span class="w"> </span>--version
+</pre></div>
+
+<br>
+<p>Expected output: <code>capcat 1.8.3</code></p>
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

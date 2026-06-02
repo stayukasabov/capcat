@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capcat - News Article Archiving System</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a></div>
+<h1>Capcat - News Article Archiving System</h1>
+<br>
+<p>A powerful, modular news article archiving system that fetches articles from 13+ sources, converts them to Markdown, and organizes them with media files.</p>
+<br>
+<h2> Features</h2>
+<br>
+<ul>
+<li><strong>Multi-Source Support</strong>: 13+ news sources including Hacker News, BBC, Nature, IEEE</li>
+<li><strong>Modular Architecture</strong>: Easy to add new sources with config-driven or custom implementations</li>
+<li><strong>Media Handling</strong>: Automatic download and organization of images, videos, and documents</li>
+<li><strong>Flexible Output</strong>: Markdown files with optional HTML generation</li>
+<li><strong>Parallel Processing</strong>: Concurrent article processing for performance</li>
+<li><strong>Privacy Compliant</strong>: Usernames anonymized, no personal data stored</li>
+<li><strong>Configurable</strong>: Command-line arguments, environment variables, and config files</li>
+</ul>
+<br>
+<h2> Requirements</h2>
+<br>
+<ul>
+<li>Python 3.8+</li>
+<li>Internet connection for article fetching</li>
+<li>~100MB disk space for dependencies</li>
+</ul>
+<br>
+<h2> Installation</h2>
+<br>
+<h3>Quick Setup</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="c1"># Clone repository</span>
+git<span class="w"> </span>clone<span class="w"> </span>&lt;repository-url&gt;
+<span class="nb">cd</span><span class="w"> </span>capcat
+
+<span class="c1"># Setup environment</span>
+python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>venv
+<span class="nb">source</span><span class="w"> </span>venv/bin/activate
+pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+
+<span class="c1"># Verify installation</span>
+./capcat<span class="w"> </span>list<span class="w"> </span>sources
+</pre></div>
+
+<br>
+<h3>Docker (Alternative)</h3>
+<br>
+<div class="highlight"><pre><span></span>docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>capcat<span class="w"> </span>.
+docker<span class="w"> </span>run<span class="w"> </span>-v<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>/output:/app/output<span class="w"> </span>capcat<span class="w"> </span>bundle<span class="w"> </span>tech<span class="w"> </span>--count<span class="w"> </span><span class="m">10</span>
+</pre></div>
+
+<br>
+<h2> Quick Start</h2>
+<br>
+<div class="highlight"><pre><span></span><span class="c1"># Fetch 10 tech articles</span>
+./capcat<span class="w"> </span>bundle<span class="w"> </span>tech<span class="w"> </span>--count<span class="w"> </span><span class="m">10</span>
+
+<span class="c1"># Fetch from specific sources</span>
+./capcat<span class="w"> </span>fetch<span class="w"> </span>hn,bbc<span class="w"> </span>--count<span class="w"> </span><span class="m">15</span><span class="w"> </span>--media
+
+<span class="c1"># Single article processing</span>
+./capcat<span class="w"> </span>single<span class="w"> </span>https://example.com/article
+
+<span class="c1"># List available sources</span>
+./capcat<span class="w"> </span>list<span class="w"> </span>sources
+
+<span class="c1"># Show bundles</span>
+./capcat<span class="w"> </span>list<span class="w"> </span>bundles
+</pre></div>
+
+<br>
+<h2> Usage</h2>
+<br>
+<h3>Command Line Interface</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="c1"># Basic usage</span>
+./capcat<span class="w"> </span>&lt;command&gt;<span class="w"> </span><span class="o">[</span>options<span class="o">]</span>
+
+<span class="c1"># Commands</span>
+list<span class="w"> </span>sources<span class="w">           </span><span class="c1"># Show all available sources</span>
+list<span class="w"> </span>bundles<span class="w">          </span><span class="c1"># Show predefined source bundles</span>
+fetch<span class="w"> </span>&lt;sources&gt;<span class="w">       </span><span class="c1"># Fetch from specific sources</span>
+bundle<span class="w"> </span>&lt;name&gt;<span class="w">         </span><span class="c1"># Fetch from predefined bundle</span>
+single<span class="w"> </span>&lt;url&gt;<span class="w">          </span><span class="c1"># Process single article</span>
+
+<span class="c1"># Options</span>
+--count<span class="w"> </span>N<span class="w">             </span><span class="c1"># Number of articles (default: 30)</span>
+--media<span class="w">               </span><span class="c1"># Download videos/audio/documents</span>
+--html<span class="w">                </span><span class="c1"># Generate HTML output</span>
+--output-dir<span class="w"> </span>DIR<span class="w">      </span><span class="c1"># Custom output directory</span>
+--config<span class="w"> </span>FILE<span class="w">         </span><span class="c1"># Custom config file</span>
+--debug<span class="w">               </span><span class="c1"># Enable debug logging</span>
+</pre></div>
+
+<br>
+<h3>Available Sources</h3>
+<br>
+<strong>Technology:</strong>
+<ul>
+<li><code>hn</code> - Hacker News</li>
+<li><code>lb</code> - Lobsters</li>
+<li><code>iq</code> - InfoQ</li>
+<li><code>ieee</code> - IEEE Spectrum</li>
+<li><code>mashable</code> - Mashable</li>
+</ul>
+<br>
+<strong>News:</strong>
+<ul>
+<li><code>bbc</code> - BBC News</li>
+<li><code>guardian</code> - The Guardian</li>
+</ul>
+<br>
+<strong>Science:</strong>
+<ul>
+<li><code>nature</code> - Nature News</li>
+<li><code>scientificamerican</code> - Scientific American</li>
+</ul>
+<br>
+<strong>AI/ML:</strong>
+<ul>
+<li><code>mitnews</code> - MIT News</li>
+</ul>
+<br>
+<strong>Sports:</strong>
+<ul>
+<li><code>bbcsport</code> - BBC Sport</li>
+</ul>
+<br>
+<h3>Predefined Bundles</h3>
+<br>
+<div class="highlight"><pre><span></span>./capcat<span class="w"> </span>bundle<span class="w"> </span>tech<span class="w">          </span><span class="c1"># ieee + mashable</span>
+./capcat<span class="w"> </span>bundle<span class="w"> </span>techpro<span class="w">       </span><span class="c1"># hn + lb + iq</span>
+./capcat<span class="w"> </span>bundle<span class="w"> </span>news<span class="w">          </span><span class="c1"># bbc + guardian</span>
+./capcat<span class="w"> </span>bundle<span class="w"> </span>science<span class="w">       </span><span class="c1"># nature + scientificamerican</span>
+./capcat<span class="w"> </span>bundle<span class="w"> </span>ai<span class="w">            </span><span class="c1"># mitnews</span>
+./capcat<span class="w"> </span>bundle<span class="w"> </span>sports<span class="w">        </span><span class="c1"># bbcsport</span>
+</pre></div>
+
+<br>
+<h2> Output Structure</h2>
+<br>
+<h3>Batch Processing</h3>
+<div class="ascii-art">../News/news_DD-MM-YYYY/
+├── Source_DD-MM-YYYY/
+│   └── NN_Article_Title/
+│       ├── article.md
+│       ├── images/
+│       ├── files/
+│       └── html/ (if --html)
+</div>
+<br>
+<h3>Single Articles</h3>
+<div class="ascii-art">../Capcats/cc_DD-MM-YYYY-Title/
+├── article.md
+├── images/
+└── files/
+</div>
+<br>
+<h2> Configuration</h2>
+<br>
+<h3>Command Line (Highest Priority)</h3>
+<div class="highlight"><pre><span></span>./capcat<span class="w"> </span>fetch<span class="w"> </span>hn<span class="w"> </span>--count<span class="w"> </span><span class="m">20</span><span class="w"> </span>--media
+</pre></div>
+
+<br>
+<h3>Environment Variables</h3>
+<div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">CAPCAT_OUTPUT_DIR</span><span class="o">=</span><span class="s2">&quot;/custom/path&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">CAPCAT_DEFAULT_COUNT</span><span class="o">=</span><span class="m">50</span>
+</pre></div>
+
+<br>
+<h3>Config File (<code>capcat.yml</code>)</h3>
+<div class="highlight"><pre><span></span><span class="nt">output_dir</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/custom/path&quot;</span>
+<span class="nt">default_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span>
+<span class="nt">media_download</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="nt">sources</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">hn</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">rate_limit</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+</pre></div>
+
+<br>
+<h2> Development</h2>
+<br>
+<h3>Adding a New Source</h3>
+<br>
+<h4>Config-Driven (15-30 minutes)</h4>
+<div class="highlight"><pre><span></span><span class="c1"># sources/active/config_driven/configs/newsource.yaml</span>
+<span class="nt">display_name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;New</span><span class="nv"> </span><span class="s">Source&quot;</span>
+<span class="nt">base_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://newsource.com/&quot;</span>
+<span class="nt">category</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tech</span>
+<span class="nt">article_selectors</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;.headline</span><span class="nv"> </span><span class="s">a&quot;</span><span class="p p-Indicator">]</span>
+<span class="nt">content_selectors</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;.article-content&quot;</span><span class="p p-Indicator">]</span>
+</pre></div>
+
+<br>
+<h4>Custom Implementation (2-4 hours)</h4>
+<div class="highlight"><pre><span></span><span class="c1"># sources/active/custom/newsource/source.py</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">core.source_system.base_source</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseSource</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">NewSource</span><span class="p">(</span><span class="n">BaseSource</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_articles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">30</span><span class="p">):</span>
+        <span class="c1"># Custom implementation</span>
+        <span class="k">pass</span>
+</pre></div>
+
+<br>
+<h3>Verification</h3>
+<div class="highlight"><pre><span></span><span class="c1"># Verify all sources work</span>
+./capcat<span class="w"> </span>list<span class="w"> </span>sources
+
+<span class="c1"># Verify specific source</span>
+./capcat<span class="w"> </span>fetch<span class="w"> </span>newsource<span class="w"> </span>--count<span class="w"> </span><span class="m">5</span>
+
+<span class="c1"># Verify bundle</span>
+./capcat<span class="w"> </span>bundle<span class="w"> </span>tech<span class="w"> </span>--count<span class="w"> </span><span class="m">10</span>
+</pre></div>
+
+<br>
+<h2> Architecture</h2>
+<br>
+<div class="mermaid">graph TB
+    CLI[CLI Interface] --> Main[Main App]
+    Main --> Factory[Source Factory]
+    Factory --> Sources[News Sources]
+    Sources --> Fetcher[Article Fetcher]
+    Fetcher --> Media[Media Processor]
+    Media --> Format[Content Formatter]
+    Format --> Output[File Output]
+</div>
+<br>
+<strong>Key Components:</strong>
+<ul>
+<li><strong>Source System</strong>: Modular source management with auto-discovery</li>
+<li><strong>Processing Pipeline</strong>: Parallel article processing with error handling</li>
+<li><strong>Media Handling</strong>: Intelligent media download and organization</li>
+<li><strong>Output Generation</strong>: Markdown and HTML with structured directories</li>
+</ul>
+<br>
+<h2> Common Issues &amp; Solutions</h2>
+<br>
+<h3>Module Not Found</h3>
+<div class="highlight"><pre><span></span><span class="c1"># Use wrapper (handles venv automatically)</span>
+./capcat<span class="w"> </span>list<span class="w"> </span>sources
+
+<span class="c1"># Or activate manually</span>
+<span class="nb">source</span><span class="w"> </span>venv/bin/activate
+</pre></div>
+
+<br>
+<h3>Source Failures</h3>
+<ul>
+<li>90% success rate is normal (anti-bot protection)</li>
+<li>Some sources may have temporary issues</li>
+<li>Check debug logs for details</li>
+</ul>
+<br>
+<h3>Performance Issues</h3>
+<div class="highlight"><pre><span></span><span class="c1"># Reduce parallel workers</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">CAPCAT_MAX_WORKERS</span><span class="o">=</span><span class="m">4</span>
+
+<span class="c1"># Enable progress tracking</span>
+./capcat<span class="w"> </span>fetch<span class="w"> </span>hn<span class="w"> </span>--count<span class="w"> </span><span class="m">10</span><span class="w"> </span>--debug
+</pre></div>
+
+<br>
+<h2> Documentation</h2>
+<br>
+<ul>
+<li><a href="docs/api/README.md">API Reference</a> - Complete API documentation</li>
+<li><a href="docs/architecture/system.md">Architecture Guide</a> - System design details</li>
+<li><a href="docs/developer/guide.md">Developer Guide</a> - Contributing and development</li>
+<li><a href="docs/developer/sources.md">Source Development</a> - Adding new sources</li>
+</ul>
+<br>
+<h2>🤝 Contributing</h2>
+<br>
+<ol>
+<li>Fork the repository</li>
+<li>Create feature branch: <code>git checkout -b feature/new-feature</code></li>
+<li>Follow PEP 8 coding standards</li>
+<li>Update documentation</li>
+<li>Submit pull request</li>
+</ol>
+<br>
+<h2>License</h2>
+<br>
+<p>MIT-Style Non-Commercial License - see <a href="../LICENSE.txt">LICENSE.txt</a> file for details.</p>
+<br>
+<strong>Copyright (c) 2025 Stayu Kasabov</strong>
+<br>
+<ul>
+<li>Non-commercial use only</li>
+<li>Attribution required</li>
+<li>Share-alike modifications</li>
+<li>Contributions welcome</li>
+</ul>
+<br>
+<h2>Acknowledgments</h2>
+<br>
+<ul>
+<li>Built with Python 3.8+</li>
+<li>Uses BeautifulSoup4 for HTML parsing</li>
+<li>Requests library for HTTP handling</li>
+<li>Threading for parallel processing</li>
+</ul>
+<br>
+<h2> Support</h2>
+<br>
+<ul>
+<li>Create an issue on GitHub</li>
+<li>Check existing documentation</li>
+<li>Review troubleshooting guide</li>
+</ul>
+<br>
+<hr>
+<br>
+<strong>Note</strong>: This tool is designed for personal archiving and research purposes. Please respect robots.txt and terms of service for all sources.
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

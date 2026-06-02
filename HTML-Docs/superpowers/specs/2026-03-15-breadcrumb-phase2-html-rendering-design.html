@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Breadcrumb Phase 2: HTML Rendering Standardisation</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / <a href="../superpowers/index.html">superpowers</a> / specs</div>
+<h1>Breadcrumb Phase 2: HTML Rendering Standardisation</h1>
+<br>
+<strong>Date:</strong> 2026-03-15
+<strong>Scope:</strong> Enforce consistent breadcrumb display in <code>_generate_breadcrumb</code> and add 3rd-level breadcrumb for comments pages.
+<br>
+<hr>
+<br>
+<h2>Prerequisite</h2>
+<br>
+<p>Phase 1 complete. After Phase 1, <code>_build_breadcrumb_path</code> returns folder names with underscores converted to spaces. <code>generate_article_html_from_template</code> receives:</p>
+<br>
+<ul>
+<li><strong>Article page</strong>: <code>breadcrumb_path = [date_folder, source_folder]</code> — 2 elements</li>
+<li><strong>Comments page</strong>: <code>breadcrumb_path = [date_folder, source_folder, &quot;Comments&quot;]</code> — 3 elements (post_processor always appends <code>&quot;Comments&quot;</code>)</li>
+</ul>
+<br>
+<p>After Phase 1 the values look like:</p>
+<ul>
+<li><code>breadcrumb_path[0]</code> = <code>&quot;News 15-03-2026&quot;</code></li>
+<li><code>breadcrumb_path[1]</code> = <code>&quot;Hacker-News 15-03-2026&quot;</code></li>
+<li><code>breadcrumb_path[2]</code> = <code>&quot;Comments&quot;</code> (comments pages only)</li>
+</ul>
+<br>
+<hr>
+<br>
+<h2>Desired Breadcrumb Output</h2>
+<br>
+<strong>Article page:</strong>
+<pre><code>News 15 March 2026 &gt; Hacker News
+</code></pre>
+<br>
+<strong>Comments page:</strong>
+<pre><code>News 15 March 2026 &gt; Hacker News &gt; Article Title
+</code></pre>
+<br>
+<p>The CSS triangle separator between <code>&lt;a&gt;</code> tags is already defined — not rendered in HTML.</p>
+<br>
+<hr>
+<br>
+<h2>Changes</h2>
+<br>
+<h3>1. <code>capcat/core/html_generator.py</code> — <code>generate_article_html_from_template</code></h3>
+<br>
+<strong>Move <code>is_comments_page</code> determination to before the <code>_generate_breadcrumb</code> call</strong> (currently it&#x27;s after). The code block at lines 567–571 must be repositioned above the breadcrumb call at lines 560–564.
+<br>
+<p>Then, when <code>is_comments_page</code> is True, build a local 3-element list for rendering:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="n">base_article_title</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\s*-\s*Comments$&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">article_title</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+<span class="n">breadcrumb_for_render</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">breadcrumb_path</span><span class="p">[:</span><span class="mi">2</span><span class="p">])</span> <span class="o">+</span> <span class="p">[</span><span class="n">base_article_title</span><span class="p">]</span>
+</pre></div>
+
+<br>
+<p>Pass <code>breadcrumb_for_render</code> to <code>_generate_breadcrumb</code> instead of <code>breadcrumb_path</code>.</p>
+<p>When <code>is_comments_page</code> is False, pass <code>breadcrumb_path</code> directly (no change).</p>
+<br>
+<strong>Critical:</strong> <code>breadcrumb_path</code> itself is never mutated. The 3rd element is <code>base_article_title</code> (stripped of <code> - Comments</code>), replacing the <code>&quot;Comments&quot;</code> string that was at index 2. The resulting list is always 3 elements for comments pages.
+<br>
+<p>The <code>&quot;Comments&quot; in breadcrumb_path</code> check in <code>is_comments_page</code> remains — it still works because the post_processor continues to pass <code>&quot;Comments&quot;</code> as <code>breadcrumb_path[2]</code>.</p>
+<br>
+<h3>2. <code>capcat/core/html_generator.py</code> — <code>_generate_breadcrumb</code></h3>
+<br>
+<strong>Depth table</strong> (unchanged):
+<pre><code>news.html            → base_depth=1  (date only)
+article.html         → base_depth=2  (date + source)
+html/article.html    → base_depth=3  (date + source)
+html/comments.html   → base_depth=3  (date + source + article)
+</code></pre>
+<br>
+<strong><code>filenames</code> list</strong>: change from <code>[&quot;index.html&quot;, &quot;news.html&quot;]</code> to <code>[&quot;index.html&quot;, &quot;news.html&quot;, &quot;article.html&quot;]</code> where index 2 is explicitly <code>&quot;article.html&quot;</code> — the comments crumb links back to the article, not to comments itself.
+<br>
+<strong><code>show_items</code> selection</strong>: add comments branch:
+<div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">is_source_index</span><span class="p">:</span>
+    <span class="n">show_items</span> <span class="o">=</span> <span class="n">breadcrumb_path</span><span class="p">[:</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">base_depth</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="k">elif</span> <span class="n">html_subfolder</span> <span class="ow">and</span> <span class="n">current_file_path</span> <span class="o">==</span> <span class="s2">&quot;comments.html&quot;</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">breadcrumb_path</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">:</span>
+    <span class="n">show_items</span> <span class="o">=</span> <span class="n">breadcrumb_path</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">base_depth</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="k">elif</span> <span class="n">html_subfolder</span><span class="p">:</span>
+    <span class="n">show_items</span> <span class="o">=</span> <span class="n">breadcrumb_path</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">base_depth</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">show_items</span> <span class="o">=</span> <span class="n">breadcrumb_path</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">base_depth</span> <span class="o">=</span> <span class="mi">2</span>
+</pre></div>
+
+<br>
+<strong>Level formatting</strong> — delete line 866 (<code>cleaned_title = self._clean_title_for_display(item)</code>) and the <code>if i &gt;= 1</code> block below it (lines 867–869). Replace them entirely with a three-branch <code>if/elif/else</code> per-level logic below. The <code>_clean_title_for_display</code> method itself is not deleted — it is still called from lines 670 and 709 elsewhere in the file:
+<br>
+<ul>
+<li><code>i == 0</code> (date folder): extract <code>DD-MM-YYYY</code> via regex <code>\d{2}-\d{2}-\d{4}</code>, reformat as <code>&quot;News {int(day)} {month_name} {year}&quot;</code>. Fallback if regex fails: use <code>item</code> as-is.</li>
+<li><code>i == 1</code> (source folder): strip trailing <code>\s+\d{2}-\d{2}-\d{4}</code>, then replace all <code>-</code> with <code> </code>.</li>
+<li><code>i == 2</code> (article title, comments only): use <code>item</code> as-is — already clean string from the caller.</li>
+</ul>
+<br>
+<strong>href arithmetic for Level 2</strong>: <code>i=2</code>, <code>base_depth=3</code>, <code>levels_up = 3-2 = 1</code>, <code>href = &quot;../&quot; + &quot;article.html&quot;</code> = <code>&quot;../article.html&quot;</code> ✓
+<br>
+<strong>Update docstring</strong> to reflect 3-level capability and new formatting logic.
+<br>
+<hr>
+<br>
+<h2>What Is NOT Changed</h2>
+<br>
+<ul>
+<li><code>html_post_processor.py</code> — no changes</li>
+<li>CSS / separator / triangle — no changes</li>
+<li><code>_generate_breadcrumb</code> method signature — no changes</li>
+<li><code>generate_article_html</code> (older non-template method) — no changes</li>
+<li><code>generate_directory_index</code> — no changes</li>
+<li><code>_clean_title_for_display</code> method — not deleted, only its call inside <code>_generate_breadcrumb</code>&#x27;s loop is removed</li>
+</ul>
+<br>
+<hr>
+<br>
+<h2>TDD Order</h2>
+<br>
+<ol>
+<li>Failing test: <code>_generate_breadcrumb</code> Level 0 — input <code>[&quot;News 15-03-2026&quot;, &quot;Hacker-News 15-03-2026&quot;]</code>, article.html, assert first <code>&lt;a&gt;</code> text is <code>&quot;News 15 March 2026&quot;</code></li>
+<li>Failing test: <code>_generate_breadcrumb</code> Level 1 — same input, assert second <code>&lt;a&gt;</code> text is <code>&quot;Hacker News&quot;</code> (no date, no hyphen)</li>
+<li>Failing test: <code>_generate_breadcrumb</code> Level 2 — input <code>[&quot;News 15-03-2026&quot;, &quot;Hacker-News 15-03-2026&quot;, &quot;My Article&quot;]</code>, html_subfolder=True, comments.html, assert 3 <code>&lt;a&gt;</code> tags, 3rd links to <code>../article.html</code> with text <code>&quot;My Article&quot;</code></li>
+<li>Failing test: html_subfolder article.html (no comments) still renders exactly 2 crumbs — regression guard</li>
+<li><strong>Update</strong> existing test <code>test_comments_breadcrumb_has_no_article_level</code> in <code>tests/unit/test_breadcrumb.py</code>: this test calls <code>_generate_breadcrumb</code> directly. Change the path from <code>[&quot;News 14-03-2026&quot;, &quot;Hacker News&quot;, &quot;Some Article&quot;, &quot;Comments&quot;]</code> to <code>[&quot;News 14-03-2026&quot;, &quot;Hacker News&quot;, &quot;Some Article&quot;]</code> (3 elements, no <code>&quot;Comments&quot;</code> — the substitution happens in the caller before <code>_generate_breadcrumb</code> is invoked). Change assertion from 2 links to 3 links, and verify the 3rd <code>&lt;a&gt;</code> has <code>href=&quot;../article.html&quot;</code>.</li>
+<li>Verify all new tests fail, updated test fails</li>
+<li>Implement both changes</li>
+<li>Verify all pass</li>
+</ol>
+<br>
+<hr>
+<br>
+<h2>Notes on Existing Tests</h2>
+<br>
+<code>tests/unit/test_breadcrumb.py</code> currently calls <code>_generate_breadcrumb</code> directly. The Level 0/1/2 formatting tests should also call it directly with pre-formatted <code>breadcrumb_path</code> values (as produced by Phase 1&#x27;s <code>_build_breadcrumb_path</code>).
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>core.source_system.enhanced_remove_command</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / <a href="../api/index.html">api</a> / core</div>
+<h1>core.source_system.enhanced_remove_command</h1>
+<br>
+<strong>File:</strong> <code>Application/core/source_system/enhanced_remove_command.py</code>
+<br>
+<h2>Description</h2>
+<br>
+<p>Enhanced remove-source command with advanced features:</p>
+<ul>
+<li>Dry-run mode</li>
+<li>Automatic backups</li>
+<li>Usage analytics</li>
+<li>Batch removal from file</li>
+<li>Undo/restore functionality</li>
+</ul>
+<br>
+<h2>Classes</h2>
+<br>
+<h3>RemovalOptions</h3>
+<br>
+<p>Options for source removal.</p>
+<br>
+<h3>EnhancedRemoveCommand</h3>
+<br>
+<p>Enhanced removal command with analytics, backups, and dry-run support.</p>
+<p>Extends base RemoveSourceCommand with advanced features.</p>
+<br>
+<h4>Methods</h4>
+<br>
+<h5>__init__</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_command</span><span class="p">:</span> <span class="n">RemoveSourceCommand</span><span class="p">,</span> <span class="n">backup_manager</span><span class="p">:</span> <span class="n">SourceBackupManager</span><span class="p">,</span> <span class="n">analytics</span><span class="p">:</span> <span class="n">SourceAnalytics</span><span class="p">,</span> <span class="n">ui</span><span class="p">:</span> <span class="n">RemovalUserInterface</span><span class="p">,</span> <span class="n">logger</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>base_command</code> (RemoveSourceCommand)</li>
+<li><code>backup_manager</code> (SourceBackupManager)</li>
+<li><code>analytics</code> (SourceAnalytics)</li>
+<li><code>ui</code> (RemovalUserInterface)</li>
+<li><code>logger</code> (Optional[any]) <em>optional</em></li>
+</ul>
+<br>
+<h5>execute_with_options</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">execute_with_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="n">RemovalOptions</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Execute removal with enhanced options.</p>
+<br>
+<p>Args:</p>
+<p>    options: RemovalOptions specifying behavior</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>options</code> (RemovalOptions)</li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h5>execute_undo</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">execute_undo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">backup_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Undo a previous removal by restoring from backup.</p>
+<br>
+<p>Args:</p>
+<p>    backup_id: Specific backup to restore (None = most recent)</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>backup_id</code> (Optional[str]) <em>optional</em></li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h5>_execute_enhanced_removal</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_execute_enhanced_removal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="n">RemovalOptions</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Execute standard interactive removal with enhancements.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>options</code> (RemovalOptions)</li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<p>⚠️ <strong>High complexity:</strong> 17</p>
+<br>
+<h5>_execute_batch_removal</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_execute_batch_removal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="n">RemovalOptions</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Execute batch removal from file.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>options</code> (RemovalOptions)</li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<p>⚠️ <strong>High complexity:</strong> 14</p>
+<br>
+<h5>_create_backup</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_create_backup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sources_info</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">SourceRemovalInfo</span><span class="p">],</span> <span class="n">output_directories</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Path</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BackupMetadata</span>
+</pre></div>
+
+<br>
+<p>Create backup before removal.</p>
+<br>
+<p>Args:</p>
+<p>    sources_info: List of sources being removed</p>
+<p>    output_directories: Optional list of output directories to backup</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>sources_info</code> (List[SourceRemovalInfo])</li>
+<li><code>output_directories</code> (Optional[List[Path]]) <em>optional</em></li>
+</ul>
+<br>
+<strong>Returns:</strong> BackupMetadata
+<br>
+<h5>_show_analytics_summary</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_show_analytics_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">available_sources</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Show analytics summary before removal.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>available_sources</code> (List[tuple[str, str]])</li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h5>_show_selected_analytics</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_show_selected_analytics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sources_info</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">SourceRemovalInfo</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Show detailed analytics for selected sources.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>sources_info</code> (List[SourceRemovalInfo])</li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h5>_show_dry_run_summary</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_show_dry_run_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sources_info</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">SourceRemovalInfo</span><span class="p">],</span> <span class="n">output_directories</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Path</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Show what would happen in dry-run mode.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>sources_info</code> (List[SourceRemovalInfo])</li>
+<li><code>output_directories</code> (Optional[List[Path]]) <em>optional</em></li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h5>_select_backup_to_restore</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_select_backup_to_restore</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">backups</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">BackupMetadata</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+</pre></div>
+
+<br>
+<p>Let user select which backup to restore.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>backups</code> (List[BackupMetadata])</li>
+</ul>
+<br>
+<strong>Returns:</strong> Optional[str]
+<br>
+<h5>_scan_output_directories</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_scan_output_directories</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sources_info</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">SourceRemovalInfo</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span>
+</pre></div>
+
+<br>
+<p>Scan for output directories matching the sources being removed.</p>
+<br>
+<p>Searches in ../News/ for directories matching source display names or IDs.</p>
+<br>
+<p>Args:</p>
+<p>    sources_info: List of sources being removed</p>
+<br>
+<p>Returns:</p>
+<p>    List of Path objects for matching output directories</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>sources_info</code> (List[SourceRemovalInfo])</li>
+</ul>
+<br>
+<strong>Returns:</strong> List[Path]
+<br>
+<h5>_calculate_directory_size</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_calculate_directory_size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directories</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span>
+</pre></div>
+
+<br>
+<p>Calculate total size of directories in bytes.</p>
+<br>
+<p>Args:</p>
+<p>    directories: List of directory paths</p>
+<br>
+<p>Returns:</p>
+<p>    Total size in bytes</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>directories</code> (List[Path])</li>
+</ul>
+<br>
+<strong>Returns:</strong> int
+<br>
+<h5>_format_size</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_format_size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size_bytes</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+
+<br>
+<p>Format byte size as human-readable string.</p>
+<br>
+<p>Args:</p>
+<p>    size_bytes: Size in bytes</p>
+<br>
+<p>Returns:</p>
+<p>    Formatted string (e.g., &quot;2.3 GB&quot;, &quot;45.7 MB&quot;)</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>size_bytes</code> (int)</li>
+</ul>
+<br>
+<strong>Returns:</strong> str
+<br>
+<h5>_prompt_output_cleanup</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_prompt_output_cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directories</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Path</span><span class="p">],</span> <span class="n">total_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Prompt user whether to delete output archives.</p>
+<br>
+<p>Args:</p>
+<p>    directories: List of output directories found</p>
+<p>    total_size: Total size in bytes</p>
+<p>    dry_run: Whether in dry-run mode</p>
+<p>    force: Whether to skip prompt</p>
+<br>
+<p>Returns:</p>
+<p>    True if user wants to delete archives</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>directories</code> (List[Path])</li>
+<li><code>total_size</code> (int)</li>
+<li><code>dry_run</code> (bool)</li>
+<li><code>force</code> (bool)</li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h5>_backup_output_directories</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_backup_output_directories</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directories</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Path</span><span class="p">],</span> <span class="n">backup_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Backup output directories before deletion.</p>
+<br>
+<p>Args:</p>
+<p>    directories: List of directories to backup</p>
+<p>    backup_path: Path to backup directory</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>directories</code> (List[Path])</li>
+<li><code>backup_path</code> (Path)</li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h5>_delete_output_directories</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_delete_output_directories</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directories</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
+</pre></div>
+
+<br>
+<p>Delete output directories.</p>
+<br>
+<p>Args:</p>
+<p>    directories: List of directories to delete</p>
+<br>
+<p>Returns:</p>
+<p>    Tuple of (number_deleted, total_size_deleted)</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>directories</code> (List[Path])</li>
+</ul>
+<br>
+<strong>Returns:</strong> tuple[int, int]
+<br>
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

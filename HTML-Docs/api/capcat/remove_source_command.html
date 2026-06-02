@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>capcat.core.source_system.remove_source_command</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / <a href="../api/index.html">api</a> / capcat</div>
+<h1>capcat.core.source_system.remove_source_command</h1>
+<br>
+<strong>File:</strong> <code>Application/capcat/core/source_system/remove_source_command.py</code>
+<br>
+<h2>Description</h2>
+<br>
+<p>Base classes and implementations for the remove-source command.</p>
+<br>
+<p>Provides the command pattern foundation used by EnhancedRemoveCommand</p>
+<p>and RemoveSourceService:</p>
+<ul>
+<li>SourceRemovalInfo: value object describing a source to be removed</li>
+<li>RemovalUserInterface: ABC for UI interactions (enables testability)</li>
+<li>RemoveSourceCommand: orchestrates selection → confirmation → removal</li>
+<li>RegistrySourceLister: queries SourceRegistry for available sources</li>
+<li>RegistrySourceInfoProvider: builds SourceRemovalInfo from config files</li>
+<li>FileSystemConfigRemover: deletes YAML config files from disk</li>
+<li>BundleManagerUpdater: removes the source from bundles.yml</li>
+</ul>
+<br>
+<h2>Classes</h2>
+<br>
+<h3>SourceRemovalInfo</h3>
+<br>
+<p>Describes a source that is about to be removed.</p>
+<br>
+<p>Attributes:</p>
+<p>    source_id: Machine-readable source identifier (e.g. `<code>&quot;hn&quot;</code>`).</p>
+<p>    display_name: Human-readable name shown in the UI.</p>
+<p>    config_path: Filesystem path to the source YAML config file.</p>
+<p>    bundles: List of bundle names that include this source.</p>
+<br>
+<h3>RemovalUserInterface</h3>
+<br>
+<strong>Inherits from:</strong> abc.ABC
+<br>
+<p>Abstract interface for all UI interactions during source removal.</p>
+<br>
+<p>Concrete implementations live in removal_ui.py (questionary-based)</p>
+<p>and tests/fixtures (mock-based).</p>
+<br>
+<h4>Methods</h4>
+<br>
+<h5>select_sources_to_remove</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">select_sources_to_remove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sources</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">tuple</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+</pre></div>
+
+<br>
+<p>Prompt the user to select one or more sources.</p>
+<br>
+<p>Args:</p>
+<p>    sources: List of `<code>(source_id, display_name)</code>` tuples.</p>
+<br>
+<p>Returns:</p>
+<p>    List of selected source IDs.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>sources</code> (List[tuple])</li>
+</ul>
+<br>
+<strong>Returns:</strong> List[str]
+<br>
+<h5>show_removal_summary</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">show_removal_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sources_info</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">SourceRemovalInfo</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Show a summary of what will be removed before confirming.</p>
+<br>
+<p>Args:</p>
+<p>    sources_info: Sources scheduled for removal.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>sources_info</code> (List[SourceRemovalInfo])</li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h5>confirm_removal</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">confirm_removal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sources_info</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">SourceRemovalInfo</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Ask the user to confirm the removal.</p>
+<br>
+<p>Args:</p>
+<p>    sources_info: Sources scheduled for removal.</p>
+<br>
+<p>Returns:</p>
+<p>    `<code>True</code><code> if the user confirmed, </code><code>False</code>` to abort.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>sources_info</code> (List[SourceRemovalInfo])</li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h5>show_success</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">show_success</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Display a success notification.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>message</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h5>show_error</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">show_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Display an error notification.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>message</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h5>show_info</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">show_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Display an informational message.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>message</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h3>SourceLister</h3>
+<br>
+<strong>Inherits from:</strong> abc.ABC
+<br>
+<p>Returns the list of removable sources as (source_id, display_name) pairs.</p>
+<br>
+<h4>Methods</h4>
+<br>
+<h5>list_sources</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">list_sources</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">tuple</span><span class="p">]</span>
+</pre></div>
+
+<br>
+<p>Return `<code>[(source_id, display_name), ...]</code>` for every available source.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<strong>Returns:</strong> List[tuple]
+<br>
+<h3>SourceInfoProvider</h3>
+<br>
+<strong>Inherits from:</strong> abc.ABC
+<br>
+<p>Builds SourceRemovalInfo objects for a list of source IDs.</p>
+<br>
+<h4>Methods</h4>
+<br>
+<h5>get_sources_info</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">get_sources_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_ids</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">SourceRemovalInfo</span><span class="p">]</span>
+</pre></div>
+
+<br>
+<p>Return removal metadata for each requested source_id.</p>
+<br>
+<p>Args:</p>
+<p>    source_ids: IDs returned by the UI selection step.</p>
+<br>
+<p>Returns:</p>
+<p>    One SourceRemovalInfo per valid source ID.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>source_ids</code> (List[str])</li>
+</ul>
+<br>
+<strong>Returns:</strong> List[SourceRemovalInfo]
+<br>
+<h3>ConfigRemover</h3>
+<br>
+<strong>Inherits from:</strong> abc.ABC
+<br>
+<p>Deletes a source&#x27;s config file from disk.</p>
+<br>
+<h4>Methods</h4>
+<br>
+<h5>remove_config</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">remove_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_info</span><span class="p">:</span> <span class="n">SourceRemovalInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Remove the config file described by <em>source_info</em>.</p>
+<br>
+<p>Args:</p>
+<p>    source_info: Removal metadata including the config path.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>source_info</code> (SourceRemovalInfo)</li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h3>BundleUpdater</h3>
+<br>
+<strong>Inherits from:</strong> abc.ABC
+<br>
+<p>Removes a source ID from all bundles in bundles.yml.</p>
+<br>
+<h4>Methods</h4>
+<br>
+<h5>remove_from_bundles</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">remove_from_bundles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Strip <em>source_id</em> from every bundle that contains it.</p>
+<br>
+<p>Args:</p>
+<p>    source_id: The source to remove from bundles.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>source_id</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h3>RemoveSourceCommand</h3>
+<br>
+<p>Orchestrates the interactive remove-source workflow.</p>
+<br>
+<p>Steps:</p>
+<ol>
+<li>List available sources via <em>source_lister</em>.</li>
+<li>Let the user select via <em>ui</em>.</li>
+<li>Gather removal info via <em>source_info_provider</em>.</li>
+<li>Show summary and ask for confirmation via <em>ui</em>.</li>
+<li>Delete config via <em>config_remover</em>.</li>
+<li>Update bundles via <em>bundle_updater</em>.</li>
+</ol>
+<br>
+<p>Args:</p>
+<p>    source_lister: Provides `<code>[(source_id, display_name)]</code>`.</p>
+<p>    source_info_provider: Builds SourceRemovalInfo objects.</p>
+<p>    ui: User-facing interaction layer.</p>
+<p>    config_remover: Removes YAML config files.</p>
+<p>    bundle_updater: Keeps bundles.yml consistent.</p>
+<p>    logger: Optional logger; defaults to module logger.</p>
+<br>
+<h4>Methods</h4>
+<br>
+<h5>__init__</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_lister</span><span class="p">:</span> <span class="n">SourceLister</span><span class="p">,</span> <span class="n">source_info_provider</span><span class="p">:</span> <span class="n">SourceInfoProvider</span><span class="p">,</span> <span class="n">ui</span><span class="p">:</span> <span class="n">RemovalUserInterface</span><span class="p">,</span> <span class="n">config_remover</span><span class="p">:</span> <span class="n">ConfigRemover</span><span class="p">,</span> <span class="n">bundle_updater</span><span class="p">:</span> <span class="n">BundleUpdater</span><span class="p">,</span> <span class="n">logger</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>source_lister</code> (SourceLister)</li>
+<li><code>source_info_provider</code> (SourceInfoProvider)</li>
+<li><code>ui</code> (RemovalUserInterface)</li>
+<li><code>config_remover</code> (ConfigRemover)</li>
+<li><code>bundle_updater</code> (BundleUpdater)</li>
+<li><code>logger</code> (Optional[Any]) <em>optional</em></li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h5>execute</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Run the full interactive removal workflow.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h5>_remove_sources</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_remove_sources</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sources_info</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="s1">&#39;SourceRemovalInfo&#39;</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Remove a list of sources (config + bundles) without UI interaction.</p>
+<br>
+<p>Used by EnhancedRemoveCommand after confirmation has been handled.</p>
+<br>
+<p>Args:</p>
+<p>    sources_info: Sources to remove.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>sources_info</code> (List[&#x27;SourceRemovalInfo&#x27;])</li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h5>_refresh_registry</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_refresh_registry</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Reset the global source registry so it reflects removed sources.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h3>RegistrySourceLister</h3>
+<br>
+<strong>Inherits from:</strong> SourceLister
+<br>
+<p>Lists sources via SourceRegistry - reads the live registry at call time.</p>
+<br>
+<h4>Methods</h4>
+<br>
+<h5>list_sources</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">list_sources</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">tuple</span><span class="p">]</span>
+</pre></div>
+
+<br>
+<p>Return `<code>[(source_id, display_name)]</code>` for every user-removable source.</p>
+<br>
+<p>Builtin sources (shipped with the application) are excluded - they</p>
+<p>cannot be removed and would silently no-op if the removal were attempted.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<strong>Returns:</strong> List[tuple]
+<br>
+<h3>RegistrySourceInfoProvider</h3>
+<br>
+<strong>Inherits from:</strong> SourceInfoProvider
+<br>
+<p>Builds SourceRemovalInfo by inspecting config files and bundles.yml.</p>
+<br>
+<p>Args:</p>
+<p>    config_path: Directory containing per-source YAML config files.</p>
+<p>    bundles_path: Path to bundles.yml.</p>
+<br>
+<h4>Methods</h4>
+<br>
+<h5>__init__</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">bundles_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>config_path</code> (Path)</li>
+<li><code>bundles_path</code> (Path)</li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h5>get_sources_info</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">get_sources_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_ids</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">SourceRemovalInfo</span><span class="p">]</span>
+</pre></div>
+
+<br>
+<p>Build SourceRemovalInfo for each source_id.</p>
+<br>
+<p>Args:</p>
+<p>    source_ids: IDs selected for removal.</p>
+<br>
+<p>Returns:</p>
+<p>    List of SourceRemovalInfo, one per valid ID.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>source_ids</code> (List[str])</li>
+</ul>
+<br>
+<strong>Returns:</strong> List[SourceRemovalInfo]
+<br>
+<h5>_load_bundles_map</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_load_bundles_map</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span>
+</pre></div>
+
+<br>
+<p>Return `<code>{source_id: [bundle_name, ...]}</code>` from bundles.yml.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<strong>Returns:</strong> dict
+<br>
+<h3>FileSystemConfigRemover</h3>
+<br>
+<strong>Inherits from:</strong> ConfigRemover
+<br>
+<p>Deletes the YAML config file for a source from disk.</p>
+<br>
+<h4>Methods</h4>
+<br>
+<h5>remove_config</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">remove_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_info</span><span class="p">:</span> <span class="n">SourceRemovalInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Delete the config file if it exists.</p>
+<br>
+<p>Args:</p>
+<p>    source_info: Contains the config_path to delete.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>source_info</code> (SourceRemovalInfo)</li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h3>BundleManagerUpdater</h3>
+<br>
+<strong>Inherits from:</strong> BundleUpdater
+<br>
+<p>Removes a source from all entries in bundles.yml.</p>
+<br>
+<p>Args:</p>
+<p>    bundles_path: Path to bundles.yml.</p>
+<br>
+<h4>Methods</h4>
+<br>
+<h5>__init__</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bundles_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>bundles_path</code> (Path)</li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h5>remove_from_bundles</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">remove_from_bundles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Strip <em>source_id</em> from every bundle in bundles.yml.</p>
+<br>
+<p>Args:</p>
+<p>    source_id: Source to remove from all bundles.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>source_id</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

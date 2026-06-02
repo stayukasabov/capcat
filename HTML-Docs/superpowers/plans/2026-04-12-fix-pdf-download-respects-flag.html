@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix: PDF Downloads Ignore User Choice Implementation Plan</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / <a href="../superpowers/index.html">superpowers</a> / plans</div>
+<h1>Fix: PDF Downloads Ignore User Choice Implementation Plan</h1>
+<br>
+<p>&gt; <strong>For agentic workers:</strong> REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (<code>- [ ]</code>) syntax for tracking.</p>
+<br>
+<strong>Goal:</strong> Make <code>--media</code> (the &quot;Download attached PDFs?&quot; interactive prompt) actually skip PDF downloads when the user says No.
+<br>
+<strong>Architecture:</strong> The bug lives in two unconditional call sites in <code>ArticleFetcher._download_pdf_links_from_markdown</code> — both ignore <code>self.download_files</code>. Gating those calls on <code>self.download_files</code> and updating the existing regression test (which locked in the wrong behavior) is the full fix. The interactive prompt text is also updated for clarity.
+<br>
+<strong>Tech Stack:</strong> Python 3, pytest, <code>capcat/core/article_fetcher.py</code>, <code>capcat/core/async_pdf_manager.py</code>
+<br>
+<hr>
+<br>
+<h2>Root Cause Summary</h2>
+<br>
+<code>ArticleFetcher._download_pdf_links_from_markdown</code> is called at <strong>two sites</strong> in <code>article_fetcher.py</code> without checking <code>self.download_files</code>:
+<br>
+<p>| Line | Caller | Note |</p>
+<p>|------|--------|------|</p>
+<p>| 1068 | <code>_save_article_with_media</code> | general content path |</p>
+<p>| 3044 | <code>fetch_article_content</code> (legacy path) | HN / specialized sources |</p>
+<br>
+<p>A regression test (<code>tests/unit/test_pdf_always_downloads.py</code>) explicitly documents this wrong behavior as intentional, which it will need to be updated.</p>
+<br>
+<p>Additionally, the interactive prompt says &quot;Download attached PDFs?&quot; but maps to <code>--media</code> — once the behavior is fixed this phrasing becomes accurate, though the note text needs a small update.</p>
+<br>
+<hr>
+<br>
+<h2>File Map</h2>
+<br>
+<p>| File | Action | Responsibility |</p>
+<p>|------|--------|---------------|</p>
+<p>| <code>capcat/core/article_fetcher.py:1066-1070</code> | Modify | Gate PDF download on <code>self.download_files</code> (path 1) |</p>
+<p>| <code>capcat/core/article_fetcher.py:3041-3051</code> | Modify | Gate PDF download on <code>self.download_files</code> (path 2) |</p>
+<p>| <code>tests/unit/test_pdf_always_downloads.py</code> | Modify | Flip test assertions to match correct behavior |</p>
+<p>| <code>capcat/core/interactive.py:666-671</code> | Modify | Update note text so it&#x27;s accurate post-fix |</p>
+<br>
+<hr>
+<br>
+<h2>Task 1: Gate PDF downloads on <code>download_files</code> — path 1</h2>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>capcat/core/article_fetcher.py:1066-1070</code></li>
+<li>Test: <code>tests/unit/test_pdf_always_downloads.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Write the failing test</strong></li>
+</ul>
+<br>
+<p>Add a new test to <code>tests/unit/test_pdf_always_downloads.py</code> that verifies PDFs are skipped when <code>download_files=False</code>:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_pdf_not_queued_when_download_files_false</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;When download_files=False, PDF links must NOT be queued.&quot;&quot;&quot;</span>
+    <span class="n">fetcher</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_fetcher</span><span class="p">(</span><span class="n">download_files</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">markdown</span> <span class="o">=</span> <span class="s2">&quot;[Paper](https://example.com/research.pdf)</span><span class="se">\n\n</span><span class="s2">Some content.&quot;</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">fetcher</span><span class="o">.</span><span class="n">_download_pdf_links_from_markdown</span><span class="p">(</span><span class="n">markdown</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">))</span>
+
+    <span class="k">assert</span> <span class="s2">&quot;downloading_research.pdf&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">result</span><span class="p">,</span> <span class="p">(</span>
+        <span class="s2">&quot;PDF must NOT be queued when download_files=False&quot;</span>
+    <span class="p">)</span>
+    <span class="c1"># Original link must be preserved unchanged</span>
+    <span class="k">assert</span> <span class="s2">&quot;https://example.com/research.pdf&quot;</span> <span class="ow">in</span> <span class="n">result</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Run test to verify it fails</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_pdf_always_downloads.py::TestPdfDownloadsWithoutMediaFlag::test_pdf_not_queued_when_download_files_false<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: <strong>FAIL</strong> — the PDF is currently always queued regardless of the flag.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Gate the call at line 1066-1070 on <code>self.download_files</code></strong></li>
+</ul>
+<br>
+<p>In <code>capcat/core/article_fetcher.py</code>, find the block at approximately line 1066:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="c1"># Download any PDF links still present in markdown (universal — works</span>
+        <span class="c1"># for all sources regardless of HTML structure)</span>
+        <span class="n">markdown_content</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_download_pdf_links_from_markdown</span><span class="p">(</span>
+            <span class="n">markdown_content</span><span class="p">,</span> <span class="n">article_folder_path</span>
+        <span class="p">)</span>
+</pre></div>
+
+<br>
+<p>Replace with:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="c1"># Download PDF links only when the user requested media downloads.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">download_files</span><span class="p">:</span>
+            <span class="n">markdown_content</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_download_pdf_links_from_markdown</span><span class="p">(</span>
+                <span class="n">markdown_content</span><span class="p">,</span> <span class="n">article_folder_path</span>
+            <span class="p">)</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Run test to verify it passes</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_pdf_always_downloads.py::TestPdfDownloadsWithoutMediaFlag::test_pdf_not_queued_when_download_files_false<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: <strong>PASS</strong></p>
+<br>
+<ul>
+<li>[ ] <strong>Step 5: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>git<span class="w"> </span>add<span class="w"> </span>capcat/core/article_fetcher.py<span class="w"> </span>tests/unit/test_pdf_always_downloads.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;fix: gate PDF downloads on download_files flag (path 1)&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h2>Task 2: Gate PDF downloads on <code>download_files</code> — path 2</h2>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>capcat/core/article_fetcher.py:3041-3051</code></li>
+<li>Test: <code>tests/unit/test_pdf_always_downloads.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Write a failing test covering the second code path</strong></li>
+</ul>
+<br>
+<p>The second call site is inside a method that handles PDF link injection before calling the downloader. Add this test to <code>tests/unit/test_pdf_always_downloads.py</code> inside <code>TestPdfDownloadsWithoutMediaFlag</code>:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_fetch_article_content_skips_pdf_when_flag_false</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;fetch_article_content must not download PDFs when download_files=False.&quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">unittest.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">patch</span><span class="p">,</span> <span class="n">MagicMock</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.article_fetcher</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArticleFetcher</span>
+
+    <span class="k">class</span><span class="w"> </span><span class="nc">_Fetcher</span><span class="p">(</span><span class="n">ArticleFetcher</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">should_skip_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">title</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="n">session</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">Session</span><span class="p">()</span>
+    <span class="k">with</span> <span class="n">patch</span><span class="p">(</span><span class="s2">&quot;capcat.core.ethical_scraping.get_ethical_manager&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">mock_em</span><span class="p">:</span>
+        <span class="n">mock_em</span><span class="o">.</span><span class="n">return_value</span><span class="o">.</span><span class="n">configure</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+        <span class="n">fetcher</span> <span class="o">=</span> <span class="n">_Fetcher</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">download_files</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">queued_pdfs</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">with</span> <span class="n">patch</span><span class="o">.</span><span class="n">object</span><span class="p">(</span><span class="n">fetcher</span><span class="p">,</span> <span class="s2">&quot;_download_pdf_links_from_markdown&quot;</span><span class="p">,</span>
+                      <span class="n">side_effect</span><span class="o">=</span><span class="k">lambda</span> <span class="n">md</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">queued_pdfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="ow">or</span> <span class="n">md</span><span class="p">)</span> <span class="k">as</span> <span class="n">mock_dl</span><span class="p">:</span>
+        <span class="c1"># Simulate article content with a PDF link</span>
+        <span class="k">with</span> <span class="n">patch</span><span class="o">.</span><span class="n">object</span><span class="p">(</span><span class="n">fetcher</span><span class="p">,</span> <span class="s2">&quot;_fetch_html_content&quot;</span><span class="p">,</span>
+                          <span class="n">return_value</span><span class="o">=</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="s2">&quot;&lt;html&gt;&lt;a href=&#39;paper.pdf&#39;&gt;Paper&lt;/a&gt;&lt;/html&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;text/html&quot;</span><span class="p">)):</span>
+            <span class="k">with</span> <span class="n">patch</span><span class="o">.</span><span class="n">object</span><span class="p">(</span><span class="n">fetcher</span><span class="p">,</span> <span class="s2">&quot;_save_markdown_file&quot;</span><span class="p">,</span> <span class="n">return_value</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                <span class="n">fetcher</span><span class="o">.</span><span class="n">fetch_article_content</span><span class="p">(</span>
+                    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Test&quot;</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://example.com/article&quot;</span><span class="p">,</span>
+                    <span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">base_folder</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">)</span>
+                <span class="p">)</span>
+
+        <span class="n">mock_dl</span><span class="o">.</span><span class="n">assert_not_called</span><span class="p">(),</span> <span class="s2">&quot;PDF downloader must not be called when download_files=False&quot;</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Run test to verify it fails</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_pdf_always_downloads.py::TestPdfDownloadsWithoutMediaFlag::test_fetch_article_content_skips_pdf_when_flag_false<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: <strong>FAIL</strong> — <code>_download_pdf_links_from_markdown</code> is called even with <code>download_files=False</code>.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Gate the call at line 3041-3051 on <code>self.download_files</code></strong></li>
+</ul>
+<br>
+<p>In <code>capcat/core/article_fetcher.py</code>, find the block at approximately line 3041:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="c1"># Download PDF links (injected above + any in the converted content).</span>
+        <span class="c1"># Wrap in try/except so a failure here never leaves an empty folder.</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">markdown_content</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_download_pdf_links_from_markdown</span><span class="p">(</span>
+                <span class="n">markdown_content</span><span class="p">,</span> <span class="n">article_folder_path</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;PDF link processing failed for </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">; &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;continuing without PDF downloads&quot;</span>
+            <span class="p">)</span>
+</pre></div>
+
+<br>
+<p>Replace with:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="c1"># Download PDF links only when the user requested media downloads.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">download_files</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">markdown_content</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_download_pdf_links_from_markdown</span><span class="p">(</span>
+                    <span class="n">markdown_content</span><span class="p">,</span> <span class="n">article_folder_path</span>
+                <span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;PDF link processing failed for </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">; &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;continuing without PDF downloads&quot;</span>
+                <span class="p">)</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Run test to verify it passes</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_pdf_always_downloads.py<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: All tests in the file pass.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 5: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>git<span class="w"> </span>add<span class="w"> </span>capcat/core/article_fetcher.py<span class="w"> </span>tests/unit/test_pdf_always_downloads.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;fix: gate PDF downloads on download_files flag (path 2)&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h2>Task 3: Update the now-wrong regression tests</h2>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>tests/unit/test_pdf_always_downloads.py</code></li>
+</ul>
+<br>
+<p>The existing tests <code>test_pdf_links_queued_without_media_flag</code> and <code>test_pdf_links_queued_with_media_flag</code> document the old wrong behavior. They need to be corrected to match the new intended behavior.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Invert <code>test_pdf_links_queued_without_media_flag</code></strong></li>
+</ul>
+<br>
+<p>Replace the existing method body:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_pdf_links_not_queued_without_media_flag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Without --media, PDF links must NOT be queued for download.&quot;&quot;&quot;</span>
+    <span class="n">fetcher</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_fetcher</span><span class="p">(</span><span class="n">download_files</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">markdown</span> <span class="o">=</span> <span class="s2">&quot;[Paper](https://example.com/research.pdf)</span><span class="se">\n\n</span><span class="s2">Some content.&quot;</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">fetcher</span><span class="o">.</span><span class="n">_download_pdf_links_from_markdown</span><span class="p">(</span><span class="n">markdown</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">))</span>
+
+    <span class="k">assert</span> <span class="s2">&quot;downloading_research.pdf&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">result</span><span class="p">,</span> <span class="p">(</span>
+        <span class="s2">&quot;PDF must NOT be queued when download_files=False&quot;</span>
+    <span class="p">)</span>
+    <span class="k">assert</span> <span class="s2">&quot;https://example.com/research.pdf&quot;</span> <span class="ow">in</span> <span class="n">result</span>
+</pre></div>
+
+<br>
+<p>Also update the method name in the same edit (<code>test_pdf_links_queued_without_media_flag</code> → <code>test_pdf_links_not_queued_without_media_flag</code>).</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Verify <code>test_pdf_links_queued_with_media_flag</code> still passes</strong></li>
+</ul>
+<br>
+<p>This test already expects PDFs to be queued when <code>download_files=True</code> — that behavior is unchanged. Run:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_pdf_always_downloads.py::TestPdfDownloadsWithoutMediaFlag::test_pdf_links_queued_with_media_flag<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: <strong>PASS</strong></p>
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Run the full test file</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_pdf_always_downloads.py<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: All tests <strong>PASS</strong>. If the integration test from Task 2 is still brittle from patching internals, simplify it to only call <code>_download_pdf_links_from_markdown</code> directly (same shape as Task 1 test).</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>git<span class="w"> </span>add<span class="w"> </span>tests/unit/test_pdf_always_downloads.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;test: update pdf regression tests to match correct behavior&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h2>Task 4: Update the interactive note text</h2>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>capcat/core/interactive.py:666-671</code></li>
+</ul>
+<br>
+<p>The note currently says &quot;Downloading PDFs can slow down the process significantly&quot; — after the fix this is now accurate (PDFs only download when <code>--media</code> is chosen). Update the note to reflect the actual behavior clearly.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: No failing test needed</strong> — this is a pure string change with no logic impact. Verify the existing interactive test suite passes before and after:</li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_interactive_pdf_message.py<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Note the current pass/fail state.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Update the note text in <code>_confirm_and_execute</code></strong></li>
+</ul>
+<br>
+<p>In <code>capcat/core/interactive.py</code>, find the block at approximately line 666:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span>
+        <span class="s2">&quot;  Note: Downloading PDFs can slow down the process significantly.</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;  You can configure the PDF size limit and other behaviors in</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;  Config/Global-settings.yaml inside your vault.&quot;</span>
+    <span class="p">)</span>
+</pre></div>
+
+<br>
+<p>Replace with:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span>
+        <span class="s2">&quot;  Note: Choosing Yes downloads PDFs, videos, audio, and documents.</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;  PDF size limit and other behaviors can be configured in</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;  Config/Global-settings.yaml inside your vault.&quot;</span>
+    <span class="p">)</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Run interactive test suite</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_interactive_pdf_message.py<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>If any test asserts the old note text, update the expected string in the test to match the new text.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Run full unit suite</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-q
+</pre></div>
+
+<br>
+<p>Expected: green.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 5: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>git<span class="w"> </span>add<span class="w"> </span>capcat/core/interactive.py<span class="w"> </span>tests/unit/test_interactive_pdf_message.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;fix: update interactive PDF note to describe actual behavior&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h2>Self-Review</h2>
+<br>
+<strong>Spec coverage:</strong>
+<ul>
+<li>✅ PDFs skipped when user answers &quot;No&quot; → Tasks 1 &amp; 2</li>
+<li>✅ PDFs still downloaded when user answers &quot;Yes&quot; (existing test unchanged) → Task 3</li>
+<li>✅ Wrong regression test corrected → Task 3</li>
+<li>✅ Interactive note text accurate → Task 4</li>
+</ul>
+<br>
+<strong>Placeholder scan:</strong> No placeholders — all code blocks contain exact content.
+<br>
+<strong>Type consistency:</strong> No new types introduced. <code>self.download_files</code> is an existing <code>bool</code> attribute on <code>ArticleFetcher</code>.
+<br>
+<strong>Edge case — async PDF manager still running from prior sessions:</strong> <code>_download_pdf_links_from_markdown</code> is now only called when <code>download_files=True</code>. The <code>AsyncPDFManager</code> is never started unless that path is hit, so no orphan threads are spawned.
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

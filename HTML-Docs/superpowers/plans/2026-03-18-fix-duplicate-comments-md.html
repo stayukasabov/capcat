@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix: Duplicate Comments MD Generation Implementation Plan</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / <a href="../superpowers/index.html">superpowers</a> / plans</div>
+<h1>Fix: Duplicate Comments MD Generation Implementation Plan</h1>
+<br>
+<p>&gt; <strong>For agentic workers:</strong> REQUIRED: Use superpowers:subagent-driven-development (if subagents available) or superpowers:executing-plans to implement this plan. Steps use checkbox (<code>- [ ]</code>) syntax for tracking.</p>
+<br>
+<strong>Goal:</strong> Remove duplicate <code><em>-Comments.md</code> files caused by <code>fetch_comments</code> being called twice per article — once inside <code>fetch_article_content</code> and again by the outer caller.
+<br>
+<strong>Architecture:</strong> Both <code>HnSource.fetch_article_content</code> and <code>LbSource.fetch_article_content</code> call <code>self.fetch_comments()</code> internally. But <code>unified_source_processor._process_single_article_new_system</code> (the caller) also calls <code>source.fetch_comments()</code> after <code>fetch_article_content</code> returns. This produces two comments files per article with different names (first uses the web page title; second uses <code>article.title</code> from the source). Fix: remove the embedded <code>fetch_comments</code> calls from both source <code>fetch_article_content</code> methods. The outer caller already handles comments correctly.
+<br>
+<strong>Tech Stack:</strong> Python, pytest, unittest.mock
+<br>
+<hr>
+<br>
+<h2>Root Cause Summary</h2>
+<br>
+<code>unified_source_processor.py:_process_single_article_new_system</code> (lines 718–752):
+<div class="highlight"><pre><span></span><span class="n">success</span><span class="p">,</span> <span class="n">article_path</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">fetch_article_content</span><span class="p">(</span><span class="n">article</span><span class="p">,</span> <span class="n">base_dir</span><span class="p">,</span> <span class="n">progress_callback</span><span class="p">)</span>
+<span class="c1"># ↑ HnSource/LbSource fetch_article_content calls self.fetch_comments() inside ← FIRST WRITE</span>
+
+<span class="k">if</span> <span class="n">supports_comments</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="s2">&quot;fetch_comments&quot;</span><span class="p">):</span>
+    <span class="n">source</span><span class="o">.</span><span class="n">fetch_comments</span><span class="p">(</span><span class="n">article</span><span class="o">.</span><span class="n">comment_url</span><span class="p">,</span> <span class="n">article</span><span class="o">.</span><span class="n">title</span><span class="p">,</span> <span class="n">article_path</span><span class="p">)</span>  <span class="c1"># ← SECOND WRITE</span>
+</pre></div>
+
+<br>
+<p>Two different titles → two different filenames in the article folder.</p>
+<br>
+<h2>Files Changed</h2>
+<br>
+<p>&lt;div class=&quot;table-container&quot;&gt;</p>
+<p>&lt;table class=&quot;centered-table&quot;&gt;</p>
+<p>  &lt;thead&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;th&gt;File&lt;/th&gt;</p>
+<p>      &lt;th&gt;Change&lt;/th&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>  &lt;/thead&gt;</p>
+<p>  &lt;tbody&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/sources/builtin/custom/hn/source.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Remove &lt;code&gt;self.fetch_comments()&lt;/code&gt; block from inside &lt;code&gt;fetch_article_content&lt;/code&gt; (lines 215–227)&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/sources/builtin/custom/lb/source.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Remove &lt;code&gt;self.fetch_comments()&lt;/code&gt; block from inside &lt;code&gt;fetch_article_content&lt;/code&gt; (lines 383–395)&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;tests/unit/test_no_duplicate_comments.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;New — verifies no duplicate comments files are created&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>  &lt;/tbody&gt;</p>
+<p>&lt;/table&gt;</p>
+<p>&lt;/div&gt;</p>
+<br>
+<hr>
+<br>
+<h2>Chunk 1: Test + Fix</h2>
+<br>
+<h3>Task 1: Write failing tests for duplicate comments</h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Create: <code>/Users/xmac/capcat/tests/unit/test_no_duplicate_comments.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Write the failing tests</strong></li>
+</ul>
+<br>
+<p>Create <code>/Users/xmac/capcat/tests/unit/test_no_duplicate_comments.py</code>:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Tests that fetch_article_content does not write comments internally.</span>
+
+<span class="sd">After the fix, only the outer caller (unified_source_processor) is</span>
+<span class="sd">responsible for writing comments. These tests confirm that</span>
+<span class="sd">fetch_article_content returns without side-effect comment files.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">unittest.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">MagicMock</span><span class="p">,</span> <span class="n">patch</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.source_system.base_source</span><span class="w"> </span><span class="kn">import</span> <span class="n">Article</span><span class="p">,</span> <span class="n">SourceConfig</span>
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Helpers</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_make_article</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Article</span><span class="p">:</span>
+    <span class="n">defaults</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Test Article Title&quot;</span><span class="p">,</span>
+        <span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://example.com/article&quot;</span><span class="p">,</span>
+        <span class="n">comment_url</span><span class="o">=</span><span class="s2">&quot;https://news.ycombinator.com/item?id=99999&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">defaults</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Article</span><span class="p">(</span><span class="o">**</span><span class="n">defaults</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_hn_config</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">SourceConfig</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">SourceConfig</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;hn&quot;</span><span class="p">,</span>
+        <span class="n">display_name</span><span class="o">=</span><span class="s2">&quot;Hacker News&quot;</span><span class="p">,</span>
+        <span class="n">base_url</span><span class="o">=</span><span class="s2">&quot;https://news.ycombinator.com&quot;</span><span class="p">,</span>
+        <span class="n">has_comments</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_lb_config</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">SourceConfig</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">SourceConfig</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;lb&quot;</span><span class="p">,</span>
+        <span class="n">display_name</span><span class="o">=</span><span class="s2">&quot;Lobsters&quot;</span><span class="p">,</span>
+        <span class="n">base_url</span><span class="o">=</span><span class="s2">&quot;https://lobste.rs&quot;</span><span class="p">,</span>
+        <span class="n">has_comments</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># HnSource: fetch_article_content must not write a comments file</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestHnSourceNoInternalComments</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;fetch_article_content must return without calling fetch_comments.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_fetch_article_content_does_not_call_fetch_comments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;fetch_comments must NOT be called inside fetch_article_content.&quot;&quot;&quot;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.sources.builtin.custom.hn.source</span><span class="w"> </span><span class="kn">import</span> <span class="n">HnSource</span>
+
+        <span class="n">source</span> <span class="o">=</span> <span class="n">HnSource</span><span class="p">(</span><span class="n">_hn_config</span><span class="p">())</span>
+        <span class="n">article</span> <span class="o">=</span> <span class="n">_make_article</span><span class="p">()</span>
+
+        <span class="c1"># Patch the external fetcher so the test is fast and offline</span>
+        <span class="n">mock_fetcher_cls</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+        <span class="n">mock_fetcher</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+        <span class="n">mock_fetcher_cls</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="n">mock_fetcher</span>
+        <span class="n">mock_fetcher</span><span class="o">.</span><span class="n">fetch_article_content</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="kc">True</span><span class="p">,</span>
+            <span class="n">article</span><span class="o">.</span><span class="n">title</span><span class="p">,</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">patch</span><span class="p">(</span>
+            <span class="s2">&quot;capcat.sources.builtin.custom.hn.source.NewsSourceArticleFetcher&quot;</span><span class="p">,</span>
+            <span class="n">mock_fetcher_cls</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="k">with</span> <span class="n">patch</span><span class="o">.</span><span class="n">object</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="s2">&quot;fetch_comments&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">mock_fetch_comments</span><span class="p">:</span>
+                <span class="n">source</span><span class="o">.</span><span class="n">fetch_article_content</span><span class="p">(</span><span class="n">article</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">))</span>
+
+        <span class="n">mock_fetch_comments</span><span class="o">.</span><span class="n">assert_not_called</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_fetch_article_content_returns_folder_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;fetch_article_content still returns (True, folder_path) after the fix.&quot;&quot;&quot;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.sources.builtin.custom.hn.source</span><span class="w"> </span><span class="kn">import</span> <span class="n">HnSource</span>
+
+        <span class="n">source</span> <span class="o">=</span> <span class="n">HnSource</span><span class="p">(</span><span class="n">_hn_config</span><span class="p">())</span>
+        <span class="n">article</span> <span class="o">=</span> <span class="n">_make_article</span><span class="p">()</span>
+
+        <span class="n">mock_fetcher_cls</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+        <span class="n">mock_fetcher</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+        <span class="n">mock_fetcher_cls</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="n">mock_fetcher</span>
+        <span class="n">mock_fetcher</span><span class="o">.</span><span class="n">fetch_article_content</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="kc">True</span><span class="p">,</span>
+            <span class="n">article</span><span class="o">.</span><span class="n">title</span><span class="p">,</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">patch</span><span class="p">(</span>
+            <span class="s2">&quot;capcat.sources.builtin.custom.hn.source.NewsSourceArticleFetcher&quot;</span><span class="p">,</span>
+            <span class="n">mock_fetcher_cls</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="k">with</span> <span class="n">patch</span><span class="o">.</span><span class="n">object</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="s2">&quot;fetch_comments&quot;</span><span class="p">):</span>
+                <span class="n">success</span><span class="p">,</span> <span class="n">path</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">fetch_article_content</span><span class="p">(</span><span class="n">article</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">))</span>
+
+        <span class="k">assert</span> <span class="n">success</span> <span class="ow">is</span> <span class="kc">True</span>
+        <span class="k">assert</span> <span class="n">path</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_no_duplicate_comments_files_in_folder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;fetch_article_content must not create any *-Comments.md files.&quot;&quot;&quot;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.sources.builtin.custom.hn.source</span><span class="w"> </span><span class="kn">import</span> <span class="n">HnSource</span>
+
+        <span class="n">source</span> <span class="o">=</span> <span class="n">HnSource</span><span class="p">(</span><span class="n">_hn_config</span><span class="p">())</span>
+        <span class="n">article</span> <span class="o">=</span> <span class="n">_make_article</span><span class="p">()</span>
+
+        <span class="n">mock_fetcher_cls</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+        <span class="n">mock_fetcher</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+        <span class="n">mock_fetcher_cls</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="n">mock_fetcher</span>
+        <span class="n">mock_fetcher</span><span class="o">.</span><span class="n">fetch_article_content</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="kc">True</span><span class="p">,</span>
+            <span class="n">article</span><span class="o">.</span><span class="n">title</span><span class="p">,</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">patch</span><span class="p">(</span>
+            <span class="s2">&quot;capcat.sources.builtin.custom.hn.source.NewsSourceArticleFetcher&quot;</span><span class="p">,</span>
+            <span class="n">mock_fetcher_cls</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="n">source</span><span class="o">.</span><span class="n">fetch_article_content</span><span class="p">(</span><span class="n">article</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">))</span>
+
+        <span class="n">comments_files</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">tmp_path</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*-Comments.md&quot;</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">comments_files</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;fetch_article_content must not create comments files; &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;found: </span><span class="si">{</span><span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">comments_files</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># LbSource: fetch_article_content must not write a comments file</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestLbSourceNoInternalComments</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;fetch_comments must NOT be called inside LbSource.fetch_article_content.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_fetch_article_content_does_not_call_fetch_comments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;fetch_comments must NOT be called inside fetch_article_content.&quot;&quot;&quot;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.sources.builtin.custom.lb.source</span><span class="w"> </span><span class="kn">import</span> <span class="n">LbSource</span>
+
+        <span class="n">source</span> <span class="o">=</span> <span class="n">LbSource</span><span class="p">(</span><span class="n">_lb_config</span><span class="p">())</span>
+        <span class="n">article</span> <span class="o">=</span> <span class="n">_make_article</span><span class="p">(</span>
+            <span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://lobste.rs/s/example/test_article&quot;</span><span class="p">,</span>
+            <span class="n">comment_url</span><span class="o">=</span><span class="s2">&quot;https://lobste.rs/s/example/test_article&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">mock_fetcher_cls</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+        <span class="n">mock_fetcher</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+        <span class="n">mock_fetcher_cls</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="n">mock_fetcher</span>
+        <span class="n">mock_fetcher</span><span class="o">.</span><span class="n">fetch_article_content</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="kc">True</span><span class="p">,</span>
+            <span class="n">article</span><span class="o">.</span><span class="n">title</span><span class="p">,</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">patch</span><span class="p">(</span>
+            <span class="s2">&quot;capcat.sources.builtin.custom.lb.source.NewsSourceArticleFetcher&quot;</span><span class="p">,</span>
+            <span class="n">mock_fetcher_cls</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="k">with</span> <span class="n">patch</span><span class="o">.</span><span class="n">object</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="s2">&quot;fetch_comments&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">mock_fetch_comments</span><span class="p">:</span>
+                <span class="n">source</span><span class="o">.</span><span class="n">fetch_article_content</span><span class="p">(</span><span class="n">article</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">))</span>
+
+        <span class="n">mock_fetch_comments</span><span class="o">.</span><span class="n">assert_not_called</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_fetch_article_content_returns_folder_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;fetch_article_content still returns (True, folder_path) after the fix.&quot;&quot;&quot;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.sources.builtin.custom.lb.source</span><span class="w"> </span><span class="kn">import</span> <span class="n">LbSource</span>
+
+        <span class="n">source</span> <span class="o">=</span> <span class="n">LbSource</span><span class="p">(</span><span class="n">_lb_config</span><span class="p">())</span>
+        <span class="n">article</span> <span class="o">=</span> <span class="n">_make_article</span><span class="p">(</span>
+            <span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://lobste.rs/s/example/test_article&quot;</span><span class="p">,</span>
+            <span class="n">comment_url</span><span class="o">=</span><span class="s2">&quot;https://lobste.rs/s/example/test_article&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">mock_fetcher_cls</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+        <span class="n">mock_fetcher</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+        <span class="n">mock_fetcher_cls</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="n">mock_fetcher</span>
+        <span class="n">mock_fetcher</span><span class="o">.</span><span class="n">fetch_article_content</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="kc">True</span><span class="p">,</span>
+            <span class="n">article</span><span class="o">.</span><span class="n">title</span><span class="p">,</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">patch</span><span class="p">(</span>
+            <span class="s2">&quot;capcat.sources.builtin.custom.lb.source.NewsSourceArticleFetcher&quot;</span><span class="p">,</span>
+            <span class="n">mock_fetcher_cls</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="k">with</span> <span class="n">patch</span><span class="o">.</span><span class="n">object</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="s2">&quot;fetch_comments&quot;</span><span class="p">):</span>
+                <span class="n">success</span><span class="p">,</span> <span class="n">path</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">fetch_article_content</span><span class="p">(</span><span class="n">article</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">))</span>
+
+        <span class="k">assert</span> <span class="n">success</span> <span class="ow">is</span> <span class="kc">True</span>
+        <span class="k">assert</span> <span class="n">path</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_no_duplicate_comments_files_in_folder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;fetch_article_content must not create any *-Comments.md files.&quot;&quot;&quot;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.sources.builtin.custom.lb.source</span><span class="w"> </span><span class="kn">import</span> <span class="n">LbSource</span>
+
+        <span class="n">source</span> <span class="o">=</span> <span class="n">LbSource</span><span class="p">(</span><span class="n">_lb_config</span><span class="p">())</span>
+        <span class="n">article</span> <span class="o">=</span> <span class="n">_make_article</span><span class="p">(</span>
+            <span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://lobste.rs/s/example/test_article&quot;</span><span class="p">,</span>
+            <span class="n">comment_url</span><span class="o">=</span><span class="s2">&quot;https://lobste.rs/s/example/test_article&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">mock_fetcher_cls</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+        <span class="n">mock_fetcher</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+        <span class="n">mock_fetcher_cls</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="n">mock_fetcher</span>
+        <span class="n">mock_fetcher</span><span class="o">.</span><span class="n">fetch_article_content</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="kc">True</span><span class="p">,</span>
+            <span class="n">article</span><span class="o">.</span><span class="n">title</span><span class="p">,</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">patch</span><span class="p">(</span>
+            <span class="s2">&quot;capcat.sources.builtin.custom.lb.source.NewsSourceArticleFetcher&quot;</span><span class="p">,</span>
+            <span class="n">mock_fetcher_cls</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="n">source</span><span class="o">.</span><span class="n">fetch_article_content</span><span class="p">(</span><span class="n">article</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">))</span>
+
+        <span class="n">comments_files</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">tmp_path</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*-Comments.md&quot;</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">comments_files</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;fetch_article_content must not create comments files; &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;found: </span><span class="si">{</span><span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">comments_files</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Run tests to verify they fail</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_no_duplicate_comments.py<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: 6 FAILED (tests currently fail because <code>fetch_article_content</code> still calls <code>fetch_comments</code> internally).</p>
+<br>
+<hr>
+<br>
+<h3>Task 2: Fix HnSource — remove internal fetch_comments call</h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>/Users/xmac/capcat/capcat/sources/builtin/custom/hn/source.py:215-226</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Remove the fetch_comments block from HnSource.fetch_article_content</strong></li>
+</ul>
+<br>
+<p>In <code>/Users/xmac/capcat/capcat/sources/builtin/custom/hn/source.py</code>, locate and <strong>delete</strong> lines 215–227 (the internal comments block). The block to remove:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="c1"># Fetch comments separately if article fetch was successful</span>
+            <span class="k">if</span> <span class="n">success</span> <span class="ow">and</span> <span class="n">article</span><span class="o">.</span><span class="n">comment_url</span> <span class="ow">and</span> <span class="n">folder_path</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">fetch_comments</span><span class="p">(</span>
+                        <span class="n">comment_url</span><span class="o">=</span><span class="n">article</span><span class="o">.</span><span class="n">comment_url</span><span class="p">,</span>
+                        <span class="n">article_title</span><span class="o">=</span><span class="n">title</span> <span class="ow">or</span> <span class="n">article</span><span class="o">.</span><span class="n">title</span><span class="p">,</span>
+                        <span class="n">article_folder_path</span><span class="o">=</span><span class="n">folder_path</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Failed to fetch comments for </span><span class="si">{</span><span class="n">article</span><span class="o">.</span><span class="n">title</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="p">)</span>
+                    <span class="c1"># Don&#39;t fail the entire article fetch if comments fail</span>
+</pre></div>
+
+<br>
+<p>After the removal, the method should end with:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">success</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">folder_path</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Run the HN tests</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_no_duplicate_comments.py::TestHnSourceNoInternalComments<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: 3 PASSED</p>
+<br>
+<hr>
+<br>
+<h3>Task 3: Fix LbSource — remove internal fetch_comments call</h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>/Users/xmac/capcat/capcat/sources/builtin/custom/lb/source.py:383-394</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 5: Remove the fetch_comments block from LbSource.fetch_article_content</strong></li>
+</ul>
+<br>
+<p>In <code>/Users/xmac/capcat/capcat/sources/builtin/custom/lb/source.py</code>, locate and <strong>delete</strong> lines 383–395 (the internal comments block). The block to remove:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="c1"># Fetch comments separately if article fetch was successful</span>
+                <span class="k">if</span> <span class="n">success</span> <span class="ow">and</span> <span class="n">article</span><span class="o">.</span><span class="n">comment_url</span> <span class="ow">and</span> <span class="n">folder_path</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">fetch_comments</span><span class="p">(</span>
+                            <span class="n">comment_url</span><span class="o">=</span><span class="n">article</span><span class="o">.</span><span class="n">comment_url</span><span class="p">,</span>
+                            <span class="n">article_title</span><span class="o">=</span><span class="n">title</span> <span class="ow">or</span> <span class="n">article</span><span class="o">.</span><span class="n">title</span><span class="p">,</span>
+                            <span class="n">article_folder_path</span><span class="o">=</span><span class="n">folder_path</span><span class="p">,</span>
+                        <span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;Failed to fetch comments for </span><span class="si">{</span><span class="n">article</span><span class="o">.</span><span class="n">title</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="p">)</span>
+                        <span class="c1"># Don&#39;t fail the entire article fetch if comments fail</span>
+</pre></div>
+
+<br>
+<p>After removal, the method should continue with:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">success</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Successfully fetched content for: </span><span class="si">{</span><span class="n">article</span><span class="o">.</span><span class="n">title</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">folder_path</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Content fetch failed for: </span><span class="si">{</span><span class="n">article</span><span class="o">.</span><span class="n">title</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 6: Run all new tests</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_no_duplicate_comments.py<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: 6 PASSED</p>
+<br>
+<hr>
+<br>
+<h3>Task 4: Verify full test suite passes</h3>
+<br>
+<ul>
+<li>[ ] <strong>Step 7: Run full test suite</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: 163 passed (157 original + 6 new), 0 failed.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 8: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>tests/unit/test_no_duplicate_comments.py<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>capcat/sources/builtin/custom/hn/source.py<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>capcat/sources/builtin/custom/lb/source.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;fix: remove internal fetch_comments from HnSource/LbSource fetch_article_content&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h2>Chunk 2: Version Bump and Release</h2>
+<br>
+<h3>Task 5: Bump version to 1.0.46 and release</h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>/Users/xmac/capcat/capcat/__init__.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 9: Bump version</strong></li>
+</ul>
+<br>
+<p>In <code>/Users/xmac/capcat/capcat/__init__.py</code>, change:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;1.0.45&quot;</span>
+</pre></div>
+
+<br>
+<p>to:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;1.0.46&quot;</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 10: Commit version bump</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>capcat/__init__.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;bump: version to 1.0.46&quot;</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 11: Verify tests still pass</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-q
+</pre></div>
+
+<br>
+<p>Expected: 163 passed.</p>
+<br>
+<hr>
+<br>
+<h2>Context for Subagents</h2>
+<br>
+<h3>What was changed and why (titled markdown filenames feature — v1.0.45)</h3>
+<br>
+<p>The previous session (<code>feat/titled-markdown-filenames</code>, PR #8) changed <code>article.md</code> / <code>comments.md</code> to use article titles as filenames. After that change, this duplicate bug became visible: two comments files with slightly different names appear in each HN/LB article folder.</p>
+<br>
+<h3>Why the bug exists</h3>
+<br>
+<code>HnSource.fetch_article_content</code> and <code>LbSource.fetch_article_content</code> both:
+<ol>
+<li>Call <code>fetcher.fetch_article_content()</code> (the <code>ArticleFetcher</code> method) to download the article</li>
+<li><strong>Then call <code>self.fetch_comments()</code> inside the same method</strong> — this is the first comments write</li>
+<li>Return <code>(True, folder_path)</code></li>
+</ol>
+<br>
+<p>The caller, <code>unified_source_processor._process_single_article_new_system</code>, then checks <code>hasattr(source, &quot;fetch_comments&quot;)</code> and calls it again — this is the second comments write.</p>
+<br>
+<p>The two calls use different titles:</p>
+<ul>
+<li>First (internal): <code>title or article.title</code> where <code>title</code> = web page title (e.g. <code>&quot;&#x27;The Secret Agent&#x27; Exploring a Vibrant, yet Violent Brazil 2025&quot;</code>)</li>
+<li>Second (external): <code>article.title</code> (HN scraper title, e.g. <code>&quot;&#x27;The Secret Agent&#x27; Exploring a Vibrant, Yet Violent Brazil&quot;</code>)</li>
+</ul>
+<br>
+<p>Result: two different <code></em>-Comments.md</code> files in the same folder.</p>
+<br>
+<h3>Why removing the internal call is safe</h3>
+<br>
+<code>unified_source_processor._process_single_article_new_system</code> already handles comments correctly:
+<ul>
+<li>It uses <code>article.title</code> (consistent with the article folder name)</li>
+<li>It uses <code>article_path</code> (the folder path returned by <code>fetch_article_content</code>)</li>
+<li>It wraps in try/except with proper logging</li>
+</ul>
+<br>
+<p>Removing the internal call does not lose any functionality.</p>
+<br>
+<h3>Test command</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected result: 163 passed (157 before + 6 new).</p>
+<br>
+<h3>Imports already present</h3>
+<br>
+<p>Both source files already import what they need. No new imports required.</p>
+<br>
+<h3>Do NOT touch</h3>
+<br>
+<ul>
+<li><code>unified_source_processor._process_single_article_new_system</code> — the outer caller is correct</li>
+<li><code>HnSource.fetch_comments</code> / <code>LbSource.fetch_comments</code> — these are fine, just called once now</li>
+<li><code>storage_manager.py</code> helpers — correct and unchanged</li>
+<li>HTML generation code — unaffected</li>
+</ul>
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

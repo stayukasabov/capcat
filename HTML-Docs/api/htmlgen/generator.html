@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>htmlgen.lesswrong.generator</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / <a href="../api/index.html">api</a> / htmlgen</div>
+<h1>htmlgen.lesswrong.generator</h1>
+<br>
+<strong>File:</strong> <code>Application/htmlgen/lesswrong/generator.py</code>
+<br>
+<h2>Description</h2>
+<br>
+<p>LessWrong specific HTML generator implementation.</p>
+<br>
+<p>This module implements the source-specific HTML generation logic for LessWrong,</p>
+<p>inheriting from BaseHTMLGenerator and providing LessWrong-specific customizations.</p>
+<br>
+<p>Key Features:</p>
+<ul>
+<li>LessWrong-specific comment pattern recognition (HTML format)</li>
+<li>Conditional comment display (only show when comments exist)</li>
+<li>Academic breadcrumb navigation style</li>
+<li>AI/rationality-focused CSS styling</li>
+<li>Enhanced content cleaning for LessWrong UI elements</li>
+</ul>
+<br>
+<h2>Classes</h2>
+<br>
+<h3>LessWrongGenerator</h3>
+<br>
+<strong>Inherits from:</strong> BaseHTMLGenerator
+<br>
+<p>LessWrong specific HTML generator.</p>
+<br>
+<p>Implements LessWrong-specific behavior:</p>
+<ul>
+<li>Comment pattern: <strong>username</strong> (&lt;a href=&quot;...&quot;&gt;profile&lt;/a&gt;)</li>
+<li>Conditional comment links (only when comments exist)</li>
+<li>Academic navigation style for rationality content</li>
+<li>AI/rationality-focused styling</li>
+<li>Enhanced content cleaning</li>
+</ul>
+<br>
+<h4>Methods</h4>
+<br>
+<h5>count_comments</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">count_comments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">comments_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span>
+</pre></div>
+
+<br>
+<p>Count LessWrong comments using HTML profile pattern.</p>
+<br>
+<p>LessWrong comments follow this pattern in HTML:</p>
+<strong>username</strong> (&lt;a href=&quot;https://www.lesswrong.com/users/username&quot;&gt;profile&lt;/a&gt;)
+<br>
+<p>Args:</p>
+<p>    comments_file: Path to comments markdown file</p>
+<br>
+<p>Returns:</p>
+<p>    Number of LessWrong comments found</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>comments_file</code> (Path)</li>
+</ul>
+<br>
+<strong>Returns:</strong> int
+<br>
+<h5>should_show_comment_link</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">should_show_comment_link</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">comment_count</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>LessWrong only shows comment links when comments exist.</p>
+<br>
+<p>Args:</p>
+<p>    comment_count: Number of comments</p>
+<br>
+<p>Returns:</p>
+<p>    True if comment link should be shown (LessWrong: only when count &gt; 0)</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>comment_count</code> (int)</li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h5>matches_directory_pattern</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">matches_directory_pattern</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Check if directory matches LessWrong patterns.</p>
+<br>
+<p>LessWrong supports these naming conventions:</p>
+<ul>
+<li>lesswrong (lowercase)</li>
+<li>LessWrong (camelCase)</li>
+</ul>
+<br>
+<p>Args:</p>
+<p>    directory_name: Directory name to check</p>
+<br>
+<p>Returns:</p>
+<p>    True if directory belongs to LessWrong</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>directory_name</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h5>generate_breadcrumb</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">generate_breadcrumb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">breadcrumb_path</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+
+<br>
+<p>Generate LessWrong-specific breadcrumb navigation.</p>
+<br>
+<p>LessWrong uses academic breadcrumb style with:</p>
+<ul>
+<li>Simplified navigation for comments pages</li>
+<li>Academic styling appropriate for rationality content</li>
+<li>Enhanced readability for long-form content</li>
+</ul>
+<br>
+<p>Args:</p>
+<p>    breadcrumb_path: List of breadcrumb elements</p>
+<p>    <strong>kwargs: Additional context</p>
+<br>
+<p>Returns:</p>
+<p>    LessWrong-styled breadcrumb HTML</p>
+<br>
+</strong>Parameters:<strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>breadcrumb_path</code> (List[str])</li>
+</ul>
+<br>
+</strong>Returns:<strong> str
+<br>
+<h5>_generate_breadcrumb_link</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_generate_breadcrumb_link</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">breadcrumb_path</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">html_subfolder</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">is_comments_page</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+
+<br>
+<p>Generate appropriate breadcrumb link for LessWrong academic navigation.</p>
+<br>
+<p>Args:</p>
+<p>    breadcrumb_path: Full breadcrumb path</p>
+<p>    index: Current item index</p>
+<p>    html_subfolder: Whether HTML is in subfolder</p>
+<p>    is_comments_page: Whether current page is comments</p>
+<br>
+<p>Returns:</p>
+<p>    Appropriate href for the breadcrumb item</p>
+<br>
+</strong>Parameters:<strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>breadcrumb_path</code> (List[str])</li>
+<li><code>index</code> (int)</li>
+<li><code>html_subfolder</code> (bool)</li>
+<li><code>is_comments_page</code> (bool)</li>
+</ul>
+<br>
+</strong>Returns:<strong> str
+<br>
+<p>⚠️ </strong>High complexity:<strong> 12</p>
+<br>
+<h5>clean_lesswrong_content</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">clean_lesswrong_content</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+
+<br>
+<p>Enhanced content cleaning for LessWrong-specific UI elements.</p>
+<br>
+<p>LessWrong articles often contain UI elements that need cleaning:</p>
+<ul>
+<li>User interaction elements (voting, timestamps)</li>
+<li>Navigation elements</li>
+<li>Site-specific formatting</li>
+</ul>
+<br>
+<p>Args:</p>
+<p>    content: Raw content to clean</p>
+<br>
+<p>Returns:</p>
+<p>    Cleaned content suitable for archival display</p>
+<br>
+</strong>Parameters:<strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>content</code> (str)</li>
+</ul>
+<br>
+</strong>Returns:<strong> str
+<br>
+<h5>generate_article_page</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">generate_article_page</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">markdown_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">article_title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">breadcrumb_path</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">html_subfolder</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+
+<br>
+<p>Generate LessWrong-style article page with academic formatting.</p>
+<br>
+<p>Args:</p>
+<p>    markdown_path: Path to article markdown</p>
+<p>    article_title: Article title</p>
+<p>    breadcrumb_path: Breadcrumb path</p>
+<p>    html_subfolder: Whether HTML is in subfolder</p>
+<br>
+<p>Returns:</p>
+<p>    Generated HTML for LessWrong article page</p>
+<br>
+</strong>Parameters:*<em>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>markdown_path</code> (str)</li>
+<li><code>article_title</code> (str)</li>
+<li><code>breadcrumb_path</code> (List[str])</li>
+<li><code>html_subfolder</code> (bool) </em>optional<em></li>
+</ul>
+<br>
+<strong>Returns:</strong> str
+<br>
+<h5>_generate_lesswrong_navigation</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_generate_lesswrong_navigation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">html_subfolder</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span>
+</pre></div>
+
+<br>
+<p>Generate LessWrong-specific navigation with academic styling.</p>
+<br>
+<p>Args:</p>
+<p>    current_path: Current file path</p>
+<p>    html_subfolder: Whether in HTML subfolder</p>
+<br>
+<p>Returns:</p>
+<p>    Navigation context dictionary</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>current_path</code> (str)</li>
+<li><code>html_subfolder</code> (bool)</li>
+</ul>
+<br>
+<strong>Returns:</strong> dict
+<br>
+<h5>_generate_index_navigation</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_generate_index_navigation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">html_subfolder</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+
+<br>
+<p>Generate back to news navigation for LessWrong with academic styling.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>current_path</code> (str)</li>
+<li><code>html_subfolder</code> (bool)</li>
+</ul>
+<br>
+<strong>Returns:</strong> str
+<br>
+<h5>_generate_comments_navigation</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_generate_comments_navigation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">html_subfolder</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+
+<br>
+<p>Generate comments navigation for LessWrong with conditional display.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>current_path</code> (str)</li>
+<li><code>html_subfolder</code> (bool)</li>
+</ul>
+<br>
+<strong>Returns:</strong> str
+<br>
+<h5>generate_comments_page</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">generate_comments_page</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">comments_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">article_title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">breadcrumb_path</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">html_subfolder</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+
+<br>
+<p>Generate LessWrong-style comments page with enhanced comment display.</p>
+<br>
+<p>Args:</p>
+<p>    comments_path: Path to comments markdown</p>
+<p>    article_title: Article title</p>
+<p>    breadcrumb_path: Breadcrumb path</p>
+<p>    html_subfolder: Whether HTML is in subfolder</p>
+<br>
+<p>Returns:</p>
+<p>    Generated HTML for LessWrong comments page</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>comments_path</code> (str)</li>
+<li><code>article_title</code> (str)</li>
+<li><code>breadcrumb_path</code> (List[str])</li>
+<li><code>html_subfolder</code> (bool) </em>optional*</li>
+</ul>
+<br>
+<strong>Returns:</strong> str
+<br>
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

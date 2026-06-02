@@ -1,0 +1,1406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Source Update UX Implementation Plan</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / <a href="../superpowers/index.html">superpowers</a> / plans</div>
+<h1>Source Update UX Implementation Plan</h1>
+<br>
+<p>&gt; <strong>For agentic workers:</strong> REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (<code>- [ ]</code>) syntax for tracking.</p>
+<br>
+<strong>Goal:</strong> Upgrade <code>SourceConfigMirror</code> to classify files by ownership (<code>app</code>/<code>config</code>/<code>user</code>), silently update app-owned files on upgrade, and present an interactive <code>questionary.select</code> menu when user-modified config files have new defaults available.
+<br>
+<strong>Architecture:</strong> All changes live in <code>capcat/core/source_config_mirror.py</code> (ownership classification, resync fix, new update paths, diff helper, interactive prompt) and <code>capcat/core/source_system/add_source_service.py</code> (one field). The manifest schema gains an <code>ownership</code> field; missing field defaults to <code>config</code> for backward compatibility.
+<br>
+<strong>Tech Stack:</strong> Python stdlib (<code>difflib</code>, <code>shutil</code>, <code>hashlib</code>), <code>questionary</code> (already imported), <code>pytest</code> with <code>tmp_path</code> and <code>monkeypatch</code>.
+<br>
+<hr>
+<br>
+<h2>File Map</h2>
+<br>
+<p>| File | Action | What changes |</p>
+<p>|------|--------|-------------|</p>
+<p>| <code>capcat/core/source_config_mirror.py</code> | Modify | Ownership field in mirror methods; resync fix; split <code>_step2_3</code>; diff helper; interactive prompt method |</p>
+<p>| <code>capcat/core/source_system/add_source_service.py</code> | Modify | Add <code>&quot;ownership&quot;: &quot;user&quot;</code> to manifest entry |</p>
+<p>| <code>tests/unit/test_source_config_mirror.py</code> | Modify | New tests for ownership field in first mirror |</p>
+<p>| <code>tests/unit/test_source_mirror_bugs.py</code> | Modify | New tests for resync fix, app path, config prompt |</p>
+<br>
+<hr>
+<br>
+<h3>Task 1: Write <code>ownership</code> field in first-mirror methods</h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>capcat/core/source_config_mirror.py</code> — <code>_mirror_config_driven</code>, <code>_mirror_custom</code>, <code>_mirror_bundles</code></li>
+<li>Test: <code>tests/unit/test_source_config_mirror.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Write failing tests</strong></li>
+</ul>
+<br>
+<p>Add to <code>tests/unit/test_source_config_mirror.py</code>:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_first_mirror_custom_writes_app_ownership_for_py</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="n">monkeypatch</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;source.py files get ownership=&#39;app&#39; in manifest after first mirror.&quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.source_config_mirror</span><span class="w"> </span><span class="kn">import</span> <span class="n">SourceConfigMirror</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">SourceConfigMirror</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="n">tui_mode</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">builtin_custom</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;_builtin&quot;</span> <span class="o">/</span> <span class="s2">&quot;custom&quot;</span> <span class="o">/</span> <span class="s2">&quot;hn&quot;</span>
+    <span class="n">builtin_custom</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">builtin_custom</span> <span class="o">/</span> <span class="s2">&quot;source.py&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;# code</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">builtin_custom</span> <span class="o">/</span> <span class="s2">&quot;config.yaml&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;name: hn</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="s2">&quot;_builtin_custom_dir&quot;</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">builtin_custom</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="s2">&quot;_builtin_config_driven_dir&quot;</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;_empty_cfg&quot;</span><span class="p">)</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="s2">&quot;_builtin_bundles_dir&quot;</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;_empty_bun&quot;</span><span class="p">)</span>
+    <span class="n">m</span><span class="o">.</span><span class="n">run_first_mirror</span><span class="p">()</span>
+    <span class="n">manifest</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">((</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;.capcat&quot;</span> <span class="o">/</span> <span class="s2">&quot;source_hashes.json&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
+    <span class="k">assert</span> <span class="n">manifest</span><span class="p">[</span><span class="s2">&quot;custom/hn/source.py&quot;</span><span class="p">][</span><span class="s2">&quot;ownership&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;app&quot;</span>
+    <span class="k">assert</span> <span class="n">manifest</span><span class="p">[</span><span class="s2">&quot;custom/hn/config.yaml&quot;</span><span class="p">][</span><span class="s2">&quot;ownership&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;config&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_first_mirror_config_driven_writes_config_ownership</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="n">monkeypatch</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Config-driven YAML files get ownership=&#39;config&#39; in manifest.&quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.source_config_mirror</span><span class="w"> </span><span class="kn">import</span> <span class="n">SourceConfigMirror</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">SourceConfigMirror</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="n">tui_mode</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">builtin_cfg</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;_builtin&quot;</span> <span class="o">/</span> <span class="s2">&quot;config_driven&quot;</span> <span class="o">/</span> <span class="s2">&quot;configs&quot;</span>
+    <span class="n">builtin_cfg</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">builtin_cfg</span> <span class="o">/</span> <span class="s2">&quot;bbc.yaml&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;name: bbc</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="s2">&quot;_builtin_config_driven_dir&quot;</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">builtin_cfg</span><span class="p">)</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="s2">&quot;_builtin_custom_dir&quot;</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;_empty_cust&quot;</span><span class="p">)</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="s2">&quot;_builtin_bundles_dir&quot;</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;_empty_bun&quot;</span><span class="p">)</span>
+    <span class="n">m</span><span class="o">.</span><span class="n">run_first_mirror</span><span class="p">()</span>
+    <span class="n">manifest</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">((</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;.capcat&quot;</span> <span class="o">/</span> <span class="s2">&quot;source_hashes.json&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
+    <span class="k">assert</span> <span class="n">manifest</span><span class="p">[</span><span class="s2">&quot;config_driven/configs/bbc.yaml&quot;</span><span class="p">][</span><span class="s2">&quot;ownership&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;config&quot;</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Run tests to confirm they fail</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_source_config_mirror.py::test_first_mirror_custom_writes_app_ownership_for_py<span class="w"> </span>tests/unit/test_source_config_mirror.py::test_first_mirror_config_driven_writes_config_ownership<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: FAIL — <code>KeyError: &#x27;ownership&#x27;</code></p>
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Add <code>ownership</code> to <code>_mirror_config_driven</code>, <code>_mirror_custom</code>, <code>_mirror_bundles</code></strong></li>
+</ul>
+<br>
+<p>In <code>capcat/core/source_config_mirror.py</code>:</p>
+<br>
+<p>In <code>_mirror_config_driven</code>, change:</p>
+<div class="highlight"><pre><span></span><span class="n">manifest</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;builtin_hash&quot;</span><span class="p">:</span> <span class="n">h</span><span class="p">,</span> <span class="s2">&quot;user_hash&quot;</span><span class="p">:</span> <span class="n">h</span><span class="p">}</span>
+</pre></div>
+
+<p>to:</p>
+<div class="highlight"><pre><span></span><span class="n">manifest</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;ownership&quot;</span><span class="p">:</span> <span class="s2">&quot;config&quot;</span><span class="p">,</span> <span class="s2">&quot;builtin_hash&quot;</span><span class="p">:</span> <span class="n">h</span><span class="p">,</span> <span class="s2">&quot;user_hash&quot;</span><span class="p">:</span> <span class="n">h</span><span class="p">}</span>
+</pre></div>
+
+<br>
+<p>In <code>_mirror_custom</code>, inside the <code>for f in dest_source.rglob(&quot;*&quot;):</code> loop, change:</p>
+<div class="highlight"><pre><span></span><span class="n">manifest</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;builtin_hash&quot;</span><span class="p">:</span> <span class="n">h</span><span class="p">,</span> <span class="s2">&quot;user_hash&quot;</span><span class="p">:</span> <span class="n">h</span><span class="p">}</span>
+</pre></div>
+
+<p>to:</p>
+<div class="highlight"><pre><span></span><span class="n">ownership</span> <span class="o">=</span> <span class="s2">&quot;app&quot;</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s2">&quot;.py&quot;</span> <span class="k">else</span> <span class="s2">&quot;config&quot;</span>
+<span class="n">manifest</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;ownership&quot;</span><span class="p">:</span> <span class="n">ownership</span><span class="p">,</span> <span class="s2">&quot;builtin_hash&quot;</span><span class="p">:</span> <span class="n">h</span><span class="p">,</span> <span class="s2">&quot;user_hash&quot;</span><span class="p">:</span> <span class="n">h</span><span class="p">}</span>
+</pre></div>
+
+<br>
+<p>In <code>_mirror_bundles</code>, change:</p>
+<div class="highlight"><pre><span></span><span class="n">manifest</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;builtin_hash&quot;</span><span class="p">:</span> <span class="n">h</span><span class="p">,</span> <span class="s2">&quot;user_hash&quot;</span><span class="p">:</span> <span class="n">h</span><span class="p">}</span>
+</pre></div>
+
+<p>to:</p>
+<div class="highlight"><pre><span></span><span class="n">manifest</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;ownership&quot;</span><span class="p">:</span> <span class="s2">&quot;config&quot;</span><span class="p">,</span> <span class="s2">&quot;builtin_hash&quot;</span><span class="p">:</span> <span class="n">h</span><span class="p">,</span> <span class="s2">&quot;user_hash&quot;</span><span class="p">:</span> <span class="n">h</span><span class="p">}</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Run tests to confirm they pass</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_source_config_mirror.py::test_first_mirror_custom_writes_app_ownership_for_py<span class="w"> </span>tests/unit/test_source_config_mirror.py::test_first_mirror_config_driven_writes_config_ownership<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: PASS</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 5: Run full unit suite to confirm no regressions</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-q
+</pre></div>
+
+<br>
+<p>Expected: all passing</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 6: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>feat/source-update-ux
+git<span class="w"> </span>add<span class="w"> </span>capcat/core/source_config_mirror.py<span class="w"> </span>tests/unit/test_source_config_mirror.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: write ownership field in first-mirror manifest entries&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h3>Task 2: Write <code>ownership: &quot;user&quot;</code> in <code>add_source_service.py</code></h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>capcat/core/source_system/add_source_service.py:96</code></li>
+<li>Test: <code>tests/unit/test_source_config_mirror.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Write failing test</strong></li>
+</ul>
+<br>
+<p>Add to <code>tests/unit/test_source_config_mirror.py</code>:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_add_source_manifest_entry_has_user_ownership</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;add_source writes ownership=&#39;user&#39; with empty builtin_hash.&quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.source_system.add_source_service</span><span class="w"> </span><span class="kn">import</span> <span class="n">AddSourceService</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">hashlib</span><span class="o">,</span><span class="w"> </span><span class="nn">json</span>
+    <span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;.capcat&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">()</span>
+    <span class="n">service</span> <span class="o">=</span> <span class="n">AddSourceService</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">AddSourceService</span><span class="p">)</span>
+    <span class="n">service</span><span class="o">.</span><span class="n">_project_root</span> <span class="o">=</span> <span class="n">tmp_path</span>
+    <span class="n">service</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="s2">&quot;logging&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
+    <span class="c1"># Write a fake config file to add</span>
+    <span class="n">config_file</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;bbc.yaml&quot;</span>
+    <span class="n">config_file</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;name: bbc</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">service</span><span class="o">.</span><span class="n">_write_manifest_entry</span><span class="p">(</span><span class="n">config_file</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="c1"># Fake the manifest write path</span>
+    <span class="n">manifest_path</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;.capcat&quot;</span> <span class="o">/</span> <span class="s2">&quot;source_hashes.json&quot;</span>
+    <span class="c1"># Re-implement write path inline as service does</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.source_system.add_source_service</span><span class="w"> </span><span class="kn">import</span> <span class="n">AddSourceService</span> <span class="k">as</span> <span class="n">AS</span>
+    <span class="n">svc</span> <span class="o">=</span> <span class="n">AS</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">AS</span><span class="p">)</span>
+    <span class="n">svc</span><span class="o">.</span><span class="n">_project_root</span> <span class="o">=</span> <span class="n">tmp_path</span>
+    <span class="n">svc</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="s2">&quot;logging&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
+    <span class="n">svc</span><span class="o">.</span><span class="n">_write_manifest_entry</span><span class="p">(</span><span class="n">config_file</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">manifest_path</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+    <span class="k">assert</span> <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;ownership&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;user&quot;</span>
+    <span class="k">assert</span> <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;builtin_hash&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Run test to confirm it fails</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_source_config_mirror.py::test_add_source_manifest_entry_has_user_ownership<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: FAIL — <code>AssertionError: &#x27;ownership&#x27; not in entry</code></p>
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Add <code>ownership</code> field in <code>add_source_service.py</code></strong></li>
+</ul>
+<br>
+<p>In <code>capcat/core/source_system/add_source_service.py</code>, change line 96:</p>
+<div class="highlight"><pre><span></span><span class="n">manifest</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;builtin_hash&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;user_hash&quot;</span><span class="p">:</span> <span class="n">user_hash</span><span class="p">}</span>
+</pre></div>
+
+<p>to:</p>
+<div class="highlight"><pre><span></span><span class="n">manifest</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;ownership&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;builtin_hash&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;user_hash&quot;</span><span class="p">:</span> <span class="n">user_hash</span><span class="p">}</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Run test to confirm it passes</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_source_config_mirror.py::test_add_source_manifest_entry_has_user_ownership<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: PASS</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 5: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>capcat/core/source_system/add_source_service.py<span class="w"> </span>tests/unit/test_source_config_mirror.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: write ownership=&#39;user&#39; in add_source manifest entries&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h3>Task 3: Fix <code>_resync_manifest</code> to use actual builtin hash</h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>capcat/core/source_config_mirror.py</code> — <code>_resync_manifest</code></li>
+<li>Test: <code>tests/unit/test_source_mirror_bugs.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Write failing tests</strong></li>
+</ul>
+<br>
+<p>Add to <code>tests/unit/test_source_mirror_bugs.py</code>:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">TestResyncManifestBuiltinHash</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_resync_sets_builtin_hash_from_installed_package</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">,</span> <span class="n">monkeypatch</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_resync_manifest uses the actual installed builtin hash, not the user file hash.&quot;&quot;&quot;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.source_config_mirror</span><span class="w"> </span><span class="kn">import</span> <span class="n">SourceConfigMirror</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">hashlib</span><span class="o">,</span><span class="w"> </span><span class="nn">json</span>
+
+        <span class="c1"># User has hn/source.py with old content</span>
+        <span class="n">user_src</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;Config&quot;</span> <span class="o">/</span> <span class="s2">&quot;sources&quot;</span> <span class="o">/</span> <span class="s2">&quot;active&quot;</span> <span class="o">/</span> <span class="s2">&quot;custom&quot;</span> <span class="o">/</span> <span class="s2">&quot;hn&quot;</span> <span class="o">/</span> <span class="s2">&quot;source.py&quot;</span>
+        <span class="n">user_src</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">user_src</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;# old code</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Builtin has new content</span>
+        <span class="n">builtin_src</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;_builtin&quot;</span> <span class="o">/</span> <span class="s2">&quot;custom&quot;</span> <span class="o">/</span> <span class="s2">&quot;hn&quot;</span> <span class="o">/</span> <span class="s2">&quot;source.py&quot;</span>
+        <span class="n">builtin_src</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">builtin_src</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;# new code</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">m</span> <span class="o">=</span> <span class="n">SourceConfigMirror</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="n">tui_mode</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="s2">&quot;_builtin_custom_dir&quot;</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">builtin_src</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
+        <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="s2">&quot;_builtin_config_driven_dir&quot;</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;_empty&quot;</span><span class="p">)</span>
+        <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="s2">&quot;_builtin_bundles_dir&quot;</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;_empty2&quot;</span><span class="p">)</span>
+        <span class="c1"># No manifest exists — triggers _resync_manifest</span>
+        <span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;.capcat&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">m</span><span class="o">.</span><span class="n">check_for_upgrades</span><span class="p">()</span>
+
+        <span class="n">manifest</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">((</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;.capcat&quot;</span> <span class="o">/</span> <span class="s2">&quot;source_hashes.json&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
+        <span class="n">entry</span> <span class="o">=</span> <span class="n">manifest</span><span class="p">[</span><span class="s2">&quot;custom/hn/source.py&quot;</span><span class="p">]</span>
+        <span class="n">builtin_hash</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;# new code</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+        <span class="n">user_hash</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;# old code</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;builtin_hash&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">builtin_hash</span><span class="p">,</span> <span class="s2">&quot;builtin_hash must be installed builtin, not user file&quot;</span>
+        <span class="k">assert</span> <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;user_hash&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">user_hash</span>
+        <span class="k">assert</span> <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;ownership&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;app&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_resync_marks_user_owned_when_no_builtin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">,</span> <span class="n">monkeypatch</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_resync_manifest sets builtin_hash=&#39;&#39; for files with no installed builtin.&quot;&quot;&quot;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.source_config_mirror</span><span class="w"> </span><span class="kn">import</span> <span class="n">SourceConfigMirror</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+
+        <span class="n">user_src</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;Config&quot;</span> <span class="o">/</span> <span class="s2">&quot;sources&quot;</span> <span class="o">/</span> <span class="s2">&quot;active&quot;</span> <span class="o">/</span> <span class="s2">&quot;custom&quot;</span> <span class="o">/</span> <span class="s2">&quot;myhn&quot;</span> <span class="o">/</span> <span class="s2">&quot;source.py&quot;</span>
+        <span class="n">user_src</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">user_src</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;# custom</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">m</span> <span class="o">=</span> <span class="n">SourceConfigMirror</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="n">tui_mode</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="s2">&quot;_builtin_custom_dir&quot;</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;_empty_cust&quot;</span><span class="p">)</span>
+        <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="s2">&quot;_builtin_config_driven_dir&quot;</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;_empty_cfg&quot;</span><span class="p">)</span>
+        <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="s2">&quot;_builtin_bundles_dir&quot;</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;_empty_bun&quot;</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;.capcat&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">m</span><span class="o">.</span><span class="n">check_for_upgrades</span><span class="p">()</span>
+
+        <span class="n">manifest</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">((</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;.capcat&quot;</span> <span class="o">/</span> <span class="s2">&quot;source_hashes.json&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
+        <span class="n">entry</span> <span class="o">=</span> <span class="n">manifest</span><span class="p">[</span><span class="s2">&quot;custom/myhn/source.py&quot;</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;builtin_hash&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">assert</span> <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;ownership&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;user&quot;</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Run tests to confirm they fail</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_source_mirror_bugs.py::TestResyncManifestBuiltinHash<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: FAIL — both hashes equal user file hash (current broken behaviour)</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Rewrite <code>_resync_manifest</code></strong></li>
+</ul>
+<br>
+<p>Replace the entire <code>_resync_manifest</code> method in <code>capcat/core/source_config_mirror.py</code>:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_resync_manifest</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Rebuild manifest from current user files when source_hashes.json is missing.</span>
+
+<span class="sd">    Uses the actual installed builtin hash as the baseline so future</span>
+<span class="sd">    check_for_upgrades() diffs are accurate.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.logging_config</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
+    <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+        <span class="s2">&quot;Capcat: source_hashes.json missing — rebuilt from current state.&quot;</span>
+    <span class="p">)</span>
+    <span class="n">manifest</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># config_driven</span>
+    <span class="n">user_cfg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_user_config_driven_dir</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">user_cfg</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">user_cfg</span><span class="o">.</span><span class="n">iterdir</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span> <span class="ow">and</span> <span class="p">(</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">suffix</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_CONFIG_DRIVEN_EXTS</span>
+                <span class="ow">or</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.yaml.disabled&quot;</span><span class="p">)</span>
+            <span class="p">):</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;config_driven/configs/</span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">user_h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_hash</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                <span class="n">builtin_f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_builtin_file_for_key</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                <span class="n">builtin_h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_hash</span><span class="p">(</span><span class="n">builtin_f</span><span class="p">)</span> <span class="k">if</span> <span class="n">builtin_f</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+                <span class="n">manifest</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;ownership&quot;</span><span class="p">:</span> <span class="s2">&quot;config&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;builtin_hash&quot;</span><span class="p">:</span> <span class="n">builtin_h</span><span class="p">,</span>
+                    <span class="s2">&quot;user_hash&quot;</span><span class="p">:</span> <span class="n">user_h</span><span class="p">,</span>
+                <span class="p">}</span>
+
+    <span class="c1"># custom</span>
+    <span class="n">user_custom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_user_custom_dir</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">user_custom</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">source_dir</span> <span class="ow">in</span> <span class="n">user_custom</span><span class="o">.</span><span class="n">iterdir</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">source_dir</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">source_dir</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_SKIP_DIRS</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">parts</span><span class="p">):</span>
+                        <span class="n">rel</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">source_dir</span><span class="p">)</span>
+                        <span class="n">key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;custom/</span><span class="si">{</span><span class="n">source_dir</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">rel</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="n">user_h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_hash</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                        <span class="n">builtin_f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_builtin_file_for_key</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                        <span class="n">builtin_h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_hash</span><span class="p">(</span><span class="n">builtin_f</span><span class="p">)</span> <span class="k">if</span> <span class="n">builtin_f</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">builtin_f</span><span class="p">:</span>
+                            <span class="n">ownership</span> <span class="o">=</span> <span class="s2">&quot;user&quot;</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">ownership</span> <span class="o">=</span> <span class="s2">&quot;app&quot;</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s2">&quot;.py&quot;</span> <span class="k">else</span> <span class="s2">&quot;config&quot;</span>
+                        <span class="n">manifest</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                            <span class="s2">&quot;ownership&quot;</span><span class="p">:</span> <span class="n">ownership</span><span class="p">,</span>
+                            <span class="s2">&quot;builtin_hash&quot;</span><span class="p">:</span> <span class="n">builtin_h</span><span class="p">,</span>
+                            <span class="s2">&quot;user_hash&quot;</span><span class="p">:</span> <span class="n">user_h</span><span class="p">,</span>
+                        <span class="p">}</span>
+
+    <span class="c1"># bundles</span>
+    <span class="n">user_bundles</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_user_bundles_dir</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">user_bundles</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">user_bundles</span><span class="o">.</span><span class="n">iterdir</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span> <span class="ow">and</span> <span class="n">f</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s2">&quot;.yml&quot;</span><span class="p">:</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;bundles/</span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">user_h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_hash</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                <span class="n">builtin_f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_builtin_file_for_key</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                <span class="n">builtin_h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_hash</span><span class="p">(</span><span class="n">builtin_f</span><span class="p">)</span> <span class="k">if</span> <span class="n">builtin_f</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+                <span class="n">manifest</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;ownership&quot;</span><span class="p">:</span> <span class="s2">&quot;config&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;builtin_hash&quot;</span><span class="p">:</span> <span class="n">builtin_h</span><span class="p">,</span>
+                    <span class="s2">&quot;user_hash&quot;</span><span class="p">:</span> <span class="n">user_h</span><span class="p">,</span>
+                <span class="p">}</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_save_manifest</span><span class="p">(</span><span class="n">manifest</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Run tests to confirm they pass</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_source_mirror_bugs.py::TestResyncManifestBuiltinHash<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: PASS</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 5: Full suite</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-q
+</pre></div>
+
+<br>
+<p>Expected: all passing</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 6: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>capcat/core/source_config_mirror.py<span class="w"> </span>tests/unit/test_source_mirror_bugs.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;fix: resync_manifest uses installed builtin hash as baseline&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h3>Task 4: Add <code>_diff_files</code> helper and <code>_key_display_name</code> function</h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>capcat/core/source_config_mirror.py</code> — add two helpers</li>
+<li>Test: <code>tests/unit/test_source_mirror_bugs.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Write failing tests</strong></li>
+</ul>
+<br>
+<p>Add to <code>tests/unit/test_source_mirror_bugs.py</code>:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">TestDiffFiles</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_diff_files_shows_user_vs_new_default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_diff_files returns unified diff with user as &#39;your version&#39;, builtin as &#39;new default&#39;.&quot;&quot;&quot;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.source_config_mirror</span><span class="w"> </span><span class="kn">import</span> <span class="n">SourceConfigMirror</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">SourceConfigMirror</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="n">tui_mode</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">user_f</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;user.yaml&quot;</span>
+        <span class="n">builtin_f</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;builtin.yaml&quot;</span>
+        <span class="n">user_f</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;article_count: 10</span><span class="se">\n</span><span class="s2">rate_limit: 1.0</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">builtin_f</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;article_count: 30</span><span class="se">\n</span><span class="s2">rate_limit: 1.0</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">diff</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">_diff_files</span><span class="p">(</span><span class="n">user_f</span><span class="p">,</span> <span class="n">builtin_f</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="s2">&quot;--- your version&quot;</span> <span class="ow">in</span> <span class="n">diff</span>
+        <span class="k">assert</span> <span class="s2">&quot;+++ new default&quot;</span> <span class="ow">in</span> <span class="n">diff</span>
+        <span class="k">assert</span> <span class="s2">&quot;-article_count: 10&quot;</span> <span class="ow">in</span> <span class="n">diff</span>
+        <span class="k">assert</span> <span class="s2">&quot;+article_count: 30&quot;</span> <span class="ow">in</span> <span class="n">diff</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_diff_files_returns_empty_for_identical</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_diff_files returns empty string when files are identical.&quot;&quot;&quot;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.source_config_mirror</span><span class="w"> </span><span class="kn">import</span> <span class="n">SourceConfigMirror</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">SourceConfigMirror</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="n">tui_mode</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">f1</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;a.yaml&quot;</span>
+        <span class="n">f2</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;b.yaml&quot;</span>
+        <span class="n">f1</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;name: bbc</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">f2</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;name: bbc</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">m</span><span class="o">.</span><span class="n">_diff_files</span><span class="p">(</span><span class="n">f1</span><span class="p">,</span> <span class="n">f2</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestKeyDisplayName</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_custom_source_display</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.source_config_mirror</span><span class="w"> </span><span class="kn">import</span> <span class="n">_key_display_name</span>
+        <span class="k">assert</span> <span class="n">_key_display_name</span><span class="p">(</span><span class="s2">&quot;custom/hn/source.py&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;hn/source.py&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_config_driven_display</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.source_config_mirror</span><span class="w"> </span><span class="kn">import</span> <span class="n">_key_display_name</span>
+        <span class="k">assert</span> <span class="n">_key_display_name</span><span class="p">(</span><span class="s2">&quot;config_driven/configs/bbc.yaml&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;bbc.yaml&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_bundles_display</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.source_config_mirror</span><span class="w"> </span><span class="kn">import</span> <span class="n">_key_display_name</span>
+        <span class="k">assert</span> <span class="n">_key_display_name</span><span class="p">(</span><span class="s2">&quot;bundles/bundles.yml&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;bundles.yml&quot;</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Run tests to confirm they fail</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_source_mirror_bugs.py::TestDiffFiles<span class="w"> </span>tests/unit/test_source_mirror_bugs.py::TestKeyDisplayName<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: FAIL — <code>AttributeError: &#x27;_diff_files&#x27;</code> and <code>ImportError: _key_display_name</code></p>
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Add helpers to <code>source_config_mirror.py</code></strong></li>
+</ul>
+<br>
+<p>Add module-level function after the imports (before the class):</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_key_display_name</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert a manifest key to a short human-readable name.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;custom/&quot;</span><span class="p">):</span>
+        <span class="n">parts</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">parts</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span> <span class="k">else</span> <span class="n">key</span>
+    <span class="k">if</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;config_driven/configs/&quot;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">key</span><span class="o">.</span><span class="n">removeprefix</span><span class="p">(</span><span class="s2">&quot;config_driven/configs/&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;bundles/&quot;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">key</span><span class="o">.</span><span class="n">removeprefix</span><span class="p">(</span><span class="s2">&quot;bundles/&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">key</span>
+</pre></div>
+
+<br>
+<p>Add method to <code>SourceConfigMirror</code> class (after <code>_backup</code>):</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_diff_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">builtin_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a unified diff of user_file vs builtin_file.</span>
+
+<span class="sd">    fromfile=&#39;your version&#39;, tofile=&#39;new default&#39;.</span>
+<span class="sd">    Returns empty string if files are identical.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">difflib</span>
+    <span class="n">user_lines</span> <span class="o">=</span> <span class="n">user_file</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;replace&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">splitlines</span><span class="p">(</span><span class="n">keepends</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">builtin_lines</span> <span class="o">=</span> <span class="n">builtin_file</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;replace&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">splitlines</span><span class="p">(</span><span class="n">keepends</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">diff</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">difflib</span><span class="o">.</span><span class="n">unified_diff</span><span class="p">(</span>
+        <span class="n">user_lines</span><span class="p">,</span>
+        <span class="n">builtin_lines</span><span class="p">,</span>
+        <span class="n">fromfile</span><span class="o">=</span><span class="s2">&quot;your version&quot;</span><span class="p">,</span>
+        <span class="n">tofile</span><span class="o">=</span><span class="s2">&quot;new default&quot;</span><span class="p">,</span>
+        <span class="n">lineterm</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="p">))</span>
+    <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">diff</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Run tests to confirm they pass</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_source_mirror_bugs.py::TestDiffFiles<span class="w"> </span>tests/unit/test_source_mirror_bugs.py::TestKeyDisplayName<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: PASS</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 5: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>capcat/core/source_config_mirror.py<span class="w"> </span>tests/unit/test_source_mirror_bugs.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: add _diff_files helper and _key_display_name function&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h3>Task 5: Split <code>_step2_3_changed_builtins</code> — <code>app</code> path and config silent path</h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>capcat/core/source_config_mirror.py</code> — rewrite <code>_step2_3_changed_builtins</code></li>
+<li>Test: <code>tests/unit/test_source_mirror_bugs.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Write failing tests</strong></li>
+</ul>
+<br>
+<p>Add to <code>tests/unit/test_source_mirror_bugs.py</code>:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">TestAppOwnershipUpdatePath</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">,</span> <span class="n">monkeypatch</span><span class="p">,</span> <span class="n">user_content</span><span class="p">,</span> <span class="n">builtin_content</span><span class="p">):</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.source_config_mirror</span><span class="w"> </span><span class="kn">import</span> <span class="n">SourceConfigMirror</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">hashlib</span><span class="o">,</span><span class="w"> </span><span class="nn">json</span>
+
+        <span class="n">builtin_src</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;_builtin&quot;</span> <span class="o">/</span> <span class="s2">&quot;custom&quot;</span> <span class="o">/</span> <span class="s2">&quot;hn&quot;</span> <span class="o">/</span> <span class="s2">&quot;source.py&quot;</span>
+        <span class="n">builtin_src</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">builtin_src</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">builtin_content</span><span class="p">)</span>
+
+        <span class="n">user_src</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;Config&quot;</span> <span class="o">/</span> <span class="s2">&quot;sources&quot;</span> <span class="o">/</span> <span class="s2">&quot;active&quot;</span> <span class="o">/</span> <span class="s2">&quot;custom&quot;</span> <span class="o">/</span> <span class="s2">&quot;hn&quot;</span> <span class="o">/</span> <span class="s2">&quot;source.py&quot;</span>
+        <span class="n">user_src</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">user_src</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">user_content</span><span class="p">)</span>
+
+        <span class="n">old_builtin_hash</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">(</span><span class="n">user_content</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+        <span class="n">manifest</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;custom/hn/source.py&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;ownership&quot;</span><span class="p">:</span> <span class="s2">&quot;app&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;builtin_hash&quot;</span><span class="p">:</span> <span class="n">old_builtin_hash</span><span class="p">,</span>
+                <span class="s2">&quot;user_hash&quot;</span><span class="p">:</span> <span class="n">old_builtin_hash</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;.capcat&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;.capcat&quot;</span> <span class="o">/</span> <span class="s2">&quot;source_hashes.json&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">manifest</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">SourceConfigMirror</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="n">tui_mode</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="s2">&quot;_builtin_custom_dir&quot;</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">builtin_src</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
+        <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="s2">&quot;_builtin_config_driven_dir&quot;</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;_empty&quot;</span><span class="p">)</span>
+        <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="s2">&quot;_builtin_bundles_dir&quot;</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;_empty2&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">m</span><span class="p">,</span> <span class="n">user_src</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_app_file_overwritten_silently_when_unmodified</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">,</span> <span class="n">monkeypatch</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;App-owned file with no user modifications is overwritten silently.&quot;&quot;&quot;</span>
+        <span class="n">m</span><span class="p">,</span> <span class="n">user_src</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="n">monkeypatch</span><span class="p">,</span> <span class="s2">&quot;# old</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;# new</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">m</span><span class="o">.</span><span class="n">check_for_upgrades</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">user_src</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;# new</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_app_file_overwritten_even_when_user_modified</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">,</span> <span class="n">monkeypatch</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;App-owned file is overwritten even if user edited it; backup is created.&quot;&quot;&quot;</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">hashlib</span><span class="o">,</span><span class="w"> </span><span class="nn">json</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.source_config_mirror</span><span class="w"> </span><span class="kn">import</span> <span class="n">SourceConfigMirror</span>
+
+        <span class="n">builtin_src</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;_builtin&quot;</span> <span class="o">/</span> <span class="s2">&quot;custom&quot;</span> <span class="o">/</span> <span class="s2">&quot;hn&quot;</span> <span class="o">/</span> <span class="s2">&quot;source.py&quot;</span>
+        <span class="n">builtin_src</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">builtin_src</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;# new</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">user_src</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;Config&quot;</span> <span class="o">/</span> <span class="s2">&quot;sources&quot;</span> <span class="o">/</span> <span class="s2">&quot;active&quot;</span> <span class="o">/</span> <span class="s2">&quot;custom&quot;</span> <span class="o">/</span> <span class="s2">&quot;hn&quot;</span> <span class="o">/</span> <span class="s2">&quot;source.py&quot;</span>
+        <span class="n">user_src</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">user_src</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;# user edit</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># user modified</span>
+
+        <span class="n">original_hash</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;# old</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+        <span class="n">manifest</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;custom/hn/source.py&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;ownership&quot;</span><span class="p">:</span> <span class="s2">&quot;app&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;builtin_hash&quot;</span><span class="p">:</span> <span class="n">original_hash</span><span class="p">,</span>  <span class="c1"># old builtin</span>
+                <span class="s2">&quot;user_hash&quot;</span><span class="p">:</span> <span class="n">original_hash</span><span class="p">,</span>     <span class="c1"># user had the old version originally</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;.capcat&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;.capcat&quot;</span> <span class="o">/</span> <span class="s2">&quot;source_hashes.json&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">manifest</span><span class="p">))</span>
+
+        <span class="n">m</span> <span class="o">=</span> <span class="n">SourceConfigMirror</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="n">tui_mode</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="s2">&quot;_builtin_custom_dir&quot;</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">builtin_src</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
+        <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="s2">&quot;_builtin_config_driven_dir&quot;</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;_empty&quot;</span><span class="p">)</span>
+        <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="s2">&quot;_builtin_bundles_dir&quot;</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;_empty2&quot;</span><span class="p">)</span>
+        <span class="n">m</span><span class="o">.</span><span class="n">check_for_upgrades</span><span class="p">()</span>
+
+        <span class="k">assert</span> <span class="n">user_src</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;# new</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;App file must be overwritten&quot;</span>
+        <span class="n">backup_dirs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">((</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;Config&quot;</span> <span class="o">/</span> <span class="s2">&quot;sources&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;backup_*&quot;</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">backup_dirs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;Backup must be created when user had edits&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_config_unmodified_overwritten_silently</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">,</span> <span class="n">monkeypatch</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Config-owned file with no user modifications is overwritten silently.&quot;&quot;&quot;</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">hashlib</span><span class="o">,</span><span class="w"> </span><span class="nn">json</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.source_config_mirror</span><span class="w"> </span><span class="kn">import</span> <span class="n">SourceConfigMirror</span>
+
+        <span class="n">builtin_cfg</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;_builtin&quot;</span> <span class="o">/</span> <span class="s2">&quot;config_driven&quot;</span> <span class="o">/</span> <span class="s2">&quot;configs&quot;</span> <span class="o">/</span> <span class="s2">&quot;bbc.yaml&quot;</span>
+        <span class="n">builtin_cfg</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">builtin_cfg</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;article_count: 30</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">user_cfg</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;Config&quot;</span> <span class="o">/</span> <span class="s2">&quot;sources&quot;</span> <span class="o">/</span> <span class="s2">&quot;active&quot;</span> <span class="o">/</span> <span class="s2">&quot;config_driven&quot;</span> <span class="o">/</span> <span class="s2">&quot;configs&quot;</span> <span class="o">/</span> <span class="s2">&quot;bbc.yaml&quot;</span>
+        <span class="n">user_cfg</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">user_cfg</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;article_count: 20</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># old content</span>
+
+        <span class="n">old_hash</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;article_count: 20</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+        <span class="n">manifest</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;config_driven/configs/bbc.yaml&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;ownership&quot;</span><span class="p">:</span> <span class="s2">&quot;config&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;builtin_hash&quot;</span><span class="p">:</span> <span class="n">old_hash</span><span class="p">,</span>
+                <span class="s2">&quot;user_hash&quot;</span><span class="p">:</span> <span class="n">old_hash</span><span class="p">,</span>  <span class="c1"># user never modified</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;.capcat&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;.capcat&quot;</span> <span class="o">/</span> <span class="s2">&quot;source_hashes.json&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">manifest</span><span class="p">))</span>
+
+        <span class="n">m</span> <span class="o">=</span> <span class="n">SourceConfigMirror</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="n">tui_mode</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="s2">&quot;_builtin_config_driven_dir&quot;</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">builtin_cfg</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
+        <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="s2">&quot;_builtin_custom_dir&quot;</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;_empty_cust&quot;</span><span class="p">)</span>
+        <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="s2">&quot;_builtin_bundles_dir&quot;</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;_empty_bun&quot;</span><span class="p">)</span>
+        <span class="n">m</span><span class="o">.</span><span class="n">check_for_upgrades</span><span class="p">()</span>
+
+        <span class="k">assert</span> <span class="n">user_cfg</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;article_count: 30</span><span class="se">\n</span><span class="s2">&quot;</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Run tests to confirm they fail</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_source_mirror_bugs.py::TestAppOwnershipUpdatePath<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: FAIL — app file not overwritten, config file not overwritten silently</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Rewrite <code>_step2_3_changed_builtins</code></strong></li>
+</ul>
+<br>
+<p>Replace the entire <code>_step2_3_changed_builtins</code> method in <code>capcat/core/source_config_mirror.py</code>:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_step2_3_changed_builtins</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">manifest</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.logging_config</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+    <span class="n">app_overwrite</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>     <span class="c1"># (key, user_file, builtin_file, new_hash, user_modified)</span>
+    <span class="n">config_silent</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>     <span class="c1"># (key, user_file, builtin_file, new_hash)</span>
+    <span class="n">config_modified</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>   <span class="c1"># (key, user_file, builtin_file, new_hash)</span>
+    <span class="n">keys_to_remove</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">entry</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">manifest</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="n">stored_builtin_hash</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;builtin_hash&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">stored_user_hash</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;user_hash&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">ownership</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ownership&quot;</span><span class="p">,</span> <span class="s2">&quot;config&quot;</span><span class="p">)</span>  <span class="c1"># backward compat: missing → config</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">stored_builtin_hash</span><span class="p">:</span>
+            <span class="k">continue</span>  <span class="c1"># user-added source — never touch</span>
+
+        <span class="n">builtin_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_builtin_file_for_key</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">builtin_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Builtin removed for </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> — leaving user file untouched&quot;</span><span class="p">)</span>
+            <span class="k">continue</span>
+
+        <span class="n">user_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_user_file</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">user_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;User file absent for </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> — removing manifest entry&quot;</span><span class="p">)</span>
+            <span class="n">keys_to_remove</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="k">continue</span>
+
+        <span class="n">current_builtin_hash</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_hash</span><span class="p">(</span><span class="n">builtin_file</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">current_builtin_hash</span> <span class="o">==</span> <span class="n">stored_builtin_hash</span><span class="p">:</span>
+            <span class="k">continue</span>  <span class="c1"># builtin unchanged</span>
+
+        <span class="n">current_user_hash</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_hash</span><span class="p">(</span><span class="n">user_file</span><span class="p">)</span>
+        <span class="n">user_modified</span> <span class="o">=</span> <span class="n">current_user_hash</span> <span class="o">!=</span> <span class="n">stored_user_hash</span>
+
+        <span class="k">if</span> <span class="n">ownership</span> <span class="o">==</span> <span class="s2">&quot;app&quot;</span><span class="p">:</span>
+            <span class="n">app_overwrite</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">user_file</span><span class="p">,</span> <span class="n">builtin_file</span><span class="p">,</span> <span class="n">current_builtin_hash</span><span class="p">,</span> <span class="n">user_modified</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">user_modified</span><span class="p">:</span>
+            <span class="n">config_modified</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">user_file</span><span class="p">,</span> <span class="n">builtin_file</span><span class="p">,</span> <span class="n">current_builtin_hash</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">config_silent</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">user_file</span><span class="p">,</span> <span class="n">builtin_file</span><span class="p">,</span> <span class="n">current_builtin_hash</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys_to_remove</span><span class="p">:</span>
+        <span class="k">del</span> <span class="n">manifest</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+    <span class="c1"># 1. App-owned: always overwrite; backup if user had edits</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">user_file</span><span class="p">,</span> <span class="n">builtin_file</span><span class="p">,</span> <span class="n">new_hash</span><span class="p">,</span> <span class="n">user_modified</span> <span class="ow">in</span> <span class="n">app_overwrite</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">user_modified</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_backup</span><span class="p">([(</span><span class="n">key</span><span class="p">,</span> <span class="n">user_file</span><span class="p">)])</span>
+            <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Backup failed for </span><span class="si">{</span><span class="n">_key_display_name</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">) — skipping update&quot;</span>
+                <span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Updated </span><span class="si">{</span><span class="n">_key_display_name</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="si">}</span><span class="s2"> (had local edits — &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;backup created at Config/sources/backup_*/)&quot;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Updated </span><span class="si">{</span><span class="n">_key_display_name</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">builtin_file</span><span class="p">,</span> <span class="n">user_file</span><span class="p">)</span>
+        <span class="n">manifest</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;builtin_hash&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_hash</span>
+        <span class="n">manifest</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;user_hash&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_hash</span>
+
+    <span class="c1"># 2. Config-owned, unmodified: silent overwrite</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">user_file</span><span class="p">,</span> <span class="n">builtin_file</span><span class="p">,</span> <span class="n">new_hash</span> <span class="ow">in</span> <span class="n">config_silent</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Updated </span><span class="si">{</span><span class="n">_key_display_name</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">builtin_file</span><span class="p">,</span> <span class="n">user_file</span><span class="p">)</span>
+        <span class="n">manifest</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;builtin_hash&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_hash</span>
+        <span class="n">manifest</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;user_hash&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_hash</span>
+
+    <span class="c1"># 3. Config-owned, user-modified: interactive prompt</span>
+    <span class="k">if</span> <span class="n">config_modified</span><span class="p">:</span>
+        <span class="n">manifest</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prompt_config_updates</span><span class="p">(</span><span class="n">manifest</span><span class="p">,</span> <span class="n">config_modified</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">manifest</span>
+</pre></div>
+
+<br>
+<p>Also add a stub for <code>_prompt_config_updates</code> (will be fully implemented in Task 6):</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_prompt_config_updates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">manifest</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">candidates</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Interactive prompt for config files the user has modified. Stub — Task 6.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">manifest</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Run tests to confirm they pass</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_source_mirror_bugs.py::TestAppOwnershipUpdatePath<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: PASS</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 5: Full suite</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-q
+</pre></div>
+
+<br>
+<p>Expected: all passing</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 6: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>capcat/core/source_config_mirror.py<span class="w"> </span>tests/unit/test_source_mirror_bugs.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: split _step2_3 into app-silent and config-interactive paths&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h3>Task 6: Non-interactive fallback for modified config files</h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>capcat/core/source_config_mirror.py</code> — partial <code>_prompt_config_updates</code></li>
+<li>Test: <code>tests/unit/test_source_mirror_bugs.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Write failing test</strong></li>
+</ul>
+<br>
+<p>Add to <code>tests/unit/test_source_mirror_bugs.py</code>:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">TestConfigModifiedNonInteractive</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_setup_modified_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">,</span> <span class="n">monkeypatch</span><span class="p">):</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">hashlib</span><span class="o">,</span><span class="w"> </span><span class="nn">json</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.source_config_mirror</span><span class="w"> </span><span class="kn">import</span> <span class="n">SourceConfigMirror</span>
+
+        <span class="n">builtin_cfg</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;_builtin&quot;</span> <span class="o">/</span> <span class="s2">&quot;config_driven&quot;</span> <span class="o">/</span> <span class="s2">&quot;configs&quot;</span> <span class="o">/</span> <span class="s2">&quot;bbc.yaml&quot;</span>
+        <span class="n">builtin_cfg</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">builtin_cfg</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;article_count: 30</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">user_cfg</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;Config&quot;</span> <span class="o">/</span> <span class="s2">&quot;sources&quot;</span> <span class="o">/</span> <span class="s2">&quot;active&quot;</span> <span class="o">/</span> <span class="s2">&quot;config_driven&quot;</span> <span class="o">/</span> <span class="s2">&quot;configs&quot;</span> <span class="o">/</span> <span class="s2">&quot;bbc.yaml&quot;</span>
+        <span class="n">user_cfg</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">user_cfg</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;article_count: 5</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># user&#39;s custom value</span>
+
+        <span class="n">old_hash</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;article_count: 20</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+        <span class="n">manifest</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;config_driven/configs/bbc.yaml&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;ownership&quot;</span><span class="p">:</span> <span class="s2">&quot;config&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;builtin_hash&quot;</span><span class="p">:</span> <span class="n">old_hash</span><span class="p">,</span>
+                <span class="s2">&quot;user_hash&quot;</span><span class="p">:</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;article_count: 5</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">(),</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;.capcat&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;.capcat&quot;</span> <span class="o">/</span> <span class="s2">&quot;source_hashes.json&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">manifest</span><span class="p">))</span>
+
+        <span class="n">m</span> <span class="o">=</span> <span class="n">SourceConfigMirror</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="n">tui_mode</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="s2">&quot;_builtin_config_driven_dir&quot;</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">builtin_cfg</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
+        <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="s2">&quot;_builtin_custom_dir&quot;</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;_empty_cust&quot;</span><span class="p">)</span>
+        <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="s2">&quot;_builtin_bundles_dir&quot;</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;_empty_bun&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">m</span><span class="p">,</span> <span class="n">user_cfg</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_non_interactive_preserves_user_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">,</span> <span class="n">monkeypatch</span><span class="p">,</span> <span class="n">capsys</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Non-interactive mode (stdin not a tty) skips prompt, keeps user file.&quot;&quot;&quot;</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+        <span class="n">m</span><span class="p">,</span> <span class="n">user_cfg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_modified_config</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="n">monkeypatch</span><span class="p">)</span>
+        <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">sys</span><span class="p">,</span> <span class="s2">&quot;stdin&quot;</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">devnull</span><span class="p">))</span>
+        <span class="n">m</span><span class="o">.</span><span class="n">check_for_upgrades</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">user_cfg</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;article_count: 5</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;User file must not be overwritten&quot;</span>
+        <span class="n">captured</span> <span class="o">=</span> <span class="n">capsys</span><span class="o">.</span><span class="n">readouterr</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="s2">&quot;WARNING&quot;</span> <span class="ow">in</span> <span class="n">captured</span><span class="o">.</span><span class="n">out</span> <span class="ow">or</span> <span class="s2">&quot;updates available&quot;</span> <span class="ow">in</span> <span class="n">captured</span><span class="o">.</span><span class="n">out</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_non_interactive_with_questionary_none_preserves_user_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">,</span> <span class="n">monkeypatch</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;When questionary is unavailable, non-interactive path preserves user file.&quot;&quot;&quot;</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">capcat.core.source_config_mirror</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">scm</span>
+        <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">scm</span><span class="p">,</span> <span class="s2">&quot;questionary&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">m</span><span class="p">,</span> <span class="n">user_cfg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_modified_config</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="n">monkeypatch</span><span class="p">)</span>
+        <span class="n">m</span><span class="o">.</span><span class="n">check_for_upgrades</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">user_cfg</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;article_count: 5</span><span class="se">\n</span><span class="s2">&quot;</span>
+</pre></div>
+
+<br>
+<p>Add <code>import os</code> at top of test file if not present.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Run tests to confirm they fail</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_source_mirror_bugs.py::TestConfigModifiedNonInteractive<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: FAIL — <code>_prompt_config_updates</code> is a stub that returns manifest without printing</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Implement non-interactive path in <code>_prompt_config_updates</code></strong></li>
+</ul>
+<br>
+<p>Replace the stub with:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_prompt_config_updates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">manifest</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">candidates</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Interactive prompt for config-owned files that the user has modified.&quot;&quot;&quot;</span>
+    <span class="n">is_interactive</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">isatty</span><span class="p">()</span> <span class="ow">and</span> <span class="n">questionary</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_interactive</span><span class="p">:</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_key_display_name</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">candidates</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;WARNING: source updates available for modified files: </span><span class="si">{</span><span class="n">names</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Run capcat fetch interactively to review.&quot;</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">manifest</span>
+
+    <span class="c1"># Interactive path — implemented in Task 7</span>
+    <span class="k">return</span> <span class="n">manifest</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Run tests to confirm they pass</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_source_mirror_bugs.py::TestConfigModifiedNonInteractive<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: PASS</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 5: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>capcat/core/source_config_mirror.py<span class="w"> </span>tests/unit/test_source_mirror_bugs.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: non-interactive fallback for modified config prompt&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h3>Task 7: Interactive <code>questionary.select</code> prompt for modified config files</h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>capcat/core/source_config_mirror.py</code> — complete <code>_prompt_config_updates</code></li>
+<li>Test: <code>tests/unit/test_source_mirror_bugs.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Write failing tests</strong></li>
+</ul>
+<br>
+<p>Add to <code>tests/unit/test_source_mirror_bugs.py</code>:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">TestConfigModifiedInteractivePrompt</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_candidate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">user_content</span><span class="p">,</span> <span class="n">builtin_content</span><span class="p">,</span> <span class="n">old_builtin_content</span><span class="p">):</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">hashlib</span>
+        <span class="n">parts</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;config_driven/configs/&quot;</span><span class="p">):</span>
+            <span class="n">user_f</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;Config&quot;</span> <span class="o">/</span> <span class="s2">&quot;sources&quot;</span> <span class="o">/</span> <span class="s2">&quot;active&quot;</span> <span class="o">/</span> <span class="s2">&quot;config_driven&quot;</span> <span class="o">/</span> <span class="s2">&quot;configs&quot;</span> <span class="o">/</span> <span class="n">parts</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">builtin_f</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;_builtin&quot;</span> <span class="o">/</span> <span class="s2">&quot;config_driven&quot;</span> <span class="o">/</span> <span class="s2">&quot;configs&quot;</span> <span class="o">/</span> <span class="n">parts</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">user_f</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;Config&quot;</span> <span class="o">/</span> <span class="s2">&quot;sources&quot;</span> <span class="o">/</span> <span class="s2">&quot;active&quot;</span> <span class="o">/</span> <span class="n">key</span>
+            <span class="n">builtin_f</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;_builtin&quot;</span> <span class="o">/</span> <span class="n">key</span>
+        <span class="n">user_f</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">builtin_f</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">user_f</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">user_content</span><span class="p">)</span>
+        <span class="n">builtin_f</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">builtin_content</span><span class="p">)</span>
+        <span class="n">new_hash</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">(</span><span class="n">builtin_content</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">user_f</span><span class="p">,</span> <span class="n">builtin_f</span><span class="p">,</span> <span class="n">new_hash</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_overwrite_all_applies_all_candidates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">,</span> <span class="n">monkeypatch</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Choosing &#39;Overwrite all&#39; copies all builtin files and updates manifest.&quot;&quot;&quot;</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">unittest.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">MagicMock</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">capcat.core.source_config_mirror</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">scm</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.source_config_mirror</span><span class="w"> </span><span class="kn">import</span> <span class="n">SourceConfigMirror</span>
+
+        <span class="n">mock_q</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+        <span class="n">mock_q</span><span class="o">.</span><span class="n">select</span><span class="o">.</span><span class="n">return_value</span><span class="o">.</span><span class="n">ask</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="s2">&quot;Overwrite all with new defaults&quot;</span>
+        <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">scm</span><span class="p">,</span> <span class="s2">&quot;questionary&quot;</span><span class="p">,</span> <span class="n">mock_q</span><span class="p">)</span>
+        <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">sys</span><span class="p">,</span> <span class="s2">&quot;stdin&quot;</span><span class="p">,</span> <span class="n">MagicMock</span><span class="p">(</span><span class="n">isatty</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="kc">True</span><span class="p">))</span>
+
+        <span class="n">m</span> <span class="o">=</span> <span class="n">SourceConfigMirror</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="n">tui_mode</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">c1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_candidate</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="s2">&quot;config_driven/configs/bbc.yaml&quot;</span><span class="p">,</span> <span class="s2">&quot;count: 5</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;count: 30</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;count: 20</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">c2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_candidate</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="s2">&quot;config_driven/configs/guardian.yaml&quot;</span><span class="p">,</span> <span class="s2">&quot;count: 3</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;count: 30</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;count: 20</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">manifest</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">c1</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="p">{</span><span class="s2">&quot;ownership&quot;</span><span class="p">:</span> <span class="s2">&quot;config&quot;</span><span class="p">,</span> <span class="s2">&quot;builtin_hash&quot;</span><span class="p">:</span> <span class="s2">&quot;old&quot;</span><span class="p">,</span> <span class="s2">&quot;user_hash&quot;</span><span class="p">:</span> <span class="s2">&quot;old&quot;</span><span class="p">},</span>
+            <span class="n">c2</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="p">{</span><span class="s2">&quot;ownership&quot;</span><span class="p">:</span> <span class="s2">&quot;config&quot;</span><span class="p">,</span> <span class="s2">&quot;builtin_hash&quot;</span><span class="p">:</span> <span class="s2">&quot;old&quot;</span><span class="p">,</span> <span class="s2">&quot;user_hash&quot;</span><span class="p">:</span> <span class="s2">&quot;old&quot;</span><span class="p">},</span>
+        <span class="p">}</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">_prompt_config_updates</span><span class="p">(</span><span class="n">manifest</span><span class="p">,</span> <span class="p">[</span><span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">])</span>
+
+        <span class="k">assert</span> <span class="n">c1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;count: 30</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">assert</span> <span class="n">c2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;count: 30</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">assert</span> <span class="n">result</span><span class="p">[</span><span class="n">c1</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="s2">&quot;builtin_hash&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">c1</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="n">result</span><span class="p">[</span><span class="n">c1</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="s2">&quot;user_hash&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">c1</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_no_keeps_all_user_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">,</span> <span class="n">monkeypatch</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Choosing &#39;No&#39; leaves all user files untouched.&quot;&quot;&quot;</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">unittest.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">MagicMock</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">capcat.core.source_config_mirror</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">scm</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.source_config_mirror</span><span class="w"> </span><span class="kn">import</span> <span class="n">SourceConfigMirror</span>
+
+        <span class="n">mock_q</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+        <span class="n">mock_q</span><span class="o">.</span><span class="n">select</span><span class="o">.</span><span class="n">return_value</span><span class="o">.</span><span class="n">ask</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="s2">&quot;No — keep my modifications&quot;</span>
+        <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">scm</span><span class="p">,</span> <span class="s2">&quot;questionary&quot;</span><span class="p">,</span> <span class="n">mock_q</span><span class="p">)</span>
+        <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">sys</span><span class="p">,</span> <span class="s2">&quot;stdin&quot;</span><span class="p">,</span> <span class="n">MagicMock</span><span class="p">(</span><span class="n">isatty</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="kc">True</span><span class="p">))</span>
+
+        <span class="n">m</span> <span class="o">=</span> <span class="n">SourceConfigMirror</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="n">tui_mode</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">c1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_candidate</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="s2">&quot;config_driven/configs/bbc.yaml&quot;</span><span class="p">,</span> <span class="s2">&quot;count: 5</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;count: 30</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;count: 20</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">manifest</span> <span class="o">=</span> <span class="p">{</span><span class="n">c1</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="p">{</span><span class="s2">&quot;ownership&quot;</span><span class="p">:</span> <span class="s2">&quot;config&quot;</span><span class="p">,</span> <span class="s2">&quot;builtin_hash&quot;</span><span class="p">:</span> <span class="s2">&quot;old&quot;</span><span class="p">,</span> <span class="s2">&quot;user_hash&quot;</span><span class="p">:</span> <span class="s2">&quot;old&quot;</span><span class="p">}}</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">_prompt_config_updates</span><span class="p">(</span><span class="n">manifest</span><span class="p">,</span> <span class="p">[</span><span class="n">c1</span><span class="p">])</span>
+
+        <span class="k">assert</span> <span class="n">c1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;count: 5</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;User file must not change&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_select_individually_updates_chosen_skips_other</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">,</span> <span class="n">monkeypatch</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;&#39;Select individually&#39; updates files the user says yes to, skips the rest.&quot;&quot;&quot;</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">unittest.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">MagicMock</span><span class="p">,</span> <span class="n">call</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">capcat.core.source_config_mirror</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">scm</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.source_config_mirror</span><span class="w"> </span><span class="kn">import</span> <span class="n">SourceConfigMirror</span>
+
+        <span class="n">top_choice</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+        <span class="n">top_choice</span><span class="o">.</span><span class="n">ask</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="s2">&quot;Select individually&quot;</span>
+        <span class="n">per_update</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+        <span class="n">per_update</span><span class="o">.</span><span class="n">ask</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="s2">&quot;Update&quot;</span>
+        <span class="n">per_skip</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+        <span class="n">per_skip</span><span class="o">.</span><span class="n">ask</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="s2">&quot;Skip&quot;</span>
+
+        <span class="n">call_count</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;n&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">select_side_effect</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">choices</span><span class="p">):</span>
+            <span class="n">call_count</span><span class="p">[</span><span class="s2">&quot;n&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">call_count</span><span class="p">[</span><span class="s2">&quot;n&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">top_choice</span>
+            <span class="k">elif</span> <span class="n">call_count</span><span class="p">[</span><span class="s2">&quot;n&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">per_update</span>   <span class="c1"># update bbc</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">per_skip</span>     <span class="c1"># skip guardian</span>
+
+        <span class="n">mock_q</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+        <span class="n">mock_q</span><span class="o">.</span><span class="n">select</span><span class="o">.</span><span class="n">side_effect</span> <span class="o">=</span> <span class="n">select_side_effect</span>
+        <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">scm</span><span class="p">,</span> <span class="s2">&quot;questionary&quot;</span><span class="p">,</span> <span class="n">mock_q</span><span class="p">)</span>
+        <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">sys</span><span class="p">,</span> <span class="s2">&quot;stdin&quot;</span><span class="p">,</span> <span class="n">MagicMock</span><span class="p">(</span><span class="n">isatty</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="kc">True</span><span class="p">))</span>
+
+        <span class="n">m</span> <span class="o">=</span> <span class="n">SourceConfigMirror</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="n">tui_mode</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">c1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_candidate</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="s2">&quot;config_driven/configs/bbc.yaml&quot;</span><span class="p">,</span> <span class="s2">&quot;count: 5</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;count: 30</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;count: 20</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">c2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_candidate</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="s2">&quot;config_driven/configs/guardian.yaml&quot;</span><span class="p">,</span> <span class="s2">&quot;count: 3</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;count: 30</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;count: 20</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">manifest</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">c1</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="p">{</span><span class="s2">&quot;ownership&quot;</span><span class="p">:</span> <span class="s2">&quot;config&quot;</span><span class="p">,</span> <span class="s2">&quot;builtin_hash&quot;</span><span class="p">:</span> <span class="s2">&quot;old&quot;</span><span class="p">,</span> <span class="s2">&quot;user_hash&quot;</span><span class="p">:</span> <span class="s2">&quot;old&quot;</span><span class="p">},</span>
+            <span class="n">c2</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="p">{</span><span class="s2">&quot;ownership&quot;</span><span class="p">:</span> <span class="s2">&quot;config&quot;</span><span class="p">,</span> <span class="s2">&quot;builtin_hash&quot;</span><span class="p">:</span> <span class="s2">&quot;old&quot;</span><span class="p">,</span> <span class="s2">&quot;user_hash&quot;</span><span class="p">:</span> <span class="s2">&quot;old&quot;</span><span class="p">},</span>
+        <span class="p">}</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">_prompt_config_updates</span><span class="p">(</span><span class="n">manifest</span><span class="p">,</span> <span class="p">[</span><span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">])</span>
+
+        <span class="k">assert</span> <span class="n">c1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;count: 30</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;bbc should be updated&quot;</span>
+        <span class="k">assert</span> <span class="n">c2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;count: 3</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;guardian should be unchanged&quot;</span>
+</pre></div>
+
+<br>
+<p>Add <code>import sys</code> at top of test file if not present.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Run tests to confirm they fail</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_source_mirror_bugs.py::TestConfigModifiedInteractivePrompt<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: FAIL — interactive path returns manifest unchanged (stub still in place)</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Complete <code>_prompt_config_updates</code></strong></li>
+</ul>
+<br>
+<p>Replace the interactive stub section (the <code># Interactive path — implemented in Task 7</code> comment and return) with:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="n">names_display</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;  - </span><span class="si">{</span><span class="n">_key_display_name</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">candidates</span>
+    <span class="p">)</span>
+    <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Capcat detected local modifications in:</span><span class="se">\n</span><span class="si">{</span><span class="n">names_display</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+    <span class="n">top_choice</span> <span class="o">=</span> <span class="n">questionary</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+        <span class="n">message</span><span class="p">,</span>
+        <span class="n">choices</span><span class="o">=</span><span class="p">[</span>
+            <span class="s2">&quot;Overwrite all with new defaults&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Select individually&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;No </span><span class="se">\u2014</span><span class="s2"> keep my modifications&quot;</span><span class="p">,</span>
+        <span class="p">],</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">ask</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">top_choice</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">top_choice</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;No&quot;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">manifest</span>
+
+    <span class="k">if</span> <span class="n">top_choice</span> <span class="o">==</span> <span class="s2">&quot;Overwrite all with new defaults&quot;</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_backup</span><span class="p">([(</span><span class="n">k</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">candidates</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Capcat: backup failed (</span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">) </span><span class="se">\u2014</span><span class="s2"> update aborted.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">manifest</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">user_file</span><span class="p">,</span> <span class="n">builtin_file</span><span class="p">,</span> <span class="n">new_hash</span> <span class="ow">in</span> <span class="n">candidates</span><span class="p">:</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">builtin_file</span><span class="p">,</span> <span class="n">user_file</span><span class="p">)</span>
+            <span class="n">manifest</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;builtin_hash&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_hash</span>
+            <span class="n">manifest</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;user_hash&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_hash</span>
+        <span class="k">return</span> <span class="n">manifest</span>
+
+    <span class="c1"># Select individually</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">user_file</span><span class="p">,</span> <span class="n">builtin_file</span><span class="p">,</span> <span class="n">new_hash</span> <span class="ow">in</span> <span class="n">candidates</span><span class="p">:</span>
+        <span class="n">diff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_diff_files</span><span class="p">(</span><span class="n">user_file</span><span class="p">,</span> <span class="n">builtin_file</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">diff</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="n">_key_display_name</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="si">}</span><span class="s2">:</span><span class="se">\n</span><span class="si">{</span><span class="n">diff</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">per_choice</span> <span class="o">=</span> <span class="n">questionary</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Update </span><span class="si">{</span><span class="n">_key_display_name</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="si">}</span><span class="s2">?&quot;</span><span class="p">,</span>
+            <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Update&quot;</span><span class="p">,</span> <span class="s2">&quot;Skip&quot;</span><span class="p">],</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">ask</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">per_choice</span> <span class="o">==</span> <span class="s2">&quot;Update&quot;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_backup</span><span class="p">([(</span><span class="n">key</span><span class="p">,</span> <span class="n">user_file</span><span class="p">)])</span>
+            <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Capcat: backup failed for </span><span class="si">{</span><span class="n">_key_display_name</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">) </span><span class="se">\u2014</span><span class="s2"> skipping.&quot;</span>
+                <span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">builtin_file</span><span class="p">,</span> <span class="n">user_file</span><span class="p">)</span>
+            <span class="n">manifest</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;builtin_hash&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_hash</span>
+            <span class="n">manifest</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;user_hash&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_hash</span>
+
+    <span class="k">return</span> <span class="n">manifest</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Run tests to confirm they pass</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_source_mirror_bugs.py::TestConfigModifiedInteractivePrompt<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: PASS</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 5: Full suite</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-q
+</pre></div>
+
+<br>
+<p>Expected: all passing</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 6: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>capcat/core/source_config_mirror.py<span class="w"> </span>tests/unit/test_source_mirror_bugs.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: interactive questionary.select prompt for modified config updates&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h3>Task 8: Merge and finish</h3>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Full suite final check</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-q
+</pre></div>
+
+<br>
+<p>Expected: all passing, no warnings about new failures</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Merge to main</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>checkout<span class="w"> </span>main<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>merge<span class="w"> </span>feat/source-update-ux<span class="w"> </span>--no-ff<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: source update UX — ownership model, silent app updates, interactive config prompt&quot;</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Bump version (minor — new user-visible behaviour)</strong></li>
+</ul>
+<br>
+<p>Edit <code>capcat/__init__.py</code>:</p>
+<div class="highlight"><pre><span></span><span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;1.9.50&quot;</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Commit, tag, push</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>capcat/__init__.py<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;bump: version to 1.9.50&quot;</span>
+git<span class="w"> </span>tag<span class="w"> </span>v1.9.50
+git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>main<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>v1.9.50
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 5: Regenerate docs</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>python3<span class="w"> </span>scripts/run_docs.py
+git<span class="w"> </span>add<span class="w"> </span>docs/<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;docs: regenerate API docs for v1.9.50&quot;</span>
+git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>main
+</pre></div>
+
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix: Specialized Source Double-Nesting Implementation Plan</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / <a href="../superpowers/index.html">superpowers</a> / plans</div>
+<h1>Fix: Specialized Source Double-Nesting Implementation Plan</h1>
+<br>
+<p>&gt; <strong>For agentic workers:</strong> REQUIRED: Use superpowers:subagent-driven-development (if subagents available) or superpowers:executing-plans to implement this plan. Steps use checkbox (<code>- [ ]</code>) syntax for tracking.</p>
+<br>
+<strong>Goal:</strong> Remove the double-nested folder created when processing YouTube/Medium/Substack articles — content must land in <code>base_folder/VideoTitle/</code> not <code>base_folder/HN_title/VideoTitle/</code>.
+<br>
+<strong>Architecture:</strong> <code>UnifiedArticleProcessor._process_with_specialized_source</code> creates an intermediate folder using the HN post title, then passes that as <code>output_dir</code> to the specialized source. The specialized source (YouTube, Medium, Substack) ALSO creates a subfolder inside <code>output_dir</code> using the actual content title. Result: two levels of nesting. Fix: remove intermediate folder creation for non-update_mode; pass <code>base_folder</code> directly so the specialized source&#x27;s subfolder is the only one created.
+<br>
+<strong>Tech Stack:</strong> Python, pytest, unittest.mock
+<br>
+<hr>
+<br>
+<h2>Root Cause Summary</h2>
+<br>
+<code>unified_article_processor.py:_process_with_specialized_source</code> (lines 118–154):
+<br>
+<div class="highlight"><pre><span></span><span class="c1"># Lines 118–121 — PROBLEM: creates intermediate folder with HN title</span>
+<span class="n">safe_title</span> <span class="o">=</span> <span class="n">sanitize_filename</span><span class="p">(</span><span class="n">title</span> <span class="ow">or</span> <span class="n">source_id</span><span class="p">)</span>
+<span class="n">article_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_folder</span><span class="p">,</span> <span class="n">safe_title</span><span class="p">)</span>
+<span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">article_folder</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Line 140–142 — passes intermediate folder to source</span>
+<span class="n">success</span><span class="p">,</span> <span class="n">article_title</span> <span class="o">=</span> <span class="n">source_instance</span><span class="o">.</span><span class="n">fetch_article_content</span><span class="p">(</span>
+    <span class="n">article</span><span class="p">,</span> <span class="n">article_folder</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="kc">None</span>   <span class="c1"># ← intermediate, not base_folder</span>
+<span class="p">)</span>
+
+<span class="c1"># Line 149 — returns intermediate folder, not what source created</span>
+<span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">article_title</span><span class="p">,</span> <span class="n">article_folder</span>           <span class="c1"># ← article_folder = intermediate (wrong)</span>
+</pre></div>
+
+<br>
+<p>YouTube (and Medium/Substack) do:</p>
+<div class="highlight"><pre><span></span><span class="n">article_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_dir</span><span class="p">,</span> <span class="n">safe_title</span><span class="p">)</span>   <span class="c1"># creates subfolder inside output_dir</span>
+<span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">article_folder</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">article_folder</span>                              <span class="c1"># returns that subfolder</span>
+</pre></div>
+
+<br>
+<p>Combined effect: <code>base_folder/HN_title/YouTube_title/</code> instead of <code>base_folder/YouTube_title/</code>.</p>
+<br>
+<h2>Files Changed</h2>
+<br>
+<p>&lt;div class=&quot;table-container&quot;&gt;</p>
+<p>&lt;table class=&quot;centered-table&quot;&gt;</p>
+<p>  &lt;thead&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;th&gt;File&lt;/th&gt;</p>
+<p>      &lt;th&gt;Change&lt;/th&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>  &lt;/thead&gt;</p>
+<p>  &lt;tbody&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;tests/unit/test_no_double_nesting.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;New — verifies no intermediate folder is created&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/core/unified_article_processor.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Remove intermediate folder creation for non-update_mode; pass &lt;code&gt;base_folder&lt;/code&gt;; return captured folder&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;capcat/__init__.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Bump to &lt;code&gt;1.0.47&lt;/code&gt;&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>  &lt;/tbody&gt;</p>
+<p>&lt;/table&gt;</p>
+<p>&lt;/div&gt;</p>
+<br>
+<hr>
+<br>
+<h2>Chunk 1: Test + Fix</h2>
+<br>
+<h3>Task 1: Write failing tests</h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Create: <code>/Users/xmac/capcat/tests/unit/test_no_double_nesting.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Write the failing tests</strong></li>
+</ul>
+<br>
+<p>Create <code>/Users/xmac/capcat/tests/unit/test_no_double_nesting.py</code>:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Tests that _process_with_specialized_source does not create an intermediate folder.</span>
+
+<span class="sd">After the fix, specialized sources (YouTube, Medium, Substack) receive base_folder</span>
+<span class="sd">directly and create their own single subfolder inside it. No HN-title intermediate</span>
+<span class="sd">folder should appear.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">unittest.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">MagicMock</span><span class="p">,</span> <span class="n">patch</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.unified_article_processor</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnifiedArticleProcessor</span>
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Helpers</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_make_processor</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">UnifiedArticleProcessor</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">UnifiedArticleProcessor</span><span class="p">()</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_make_mock_specialized_source</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="n">content_folder_name</span><span class="o">=</span><span class="s2">&quot;YouTube-Video-Title&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a mock specialized source that creates a real subfolder in output_dir.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_fake_fetch</span><span class="p">(</span><span class="n">article</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">content_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_dir</span><span class="p">,</span> <span class="n">content_folder_name</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">content_folder</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">content_folder</span>
+
+    <span class="n">source_instance</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+    <span class="n">source_instance</span><span class="o">.</span><span class="n">fetch_article_content</span><span class="o">.</span><span class="n">side_effect</span> <span class="o">=</span> <span class="n">_fake_fetch</span>
+    <span class="k">return</span> <span class="n">source_instance</span>
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># No intermediate folder</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestNoIntermediateFolder</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;_process_with_specialized_source must not create base_folder/&lt;hn_title&gt;/.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_no_intermediate_folder_created</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The single direct child must be named after the content, not the HN post title.&quot;&quot;&quot;</span>
+        <span class="n">content_name</span> <span class="o">=</span> <span class="s2">&quot;YouTube-Video-Title&quot;</span>
+        <span class="n">hn_title</span> <span class="o">=</span> <span class="s2">&quot;Some HN Post Title&quot;</span>
+        <span class="n">processor</span> <span class="o">=</span> <span class="n">_make_processor</span><span class="p">()</span>
+        <span class="n">source_instance</span> <span class="o">=</span> <span class="n">_make_mock_specialized_source</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="n">content_name</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">patch</span><span class="o">.</span><span class="n">object</span><span class="p">(</span>
+            <span class="n">processor</span><span class="o">.</span><span class="n">specialized_manager</span><span class="p">,</span>
+            <span class="s2">&quot;can_handle_url&quot;</span><span class="p">,</span>
+            <span class="n">return_value</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="k">with</span> <span class="n">patch</span><span class="o">.</span><span class="n">object</span><span class="p">(</span>
+                <span class="n">processor</span><span class="o">.</span><span class="n">specialized_manager</span><span class="p">,</span>
+                <span class="s2">&quot;get_source_for_url&quot;</span><span class="p">,</span>
+                <span class="n">return_value</span><span class="o">=</span><span class="p">(</span><span class="n">source_instance</span><span class="p">,</span> <span class="s2">&quot;youtube&quot;</span><span class="p">),</span>
+            <span class="p">):</span>
+                <span class="n">success</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">folder</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">process_article</span><span class="p">(</span>
+                    <span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://www.youtube.com/watch?v=abc123&quot;</span><span class="p">,</span>
+                    <span class="n">title</span><span class="o">=</span><span class="n">hn_title</span><span class="p">,</span>
+                    <span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                    <span class="n">base_folder</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">),</span>
+                <span class="p">)</span>
+
+        <span class="k">assert</span> <span class="n">success</span> <span class="ow">is</span> <span class="kc">True</span>
+
+        <span class="c1"># The single direct child must be the content folder, not an HN-title intermediate</span>
+        <span class="n">children</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">tmp_path</span><span class="o">.</span><span class="n">iterdir</span><span class="p">()</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()]</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">children</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Expected exactly 1 subfolder in base_folder, found: &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">children</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+        <span class="k">assert</span> <span class="n">children</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">content_name</span><span class="p">,</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Expected single child to be &#39;</span><span class="si">{</span><span class="n">content_name</span><span class="si">}</span><span class="s2">&#39; (content folder), &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;got &#39;</span><span class="si">{</span><span class="n">children</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; (likely the HN-title intermediate folder)&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_returned_folder_is_content_folder_not_intermediate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;process_article must return the folder the specialized source created.&quot;&quot;&quot;</span>
+        <span class="n">content_name</span> <span class="o">=</span> <span class="s2">&quot;YouTube-Video-Title&quot;</span>
+        <span class="n">processor</span> <span class="o">=</span> <span class="n">_make_processor</span><span class="p">()</span>
+        <span class="n">source_instance</span> <span class="o">=</span> <span class="n">_make_mock_specialized_source</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="n">content_name</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">patch</span><span class="o">.</span><span class="n">object</span><span class="p">(</span>
+            <span class="n">processor</span><span class="o">.</span><span class="n">specialized_manager</span><span class="p">,</span>
+            <span class="s2">&quot;can_handle_url&quot;</span><span class="p">,</span>
+            <span class="n">return_value</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="k">with</span> <span class="n">patch</span><span class="o">.</span><span class="n">object</span><span class="p">(</span>
+                <span class="n">processor</span><span class="o">.</span><span class="n">specialized_manager</span><span class="p">,</span>
+                <span class="s2">&quot;get_source_for_url&quot;</span><span class="p">,</span>
+                <span class="n">return_value</span><span class="o">=</span><span class="p">(</span><span class="n">source_instance</span><span class="p">,</span> <span class="s2">&quot;youtube&quot;</span><span class="p">),</span>
+            <span class="p">):</span>
+                <span class="n">success</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">folder</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">process_article</span><span class="p">(</span>
+                    <span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://www.youtube.com/watch?v=abc123&quot;</span><span class="p">,</span>
+                    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Some HN Post Title&quot;</span><span class="p">,</span>
+                    <span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                    <span class="n">base_folder</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">),</span>
+                <span class="p">)</span>
+
+        <span class="n">expected_folder</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="n">content_name</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">folder</span> <span class="o">==</span> <span class="n">expected_folder</span><span class="p">,</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Expected folder to be the content folder &#39;</span><span class="si">{</span><span class="n">expected_folder</span><span class="si">}</span><span class="s2">&#39;, &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;got &#39;</span><span class="si">{</span><span class="n">folder</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_content_is_directly_inside_base_folder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Content folder must be at base_folder/content_title/, not base_folder/hn_title/content_title/.&quot;&quot;&quot;</span>
+        <span class="n">content_name</span> <span class="o">=</span> <span class="s2">&quot;YouTube-Video-Title&quot;</span>
+        <span class="n">hn_title</span> <span class="o">=</span> <span class="s2">&quot;Some HN Post Title&quot;</span>
+        <span class="n">processor</span> <span class="o">=</span> <span class="n">_make_processor</span><span class="p">()</span>
+        <span class="n">source_instance</span> <span class="o">=</span> <span class="n">_make_mock_specialized_source</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="n">content_name</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">patch</span><span class="o">.</span><span class="n">object</span><span class="p">(</span>
+            <span class="n">processor</span><span class="o">.</span><span class="n">specialized_manager</span><span class="p">,</span>
+            <span class="s2">&quot;can_handle_url&quot;</span><span class="p">,</span>
+            <span class="n">return_value</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="k">with</span> <span class="n">patch</span><span class="o">.</span><span class="n">object</span><span class="p">(</span>
+                <span class="n">processor</span><span class="o">.</span><span class="n">specialized_manager</span><span class="p">,</span>
+                <span class="s2">&quot;get_source_for_url&quot;</span><span class="p">,</span>
+                <span class="n">return_value</span><span class="o">=</span><span class="p">(</span><span class="n">source_instance</span><span class="p">,</span> <span class="s2">&quot;youtube&quot;</span><span class="p">),</span>
+            <span class="p">):</span>
+                <span class="n">processor</span><span class="o">.</span><span class="n">process_article</span><span class="p">(</span>
+                    <span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://www.youtube.com/watch?v=abc123&quot;</span><span class="p">,</span>
+                    <span class="n">title</span><span class="o">=</span><span class="n">hn_title</span><span class="p">,</span>
+                    <span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                    <span class="n">base_folder</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">),</span>
+                <span class="p">)</span>
+
+        <span class="c1"># Content folder must be a direct child of base_folder</span>
+        <span class="n">expected</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="n">content_name</span>
+        <span class="k">assert</span> <span class="n">expected</span><span class="o">.</span><span class="n">exists</span><span class="p">(),</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Content folder &#39;</span><span class="si">{</span><span class="n">content_name</span><span class="si">}</span><span class="s2">&#39; not found as direct child of base_folder. &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Found: </span><span class="si">{</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">tmp_path</span><span class="o">.</span><span class="n">iterdir</span><span class="p">()]</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+        <span class="c1"># The hn-title intermediate folder must NOT exist</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">sanitize_filename</span>
+        <span class="n">intermediate</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="n">sanitize_filename</span><span class="p">(</span><span class="n">hn_title</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="n">intermediate</span><span class="o">.</span><span class="n">exists</span><span class="p">(),</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Intermediate folder &#39;</span><span class="si">{</span><span class="n">intermediate</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; must not be created&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_specialized_source_receives_base_folder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The specialized source&#39;s fetch_article_content must be called with base_folder.&quot;&quot;&quot;</span>
+        <span class="n">processor</span> <span class="o">=</span> <span class="n">_make_processor</span><span class="p">()</span>
+        <span class="n">source_instance</span> <span class="o">=</span> <span class="n">_make_mock_specialized_source</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">patch</span><span class="o">.</span><span class="n">object</span><span class="p">(</span>
+            <span class="n">processor</span><span class="o">.</span><span class="n">specialized_manager</span><span class="p">,</span>
+            <span class="s2">&quot;can_handle_url&quot;</span><span class="p">,</span>
+            <span class="n">return_value</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="k">with</span> <span class="n">patch</span><span class="o">.</span><span class="n">object</span><span class="p">(</span>
+                <span class="n">processor</span><span class="o">.</span><span class="n">specialized_manager</span><span class="p">,</span>
+                <span class="s2">&quot;get_source_for_url&quot;</span><span class="p">,</span>
+                <span class="n">return_value</span><span class="o">=</span><span class="p">(</span><span class="n">source_instance</span><span class="p">,</span> <span class="s2">&quot;youtube&quot;</span><span class="p">),</span>
+            <span class="p">):</span>
+                <span class="n">processor</span><span class="o">.</span><span class="n">process_article</span><span class="p">(</span>
+                    <span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://www.youtube.com/watch?v=abc123&quot;</span><span class="p">,</span>
+                    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Some HN Post Title&quot;</span><span class="p">,</span>
+                    <span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                    <span class="n">base_folder</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">),</span>
+                <span class="p">)</span>
+
+        <span class="n">call_args</span> <span class="o">=</span> <span class="n">source_instance</span><span class="o">.</span><span class="n">fetch_article_content</span><span class="o">.</span><span class="n">call_args</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">output_dir_arg</span> <span class="o">=</span> <span class="n">call_args</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">call_args</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># article, output_dir</span>
+        <span class="k">assert</span> <span class="n">output_dir_arg</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">),</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Expected output_dir to be base_folder &#39;</span><span class="si">{</span><span class="n">tmp_path</span><span class="si">}</span><span class="s2">&#39;, &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;got &#39;</span><span class="si">{</span><span class="n">output_dir_arg</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+        <span class="p">)</span>
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># update_mode backward compatibility</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestUpdateModeBackwardCompat</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;update_mode=True must still create the intermediate folder (backward compat).&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_update_mode_creates_intermediate_folder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;In update_mode, the intermediate folder (hn_title) must still be created.&quot;&quot;&quot;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">sanitize_filename</span>
+
+        <span class="n">hn_title</span> <span class="o">=</span> <span class="s2">&quot;Some HN Post Title&quot;</span>
+        <span class="n">processor</span> <span class="o">=</span> <span class="n">_make_processor</span><span class="p">()</span>
+        <span class="n">source_instance</span> <span class="o">=</span> <span class="n">_make_mock_specialized_source</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">)</span>
+
+        <span class="c1"># Patch _check_url_validity to return True (valid URL)</span>
+        <span class="k">with</span> <span class="n">patch</span><span class="o">.</span><span class="n">object</span><span class="p">(</span><span class="n">processor</span><span class="p">,</span> <span class="s2">&quot;_check_url_validity&quot;</span><span class="p">,</span> <span class="n">return_value</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+            <span class="k">with</span> <span class="n">patch</span><span class="o">.</span><span class="n">object</span><span class="p">(</span><span class="n">processor</span><span class="p">,</span> <span class="s2">&quot;_update_timestamp&quot;</span><span class="p">):</span>
+                <span class="k">with</span> <span class="n">patch</span><span class="o">.</span><span class="n">object</span><span class="p">(</span>
+                    <span class="n">processor</span><span class="o">.</span><span class="n">specialized_manager</span><span class="p">,</span>
+                    <span class="s2">&quot;can_handle_url&quot;</span><span class="p">,</span>
+                    <span class="n">return_value</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="p">):</span>
+                    <span class="k">with</span> <span class="n">patch</span><span class="o">.</span><span class="n">object</span><span class="p">(</span>
+                        <span class="n">processor</span><span class="o">.</span><span class="n">specialized_manager</span><span class="p">,</span>
+                        <span class="s2">&quot;get_source_for_url&quot;</span><span class="p">,</span>
+                        <span class="n">return_value</span><span class="o">=</span><span class="p">(</span><span class="n">source_instance</span><span class="p">,</span> <span class="s2">&quot;youtube&quot;</span><span class="p">),</span>
+                    <span class="p">):</span>
+                        <span class="n">processor</span><span class="o">.</span><span class="n">process_article</span><span class="p">(</span>
+                            <span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://www.youtube.com/watch?v=abc123&quot;</span><span class="p">,</span>
+                            <span class="n">title</span><span class="o">=</span><span class="n">hn_title</span><span class="p">,</span>
+                            <span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                            <span class="n">base_folder</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">),</span>
+                            <span class="n">update_mode</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="p">)</span>
+
+        <span class="n">intermediate</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="n">sanitize_filename</span><span class="p">(</span><span class="n">hn_title</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">intermediate</span><span class="o">.</span><span class="n">exists</span><span class="p">(),</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;update_mode must create intermediate folder &#39;</span><span class="si">{</span><span class="n">intermediate</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;for backward compat with existing article structure&quot;</span>
+        <span class="p">)</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Run tests to verify they fail</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_no_double_nesting.py<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: 4 FAILED (<code>TestNoIntermediateFolder</code> tests fail because the intermediate folder IS being created), 1 PASSED (<code>TestUpdateModeBackwardCompat</code> passes because before the fix the intermediate folder exists in all modes).</p>
+<br>
+<hr>
+<br>
+<h3>Task 2: Fix <code>_process_with_specialized_source</code></h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>/Users/xmac/capcat/capcat/core/unified_article_processor.py:91-154</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Apply the fix</strong></li>
+</ul>
+<br>
+<p>In <code>/Users/xmac/capcat/capcat/core/unified_article_processor.py</code>, replace the <code>_process_with_specialized_source</code> method body. The fix:</p>
+<br>
+<ol>
+<li>Move intermediate folder creation <strong>inside</strong> the <code>update_mode</code> block only</li>
+<li>Pass <code>base_folder</code> (not intermediate folder) to <code>fetch_article_content</code> in non-update_mode</li>
+<li>Capture the returned folder from the specialized source</li>
+</ol>
+<br>
+<p>The current method (lines 91–154):</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_process_with_specialized_source</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">base_folder</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">update_mode</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Handle specialized sources (Twitter, YouTube, Medium, Substack).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            url: Article URL</span>
+<span class="sd">            title: Article title</span>
+<span class="sd">            base_folder: Output directory</span>
+<span class="sd">            update_mode: Whether to re-check URL and update timestamp</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Tuple of (success, article_title, article_folder_path)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">source_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">specialized_manager</span><span class="o">.</span><span class="n">get_source_for_url</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">source_result</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Specialized source detection failed for: </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+
+        <span class="n">source_instance</span><span class="p">,</span> <span class="n">source_id</span> <span class="o">=</span> <span class="n">source_result</span>
+
+        <span class="c1"># Create output directory for specialized content</span>
+        <span class="n">safe_title</span> <span class="o">=</span> <span class="n">sanitize_filename</span><span class="p">(</span><span class="n">title</span> <span class="ow">or</span> <span class="n">source_id</span><span class="p">)</span>
+        <span class="n">article_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_folder</span><span class="p">,</span> <span class="n">safe_title</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">article_folder</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Update mode: re-check URL validity and update timestamp</span>
+        <span class="k">if</span> <span class="n">update_mode</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_url_validity</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_add_url_warning</span><span class="p">(</span><span class="n">article_folder</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;URL invalid, preserved existing placeholder: </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+                <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">article_folder</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_update_timestamp</span><span class="p">(</span><span class="n">article_folder</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Updated timestamp for: </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Create article object for specialized handler</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.source_system.base_source</span><span class="w"> </span><span class="kn">import</span> <span class="n">Article</span>
+        <span class="n">article</span> <span class="o">=</span> <span class="n">Article</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="n">title</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">)</span>
+
+        <span class="c1"># Fetch content with specialized handler</span>
+        <span class="n">success</span><span class="p">,</span> <span class="n">article_title</span> <span class="o">=</span> <span class="n">source_instance</span><span class="o">.</span><span class="n">fetch_article_content</span><span class="p">(</span>
+            <span class="n">article</span><span class="p">,</span> <span class="n">article_folder</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="kc">None</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Specialized source &#39;</span><span class="si">{</span><span class="n">source_id</span><span class="si">}</span><span class="s2">&#39; created placeholder: &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">article_title</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">article_title</span><span class="p">,</span> <span class="n">article_folder</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Specialized source &#39;</span><span class="si">{</span><span class="n">source_id</span><span class="si">}</span><span class="s2">&#39; failed for: </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Replace with:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_process_with_specialized_source</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">base_folder</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">update_mode</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Handle specialized sources (Twitter, YouTube, Medium, Substack).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            url: Article URL</span>
+<span class="sd">            title: Article title</span>
+<span class="sd">            base_folder: Output directory</span>
+<span class="sd">            update_mode: Whether to re-check URL and update timestamp</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Tuple of (success, article_title, article_folder_path)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">source_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">specialized_manager</span><span class="o">.</span><span class="n">get_source_for_url</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">source_result</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Specialized source detection failed for: </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+
+        <span class="n">source_instance</span><span class="p">,</span> <span class="n">source_id</span> <span class="o">=</span> <span class="n">source_result</span>
+
+        <span class="n">article_folder</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># defined inside update_mode block; safe because only read when update_mode=True</span>
+
+        <span class="c1"># Update mode: operate on existing intermediate folder for backward compat</span>
+        <span class="k">if</span> <span class="n">update_mode</span><span class="p">:</span>
+            <span class="n">safe_title</span> <span class="o">=</span> <span class="n">sanitize_filename</span><span class="p">(</span><span class="n">title</span> <span class="ow">or</span> <span class="n">source_id</span><span class="p">)</span>
+            <span class="n">article_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_folder</span><span class="p">,</span> <span class="n">safe_title</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">article_folder</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_url_validity</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_add_url_warning</span><span class="p">(</span><span class="n">article_folder</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;URL invalid, preserved existing placeholder: </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+                <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">article_folder</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_update_timestamp</span><span class="p">(</span><span class="n">article_folder</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Updated timestamp for: </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Create article object for specialized handler</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.source_system.base_source</span><span class="w"> </span><span class="kn">import</span> <span class="n">Article</span>
+        <span class="n">article</span> <span class="o">=</span> <span class="n">Article</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="n">title</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">)</span>
+
+        <span class="c1"># Pass base_folder directly — specialized source creates its own subfolder</span>
+        <span class="n">output_dir</span> <span class="o">=</span> <span class="n">article_folder</span> <span class="k">if</span> <span class="n">update_mode</span> <span class="k">else</span> <span class="n">base_folder</span>
+        <span class="n">success</span><span class="p">,</span> <span class="n">content_folder</span> <span class="o">=</span> <span class="n">source_instance</span><span class="o">.</span><span class="n">fetch_article_content</span><span class="p">(</span>
+            <span class="n">article</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="kc">None</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Specialized source &#39;</span><span class="si">{</span><span class="n">source_id</span><span class="si">}</span><span class="s2">&#39; created placeholder: &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">content_folder</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">title</span> <span class="ow">or</span> <span class="n">source_id</span><span class="p">,</span> <span class="n">content_folder</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Specialized source &#39;</span><span class="si">{</span><span class="n">source_id</span><span class="si">}</span><span class="s2">&#39; failed for: </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Run the new tests</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_no_double_nesting.py<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: 5 PASSED.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 5: Run full test suite</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: 168 passed (163 + 5 new), 0 failed.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 6: Commit fix</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>fix/specialized-source-double-nesting
+git<span class="w"> </span>add<span class="w"> </span>tests/unit/test_no_double_nesting.py<span class="w"> </span>capcat/core/unified_article_processor.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;fix: remove intermediate folder creation in _process_with_specialized_source</span>
+
+<span class="s2">Specialized sources (YouTube, Medium, Substack) create their own subfolder</span>
+<span class="s2">inside output_dir. Previously an intermediate folder (using the HN post title)</span>
+<span class="s2">was also created, resulting in double-nesting: base/HN_title/Content_title/</span>
+<span class="s2">instead of the correct base/Content_title/.</span>
+
+<span class="s2">Fix: move intermediate folder creation inside the update_mode block only.</span>
+<span class="s2">In normal mode, pass base_folder directly so the specialized source&#39;s folder</span>
+<span class="s2">is the only one created.&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h2>Chunk 2: Version Bump and Release</h2>
+<br>
+<h3>Task 3: Bump version to 1.0.47</h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>/Users/xmac/capcat/capcat/__init__.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 7: Bump version</strong></li>
+</ul>
+<br>
+<p>In <code>/Users/xmac/capcat/capcat/__init__.py</code>, change:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;1.0.46&quot;</span>
+</pre></div>
+
+<br>
+<p>to:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;1.0.47&quot;</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 8: Commit version bump</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>capcat/__init__.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;bump: version to 1.0.47&quot;</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 9: Verify tests still pass</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-q
+</pre></div>
+
+<br>
+<p>Expected: 168 passed.</p>
+<br>
+<hr>
+<br>
+<h2>Context for Subagents</h2>
+<br>
+<h3>What the double-nesting bug looks like</h3>
+<br>
+<p>When a Hacker News article links to a YouTube video, the current flow is:</p>
+<br>
+<ol>
+<li><code>unified_source_processor</code> calls <code>UnifiedArticleProcessor.process_article(url=&quot;youtube.com/...&quot;, title=&quot;Some HN Title&quot;, base_folder=&quot;/output/HN_date/&quot;)</code></li>
+<li><code>process_article</code> calls <code>_process_with_specialized_source</code></li>
+<li><code>_process_with_specialized_source</code> creates <code>/output/HN_date/Some-HN-Title/</code> (intermediate)</li>
+<li>Passes that intermediate folder to <code>YouTubeSource.fetch_article_content</code></li>
+<li>YouTube creates <code>/output/HN_date/Some-HN-Title/Actual-YouTube-Video-Title/</code></li>
+</ol>
+<br>
+<p>Result: content is two levels deep. The intermediate folder is empty (or nearly empty).</p>
+<br>
+<h3>What the fix achieves</h3>
+<br>
+<p>After the fix:</p>
+<ol>
+<li><code>_process_with_specialized_source</code> does NOT create the intermediate folder (in normal mode)</li>
+<li>Passes <code>base_folder</code> directly to the specialized source</li>
+<li>YouTube creates <code>/output/HN_date/Actual-YouTube-Video-Title/</code> — correct</li>
+</ol>
+<br>
+<p>The intermediate folder only appears in <code>update_mode=True</code> for backward compatibility with existing articles.</p>
+<br>
+<h3>Why <code>update_mode</code> keeps the intermediate folder</h3>
+<br>
+<p>Update mode runs on articles that ALREADY EXIST on disk. Those articles were created with the old (buggy) structure. The intermediate folder IS there. <code>_check_url_validity</code> and <code>_update_timestamp</code> operate on that folder. Changing update_mode behavior would break existing article updates.</p>
+<br>
+<h3>All three specialized sources follow the same pattern</h3>
+<br>
+<code>youtube/source.py</code>, <code>medium/source.py</code>, and <code>substack/source.py</code> all:
+<ul>
+<li>Accept <code>output_dir</code> as the second argument</li>
+<li>Create a subfolder <code>os.path.join(output_dir, safe_title)</code> inside it</li>
+<li>Return <code>(True, subfolder_path)</code></li>
+</ul>
+<br>
+<p>The fix to <code>_process_with_specialized_source</code> fixes all three with one change.</p>
+<br>
+<h3>Test command</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected result: 168 passed (163 before + 5 new).</p>
+<br>
+<h3>Imports already present</h3>
+<br>
+<code>unified_article_processor.py</code> already imports <code>sanitize_filename</code> and <code>os</code>. No new imports required.
+<br>
+<h3>Do NOT touch</h3>
+<br>
+<ul>
+<li><code>youtube/source.py</code>, <code>medium/source.py</code>, <code>substack/source.py</code> — their internal folder creation is correct</li>
+<li><code>unified_source_processor.py</code> — the caller is unaffected</li>
+<li>Any HN/LB source files — unrelated to this fix</li>
+</ul>
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

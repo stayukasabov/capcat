@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Api / Capcat</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a></div>
+<h1>Api / Capcat</h1>
+<h2>Documents</h2>
+<ul>
+<li><a href="README.html">Readme</a></li>
+<li><a href="__init__.html">  Init  </a></li>
+<li><a href="__main__.html">  Main  </a></li>
+<li><a href="add_source.html">Add Source</a></li>
+<li><a href="add_source_command.html">Add Source Command</a></li>
+<li><a href="add_source_service.html">Add Source Service</a></li>
+<li><a href="article_fetcher.html">Article Fetcher</a></li>
+<li><a href="async_pdf_manager.html">Async Pdf Manager</a></li>
+<li><a href="base_generator.html">Base Generator</a></li>
+<li><a href="base_source.html">Base Source</a></li>
+<li><a href="bundle_manager.html">Bundle Manager</a></li>
+<li><a href="bundle_models.html">Bundle Models</a></li>
+<li><a href="bundle_service.html">Bundle Service</a></li>
+<li><a href="bundle_ui.html">Bundle Ui</a></li>
+<li><a href="bundle_validator.html">Bundle Validator</a></li>
+<li><a href="capcat.html">Capcat</a></li>
+<li><a href="circuit_breaker.html">Circuit Breaker</a></li>
+<li><a href="cli.html">Cli</a></li>
+<li><a href="cli_recovery.html">Cli Recovery</a></li>
+<li><a href="cli_validation.html">Cli Validation</a></li>
+<li><a href="command_logging.html">Command Logging</a></li>
+<li><a href="config.html">Config</a></li>
+<li><a href="config_driven_source.html">Config Driven Source</a></li>
+<li><a href="config_schema.html">Config Schema</a></li>
+<li><a href="constants.html">Constants</a></li>
+<li><a href="conversion_executor.html">Conversion Executor</a></li>
+<li><a href="design_system_compiler.html">Design System Compiler</a></li>
+<li><a href="discovery_strategies.html">Discovery Strategies</a></li>
+<li><a href="downloader.html">Downloader</a></li>
+<li><a href="enhanced_argparse.html">Enhanced Argparse</a></li>
+<li><a href="enhanced_remove_command.html">Enhanced Remove Command</a></li>
+<li><a href="error_handling.html">Error Handling</a></li>
+<li><a href="ethical_scraping.html">Ethical Scraping</a></li>
+<li><a href="exceptions.html">Exceptions</a></li>
+<li><a href="factory.html">Factory</a></li>
+<li><a href="feed_discovery.html">Feed Discovery</a></li>
+<li><a href="feed_parser.html">Feed Parser</a></li>
+<li><a href="fetch.html">Fetch</a></li>
+<li><a href="formatter.html">Formatter</a></li>
+<li><a href="generate_config.html">Generate Config</a></li>
+<li><a href="generate_source_config.html">Generate Source Config</a></li>
+<li><a href="generator.html">Generator</a></li>
+<li><a href="html_generator.html">Html Generator</a></li>
+<li><a href="html_post_processor.html">Html Post Processor</a></li>
+<li><a href="image_processor.html">Image Processor</a></li>
+<li><a href="init.html">Init</a></li>
+<li><a href="interactive.html">Interactive</a></li>
+<li><a href="logging_config.html">Logging Config</a></li>
+<li><a href="media_config.html">Media Config</a></li>
+<li><a href="media_executor.html">Media Executor</a></li>
+<li><a href="media_processor.html">Media Processor</a></li>
+<li><a href="network_resilience.html">Network Resilience</a></li>
+<li><a href="news_source_adapter.html">News Source Adapter</a></li>
+<li><a href="pdf_landing_resolver.html">Pdf Landing Resolver</a></li>
+<li><a href="performance_monitor.html">Performance Monitor</a></li>
+<li><a href="progress.html">Progress</a></li>
+<li><a href="questionary_ui.html">Questionary Ui</a></li>
+<li><a href="rate_limiter.html">Rate Limiter</a></li>
+<li><a href="removal_ui.html">Removal Ui</a></li>
+<li><a href="remove_source.html">Remove Source</a></li>
+<li><a href="remove_source_command.html">Remove Source Command</a></li>
+<li><a href="remove_source_service.html">Remove Source Service</a></li>
+<li><a href="retry.html">Retry</a></li>
+<li><a href="retry_skip.html">Retry Skip</a></li>
+<li><a href="rss_feed_introspector.html">Rss Feed Introspector</a></li>
+<li><a href="session_pool.html">Session Pool</a></li>
+<li><a href="shutdown.html">Shutdown</a></li>
+<li><a href="single.html">Single</a></li>
+<li><a href="source.html">Source</a></li>
+<li><a href="source_analytics.html">Source Analytics</a></li>
+<li><a href="source_backup_manager.html">Source Backup Manager</a></li>
+<li><a href="source_base.html">Source Base</a></li>
+<li><a href="source_config.html">Source Config</a></li>
+<li><a href="source_config_generator.html">Source Config Generator</a></li>
+<li><a href="source_config_mirror.html">Source Config Mirror</a></li>
+<li><a href="source_configs.html">Source Configs</a></li>
+<li><a href="source_factory.html">Source Factory</a></li>
+<li><a href="source_registry.html">Source Registry</a></li>
+<li><a href="specialized_source_manager.html">Specialized Source Manager</a></li>
+<li><a href="storage_manager.html">Storage Manager</a></li>
+<li><a href="streamlined_comment_processor.html">Streamlined Comment Processor</a></li>
+<li><a href="template_renderer.html">Template Renderer</a></li>
+<li><a href="theme_utils.html">Theme Utils</a></li>
+<li><a href="timeout_config.html">Timeout Config</a></li>
+<li><a href="timeout_wrapper.html">Timeout Wrapper</a></li>
+<li><a href="tui.html">Tui</a></li>
+<li><a href="tui_context.html">Tui Context</a></li>
+<li><a href="unified_article_processor.html">Unified Article Processor</a></li>
+<li><a href="unified_media_processor.html">Unified Media Processor</a></li>
+<li><a href="unified_source_processor.html">Unified Source Processor</a></li>
+<li><a href="update_manager.html">Update Manager</a></li>
+<li><a href="url_utils.html">Url Utils</a></li>
+<li><a href="utils.html">Utils</a></li>
+<li><a href="validation_engine.html">Validation Engine</a></li>
+</ul>
+
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>core.html_generator</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / <a href="../api/index.html">api</a> / core</div>
+<h1>core.html_generator</h1>
+<br>
+<strong>File:</strong> <code>Application/core/html_generator.py</code>
+<br>
+<h2>Description</h2>
+<br>
+<p>HTML Generator for Capcat - Static Site Generation</p>
+<p>Creates self-contained HTML files from markdown content with embedded CSS and JavaScript.</p>
+<p>Follows minimalist design principles with dark/light theme support using SVG icon toggle.</p>
+<br>
+<h2>Classes</h2>
+<br>
+<h3>HTMLGenerator</h3>
+<br>
+<p>Static HTML generator for Capcat archives.</p>
+<p>Creates self-contained HTML files with embedded CSS and JavaScript.</p>
+<br>
+<h4>Methods</h4>
+<br>
+<h5>__init__</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<h5>_setup_markdown_processor</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_setup_markdown_processor</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<p>Configure markdown processor with syntax highlighting and extensions.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<h5>_get_embedded_css</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_get_embedded_css</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+
+<br>
+<p>Read and embed CSS files into a single &lt;style&gt; tag with compiled design system.</p>
+<br>
+<p>Args:</p>
+<p>    app_dir: Path to Application directory</p>
+<br>
+<p>Returns:</p>
+<p>    HTML style tag with embedded CSS content including compiled design system</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>app_dir</code> (Path)</li>
+</ul>
+<br>
+<strong>Returns:</strong> str
+<br>
+<h5>_get_embedded_assets_for_template</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_get_embedded_assets_for_template</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span>
+</pre></div>
+
+<br>
+<p>Read and embed CSS and JavaScript assets for template rendering with design system.</p>
+<br>
+<p>Args:</p>
+<p>    app_dir: Path to Application directory</p>
+<br>
+<p>Returns:</p>
+<p>    Dictionary containing embedded_styles and embedded_script</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>app_dir</code> (Path)</li>
+</ul>
+<br>
+<strong>Returns:</strong> dict
+<br>
+<h5>_get_base_template</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_get_base_template</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">html_output_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">html_subfolder</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Template</span>
+</pre></div>
+
+<br>
+<p>Get the base HTML template with embedded CSS and JavaScript.</p>
+<p>Returns a Template object that uses $variable syntax to avoid brace conflicts.</p>
+<br>
+<p>Args:</p>
+<p>    html_output_path: Path where the HTML file will be saved</p>
+<p>    html_subfolder: True if HTML is in html/ subfolder</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>html_output_path</code> (str) <em>optional</em></li>
+<li><code>html_subfolder</code> (bool) <em>optional</em></li>
+</ul>
+<br>
+<strong>Returns:</strong> Template
+<br>
+<h5>generate_article_html</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">generate_article_html</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">markdown_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">article_title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">breadcrumb_path</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">html_subfolder</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">html_output_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+
+<br>
+<p>Generate HTML for an article from its markdown file.</p>
+<br>
+<p>Args:</p>
+<p>    markdown_path: Path to the markdown file</p>
+<p>    article_title: Title of the article</p>
+<p>    breadcrumb_path: List of breadcrumb elements</p>
+<p>    html_subfolder: True if HTML is in html/ subfolder (affects relative paths)</p>
+<p>    html_output_path: Path where the HTML file will be saved (for dynamic CSS path calculation)</p>
+<br>
+<p>Returns:</p>
+<p>    Generated HTML content</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>markdown_path</code> (str)</li>
+<li><code>article_title</code> (str)</li>
+<li><code>breadcrumb_path</code> (List[str])</li>
+<li><code>html_subfolder</code> (bool) <em>optional</em></li>
+<li><code>html_output_path</code> (str) <em>optional</em></li>
+</ul>
+<br>
+<strong>Returns:</strong> str
+<br>
+<h5>generate_article_html_from_template</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">generate_article_html_from_template</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">markdown_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">article_title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">breadcrumb_path</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">source_config</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">html_subfolder</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">html_output_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">index_filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;news.html&#39;</span><span class="p">,</span> <span class="n">is_single_article</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+
+<br>
+<p>Generate HTML for an article using the template system.</p>
+<p>This is the new, reliable template-based approach.</p>
+<br>
+<p>Args:</p>
+<p>    markdown_path: Path to the markdown file</p>
+<p>    article_title: Title of the article</p>
+<p>    breadcrumb_path: List of breadcrumb elements</p>
+<p>    source_config: Source configuration containing template metadata</p>
+<p>    html_subfolder: True if HTML is in html/ subfolder</p>
+<br>
+<p>Returns:</p>
+<p>    Generated HTML content</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>markdown_path</code> (str)</li>
+<li><code>article_title</code> (str)</li>
+<li><code>breadcrumb_path</code> (List[str])</li>
+<li><code>source_config</code> (Dict[str, Any])</li>
+<li><code>html_subfolder</code> (bool) <em>optional</em></li>
+<li><code>html_output_path</code> (str) <em>optional</em></li>
+<li><code>index_filename</code> (str) <em>optional</em></li>
+<li><code>is_single_article</code> (bool) <em>optional</em></li>
+</ul>
+<br>
+<strong>Returns:</strong> str
+<br>
+<h5>_get_display_name_without_date</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_get_display_name_without_date</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+
+<br>
+<p>Removes a date pattern (DD-MM-YYYY) from the end of a string.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>name</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> str
+<br>
+<h5>_get_article_title_from_markdown</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_get_article_title_from_markdown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">article_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+
+<br>
+<p>Extract article title from markdown file&#x27;s H1 heading.</p>
+<p>Falls back to folder name if extraction fails.</p>
+<br>
+<p>Args:</p>
+<p>    article_dir: Path to article directory</p>
+<br>
+<p>Returns:</p>
+<p>    Article title string</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>article_dir</code> (Path)</li>
+</ul>
+<br>
+<strong>Returns:</strong> str
+<br>
+<p>⚠️ <strong>High complexity:</strong> 11</p>
+<br>
+<h5>generate_directory_index</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">generate_directory_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">breadcrumb_path</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+
+<br>
+<p>Generate HTML index for a directory listing using template system.</p>
+<br>
+<p>Args:</p>
+<p>    directory_path: Path to the directory</p>
+<p>    title: Page title</p>
+<p>    breadcrumb_path: List of breadcrumb elements</p>
+<br>
+<p>Returns:</p>
+<p>    Generated HTML content</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>directory_path</code> (str)</li>
+<li><code>title</code> (str)</li>
+<li><code>breadcrumb_path</code> (List[str])</li>
+</ul>
+<br>
+<strong>Returns:</strong> str
+<br>
+<h5>_get_index_filename</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_get_index_filename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">levels_up</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">total_levels</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+
+<br>
+<p>Determine whether to use index.html (root) or news.html (directory).</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>levels_up</code> (int)</li>
+<li><code>total_levels</code> (int)</li>
+</ul>
+<br>
+<strong>Returns:</strong> str
+<br>
+<h5>_generate_breadcrumb</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_generate_breadcrumb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">breadcrumb_path</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">html_subfolder</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">current_file_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+
+<br>
+<p>Generate breadcrumb navigation HTML with proper directory-aware links.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>breadcrumb_path</code> (List[str])</li>
+<li><code>html_subfolder</code> (bool) <em>optional</em></li>
+<li><code>current_file_path</code> (str) <em>optional</em></li>
+</ul>
+<br>
+<strong>Returns:</strong> str
+<br>
+<p>⚠️ <strong>High complexity:</strong> 22</p>
+<br>
+<h5>_generate_directory_listing</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_generate_directory_listing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">is_root_level</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+
+<br>
+<p>Generate HTML listing for directory contents with intelligent content detection.</p>
+<p>Auto-discovers categories from source configurations.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>directory_path</code> (str)</li>
+<li><code>is_root_level</code> (bool) <em>optional</em></li>
+</ul>
+<br>
+<strong>Returns:</strong> str
+<br>
+<p>⚠️ <strong>High complexity:</strong> 48</p>
+<br>
+<h5>_generate_index_navigation</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_generate_index_navigation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">html_subfolder</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+
+<br>
+<p>Generate index navigation HTML.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>current_path</code> (str)</li>
+<li><code>show</code> (bool) <em>optional</em></li>
+<li><code>html_subfolder</code> (bool) <em>optional</em></li>
+</ul>
+<br>
+<strong>Returns:</strong> str
+<br>
+<p>⚠️ <strong>High complexity:</strong> 22</p>
+<br>
+<h5>_generate_global_index_navigation</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_generate_global_index_navigation</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+
+<br>
+<p>Generate global index navigation HTML.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<strong>Returns:</strong> str
+<br>
+<h5>_generate_comments_navigation</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_generate_comments_navigation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current_article_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">html_subfolder</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+
+<br>
+<p>Generate comments navigation HTML if comments exist.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>current_article_path</code> (str)</li>
+<li><code>html_subfolder</code> (bool) <em>optional</em></li>
+</ul>
+<br>
+<strong>Returns:</strong> str
+<br>
+<h5>_create_navigation_container</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_create_navigation_container</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index_nav</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">comments_nav</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+
+<br>
+<p>Create a navigation container with both index and comments navigation.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>index_nav</code> (str)</li>
+<li><code>comments_nav</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> str
+<br>
+<h5>_generate_article_navigation</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_generate_article_navigation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">markdown_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">html_subfolder</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span>
+</pre></div>
+
+<br>
+<p>Generate navigation content for articles, including Back to News button.</p>
+<br>
+<p>Args:</p>
+<p>    markdown_path: Path to the markdown file</p>
+<p>    html_subfolder: True if HTML is in html/ subfolder</p>
+<br>
+<p>Returns:</p>
+<p>    Dictionary with &#x27;top&#x27; and &#x27;bottom&#x27; navigation HTML</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>markdown_path</code> (str)</li>
+<li><code>html_subfolder</code> (bool) <em>optional</em></li>
+</ul>
+<br>
+<strong>Returns:</strong> Dict[str, str]
+<br>
+<h5>_clean_markdown_content</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_clean_markdown_content</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+
+<br>
+<p>Clean up problematic content in markdown that could interfere with templates.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>content</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> str
+<br>
+<h5>_remove_grey_placeholder_images</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_remove_grey_placeholder_images</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">html_content</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+
+<br>
+<p>Remove grey-placeholder images from HTML content.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>html_content</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> str
+<br>
+<h5>_remove_headerlink_anchors</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_remove_headerlink_anchors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">html_content</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+
+<br>
+<p>Remove headerlink anchor tags from HTML content.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>html_content</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> str
+<br>
+<h5>_remove_image_anchor_wrappers</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_remove_image_anchor_wrappers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">html_content</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+
+<br>
+<p>Remove anchor tags that wrap image tags.</p>
+<br>
+<p>Substack and other sources download images locally but markdown-to-HTML</p>
+<p>conversion wraps them in &lt;a href&gt; linking to original URL. This removes</p>
+<p>those anchor wrappers while preserving the image tags and their attributes.</p>
+<br>
+<p>Args:</p>
+<p>    html_content: HTML content to process</p>
+<br>
+<p>Returns:</p>
+<p>    HTML with image anchor wrappers removed</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>html_content</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> str
+<br>
+<h5>_remove_duplicate_h1_title</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_remove_duplicate_h1_title</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">html_content</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">article_title</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+
+<br>
+<p>Remove duplicate H1 title from article content if it matches header title.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>html_content</code> (str)</li>
+<li><code>article_title</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> str
+<br>
+<h5>_wrap_source_url_in_div</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_wrap_source_url_in_div</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">html_content</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+
+<br>
+<p>Transform source/comments URL paragraphs into semantic div elements for better styling.</p>
+<br>
+<p>This function converts markdown-generated paragraph tags containing source URLs</p>
+<p>and comments URLs into div elements with CSS class &#x27;source-url&#x27; for consistent</p>
+<p>styling across the application.</p>
+<br>
+<p>Args:</p>
+<p>    html_content: HTML string from markdown conversion</p>
+<br>
+<p>Returns:</p>
+<p>    HTML string with URL paragraphs converted to divs</p>
+<br>
+<p>Regex Pattern Explanation:</p>
+<ul>
+<li>(&lt;p[^&gt;]<em>&gt;): Captures opening &lt;p&gt; tag with any attributes</li>
+<li>\s</em>: Matches optional whitespace</li>
+<li>(&lt;strong&gt;(?:Source URL|Comments URL):&lt;/strong&gt;\s<em>&lt;a\s+href=&quot;[^&quot;]</em>&quot;[^&gt;]<em>&gt;[^&lt;]</em>&lt;/a&gt;):</li>
+</ul>
+<p>      Captures the strong tag + link structure for both source and comments URLs</p>
+<ul>
+<li>\s*: Matches optional whitespace</li>
+<li>(&lt;/p&gt;): Captures closing &lt;/p&gt; tag</li>
+</ul>
+<br>
+<p>Transform: &lt;p&gt;&lt;strong&gt;Source URL:&lt;/strong&gt; &lt;a href=&quot;...&quot;&gt;...&lt;/a&gt;&lt;/p&gt;</p>
+<p>        → &lt;div class=&quot;source-url&quot;&gt;&lt;strong&gt;Source URL:&lt;/strong&gt; &lt;a href=&quot;...&quot;&gt;...&lt;/a&gt;&lt;/div&gt;</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>html_content</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> str
+<br>
+<h5>_adjust_paths_for_subfolder</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_adjust_paths_for_subfolder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">html_content</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+
+<br>
+<p>Adjust relative paths in HTML content when HTML files are in html/ subfolder.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>html_content</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> str
+<br>
+<h5>_is_main_news_index</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_is_main_news_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Check if current directory is the main news index (news_DD-MM-YYYY or News_DD-MM-YYYY level).</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>directory_path</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h5>_is_news_source_directory</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_is_news_source_directory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Check if directory is a news source directory (e.g., Hacker-News_DD-MM-YYYY, BBC-News_DD-MM-YYYY).</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>directory_name</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h5>_clean_title_for_display</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_clean_title_for_display</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+
+<br>
+<p>Clean title for display by removing date stamps and replacing underscores.</p>
+<p>Converts folder names like &quot;IEEE_Spectrum_25-09-2025&quot; to &quot;IEEE Spectrum&quot;.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>title</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> str
+<br>
+<h5>_count_comments</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_count_comments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">comments_file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span>
+</pre></div>
+
+<br>
+<p>Count the number of comments in a comments.md file.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>comments_file_path</code> (Path)</li>
+</ul>
+<br>
+<strong>Returns:</strong> int
+<br>
+<h5>_format_date_for_h1_header</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_format_date_for_h1_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+
+<br>
+<p>Format dates in titles specifically for h1 headers only.</p>
+<p>Converts &quot;InfoQ 11-09-2025&quot; to &quot;InfoQ 11 September 2025&quot;</p>
+<p>Only affects the date portion, leaves source names unchanged.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>title</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> str
+<br>
+<h5>_generate_error_page</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_generate_error_page</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error_message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+
+<br>
+<p>Generate error page HTML.</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>error_message</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> str
+<br>
+<h2>Functions</h2>
+<br>
+<h3>extract_source_id</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">extract_source_id</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<p>Extract source ID from folder name.</p>
+<p>Folder names use display_name (e.g., &#x27;Hacker_News_19-10-2025&#x27;)</p>
+<p>Need to map back to source_id (e.g., &#x27;hn&#x27;)</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>name</code></li>
+</ul>
+<br>
+<h3>find_category</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">find_category</span><span class="p">(</span><span class="n">source_id</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>source_id</code></li>
+</ul>
+<br>
+<h3>sort_items</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">sort_items</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>item</code></li>
+</ul>
+<br>
+<h3>extract_content</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">extract_content</span><span class="p">(</span><span class="n">html_content</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">div_class</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>html_content</code> (str)</li>
+<li><code>div_class</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> str
+<br>
+<h3>replace_source_url</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">replace_source_url</span><span class="p">(</span><span class="n">match</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>match</code></li>
+</ul>
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

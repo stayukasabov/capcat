@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceptance Test Bug Fixes Implementation Plan</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / <a href="../superpowers/index.html">superpowers</a> / plans</div>
+<h1>Acceptance Test Bug Fixes Implementation Plan</h1>
+<br>
+<p>&gt; <strong>For agentic workers:</strong> REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (<code>- [ ]</code>) syntax for tracking. Execute inline — do NOT dispatch subagents.</p>
+<br>
+<strong>Goal:</strong> Fix two bugs found during live acceptance testing of v1.9.6: (1) <code>article_count</code> in the <code>capcat.yml</code> sources list is silently ignored, and (2) &quot;Capcat Info: Connecting to X...&quot; is printed in quiet mode because it uses <code>print()</code> instead of the logger.
+<br>
+<strong>Architecture:</strong> B1 requires adding a <code>source_overrides</code> dict to <code>FetchNewsConfig</code>, parsing the <code>capcat.yml</code> sources list into it, and adding a new resolution tier in <code>_resolve_count</code>. B3 is a one-line fix: replace the raw <code>print()</code> in <code>base_source.py</code> with <code>self.logger.info()</code>.
+<br>
+<strong>Tech Stack:</strong> Python 3, dataclasses, PyYAML, pytest
+<br>
+<hr>
+<br>
+<h2>File Map</h2>
+<br>
+<p>| File | Change |</p>
+<p>|------|--------|</p>
+<p>| <code>capcat/core/config.py</code> | Add <code>source_overrides</code> field to <code>FetchNewsConfig</code>; parse capcat.yml sources list in <code>_merge_config_data</code> |</p>
+<p>| <code>capcat/core/unified_source_processor.py</code> | Pass vault <code>article_count</code> to <code>_resolve_count</code>; update <code>_resolve_count</code> signature |</p>
+<p>| <code>capcat/core/source_system/base_source.py</code> | Replace <code>print()</code> with <code>self.logger.info()</code> for &quot;Connecting to&quot; message |</p>
+<p>| <code>tests/unit/test_capcat_yml_source_overrides.py</code> | New — regression tests for B1 |</p>
+<p>| <code>tests/unit/test_quiet_mode_no_print.py</code> | New — regression test for B3 |</p>
+<br>
+<hr>
+<br>
+<h2>Task 0: Create branch</h2>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Create branch</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>fix/acceptance-test-bugs
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h2>Task 1: Regression test for B3 — quiet mode print</h2>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Create: <code>tests/unit/test_quiet_mode_no_print.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Write the failing test</strong></li>
+</ul>
+<br>
+<p>Create <code>tests/unit/test_quiet_mode_no_print.py</code>:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Regression test for B3: &quot;Capcat Info: Connecting to X...&quot; must not be printed</span>
+<span class="sd">in quiet mode. The message uses print() which bypasses the logging system.</span>
+<span class="sd">After the fix, it must use self.logger.info() so -q suppresses it.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">unittest.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">MagicMock</span><span class="p">,</span> <span class="n">patch</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestConnectingMessageRespectsQuietMode</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;&#39;Connecting to X...&#39; must not print in quiet mode.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_connecting_message_uses_logger_not_print</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">capsys</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        discover_articles_with_retry_skip must NOT call print() for the</span>
+<span class="sd">        &#39;Connecting to X&#39; status message. It must use self.logger.info().</span>
+
+<span class="sd">        Current broken behaviour: print(f&quot;Capcat Info: Connecting to {name}...&quot;)</span>
+<span class="sd">        fires unconditionally — bypasses the logging system, appears in -q mode.</span>
+
+<span class="sd">        Fixed behaviour: self.logger.info(f&quot;Connecting to {name}...&quot;) — suppressed</span>
+<span class="sd">        when console handler is at WARNING level (quiet mode).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.source_system.base_source</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseSource</span><span class="p">,</span> <span class="n">SourceConfig</span>
+
+        <span class="n">config</span> <span class="o">=</span> <span class="n">SourceConfig</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
+            <span class="n">display_name</span><span class="o">=</span><span class="s2">&quot;Test Source&quot;</span><span class="p">,</span>
+            <span class="n">base_url</span><span class="o">=</span><span class="s2">&quot;https://example.com&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">class</span><span class="w"> </span><span class="nc">FakeSource</span><span class="p">(</span><span class="n">BaseSource</span><span class="p">):</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">discover_articles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+                <span class="k">return</span> <span class="p">[]</span>
+
+            <span class="k">def</span><span class="w"> </span><span class="nf">fetch_article</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">article</span><span class="p">):</span>
+                <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="n">source</span> <span class="o">=</span> <span class="n">FakeSource</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+
+        <span class="c1"># discover_articles returns empty list — triggers the retry logic (max_retries=2)</span>
+        <span class="n">source</span><span class="o">.</span><span class="n">discover_articles_with_retry_skip</span><span class="p">(</span><span class="n">count</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_retries</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">captured</span> <span class="o">=</span> <span class="n">capsys</span><span class="o">.</span><span class="n">readouterr</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="s2">&quot;Connecting to&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">captured</span><span class="o">.</span><span class="n">out</span><span class="p">,</span> <span class="p">(</span>
+            <span class="s2">&quot;&#39;Connecting to&#39; message must not go to stdout via print(). &quot;</span>
+            <span class="s2">&quot;Use self.logger.info() so it respects quiet mode.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_connecting_message_is_logged_at_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">capsys</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The &#39;Connecting to X&#39; message must be emitted at INFO level through</span>
+<span class="sd">        the logger so it appears in normal mode but not in quiet mode.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.source_system.base_source</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseSource</span><span class="p">,</span> <span class="n">SourceConfig</span>
+
+        <span class="n">config</span> <span class="o">=</span> <span class="n">SourceConfig</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
+            <span class="n">display_name</span><span class="o">=</span><span class="s2">&quot;Test Source&quot;</span><span class="p">,</span>
+            <span class="n">base_url</span><span class="o">=</span><span class="s2">&quot;https://example.com&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">class</span><span class="w"> </span><span class="nc">FakeSource</span><span class="p">(</span><span class="n">BaseSource</span><span class="p">):</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">discover_articles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+                <span class="k">return</span> <span class="p">[]</span>
+
+            <span class="k">def</span><span class="w"> </span><span class="nf">fetch_article</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">article</span><span class="p">):</span>
+                <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="n">source</span> <span class="o">=</span> <span class="n">FakeSource</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+
+        <span class="n">log_records</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">handlers</span><span class="o">.</span><span class="n">MemoryHandler</span><span class="p">(</span><span class="n">capacity</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">flushLevel</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+
+        <span class="k">class</span><span class="w"> </span><span class="nc">CapturingHandler</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">Handler</span><span class="p">):</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
+                <span class="n">log_records</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
+
+        <span class="n">capturing</span> <span class="o">=</span> <span class="n">CapturingHandler</span><span class="p">()</span>
+        <span class="n">capturing</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+        <span class="n">source</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">capturing</span><span class="p">)</span>
+        <span class="n">source</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+
+        <span class="n">source</span><span class="o">.</span><span class="n">discover_articles_with_retry_skip</span><span class="p">(</span><span class="n">count</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_retries</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">source</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">removeHandler</span><span class="p">(</span><span class="n">capturing</span><span class="p">)</span>
+
+        <span class="n">info_msgs</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span><span class="o">.</span><span class="n">getMessage</span><span class="p">()</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">log_records</span> <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">levelno</span> <span class="o">==</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="nb">any</span><span class="p">(</span><span class="s2">&quot;Connecting to&quot;</span> <span class="ow">in</span> <span class="n">m</span> <span class="ow">or</span> <span class="s2">&quot;Test Source&quot;</span> <span class="ow">in</span> <span class="n">m</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">info_msgs</span><span class="p">),</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Expected an INFO log containing &#39;Connecting to&#39; or &#39;Test Source&#39;. &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Got INFO messages: </span><span class="si">{</span><span class="n">info_msgs</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Add missing import</strong></li>
+</ul>
+<br>
+<p>The test uses <code>logging.handlers.MemoryHandler</code>. Add at the top of the test file:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging.handlers</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">unittest.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">MagicMock</span><span class="p">,</span> <span class="n">patch</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Run test to verify it fails</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_quiet_mode_no_print.py<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: <code>test_connecting_message_uses_logger_not_print</code> FAILS — &quot;Connecting to&quot; appears in stdout.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Commit the failing test</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>tests/unit/test_quiet_mode_no_print.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;test: add regression test for B3 — Connecting message bypasses logging in quiet mode&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h2>Task 2: Fix B3 — replace print() with logger.info()</h2>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>capcat/core/source_system/base_source.py:366</code></li>
+</ul>
+<br>
+<p>Context: <code>discover_articles_with_retry_skip</code> calls</p>
+<code>print(f&quot;Capcat Info: Connecting to {self.config.display_name}...&quot;, flush=True)</code>
+<p>at line 366 before the retry loop. Replace with <code>self.logger.info</code>.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Read <code>capcat/core/source_system/base_source.py</code></strong> around line 360–375 to confirm exact text.</li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Apply the fix</strong></li>
+</ul>
+<br>
+<p>Replace:</p>
+<div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">max_retries</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Capcat Info: Connecting to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">display_name</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<p>With:</p>
+<div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">max_retries</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Connecting to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">display_name</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Run the regression test</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_quiet_mode_no_print.py<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: both tests PASS.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Run full unit suite</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-q
+</pre></div>
+
+<br>
+<p>Expected: all pass.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 5: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>capcat/core/source_system/base_source.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;fix: replace print() with logger.info() for &#39;Connecting to&#39; message — respects quiet mode (B3)&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h2>Task 3: Regression tests for B1 — article_count from capcat.yml ignored</h2>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Create: <code>tests/unit/test_capcat_yml_source_overrides.py</code></li>
+</ul>
+<br>
+<p>Context:</p>
+<ul>
+<li><code>FetchNewsConfig</code> is in <code>capcat/core/config.py</code> — it&#x27;s a <code>@dataclass</code> with <code>network</code>, <code>processing</code>, <code>logging</code>, <code>ui</code>, <code>pdf</code> sub-configs. No <code>source_overrides</code> field yet.</li>
+<li><code>ConfigManager._merge_config_data</code> in <code>capcat/core/config.py</code> iterates sections and sets attributes. It currently warns &quot;Unknown config section: sources&quot; and drops it.</li>
+<li><code>_resolve_count(cli_count, source_config, config)</code> in <code>capcat/core/unified_source_processor.py</code> — chain is CLI &gt; source config.yaml &gt; global config. No vault-level tier.</li>
+<li>These tests must FAIL before the fix.</li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Create the test file</strong></li>
+</ul>
+<br>
+<p>Create <code>tests/unit/test_capcat_yml_source_overrides.py</code>:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Regression tests for B1: article_count in capcat.yml sources list is silently</span>
+<span class="sd">ignored.</span>
+
+<span class="sd">Current broken behaviour: ConfigManager._merge_config_data drops the &#39;sources&#39;</span>
+<span class="sd">key with a warning. _resolve_count has no vault-level tier. Setting</span>
+<span class="sd">article_count: 5 for hn in capcat.yml has no effect — the builtin source</span>
+<span class="sd">config.yaml value (30) is always used.</span>
+
+<span class="sd">Fixed behaviour: capcat.yml sources list is parsed into</span>
+<span class="sd">FetchNewsConfig.source_overrides = {&quot;hn&quot;: {&quot;article_count&quot;: 5}}.</span>
+<span class="sd">_resolve_count checks this dict as a new tier between the CLI flag and the</span>
+<span class="sd">source&#39;s own config.yaml value.</span>
+
+<span class="sd">Resolution chain after fix:</span>
+<span class="sd">  CLI --count &gt; capcat.yml sources list &gt; source config.yaml &gt; Global-settings.yaml default</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">FetchNewsConfig</span><span class="p">,</span> <span class="n">ConfigManager</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestFetchNewsConfigSourceOverrides</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;FetchNewsConfig must store per-source overrides from capcat.yml.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_source_overrides_field_exists</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;FetchNewsConfig must have a source_overrides dict field.&quot;&quot;&quot;</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">FetchNewsConfig</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="s2">&quot;source_overrides&quot;</span><span class="p">),</span> <span class="p">(</span>
+            <span class="s2">&quot;FetchNewsConfig must have a source_overrides attribute&quot;</span>
+        <span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">source_overrides</span><span class="p">,</span> <span class="nb">dict</span><span class="p">),</span> <span class="p">(</span>
+            <span class="s2">&quot;source_overrides must be a dict&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_source_overrides_empty_by_default</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;source_overrides must be an empty dict on fresh FetchNewsConfig.&quot;&quot;&quot;</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">FetchNewsConfig</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">config</span><span class="o">.</span><span class="n">source_overrides</span> <span class="o">==</span> <span class="p">{},</span> <span class="p">(</span>
+            <span class="s2">&quot;source_overrides must be empty dict by default&quot;</span>
+        <span class="p">)</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestConfigManagerParsesSourcesList</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;ConfigManager must parse capcat.yml sources list into source_overrides.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_sources_list_article_count_stored_in_overrides</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        When capcat.yml contains:</span>
+<span class="sd">          sources:</span>
+<span class="sd">            - name: hn</span>
+<span class="sd">              article_count: 5</span>
+<span class="sd">        ConfigManager must store {&quot;hn&quot;: {&quot;article_count&quot;: 5}} in source_overrides.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">capcat_yml</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;capcat.yml&quot;</span>
+        <span class="n">capcat_yml</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span>
+            <span class="s2">&quot;sources:</span><span class="se">\n</span><span class="s2">  - name: hn</span><span class="se">\n</span><span class="s2">    article_count: 5</span><span class="se">\n</span><span class="s2">bundles: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+        <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+        <span class="n">old_cwd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">manager</span> <span class="o">=</span> <span class="n">ConfigManager</span><span class="p">()</span>
+            <span class="n">config</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">load_config</span><span class="p">()</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">old_cwd</span><span class="p">)</span>
+
+        <span class="k">assert</span> <span class="s2">&quot;hn&quot;</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">source_overrides</span><span class="p">,</span> <span class="p">(</span>
+            <span class="s2">&quot;source_overrides must contain &#39;hn&#39; key after loading capcat.yml&quot;</span>
+        <span class="p">)</span>
+        <span class="k">assert</span> <span class="n">config</span><span class="o">.</span><span class="n">source_overrides</span><span class="p">[</span><span class="s2">&quot;hn&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;article_count&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">5</span><span class="p">,</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Expected article_count=5 for hn, got: </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">source_overrides</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;hn&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_multiple_sources_all_stored</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        All sources with overrides in capcat.yml must appear in source_overrides.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">capcat_yml</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;capcat.yml&quot;</span>
+        <span class="n">capcat_yml</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span>
+            <span class="s2">&quot;sources:</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="s2">&quot;  - name: hn</span><span class="se">\n</span><span class="s2">    article_count: 3</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="s2">&quot;  - name: lb</span><span class="se">\n</span><span class="s2">    article_count: 7</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="s2">&quot;bundles: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+        <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+        <span class="n">old_cwd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">manager</span> <span class="o">=</span> <span class="n">ConfigManager</span><span class="p">()</span>
+            <span class="n">config</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">load_config</span><span class="p">()</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">old_cwd</span><span class="p">)</span>
+
+        <span class="k">assert</span> <span class="n">config</span><span class="o">.</span><span class="n">source_overrides</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hn&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;article_count&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span>
+        <span class="k">assert</span> <span class="n">config</span><span class="o">.</span><span class="n">source_overrides</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;lb&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;article_count&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">7</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_source_without_article_count_not_in_overrides</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A source entry with no article_count must not create a spurious entry.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">capcat_yml</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;capcat.yml&quot;</span>
+        <span class="n">capcat_yml</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span>
+            <span class="s2">&quot;sources:</span><span class="se">\n</span><span class="s2">  - name: hn</span><span class="se">\n</span><span class="s2">bundles: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+        <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+        <span class="n">old_cwd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">manager</span> <span class="o">=</span> <span class="n">ConfigManager</span><span class="p">()</span>
+            <span class="n">config</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">load_config</span><span class="p">()</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">old_cwd</span><span class="p">)</span>
+
+        <span class="c1"># Either not present or present with no article_count key</span>
+        <span class="n">override</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">source_overrides</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hn&quot;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="k">assert</span> <span class="s2">&quot;article_count&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">override</span><span class="p">,</span> <span class="p">(</span>
+            <span class="s2">&quot;article_count must not appear in overrides when not set in capcat.yml&quot;</span>
+        <span class="p">)</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestResolvCountVaultTier</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;_resolve_count must use vault capcat.yml article_count as new tier.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_vault_count_overrides_source_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        When vault source_overrides has article_count for a source,</span>
+<span class="sd">        _resolve_count must return it instead of the source config.yaml value.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.unified_source_processor</span><span class="w"> </span><span class="kn">import</span> <span class="n">_resolve_count</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.source_system.base_source</span><span class="w"> </span><span class="kn">import</span> <span class="n">SourceConfig</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">FetchNewsConfig</span>
+
+        <span class="n">source_config</span> <span class="o">=</span> <span class="n">SourceConfig</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;hn&quot;</span><span class="p">,</span>
+            <span class="n">display_name</span><span class="o">=</span><span class="s2">&quot;Hacker News&quot;</span><span class="p">,</span>
+            <span class="n">base_url</span><span class="o">=</span><span class="s2">&quot;https://news.ycombinator.com&quot;</span><span class="p">,</span>
+            <span class="n">article_count</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>  <span class="c1"># builtin default</span>
+        <span class="p">)</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">FetchNewsConfig</span><span class="p">()</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">source_overrides</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;hn&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;article_count&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">}}</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="n">_resolve_count</span><span class="p">(</span>
+            <span class="n">cli_count</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">source_config</span><span class="o">=</span><span class="n">source_config</span><span class="p">,</span>
+            <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">assert</span> <span class="n">result</span> <span class="o">==</span> <span class="mi">5</span><span class="p">,</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Expected vault override of 5, got </span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="s2">. &quot;</span>
+            <span class="s2">&quot;capcat.yml source article_count must override source config.yaml value.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_cli_count_overrides_vault_count</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;CLI --count must still win over vault capcat.yml override.&quot;&quot;&quot;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.unified_source_processor</span><span class="w"> </span><span class="kn">import</span> <span class="n">_resolve_count</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.source_system.base_source</span><span class="w"> </span><span class="kn">import</span> <span class="n">SourceConfig</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">FetchNewsConfig</span>
+
+        <span class="n">source_config</span> <span class="o">=</span> <span class="n">SourceConfig</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;hn&quot;</span><span class="p">,</span>
+            <span class="n">display_name</span><span class="o">=</span><span class="s2">&quot;Hacker News&quot;</span><span class="p">,</span>
+            <span class="n">base_url</span><span class="o">=</span><span class="s2">&quot;https://news.ycombinator.com&quot;</span><span class="p">,</span>
+            <span class="n">article_count</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">FetchNewsConfig</span><span class="p">()</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">source_overrides</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;hn&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;article_count&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">}}</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="n">_resolve_count</span><span class="p">(</span>
+            <span class="n">cli_count</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+            <span class="n">source_config</span><span class="o">=</span><span class="n">source_config</span><span class="p">,</span>
+            <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">assert</span> <span class="n">result</span> <span class="o">==</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;CLI --count=2 must override vault override of 5, got </span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_source_config_used_when_no_vault_override</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;When no vault override exists, source config.yaml value is used.&quot;&quot;&quot;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.unified_source_processor</span><span class="w"> </span><span class="kn">import</span> <span class="n">_resolve_count</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.source_system.base_source</span><span class="w"> </span><span class="kn">import</span> <span class="n">SourceConfig</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">FetchNewsConfig</span>
+
+        <span class="n">source_config</span> <span class="o">=</span> <span class="n">SourceConfig</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;hn&quot;</span><span class="p">,</span>
+            <span class="n">display_name</span><span class="o">=</span><span class="s2">&quot;Hacker News&quot;</span><span class="p">,</span>
+            <span class="n">base_url</span><span class="o">=</span><span class="s2">&quot;https://news.ycombinator.com&quot;</span><span class="p">,</span>
+            <span class="n">article_count</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">FetchNewsConfig</span><span class="p">()</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">source_overrides</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># no vault override</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="n">_resolve_count</span><span class="p">(</span>
+            <span class="n">cli_count</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">source_config</span><span class="o">=</span><span class="n">source_config</span><span class="p">,</span>
+            <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">assert</span> <span class="n">result</span> <span class="o">==</span> <span class="mi">30</span><span class="p">,</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Source config.yaml value (30) must be used when no vault override, got </span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_global_default_used_when_source_count_is_none</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Global config fallback must be used when source config has no article_count.&quot;&quot;&quot;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.unified_source_processor</span><span class="w"> </span><span class="kn">import</span> <span class="n">_resolve_count</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.source_system.base_source</span><span class="w"> </span><span class="kn">import</span> <span class="n">SourceConfig</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">FetchNewsConfig</span><span class="p">,</span> <span class="n">ProcessingConfig</span>
+
+        <span class="n">source_config</span> <span class="o">=</span> <span class="n">SourceConfig</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;hn&quot;</span><span class="p">,</span>
+            <span class="n">display_name</span><span class="o">=</span><span class="s2">&quot;Hacker News&quot;</span><span class="p">,</span>
+            <span class="n">base_url</span><span class="o">=</span><span class="s2">&quot;https://news.ycombinator.com&quot;</span><span class="p">,</span>
+            <span class="n">article_count</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="c1"># not set in source config</span>
+        <span class="p">)</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">FetchNewsConfig</span><span class="p">()</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">source_overrides</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">processing</span> <span class="o">=</span> <span class="n">ProcessingConfig</span><span class="p">(</span><span class="n">article_count</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="n">_resolve_count</span><span class="p">(</span>
+            <span class="n">cli_count</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">source_config</span><span class="o">=</span><span class="n">source_config</span><span class="p">,</span>
+            <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">assert</span> <span class="n">result</span> <span class="o">==</span> <span class="mi">15</span><span class="p">,</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Global processing.article_count=15 must be used as final fallback, got </span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Run tests to verify they fail</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_capcat_yml_source_overrides.py<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected failures:</p>
+<ul>
+<li><code>test_source_overrides_field_exists</code> — AttributeError: no <code>source_overrides</code> on <code>FetchNewsConfig</code></li>
+<li><code>test_vault_count_overrides_source_config</code> — returns 30 instead of 5</li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Commit failing tests</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>tests/unit/test_capcat_yml_source_overrides.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;test: add regression tests for B1 — article_count in capcat.yml sources list ignored&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h2>Task 4: Fix B1 — add source_overrides to FetchNewsConfig</h2>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>capcat/core/config.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Read <code>capcat/core/config.py</code></strong> lines 135–185 (FetchNewsConfig and <code>__post_init__</code>).</li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Add <code>source_overrides</code> field to <code>FetchNewsConfig</code></strong></li>
+</ul>
+<br>
+<p>In <code>FetchNewsConfig</code> (after <code>pdf: PdfConfig = None</code>), add:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="n">source_overrides</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>In <code>__post_init__</code> (after <code>if self.pdf is None:</code>), add:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_overrides</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">source_overrides</span> <span class="o">=</span> <span class="p">{}</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Parse capcat.yml sources list in <code>_merge_config_data</code></strong></li>
+</ul>
+<br>
+<p>In <code>ConfigManager._merge_config_data</code> (around line 419), the method iterates <code>data.items()</code>. The <code>sources</code> key is a list, not a dict, so it falls into the <code>else</code> branch and warns &quot;Unknown config section: sources&quot;.</p>
+<br>
+<p>Add special handling for <code>sources</code> at the top of the loop body:</p>
+<br>
+<p>Find this block in <code>_merge_config_data</code>:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">section_name</span><span class="p">,</span> <span class="n">section_data</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">,</span> <span class="n">section_name</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span>
+                <span class="n">section_data</span><span class="p">,</span> <span class="nb">dict</span>
+            <span class="p">):</span>
+</pre></div>
+
+<br>
+<p>Replace the entire <code>_merge_config_data</code> method body with:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_merge_config_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Merge configuration data into current config.</span>
+
+<span class="sd">        Updates existing config object with values from data dict.</span>
+<span class="sd">        Warns about unknown sections or keys.</span>
+<span class="sd">        The &#39;sources&#39; list from capcat.yml is parsed into source_overrides.</span>
+<span class="sd">        The &#39;bundles&#39; key is silently ignored (not a settings concern).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data: Dictionary with section.key structure</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Parse capcat.yml sources list into source_overrides dict.</span>
+        <span class="c1"># Each entry like {name: hn, article_count: 5} becomes</span>
+        <span class="c1"># source_overrides[&quot;hn&quot;] = {&quot;article_count&quot;: 5}.</span>
+        <span class="n">sources_list</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sources&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sources_list</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">sources_list</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;name&quot;</span> <span class="ow">in</span> <span class="n">entry</span><span class="p">:</span>
+                    <span class="n">name</span> <span class="o">=</span> <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+                    <span class="n">overrides</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">entry</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="o">!=</span> <span class="s2">&quot;name&quot;</span><span class="p">}</span>
+                    <span class="k">if</span> <span class="n">overrides</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">source_overrides</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">overrides</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;Vault source override: </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">overrides</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">section_name</span><span class="p">,</span> <span class="n">section_data</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">section_name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;sources&quot;</span><span class="p">,</span> <span class="s2">&quot;bundles&quot;</span><span class="p">):</span>
+                <span class="c1"># Handled above or intentionally ignored</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">,</span> <span class="n">section_name</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span>
+                <span class="n">section_data</span><span class="p">,</span> <span class="nb">dict</span>
+            <span class="p">):</span>
+                <span class="n">section_obj</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">,</span> <span class="n">section_name</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">section_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">section_obj</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+                        <span class="nb">setattr</span><span class="p">(</span><span class="n">section_obj</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;Set </span><span class="si">{</span><span class="n">section_name</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;Unknown config key: </span><span class="si">{</span><span class="n">section_name</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown config section: </span><span class="si">{</span><span class="n">section_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Run the config tests</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_capcat_yml_source_overrides.py::TestFetchNewsConfigSourceOverrides<span class="w"> </span>tests/unit/test_capcat_yml_source_overrides.py::TestConfigManagerParsesSourcesList<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: all 5 tests in those two classes PASS.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 5: Run full suite (catch regressions)</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-q
+</pre></div>
+
+<br>
+<p>Expected: all pass.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 6: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>capcat/core/config.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;fix: parse capcat.yml sources list into FetchNewsConfig.source_overrides (B1 part 1)&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h2>Task 5: Fix B1 — wire vault count into _resolve_count</h2>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>capcat/core/unified_source_processor.py:53-74</code> (<code>_resolve_count</code>)</li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Read <code>capcat/core/unified_source_processor.py</code></strong> lines 53–75 (current <code>_resolve_count</code>).</li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Update <code>_resolve_count</code> to add vault tier</strong></li>
+</ul>
+<br>
+<p>Replace the existing <code>_resolve_count</code> function with:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_resolve_count</span><span class="p">(</span>
+    <span class="n">cli_count</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+    <span class="n">source_config</span><span class="p">:</span> <span class="s2">&quot;SourceConfig&quot;</span><span class="p">,</span>
+    <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Resolve article count: CLI flag &gt; capcat.yml sources list &gt; source YAML &gt; global config default.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        cli_count: Value from --count flag, or None if not provided.</span>
+<span class="sd">        source_config: The source&#39;s SourceConfig (has article_count field).</span>
+<span class="sd">        config: FetchNewsConfig instance (used for vault overrides and global fallback).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Number of articles to fetch.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">cli_count</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">cli_count</span>
+    <span class="k">if</span> <span class="n">config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">vault_count</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">source_overrides</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">source_config</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;article_count&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">vault_count</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">vault_count</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">source_config</span><span class="o">.</span><span class="n">article_count</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">source_config</span><span class="o">.</span><span class="n">article_count</span>
+    <span class="k">if</span> <span class="n">config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">config</span><span class="o">.</span><span class="n">processing</span><span class="o">.</span><span class="n">article_count</span>
+    <span class="k">return</span> <span class="n">get_config</span><span class="p">()</span><span class="o">.</span><span class="n">processing</span><span class="o">.</span><span class="n">article_count</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Run the full regression tests</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_capcat_yml_source_overrides.py<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: all 9 tests PASS.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Run full unit suite</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-q
+</pre></div>
+
+<br>
+<p>Expected: all pass.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 5: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>capcat/core/unified_source_processor.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;fix: add vault capcat.yml tier to _resolve_count — article_count in sources list now respected (B1)&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h2>Task 6: Version bump and merge</h2>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>capcat/__init__.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Bump version</strong></li>
+</ul>
+<br>
+<p>In <code>capcat/__init__.py</code>, change <code>__version__ = &quot;1.9.6&quot;</code> to <code>__version__ = &quot;1.9.7&quot;</code>.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Regenerate docs</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>python3<span class="w"> </span>scripts/run_docs.py
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Run full suite one final time</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-q
+</pre></div>
+
+<br>
+<p>Expected: all pass.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Commit, merge, tag, push</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>capcat/__init__.py<span class="w"> </span>docs/
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;bump: version to 1.9.7&quot;</span>
+git<span class="w"> </span>checkout<span class="w"> </span>main
+git<span class="w"> </span>merge<span class="w"> </span>fix/acceptance-test-bugs
+git<span class="w"> </span>tag<span class="w"> </span>v1.9.7
+git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>main<span class="w"> </span>--tags
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 5: Upgrade and verify</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>pipx<span class="w"> </span>upgrade<span class="w"> </span>capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>capcat<span class="w"> </span>--version
+</pre></div>
+
+<br>
+<p>Expected: <code>capcat 1.9.7</code></p>
+<br>
+<hr>
+<br>
+<h2>Self-Review</h2>
+<br>
+<strong>Spec coverage:</strong>
+<ul>
+<li>B1 (article_count ignored) — Tasks 3, 4, 5 implement and test the full fix</li>
+<li>B3 (print in quiet mode) — Tasks 1, 2 implement and test the fix</li>
+<li>Resolution chain CLI &gt; vault &gt; source YAML &gt; global — verified in <code>TestResolvCountVaultTier</code></li>
+<li>Regression: <code>source_overrides</code> empty dict default — covered in <code>TestFetchNewsConfigSourceOverrides</code></li>
+</ul>
+<br>
+<strong>Placeholder scan:</strong> None found.
+<br>
+<strong>Type consistency:</strong>
+<ul>
+<li><code>source_overrides: dict</code> used throughout — consistent</li>
+<li><code>_resolve_count(cli_count, source_config, config)</code> signature unchanged at call sites — compatible</li>
+</ul>
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

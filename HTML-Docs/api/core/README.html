@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Core Package</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / <a href="../api/index.html">api</a> / core</div>
+<h1>Core Package</h1>
+<br>
+<h2>Overview</h2>
+<br>
+<p>This package contains the following modules:</p>
+<br>
+<ul>
+<li><a href="./unified_article_processor.md"><code>core.unified_article_processor</code></a> - Unified Article Processor - Universal entry point for all article processing</li>
+<li><a href="./image_processor.md"><code>core.image_processor</code></a> - Global Image Processor for Capcat</li>
+<li><a href="./source_configs.md"><code>core.source_configs</code></a> - Modular source configuration system with backward compatibility</li>
+<li><a href="./timeout_config.md"><code>core.timeout_config</code></a> - Adaptive timeout configuration for Capcat</li>
+<li><a href="./storage_manager.md"><code>core.storage_manager</code></a> - Storage management component for Capcat</li>
+<li><a href="./formatter.md"><code>core.formatter</code></a> - HTML to Markdown converter for Capcat</li>
+<li><a href="./command_logging.md"><code>core.command_logging</code></a> - Enhanced command logging for CLI debugging and audit trail</li>
+<li><a href="./config.md"><code>core.config</code></a> - Configuration management for Capcat</li>
+<li><a href="./logging_config.md"><code>core.logging_config</code></a> - Logging configuration for Capcat</li>
+<li><a href="./downloader.md"><code>core.downloader</code></a> - Media downloader for Capcat</li>
+<li><a href="./theme_utils.md"><code>core.theme_utils</code></a> - Theme utilities for hash-based theme persistence</li>
+<li><a href="./news_source_adapter.md"><code>core.news_source_adapter</code></a> - Base NewsSourceAdapter class to eliminate code duplication across source modules</li>
+<li><a href="./article_fetcher.md"><code>core.article_fetcher</code></a> - Shared article fetching functionality for Capcat sources</li>
+<li><a href="./retry_skip.md"><code>core.retry_skip</code></a> - Retry-and-Skip Logic for Network Resilience</li>
+</ul>
+<br>
+<p>Implements intelligent retry-and-skip mechanism for sources that timeout</p>
+<p>or refuse connection</p>
+<ul>
+<li><a href="./source_factory.md"><code>core.source_factory</code></a> - Modernized factory for creating news source adapters</li>
+<li><a href="./unified_source_processor.md"><code>core.unified_source_processor</code></a> - Unified Source Processor for Capcat</li>
+<li><a href="./network_resilience.md"><code>core.network_resilience</code></a> - Network Resilience Patterns for Source Processing</li>
+</ul>
+<br>
+<p>Clean architecture implementation applying SOLID principles:</p>
+<ul>
+<li>Single Responsibility: Each class has one clear purpose</li>
+<li>Open/Closed: Extensible via strategy pattern</li>
+<li>Liskov Substitution: RetryStrategy implementations interchangeable</li>
+<li>Interface Segregation: Small, focused interfaces</li>
+<li>Dependency Inversion: Depend on abstractions not concretions</li>
+<li><a href="./session_pool.md"><code>core.session_pool</code></a> - Global session pooling for optimal network performance across all sources</li>
+<li><a href="./html_generator.md"><code>core.html_generator</code></a> - HTML Generator for Capcat - Static Site Generation</li>
+</ul>
+<p>Creates self-contained HTML files from markdown content with embedded CSS and JavaScript</p>
+<ul>
+<li><a href="./shutdown.md"><code>core.shutdown</code></a> - Graceful shutdown handling for Capcat</li>
+<li><a href="./rate_limiter.md"><code>core.rate_limiter</code></a> - Rate limiting system for Capcat to prevent overwhelming source servers</li>
+<li><a href="./ethical_scraping.md"><code>core.ethical_scraping</code></a> - Ethical scraping utilities for Capcat</li>
+<li><a href="./error_handling.md"><code>core.error_handling</code></a> - Comprehensive error handling and recovery system for Capcat</li>
+<li><a href="./retry.md"><code>core.retry</code></a> - Retry mechanisms with exponential backoff for Capcat</li>
+<li><a href="./conversion_executor.md"><code>core.conversion_executor</code></a> - Shared executor pool for HTML-to-Markdown conversion to prevent nested ThreadPoolExecutor deadlock</li>
+<li><a href="./enhanced_argparse.md"><code>core.enhanced_argparse</code></a> - Enhanced ArgumentParser with better error messages and validation</li>
+<li><a href="./circuit_breaker.md"><code>core.circuit_breaker</code></a> - Circuit Breaker pattern implementation for Capcat</li>
+<li><a href="./utils.md"><code>core.utils</code></a> - Core utilities for the Capcat application</li>
+<li><a href="./cli_validation.md"><code>core.cli_validation</code></a> - Enhanced CLI validation and error handling for better user experience</li>
+<li><a href="./html_post_processor.md"><code>core.html_post_processor</code></a> - HTML Post-Processor for Capcat Archives</li>
+</ul>
+<p>Handles post-processing HTML generation after article scraping is complete</p>
+<ul>
+<li><a href="./interactive.md"><code>core.interactive</code></a> - Interactive mode for Capcat</li>
+<li><a href="./exceptions.md"><code>core.exceptions</code></a> - Custom exceptions for Capcat application</li>
+<li><a href="./update_manager.md"><code>core.update_manager</code></a> - Update Manager for Capcat</li>
+<li><a href="./cli_recovery.md"><code>core.cli_recovery</code></a> - CLI error recovery and user guidance system</li>
+<li><a href="./progress.md"><code>core.progress</code></a> - Progress indicators and status reporting for Capcat</li>
+<li><a href="./media_processor.md"><code>core.media_processor</code></a> - Media processing component for Capcat</li>
+<li><a href="./source_config.md"><code>core.source_config</code></a> - Source configuration for optimized URL detection in Capcat</li>
+<li><a href="./url_utils.md"><code>core.url_utils</code></a> - URL validation and normalization utilities for Capcat</li>
+<li><a href="./design_system_compiler.md"><code>core.design_system_compiler</code></a> - Design System Compiler for Capcat HTML Generation</li>
+</ul>
+<br>
+<p>Compiles CSS custom properties from the design system into hardcoded values</p>
+<p>for performance optimization and self-contained HTML generation</p>
+<ul>
+<li><a href="./media_executor.md"><code>core.media_executor</code></a> - Shared executor pool for media processing to prevent nested ThreadPoolExecutor deadlock</li>
+<li><a href="./timeout_wrapper.md"><code>core.timeout_wrapper</code></a> - Timeout wrapper utilities for preventing hanging operations</li>
+<li><a href="./media_config.md"><code>core.media_config</code></a> - Media Configuration Manager for different news sources</li>
+<li><a href="./unified_media_processor.md"><code>core.unified_media_processor</code></a> - Unified Media Processor Integration Layer</li>
+<li><a href="./template_renderer.md"><code>core.template_renderer</code></a> - Simple Template Renderer for Capcat</li>
+</ul>
+<p>Replaces {{placeholder}} variables with actual values from configuration</p>
+<ul>
+<li><a href="./specialized_source_manager.md"><code>core.specialized_source_manager</code></a> - Specialized Source Manager for automatic URL-based source activation</li>
+<li><a href="./__init__.md"><code>core.config.__init__</code></a> - Configuration management package for Capcat</li>
+<li><a href="./source_registry.md"><code>core.config.source_registry</code></a> - Source Registry for managing all available news sources and their configurations</li>
+<li><a href="./source_base.md"><code>core.config.source_base</code></a> - Base configuration classes for news sources</li>
+<li><a href="./bundle_manager.md"><code>core.source_system.bundle_manager</code></a></li>
+<li><a href="./remove_source_command.md"><code>core.source_system.remove_source_command</code></a> - Professional implementation of the remove-source command using clean architecture</li>
+<li><a href="./add_source_command.md"><code>core.source_system.add_source_command</code></a> - Professional implementation of the add-source command using clean architecture principles</li>
+<li><a href="./removal_ui.md"><code>core.source_system.removal_ui</code></a> - User interface implementation for remove-source command</li>
+<li><a href="./feed_discovery.md"><code>core.source_system.feed_discovery</code></a> - RSS/Atom feed discovery utilities</li>
+<li><a href="./source_analytics.md"><code>core.source_system.source_analytics</code></a> - Source usage analytics and statistics</li>
+<li><a href="./validation_engine.md"><code>core.source_system.validation_engine</code></a> - Enhanced configuration validation engine for the source system</li>
+<li><a href="./remove_source_service.md"><code>core.source_system.remove_source_service</code></a> - Service layer for remove-source command</li>
+<li><a href="./add_source_service.md"><code>core.source_system.add_source_service</code></a> - Service layer for the add-source command</li>
+<li><a href="./bundle_models.md"><code>core.source_system.bundle_models</code></a> - Data models for bundle management</li>
+<li><a href="./source_factory.md"><code>core.source_system.source_factory</code></a> - Source factory for creating and managing news source instances</li>
+<li><a href="./performance_monitor.md"><code>core.source_system.performance_monitor</code></a> - Source performance monitoring system for the hybrid architecture</li>
+<li><a href="./__init__.md"><code>core.source_system.__init__</code></a> - Source system for specialized source handling</li>
+<li><a href="./bundle_validator.md"><code>core.source_system.bundle_validator</code></a> - Bundle validation logic</li>
+<li><a href="./bundle_ui.md"><code>core.source_system.bundle_ui</code></a> - User interface components for bundle management</li>
+<li><a href="./rss_feed_introspector.md"><code>core.source_system.rss_feed_introspector</code></a></li>
+<li><a href="./discovery_strategies.md"><code>core.source_system.discovery_strategies</code></a> - Discovery strategy implementations for article discovery</li>
+<li><a href="./source_backup_manager.md"><code>core.source_system.source_backup_manager</code></a> - Backup and restore functionality for source configurations</li>
+<li><a href="./questionary_ui.md"><code>core.source_system.questionary_ui</code></a> - User interface implementation using questionary for interactive prompts</li>
+<li><a href="./config_driven_source.md"><code>core.source_system.config_driven_source</code></a> - Config-driven source implementation</li>
+<li><a href="./feed_parser.md"><code>core.source_system.feed_parser</code></a> - Feed parser abstraction for RSS and Atom feeds</li>
+<li><a href="./source_config.md"><code>core.source_system.source_config</code></a> - Source configuration system for specialized sources</li>
+<li><a href="./source_config_generator.md"><code>core.source_system.source_config_generator</code></a></li>
+<li><a href="./base_source.md"><code>core.source_system.base_source</code></a> - Abstract base class for all news sources</li>
+<li><a href="./source_registry.md"><code>core.source_system.source_registry</code></a> - Source registry for automatic discovery and management of news sources</li>
+<li><a href="./enhanced_remove_command.md"><code>core.source_system.enhanced_remove_command</code></a> - Enhanced remove-source command with advanced features:</li>
+<li>Dry-run mode</li>
+<li>Automatic backups</li>
+<li>Usage analytics</li>
+<li>Batch removal from file</li>
+<li>Undo/restore functionality</li>
+<li><a href="./bundle_service.md"><code>core.source_system.bundle_service</code></a> - Service layer for bundle management</li>
+</ul>
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

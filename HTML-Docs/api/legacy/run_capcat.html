@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>legacy.run_capcat</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / <a href="../api/index.html">api</a> / legacy</div>
+<h1>legacy.run_capcat</h1>
+<br>
+<strong>File:</strong> <code>Application/legacy/run_capcat.py</code>
+<br>
+<h2>Description</h2>
+<br>
+<p>Capcat - News Article Archiving System (Enhanced Python Wrapper)</p>
+<br>
+<p>Refactored wrapper with robust dependency management, intelligent error</p>
+<p>handling, and comprehensive validation. Integrates with the automated</p>
+<p>dependency setup system.</p>
+<br>
+<p>Author: Stayu Kasabov (https://stayux.com)</p>
+<p>License: MIT-Style Non-Commercial</p>
+<p>Copyright (c) 2025 Stayu Kasabov</p>
+<br>
+<h2>Classes</h2>
+<br>
+<h3>CapcatExecutionError</h3>
+<br>
+<strong>Inherits from:</strong> Exception
+<br>
+<p>Custom exception for Capcat execution failures.</p>
+<br>
+<h3>DependencyError</h3>
+<br>
+<strong>Inherits from:</strong> Exception
+<br>
+<p>Custom exception for dependency-related failures.</p>
+<br>
+<h3>CapcatWrapperRefactored</h3>
+<br>
+<p>Enhanced wrapper with robust dependency management and error handling.</p>
+<br>
+<p>Provides intelligent dependency validation, automatic repair, comprehensive</p>
+<p>error handling, and fallback mechanisms for reliability.</p>
+<br>
+<p>Attributes:</p>
+<p>    script_dir: Application root directory path</p>
+<p>    capcat_py: Path to main capcat.py script</p>
+<p>    dependency_script: Path to automated dependency setup script</p>
+<br>
+<h4>Methods</h4>
+<br>
+<h5>__init__</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Initialize the wrapper with path validation.</p>
+<br>
+<p>Sets up script directory paths and validates that essential files exist.</p>
+<p>Falls back to basic dependency management if enhanced script missing.</p>
+<br>
+<p>Raises:</p>
+<p>    CapcatExecutionError: If capcat.py not found in script directory</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h5>_validate_installation</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_validate_installation</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Validate that essential files exist.</p>
+<br>
+<p>Checks for capcat.py and dependency setup script. Sets dependency_script</p>
+<p>to None if enhanced script missing (triggers basic fallback).</p>
+<br>
+<p>Raises:</p>
+<p>    CapcatExecutionError: If capcat.py not found</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h5>_log_message</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_log_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;INFO&#39;</span><span class="p">,</span> <span class="n">color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\x1b</span><span class="s1">[38;5;157m&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Log formatted message with color.</p>
+<br>
+<p>Args:</p>
+<p>    message: Text to log</p>
+<p>    level: Log level string (INFO, ERROR, WARNING, SUCCESS)</p>
+<p>    color: ANSI color code for formatting</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>message</code> (str)</li>
+<li><code>level</code> (str) <em>optional</em></li>
+<li><code>color</code> (str) <em>optional</em></li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h5>_log_error</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_log_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Log error message.</p>
+<br>
+<p>Args:</p>
+<p>    message: Error message to display</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>message</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h5>_log_warning</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_log_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Log warning message.</p>
+<br>
+<p>Args:</p>
+<p>    message: Warning message to display</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>message</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h5>_log_success</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_log_success</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Log success message.</p>
+<br>
+<p>Args:</p>
+<p>    message: Success message to display</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>message</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h5>_run_dependency_setup</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_run_dependency_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force_rebuild</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Run the automated dependency setup script.</p>
+<br>
+<p>Falls back to basic setup if enhanced script unavailable.</p>
+<br>
+<p>Args:</p>
+<p>    force_rebuild: Force complete venv rebuild</p>
+<br>
+<p>Returns:</p>
+<p>    True if setup successful, False otherwise</p>
+<br>
+<p>Raises:</p>
+<p>    subprocess.CalledProcessError: If dependency setup command fails</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>force_rebuild</code> (bool) <em>optional</em></li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h5>_basic_dependency_setup</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_basic_dependency_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Basic fallback dependency setup when enhanced script unavailable.</p>
+<br>
+<p>Creates venv if missing and installs requirements.txt dependencies.</p>
+<br>
+<p>Returns:</p>
+<p>    True if basic setup successful, False otherwise</p>
+<br>
+<p>Raises:</p>
+<p>    subprocess.CalledProcessError: If venv creation or pip install fails</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h5>_get_python_executable</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_get_python_executable</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+
+<br>
+<p>Get the best available Python executable.</p>
+<br>
+<p>Tries venv Python first, tests if it works, then falls back to</p>
+<p>system Python if necessary.</p>
+<br>
+<p>Returns:</p>
+<p>    Path to Python executable</p>
+<br>
+<p>Raises:</p>
+<p>    DependencyError: If no suitable Python found</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<strong>Returns:</strong> str
+<br>
+<h5>_validate_dependencies</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_validate_dependencies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">python_exe</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Quick validation of critical dependencies.</p>
+<br>
+<p>Tests imports of requests, yaml, and bs4 (BeautifulSoup).</p>
+<br>
+<p>Args:</p>
+<p>    python_exe: Python executable to test</p>
+<br>
+<p>Returns:</p>
+<p>    True if basic dependencies available, False otherwise</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>python_exe</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h5>_handle_dependency_failure</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_handle_dependency_failure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">python_exe</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Handle dependency validation failure with repair attempts.</p>
+<br>
+<p>Tries automated setup first, then force rebuild as last resort.</p>
+<br>
+<p>Args:</p>
+<p>    python_exe: Python executable that failed validation</p>
+<br>
+<p>Returns:</p>
+<p>    True if repair successful, False otherwise</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>python_exe</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h5>_should_show_success_message</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_should_show_success_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Determine if success message should be shown.</p>
+<br>
+<p>Suppresses success message for help/version/list commands and</p>
+<p>detects when help was triggered by flag syntax errors.</p>
+<br>
+<p>Args:</p>
+<p>    args: Command line arguments</p>
+<br>
+<p>Returns:</p>
+<p>    True if success message appropriate, False otherwise</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>args</code> (List[str])</li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h5>_show_intelligent_help</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_show_intelligent_help</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">detected_issues</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span>
+</pre></div>
+
+<br>
+<p>Show intelligent help when flag syntax errors are detected.</p>
+<br>
+<p>Args:</p>
+<p>    args: Original command line arguments</p>
+<p>    detected_issues: List of problematic flags detected</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>args</code> (List[str])</li>
+<li><code>detected_issues</code> (List[str])</li>
+</ul>
+<br>
+<h5>execute_capcat</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">execute_capcat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span>
+</pre></div>
+
+<br>
+<p>Execute capcat.py with comprehensive error handling.</p>
+<br>
+<p>Validates dependencies, attempts repair if needed, and executes capcat</p>
+<p>with proper subprocess management and error handling.</p>
+<br>
+<p>Args:</p>
+<p>    args: Command line arguments to pass to capcat.py</p>
+<br>
+<p>Returns:</p>
+<p>    Exit code from capcat execution</p>
+<br>
+<p>Raises:</p>
+<p>    CapcatExecutionError: If execution fails</p>
+<p>    DependencyError: If dependencies cannot be resolved</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+<li><code>args</code> (List[str])</li>
+</ul>
+<br>
+<strong>Returns:</strong> int
+<br>
+<h5>run</h5>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Main execution method with comprehensive error handling.</p>
+<br>
+<p>Handles all exceptions and exits with appropriate codes. Provides</p>
+<p>manual recovery instructions on failure.</p>
+<br>
+<p>Exit Codes:</p>
+<p>    0: Success</p>
+<p>    1: Unexpected error</p>
+<p>    2: Dependency error</p>
+<p>    3: Execution error</p>
+<p>    130: User interrupt (Ctrl+C)</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>self</code></li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h2>Functions</h2>
+<br>
+<h3>main</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Entry point for the enhanced wrapper.</p>
+<br>
+<p>Instantiates CapcatWrapperRefactored and runs the application with</p>
+<p>comprehensive dependency management and error handling.</p>
+<br>
+<strong>Returns:</strong> None
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

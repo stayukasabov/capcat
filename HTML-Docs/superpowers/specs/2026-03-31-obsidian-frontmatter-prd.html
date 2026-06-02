@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRD: Obsidian Frontmatter for Article Output</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / <a href="../superpowers/index.html">superpowers</a> / specs</div>
+<h1>PRD: Obsidian Frontmatter for Article Output</h1>
+<br>
+<strong>Status:</strong> Draft
+<strong>Date:</strong> 2026-03-31
+<strong>Version target:</strong> 1.7.0 (minor — new behaviour, backwards compatible)
+<br>
+<hr>
+<br>
+<h2>Problem</h2>
+<br>
+<p>Capcat already produces clean Markdown with bidirectional wikilinks between articles and comments (<code>→ [[comments|Comments]]</code> / <code>← [[article|Article]]</code>). The output lands in Obsidian and is readable.</p>
+<br>
+<p>But the notes are not <strong>queryable</strong>. A professional with 500+ archived articles has no way to answer:</p>
+<br>
+<ul>
+<li>&quot;Show me all HN articles from this week&quot;</li>
+<li>&quot;List everything in the <code>tech</code> bundle I captured in March&quot;</li>
+<li>&quot;Which BBC articles reference climate?&quot;</li>
+</ul>
+<br>
+<p>Without YAML frontmatter, Obsidian&#x27;s Properties panel is empty, Dataview queries return nothing, and the graph view has no metadata to filter on. The notes exist but are inert.</p>
+<br>
+<hr>
+<br>
+<h2>Target User</h2>
+<br>
+<p>Developer/power user professional who:</p>
+<ul>
+<li>Runs Capcat on a schedule (cron or manual) to archive curated sources</li>
+<li>Uses Obsidian as a knowledge base (graph view, Dataview plugin, tags)</li>
+<li>Shares output folders — structured data directories, not links</li>
+<li>Has an existing vault where Capcat output lands as a subfolder</li>
+</ul>
+<br>
+<hr>
+<br>
+<h2>Goal</h2>
+<br>
+<p>Every <code>article.md</code> Capcat produces must begin with YAML frontmatter that makes the note:</p>
+<br>
+<ol>
+<li><strong>Queryable</strong> via Dataview</li>
+<li><strong>Filterable</strong> by source, category, and date in Obsidian graph view</li>
+<li><strong>Identifiable</strong> by origin URL for deduplication and reference</li>
+</ol>
+<br>
+<hr>
+<br>
+<h2>What Data Is Available</h2>
+<br>
+<p>Confirmed available at write time (no new fetching required):</p>
+<br>
+<p>| Field | Source in code |</p>
+<p>|---|---|</p>
+<p>| <code>title</code> | always present |</p>
+<p>| <code>url</code> | article URL, always present |</p>
+<p>| <code>date</code> | <code>FeedItem.published_date</code> (Optional) |</p>
+<p>| <code>source</code> | <code>source_name</code> from YAML config (e.g. <code>&quot;Hacker News&quot;</code>) |</p>
+<p>| <code>source_code</code> | <code>source_code</code> passed to <code>ArticleFetcher</code> (e.g. <code>&quot;hn&quot;</code>) |</p>
+<p>| <code>category</code> | <code>category</code> from YAML config (e.g. <code>&quot;tech&quot;</code>, <code>&quot;ai&quot;</code>) |</p>
+<p>| <code>captured</code> | <code>datetime.now()</code> at write time — always available |</p>
+<br>
+<strong>Not available without new work:</strong> author (not in <code>FeedItem</code>). Out of scope for v1.7.0.
+<br>
+<hr>
+<br>
+<h2>Frontmatter Spec</h2>
+<br>
+<h3>article.md</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="nn">---</span>
+<span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Article</span><span class="nv"> </span><span class="s">Title</span><span class="nv"> </span><span class="s">Here&quot;</span>
+<span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://example.com/article&quot;</span>
+<span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Hacker</span><span class="nv"> </span><span class="s">News&quot;</span>
+<span class="nt">source_code</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;hn&quot;</span>
+<span class="nt">category</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;tech&quot;</span>
+<span class="nt">date</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2026-03-28</span>
+<span class="nt">captured</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2026-03-31</span>
+<span class="nt">tags</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hn</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tech</span>
+<span class="nn">---</span>
+</pre></div>
+
+<br>
+<strong>Rules:</strong>
+<br>
+<ul>
+<li><code>title</code> — sanitized (no quotes that break YAML). Wrap in double quotes always.</li>
+<li><code>url</code> — original article URL, not the feed URL.</li>
+<li><code>source</code> — human-readable name from YAML config (<code>name:</code> field).</li>
+<li><code>source_code</code> — machine code from registry (e.g. <code>hn</code>, <code>lb</code>, <code>bbc</code>).</li>
+<li><code>category</code> — from YAML config (<code>category:</code> field). Fallback: <code>&quot;unknown&quot;</code>.</li>
+<li><code>date</code> — <code>FeedItem.published_date</code> formatted as <code>YYYY-MM-DD</code>. If None: omit the field entirely (do not write <code>date: null</code>).</li>
+<li><code>captured</code> — <code>datetime.now()</code> at write time, always <code>YYYY-MM-DD</code>.</li>
+<li><code>tags</code> — list containing <code>source_code</code> + <code>category</code>. Always at least one entry.</li>
+</ul>
+<br>
+<h3>comments.md</h3>
+<br>
+<p>Simpler — comments are derivative of the article:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="nn">---</span>
+<span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Comments:</span><span class="nv"> </span><span class="s">Article</span><span class="nv"> </span><span class="s">Title</span><span class="nv"> </span><span class="s">Here&quot;</span>
+<span class="nt">article_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://example.com/article&quot;</span>
+<span class="nt">source_code</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;hn&quot;</span>
+<span class="nt">captured</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2026-03-31</span>
+<span class="nt">tags</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">comments</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hn</span>
+<span class="nn">---</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h2>Dataview Queries This Unlocks</h2>
+<br>
+<pre><code>TABLE date, source FROM #tech WHERE captured &gt;= date(today) - dur(7 days)
+SORT date DESC
+</code></pre>
+<br>
+<pre><code>LIST FROM #hn WHERE date &gt;= date(2026-03-01)
+</code></pre>
+<br>
+<pre><code>TABLE source, url FROM &quot;&quot; WHERE file.name CONTAINS &quot;AI&quot; AND #tech
+</code></pre>
+<br>
+<hr>
+<br>
+<h2>Behaviour</h2>
+<br>
+<ul>
+<li><strong>Default on.</strong> No flag required. All output gets frontmatter.</li>
+<li><strong>Idempotent.</strong> If a file already has frontmatter on line 1 (<code>---</code>), do not rewrite it. (Consistent with existing wikilink idempotency pattern in <code>storage_manager.inject_comments_wikilink</code>.)</li>
+<li><strong>HTML output unaffected.</strong> The HTML post-processor strips frontmatter before rendering. No change needed there.</li>
+<li><strong>Single-URL mode included.</strong> <code>capcat single &lt;url&gt;</code> also gets frontmatter. <code>source_code</code> falls back to <code>&quot;single&quot;</code>, <code>category</code> to <code>&quot;single&quot;</code>.</li>
+</ul>
+<br>
+<hr>
+<br>
+<h2>Out of Scope (v1.7.0)</h2>
+<br>
+<ul>
+<li><code>author</code> field — not in <code>FeedItem</code>, would require per-source scraping changes</li>
+<li><code>cssclasses</code> — Obsidian theme customisation per source; future nice-to-have</li>
+<li>Retroactive frontmatter injection into existing archives — separate utility if ever needed</li>
+<li>Frontmatter for PDF/audio/video placeholder notes — defer</li>
+</ul>
+<br>
+<hr>
+<br>
+<h2>Implementation Surface</h2>
+<br>
+<p>Three files need changes:</p>
+<br>
+<p>| File | Change |</p>
+<p>|---|---|</p>
+<p>| <code>capcat/core/storage_manager.py</code> | New <code>inject_frontmatter(path, metadata)</code> function |</p>
+<p>| <code>capcat/core/unified_source_processor.py</code> | Call <code>inject_frontmatter</code> after article write |</p>
+<p>| <code>capcat/core/streamlined_comment_processor.py</code> | Call <code>inject_frontmatter</code> after comments write |</p>
+<br>
+<code>FeedItem</code> does <strong>not</strong> need changes — <code>published_date</code> is already there.
+<code>ArticleFetcher</code> already receives <code>source_code</code> — no interface changes.
+<br>
+<hr>
+<br>
+<h2>Success Criteria</h2>
+<br>
+<ul>
+<li>Every <code>article.md</code> produced by <code>capcat bundle</code>, <code>capcat fetch</code>, and <code>capcat single</code> begins with valid YAML frontmatter</li>
+<li>Frontmatter is parseable by <code>python-frontmatter</code> and Obsidian without errors</li>
+<li>Existing wikilinks (<code>→ [[comments|Comments]]</code>) appear after the closing <code>---</code>, not inside it</li>
+<li>Dataview query <code>TABLE source, date FROM #tech</code> returns results from a fresh run</li>
+<li>All existing tests pass</li>
+<li>New regression tests cover: frontmatter present, correct fields, idempotency, None date omitted</li>
+</ul>
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

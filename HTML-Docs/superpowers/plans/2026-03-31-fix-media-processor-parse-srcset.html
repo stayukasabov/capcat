@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix MediaProcessor.parse_srcset CDN Comma Bug Implementation Plan</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / <a href="../superpowers/index.html">superpowers</a> / plans</div>
+<h1>Fix MediaProcessor.parse_srcset CDN Comma Bug Implementation Plan</h1>
+<br>
+<p>&gt; <strong>For agentic workers:</strong> REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (<code>- [ ]</code>) syntax for tracking.</p>
+<br>
+<strong>Goal:</strong> Fix <code>MediaProcessor.parse_srcset</code> so it correctly handles CDN proxy URLs (Substack, Cloudinary) that embed comma-separated transformation parameters in the path, enabling Substack images to be downloaded and embedded in HTML output.
+<br>
+<strong>Architecture:</strong> <code>formatter.py::_parse_srcset</code> was fixed in v1.6.7 with a descriptor-aware fragment-merging algorithm. <code>MediaProcessor.parse_srcset</code> is a duplicate implementation that still uses naive <code>srcset.split(&quot;,&quot;)</code>. The fix ports the equivalent algorithm into <code>parse_srcset</code>. The only intentional divergence from <code>formatter.py</code>: the <code>x</code>-descriptor float check is inlined as <code>try/except float()</code> instead of delegating to the module-level <code>_is_float</code> helper (which lives in <code>formatter.py</code> and should not be imported across modules for a private helper). Functionally identical. No interface changes — same method signature and return type.
+<br>
+<strong>Tech Stack:</strong> Python 3, BeautifulSoup4, pytest
+<br>
+<hr>
+<br>
+<h2>File Structure</h2>
+<br>
+<p>| File | Change |</p>
+<p>|------|--------|</p>
+<p>| <code>capcat/core/media_processor.py</code> | Modify <code>MediaProcessor.parse_srcset</code> (lines 690–750) — replace naive comma-split with descriptor-aware algorithm |</p>
+<p>| <code>tests/unit/test_image_srcset_url_mismatch.py</code> | Add one new regression test: <code>test_media_processor_parse_srcset_cdn_url_with_commas_in_path</code> |</p>
+<br>
+<hr>
+<br>
+<h2>Context for the implementer</h2>
+<br>
+<h3>The broken URL pattern (observed in CLI debug output)</h3>
+<pre><code>DEBUG: Failed to download https://senykamara.substack.com/p/fl_progressive:steep/https%3A%2F%2F...
+</code></pre>
+<p>The URL fragment <code>fl_progressive:steep/...</code> is the tail of a Substack CDN path after a comma split corrupted it. The real URL is:</p>
+<pre><code>https://substackcdn.com/image/fetch/$s_X,w_1456,c_limit,f_auto,fl_progressive:steep/https%3A%2F%2F...
+</code></pre>
+<p>Naive <code>srcset.split(&quot;,&quot;)</code> splits on every comma, including the ones inside <code>w_1456,c_limit,f_auto,fl_progressive:steep</code>.</p>
+<br>
+<h3>The correct algorithm (already in <code>formatter.py::_parse_srcset</code>, lines 221–288)</h3>
+<p>A srcset entry ends when its last space-separated token is a valid descriptor (<code>Nw</code> or <code>Nx</code>). Until that descriptor appears, any comma-split fragment is a continuation of the previous URL and must be re-joined. Full implementation is at <code>/Volumes/DRIVE B/SYNCA/SynologyDrive/_!0A/_!1-LEARNING/_/_!0-CURRENT-LEARNING/_!0START/_!0NEWS/GEMINI-Capcat-copy/Application/capcat/core/formatter.py</code> lines 221–288. <strong>Read it before implementing.</strong></p>
+<br>
+<h3>Existing tests to keep passing</h3>
+<code>tests/unit/test_image_srcset_url_mismatch.py</code>:
+<ul>
+<li><code>test_media_processor_parse_srcset_skips_data_uri</code> — data: URI → returns <code>&quot;&quot;</code></li>
+<li><code>test_media_processor_parse_srcset_returns_highest_res_real_url</code> — normal srcset → returns highest-res URL</li>
+</ul>
+<br>
+<p>Both must still pass after the change.</p>
+<br>
+<strong>Note:</strong> The file also contains <code>test_parse_srcset_cdn_url_with_commas_in_path</code> (line 167) which tests <code>formatter._parse_srcset</code> — a different class. The new test in Task 1 tests <code>MediaProcessor.parse_srcset</code> and has a different name. Do NOT skip Task 1 assuming the test already exists.
+<br>
+<h3>Branch convention</h3>
+<div class="highlight"><pre><span></span>git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>fix/media-processor-parse-srcset
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h3>Task 1: Add failing regression test</h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>tests/unit/test_image_srcset_url_mismatch.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Add the failing test</strong></li>
+</ul>
+<br>
+<p>Append to <code>tests/unit/test_image_srcset_url_mismatch.py</code>:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_media_processor_parse_srcset_cdn_url_with_commas_in_path</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;MediaProcessor.parse_srcset must handle CDN URLs with commas in transformation params.&quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.media_processor</span><span class="w"> </span><span class="kn">import</span> <span class="n">MediaProcessor</span>
+    <span class="n">processor</span> <span class="o">=</span> <span class="n">MediaProcessor</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">MediaProcessor</span><span class="p">)</span>
+    <span class="n">substack_srcset</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;https://substackcdn.com/image/fetch/$s_X,w_424,c_limit,f_auto,&quot;</span>
+        <span class="s2">&quot;fl_progressive:steep/https%3A</span><span class="si">%2F%2F</span><span class="s2">example.com</span><span class="si">%2F</span><span class="s2">img.png 424w, &quot;</span>
+        <span class="s2">&quot;https://substackcdn.com/image/fetch/$s_X,w_848,c_limit,f_auto,&quot;</span>
+        <span class="s2">&quot;fl_progressive:steep/https%3A</span><span class="si">%2F%2F</span><span class="s2">example.com</span><span class="si">%2F</span><span class="s2">img.png 848w, &quot;</span>
+        <span class="s2">&quot;https://substackcdn.com/image/fetch/$s_X,w_1456,c_limit,f_auto,&quot;</span>
+        <span class="s2">&quot;fl_progressive:steep/https%3A</span><span class="si">%2F%2F</span><span class="s2">example.com</span><span class="si">%2F</span><span class="s2">img.png 1456w&quot;</span>
+    <span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">parse_srcset</span><span class="p">(</span><span class="n">substack_srcset</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;https://substackcdn.com/&quot;</span><span class="p">),</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;URL was corrupted by comma-splitting: </span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
+    <span class="k">assert</span> <span class="s2">&quot;w_1456&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">,</span> <span class="s2">&quot;Should select highest-width entry&quot;</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Run test to verify it fails</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_image_srcset_url_mismatch.py::test_media_processor_parse_srcset_cdn_url_with_commas_in_path<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: FAIL — the naive split on the test input produces the last comma-split fragment <code>&quot;fl_progressive:steep/https%3A%2F%2Fexample.com%2Fimg.png&quot;</code> as the highest-width URL (it gets descriptor <code>1456w</code> after the split). So <code>result</code> will be <code>&quot;fl_progressive:steep/https%3A%2F%2Fexample.com%2Fimg.png&quot;</code> — it does not start with <code>&quot;https://substackcdn.com/&quot;</code> and the first assertion fails. That is the correct failure.</p>
+<br>
+<hr>
+<br>
+<h3>Task 2: Fix MediaProcessor.parse_srcset</h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>capcat/core/media_processor.py:690–750</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Read the reference implementation first</strong></li>
+</ul>
+<br>
+<p>Read <code>capcat/core/formatter.py</code> lines 208–288 to understand the descriptor-aware algorithm before writing any code.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Replace parse_srcset body</strong></li>
+</ul>
+<br>
+<p>Replace the entire body of <code>MediaProcessor.parse_srcset</code> (from <code>if not srcset:</code> through <code>return &quot;&quot;</code> at line 750) with:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">if</span> <span class="ow">not</span> <span class="n">srcset</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+
+        <span class="c1"># Reject pure data: URI placeholders before any comma-splitting</span>
+        <span class="k">if</span> <span class="n">srcset</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;data:&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">_ends_with_descriptor</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+            <span class="n">tokens</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="n">desc</span> <span class="o">=</span> <span class="n">tokens</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">desc</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">desc</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+                <span class="k">return</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">desc</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="nb">float</span><span class="p">(</span><span class="n">desc</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="k">return</span> <span class="kc">True</span>
+                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                    <span class="k">pass</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="c1"># Merge comma-split fragments that are continuations of the same URL.</span>
+        <span class="c1"># A fragment is a continuation when it does not start a new URL scheme</span>
+        <span class="c1"># AND the previous accumulated entry has not yet ended with a descriptor.</span>
+        <span class="n">raw_parts</span> <span class="o">=</span> <span class="n">srcset</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+        <span class="n">entries</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">raw_parts</span><span class="p">:</span>
+            <span class="n">stripped</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">starts_new</span> <span class="o">=</span> <span class="n">stripped</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="s2">&quot;http://&quot;</span><span class="p">,</span> <span class="s2">&quot;https://&quot;</span><span class="p">,</span> <span class="s2">&quot;//&quot;</span><span class="p">,</span> <span class="s2">&quot;data:&quot;</span><span class="p">))</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">entries</span> <span class="ow">or</span> <span class="n">starts_new</span> <span class="ow">or</span> <span class="n">_ends_with_descriptor</span><span class="p">(</span><span class="n">entries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
+                <span class="n">entries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stripped</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">entries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="s2">&quot;,&quot;</span> <span class="o">+</span> <span class="n">part</span>
+
+        <span class="n">best_url</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">max_width</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">entries</span><span class="p">:</span>
+            <span class="n">parts</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">url</span><span class="p">,</span> <span class="n">descriptor</span> <span class="o">=</span> <span class="n">parts</span>
+                <span class="n">url</span> <span class="o">=</span> <span class="n">url</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">url</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;data:&quot;</span><span class="p">):</span>
+                    <span class="k">continue</span>
+                <span class="n">descriptor</span> <span class="o">=</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+                <span class="k">if</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">width</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">descriptor</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                        <span class="k">if</span> <span class="n">width</span> <span class="o">&gt;</span> <span class="n">max_width</span><span class="p">:</span>
+                            <span class="n">max_width</span> <span class="o">=</span> <span class="n">width</span>
+                            <span class="n">best_url</span> <span class="o">=</span> <span class="n">url</span>
+                    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                <span class="k">elif</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="nb">float</span><span class="p">(</span><span class="n">descriptor</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">best_url</span> <span class="ow">or</span> <span class="n">max_width</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">best_url</span> <span class="o">=</span> <span class="n">url</span>
+                    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                        <span class="k">continue</span>
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">url</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">url</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;data:&quot;</span><span class="p">):</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">best_url</span><span class="p">:</span>
+                    <span class="n">best_url</span> <span class="o">=</span> <span class="n">url</span>
+
+        <span class="k">return</span> <span class="n">best_url</span>
+</pre></div>
+
+<br>
+<p>Keep the docstring unchanged — only the body changes.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 5: Run all three MediaProcessor srcset tests</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_image_srcset_url_mismatch.py<span class="w"> </span>-k<span class="w"> </span><span class="s2">&quot;media_processor&quot;</span><span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: all 3 PASS:</p>
+<ul>
+<li><code>test_media_processor_parse_srcset_skips_data_uri</code></li>
+<li><code>test_media_processor_parse_srcset_returns_highest_res_real_url</code></li>
+<li><code>test_media_processor_parse_srcset_cdn_url_with_commas_in_path</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 6: Run the full unit test suite</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-q
+</pre></div>
+
+<br>
+<p>Expected: all tests pass (≥430). Zero failures, zero errors.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 7: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>capcat/core/media_processor.py<span class="w"> </span>tests/unit/test_image_srcset_url_mismatch.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;fix: apply descriptor-aware srcset parsing to MediaProcessor.parse_srcset</span>
+
+<span class="s2">Naive srcset.split(&#39;,&#39;) corrupted Substack/Cloudinary CDN URLs that embed</span>
+<span class="s2">comma-separated transformation params in the path (e.g. w_1456,c_limit,f_auto).</span>
+<span class="s2">Apply the same fragment-merging algorithm already used in formatter._parse_srcset.</span>
+
+<span class="s2">Regression test added: test_media_processor_parse_srcset_cdn_url_with_commas_in_path&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h3>Task 3: Version bump and release</h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>capcat/__init__.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 8: Bump patch version</strong></li>
+</ul>
+<br>
+<p>Current version: <code>1.6.7</code>. Increment to <code>1.6.8</code>.</p>
+<br>
+<p>In <code>capcat/__init__.py</code>, change:</p>
+<div class="highlight"><pre><span></span><span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;1.6.7&quot;</span>
+</pre></div>
+
+<p>to:</p>
+<div class="highlight"><pre><span></span><span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;1.6.8&quot;</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 9: Commit version bump</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>capcat/__init__.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;bump: version to 1.6.8&quot;</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 10: Merge to main and tag</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>checkout<span class="w"> </span>main<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>merge<span class="w"> </span>fix/media-processor-parse-srcset
+git<span class="w"> </span>tag<span class="w"> </span>v1.6.8
+git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>main<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>v1.6.8
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 11: Verify PyPI release (after ~2 min)</strong></li>
+</ul>
+<br>
+<p>The project uses GitHub Actions: pushing a <code>v*</code> tag triggers the CI/CD pipeline to publish to PyPI. Wait ~2 minutes after the tag push, then:</p>
+<br>
+<div class="highlight"><pre><span></span>pipx<span class="w"> </span>upgrade<span class="w"> </span>capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>capcat<span class="w"> </span>--version
+</pre></div>
+
+<br>
+<p>Expected: <code>capcat 1.6.8</code></p>
+<br>
+<p>If the version does not update, check GitHub Actions for the tag-triggered workflow run before investigating further.</p>
+<br>
+<hr>
+<br>
+<h3>Task 4: End-to-end verification</h3>
+<br>
+<ul>
+<li>[ ] <strong>Step 12: Test a single Substack article download</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate
+capcat<span class="w"> </span>single<span class="w"> </span><span class="s2">&quot;https://senykamara.substack.com/p/contextualizing-cryptography&quot;</span><span class="w"> </span>--output<span class="w"> </span>/tmp/capcat-test-v168<span class="w"> </span>--html<span class="w"> </span>-V<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s2">&quot;image|Image|srcset|download|embed|Processed&quot;</span>
+</pre></div>
+
+<br>
+<p>Expected:</p>
+<ul>
+<li>No <code>DEBUG: Failed to download https://senykamara.substack.com/p/fl_progressive:steep/...</code> lines</li>
+<li><code>INFO: Processed N images</code> where N &gt; 0</li>
+<li>No broken URL fragments in log output</li>
+</ul>
+<br>
+<p>If N = 0 still, report the debug output — do not fix further without investigation.</p>
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

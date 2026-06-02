@@ -1,0 +1,2208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceptance Test Runner — Implementation Plan</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / <a href="../superpowers/index.html">superpowers</a> / plans</div>
+<h1>Acceptance Test Runner — Implementation Plan</h1>
+<br>
+<p>&gt; <strong>For agentic workers:</strong> REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (<code>- [ ]</code>) syntax for tracking.</p>
+<br>
+<strong>Goal:</strong> Build a human-in-the-loop acceptance test runner that executes all 74 capcat CLI/TUI commands as real subprocesses, streams live output, waits for the user&#x27;s verdict after each test, and writes a session report.
+<br>
+<strong>Architecture:</strong> Three Python modules (<code>reporter.py</code>, <code>catalog.py</code>, <code>run_acceptance.py</code>) under <code>tests/acceptance/</code>. No new dependencies — stdlib only. The runner calls <code>capcat</code> as a real subprocess. Two fixture files support add-source and remove-source tests.
+<br>
+<strong>Tech Stack:</strong> Python 3.11+, stdlib (<code>subprocess</code>, <code>tempfile</code>, <code>tty</code>/<code>msvcrt</code>, <code>argparse</code>, <code>shutil</code>, <code>pathlib</code>, <code>datetime</code>)
+<br>
+<strong>Spec:</strong> <code>docs/superpowers/specs/2026-03-20-acceptance-test-runner-design.md</code>
+<br>
+<hr>
+<br>
+<h2>File Map</h2>
+<br>
+<p>&lt;div class=&quot;table-container&quot;&gt;</p>
+<p>&lt;table class=&quot;centered-table&quot;&gt;</p>
+<p>  &lt;thead&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;th&gt;File&lt;/th&gt;</p>
+<p>      &lt;th&gt;Role&lt;/th&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>  &lt;/thead&gt;</p>
+<p>  &lt;tbody&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;tests/acceptance/__init__.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Makes the package importable for tests&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;tests/acceptance/fixtures/mock_feed.xml&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;RSS fixture for add-source tests&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;tests/acceptance/fixtures/batch_ids.txt&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Batch-removal fixture&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;tests/acceptance/reporter.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Writes per-test entries + prepends summary&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;tests/acceptance/catalog.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;All 74 test definitions (TESTS list of dicts)&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;tests/acceptance/run_acceptance.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Entry point: core loop, subprocess execution, UX&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;tests/acceptance/test_reporter.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Unit tests for reporter.py&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>    &lt;tr&gt;</p>
+<p>      &lt;td&gt;&lt;code&gt;tests/acceptance/test_catalog.py&lt;/code&gt;&lt;/td&gt;</p>
+<p>      &lt;td&gt;Structural validation tests for catalog.py&lt;/td&gt;</p>
+<p>    &lt;/tr&gt;</p>
+<p>  &lt;/tbody&gt;</p>
+<p>&lt;/table&gt;</p>
+<p>&lt;/div&gt;</p>
+<br>
+<strong>Sentinel strings used in catalog <code>cmd</code> lists (replaced at runtime by runner):</strong>
+<ul>
+<li><code>&quot;__FIXTURE_URL__&quot;</code> → <code>file://&lt;tmp_dir&gt;/mock_feed.xml</code> (used in test 54)</li>
+<li><code>&quot;__TMP__&quot;</code> → absolute path of the test&#x27;s tmp dir (used in tests 5, 17, 30, 44, 62, 66)</li>
+</ul>
+<br>
+<hr>
+<br>
+<h2>Task 1: Scaffold and Fixtures</h2>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Create: <code>tests/acceptance/__init__.py</code></li>
+<li>Create: <code>tests/acceptance/fixtures/mock_feed.xml</code></li>
+<li>Create: <code>tests/acceptance/fixtures/batch_ids.txt</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Create the directory structure</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>mkdir<span class="w"> </span>-p<span class="w"> </span>tests/acceptance/fixtures<span class="w"> </span>tests/acceptance/results
+touch<span class="w"> </span>tests/acceptance/__init__.py
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Write <code>tests/acceptance/fixtures/mock_feed.xml</code></strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span>
+<span class="nt">&lt;rss</span><span class="w"> </span><span class="na">version=</span><span class="s">&quot;2.0&quot;</span><span class="nt">&gt;</span>
+<span class="w">  </span><span class="nt">&lt;channel&gt;</span>
+<span class="w">    </span><span class="nt">&lt;title&gt;</span>Mock<span class="w"> </span>Test<span class="w"> </span>Feed<span class="nt">&lt;/title&gt;</span>
+<span class="w">    </span><span class="nt">&lt;link&gt;</span>https://example.com<span class="nt">&lt;/link&gt;</span>
+<span class="w">    </span><span class="nt">&lt;description&gt;</span>Fixture<span class="w"> </span>feed<span class="w"> </span>for<span class="w"> </span>acceptance<span class="w"> </span>tests<span class="nt">&lt;/description&gt;</span>
+<span class="w">    </span><span class="nt">&lt;item&gt;</span>
+<span class="w">      </span><span class="nt">&lt;title&gt;</span>Test<span class="w"> </span>Article<span class="w"> </span>One<span class="nt">&lt;/title&gt;</span>
+<span class="w">      </span><span class="nt">&lt;link&gt;</span>https://example.com/article-1<span class="nt">&lt;/link&gt;</span>
+<span class="w">      </span><span class="nt">&lt;description&gt;</span>First<span class="w"> </span>test<span class="w"> </span>article.<span class="nt">&lt;/description&gt;</span>
+<span class="w">      </span><span class="nt">&lt;pubDate&gt;</span>Fri,<span class="w"> </span>20<span class="w"> </span>Mar<span class="w"> </span>2026<span class="w"> </span>10:00:00<span class="w"> </span>+0000<span class="nt">&lt;/pubDate&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/item&gt;</span>
+<span class="w">    </span><span class="nt">&lt;item&gt;</span>
+<span class="w">      </span><span class="nt">&lt;title&gt;</span>Test<span class="w"> </span>Article<span class="w"> </span>Two<span class="nt">&lt;/title&gt;</span>
+<span class="w">      </span><span class="nt">&lt;link&gt;</span>https://example.com/article-2<span class="nt">&lt;/link&gt;</span>
+<span class="w">      </span><span class="nt">&lt;description&gt;</span>Second<span class="w"> </span>test<span class="w"> </span>article.<span class="nt">&lt;/description&gt;</span>
+<span class="w">      </span><span class="nt">&lt;pubDate&gt;</span>Fri,<span class="w"> </span>20<span class="w"> </span>Mar<span class="w"> </span>2026<span class="w"> </span>11:00:00<span class="w"> </span>+0000<span class="nt">&lt;/pubDate&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/item&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/channel&gt;</span>
+<span class="nt">&lt;/rss&gt;</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Write <code>tests/acceptance/fixtures/batch_ids.txt</code></strong></li>
+</ul>
+<br>
+<pre><code>hn
+</code></pre>
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>git<span class="w"> </span>add<span class="w"> </span>tests/acceptance/
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: scaffold acceptance test runner directory and fixtures&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h2>Task 2: reporter.py — TDD</h2>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Create: <code>tests/acceptance/test_reporter.py</code></li>
+<li>Create: <code>tests/acceptance/reporter.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Write the failing tests</strong></li>
+</ul>
+<br>
+<p>Create <code>tests/acceptance/test_reporter.py</code>:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Unit tests for reporter.py.&quot;&quot;&quot;</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tests.acceptance.reporter</span><span class="w"> </span><span class="kn">import</span> <span class="n">Reporter</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_write_entry_appends_markdown</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">):</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">Reporter</span><span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;session.md&quot;</span><span class="p">)</span>
+    <span class="n">r</span><span class="o">.</span><span class="n">write_entry</span><span class="p">(</span>
+        <span class="nb">id</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s2">&quot;fetch&quot;</span><span class="p">,</span> <span class="n">cmd</span><span class="o">=</span><span class="s2">&quot;capcat fetch hn --count 3&quot;</span><span class="p">,</span>
+        <span class="n">status</span><span class="o">=</span><span class="s2">&quot;PASS&quot;</span><span class="p">,</span> <span class="n">exit_code</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">expected_exit</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">duration</span><span class="o">=</span><span class="mf">4.2</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="s2">&quot;file:///tmp/out&quot;</span><span class="p">,</span> <span class="n">file_count</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+        <span class="n">analysis</span><span class="o">=</span><span class="s2">&quot;Exit ✓&quot;</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">content</span> <span class="o">=</span> <span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;session.md&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="s2">&quot;## TEST 12 — fetch: capcat fetch hn --count 3&quot;</span> <span class="ow">in</span> <span class="n">content</span>
+    <span class="k">assert</span> <span class="s2">&quot;**Status**: PASS&quot;</span> <span class="ow">in</span> <span class="n">content</span>
+    <span class="k">assert</span> <span class="s2">&quot;0 (expected 0)  ✓&quot;</span> <span class="ow">in</span> <span class="n">content</span>
+    <span class="k">assert</span> <span class="s2">&quot;**Duration**: 4.2s&quot;</span> <span class="ow">in</span> <span class="n">content</span>
+    <span class="k">assert</span> <span class="s2">&quot;file:///tmp/out&quot;</span> <span class="ow">in</span> <span class="n">content</span>
+    <span class="k">assert</span> <span class="s2">&quot;**Files created**: 3&quot;</span> <span class="ow">in</span> <span class="n">content</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_write_entry_none_expected_exit_shows_question_mark</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">):</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">Reporter</span><span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;session.md&quot;</span><span class="p">)</span>
+    <span class="n">r</span><span class="o">.</span><span class="n">write_entry</span><span class="p">(</span>
+        <span class="nb">id</span><span class="o">=</span><span class="mi">57</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s2">&quot;remove-source&quot;</span><span class="p">,</span> <span class="n">cmd</span><span class="o">=</span><span class="s2">&quot;capcat remove-source&quot;</span><span class="p">,</span>
+        <span class="n">status</span><span class="o">=</span><span class="s2">&quot;PASS&quot;</span><span class="p">,</span> <span class="n">exit_code</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">expected_exit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">duration</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">file_count</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">analysis</span><span class="o">=</span><span class="s2">&quot;exit check skipped — user judges&quot;</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">content</span> <span class="o">=</span> <span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;session.md&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="s2">&quot;(expected ?)  ?&quot;</span> <span class="ow">in</span> <span class="n">content</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_write_entry_no_output_path_omits_output_lines</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">):</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">Reporter</span><span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;session.md&quot;</span><span class="p">)</span>
+    <span class="n">r</span><span class="o">.</span><span class="n">write_entry</span><span class="p">(</span>
+        <span class="nb">id</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s2">&quot;global&quot;</span><span class="p">,</span> <span class="n">cmd</span><span class="o">=</span><span class="s2">&quot;capcat --help&quot;</span><span class="p">,</span>
+        <span class="n">status</span><span class="o">=</span><span class="s2">&quot;PASS&quot;</span><span class="p">,</span> <span class="n">exit_code</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">expected_exit</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">duration</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">file_count</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">analysis</span><span class="o">=</span><span class="s2">&quot;Exit ✓&quot;</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">content</span> <span class="o">=</span> <span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;session.md&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="s2">&quot;**Output**&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">content</span>
+    <span class="k">assert</span> <span class="s2">&quot;**Files created**&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">content</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_write_entry_with_note_fills_note_field</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">):</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">Reporter</span><span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;session.md&quot;</span><span class="p">)</span>
+    <span class="n">r</span><span class="o">.</span><span class="n">write_entry</span><span class="p">(</span>
+        <span class="nb">id</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s2">&quot;global&quot;</span><span class="p">,</span> <span class="n">cmd</span><span class="o">=</span><span class="s2">&quot;capcat -h&quot;</span><span class="p">,</span>
+        <span class="n">status</span><span class="o">=</span><span class="s2">&quot;PASS&quot;</span><span class="p">,</span> <span class="n">exit_code</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">expected_exit</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">duration</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">file_count</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">analysis</span><span class="o">=</span><span class="s2">&quot;Exit ✓&quot;</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="s2">&quot;took longer than expected&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">content</span> <span class="o">=</span> <span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;session.md&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="s2">&quot;took longer than expected&quot;</span> <span class="ow">in</span> <span class="n">content</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_write_entry_empty_note_renders_dash</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">):</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">Reporter</span><span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;session.md&quot;</span><span class="p">)</span>
+    <span class="n">r</span><span class="o">.</span><span class="n">write_entry</span><span class="p">(</span>
+        <span class="nb">id</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s2">&quot;global&quot;</span><span class="p">,</span> <span class="n">cmd</span><span class="o">=</span><span class="s2">&quot;capcat&quot;</span><span class="p">,</span>
+        <span class="n">status</span><span class="o">=</span><span class="s2">&quot;PASS&quot;</span><span class="p">,</span> <span class="n">exit_code</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">expected_exit</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">duration</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">file_count</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">analysis</span><span class="o">=</span><span class="s2">&quot;Exit ✓&quot;</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">content</span> <span class="o">=</span> <span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;session.md&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="s2">&quot;**Note**: —&quot;</span> <span class="ow">in</span> <span class="n">content</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_write_entry_fail_status</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">):</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">Reporter</span><span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;session.md&quot;</span><span class="p">)</span>
+    <span class="n">r</span><span class="o">.</span><span class="n">write_entry</span><span class="p">(</span>
+        <span class="nb">id</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s2">&quot;fetch&quot;</span><span class="p">,</span> <span class="n">cmd</span><span class="o">=</span><span class="s2">&quot;capcat fetch hn,bbc --count 3&quot;</span><span class="p">,</span>
+        <span class="n">status</span><span class="o">=</span><span class="s2">&quot;FAIL&quot;</span><span class="p">,</span> <span class="n">exit_code</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">expected_exit</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">duration</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">file_count</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">analysis</span><span class="o">=</span><span class="s2">&quot;Exit ✗ | Traceback found&quot;</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">content</span> <span class="o">=</span> <span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;session.md&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="s2">&quot;**Status**: FAIL&quot;</span> <span class="ow">in</span> <span class="n">content</span>
+    <span class="k">assert</span> <span class="s2">&quot;1 (expected 0)  ✗&quot;</span> <span class="ow">in</span> <span class="n">content</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_finalize_prepends_summary_before_entries</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">):</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;session.md&quot;</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">Reporter</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">r</span><span class="o">.</span><span class="n">write_entry</span><span class="p">(</span>
+        <span class="nb">id</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s2">&quot;global&quot;</span><span class="p">,</span> <span class="n">cmd</span><span class="o">=</span><span class="s2">&quot;capcat&quot;</span><span class="p">,</span>
+        <span class="n">status</span><span class="o">=</span><span class="s2">&quot;PASS&quot;</span><span class="p">,</span> <span class="n">exit_code</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">expected_exit</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">duration</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">file_count</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">analysis</span><span class="o">=</span><span class="s2">&quot;Exit ✓&quot;</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">r</span><span class="o">.</span><span class="n">finalize</span><span class="p">(</span>
+        <span class="n">counts</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;global&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;pass&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;fail&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;skip&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}},</span>
+        <span class="n">failed_tests</span><span class="o">=</span><span class="p">[],</span>
+    <span class="p">)</span>
+    <span class="n">content</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="n">content</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;# Capcat Acceptance Test Run&quot;</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">content</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;## TEST 1&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_finalize_shows_correct_totals</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">):</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;session.md&quot;</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">Reporter</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">r</span><span class="o">.</span><span class="n">finalize</span><span class="p">(</span>
+        <span class="n">counts</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;global&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;pass&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s2">&quot;fail&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;skip&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+            <span class="s2">&quot;fetch&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;pass&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;fail&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;skip&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span>
+        <span class="p">},</span>
+        <span class="n">failed_tests</span><span class="o">=</span><span class="p">[],</span>
+    <span class="p">)</span>
+    <span class="n">content</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="s2">&quot;**Passed**: 8&quot;</span> <span class="ow">in</span> <span class="n">content</span>
+    <span class="k">assert</span> <span class="s2">&quot;**Failed**: 1&quot;</span> <span class="ow">in</span> <span class="n">content</span>
+    <span class="k">assert</span> <span class="s2">&quot;**Skipped**: 1&quot;</span> <span class="ow">in</span> <span class="n">content</span>
+    <span class="k">assert</span> <span class="s2">&quot;**Total run**: 10&quot;</span> <span class="ow">in</span> <span class="n">content</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_finalize_lists_failed_tests</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">):</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;session.md&quot;</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">Reporter</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">r</span><span class="o">.</span><span class="n">finalize</span><span class="p">(</span>
+        <span class="n">counts</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;fetch&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;pass&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;fail&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;skip&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}},</span>
+        <span class="n">failed_tests</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;TEST 25: fetch hn,bbc — Traceback in output&quot;</span><span class="p">],</span>
+    <span class="p">)</span>
+    <span class="n">content</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="s2">&quot;### Failed Tests&quot;</span> <span class="ow">in</span> <span class="n">content</span>
+    <span class="k">assert</span> <span class="s2">&quot;TEST 25&quot;</span> <span class="ow">in</span> <span class="n">content</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_finalize_no_failed_tests_omits_section</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">):</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;session.md&quot;</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">Reporter</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">r</span><span class="o">.</span><span class="n">finalize</span><span class="p">(</span>
+        <span class="n">counts</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;global&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;pass&quot;</span><span class="p">:</span> <span class="mi">7</span><span class="p">,</span> <span class="s2">&quot;fail&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;skip&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}},</span>
+        <span class="n">failed_tests</span><span class="o">=</span><span class="p">[],</span>
+    <span class="p">)</span>
+    <span class="n">content</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="s2">&quot;### Failed Tests&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">content</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Run to verify all fail</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>tests/acceptance/test_reporter.py<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: all fail with <code>ModuleNotFoundError</code> (reporter.py doesn&#x27;t exist yet).</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Implement <code>tests/acceptance/reporter.py</code></strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Writes per-test report entries and session summary to the session file.&quot;&quot;&quot;</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Reporter</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="o">=</span> <span class="n">session_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="o">.</span><span class="n">touch</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">write_entry</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">group</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">cmd</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">status</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">exit_code</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">expected_exit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">duration</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">output_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">file_count</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">analysis</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">note</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">exit_display</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">exit_code</span><span class="p">)</span> <span class="k">if</span> <span class="n">exit_code</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;?&quot;</span>
+        <span class="n">expected_display</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">expected_exit</span><span class="p">)</span> <span class="k">if</span> <span class="n">expected_exit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;?&quot;</span>
+        <span class="k">if</span> <span class="n">expected_exit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">exit_code</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">match_symbol</span> <span class="o">=</span> <span class="s2">&quot;✓&quot;</span> <span class="k">if</span> <span class="n">exit_code</span> <span class="o">==</span> <span class="n">expected_exit</span> <span class="k">else</span> <span class="s2">&quot;✗&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">match_symbol</span> <span class="o">=</span> <span class="s2">&quot;?&quot;</span>
+
+        <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">## TEST </span><span class="si">{</span><span class="nb">id</span><span class="si">}</span><span class="s2"> — </span><span class="si">{</span><span class="n">group</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">cmd</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;- **Status**: </span><span class="si">{</span><span class="n">status</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;- **Exit**: </span><span class="si">{</span><span class="n">exit_display</span><span class="si">}</span><span class="s2"> (expected </span><span class="si">{</span><span class="n">expected_display</span><span class="si">}</span><span class="s2">)  </span><span class="si">{</span><span class="n">match_symbol</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;- **Duration**: </span><span class="si">{</span><span class="n">duration</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">s&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="k">if</span> <span class="n">output_path</span><span class="p">:</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- **Output**: </span><span class="si">{</span><span class="n">output_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">file_count</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- **Files created**: </span><span class="si">{</span><span class="n">file_count</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- **Auto-analysis**: </span><span class="si">{</span><span class="n">analysis</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- **Note**: </span><span class="si">{</span><span class="n">note</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">note</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;—&#39;</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">finalize</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">counts</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span>
+        <span class="n">failed_tests</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">passed</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;pass&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">counts</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="n">failed_count</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;fail&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">counts</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="n">skipped</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;skip&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">counts</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="n">total_run</span> <span class="o">=</span> <span class="n">passed</span> <span class="o">+</span> <span class="n">failed_count</span> <span class="o">+</span> <span class="n">skipped</span>
+
+        <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M&quot;</span><span class="p">)</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;| Group           | Pass | Fail | Skip |&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;|-----------------|------|------|------|&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="k">for</span> <span class="n">group</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">counts</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;| </span><span class="si">{</span><span class="n">group</span><span class="si">:</span><span class="s2">&lt;15</span><span class="si">}</span><span class="s2"> | </span><span class="si">{</span><span class="n">v</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;pass&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="si">:</span><span class="s2">&lt;4</span><span class="si">}</span><span class="s2"> | </span><span class="si">{</span><span class="n">v</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;fail&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="si">:</span><span class="s2">&lt;4</span><span class="si">}</span><span class="s2"> | </span><span class="si">{</span><span class="n">v</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;skip&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="si">:</span><span class="s2">&lt;4</span><span class="si">}</span><span class="s2"> |&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">header_lines</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="sa">f</span><span class="s2">&quot;# Capcat Acceptance Test Run — </span><span class="si">{</span><span class="n">now</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;**Passed**: </span><span class="si">{</span><span class="n">passed</span><span class="si">}</span><span class="s2">  **Failed**: </span><span class="si">{</span><span class="n">failed_count</span><span class="si">}</span><span class="s2">  &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;**Skipped**: </span><span class="si">{</span><span class="n">skipped</span><span class="si">}</span><span class="s2">  **Total run**: </span><span class="si">{</span><span class="n">total_run</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="p">]</span> <span class="o">+</span> <span class="n">rows</span>
+
+        <span class="k">if</span> <span class="n">failed_tests</span><span class="p">:</span>
+            <span class="n">header_lines</span> <span class="o">+=</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;### Failed Tests&quot;</span><span class="p">]</span>
+            <span class="n">header_lines</span> <span class="o">+=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;- </span><span class="si">{</span><span class="n">t</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">failed_tests</span><span class="p">]</span>
+
+        <span class="n">summary</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">header_lines</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">---</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">existing</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">summary</span> <span class="o">+</span> <span class="n">existing</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Run tests — all must pass</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>tests/acceptance/test_reporter.py<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: all 10 tests PASS.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 5: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>git<span class="w"> </span>add<span class="w"> </span>tests/acceptance/reporter.py<span class="w"> </span>tests/acceptance/test_reporter.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: add reporter.py with session entry/summary writing&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h2>Task 3: catalog.py Skeleton + Structural Tests</h2>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Create: <code>tests/acceptance/test_catalog.py</code></li>
+<li>Create: <code>tests/acceptance/catalog.py</code> (skeleton, TESTS = [])</li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Write the structural tests</strong></li>
+</ul>
+<br>
+<p>Create <code>tests/acceptance/test_catalog.py</code>:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Structural validation tests for catalog.py — ensures all 74 entries are well-formed.&quot;&quot;&quot;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+
+<span class="n">REQUIRED_FIELDS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;group&quot;</span><span class="p">,</span> <span class="s2">&quot;label&quot;</span><span class="p">,</span> <span class="s2">&quot;cmd&quot;</span><span class="p">,</span> <span class="s2">&quot;expected_exit&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;expected_in_output&quot;</span><span class="p">,</span> <span class="s2">&quot;creates_files&quot;</span><span class="p">,</span> <span class="s2">&quot;needs_init&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;pre_init&quot;</span><span class="p">,</span> <span class="s2">&quot;is_tui&quot;</span><span class="p">,</span> <span class="s2">&quot;passthrough&quot;</span><span class="p">,</span> <span class="s2">&quot;timeout&quot;</span><span class="p">,</span> <span class="s2">&quot;fixture&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="n">VALID_GROUPS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;global&quot;</span><span class="p">,</span> <span class="s2">&quot;init&quot;</span><span class="p">,</span> <span class="s2">&quot;single&quot;</span><span class="p">,</span> <span class="s2">&quot;fetch&quot;</span><span class="p">,</span> <span class="s2">&quot;bundle&quot;</span><span class="p">,</span> <span class="s2">&quot;list&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;add-source&quot;</span><span class="p">,</span> <span class="s2">&quot;remove-source&quot;</span><span class="p">,</span> <span class="s2">&quot;generate-config&quot;</span><span class="p">,</span> <span class="s2">&quot;tui&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">get_tests</span><span class="p">():</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">tests.acceptance.catalog</span><span class="w"> </span><span class="kn">import</span> <span class="n">TESTS</span>
+    <span class="k">return</span> <span class="n">TESTS</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_total_count_is_74</span><span class="p">():</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">get_tests</span><span class="p">())</span> <span class="o">==</span> <span class="mi">74</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Expected 74, got </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">get_tests</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_all_entries_have_required_fields</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">get_tests</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">REQUIRED_FIELDS</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">t</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Test </span><span class="si">{</span><span class="n">t</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;?&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2"> missing field &#39;</span><span class="si">{</span><span class="n">field</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_ids_are_sequential_from_one</span><span class="p">():</span>
+    <span class="n">ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">get_tests</span><span class="p">()]</span>
+    <span class="k">assert</span> <span class="n">ids</span> <span class="o">==</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)),</span> <span class="sa">f</span><span class="s2">&quot;IDs not sequential: </span><span class="si">{</span><span class="n">ids</span><span class="si">}</span><span class="s2">&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_all_groups_are_valid</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">get_tests</span><span class="p">():</span>
+        <span class="k">assert</span> <span class="n">t</span><span class="p">[</span><span class="s2">&quot;group&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">VALID_GROUPS</span><span class="p">,</span> \
+            <span class="sa">f</span><span class="s2">&quot;Test </span><span class="si">{</span><span class="n">t</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> has invalid group &#39;</span><span class="si">{</span><span class="n">t</span><span class="p">[</span><span class="s1">&#39;group&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_no_passthrough_with_creates_files</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">get_tests</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">t</span><span class="p">[</span><span class="s2">&quot;passthrough&quot;</span><span class="p">]:</span>
+            <span class="k">assert</span> <span class="ow">not</span> <span class="n">t</span><span class="p">[</span><span class="s2">&quot;creates_files&quot;</span><span class="p">],</span> \
+                <span class="sa">f</span><span class="s2">&quot;Test </span><span class="si">{</span><span class="n">t</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">: passthrough=True but creates_files=True&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_no_passthrough_with_expected_in_output</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">get_tests</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">t</span><span class="p">[</span><span class="s2">&quot;passthrough&quot;</span><span class="p">]:</span>
+            <span class="k">assert</span> <span class="n">t</span><span class="p">[</span><span class="s2">&quot;expected_in_output&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="p">[],</span> \
+                <span class="sa">f</span><span class="s2">&quot;Test </span><span class="si">{</span><span class="n">t</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">: passthrough=True but expected_in_output non-empty&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_no_both_needs_init_and_pre_init</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">get_tests</span><span class="p">():</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s2">&quot;needs_init&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">t</span><span class="p">[</span><span class="s2">&quot;pre_init&quot;</span><span class="p">]),</span> \
+            <span class="sa">f</span><span class="s2">&quot;Test </span><span class="si">{</span><span class="n">t</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">: both needs_init and pre_init are True&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_cmd_starts_with_capcat</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">get_tests</span><span class="p">():</span>
+        <span class="k">assert</span> <span class="n">t</span><span class="p">[</span><span class="s2">&quot;cmd&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;capcat&quot;</span><span class="p">,</span> \
+            <span class="sa">f</span><span class="s2">&quot;Test </span><span class="si">{</span><span class="n">t</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> cmd doesn&#39;t start with &#39;capcat&#39;: </span><span class="si">{</span><span class="n">t</span><span class="p">[</span><span class="s1">&#39;cmd&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_tui_tests_have_timeout_120</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">get_tests</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">t</span><span class="p">[</span><span class="s2">&quot;is_tui&quot;</span><span class="p">]:</span>
+            <span class="k">assert</span> <span class="n">t</span><span class="p">[</span><span class="s2">&quot;timeout&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">120</span><span class="p">,</span> \
+                <span class="sa">f</span><span class="s2">&quot;TUI test </span><span class="si">{</span><span class="n">t</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> should have timeout=120, got </span><span class="si">{</span><span class="n">t</span><span class="p">[</span><span class="s1">&#39;timeout&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_tui_tests_use_catch_subcommand</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">get_tests</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">t</span><span class="p">[</span><span class="s2">&quot;is_tui&quot;</span><span class="p">]:</span>
+            <span class="k">assert</span> <span class="n">t</span><span class="p">[</span><span class="s2">&quot;cmd&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;capcat&quot;</span><span class="p">,</span> <span class="s2">&quot;catch&quot;</span><span class="p">],</span> \
+                <span class="sa">f</span><span class="s2">&quot;TUI test </span><span class="si">{</span><span class="n">t</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> cmd should be [&#39;capcat&#39;, &#39;catch&#39;]&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_fixture_url_sentinel_only_in_test_54</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">get_tests</span><span class="p">():</span>
+        <span class="n">has_sentinel</span> <span class="o">=</span> <span class="s2">&quot;__FIXTURE_URL__&quot;</span> <span class="ow">in</span> <span class="n">t</span><span class="p">[</span><span class="s2">&quot;cmd&quot;</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="n">has_sentinel</span> <span class="o">==</span> <span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">54</span><span class="p">),</span> \
+            <span class="sa">f</span><span class="s2">&quot;Test </span><span class="si">{</span><span class="n">t</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">: unexpected __FIXTURE_URL__ sentinel&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_tmp_sentinel_in_expected_tests</span><span class="p">():</span>
+    <span class="c1"># Tests that reference tmp dir in their cmd</span>
+    <span class="n">tmp_tests</span> <span class="o">=</span> <span class="p">{</span><span class="mi">5</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">44</span><span class="p">,</span> <span class="mi">62</span><span class="p">,</span> <span class="mi">66</span><span class="p">}</span>
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">get_tests</span><span class="p">():</span>
+        <span class="n">has_tmp</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="s2">&quot;__TMP__&quot;</span> <span class="ow">in</span> <span class="n">arg</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">t</span><span class="p">[</span><span class="s2">&quot;cmd&quot;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">t</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">tmp_tests</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">has_tmp</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Test </span><span class="si">{</span><span class="n">t</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> should contain __TMP__ sentinel&quot;</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Create skeleton <code>tests/acceptance/catalog.py</code></strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Full ordered test catalog — 74 acceptance tests.&quot;&quot;&quot;</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="n">TESTS</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Run structural tests — verify they fail correctly</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>tests/acceptance/test_catalog.py<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: <code>test_total_count_is_74</code> fails with <code>Expected 74, got 0</code>. All others pass (empty list satisfies vacuous quantifiers except count).</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Commit skeleton</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>git<span class="w"> </span>add<span class="w"> </span>tests/acceptance/catalog.py<span class="w"> </span>tests/acceptance/test_catalog.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: add catalog skeleton and structural validation tests&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h2>Task 4: Catalog — global + init Groups (Tests 1–10)</h2>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>tests/acceptance/catalog.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Add global + init entries to TESTS</strong></li>
+</ul>
+<br>
+<p>Replace the <code>TESTS</code> list in <code>catalog.py</code> with:</p>
+<br>
+<div class="ascii-art">&quot;&quot;&quot;Full ordered test catalog — 74 acceptance tests.
+
+Sentinels replaced at runtime by run_acceptance.py:
+  __FIXTURE_URL__  → file://&lt;tmp_dir&gt;/mock_feed.xml
+  __TMP__          → absolute path of the test&#x27;s tmp dir
+&quot;&quot;&quot;
+from __future__ import annotations
+
+TESTS: list[dict] = [
+    # ── global (7) ────────────────────────────────────────────────────────────
+    {
+        &quot;id&quot;: 1, &quot;group&quot;: &quot;global&quot;, &quot;label&quot;: &quot;No args prints help&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [&quot;capcat&quot;],
+        &quot;creates_files&quot;: False, &quot;needs_init&quot;: False, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 30, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 2, &quot;group&quot;: &quot;global&quot;, &quot;label&quot;: &quot;--help flag&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;--help&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [&quot;Usage&quot;],
+        &quot;creates_files&quot;: False, &quot;needs_init&quot;: False, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 30, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 3, &quot;group&quot;: &quot;global&quot;, &quot;label&quot;: &quot;-h flag&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;-h&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [&quot;Usage&quot;],
+        &quot;creates_files&quot;: False, &quot;needs_init&quot;: False, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 30, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 4, &quot;group&quot;: &quot;global&quot;, &quot;label&quot;: &quot;--version prints version&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;--version&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [&quot;capcat&quot;],
+        &quot;creates_files&quot;: False, &quot;needs_init&quot;: False, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 30, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 5, &quot;group&quot;: &quot;global&quot;, &quot;label&quot;: &quot;-L logs to file&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;-L&quot;, &quot;__TMP__/capcat.log&quot;, &quot;fetch&quot;, &quot;hn&quot;, &quot;--count&quot;, &quot;1&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: True, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 60, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 6, &quot;group&quot;: &quot;global&quot;, &quot;label&quot;: &quot;-L missing filename exits 1&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;-L&quot;],
+        &quot;expected_exit&quot;: 1, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: False, &quot;needs_init&quot;: False, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 30, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 7, &quot;group&quot;: &quot;global&quot;, &quot;label&quot;: &quot;Unknown command exits 1&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;unknowncmd_xyz&quot;],
+        &quot;expected_exit&quot;: 1, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: False, &quot;needs_init&quot;: False, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 30, &quot;fixture&quot;: None,
+    },
+    # ── init (3) ──────────────────────────────────────────────────────────────
+    {
+        &quot;id&quot;: 8, &quot;group&quot;: &quot;init&quot;, &quot;label&quot;: &quot;Fresh init&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;init&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [&quot;initialized&quot;],
+        &quot;creates_files&quot;: False, &quot;needs_init&quot;: False, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 30, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 9, &quot;group&quot;: &quot;init&quot;, &quot;label&quot;: &quot;Already init&#x27;d exits 1&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;init&quot;],
+        &quot;expected_exit&quot;: 1, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: False, &quot;needs_init&quot;: False, &quot;pre_init&quot;: True,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 30, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 10, &quot;group&quot;: &quot;init&quot;, &quot;label&quot;: &quot;--reinit on existing succeeds&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;init&quot;, &quot;--reinit&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: False, &quot;needs_init&quot;: False, &quot;pre_init&quot;: True,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 30, &quot;fixture&quot;: None,
+    },
+]
+</div>
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Run structural tests</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>tests/acceptance/test_catalog.py<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: <code>test_total_count_is_74</code> still fails (10 entries). All others pass.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>git<span class="w"> </span>add<span class="w"> </span>tests/acceptance/catalog.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: catalog — global and init groups (tests 1-10)&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h2>Task 5: Catalog — single + fetch Groups (Tests 11–32)</h2>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>tests/acceptance/catalog.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Append single entries (11–19) to TESTS</strong></li>
+</ul>
+<br>
+<div class="ascii-art">    # ── single (9) ────────────────────────────────────────────────────────────
+    {
+        &quot;id&quot;: 11, &quot;group&quot;: &quot;single&quot;, &quot;label&quot;: &quot;No URL prints usage&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;single&quot;],
+        &quot;expected_exit&quot;: None, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: False, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 30, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 12, &quot;group&quot;: &quot;single&quot;, &quot;label&quot;: &quot;--help&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;single&quot;, &quot;--help&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [&quot;Usage&quot;],
+        &quot;creates_files&quot;: False, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 30, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 13, &quot;group&quot;: &quot;single&quot;, &quot;label&quot;: &quot;Basic single URL&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;single&quot;, &quot;https://example.com&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: True, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 60, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 14, &quot;group&quot;: &quot;single&quot;, &quot;label&quot;: &quot;single + --html&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;single&quot;, &quot;https://example.com&quot;, &quot;--html&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: True, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 60, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 15, &quot;group&quot;: &quot;single&quot;, &quot;label&quot;: &quot;single + --media&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;single&quot;, &quot;https://example.com&quot;, &quot;--media&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: True, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 60, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 16, &quot;group&quot;: &quot;single&quot;, &quot;label&quot;: &quot;single + --update&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;single&quot;, &quot;https://example.com&quot;, &quot;--update&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: True, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 60, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 17, &quot;group&quot;: &quot;single&quot;, &quot;label&quot;: &quot;single + --output&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;single&quot;, &quot;https://example.com&quot;, &quot;--output&quot;, &quot;__TMP__/out&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: True, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 60, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 18, &quot;group&quot;: &quot;single&quot;, &quot;label&quot;: &quot;single + -V verbose&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;single&quot;, &quot;https://example.com&quot;, &quot;-V&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: True, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 60, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 19, &quot;group&quot;: &quot;single&quot;, &quot;label&quot;: &quot;single + -q quiet&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;single&quot;, &quot;https://example.com&quot;, &quot;-q&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: True, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 60, &quot;fixture&quot;: None,
+    },
+    # ── fetch (13) ────────────────────────────────────────────────────────────
+    {
+        &quot;id&quot;: 20, &quot;group&quot;: &quot;fetch&quot;, &quot;label&quot;: &quot;No source prints usage&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;fetch&quot;],
+        &quot;expected_exit&quot;: None, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: False, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 30, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 21, &quot;group&quot;: &quot;fetch&quot;, &quot;label&quot;: &quot;--help&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;fetch&quot;, &quot;--help&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [&quot;Usage&quot;],
+        &quot;creates_files&quot;: False, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 30, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 22, &quot;group&quot;: &quot;fetch&quot;, &quot;label&quot;: &quot;Single source: hn&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;fetch&quot;, &quot;hn&quot;, &quot;--count&quot;, &quot;3&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: True, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 60, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 23, &quot;group&quot;: &quot;fetch&quot;, &quot;label&quot;: &quot;Single source: bbc&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;fetch&quot;, &quot;bbc&quot;, &quot;--count&quot;, &quot;3&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: True, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 60, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 24, &quot;group&quot;: &quot;fetch&quot;, &quot;label&quot;: &quot;Single source: lb&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;fetch&quot;, &quot;lb&quot;, &quot;--count&quot;, &quot;3&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: True, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 60, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 25, &quot;group&quot;: &quot;fetch&quot;, &quot;label&quot;: &quot;Multi source: hn,bbc&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;fetch&quot;, &quot;hn,bbc&quot;, &quot;--count&quot;, &quot;3&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: True, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 90, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 26, &quot;group&quot;: &quot;fetch&quot;, &quot;label&quot;: &quot;Three sources: hn,bbc,lb&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;fetch&quot;, &quot;hn,bbc,lb&quot;, &quot;--count&quot;, &quot;3&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: True, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 90, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 27, &quot;group&quot;: &quot;fetch&quot;, &quot;label&quot;: &quot;fetch + --html&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;fetch&quot;, &quot;hn&quot;, &quot;--count&quot;, &quot;3&quot;, &quot;--html&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: True, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 60, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 28, &quot;group&quot;: &quot;fetch&quot;, &quot;label&quot;: &quot;fetch + --media&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;fetch&quot;, &quot;hn&quot;, &quot;--count&quot;, &quot;3&quot;, &quot;--media&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: True, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 60, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 29, &quot;group&quot;: &quot;fetch&quot;, &quot;label&quot;: &quot;fetch + --update&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;fetch&quot;, &quot;hn&quot;, &quot;--count&quot;, &quot;3&quot;, &quot;--update&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: True, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 60, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 30, &quot;group&quot;: &quot;fetch&quot;, &quot;label&quot;: &quot;fetch + --output&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;fetch&quot;, &quot;hn&quot;, &quot;--count&quot;, &quot;3&quot;, &quot;--output&quot;, &quot;__TMP__/out&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: True, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 60, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 31, &quot;group&quot;: &quot;fetch&quot;, &quot;label&quot;: &quot;fetch + -V verbose&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;fetch&quot;, &quot;hn&quot;, &quot;--count&quot;, &quot;3&quot;, &quot;-V&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: True, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 60, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 32, &quot;group&quot;: &quot;fetch&quot;, &quot;label&quot;: &quot;fetch + -q quiet&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;fetch&quot;, &quot;hn&quot;, &quot;--count&quot;, &quot;3&quot;, &quot;-q&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: True, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 60, &quot;fixture&quot;: None,
+    },
+</div>
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Run structural tests</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>tests/acceptance/test_catalog.py<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: <code>test_total_count_is_74</code> still fails (32 entries). All others pass.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>git<span class="w"> </span>add<span class="w"> </span>tests/acceptance/catalog.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: catalog — single and fetch groups (tests 11-32)&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h2>Task 6: Catalog — bundle + list Groups (Tests 33–51)</h2>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>tests/acceptance/catalog.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Append bundle + list entries</strong></li>
+</ul>
+<br>
+<div class="ascii-art">    # ── bundle (14) ───────────────────────────────────────────────────────────
+    {
+        &quot;id&quot;: 33, &quot;group&quot;: &quot;bundle&quot;, &quot;label&quot;: &quot;No name prints usage&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;bundle&quot;],
+        &quot;expected_exit&quot;: None, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: False, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 30, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 34, &quot;group&quot;: &quot;bundle&quot;, &quot;label&quot;: &quot;--help&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;bundle&quot;, &quot;--help&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [&quot;Usage&quot;],
+        &quot;creates_files&quot;: False, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 30, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 35, &quot;group&quot;: &quot;bundle&quot;, &quot;label&quot;: &quot;Bundle: tech&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;bundle&quot;, &quot;tech&quot;, &quot;--count&quot;, &quot;3&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: True, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 90, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 36, &quot;group&quot;: &quot;bundle&quot;, &quot;label&quot;: &quot;Bundle: techpro&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;bundle&quot;, &quot;techpro&quot;, &quot;--count&quot;, &quot;3&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: True, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 90, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 37, &quot;group&quot;: &quot;bundle&quot;, &quot;label&quot;: &quot;Bundle: news&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;bundle&quot;, &quot;news&quot;, &quot;--count&quot;, &quot;3&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: True, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 90, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 38, &quot;group&quot;: &quot;bundle&quot;, &quot;label&quot;: &quot;Bundle: science&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;bundle&quot;, &quot;science&quot;, &quot;--count&quot;, &quot;3&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: True, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 90, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 39, &quot;group&quot;: &quot;bundle&quot;, &quot;label&quot;: &quot;Bundle: ai&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;bundle&quot;, &quot;ai&quot;, &quot;--count&quot;, &quot;3&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: True, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 90, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 40, &quot;group&quot;: &quot;bundle&quot;, &quot;label&quot;: &quot;Bundle: sports&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;bundle&quot;, &quot;sports&quot;, &quot;--count&quot;, &quot;3&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: True, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 90, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 41, &quot;group&quot;: &quot;bundle&quot;, &quot;label&quot;: &quot;Bundle: all keyword&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;bundle&quot;, &quot;all&quot;, &quot;--count&quot;, &quot;2&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: True, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 120, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 42, &quot;group&quot;: &quot;bundle&quot;, &quot;label&quot;: &quot;Bundle: --all flag&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;bundle&quot;, &quot;--all&quot;, &quot;--count&quot;, &quot;2&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: True, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 120, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 43, &quot;group&quot;: &quot;bundle&quot;, &quot;label&quot;: &quot;bundle + --html&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;bundle&quot;, &quot;tech&quot;, &quot;--count&quot;, &quot;3&quot;, &quot;--html&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: True, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 90, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 44, &quot;group&quot;: &quot;bundle&quot;, &quot;label&quot;: &quot;bundle + --output&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;bundle&quot;, &quot;tech&quot;, &quot;--count&quot;, &quot;3&quot;, &quot;--output&quot;, &quot;__TMP__/out&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: True, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 90, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 45, &quot;group&quot;: &quot;bundle&quot;, &quot;label&quot;: &quot;bundle + -V verbose&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;bundle&quot;, &quot;tech&quot;, &quot;--count&quot;, &quot;3&quot;, &quot;-V&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: True, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 90, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 46, &quot;group&quot;: &quot;bundle&quot;, &quot;label&quot;: &quot;Unknown bundle exits 1&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;bundle&quot;, &quot;unknown_bundle_xyz&quot;],
+        &quot;expected_exit&quot;: 1, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: False, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 30, &quot;fixture&quot;: None,
+    },
+    # ── list (5) ──────────────────────────────────────────────────────────────
+    {
+        &quot;id&quot;: 47, &quot;group&quot;: &quot;list&quot;, &quot;label&quot;: &quot;list (no subcommand)&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;list&quot;],
+        &quot;expected_exit&quot;: 0,
+        &quot;expected_in_output&quot;: [&quot;Available sources&quot;, &quot;Available bundles&quot;],
+        &quot;creates_files&quot;: False, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 30, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 48, &quot;group&quot;: &quot;list&quot;, &quot;label&quot;: &quot;list sources&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;list&quot;, &quot;sources&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [&quot;Available sources&quot;],
+        &quot;creates_files&quot;: False, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 30, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 49, &quot;group&quot;: &quot;list&quot;, &quot;label&quot;: &quot;list bundles&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;list&quot;, &quot;bundles&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [&quot;Available bundles&quot;],
+        &quot;creates_files&quot;: False, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 30, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 50, &quot;group&quot;: &quot;list&quot;, &quot;label&quot;: &quot;list all&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;list&quot;, &quot;all&quot;],
+        &quot;expected_exit&quot;: 0,
+        &quot;expected_in_output&quot;: [&quot;Available sources&quot;, &quot;Available bundles&quot;],
+        &quot;creates_files&quot;: False, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 30, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 51, &quot;group&quot;: &quot;list&quot;, &quot;label&quot;: &quot;list --help&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;list&quot;, &quot;--help&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [&quot;Usage&quot;],
+        &quot;creates_files&quot;: False, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 30, &quot;fixture&quot;: None,
+    },
+</div>
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Run structural tests</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>tests/acceptance/test_catalog.py<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: count test still fails (51 entries). All others pass.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>git<span class="w"> </span>add<span class="w"> </span>tests/acceptance/catalog.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: catalog — bundle and list groups (tests 33-51)&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h2>Task 7: Catalog — add-source, remove-source, generate-config (Tests 52–66)</h2>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>tests/acceptance/catalog.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Append entries 52–66</strong></li>
+</ul>
+<br>
+<div class="ascii-art">    # ── add-source (4) ────────────────────────────────────────────────────────
+    {
+        &quot;id&quot;: 52, &quot;group&quot;: &quot;add-source&quot;, &quot;label&quot;: &quot;No --url exits 1&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;add-source&quot;],
+        &quot;expected_exit&quot;: 1, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: False, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 30, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 53, &quot;group&quot;: &quot;add-source&quot;, &quot;label&quot;: &quot;--help&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;add-source&quot;, &quot;--help&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [&quot;Usage&quot;],
+        &quot;creates_files&quot;: False, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 30, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 54, &quot;group&quot;: &quot;add-source&quot;, &quot;label&quot;: &quot;Valid feed URL (fixture)&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;add-source&quot;, &quot;--url&quot;, &quot;__FIXTURE_URL__&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: False, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: True, &quot;timeout&quot;: 60,
+        &quot;fixture&quot;: &quot;mock_feed.xml&quot;,
+    },
+    {
+        &quot;id&quot;: 55, &quot;group&quot;: &quot;add-source&quot;, &quot;label&quot;: &quot;Invalid URL (error handling)&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;add-source&quot;, &quot;--url&quot;, &quot;http://localhost:19999/no-such-feed&quot;],
+        &quot;expected_exit&quot;: 1, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: False, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 30, &quot;fixture&quot;: None,
+    },
+    # ── remove-source (8) ─────────────────────────────────────────────────────
+    {
+        &quot;id&quot;: 56, &quot;group&quot;: &quot;remove-source&quot;, &quot;label&quot;: &quot;--help&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;remove-source&quot;, &quot;--help&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: False, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 30, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 57, &quot;group&quot;: &quot;remove-source&quot;, &quot;label&quot;: &quot;Interactive (manual)&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;remove-source&quot;],
+        &quot;expected_exit&quot;: None, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: False, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: True, &quot;timeout&quot;: 120, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 58, &quot;group&quot;: &quot;remove-source&quot;, &quot;label&quot;: &quot;--dry-run&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;remove-source&quot;, &quot;--dry-run&quot;],
+        &quot;expected_exit&quot;: None, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: False, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: True, &quot;timeout&quot;: 120, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 59, &quot;group&quot;: &quot;remove-source&quot;, &quot;label&quot;: &quot;--force&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;remove-source&quot;, &quot;--force&quot;],
+        &quot;expected_exit&quot;: None, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: False, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: True, &quot;timeout&quot;: 120, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 60, &quot;group&quot;: &quot;remove-source&quot;, &quot;label&quot;: &quot;--no-backup&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;remove-source&quot;, &quot;--no-backup&quot;],
+        &quot;expected_exit&quot;: None, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: False, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: True, &quot;timeout&quot;: 120, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 61, &quot;group&quot;: &quot;remove-source&quot;, &quot;label&quot;: &quot;--no-analytics&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;remove-source&quot;, &quot;--no-analytics&quot;],
+        &quot;expected_exit&quot;: None, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: False, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: True, &quot;timeout&quot;: 120, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 62, &quot;group&quot;: &quot;remove-source&quot;, &quot;label&quot;: &quot;--batch (fixture)&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;remove-source&quot;, &quot;--batch&quot;, &quot;__TMP__/batch_ids.txt&quot;],
+        &quot;expected_exit&quot;: None, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: False, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: True, &quot;timeout&quot;: 120,
+        &quot;fixture&quot;: &quot;batch_ids.txt&quot;,
+    },
+    {
+        &quot;id&quot;: 63, &quot;group&quot;: &quot;remove-source&quot;, &quot;label&quot;: &quot;--undo latest&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;remove-source&quot;, &quot;--undo&quot;],
+        &quot;expected_exit&quot;: None, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: False, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: True, &quot;timeout&quot;: 120, &quot;fixture&quot;: None,
+    },
+    # ── generate-config (3) ───────────────────────────────────────────────────
+    {
+        &quot;id&quot;: 64, &quot;group&quot;: &quot;generate-config&quot;, &quot;label&quot;: &quot;--help&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;generate-config&quot;, &quot;--help&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: False, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: False, &quot;timeout&quot;: 30, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 65, &quot;group&quot;: &quot;generate-config&quot;, &quot;label&quot;: &quot;Interactive&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;generate-config&quot;],
+        &quot;expected_exit&quot;: None, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: False, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: True, &quot;timeout&quot;: 120, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 66, &quot;group&quot;: &quot;generate-config&quot;, &quot;label&quot;: &quot;--output file&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;generate-config&quot;, &quot;--output&quot;, &quot;__TMP__/myconfig.yaml&quot;],
+        &quot;expected_exit&quot;: None, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: False, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: False, &quot;passthrough&quot;: True, &quot;timeout&quot;: 120, &quot;fixture&quot;: None,
+    },
+</div>
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Run structural tests</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>tests/acceptance/test_catalog.py<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: count test still fails (66 entries). All others pass.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>git<span class="w"> </span>add<span class="w"> </span>tests/acceptance/catalog.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: catalog — add-source, remove-source, generate-config groups (tests 52-66)&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h2>Task 8: Catalog — tui Group (Tests 67–74)</h2>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>tests/acceptance/catalog.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Append TUI entries 67–74</strong></li>
+</ul>
+<br>
+<div class="ascii-art">    # ── tui (8) ───────────────────────────────────────────────────────────────
+    {
+        &quot;id&quot;: 67, &quot;group&quot;: &quot;tui&quot;, &quot;label&quot;: &quot;Main Menu → Exit&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;catch&quot;],
+        &quot;steps&quot;: [&quot;Select \&quot;Exit\&quot;&quot;],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: False, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: True, &quot;passthrough&quot;: False, &quot;timeout&quot;: 120, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 68, &quot;group&quot;: &quot;tui&quot;, &quot;label&quot;: &quot;bundle → techpro → No HTML → Back → Exit&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;catch&quot;],
+        &quot;steps&quot;: [
+            &quot;Select \&quot;Catch articles from a bundle of sources\&quot;&quot;,
+            &quot;Select \&quot;techpro\&quot;&quot;,
+            &quot;Choose \&quot;No\&quot; for HTML&quot;,
+            &quot;In completion screen choose \&quot;Back to Main Menu\&quot;&quot;,
+            &quot;Choose \&quot;Exit\&quot;&quot;,
+        ],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: False, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: True, &quot;passthrough&quot;: False, &quot;timeout&quot;: 120, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 69, &quot;group&quot;: &quot;tui&quot;, &quot;label&quot;: &quot;bundle → tech → Yes HTML → Exit&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;catch&quot;],
+        &quot;steps&quot;: [
+            &quot;Select \&quot;Catch articles from a bundle of sources\&quot;&quot;,
+            &quot;Select \&quot;tech\&quot;&quot;,
+            &quot;Choose \&quot;Yes\&quot; for HTML&quot;,
+            &quot;In completion screen choose \&quot;Exit\&quot;&quot;,
+        ],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: False, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: True, &quot;passthrough&quot;: False, &quot;timeout&quot;: 120, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 70, &quot;group&quot;: &quot;tui&quot;, &quot;label&quot;: &quot;fetch multi-select hn+bbc → No HTML → Back → Exit&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;catch&quot;],
+        &quot;steps&quot;: [
+            &quot;Select \&quot;Catch articles from a list of sources\&quot;&quot;,
+            &quot;Space-select hn and bbc, press Enter&quot;,
+            &quot;Choose \&quot;No\&quot; for HTML&quot;,
+            &quot;In completion screen choose \&quot;Back to Main Menu\&quot;&quot;,
+            &quot;Choose \&quot;Exit\&quot;&quot;,
+        ],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: False, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: True, &quot;passthrough&quot;: False, &quot;timeout&quot;: 120, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 71, &quot;group&quot;: &quot;tui&quot;, &quot;label&quot;: &quot;single source → hn → No HTML → Back → Exit&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;catch&quot;],
+        &quot;steps&quot;: [
+            &quot;Select \&quot;Catch from a single source\&quot;&quot;,
+            &quot;Select \&quot;hn\&quot;&quot;,
+            &quot;Choose \&quot;No\&quot; for HTML&quot;,
+            &quot;In completion screen choose \&quot;Back to Main Menu\&quot;&quot;,
+            &quot;Choose \&quot;Exit\&quot;&quot;,
+        ],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: False, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: True, &quot;passthrough&quot;: False, &quot;timeout&quot;: 120, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 72, &quot;group&quot;: &quot;tui&quot;, &quot;label&quot;: &quot;single URL → https://example.com → No HTML → Back → Exit&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;catch&quot;],
+        &quot;steps&quot;: [
+            &quot;Select \&quot;Catch a single article by URL\&quot;&quot;,
+            &quot;Type: https://example.com  then press Enter&quot;,
+            &quot;Choose \&quot;No\&quot; for HTML&quot;,
+            &quot;In completion screen choose \&quot;Back to Main Menu\&quot;&quot;,
+            &quot;Choose \&quot;Exit\&quot;&quot;,
+        ],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: False, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: True, &quot;passthrough&quot;: False, &quot;timeout&quot;: 120, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 73, &quot;group&quot;: &quot;tui&quot;, &quot;label&quot;: &quot;Manage Sources → List → browse → back → Exit&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;catch&quot;],
+        &quot;steps&quot;: [
+            &quot;Select \&quot;Manage Sources (add/remove/configure)\&quot;&quot;,
+            &quot;Select \&quot;List All Sources\&quot;&quot;,
+            &quot;Browse the list, then select \&quot;Back to Source Management\&quot;&quot;,
+            &quot;Select \&quot;Back to Main Menu\&quot;&quot;,
+            &quot;Select \&quot;Exit\&quot;&quot;,
+        ],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: False, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: True, &quot;passthrough&quot;: False, &quot;timeout&quot;: 120, &quot;fixture&quot;: None,
+    },
+    {
+        &quot;id&quot;: 74, &quot;group&quot;: &quot;tui&quot;, &quot;label&quot;: &quot;Manage Sources → Add RSS → type fixture URL → back → Exit&quot;,
+        &quot;cmd&quot;: [&quot;capcat&quot;, &quot;catch&quot;],
+        &quot;steps&quot;: [
+            &quot;Select \&quot;Manage Sources (add/remove/configure)\&quot;&quot;,
+            &quot;Select \&quot;Add New Source from RSS Feed\&quot;&quot;,
+            &quot;Type the fixture URL shown above, press Enter&quot;,
+            &quot;Press Enter to continue&quot;,
+            &quot;Select \&quot;Back to Main Menu\&quot;&quot;,
+            &quot;Select \&quot;Exit\&quot;&quot;,
+        ],
+        &quot;expected_exit&quot;: 0, &quot;expected_in_output&quot;: [],
+        &quot;creates_files&quot;: False, &quot;needs_init&quot;: True, &quot;pre_init&quot;: False,
+        &quot;is_tui&quot;: True, &quot;passthrough&quot;: False, &quot;timeout&quot;: 120,
+        &quot;fixture&quot;: &quot;mock_feed.xml&quot;,
+    },
+]
+</div>
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Run all structural tests — all must pass</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>tests/acceptance/test_catalog.py<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: all 12 tests PASS (74 entries, all well-formed).</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Run unit test suite to check for regressions</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-q
+</pre></div>
+
+<br>
+<p>Expected: same pass count as before (264+).</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>git<span class="w"> </span>add<span class="w"> </span>tests/acceptance/catalog.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: catalog — tui group (tests 67-74); all 74 tests defined&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h2>Task 9: run_acceptance.py — Execution Engine</h2>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Create: <code>tests/acceptance/run_acceptance.py</code></li>
+</ul>
+<br>
+<p>This task implements all the core machinery: subprocess execution, sentinel replacement, auto-analysis, RESULT block printing, and _getch(). No automated tests — this is a script verified by smoke test in Task 11.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Create <code>tests/acceptance/run_acceptance.py</code> with the execution engine</strong></li>
+</ul>
+<br>
+<div class="ascii-art">#!/usr/bin/env python3
+&quot;&quot;&quot;Capcat human-in-the-loop acceptance test runner.
+
+Usage:
+    python tests/acceptance/run_acceptance.py
+    python tests/acceptance/run_acceptance.py --group fetch
+    python tests/acceptance/run_acceptance.py --from 22
+    python tests/acceptance/run_acceptance.py --only 25,30,46
+    python tests/acceptance/run_acceptance.py --timeout 60
+&quot;&quot;&quot;
+from __future__ import annotations
+
+import argparse
+import datetime
+import os
+import shutil
+import subprocess
+import sys
+import tempfile
+import time
+from pathlib import Path
+
+# ── Platform single-keypress ──────────────────────────────────────────────────
+
+if sys.platform == &quot;win32&quot;:
+    import msvcrt
+
+    def _getch() -&gt; str:
+        return msvcrt.getch().decode(&quot;utf-8&quot;, errors=&quot;replace&quot;)
+
+else:
+    import tty
+    import termios
+
+    def _getch() -&gt; str:
+        fd = sys.stdin.fileno()
+        old = termios.tcgetattr(fd)
+        try:
+            tty.setraw(fd)
+            ch = sys.stdin.read(1)
+        finally:
+            termios.tcsetattr(fd, termios.TCSADRAIN, old)
+        return ch
+
+
+# ── Paths ─────────────────────────────────────────────────────────────────────
+
+_HERE = Path(__file__).parent
+_FIXTURES = _HERE / &quot;fixtures&quot;
+_RESULTS = _HERE / &quot;results&quot;
+
+
+# ── Sentinel replacement ──────────────────────────────────────────────────────
+
+def _resolve_cmd(cmd: list[str], tmp_dir: str, fixture: str | None) -&gt; list[str]:
+    &quot;&quot;&quot;Replace __TMP__ and __FIXTURE_URL__ sentinels in cmd.&quot;&quot;&quot;
+    fixture_url = &quot;&quot;
+    if fixture:
+        fixture_url = &quot;file://&quot; + str(Path(tmp_dir) / fixture)
+
+    result = []
+    for arg in cmd:
+        if arg == &quot;__TMP__&quot;:
+            result.append(tmp_dir)
+        elif &quot;__TMP__/&quot; in arg:
+            result.append(arg.replace(&quot;__TMP__&quot;, tmp_dir))
+        elif arg == &quot;__FIXTURE_URL__&quot;:
+            result.append(fixture_url)
+        else:
+            result.append(arg)
+    return result
+
+
+# ── Fixture setup ─────────────────────────────────────────────────────────────
+
+def _copy_fixture(fixture: str, tmp_dir: str) -&gt; None:
+    src = _FIXTURES / fixture
+    shutil.copy(src, Path(tmp_dir) / fixture)
+
+
+# ── Silent init ───────────────────────────────────────────────────────────────
+
+def _silent_init(tmp_dir: str) -&gt; None:
+    result = subprocess.run(
+        [&quot;capcat&quot;, &quot;init&quot;],
+        cwd=tmp_dir,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+    if result.returncode != 0:
+        print(f&quot;\n[RUNNER ERROR] Silent init failed in {tmp_dir} (exit {result.returncode})&quot;)
+        sys.exit(1)
+
+
+# ── Subprocess execution ──────────────────────────────────────────────────────
+
+def _run_captured(
+    cmd: list[str], cwd: str, timeout: int
+) -&gt; tuple[int | None, str, float, bool]:
+    &quot;&quot;&quot;Run cmd, stream output live, capture it too. Returns (exit_code, output, duration, timed_out).&quot;&quot;&quot;
+    start = time.monotonic()
+    timed_out = False
+    output_lines: list[str] = []
+
+    print(f&quot;\n{&#x27;━&#x27;*54} LIVE OUTPUT {&#x27;━&#x27;*54}&quot;)
+    try:
+        proc = subprocess.Popen(
+            cmd,
+            cwd=cwd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1,
+        )
+        try:
+            for line in proc.stdout:  # type: ignore[union-attr]
+                sys.stdout.write(line)
+                sys.stdout.flush()
+                output_lines.append(line)
+            proc.wait(timeout=max(0, timeout - (time.monotonic() - start)))
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            proc.wait()
+            timed_out = True
+    except FileNotFoundError:
+        print(&quot;[ERROR] &#x27;capcat&#x27; not found on PATH. Install with: pipx install capcat&quot;)
+        return None, &quot;&quot;, time.monotonic() - start, False
+
+    print(f&quot;{&#x27;━&#x27;*121}&quot;)
+    duration = time.monotonic() - start
+    return proc.returncode, &quot;&quot;.join(output_lines), duration, timed_out
+
+
+def _run_passthrough(
+    cmd: list[str], cwd: str, timeout: int
+) -&gt; tuple[int | None, float, bool]:
+    &quot;&quot;&quot;Run cmd with no capture — output goes directly to terminal. Returns (exit_code, duration, timed_out).&quot;&quot;&quot;
+    start = time.monotonic()
+    timed_out = False
+    try:
+        proc = subprocess.Popen(cmd, cwd=cwd)
+        try:
+            proc.wait(timeout=timeout)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            proc.wait()
+            timed_out = True
+    except FileNotFoundError:
+        print(&quot;[ERROR] &#x27;capcat&#x27; not found on PATH.&quot;)
+        return None, time.monotonic() - start, False
+    return proc.returncode, time.monotonic() - start, timed_out
+
+
+# ── Output path detection ─────────────────────────────────────────────────────
+
+def _find_output_path(tmp_dir: str) -&gt; str | None:
+    &quot;&quot;&quot;Return file:// link to the first interesting output directory in tmp_dir.&quot;&quot;&quot;
+    skip = {&quot;.capcat&quot;, &quot;Config&quot;}
+    for entry in sorted(Path(tmp_dir).iterdir()):
+        if entry.name not in skip and entry.is_dir():
+            return &quot;file://&quot; + str(entry.resolve())
+    return None
+
+
+def _count_output_files(tmp_dir: str) -&gt; int:
+    skip = {&quot;.capcat&quot;, &quot;Config&quot;}
+    return sum(1 for e in Path(tmp_dir).iterdir() if e.name not in skip)
+
+
+# ── Auto-analysis ─────────────────────────────────────────────────────────────
+
+ERROR_STRINGS = (&quot;Traceback&quot;, &quot;Error:&quot;, &quot;CRITICAL&quot;)
+
+
+def _auto_analyze(
+    test: dict,
+    exit_code: int | None,
+    output: str,
+    tmp_dir: str,
+    timed_out: bool,
+    global_timeout: int | None,
+) -&gt; tuple[str, str | None, int | None]:
+    &quot;&quot;&quot;Return (analysis_str, output_path, file_count).&quot;&quot;&quot;
+    parts: list[str] = []
+    output_path: str | None = None
+    file_count: int | None = None
+    effective_timeout = global_timeout if global_timeout is not None else test[&quot;timeout&quot;]
+
+    if timed_out:
+        parts.append(f&quot;TIMEOUT after {effective_timeout}s ✗&quot;)
+        return &quot; | &quot;.join(parts), None, None
+
+    # Exit code
+    expected = test[&quot;expected_exit&quot;]
+    if expected is None:
+        parts.append(&quot;exit check skipped — user judges&quot;)
+    elif exit_code == expected:
+        parts.append(f&quot;Exit {exit_code} ✓&quot;)
+    else:
+        parts.append(f&quot;Exit {exit_code} ✗ (expected {expected})&quot;)
+
+    # For passthrough/TUI — no output to analyze further
+    if test[&quot;is_tui&quot;] or test[&quot;passthrough&quot;]:
+        parts.append(&quot;(output passed through — no capture)&quot;)
+        return &quot; | &quot;.join(parts), None, None
+
+    # Expected strings
+    for s in test[&quot;expected_in_output&quot;]:
+        if s in output:
+            parts.append(f&#x27;&quot;{s}&quot; ✓&#x27;)
+        else:
+            parts.append(f&#x27;&quot;{s}&quot; NOT FOUND ✗&#x27;)
+
+    # Error string scan (only when expected exit is 0)
+    if expected == 0:
+        found_errors = [e for e in ERROR_STRINGS if e in output]
+        if found_errors:
+            parts.append(f&quot;error strings found: {&#x27;, &#x27;.join(found_errors)} ✗&quot;)
+        else:
+            parts.append(&quot;no error strings ✓&quot;)
+
+    # Log file check
+    cmd_str = &quot; &quot;.join(test[&quot;cmd&quot;])
+    if &quot;-L&quot; in test[&quot;cmd&quot;]:
+        idx = test[&quot;cmd&quot;].index(&quot;-L&quot;)
+        if idx + 1 &lt; len(test[&quot;cmd&quot;]):
+            log_path_raw = test[&quot;cmd&quot;][idx + 1].replace(&quot;__TMP__&quot;, tmp_dir)
+            log_p = Path(log_path_raw)
+            if log_p.exists() and log_p.stat().st_size &gt; 0:
+                parts.append(f&quot;log file written ✓&quot;)
+            else:
+                parts.append(f&quot;log file missing or empty ✗&quot;)
+
+    # File count
+    if test[&quot;creates_files&quot;]:
+        file_count = _count_output_files(tmp_dir)
+        output_path = _find_output_path(tmp_dir)
+        parts.append(f&quot;{file_count} output item(s) in tmp dir&quot;)
+    elif output_path is None:
+        output_path = _find_output_path(tmp_dir)
+
+    return &quot; | &quot;.join(parts), output_path, file_count
+
+
+# ── Screen helpers ────────────────────────────────────────────────────────────
+
+def _clear() -&gt; None:
+    print(&quot;\033[2J\033[H&quot;, end=&quot;&quot;, flush=True)
+
+
+def _print_header(test: dict, total: int) -&gt; None:
+    label = &quot; &quot;.join(test[&quot;cmd&quot;])
+    bar = &quot;═&quot; * 62
+    print(f&quot;\n{bar}&quot;)
+    print(f&quot;TEST {test[&#x27;id&#x27;]}/{total}  [{test[&#x27;group&#x27;]}]   {label}&quot;)
+    print(f&quot;{bar}\n&quot;)
+
+
+def _print_result_cli(
+    test: dict,
+    exit_code: int | None,
+    duration: float,
+    analysis: str,
+    output_path: str | None,
+    file_count: int | None,
+    timed_out: bool,
+) -&gt; None:
+    expected = test[&quot;expected_exit&quot;]
+    if timed_out:
+        exit_line = f&quot;  Exit code : TIMEOUT  ✗&quot;
+    elif exit_code is None:
+        exit_line = f&quot;  Exit code : ?  (expected {expected if expected is not None else &#x27;?&#x27;})&quot;
+    elif expected is None:
+        exit_line = f&quot;  Exit code : {exit_code}  ?  (expected ?)&quot;
+    elif exit_code == expected:
+        exit_line = f&quot;  Exit code : {exit_code}  ✓  (expected {expected})&quot;
+    else:
+        exit_line = f&quot;  Exit code : {exit_code}  ✗  (expected {expected})&quot;
+
+    print(&quot;\nRESULT&quot;)
+    print(exit_line)
+    print(f&quot;  Duration  : {duration:.1f}s&quot;)
+    if output_path:
+        print(f&quot;  Output    : {output_path}   ← open in browser&quot;)
+    if file_count is not None:
+        print(f&quot;  Files     : {file_count} item(s) created&quot;)
+    print(f&quot;  Analysis  : {analysis}&quot;)
+    print()
+    print(&quot;[Enter] Pass   [f] Fail   [n] Note+Pass   [s] Skip   [q] Quit&quot;)
+
+
+def _print_result_passthrough(
+    test: dict,
+    exit_code: int | None,
+    duration: float,
+    timed_out: bool,
+    analysis: str,
+) -&gt; None:
+    expected = test[&quot;expected_exit&quot;]
+    if timed_out:
+        exit_line = &quot;  Exit code : TIMEOUT  ✗&quot;
+    elif exit_code is None:
+        exit_line = &quot;  Exit code : ?  (expected ?)&quot;
+    elif expected is None:
+        exit_line = f&quot;  Exit code : {exit_code}  ?  (expected ?)&quot;
+    elif exit_code == expected:
+        exit_line = f&quot;  Exit code : {exit_code}  ✓  (expected {expected})&quot;
+    else:
+        exit_line = f&quot;  Exit code : {exit_code}  ✗  (expected {expected})&quot;
+
+    print(&quot;\nRESULT&quot;)
+    print(exit_line)
+    print(f&quot;  Duration  : {duration:.1f}s&quot;)
+    print(f&quot;  Analysis  : {analysis}&quot;)
+    print()
+    print(&quot;[Enter] Pass   [f] Fail   [n] Note+Pass   [s] Skip   [q] Quit&quot;)
+
+
+def _print_tui_header(test: dict, total: int, fixture_url: str) -&gt; None:
+    _print_header(test, total)
+    print(&quot;MANUAL TEST — you drive this one.\n&quot;)
+    if fixture_url:
+        print(f&quot;  URL to enter when prompted: {fixture_url}\n&quot;)
+    print(&quot;Steps to follow:&quot;)
+    for i, step in enumerate(test.get(&quot;steps&quot;, []), 1):
+        print(f&quot;  {i}. {step}&quot;)
+    print()
+    print(&quot;Press [Enter] to launch TUI, interact, then return here.&quot;)
+    input()
+</div>
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>git<span class="w"> </span>add<span class="w"> </span>tests/acceptance/run_acceptance.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: run_acceptance.py — execution engine, _getch, auto-analysis, RESULT block&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h2>Task 10: run_acceptance.py — Core Loop + CLI Flags</h2>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>tests/acceptance/run_acceptance.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Append the core loop, verdict handler, and main() to run_acceptance.py</strong></li>
+</ul>
+<br>
+<p>Add these functions after the existing code in <code>run_acceptance.py</code>:</p>
+<br>
+<div class="ascii-art"># ── Verdict handler ───────────────────────────────────────────────────────────
+
+def _wait_verdict() -&gt; tuple[str, str]:
+    &quot;&quot;&quot;Return (verdict, note). verdict is one of: pass, fail, skip, quit.&quot;&quot;&quot;
+    while True:
+        ch = _getch().lower()
+        if ch in (&quot;\r&quot;, &quot;\n&quot;, &quot; &quot;):
+            return &quot;pass&quot;, &quot;&quot;
+        if ch == &quot;f&quot;:
+            return &quot;fail&quot;, &quot;&quot;
+        if ch == &quot;n&quot;:
+            # Restore normal terminal for line input
+            note = input(&quot;\nNote: &quot;)
+            return &quot;pass&quot;, note
+        if ch == &quot;s&quot;:
+            return &quot;skip&quot;, &quot;&quot;
+        if ch == &quot;q&quot;:
+            return &quot;quit&quot;, &quot;&quot;
+
+
+# ── Per-test runner ───────────────────────────────────────────────────────────
+
+def _run_one_test(
+    test: dict,
+    total: int,
+    reporter,
+    counts: dict,
+    failed_tests: list[str],
+    global_timeout: int | None,
+) -&gt; str:
+    &quot;&quot;&quot;Execute one test. Returns &#x27;quit&#x27; to signal session end, else &#x27;continue&#x27;.&quot;&quot;&quot;
+    tmp_dir = tempfile.mkdtemp(prefix=f&quot;cap_t{test[&#x27;id&#x27;]}_&quot;)
+
+    # Pre-setup: copy fixture
+    if test[&quot;fixture&quot;]:
+        _copy_fixture(test[&quot;fixture&quot;], tmp_dir)
+
+    # Pre-setup: silent init
+    if test[&quot;needs_init&quot;] or test[&quot;pre_init&quot;]:
+        _silent_init(tmp_dir)
+
+    # Resolve cmd (substitute sentinels)
+    resolved_cmd = _resolve_cmd(test[&quot;cmd&quot;], tmp_dir, test[&quot;fixture&quot;])
+    effective_timeout = global_timeout if global_timeout is not None else test[&quot;timeout&quot;]
+
+    group = test[&quot;group&quot;]
+    counts.setdefault(group, {&quot;pass&quot;: 0, &quot;fail&quot;: 0, &quot;skip&quot;: 0})
+
+    # ── TUI flow ──────────────────────────────────────────────────────────────
+    if test[&quot;is_tui&quot;]:
+        fixture_url = &quot;&quot;
+        if test[&quot;fixture&quot;]:
+            fixture_url = &quot;file://&quot; + str(Path(tmp_dir) / test[&quot;fixture&quot;])
+        _print_tui_header(test, total, fixture_url)
+        exit_code, duration, timed_out = _run_passthrough(
+            resolved_cmd, tmp_dir, effective_timeout
+        )
+        analysis, _, _ = _auto_analyze(test, exit_code, &quot;&quot;, tmp_dir, timed_out, global_timeout)
+        _print_result_passthrough(test, exit_code, duration, timed_out, analysis)
+        verdict, note = _wait_verdict()
+
+    # ── Passthrough flow ──────────────────────────────────────────────────────
+    elif test[&quot;passthrough&quot;]:
+        _print_header(test, total)
+        print(&quot;Running...  (interactive — output direct to terminal)\n&quot;)
+        exit_code, duration, timed_out = _run_passthrough(
+            resolved_cmd, tmp_dir, effective_timeout
+        )
+        analysis, _, _ = _auto_analyze(test, exit_code, &quot;&quot;, tmp_dir, timed_out, global_timeout)
+        _print_result_passthrough(test, exit_code, duration, timed_out, analysis)
+        verdict, note = _wait_verdict()
+
+    # ── Captured flow ─────────────────────────────────────────────────────────
+    else:
+        _print_header(test, total)
+        print(f&quot;Running...  (timeout: {effective_timeout}s)&quot;)
+        exit_code, output, duration, timed_out = _run_captured(
+            resolved_cmd, tmp_dir, effective_timeout
+        )
+        analysis, output_path, file_count = _auto_analyze(
+            test, exit_code, output, tmp_dir, timed_out, global_timeout
+        )
+        _print_result_cli(
+            test, exit_code, duration, analysis, output_path, file_count, timed_out
+        )
+        verdict, note = _wait_verdict()
+
+    # ── Handle verdict ────────────────────────────────────────────────────────
+    if verdict == &quot;quit&quot;:
+        return &quot;quit&quot;
+
+    if verdict == &quot;skip&quot;:
+        counts[group][&quot;skip&quot;] += 1
+        _clear()
+        return &quot;continue&quot;
+
+    status = &quot;PASS&quot; if verdict == &quot;pass&quot; else &quot;FAIL&quot;
+    if verdict == &quot;fail&quot;:
+        counts[group][&quot;fail&quot;] += 1
+        failed_tests.append(
+            f&quot;TEST {test[&#x27;id&#x27;]}: {test[&#x27;group&#x27;]} {test[&#x27;label&#x27;]}&quot;
+            + (f&quot; — {note}&quot; if note else &quot;&quot;)
+        )
+    else:
+        counts[group][&quot;pass&quot;] += 1
+
+    output_path_for_report = None
+    file_count_for_report = None
+    if not test[&quot;is_tui&quot;] and not test[&quot;passthrough&quot;]:
+        # Re-derive for report (analysis already has it, but we need the raw values)
+        output_path_for_report = _find_output_path(tmp_dir)
+        if test[&quot;creates_files&quot;]:
+            file_count_for_report = _count_output_files(tmp_dir)
+
+    cmd_str = &quot; &quot;.join(test[&quot;cmd&quot;]).replace(&quot;__TMP__&quot;, &quot;&lt;tmp&gt;&quot;).replace(&quot;__FIXTURE_URL__&quot;, &quot;&lt;fixture_url&gt;&quot;)
+    reporter.write_entry(
+        id=test[&quot;id&quot;],
+        group=test[&quot;group&quot;],
+        cmd=cmd_str,
+        status=status,
+        exit_code=exit_code,
+        expected_exit=test[&quot;expected_exit&quot;],
+        duration=duration,
+        output_path=output_path_for_report,
+        file_count=file_count_for_report,
+        analysis=analysis,
+        note=note,
+    )
+    _clear()
+    return &quot;continue&quot;
+
+
+# ── Main ──────────────────────────────────────────────────────────────────────
+
+def main() -&gt; None:
+    from tests.acceptance.catalog import TESTS
+    from tests.acceptance.reporter import Reporter
+
+    parser = argparse.ArgumentParser(
+        description=&quot;Capcat human-in-the-loop acceptance test runner&quot;
+    )
+    group_filter = parser.add_mutually_exclusive_group()
+    group_filter.add_argument(&quot;--group&quot;, metavar=&quot;NAME&quot;,
+        help=&quot;Run only tests in this group (e.g. fetch, add-source)&quot;)
+    group_filter.add_argument(&quot;--from&quot;, dest=&quot;from_id&quot;, type=int, metavar=&quot;N&quot;,
+        help=&quot;Resume from test #N&quot;)
+    group_filter.add_argument(&quot;--only&quot;, metavar=&quot;N,N,...&quot;,
+        help=&quot;Run only these test IDs (comma-separated)&quot;)
+    parser.add_argument(&quot;--timeout&quot;, type=int, metavar=&quot;SECONDS&quot;,
+        help=&quot;Override timeout for all tests&quot;)
+    args = parser.parse_args()
+
+    # Build active test list
+    tests = list(TESTS)
+    if args.group:
+        tests = [t for t in tests if t[&quot;group&quot;] == args.group]
+        if not tests:
+            print(f&quot;Error: no tests found for group &#x27;{args.group}&#x27;&quot;)
+            sys.exit(1)
+    elif args.from_id:
+        tests = [t for t in tests if t[&quot;id&quot;] &gt;= args.from_id]
+    elif args.only:
+        ids = {int(x) for x in args.only.split(&quot;,&quot;)}
+        tests = [t for t in tests if t[&quot;id&quot;] in ids]
+
+    total = len(tests)
+    if total == 0:
+        print(&quot;No tests selected.&quot;)
+        sys.exit(0)
+
+    # Create results dir and session file
+    _RESULTS.mkdir(parents=True, exist_ok=True)
+    session_name = datetime.datetime.now().strftime(&quot;%Y-%m-%d_%H-%M&quot;) + &quot;.md&quot;
+    session_path = _RESULTS / session_name
+    reporter = Reporter(session_path)
+
+    counts: dict[str, dict[str, int]] = {}
+    failed_tests: list[str] = []
+
+    _clear()
+    print(f&quot;Capcat Acceptance Test Runner&quot;)
+    print(f&quot;Session: {session_path}&quot;)
+    print(f&quot;Tests to run: {total}&quot;)
+    print(f&quot;\nPress [Enter] to begin...&quot;)
+    input()
+
+    for test in tests:
+        result = _run_one_test(
+            test, total, reporter, counts, failed_tests, args.timeout
+        )
+        if result == &quot;quit&quot;:
+            break
+
+    reporter.finalize(counts, failed_tests)
+    print(f&quot;\nSession ended. Report saved to:\nfile://{session_path.resolve()}&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</div>
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>git<span class="w"> </span>add<span class="w"> </span>tests/acceptance/run_acceptance.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: run_acceptance.py — core loop, verdict handler, CLI flags&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h2>Task 11: Smoke Test</h2>
+<br>
+<strong>Files:</strong> none
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Verify capcat is on PATH</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>capcat<span class="w"> </span>--version
+</pre></div>
+
+<br>
+<p>Expected: prints <code>capcat 1.4.1</code> (or current version).</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Run a single fast test (test #2: --help)</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>python<span class="w"> </span>tests/acceptance/run_acceptance.py<span class="w"> </span>--only<span class="w"> </span><span class="m">2</span>
+</pre></div>
+
+<br>
+<p>Expected:</p>
+<ul>
+<li>Header prints <code>TEST 2/1  [global]   capcat --help</code></li>
+<li>Live output shows capcat help text</li>
+<li>RESULT block shows <code>Exit code : 0  ✓</code></li>
+<li>Keypress prompt appears</li>
+<li>Press Enter → PASS</li>
+<li>Session file created in <code>tests/acceptance/results/</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Verify the report file</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>cat<span class="w"> </span>tests/acceptance/results/*.md
+</pre></div>
+
+<br>
+<p>Expected: markdown file with summary header + TEST 2 entry.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Run global group as a batch (tests 1–7, fast)</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>python<span class="w"> </span>tests/acceptance/run_acceptance.py<span class="w"> </span>--group<span class="w"> </span>global
+</pre></div>
+
+<br>
+<p>Expected: 7 tests run in sequence, each with live output and verdict prompt.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 5: Run full unit test suite to verify no regressions</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>tests/acceptance/test_reporter.py<span class="w"> </span>tests/acceptance/test_catalog.py<span class="w"> </span>-q
+</pre></div>
+
+<br>
+<p>Expected: all pass.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 6: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>git<span class="w"> </span>add<span class="w"> </span>tests/acceptance/
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: complete acceptance test runner — 74 tests, reporter, catalog, runner&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h2>Final Verification</h2>
+<br>
+<ul>
+<li>[ ] All structural tests pass: <code>python -m pytest tests/acceptance/test_catalog.py tests/acceptance/test_reporter.py -v</code></li>
+<li>[ ] Reporter unit tests pass: 10/10</li>
+<li>[ ] Catalog structural tests pass: 12/12</li>
+<li>[ ] Smoke test: <code>python tests/acceptance/run_acceptance.py --only 2</code> runs and produces a report</li>
+<li>[ ] Full unit suite: no regressions</li>
+</ul>
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

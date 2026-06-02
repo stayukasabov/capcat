@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Breadcrumb Phase 2: HTML Rendering Standardisation — Implementation Plan</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / <a href="../superpowers/index.html">superpowers</a> / plans</div>
+<h1>Breadcrumb Phase 2: HTML Rendering Standardisation — Implementation Plan</h1>
+<br>
+<p>&gt; <strong>For agentic workers:</strong> REQUIRED: Use superpowers:subagent-driven-development (if subagents available) or superpowers:executing-plans to implement this plan. Steps use checkbox (<code>- [ ]</code>) syntax for tracking.</p>
+<br>
+<strong>Goal:</strong> Enforce consistent breadcrumb display — Level 0 as &quot;News D Month YYYY&quot;, Level 1 as clean source name, Level 2 as article title link on comments pages.
+<br>
+<strong>Architecture:</strong> Two changes in <code>html_generator.py</code>: (1) <code>_generate_breadcrumb</code> gets new per-level formatting and a comments 3rd-crumb branch; (2) <code>generate_article_html_from_template</code> moves <code>is_comments_page</code> before the breadcrumb call and injects the article title as the 3rd element. TDD throughout.
+<br>
+<strong>Tech Stack:</strong> Python 3, pytest, <code>re</code> module (already imported)
+<br>
+<hr>
+<br>
+<h2>Chunk 1: Branch + Failing Tests</h2>
+<br>
+<h3>Task 1: Create feature branch</h3>
+<br>
+<strong>Files:</strong> none
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Create and checkout branch</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>checkout<span class="w"> </span>fix/source-folder-naming-standard<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>fix/breadcrumb-phase2-rendering
+</pre></div>
+
+<br>
+<p>Expected: <code>Switched to a new branch &#x27;fix/breadcrumb-phase2-rendering&#x27;</code></p>
+<br>
+<hr>
+<br>
+<h3>Task 2: Write failing tests — Level 0 and Level 1 formatting</h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>tests/unit/test_breadcrumb.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Append Level 0 and Level 1 tests to <code>tests/unit/test_breadcrumb.py</code></strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Phase 2: Level 0 — date folder formatting</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_level0_formats_date_as_news_d_month_yyyy</span><span class="p">(</span><span class="n">generator</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Date folder &#39;News 15-03-2026&#39; must render as &#39;News 15 March 2026&#39;.&quot;&quot;&quot;</span>
+    <span class="n">crumbs</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;News 15-03-2026&quot;</span><span class="p">,</span> <span class="s2">&quot;Hacker-News 15-03-2026&quot;</span><span class="p">]</span>
+    <span class="n">html</span> <span class="o">=</span> <span class="n">_call</span><span class="p">(</span><span class="n">generator</span><span class="p">,</span> <span class="n">crumbs</span><span class="p">,</span> <span class="n">html_subfolder</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">current_file</span><span class="o">=</span><span class="s2">&quot;article.html&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="s2">&quot;News 15 March 2026&quot;</span> <span class="ow">in</span> <span class="n">html</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_level0_does_not_show_raw_dd_mm_yyyy</span><span class="p">(</span><span class="n">generator</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raw DD-MM-YYYY must not appear in the date breadcrumb anchor.&quot;&quot;&quot;</span>
+    <span class="n">crumbs</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;News 15-03-2026&quot;</span><span class="p">,</span> <span class="s2">&quot;Hacker-News 15-03-2026&quot;</span><span class="p">]</span>
+    <span class="n">html</span> <span class="o">=</span> <span class="n">_call</span><span class="p">(</span><span class="n">generator</span><span class="p">,</span> <span class="n">crumbs</span><span class="p">,</span> <span class="n">html_subfolder</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">current_file</span><span class="o">=</span><span class="s2">&quot;article.html&quot;</span><span class="p">)</span>
+    <span class="n">first_anchor</span> <span class="o">=</span> <span class="n">html</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;&lt;/a&gt;&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="s2">&quot;15-03-2026&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">first_anchor</span>
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Phase 2: Level 1 — source folder formatting</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_level1_strips_date_and_normalises_hyphens</span><span class="p">(</span><span class="n">generator</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Source folder &#39;Hacker-News 15-03-2026&#39; must render as &#39;Hacker News&#39;.&quot;&quot;&quot;</span>
+    <span class="n">crumbs</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;News 15-03-2026&quot;</span><span class="p">,</span> <span class="s2">&quot;Hacker-News 15-03-2026&quot;</span><span class="p">]</span>
+    <span class="n">html</span> <span class="o">=</span> <span class="n">_call</span><span class="p">(</span><span class="n">generator</span><span class="p">,</span> <span class="n">crumbs</span><span class="p">,</span> <span class="n">html_subfolder</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">current_file</span><span class="o">=</span><span class="s2">&quot;article.html&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="s2">&quot;Hacker News&quot;</span> <span class="ow">in</span> <span class="n">html</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_level1_has_no_trailing_date</span><span class="p">(</span><span class="n">generator</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Source breadcrumb must contain no date portion.&quot;&quot;&quot;</span>
+    <span class="n">crumbs</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;News 15-03-2026&quot;</span><span class="p">,</span> <span class="s2">&quot;Hacker-News 15-03-2026&quot;</span><span class="p">]</span>
+    <span class="n">html</span> <span class="o">=</span> <span class="n">_call</span><span class="p">(</span><span class="n">generator</span><span class="p">,</span> <span class="n">crumbs</span><span class="p">,</span> <span class="n">html_subfolder</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">current_file</span><span class="o">=</span><span class="s2">&quot;article.html&quot;</span><span class="p">)</span>
+    <span class="n">anchors</span> <span class="o">=</span> <span class="n">html</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;&lt;/a&gt;&quot;</span><span class="p">)</span>
+    <span class="n">source_anchor</span> <span class="o">=</span> <span class="n">anchors</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">anchors</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">assert</span> <span class="s2">&quot;15-03-2026&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">source_anchor</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Run to verify they fail</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_breadcrumb.py::test_level0_formats_date_as_news_d_month_yyyy<span class="w"> </span>tests/unit/test_breadcrumb.py::test_level0_does_not_show_raw_dd_mm_yyyy<span class="w"> </span>tests/unit/test_breadcrumb.py::test_level1_strips_date_and_normalises_hyphens<span class="w"> </span>tests/unit/test_breadcrumb.py::test_level1_has_no_trailing_date<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: 3 FAIL, 1 PASS — <code>test_level1_has_no_trailing_date</code> already passes because the current code strips the trailing date at Level 1. The other 3 fail: <code>&quot;News 15 March 2026&quot;</code> not rendered, hyphen not normalised to space.</p>
+<br>
+<hr>
+<br>
+<h3>Task 3: Write failing tests — Level 2 comments + update existing test + regression guard</h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>tests/unit/test_breadcrumb.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Replace <code>test_comments_breadcrumb_has_no_article_level</code> and append Level 2 and regression tests</strong></li>
+</ul>
+<br>
+<p>Replace the existing test (lines 112–118):</p>
+<div class="highlight"><pre><span></span><span class="c1"># BEFORE (delete this):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_comments_breadcrumb_has_no_article_level</span><span class="p">(</span><span class="n">generator</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Comments page must NOT have an &#39;Article&#39; breadcrumb item — that</span>
+<span class="sd">    navigation is handled by the Back to Article button.&quot;&quot;&quot;</span>
+    <span class="n">crumbs</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;News 14-03-2026&quot;</span><span class="p">,</span> <span class="s2">&quot;Hacker News&quot;</span><span class="p">,</span> <span class="s2">&quot;Some Article&quot;</span><span class="p">,</span> <span class="s2">&quot;Comments&quot;</span><span class="p">]</span>
+    <span class="n">html</span> <span class="o">=</span> <span class="n">_call</span><span class="p">(</span><span class="n">generator</span><span class="p">,</span> <span class="n">crumbs</span><span class="p">,</span> <span class="n">html_subfolder</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">current_file</span><span class="o">=</span><span class="s2">&quot;comments.html&quot;</span><span class="p">)</span>
+    <span class="c1"># Should only show date and source (2 links)</span>
+    <span class="k">assert</span> <span class="n">html</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;&lt;a &quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span>
+</pre></div>
+
+<br>
+<p>With:</p>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_comments_breadcrumb_has_article_level</span><span class="p">(</span><span class="n">generator</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;comments.html with 3-element path must render 3 breadcrumbs including article link.&quot;&quot;&quot;</span>
+    <span class="n">crumbs</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;News 14-03-2026&quot;</span><span class="p">,</span> <span class="s2">&quot;Hacker-News 14-03-2026&quot;</span><span class="p">,</span> <span class="s2">&quot;Some Article&quot;</span><span class="p">]</span>
+    <span class="n">html</span> <span class="o">=</span> <span class="n">_call</span><span class="p">(</span><span class="n">generator</span><span class="p">,</span> <span class="n">crumbs</span><span class="p">,</span> <span class="n">html_subfolder</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">current_file</span><span class="o">=</span><span class="s2">&quot;comments.html&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">html</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;&lt;a &quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span>
+    <span class="k">assert</span> <span class="s1">&#39;href=&quot;../article.html&quot;&#39;</span> <span class="ow">in</span> <span class="n">html</span>
+</pre></div>
+
+<br>
+<p>Then append after the existing edge-case tests:</p>
+<div class="highlight"><pre><span></span><span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Phase 2: Level 2 — comments page article breadcrumb</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_comments_third_link_points_to_article</span><span class="p">(</span><span class="n">generator</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Third breadcrumb on comments page must link to ../article.html.&quot;&quot;&quot;</span>
+    <span class="n">crumbs</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;News 15-03-2026&quot;</span><span class="p">,</span> <span class="s2">&quot;Hacker-News 15-03-2026&quot;</span><span class="p">,</span> <span class="s2">&quot;My Article Title&quot;</span><span class="p">]</span>
+    <span class="n">html</span> <span class="o">=</span> <span class="n">_call</span><span class="p">(</span><span class="n">generator</span><span class="p">,</span> <span class="n">crumbs</span><span class="p">,</span> <span class="n">html_subfolder</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">current_file</span><span class="o">=</span><span class="s2">&quot;comments.html&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="s1">&#39;href=&quot;../article.html&quot;&#39;</span> <span class="ow">in</span> <span class="n">html</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_comments_third_link_shows_article_title</span><span class="p">(</span><span class="n">generator</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Third breadcrumb must display the article title text.&quot;&quot;&quot;</span>
+    <span class="n">crumbs</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;News 15-03-2026&quot;</span><span class="p">,</span> <span class="s2">&quot;Hacker-News 15-03-2026&quot;</span><span class="p">,</span> <span class="s2">&quot;My Article Title&quot;</span><span class="p">]</span>
+    <span class="n">html</span> <span class="o">=</span> <span class="n">_call</span><span class="p">(</span><span class="n">generator</span><span class="p">,</span> <span class="n">crumbs</span><span class="p">,</span> <span class="n">html_subfolder</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">current_file</span><span class="o">=</span><span class="s2">&quot;comments.html&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="s2">&quot;My Article Title&quot;</span> <span class="ow">in</span> <span class="n">html</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_html_subfolder_article_still_has_two_links</span><span class="p">(</span><span class="n">generator</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;html/article.html (not comments) must still render exactly 2 breadcrumbs.&quot;&quot;&quot;</span>
+    <span class="n">crumbs</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;News 15-03-2026&quot;</span><span class="p">,</span> <span class="s2">&quot;Hacker-News 15-03-2026&quot;</span><span class="p">]</span>
+    <span class="n">html</span> <span class="o">=</span> <span class="n">_call</span><span class="p">(</span><span class="n">generator</span><span class="p">,</span> <span class="n">crumbs</span><span class="p">,</span> <span class="n">html_subfolder</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">current_file</span><span class="o">=</span><span class="s2">&quot;article.html&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">html</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;&lt;a &quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Run to verify new tests fail and updated test fails</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_breadcrumb.py::test_comments_breadcrumb_has_article_level<span class="w"> </span>tests/unit/test_breadcrumb.py::test_comments_third_link_points_to_article<span class="w"> </span>tests/unit/test_breadcrumb.py::test_comments_third_link_shows_article_title<span class="w"> </span>tests/unit/test_breadcrumb.py::test_html_subfolder_article_still_has_two_links<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: <code>test_comments_breadcrumb_has_article_level</code>, <code>test_comments_third_link_points_to_article</code>, <code>test_comments_third_link_shows_article_title</code> FAIL. <code>test_html_subfolder_article_still_has_two_links</code> PASSES (already correct).</p>
+<br>
+<hr>
+<br>
+<h2>Chunk 2: Implementation + Commit</h2>
+<br>
+<h3>Task 4: Implement <code>_generate_breadcrumb</code></h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>capcat/core/html_generator.py:818-874</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Replace the entire <code>_generate_breadcrumb</code> method</strong></li>
+</ul>
+<br>
+<p>Replace lines 818–874 with:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_generate_breadcrumb</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">breadcrumb_path</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">html_subfolder</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">current_file_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate breadcrumb navigation HTML.</span>
+
+<span class="sd">        Renders 1–3 links depending on page type:</span>
+<span class="sd">          news.html  (source dir)      → date only (1 link)</span>
+<span class="sd">          article.html                 → date + source (2 links)</span>
+<span class="sd">          html/article.html            → date + source (2 links)</span>
+<span class="sd">          html/comments.html           → date + source + article (3 links)</span>
+
+<span class="sd">        Display format:</span>
+<span class="sd">          Level 0 (date):    &quot;News 15 March 2026&quot;</span>
+<span class="sd">          Level 1 (source):  &quot;Hacker News&quot;</span>
+<span class="sd">          Level 2 (article): article title as-is</span>
+
+<span class="sd">        Depths are fixed by physical directory structure, not breadcrumb length.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">breadcrumb_path</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+
+        <span class="n">is_source_index</span> <span class="o">=</span> <span class="n">current_file_path</span> <span class="ow">and</span> <span class="s2">&quot;news.html&quot;</span> <span class="ow">in</span> <span class="n">current_file_path</span>
+        <span class="n">is_comments</span> <span class="o">=</span> <span class="n">current_file_path</span> <span class="o">==</span> <span class="s2">&quot;comments.html&quot;</span>
+
+        <span class="k">if</span> <span class="n">is_source_index</span><span class="p">:</span>
+            <span class="n">show_items</span> <span class="o">=</span> <span class="n">breadcrumb_path</span><span class="p">[:</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">base_depth</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">html_subfolder</span> <span class="ow">and</span> <span class="n">is_comments</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">breadcrumb_path</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">show_items</span> <span class="o">=</span> <span class="n">breadcrumb_path</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span>
+            <span class="n">base_depth</span> <span class="o">=</span> <span class="mi">3</span>
+        <span class="k">elif</span> <span class="n">html_subfolder</span><span class="p">:</span>
+            <span class="n">show_items</span> <span class="o">=</span> <span class="n">breadcrumb_path</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">base_depth</span> <span class="o">=</span> <span class="mi">3</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">show_items</span> <span class="o">=</span> <span class="n">breadcrumb_path</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">base_depth</span> <span class="o">=</span> <span class="mi">2</span>
+
+        <span class="n">filenames</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;index.html&quot;</span><span class="p">,</span> <span class="s2">&quot;news.html&quot;</span><span class="p">,</span> <span class="s2">&quot;article.html&quot;</span><span class="p">]</span>
+        <span class="n">months</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;January&quot;</span><span class="p">,</span> <span class="s2">&quot;February&quot;</span><span class="p">,</span> <span class="s2">&quot;March&quot;</span><span class="p">,</span> <span class="s2">&quot;April&quot;</span><span class="p">,</span> <span class="s2">&quot;May&quot;</span><span class="p">,</span> <span class="s2">&quot;June&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;July&quot;</span><span class="p">,</span> <span class="s2">&quot;August&quot;</span><span class="p">,</span> <span class="s2">&quot;September&quot;</span><span class="p">,</span> <span class="s2">&quot;October&quot;</span><span class="p">,</span> <span class="s2">&quot;November&quot;</span><span class="p">,</span> <span class="s2">&quot;December&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+
+        <span class="n">breadcrumb_items</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">show_items</span><span class="p">):</span>
+            <span class="n">levels_up</span> <span class="o">=</span> <span class="n">base_depth</span> <span class="o">-</span> <span class="n">i</span>
+            <span class="n">href</span> <span class="o">=</span> <span class="s2">&quot;../&quot;</span> <span class="o">*</span> <span class="n">levels_up</span> <span class="o">+</span> <span class="n">filenames</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># Date folder: &quot;News 15-03-2026&quot; → &quot;News 15 March 2026&quot;</span>
+                <span class="n">m</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;(\d</span><span class="si">{2}</span><span class="s2">)-(\d</span><span class="si">{2}</span><span class="s2">)-(\d</span><span class="si">{4}</span><span class="s2">)&quot;</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
+                    <span class="n">day</span><span class="p">,</span> <span class="n">month</span><span class="p">,</span> <span class="n">year</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">display</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;News </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">day</span><span class="p">)</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">months</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">month</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">year</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">IndexError</span><span class="p">):</span>
+                        <span class="n">display</span> <span class="o">=</span> <span class="n">item</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">display</span> <span class="o">=</span> <span class="n">item</span>
+            <span class="k">elif</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="c1"># Source folder: strip date, normalise hyphens to spaces</span>
+                <span class="n">display</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s+\d</span><span class="si">{2}</span><span class="s2">-\d</span><span class="si">{2}</span><span class="s2">-\d</span><span class="si">{4}</span><span class="s2">$&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="n">display</span> <span class="o">=</span> <span class="n">display</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Article title (comments only): use as-is</span>
+                <span class="n">display</span> <span class="o">=</span> <span class="n">item</span>
+
+            <span class="n">breadcrumb_items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;&lt;a href=&quot;</span><span class="si">{</span><span class="n">href</span><span class="si">}</span><span class="s1">&quot; title=&quot;Navigate to </span><span class="si">{</span><span class="n">display</span><span class="si">}</span><span class="s1">&quot;&gt;</span><span class="si">{</span><span class="n">display</span><span class="si">}</span><span class="s1">&lt;/a&gt;&#39;</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">breadcrumb_items</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Run the breadcrumb tests</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_breadcrumb.py<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: all tests in <code>test_breadcrumb.py</code> PASS.</p>
+<br>
+<hr>
+<br>
+<h3>Task 5: Implement <code>generate_article_html_from_template</code> — move <code>is_comments_page</code> and inject article title</h3>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>capcat/core/html_generator.py:554-571</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Reorder and extend the breadcrumb section</strong></li>
+</ul>
+<br>
+<p>Replace lines 554–571 (the breadcrumb call + <code>is_comments_page</code> block) with:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="c1"># Determine if this is a comments page (must precede breadcrumb call)</span>
+            <span class="n">is_comments_page</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">article_title</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot; - Comments&quot;</span><span class="p">)</span>
+                <span class="ow">or</span> <span class="s2">&quot;comments&quot;</span> <span class="ow">in</span> <span class="n">markdown_path</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                <span class="ow">or</span> <span class="s2">&quot;Comments&quot;</span> <span class="ow">in</span> <span class="n">breadcrumb_path</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Generate breadcrumb navigation</span>
+            <span class="n">current_file</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s2">&quot;comments.html&quot;</span>
+                <span class="k">if</span> <span class="s2">&quot;comments&quot;</span> <span class="ow">in</span> <span class="n">markdown_path</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                <span class="k">else</span> <span class="s2">&quot;article.html&quot;</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">is_comments_page</span><span class="p">:</span>
+                <span class="n">base_article_title</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span>
+                    <span class="sa">r</span><span class="s2">&quot;\s*-\s*Comments$&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">article_title</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="n">breadcrumb_for_render</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">breadcrumb_path</span><span class="p">[:</span><span class="mi">2</span><span class="p">])</span> <span class="o">+</span> <span class="p">[</span><span class="n">base_article_title</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">breadcrumb_for_render</span> <span class="o">=</span> <span class="n">breadcrumb_path</span>
+            <span class="n">breadcrumb_html</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_breadcrumb</span><span class="p">(</span>
+                <span class="n">breadcrumb_for_render</span><span class="p">,</span>
+                <span class="n">html_subfolder</span><span class="o">=</span><span class="n">html_subfolder</span><span class="p">,</span>
+                <span class="n">current_file_path</span><span class="o">=</span><span class="n">current_file</span><span class="p">,</span>
+            <span class="p">)</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Run the full test suite</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: all tests pass.</p>
+<br>
+<hr>
+<br>
+<h3>Task 6: Commit</h3>
+<br>
+<strong>Files:</strong> all changed files
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Stage and commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>capcat/core/html_generator.py<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>tests/unit/test_breadcrumb.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;fix: enforce consistent breadcrumb rendering — Phase 2</span>
+
+<span class="s2">- _generate_breadcrumb: Level 0 formats date as &#39;News D Month YYYY&#39;</span>
+<span class="s2">- _generate_breadcrumb: Level 1 strips date and normalises hyphens to spaces</span>
+<span class="s2">- _generate_breadcrumb: Level 2 adds article title link for comments pages</span>
+<span class="s2">- generate_article_html_from_template: inject article title as 3rd crumb for comments</span>
+<span class="s2">- Update test: comments breadcrumb now shows 3 levels (article link replaces Back-to-Article)&quot;</span>
+</pre></div>
+
+<br>
+<p>Expected: commit succeeds, pre-commit hooks pass.</p>
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

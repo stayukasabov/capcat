@@ -1,0 +1,2008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global-Settings YAML Implementation Plan</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / <a href="../superpowers/index.html">superpowers</a> / plans</div>
+<h1>Global-Settings YAML Implementation Plan</h1>
+<br>
+<p>&gt; <strong>For agentic workers:</strong> REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (<code>- [ ]</code>) syntax for tracking.</p>
+<br>
+<strong>Goal:</strong> Expose all tunable capcat settings as a human-editable <code>Config/Global-settings.yaml</code> vault file with a user-level fallback, starting with PDF limit enforcement.
+<br>
+<strong>Architecture:</strong> Two-file separation: <code>Config/capcat.yml</code> owns sources/bundles (unchanged); <code>Config/Global-settings.yaml</code> owns all tunable settings. New <code>PdfConfig</code> dataclass wired into <code>FetchNewsConfig</code>. <code>ConfigManager._load_settings_file()</code> loads both user-level and vault-level settings files unconditionally on every <code>load_config()</code> call, applying key-level merges on top of fresh dataclass defaults.
+<br>
+<strong>Tech Stack:</strong> Python 3, dataclasses, PyYAML (already a dependency), requests HEAD pre-flight, threading.
+<br>
+<hr>
+<br>
+<h2>File Map</h2>
+<br>
+<p>| File | Action | Responsibility |</p>
+<p>|---|---|---|</p>
+<p>| <code>capcat/core/config.py</code> | Modify | New <code>PdfConfig</code>; 9 new fields on existing dataclasses; <code>_filter_fields</code>; <code>from_dict()</code> fix; <code>_load_settings_file</code>; <code>_section_to_class</code>; <code>load_config()</code> wiring |</p>
+<p>| <code>capcat/core/constants.py</code> | Modify | Remove 9 constants that move to config; keep <code>ErrorCode</code>, <code>SAFE_FILENAME_CHARS</code>, <code>MAX_LINK_DENSITY_PERCENT</code>, <code>MAX_EXTERNAL_DOMAINS</code> |</p>
+<p>| <code>capcat/core/ethical_scraping.py</code> | Modify | <code>self.crawl_delay = 1.0</code> in <code>__init__</code>; new <code>configure()</code> method; <code>enforce_rate_limit</code> floor update |</p>
+<p>| <code>capcat/core/async_pdf_manager.py</code> | Modify | New <code>PdfConfig</code> param; <code>self._check_session</code>; <code>initialize_pdf_manager()</code>; <code>pdf_exceeds_size_limit()</code> helper; count cap in <code>extract_and_queue_pdf_links</code>; HEAD size check in <code>_download_pdf</code> |</p>
+<p>| <code>capcat/core/article_fetcher.py</code> | Modify | <code>initialize_pdf_manager(config.pdf)</code> at startup; <code>get_ethical_manager().configure(...)</code> at startup; remove <code>LARGE_PDF_THRESHOLD_MB</code> + <code>_check_pdf_size_and_prompt</code> prompt path; fix <code>convert_html_with_timeout</code> default arg; import <code>pdf_exceeds_size_limit</code> |</p>
+<p>| <code>capcat/core/unified_source_processor.py</code> | Modify | <code>_resolve_count</code> falls back to <code>config.processing.article_count</code> |</p>
+<p>| <code>capcat/core/source_system/base_source.py</code> | Modify | <code>SourceConfig.article_count</code> default → <code>None</code>; update <code>__post_init__</code> guard |</p>
+<p>| <code>capcat/core/source_system/source_registry.py</code> | Modify | Remove hardcoded <code>30</code> fallback at two <code>article_count</code> call sites |</p>
+<p>| <code>capcat/cli.py</code> | Modify | New <code>capcat settings</code> command; <code>_cmd_init</code> writes user-level template; <code>GLOBAL_SETTINGS_TEMPLATE</code> constant |</p>
+<p>| <code>tests/unit/test_config_global_settings.py</code> | Create | Load/merge order; vault overrides user; missing file handled; <code>sources</code>/<code>bundles</code> silenced; unknown keys ignored; <code>from_dict()</code> extra keys |</p>
+<p>| <code>tests/unit/test_async_pdf_manager_limits.py</code> | Create | Size skip; no Content-Length allows; HEAD failure allows; count cap; singleton |</p>
+<br>
+<hr>
+<br>
+<h2>Task 0: Create Feature Branch</h2>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Create branch and verify clean state</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>feat/global-settings-yaml
+git<span class="w"> </span>status
+</pre></div>
+
+<br>
+<p>Expected: clean working tree, on branch <code>feat/global-settings-yaml</code>.</p>
+<br>
+<hr>
+<br>
+<h2>Task 1: PdfConfig + FetchNewsConfig.pdf + _filter_fields + from_dict() fix</h2>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>capcat/core/config.py</code></li>
+<li>Create: <code>tests/unit/test_config_global_settings.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Write the failing tests</strong></li>
+</ul>
+<br>
+<p>Create <code>tests/unit/test_config_global_settings.py</code>:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Tests for PdfConfig dataclass and from_dict() completeness.&quot;&quot;&quot;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.config</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">FetchNewsConfig</span><span class="p">,</span>
+    <span class="n">PdfConfig</span><span class="p">,</span>
+    <span class="n">_filter_fields</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestPdfConfig</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_defaults</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">cfg</span> <span class="o">=</span> <span class="n">PdfConfig</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">cfg</span><span class="o">.</span><span class="n">max_pdf_size_bytes</span> <span class="o">==</span> <span class="mi">20_971_520</span>
+        <span class="k">assert</span> <span class="n">cfg</span><span class="o">.</span><span class="n">max_pdf_per_article</span> <span class="o">==</span> <span class="mi">10</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_custom_values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">cfg</span> <span class="o">=</span> <span class="n">PdfConfig</span><span class="p">(</span><span class="n">max_pdf_size_bytes</span><span class="o">=</span><span class="mi">10_000</span><span class="p">,</span> <span class="n">max_pdf_per_article</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">cfg</span><span class="o">.</span><span class="n">max_pdf_size_bytes</span> <span class="o">==</span> <span class="mi">10_000</span>
+        <span class="k">assert</span> <span class="n">cfg</span><span class="o">.</span><span class="n">max_pdf_per_article</span> <span class="o">==</span> <span class="mi">3</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestFetchNewsConfigPdf</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_pdf_field_initialized</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">cfg</span> <span class="o">=</span> <span class="n">FetchNewsConfig</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">cfg</span><span class="o">.</span><span class="n">pdf</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">pdf</span><span class="p">,</span> <span class="n">PdfConfig</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_pdf_defaults</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">cfg</span> <span class="o">=</span> <span class="n">FetchNewsConfig</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">cfg</span><span class="o">.</span><span class="n">pdf</span><span class="o">.</span><span class="n">max_pdf_size_bytes</span> <span class="o">==</span> <span class="mi">20_971_520</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_from_dict_preserves_pdf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;pdf&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;max_pdf_size_bytes&quot;</span><span class="p">:</span> <span class="mi">5_000_000</span><span class="p">,</span> <span class="s2">&quot;max_pdf_per_article&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">}}</span>
+        <span class="n">cfg</span> <span class="o">=</span> <span class="n">FetchNewsConfig</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">cfg</span><span class="o">.</span><span class="n">pdf</span><span class="o">.</span><span class="n">max_pdf_size_bytes</span> <span class="o">==</span> <span class="mi">5_000_000</span>
+        <span class="k">assert</span> <span class="n">cfg</span><span class="o">.</span><span class="n">pdf</span><span class="o">.</span><span class="n">max_pdf_per_article</span> <span class="o">==</span> <span class="mi">3</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_from_dict_unknown_key_ignored</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_filter_fields prevents TypeError on unknown keys.&quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;pdf&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;max_pdf_size_bytes&quot;</span><span class="p">:</span> <span class="mi">5_000_000</span><span class="p">,</span> <span class="s2">&quot;unknown_key&quot;</span><span class="p">:</span> <span class="s2">&quot;ignored&quot;</span><span class="p">}}</span>
+        <span class="n">cfg</span> <span class="o">=</span> <span class="n">FetchNewsConfig</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">cfg</span><span class="o">.</span><span class="n">pdf</span><span class="o">.</span><span class="n">max_pdf_size_bytes</span> <span class="o">==</span> <span class="mi">5_000_000</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_from_dict_empty_pdf_uses_defaults</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">cfg</span> <span class="o">=</span> <span class="n">FetchNewsConfig</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({})</span>
+        <span class="k">assert</span> <span class="n">cfg</span><span class="o">.</span><span class="n">pdf</span><span class="o">.</span><span class="n">max_pdf_size_bytes</span> <span class="o">==</span> <span class="mi">20_971_520</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_from_dict_ui_preserved</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;from_dict() must not silently drop ui section.&quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;ui&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;use_emojis&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}}</span>
+        <span class="n">cfg</span> <span class="o">=</span> <span class="n">FetchNewsConfig</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">cfg</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">use_emojis</span> <span class="ow">is</span> <span class="kc">False</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestFilterFields</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_keeps_known_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">_filter_fields</span><span class="p">(</span><span class="n">PdfConfig</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;max_pdf_size_bytes&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;max_pdf_per_article&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">})</span>
+        <span class="k">assert</span> <span class="n">result</span> <span class="o">==</span> <span class="p">{</span><span class="s2">&quot;max_pdf_size_bytes&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;max_pdf_per_article&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_drops_unknown_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">_filter_fields</span><span class="p">(</span><span class="n">PdfConfig</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;max_pdf_size_bytes&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;bogus&quot;</span><span class="p">:</span> <span class="s2">&quot;x&quot;</span><span class="p">})</span>
+        <span class="k">assert</span> <span class="s2">&quot;bogus&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">result</span>
+        <span class="k">assert</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;max_pdf_size_bytes&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Run tests to verify they fail</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_config_global_settings.py<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: multiple failures — <code>PdfConfig</code> not found, <code>_filter_fields</code> not found, <code>from_dict</code> drops <code>ui</code>/<code>pdf</code>.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Implement PdfConfig, _filter_fields, and fix from_dict()</strong></li>
+</ul>
+<br>
+<p>In <code>capcat/core/config.py</code>:</p>
+<br>
+<strong>Add <code>PdfConfig</code> after <code>LoggingConfig</code>:</strong>
+<br>
+<div class="highlight"><pre><span></span><span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PdfConfig</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;PDF download configuration settings.&quot;&quot;&quot;</span>
+
+    <span class="n">max_pdf_size_bytes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20_971_520</span>  <span class="c1"># 20MB</span>
+    <span class="n">max_pdf_per_article</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span>
+</pre></div>
+
+<br>
+<strong>Add <code>_filter_fields</code> as a module-level function (before <code>FetchNewsConfig</code>):</strong>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_filter_fields</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return only keys that are known fields on the dataclass cls.&quot;&quot;&quot;</span>
+    <span class="n">known</span> <span class="o">=</span> <span class="p">{</span><span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">fields</span><span class="p">(</span><span class="bp">cls</span><span class="p">)}</span>
+    <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">known</span><span class="p">}</span>
+</pre></div>
+
+<br>
+<strong>Update <code>FetchNewsConfig</code>:</strong>
+<br>
+<p>Add <code>pdf: PdfConfig = None</code> field. In <code>__post_init__</code>, add:</p>
+<div class="highlight"><pre><span></span><span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pdf</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pdf</span> <span class="o">=</span> <span class="n">PdfConfig</span><span class="p">()</span>
+</pre></div>
+
+<br>
+<strong>Fix <code>from_dict()</code></strong> to handle all five sections with <code>_filter_fields</code>:
+<br>
+<div class="highlight"><pre><span></span><span class="nd">@classmethod</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s2">&quot;FetchNewsConfig&quot;</span><span class="p">:</span>
+    <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+        <span class="n">network</span><span class="o">=</span><span class="n">NetworkConfig</span><span class="p">(</span><span class="o">**</span><span class="n">_filter_fields</span><span class="p">(</span><span class="n">NetworkConfig</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;network&quot;</span><span class="p">,</span> <span class="p">{}))),</span>
+        <span class="n">processing</span><span class="o">=</span><span class="n">ProcessingConfig</span><span class="p">(</span><span class="o">**</span><span class="n">_filter_fields</span><span class="p">(</span><span class="n">ProcessingConfig</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;processing&quot;</span><span class="p">,</span> <span class="p">{}))),</span>
+        <span class="n">logging</span><span class="o">=</span><span class="n">LoggingConfig</span><span class="p">(</span><span class="o">**</span><span class="n">_filter_fields</span><span class="p">(</span><span class="n">LoggingConfig</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;logging&quot;</span><span class="p">,</span> <span class="p">{}))),</span>
+        <span class="n">ui</span><span class="o">=</span><span class="n">UIConfig</span><span class="p">(</span><span class="o">**</span><span class="n">_filter_fields</span><span class="p">(</span><span class="n">UIConfig</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ui&quot;</span><span class="p">,</span> <span class="p">{}))),</span>
+        <span class="n">pdf</span><span class="o">=</span><span class="n">PdfConfig</span><span class="p">(</span><span class="o">**</span><span class="n">_filter_fields</span><span class="p">(</span><span class="n">PdfConfig</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;pdf&quot;</span><span class="p">,</span> <span class="p">{}))),</span>
+    <span class="p">)</span>
+</pre></div>
+
+<br>
+<p>Also add <code>import dataclasses</code> to the top-level imports (it&#x27;s used by <code>_filter_fields</code>; check if <code>dataclasses</code> is already imported — it provides <code>asdict</code> via <code>from dataclasses import asdict, dataclass</code>, so add <code>fields</code> to that import).</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Run tests to verify they pass</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_config_global_settings.py<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: all new tests pass.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 5: Run full suite</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-q
+</pre></div>
+
+<br>
+<p>Expected: all existing tests pass plus new tests.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 6: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>capcat/core/config.py<span class="w"> </span>tests/unit/test_config_global_settings.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: add PdfConfig dataclass, _filter_fields, fix from_dict for ui+pdf sections&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h2>Task 2: _load_settings_file + load_config() wiring</h2>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>capcat/core/config.py</code></li>
+<li>Modify: <code>tests/unit/test_config_global_settings.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Write failing tests</strong></li>
+</ul>
+<br>
+<p>Append to <code>tests/unit/test_config_global_settings.py</code>:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">unittest.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">patch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigManager</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestLoadSettingsFile</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_yaml</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;Global-settings.yaml&quot;</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">f</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_missing_file_is_silently_ignored</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+        <span class="n">mgr</span> <span class="o">=</span> <span class="n">ConfigManager</span><span class="p">()</span>
+        <span class="n">mgr</span><span class="o">.</span><span class="n">_config</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="s1">&#39;capcat.core.config&#39;</span><span class="p">,</span> <span class="n">fromlist</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;FetchNewsConfig&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">FetchNewsConfig</span><span class="p">()</span>
+        <span class="n">mgr</span><span class="o">.</span><span class="n">_load_settings_file</span><span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;nonexistent.yaml&quot;</span><span class="p">)</span>  <span class="c1"># must not raise</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_vault_overrides_default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+        <span class="n">mgr</span> <span class="o">=</span> <span class="n">ConfigManager</span><span class="p">()</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_yaml</span><span class="p">(</span><span class="s2">&quot;pdf:</span><span class="se">\n</span><span class="s2">  max_pdf_size_bytes: 1000000</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">)</span>
+        <span class="n">mgr</span><span class="o">.</span><span class="n">_config</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="s1">&#39;capcat.core.config&#39;</span><span class="p">,</span> <span class="n">fromlist</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;FetchNewsConfig&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">FetchNewsConfig</span><span class="p">()</span>
+        <span class="n">mgr</span><span class="o">.</span><span class="n">_load_settings_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">mgr</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">pdf</span><span class="o">.</span><span class="n">max_pdf_size_bytes</span> <span class="o">==</span> <span class="mi">1_000_000</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_sources_and_bundles_silenced</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+        <span class="n">mgr</span> <span class="o">=</span> <span class="n">ConfigManager</span><span class="p">()</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_yaml</span><span class="p">(</span>
+            <span class="s2">&quot;sources:</span><span class="se">\n</span><span class="s2">  - foo</span><span class="se">\n</span><span class="s2">bundles:</span><span class="se">\n</span><span class="s2">  - bar</span><span class="se">\n</span><span class="s2">pdf:</span><span class="se">\n</span><span class="s2">  max_pdf_per_article: 3</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">tmp_path</span>
+        <span class="p">)</span>
+        <span class="n">mgr</span><span class="o">.</span><span class="n">_config</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="s1">&#39;capcat.core.config&#39;</span><span class="p">,</span> <span class="n">fromlist</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;FetchNewsConfig&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">FetchNewsConfig</span><span class="p">()</span>
+        <span class="n">mgr</span><span class="o">.</span><span class="n">_load_settings_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="c1"># sources/bundles silently dropped; pdf applied</span>
+        <span class="k">assert</span> <span class="n">mgr</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">pdf</span><span class="o">.</span><span class="n">max_pdf_per_article</span> <span class="o">==</span> <span class="mi">3</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_unknown_section_logged_not_raised</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+        <span class="n">mgr</span> <span class="o">=</span> <span class="n">ConfigManager</span><span class="p">()</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_yaml</span><span class="p">(</span><span class="s2">&quot;unknown_section:</span><span class="se">\n</span><span class="s2">  foo: bar</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">)</span>
+        <span class="n">mgr</span><span class="o">.</span><span class="n">_config</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="s1">&#39;capcat.core.config&#39;</span><span class="p">,</span> <span class="n">fromlist</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;FetchNewsConfig&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">FetchNewsConfig</span><span class="p">()</span>
+        <span class="n">mgr</span><span class="o">.</span><span class="n">_load_settings_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>  <span class="c1"># must not raise</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_unknown_key_in_known_section_ignored</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+        <span class="n">mgr</span> <span class="o">=</span> <span class="n">ConfigManager</span><span class="p">()</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_yaml</span><span class="p">(</span>
+            <span class="s2">&quot;pdf:</span><span class="se">\n</span><span class="s2">  max_pdf_size_bytes: 999</span><span class="se">\n</span><span class="s2">  bogus_key: ignored</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">tmp_path</span>
+        <span class="p">)</span>
+        <span class="n">mgr</span><span class="o">.</span><span class="n">_config</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="s1">&#39;capcat.core.config&#39;</span><span class="p">,</span> <span class="n">fromlist</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;FetchNewsConfig&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">FetchNewsConfig</span><span class="p">()</span>
+        <span class="n">mgr</span><span class="o">.</span><span class="n">_load_settings_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">mgr</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">pdf</span><span class="o">.</span><span class="n">max_pdf_size_bytes</span> <span class="o">==</span> <span class="mi">999</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_user_then_vault_merge_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Vault-level setting overrides user-level; unset keys keep user value.&quot;&quot;&quot;</span>
+        <span class="n">user_dir</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;user&quot;</span>
+        <span class="n">vault_dir</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;vault&quot;</span>
+        <span class="n">user_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">()</span>
+        <span class="n">vault_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">()</span>
+        <span class="p">(</span><span class="n">user_dir</span> <span class="o">/</span> <span class="s2">&quot;Global-settings.yaml&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span>
+            <span class="s2">&quot;pdf:</span><span class="se">\n</span><span class="s2">  max_pdf_size_bytes: 5000000</span><span class="se">\n</span><span class="s2">  max_pdf_per_article: 7</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+        <span class="p">(</span><span class="n">vault_dir</span> <span class="o">/</span> <span class="s2">&quot;Global-settings.yaml&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span>
+            <span class="s2">&quot;pdf:</span><span class="se">\n</span><span class="s2">  max_pdf_size_bytes: 1000000</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+        <span class="n">mgr</span> <span class="o">=</span> <span class="n">ConfigManager</span><span class="p">()</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">FetchNewsConfig</span>
+        <span class="n">mgr</span><span class="o">.</span><span class="n">_config</span> <span class="o">=</span> <span class="n">FetchNewsConfig</span><span class="p">()</span>
+        <span class="n">mgr</span><span class="o">.</span><span class="n">_load_settings_file</span><span class="p">(</span><span class="n">user_dir</span> <span class="o">/</span> <span class="s2">&quot;Global-settings.yaml&quot;</span><span class="p">)</span>
+        <span class="n">mgr</span><span class="o">.</span><span class="n">_load_settings_file</span><span class="p">(</span><span class="n">vault_dir</span> <span class="o">/</span> <span class="s2">&quot;Global-settings.yaml&quot;</span><span class="p">)</span>
+        <span class="c1"># vault wins on max_pdf_size_bytes</span>
+        <span class="k">assert</span> <span class="n">mgr</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">pdf</span><span class="o">.</span><span class="n">max_pdf_size_bytes</span> <span class="o">==</span> <span class="mi">1_000_000</span>
+        <span class="c1"># user value for max_pdf_per_article preserved (vault didn&#39;t set it)</span>
+        <span class="k">assert</span> <span class="n">mgr</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">pdf</span><span class="o">.</span><span class="n">max_pdf_per_article</span> <span class="o">==</span> <span class="mi">7</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_load_config_fires_settings_files_unconditionally</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">,</span> <span class="n">monkeypatch</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;load_config() must load user-level and vault-level settings without --config flag.&quot;&quot;&quot;</span>
+        <span class="c1"># Arrange: user-level and vault-level files with different pdf values</span>
+        <span class="n">user_dir</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;home&quot;</span> <span class="o">/</span> <span class="s2">&quot;.config&quot;</span> <span class="o">/</span> <span class="s2">&quot;capcat&quot;</span>
+        <span class="n">vault_dir</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;vault&quot;</span> <span class="o">/</span> <span class="s2">&quot;Config&quot;</span>
+        <span class="n">user_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">vault_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">user_dir</span> <span class="o">/</span> <span class="s2">&quot;Global-settings.yaml&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span>
+            <span class="s2">&quot;pdf:</span><span class="se">\n</span><span class="s2">  max_pdf_size_bytes: 3000000</span><span class="se">\n</span><span class="s2">  max_pdf_per_article: 5</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+        <span class="p">(</span><span class="n">vault_dir</span> <span class="o">/</span> <span class="s2">&quot;Global-settings.yaml&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span>
+            <span class="s2">&quot;pdf:</span><span class="se">\n</span><span class="s2">  max_pdf_size_bytes: 1000000</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Patch Path.home() to return our fake home, and cwd to return fake vault</span>
+        <span class="n">monkeypatch</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;vault&quot;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">patch</span><span class="p">(</span><span class="s2">&quot;capcat.core.config.Path.home&quot;</span><span class="p">,</span> <span class="n">return_value</span><span class="o">=</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;home&quot;</span><span class="p">):</span>
+            <span class="n">mgr</span> <span class="o">=</span> <span class="n">ConfigManager</span><span class="p">()</span>
+            <span class="c1"># Suppress env var loading and legacy capcat.yml search</span>
+            <span class="n">cfg</span> <span class="o">=</span> <span class="n">mgr</span><span class="o">.</span><span class="n">load_config</span><span class="p">(</span><span class="n">load_env</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1"># vault overrides user on max_pdf_size_bytes</span>
+        <span class="k">assert</span> <span class="n">cfg</span><span class="o">.</span><span class="n">pdf</span><span class="o">.</span><span class="n">max_pdf_size_bytes</span> <span class="o">==</span> <span class="mi">1_000_000</span>
+        <span class="c1"># user value preserved for max_pdf_per_article</span>
+        <span class="k">assert</span> <span class="n">cfg</span><span class="o">.</span><span class="n">pdf</span><span class="o">.</span><span class="n">max_pdf_per_article</span> <span class="o">==</span> <span class="mi">5</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Run to verify failures</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_config_global_settings.py::TestLoadSettingsFile<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: <code>AttributeError: &#x27;ConfigManager&#x27; object has no attribute &#x27;_load_settings_file&#x27;</code>.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Implement _load_settings_file and _section_to_class</strong></li>
+</ul>
+<br>
+<p>In <code>capcat/core/config.py</code>, add the following to <code>ConfigManager</code>:</p>
+<br>
+<strong>Class attribute <code>_section_to_class</code></strong> (defined at class body level, after <code>__init__</code>):
+<br>
+<div class="highlight"><pre><span></span><span class="n">_section_to_class</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;network&quot;</span><span class="p">:</span> <span class="n">NetworkConfig</span><span class="p">,</span>
+    <span class="s2">&quot;processing&quot;</span><span class="p">:</span> <span class="n">ProcessingConfig</span><span class="p">,</span>
+    <span class="s2">&quot;ui&quot;</span><span class="p">:</span> <span class="n">UIConfig</span><span class="p">,</span>
+    <span class="s2">&quot;logging&quot;</span><span class="p">:</span> <span class="n">LoggingConfig</span><span class="p">,</span>
+    <span class="s2">&quot;pdf&quot;</span><span class="p">:</span> <span class="n">PdfConfig</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+
+<br>
+<strong>New method <code>_load_settings_file</code>:</strong>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_load_settings_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load a Global-settings.yaml file and merge into current config.</span>
+
+<span class="sd">    Silently ignores missing files, sources/bundles keys, and unknown keys.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">return</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span> <span class="ow">or</span> <span class="p">{}</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to read settings file </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="c1"># sources/bundles belong to capcat.yml, not settings files</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;sources&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;bundles&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="c1"># Filter each section to known fields before merging</span>
+    <span class="k">for</span> <span class="n">section_name</span><span class="p">,</span> <span class="n">section_data</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="bp">cls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_section_to_class</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">section_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">cls</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">section_data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">section_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">_filter_fields</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">section_data</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_merge_config_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<strong>Wire into <code>load_config()</code></strong> — insert after <code>self._config = FetchNewsConfig()</code> and before <code>if config_file:</code>:
+<br>
+<div class="highlight"><pre><span></span><span class="c1"># Load Global-settings.yaml from user-level then vault-level (unconditional)</span>
+<span class="n">user_settings</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;.config&quot;</span> <span class="o">/</span> <span class="s2">&quot;capcat&quot;</span> <span class="o">/</span> <span class="s2">&quot;Global-settings.yaml&quot;</span>
+<span class="n">vault_settings</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;Config&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;Global-settings.yaml&quot;</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">_load_settings_file</span><span class="p">(</span><span class="n">user_settings</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">_load_settings_file</span><span class="p">(</span><span class="n">vault_settings</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<p>The full <code>load_config()</code> order after changes:</p>
+<ol>
+<li><code>self._config = FetchNewsConfig()</code> (reset to defaults)</li>
+<li><code>_load_settings_file(user_settings)</code> (user-level)</li>
+<li><code>_load_settings_file(vault_settings)</code> (vault-level overrides)</li>
+<li><code>if config_file: _load_from_file(config_file)</code> else <code>_load_default_config_files()</code> (legacy capcat.yml)</li>
+<li><code>_load_from_env()</code> (env vars override all)</li>
+</ol>
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Run tests to verify pass</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_config_global_settings.py<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: all tests pass.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 5: Run full suite</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-q
+</pre></div>
+
+<br>
+<p>Expected: all pass.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 6: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>capcat/core/config.py<span class="w"> </span>tests/unit/test_config_global_settings.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: add _load_settings_file, _section_to_class, wire Global-settings.yaml into load_config&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h2>Task 3: ProcessingConfig new fields + NetworkConfig new fields + constants.py cleanup</h2>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>capcat/core/config.py</code></li>
+<li>Modify: <code>capcat/core/constants.py</code></li>
+<li>Modify: <code>capcat/core/article_fetcher.py</code> (CONVERSION_TIMEOUT_SECONDS sentinel only)</li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Write failing tests</strong></li>
+</ul>
+<br>
+<p>Append to <code>tests/unit/test_config_global_settings.py</code>:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">TestNewConfigFields</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_processing_new_fields_defaults</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProcessingConfig</span>
+        <span class="n">cfg</span> <span class="o">=</span> <span class="n">ProcessingConfig</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">cfg</span><span class="o">.</span><span class="n">article_count</span> <span class="o">==</span> <span class="mi">30</span>
+        <span class="k">assert</span> <span class="n">cfg</span><span class="o">.</span><span class="n">max_images</span> <span class="o">==</span> <span class="mi">20</span>
+        <span class="k">assert</span> <span class="n">cfg</span><span class="o">.</span><span class="n">max_images_media_mode</span> <span class="o">==</span> <span class="mi">1000</span>
+        <span class="k">assert</span> <span class="n">cfg</span><span class="o">.</span><span class="n">min_image_dimensions</span> <span class="o">==</span> <span class="mi">150</span>
+        <span class="k">assert</span> <span class="n">cfg</span><span class="o">.</span><span class="n">max_image_size_bytes</span> <span class="o">==</span> <span class="mi">5_242_880</span>
+        <span class="k">assert</span> <span class="n">cfg</span><span class="o">.</span><span class="n">conversion_timeout</span> <span class="o">==</span> <span class="mi">30</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_network_new_fields_defaults</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">NetworkConfig</span>
+        <span class="n">cfg</span> <span class="o">=</span> <span class="n">NetworkConfig</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">cfg</span><span class="o">.</span><span class="n">crawl_delay</span> <span class="o">==</span> <span class="mf">1.0</span>
+        <span class="k">assert</span> <span class="n">cfg</span><span class="o">.</span><span class="n">robots_cache_ttl_minutes</span> <span class="o">==</span> <span class="mi">15</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_processing_fields_loadable_from_yaml</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigManager</span><span class="p">,</span> <span class="n">FetchNewsConfig</span>
+        <span class="n">yaml_content</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot;processing:</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="s2">&quot;  article_count: 50</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="s2">&quot;  max_images: 10</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="s2">&quot;  conversion_timeout: 60</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;Global-settings.yaml&quot;</span>
+        <span class="n">path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">yaml_content</span><span class="p">)</span>
+        <span class="n">mgr</span> <span class="o">=</span> <span class="n">ConfigManager</span><span class="p">()</span>
+        <span class="n">mgr</span><span class="o">.</span><span class="n">_config</span> <span class="o">=</span> <span class="n">FetchNewsConfig</span><span class="p">()</span>
+        <span class="n">mgr</span><span class="o">.</span><span class="n">_load_settings_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">mgr</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">processing</span><span class="o">.</span><span class="n">article_count</span> <span class="o">==</span> <span class="mi">50</span>
+        <span class="k">assert</span> <span class="n">mgr</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">processing</span><span class="o">.</span><span class="n">max_images</span> <span class="o">==</span> <span class="mi">10</span>
+        <span class="k">assert</span> <span class="n">mgr</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">processing</span><span class="o">.</span><span class="n">conversion_timeout</span> <span class="o">==</span> <span class="mi">60</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_network_fields_loadable_from_yaml</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigManager</span><span class="p">,</span> <span class="n">FetchNewsConfig</span>
+        <span class="n">yaml_content</span> <span class="o">=</span> <span class="s2">&quot;network:</span><span class="se">\n</span><span class="s2">  crawl_delay: 2.5</span><span class="se">\n</span><span class="s2">  robots_cache_ttl_minutes: 30</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;Global-settings.yaml&quot;</span>
+        <span class="n">path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">yaml_content</span><span class="p">)</span>
+        <span class="n">mgr</span> <span class="o">=</span> <span class="n">ConfigManager</span><span class="p">()</span>
+        <span class="n">mgr</span><span class="o">.</span><span class="n">_config</span> <span class="o">=</span> <span class="n">FetchNewsConfig</span><span class="p">()</span>
+        <span class="n">mgr</span><span class="o">.</span><span class="n">_load_settings_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">mgr</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">crawl_delay</span> <span class="o">==</span> <span class="mf">2.5</span>
+        <span class="k">assert</span> <span class="n">mgr</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">robots_cache_ttl_minutes</span> <span class="o">==</span> <span class="mi">30</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Run to verify failures</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_config_global_settings.py::TestNewConfigFields<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: <code>AttributeError: ProcessingConfig has no field &#x27;article_count&#x27;</code>.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Add new fields to ProcessingConfig and NetworkConfig</strong></li>
+</ul>
+<br>
+<p>In <code>capcat/core/config.py</code>:</p>
+<br>
+<strong><code>ProcessingConfig</code></strong> — add these fields (after <code>max_workers</code>):
+<div class="highlight"><pre><span></span><span class="c1"># Article fetching</span>
+<span class="n">article_count</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span>
+<span class="n">conversion_timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span>
+
+<span class="c1"># Image limits (sourced from constants.py)</span>
+<span class="n">max_images</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="n">max_images_media_mode</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="n">min_image_dimensions</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">150</span>
+<span class="n">max_image_size_bytes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5_242_880</span>  <span class="c1"># 5MB</span>
+</pre></div>
+
+<br>
+<strong><code>NetworkConfig</code></strong> — add these fields (after <code>retry_delay</code>):
+<div class="highlight"><pre><span></span><span class="n">crawl_delay</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="n">robots_cache_ttl_minutes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">15</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Remove migrated constants from constants.py</strong></li>
+</ul>
+<br>
+<p>In <code>capcat/core/constants.py</code>, remove these lines:</p>
+<ul>
+<li><code>CONVERSION_TIMEOUT_SECONDS = 30</code></li>
+<li><code>DEFAULT_ARTICLE_COUNT = 30</code></li>
+<li><code>DEFAULT_MAX_IMAGES = 20</code></li>
+<li><code>MEDIA_FLAG_MAX_IMAGES = 1000</code></li>
+<li><code>MIN_IMAGE_DIMENSIONS = 150</code></li>
+<li><code>MAX_IMAGE_SIZE_BYTES = 5 <em> 1024 </em> 1024</code></li>
+<li><code>MAX_FILENAME_LENGTH = 255</code></li>
+<li><code>DEFAULT_CRAWL_DELAY = 1.0</code></li>
+<li><code>ROBOTS_CACHE_TTL_MINUTES = 15</code></li>
+</ul>
+<br>
+<p>Keep: <code>ErrorCode</code>, <code>SAFE_FILENAME_CHARS</code>, <code>MAX_LINK_DENSITY_PERCENT</code>, <code>MAX_EXTERNAL_DOMAINS</code>, <code>DEFAULT_CONNECT_TIMEOUT</code>, <code>DEFAULT_READ_TIMEOUT</code>, <code>MAX_RETRIES</code>, <code>RETRY_DELAY_SECONDS</code>.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 5: Fix the only active consumer — article_fetcher.py</strong></li>
+</ul>
+<br>
+<p>In <code>capcat/core/article_fetcher.py</code>:</p>
+<br>
+<p>Remove the import:</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">CONVERSION_TIMEOUT_SECONDS</span>
+</pre></div>
+
+<br>
+<p>Change the function signature of <code>convert_html_with_timeout</code>:</p>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">convert_html_with_timeout</span><span class="p">(</span>
+    <span class="n">html_content</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</pre></div>
+
+<br>
+<p>At the start of the function body, add:</p>
+<div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">timeout</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_config</span>
+    <span class="n">timeout</span> <span class="o">=</span> <span class="n">get_config</span><span class="p">()</span><span class="o">.</span><span class="n">processing</span><span class="o">.</span><span class="n">conversion_timeout</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 6: Delete stale duplicate constants file</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>git<span class="w"> </span>-C<span class="w"> </span>~/capcat<span class="w"> </span>ls-files<span class="w"> </span>--error-unmatch<span class="w"> </span>core/constants.py<span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;git-tracked&quot;</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;untracked&quot;</span>
+</pre></div>
+
+<br>
+<p>If git-tracked, remove it from git and disk:</p>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>rm<span class="w"> </span>core/constants.py
+</pre></div>
+
+<br>
+<p>If untracked (not in git), just delete:</p>
+<div class="highlight"><pre><span></span>rm<span class="w"> </span>/Users/xmac/capcat/core/constants.py
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 7: Run all tests</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-q
+</pre></div>
+
+<br>
+<p>Expected: all pass.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 8: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>capcat/core/config.py<span class="w"> </span>capcat/core/constants.py<span class="w"> </span>capcat/core/article_fetcher.py<span class="w"> </span>tests/unit/test_config_global_settings.py
+<span class="c1"># If stale duplicate was git-tracked and removed with git rm, it is already staged</span>
+git<span class="w"> </span>status<span class="w">  </span><span class="c1"># confirm nothing is accidentally left unstaged</span>
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: add article_count/max_images/conversion_timeout/crawl_delay fields to config; migrate constants&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h2>Task 4: EthicalScrapingManager.configure() + crawl_delay floor</h2>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>capcat/core/ethical_scraping.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Write failing tests</strong></li>
+</ul>
+<br>
+<p>Create <code>tests/unit/test_ethical_scraping_configure.py</code>:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Tests for EthicalScrapingManager.configure() and crawl_delay floor.&quot;&quot;&quot;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">unittest.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">patch</span><span class="p">,</span> <span class="n">MagicMock</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.ethical_scraping</span><span class="w"> </span><span class="kn">import</span> <span class="n">EthicalScrapingManager</span>
+
+<span class="c1"># Note: tests use mock-patched sleep so they run fast (no real time.sleep calls).</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestConfigureMethod</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_configure_updates_crawl_delay</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">mgr</span> <span class="o">=</span> <span class="n">EthicalScrapingManager</span><span class="p">()</span>
+        <span class="n">mgr</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">crawl_delay</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">robots_cache_ttl_minutes</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">mgr</span><span class="o">.</span><span class="n">crawl_delay</span> <span class="o">==</span> <span class="mf">2.0</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_configure_updates_cache_ttl</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">timedelta</span>
+        <span class="n">mgr</span> <span class="o">=</span> <span class="n">EthicalScrapingManager</span><span class="p">()</span>
+        <span class="n">mgr</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">crawl_delay</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">robots_cache_ttl_minutes</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">mgr</span><span class="o">.</span><span class="n">cache_ttl</span> <span class="o">==</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">minutes</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_default_crawl_delay_is_one</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;self.crawl_delay must be initialized before configure() is called.&quot;&quot;&quot;</span>
+        <span class="n">mgr</span> <span class="o">=</span> <span class="n">EthicalScrapingManager</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">mgr</span><span class="o">.</span><span class="n">crawl_delay</span> <span class="o">==</span> <span class="mf">1.0</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_enforce_rate_limit_crawl_delay_floor_applied</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;self.crawl_delay acts as a floor: effective = max(arg, min_delay, self.crawl_delay).&quot;&quot;&quot;</span>
+        <span class="n">mgr</span> <span class="o">=</span> <span class="n">EthicalScrapingManager</span><span class="p">()</span>
+        <span class="n">mgr</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">crawl_delay</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span> <span class="n">robots_cache_ttl_minutes</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+        <span class="c1"># Place last_request_time in the future so the next call would need to wait</span>
+        <span class="n">mgr</span><span class="o">.</span><span class="n">last_request_time</span><span class="p">[</span><span class="s2">&quot;example.com&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">+</span> <span class="mf">4.0</span>
+        <span class="c1"># The effective_delay should be max(0.0, 0.0, 5.0) = 5.0</span>
+        <span class="c1"># Reserve the slot and measure what sleep_time would be — inspect via a patched sleep</span>
+        <span class="n">sleep_times</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">with</span> <span class="n">patch</span><span class="p">(</span><span class="s2">&quot;capcat.core.ethical_scraping.time.sleep&quot;</span><span class="p">,</span> <span class="n">side_effect</span><span class="o">=</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">sleep_times</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="p">)):</span>
+            <span class="n">mgr</span><span class="o">.</span><span class="n">enforce_rate_limit</span><span class="p">(</span><span class="s2">&quot;example.com&quot;</span><span class="p">,</span> <span class="n">crawl_delay</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">min_delay</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">sleep_times</span><span class="p">,</span> <span class="s2">&quot;Expected sleep to be called&quot;</span>
+        <span class="k">assert</span> <span class="n">sleep_times</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mf">4.5</span>  <span class="c1"># slot was 4s in future + floor = still 5s effective</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_explicit_crawl_delay_wins_over_floor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;If robots.txt requires more than self.crawl_delay, the larger value wins.&quot;&quot;&quot;</span>
+        <span class="n">mgr</span> <span class="o">=</span> <span class="n">EthicalScrapingManager</span><span class="p">()</span>
+        <span class="n">mgr</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">crawl_delay</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">robots_cache_ttl_minutes</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+        <span class="n">mgr</span><span class="o">.</span><span class="n">last_request_time</span><span class="p">[</span><span class="s2">&quot;slow.com&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">+</span> <span class="mf">2.0</span>
+        <span class="n">sleep_times</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">with</span> <span class="n">patch</span><span class="p">(</span><span class="s2">&quot;capcat.core.ethical_scraping.time.sleep&quot;</span><span class="p">,</span> <span class="n">side_effect</span><span class="o">=</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">sleep_times</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="p">)):</span>
+            <span class="n">mgr</span><span class="o">.</span><span class="n">enforce_rate_limit</span><span class="p">(</span><span class="s2">&quot;slow.com&quot;</span><span class="p">,</span> <span class="n">crawl_delay</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span> <span class="n">min_delay</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">sleep_times</span>
+        <span class="k">assert</span> <span class="n">sleep_times</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mf">2.5</span>  <span class="c1"># effective = max(3.0, 1.0, 1.0) = 3.0; slot 2s in future</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Run to verify failures</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_ethical_scraping_configure.py<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: <code>AttributeError: &#x27;EthicalScrapingManager&#x27; object has no attribute &#x27;crawl_delay&#x27;</code> and <code>configure</code> not found.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Implement changes in ethical_scraping.py</strong></li>
+</ul>
+<br>
+<strong>In <code>EthicalScrapingManager.__init__</code></strong>, add after <code>self._lock = threading.Lock()</code>:
+<div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">crawl_delay</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span>
+</pre></div>
+
+<br>
+<strong>Add <code>configure()</code> method:</strong>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">configure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">crawl_delay</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">robots_cache_ttl_minutes</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Update rate-limiting parameters on the singleton after config is loaded.&quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">crawl_delay</span> <span class="o">=</span> <span class="n">crawl_delay</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">cache_ttl</span> <span class="o">=</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">minutes</span><span class="o">=</span><span class="n">robots_cache_ttl_minutes</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<strong>Update <code>enforce_rate_limit</code> body</strong> — change the <code>effective_delay</code> line from:
+<div class="highlight"><pre><span></span><span class="n">effective_delay</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">crawl_delay</span><span class="p">,</span> <span class="n">min_delay</span><span class="p">)</span>
+</pre></div>
+
+<p>to:</p>
+<div class="highlight"><pre><span></span><span class="n">effective_delay</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">crawl_delay</span><span class="p">,</span> <span class="n">min_delay</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">crawl_delay</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Run tests to verify pass</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_ethical_scraping_configure.py<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: all pass. The floor tests use patched <code>time.sleep</code> so they run instantly.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 5: Run full suite</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-q
+</pre></div>
+
+<br>
+<p>Expected: all pass.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 6: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>capcat/core/ethical_scraping.py<span class="w"> </span>tests/unit/test_ethical_scraping_configure.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: add EthicalScrapingManager.configure() and crawl_delay floor in enforce_rate_limit&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h2>Task 5: AsyncPDFManager — pdf_exceeds_size_limit, initialize_pdf_manager, count cap, size check</h2>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>capcat/core/async_pdf_manager.py</code></li>
+<li>Create: <code>tests/unit/test_async_pdf_manager_limits.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Write failing tests</strong></li>
+</ul>
+<br>
+<p>Create <code>tests/unit/test_async_pdf_manager_limits.py</code>:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Tests for PDF size/count enforcement in AsyncPDFManager.&quot;&quot;&quot;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">threading</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">unittest.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">MagicMock</span><span class="p">,</span> <span class="n">patch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">PdfConfig</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.async_pdf_manager</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">AsyncPDFManager</span><span class="p">,</span>
+    <span class="n">pdf_exceeds_size_limit</span><span class="p">,</span>
+    <span class="n">initialize_pdf_manager</span><span class="p">,</span>
+    <span class="n">get_pdf_manager</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestPdfExceedsSizeLimit</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_returns_true_when_content_length_exceeds_limit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">session</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+        <span class="n">response</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Content-Length&quot;</span><span class="p">:</span> <span class="s2">&quot;10000000&quot;</span><span class="p">}</span>
+        <span class="n">session</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="n">response</span>
+
+        <span class="k">assert</span> <span class="n">pdf_exceeds_size_limit</span><span class="p">(</span><span class="s2">&quot;http://example.com/file.pdf&quot;</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="mi">5_000_000</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_returns_false_when_content_length_within_limit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">session</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+        <span class="n">response</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Content-Length&quot;</span><span class="p">:</span> <span class="s2">&quot;1000&quot;</span><span class="p">}</span>
+        <span class="n">session</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="n">response</span>
+
+        <span class="k">assert</span> <span class="n">pdf_exceeds_size_limit</span><span class="p">(</span><span class="s2">&quot;http://example.com/file.pdf&quot;</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="mi">5_000_000</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_returns_false_when_no_content_length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">session</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+        <span class="n">response</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">session</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="n">response</span>
+
+        <span class="k">assert</span> <span class="n">pdf_exceeds_size_limit</span><span class="p">(</span><span class="s2">&quot;http://example.com/file.pdf&quot;</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="mi">5_000_000</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_returns_false_when_head_raises</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">session</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+        <span class="n">session</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">side_effect</span> <span class="o">=</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;network error&quot;</span><span class="p">)</span>
+
+        <span class="k">assert</span> <span class="n">pdf_exceeds_size_limit</span><span class="p">(</span><span class="s2">&quot;http://example.com/file.pdf&quot;</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="mi">5_000_000</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestInitializePdfManager</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_initialize_seeds_singleton_with_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">cfg</span> <span class="o">=</span> <span class="n">PdfConfig</span><span class="p">(</span><span class="n">max_pdf_size_bytes</span><span class="o">=</span><span class="mi">999_999</span><span class="p">,</span> <span class="n">max_pdf_per_article</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+        <span class="n">mgr</span> <span class="o">=</span> <span class="n">initialize_pdf_manager</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">mgr</span><span class="o">.</span><span class="n">pdf_config</span><span class="o">.</span><span class="n">max_pdf_size_bytes</span> <span class="o">==</span> <span class="mi">999_999</span>
+        <span class="k">assert</span> <span class="n">mgr</span><span class="o">.</span><span class="n">pdf_config</span><span class="o">.</span><span class="n">max_pdf_per_article</span> <span class="o">==</span> <span class="mi">5</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_get_pdf_manager_returns_initialized_singleton</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">cfg</span> <span class="o">=</span> <span class="n">PdfConfig</span><span class="p">(</span><span class="n">max_pdf_size_bytes</span><span class="o">=</span><span class="mi">888_888</span><span class="p">,</span> <span class="n">max_pdf_per_article</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+        <span class="n">initialize_pdf_manager</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+        <span class="n">mgr</span> <span class="o">=</span> <span class="n">get_pdf_manager</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">mgr</span><span class="o">.</span><span class="n">pdf_config</span><span class="o">.</span><span class="n">max_pdf_size_bytes</span> <span class="o">==</span> <span class="mi">888_888</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_get_pdf_manager_uses_defaults_if_never_initialized</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Reset global singleton</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">capcat.core.async_pdf_manager</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">apm</span>
+        <span class="n">apm</span><span class="o">.</span><span class="n">_global_pdf_manager</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">mgr</span> <span class="o">=</span> <span class="n">get_pdf_manager</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">mgr</span><span class="o">.</span><span class="n">pdf_config</span><span class="o">.</span><span class="n">max_pdf_size_bytes</span> <span class="o">==</span> <span class="mi">20_971_520</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestCountCap</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_extract_stops_after_max_pdf_per_article</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">cfg</span> <span class="o">=</span> <span class="n">PdfConfig</span><span class="p">(</span><span class="n">max_pdf_size_bytes</span><span class="o">=</span><span class="mi">99_999_999</span><span class="p">,</span> <span class="n">max_pdf_per_article</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">mgr</span> <span class="o">=</span> <span class="n">AsyncPDFManager</span><span class="p">(</span><span class="n">pdf_config</span><span class="o">=</span><span class="n">cfg</span><span class="p">)</span>
+
+        <span class="c1"># Patch _download_pdf to prevent real network calls from background workers</span>
+        <span class="k">with</span> <span class="n">patch</span><span class="o">.</span><span class="n">object</span><span class="p">(</span><span class="n">mgr</span><span class="p">,</span> <span class="s2">&quot;_download_pdf&quot;</span><span class="p">,</span> <span class="n">return_value</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <span class="n">mgr</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+            <span class="n">markdown</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s2">&quot;[PDF 1](http://example.com/1.pdf)</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;[PDF 2](http://example.com/2.pdf)</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;[PDF 3](http://example.com/3.pdf)</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="n">mgr</span><span class="o">.</span><span class="n">extract_and_queue_pdf_links</span><span class="p">(</span><span class="n">markdown</span><span class="p">,</span> <span class="s2">&quot;/tmp/article1&quot;</span><span class="p">)</span>
+            <span class="n">mgr</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+
+        <span class="k">assert</span> <span class="n">count</span> <span class="o">==</span> <span class="mi">2</span>  <span class="c1"># capped at max_pdf_per_article=2</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Run to verify failures</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_async_pdf_manager_limits.py<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: <code>ImportError</code> for <code>pdf_exceeds_size_limit</code>, <code>initialize_pdf_manager</code>.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Implement changes in async_pdf_manager.py</strong></li>
+</ul>
+<br>
+<strong>Add <code>import requests</code> at the top</strong> (already uses <code>requests.Session</code> in type hints? Check. If not yet imported, add <code>import requests</code>).
+<br>
+<strong>Add <code>PdfConfig</code> import:</strong>
+<div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">PdfConfig</span>
+</pre></div>
+
+<br>
+<strong>Add module-level <code>pdf_exceeds_size_limit</code> function</strong> (before the class):
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">pdf_exceeds_size_limit</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">max_bytes</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return True if HEAD response reports Content-Length &gt; max_bytes.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">head</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">allow_redirects</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">content_length</span> <span class="o">=</span> <span class="n">head</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Content-Length&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">content_length</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">content_length</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">max_bytes</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">return</span> <span class="kc">False</span>
+</pre></div>
+
+<br>
+<strong>Update <code>AsyncPDFManager.__init__</code></strong> to accept <code>pdf_config</code>:
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">pdf_config</span><span class="p">:</span> <span class="n">PdfConfig</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">max_workers</span> <span class="o">=</span> <span class="n">max_workers</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pdf_config</span> <span class="o">=</span> <span class="n">pdf_config</span> <span class="k">if</span> <span class="n">pdf_config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">PdfConfig</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_check_session</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">Session</span><span class="p">()</span>
+    <span class="c1"># ... rest of existing __init__ unchanged</span>
+</pre></div>
+
+<br>
+<strong>Update <code>extract_and_queue_pdf_links</code></strong> — inside <code>replace_link</code>, after <code>seen_urls.add(link_url)</code>, add the count cap:
+<div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">queued_count</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pdf_config</span><span class="o">.</span><span class="n">max_pdf_per_article</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># Cap reached, keep original link unchanged</span>
+</pre></div>
+
+<br>
+<p>(Add this check before the queuing logic, so links beyond the cap are left as-is.)</p>
+<br>
+<strong>Add HEAD size check in <code>_download_pdf</code></strong> — read the method to find where it calls <code>download_file</code>, then insert before that call:
+<div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">pdf_exceeds_size_limit</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_session</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pdf_config</span><span class="o">.</span><span class="n">max_pdf_size_bytes</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Skipping PDF (too large): </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
+    <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">failed_downloads</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="k">return</span>
+</pre></div>
+
+<br>
+<strong>Add <code>initialize_pdf_manager</code> and update <code>get_pdf_manager</code>:</strong>
+<br>
+<div class="highlight"><pre><span></span><span class="n">_global_pdf_manager</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">AsyncPDFManager</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">initialize_pdf_manager</span><span class="p">(</span><span class="n">pdf_config</span><span class="p">:</span> <span class="n">PdfConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AsyncPDFManager</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create and cache the global AsyncPDFManager with the given config.&quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">_global_pdf_manager</span>
+    <span class="n">_global_pdf_manager</span> <span class="o">=</span> <span class="n">AsyncPDFManager</span><span class="p">(</span><span class="n">pdf_config</span><span class="o">=</span><span class="n">pdf_config</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_global_pdf_manager</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">get_pdf_manager</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">AsyncPDFManager</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the global AsyncPDFManager, creating with defaults if needed.&quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">_global_pdf_manager</span>
+    <span class="k">if</span> <span class="n">_global_pdf_manager</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_global_pdf_manager</span> <span class="o">=</span> <span class="n">AsyncPDFManager</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">_global_pdf_manager</span>
+</pre></div>
+
+<br>
+<p>If a <code>get_pdf_manager</code> already exists at module level, replace it with this version.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Run tests to verify pass</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_async_pdf_manager_limits.py<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: all pass.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 5: Run full suite</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-q
+</pre></div>
+
+<br>
+<p>Expected: all pass.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 6: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>capcat/core/async_pdf_manager.py<span class="w"> </span>tests/unit/test_async_pdf_manager_limits.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: add pdf_exceeds_size_limit, initialize_pdf_manager, count cap, HEAD size check in AsyncPDFManager&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h2>Task 6: article_fetcher.py wiring</h2>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>capcat/core/article_fetcher.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Read the direct-PDF path to understand its exact structure</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>grep<span class="w"> </span>-n<span class="w"> </span><span class="s2">&quot;_check_pdf_size_and_prompt\|is_direct_pdf\|direct_pdf\|\.pdf\|LARGE_PDF&quot;</span><span class="w"> </span>capcat/core/article_fetcher.py<span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-50
+</pre></div>
+
+<br>
+<p>Also read lines 800–840 of <code>article_fetcher.py</code> to see the exact code path and return contract for the direct-PDF URL check.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Write the failing test</strong></li>
+</ul>
+<br>
+<p>After reading the code in Step 1, identify the method that contains the direct-PDF URL branch (look for <code>is_direct_pdf_url = url.lower().endswith(&#x27;.pdf&#x27;)</code> around line 820). Then write the test targeting the <strong>post-fix behavior</strong>:</p>
+<br>
+<strong>Post-fix contract:</strong> When <code>pdf_exceeds_size_limit</code> returns <code>True</code> for a direct-PDF URL, the enclosing fetch method must return <code>(True, None, None)</code> (skip, no title, no path). The old <code>_check_pdf_size_and_prompt</code> method must be gone.
+<br>
+<p>Write the test as follows (adapt <code>_fetch_web_page_content</code> to the actual method name from Step 1):</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">TestArticleFetcherWiring</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_direct_pdf_url_skipped_when_exceeds_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;After fix: pdf_exceeds_size_limit True → (True, None, None) skip.&quot;&quot;&quot;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.async_pdf_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">initialize_pdf_manager</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">PdfConfig</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.article_fetcher</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArticleFetcher</span>  <span class="c1"># import before patch</span>
+
+        <span class="n">cfg</span> <span class="o">=</span> <span class="n">PdfConfig</span><span class="p">(</span><span class="n">max_pdf_size_bytes</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">max_pdf_per_article</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+        <span class="n">initialize_pdf_manager</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+
+        <span class="n">fetcher</span> <span class="o">=</span> <span class="n">ArticleFetcher</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">ArticleFetcher</span><span class="p">)</span>
+        <span class="n">fetcher</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+        <span class="n">fetcher</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+        <span class="n">fetcher</span><span class="o">.</span><span class="n">download_files</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;http://example.com/large.pdf&quot;</span>
+
+        <span class="c1"># Patch AFTER import to ensure the module-level name is intercepted</span>
+        <span class="k">with</span> <span class="n">patch</span><span class="p">(</span><span class="s2">&quot;capcat.core.article_fetcher.pdf_exceeds_size_limit&quot;</span><span class="p">,</span> <span class="n">return_value</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+            <span class="c1"># Call the method that contains the direct-PDF URL branch.</span>
+            <span class="c1"># Replace _fetch_web_page_content with the actual method name from Step 1.</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">fetcher</span><span class="o">.</span><span class="n">_fetch_web_page_content</span><span class="p">(</span>
+                <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Test Article&quot;</span><span class="p">,</span>
+                <span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span>
+                <span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="n">base_folder</span><span class="o">=</span><span class="s2">&quot;/tmp/test&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="c1"># Contract: skip returns (True, None, None)</span>
+            <span class="k">assert</span> <span class="n">result</span> <span class="o">==</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_direct_pdf_url_proceeds_when_within_limit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;After fix: pdf_exceeds_size_limit False → fetch proceeds normally.&quot;&quot;&quot;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.article_fetcher</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArticleFetcher</span>  <span class="c1"># import before patch</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.async_pdf_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">initialize_pdf_manager</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">PdfConfig</span>
+
+        <span class="n">initialize_pdf_manager</span><span class="p">(</span><span class="n">PdfConfig</span><span class="p">(</span><span class="n">max_pdf_size_bytes</span><span class="o">=</span><span class="mi">999_999_999</span><span class="p">))</span>
+
+        <span class="n">fetcher</span> <span class="o">=</span> <span class="n">ArticleFetcher</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">ArticleFetcher</span><span class="p">)</span>
+        <span class="n">fetcher</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+        <span class="n">fetcher</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+        <span class="n">fetcher</span><span class="o">.</span><span class="n">download_files</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;http://example.com/small.pdf&quot;</span>
+
+        <span class="k">with</span> <span class="n">patch</span><span class="p">(</span><span class="s2">&quot;capcat.core.article_fetcher.pdf_exceeds_size_limit&quot;</span><span class="p">,</span> <span class="n">return_value</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span> \
+             <span class="n">patch</span><span class="o">.</span><span class="n">object</span><span class="p">(</span><span class="n">fetcher</span><span class="p">,</span> <span class="s2">&quot;_fetch_url_with_retry&quot;</span><span class="p">,</span> <span class="n">side_effect</span><span class="o">=</span><span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;halt&quot;</span><span class="p">)):</span>
+            <span class="c1"># pdf_exceeds_size_limit returns False → proceeds to fetch attempt</span>
+            <span class="c1"># The fetch itself throws (expected), but the PDF was NOT skipped</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">fetcher</span><span class="o">.</span><span class="n">_fetch_web_page_content</span><span class="p">(</span><span class="s2">&quot;Title&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;/tmp/test&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="k">pass</span>  <span class="c1"># expected — just verifying it got past the size check</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_check_pdf_size_and_prompt_removed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;After fix: the old interactive prompt method must not exist.&quot;&quot;&quot;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.article_fetcher</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArticleFetcher</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">ArticleFetcher</span><span class="p">,</span> <span class="s2">&quot;_check_pdf_size_and_prompt&quot;</span><span class="p">),</span> \
+            <span class="s2">&quot;_check_pdf_size_and_prompt was not removed&quot;</span>
+</pre></div>
+
+<br>
+<strong>Adapt method names</strong> from Step 1 findings: <code>_fetch_web_page_content</code> is a guess — replace with the actual name.
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Implement changes in article_fetcher.py</strong></li>
+</ul>
+<br>
+<strong>Add import at top</strong> (with other imports from async_pdf_manager):
+<div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.async_pdf_manager</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">get_pdf_manager</span><span class="p">,</span>
+    <span class="n">initialize_pdf_manager</span><span class="p">,</span>
+    <span class="n">pdf_exceeds_size_limit</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+
+<br>
+<p>If <code>get_pdf_manager</code> is currently a deferred import inside a method body, move it to module-level and add <code>initialize_pdf_manager</code> and <code>pdf_exceeds_size_limit</code>.</p>
+<br>
+<strong>Wire initialize_pdf_manager at fetcher startup</strong> — find the <code>ArticleFetcher.__init__</code> or the main startup sequence and add:
+<div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_config</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">get_config</span><span class="p">()</span>
+<span class="n">initialize_pdf_manager</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">pdf</span><span class="p">)</span>
+<span class="n">get_ethical_manager</span><span class="p">()</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">crawl_delay</span><span class="p">,</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">robots_cache_ttl_minutes</span>
+<span class="p">)</span>
+</pre></div>
+
+<br>
+<strong>Replace direct-PDF path</strong> — find the <code>_check_pdf_size_and_prompt</code> call in the direct-PDF URL path (around line 822) and replace with:
+<div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">pdf_exceeds_size_limit</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">,</span> <span class="n">get_config</span><span class="p">()</span><span class="o">.</span><span class="n">pdf</span><span class="o">.</span><span class="n">max_pdf_size_bytes</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Skipping oversized PDF: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<strong>Remove <code>_check_pdf_size_and_prompt</code></strong> — delete the method entirely (lines ~666–end of method). Remove <code>LARGE_PDF_THRESHOLD_MB</code>, <code>SKIP_PROMPT_TIMEOUT_SECONDS</code>, <code>BYTES_TO_MB</code> constants (lines ~73–76). Remove the <code>_listen_for_esc</code> function if it is only used by <code>_check_pdf_size_and_prompt</code> — check first.
+<br>
+<strong><code>convert_html_with_timeout</code> default arg</strong> was already fixed in Task 3 — verify no lingering <code>CONVERSION_TIMEOUT_SECONDS</code> references remain.
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Run tests</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-q
+</pre></div>
+
+<br>
+<p>Expected: all pass.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 5: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>capcat/core/article_fetcher.py<span class="w"> </span>tests/unit/test_async_pdf_manager_limits.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: wire initialize_pdf_manager and configure into ArticleFetcher; replace PDF size prompt with silent size check&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h2>Task 7: article_count chain</h2>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>capcat/core/source_system/base_source.py</code></li>
+<li>Modify: <code>capcat/core/source_system/source_registry.py</code></li>
+<li>Modify: <code>capcat/core/unified_source_processor.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Write failing tests</strong></li>
+</ul>
+<br>
+<p>Create <code>tests/unit/test_article_count_chain.py</code>:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Tests for article_count None propagation through SourceConfig and _resolve_count.&quot;&quot;&quot;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.source_system.base_source</span><span class="w"> </span><span class="kn">import</span> <span class="n">SourceConfig</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestSourceConfigArticleCount</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_default_is_none</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">cfg</span> <span class="o">=</span> <span class="n">SourceConfig</span><span class="p">(</span>
+            <span class="n">source_id</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
+            <span class="n">display_name</span><span class="o">=</span><span class="s2">&quot;Test&quot;</span><span class="p">,</span>
+            <span class="n">base_url</span><span class="o">=</span><span class="s2">&quot;http://example.com&quot;</span><span class="p">,</span>
+            <span class="n">rss_url</span><span class="o">=</span><span class="s2">&quot;http://example.com/rss&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">assert</span> <span class="n">cfg</span><span class="o">.</span><span class="n">article_count</span> <span class="ow">is</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_explicit_count_preserved</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">cfg</span> <span class="o">=</span> <span class="n">SourceConfig</span><span class="p">(</span>
+            <span class="n">source_id</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
+            <span class="n">display_name</span><span class="o">=</span><span class="s2">&quot;Test&quot;</span><span class="p">,</span>
+            <span class="n">base_url</span><span class="o">=</span><span class="s2">&quot;http://example.com&quot;</span><span class="p">,</span>
+            <span class="n">rss_url</span><span class="o">=</span><span class="s2">&quot;http://example.com/rss&quot;</span><span class="p">,</span>
+            <span class="n">article_count</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">assert</span> <span class="n">cfg</span><span class="o">.</span><span class="n">article_count</span> <span class="o">==</span> <span class="mi">50</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_zero_raises_value_error</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+            <span class="n">SourceConfig</span><span class="p">(</span>
+                <span class="n">source_id</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
+                <span class="n">display_name</span><span class="o">=</span><span class="s2">&quot;Test&quot;</span><span class="p">,</span>
+                <span class="n">base_url</span><span class="o">=</span><span class="s2">&quot;http://example.com&quot;</span><span class="p">,</span>
+                <span class="n">rss_url</span><span class="o">=</span><span class="s2">&quot;http://example.com/rss&quot;</span><span class="p">,</span>
+                <span class="n">article_count</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_none_does_not_raise</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;None must not trigger the guard that rejects &lt;= 0.&quot;&quot;&quot;</span>
+        <span class="n">cfg</span> <span class="o">=</span> <span class="n">SourceConfig</span><span class="p">(</span>
+            <span class="n">source_id</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
+            <span class="n">display_name</span><span class="o">=</span><span class="s2">&quot;Test&quot;</span><span class="p">,</span>
+            <span class="n">base_url</span><span class="o">=</span><span class="s2">&quot;http://example.com&quot;</span><span class="p">,</span>
+            <span class="n">rss_url</span><span class="o">=</span><span class="s2">&quot;http://example.com/rss&quot;</span><span class="p">,</span>
+            <span class="n">article_count</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">assert</span> <span class="n">cfg</span><span class="o">.</span><span class="n">article_count</span> <span class="ow">is</span> <span class="kc">None</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestResolveCount</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cli_count</span><span class="p">,</span> <span class="n">source_count</span><span class="p">,</span> <span class="n">global_count</span><span class="p">):</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.core.unified_source_processor</span><span class="w"> </span><span class="kn">import</span> <span class="n">_resolve_count</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">unittest.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">MagicMock</span>
+
+        <span class="n">source_config</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+        <span class="n">source_config</span><span class="o">.</span><span class="n">article_count</span> <span class="o">=</span> <span class="n">source_count</span>
+
+        <span class="n">config</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">processing</span><span class="o">.</span><span class="n">article_count</span> <span class="o">=</span> <span class="n">global_count</span>
+
+        <span class="k">return</span> <span class="n">_resolve_count</span><span class="p">(</span><span class="n">cli_count</span><span class="p">,</span> <span class="n">source_config</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_cli_count_wins</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve</span><span class="p">(</span><span class="n">cli_count</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">source_count</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">global_count</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span> <span class="o">==</span> <span class="mi">5</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_source_count_wins_over_global</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve</span><span class="p">(</span><span class="n">cli_count</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">source_count</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">global_count</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span> <span class="o">==</span> <span class="mi">10</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_global_count_used_when_source_is_none</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve</span><span class="p">(</span><span class="n">cli_count</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">source_count</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">global_count</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span> <span class="o">==</span> <span class="mi">30</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_global_count_used_when_all_none</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve</span><span class="p">(</span><span class="n">cli_count</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">source_count</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">global_count</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span> <span class="o">==</span> <span class="mi">42</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Run to verify failures</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_article_count_chain.py<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: <code>test_default_is_none</code> fails (<code>30</code> != <code>None</code>), <code>_resolve_count</code> signature mismatch.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Update SourceConfig</strong></li>
+</ul>
+<br>
+<p>In <code>capcat/core/source_system/base_source.py</code>:</p>
+<br>
+<p>Change <code>article_count: int = 30</code> → <code>article_count: Optional[int] = None</code></p>
+<br>
+<p>Add <code>from typing import Optional</code> if not already imported.</p>
+<br>
+<p>Update the <code>__post_init__</code> guard from:</p>
+<div class="highlight"><pre><span></span><span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">article_count</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+</pre></div>
+
+<p>to:</p>
+<div class="highlight"><pre><span></span><span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">article_count</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">article_count</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Update source_registry.py</strong></li>
+</ul>
+<br>
+<p>In <code>capcat/core/source_system/source_registry.py</code>, find both <code>article_count</code> construction call sites (around lines 173 and 251) and update each from:</p>
+<div class="highlight"><pre><span></span><span class="n">article_count</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;article_count&quot;</span><span class="p">,</span> <span class="mi">30</span><span class="p">)),</span>
+</pre></div>
+
+<p>to:</p>
+<div class="highlight"><pre><span></span><span class="n">article_count</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;article_count&quot;</span><span class="p">))</span> <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;article_count&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+</pre></div>
+
+<br>
+<p>(Same pattern for <code>config_data.get(&quot;article_count&quot;, 30)</code> at the second call site — replace <code>config_data</code> accordingly.)</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 5: Update _resolve_count</strong></li>
+</ul>
+<br>
+<p>In <code>capcat/core/unified_source_processor.py</code>, change <code>_resolve_count</code> signature to accept <code>config</code> as third parameter and update the body:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_resolve_count</span><span class="p">(</span>
+    <span class="n">cli_count</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+    <span class="n">source_config</span><span class="p">:</span> <span class="s2">&quot;SourceConfig&quot;</span><span class="p">,</span>
+    <span class="n">config</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">cli_count</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">cli_count</span>
+    <span class="k">if</span> <span class="n">source_config</span><span class="o">.</span><span class="n">article_count</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">source_config</span><span class="o">.</span><span class="n">article_count</span>
+    <span class="k">return</span> <span class="n">config</span><span class="o">.</span><span class="n">processing</span><span class="o">.</span><span class="n">article_count</span>
+</pre></div>
+
+<br>
+<p>Update the call site (around line 236) to pass <code>config</code>:</p>
+<div class="highlight"><pre><span></span><span class="n">resolved_count</span> <span class="o">=</span> <span class="n">_resolve_count</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="n">source_config</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<p>Check that <code>config</code> is available at the call site — it should be the <code>FetchNewsConfig</code> already in scope.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 6: Run tests</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-q
+</pre></div>
+
+<br>
+<p>Expected: all pass.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 7: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>capcat/core/source_system/base_source.py<span class="w"> </span>capcat/core/source_system/source_registry.py<span class="w"> </span>capcat/core/unified_source_processor.py<span class="w"> </span>tests/unit/test_article_count_chain.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: SourceConfig.article_count defaults to None; _resolve_count falls back to config.processing.article_count&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h2>Task 8: capcat settings command + init user-level template</h2>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>capcat/cli.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Write failing tests</strong></li>
+</ul>
+<br>
+<p>Create <code>tests/unit/test_cli_settings.py</code>:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Tests for capcat settings command and init template write.&quot;&quot;&quot;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">unittest.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">patch</span><span class="p">,</span> <span class="n">MagicMock</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestCmdSettings</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_writes_global_settings_yaml</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">,</span> <span class="n">monkeypatch</span><span class="p">):</span>
+        <span class="n">monkeypatch</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;Config&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">()</span>
+
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.cli</span><span class="w"> </span><span class="kn">import</span> <span class="n">_cmd_settings</span>
+        <span class="n">_cmd_settings</span><span class="p">([])</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;Config&quot;</span> <span class="o">/</span> <span class="s2">&quot;Global-settings.yaml&quot;</span>
+        <span class="k">assert</span> <span class="n">out</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="s2">&quot;max_pdf_size_bytes&quot;</span> <span class="ow">in</span> <span class="n">content</span>
+        <span class="k">assert</span> <span class="s2">&quot;article_count&quot;</span> <span class="ow">in</span> <span class="n">content</span>
+        <span class="k">assert</span> <span class="s2">&quot;crawl_delay&quot;</span> <span class="ow">in</span> <span class="n">content</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_does_not_overwrite_existing_without_force</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">,</span> <span class="n">monkeypatch</span><span class="p">):</span>
+        <span class="n">monkeypatch</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;Config&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">()</span>
+        <span class="n">existing</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;Config&quot;</span> <span class="o">/</span> <span class="s2">&quot;Global-settings.yaml&quot;</span>
+        <span class="n">existing</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;original content&quot;</span><span class="p">)</span>
+
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.cli</span><span class="w"> </span><span class="kn">import</span> <span class="n">_cmd_settings</span>
+        <span class="n">_cmd_settings</span><span class="p">([])</span>
+
+        <span class="k">assert</span> <span class="n">existing</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;original content&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_overwrites_with_force</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">,</span> <span class="n">monkeypatch</span><span class="p">):</span>
+        <span class="n">monkeypatch</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;Config&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">()</span>
+        <span class="n">existing</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;Config&quot;</span> <span class="o">/</span> <span class="s2">&quot;Global-settings.yaml&quot;</span>
+        <span class="n">existing</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;original content&quot;</span><span class="p">)</span>
+
+        <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.cli</span><span class="w"> </span><span class="kn">import</span> <span class="n">_cmd_settings</span>
+        <span class="n">_cmd_settings</span><span class="p">([</span><span class="s2">&quot;--force&quot;</span><span class="p">])</span>
+
+        <span class="k">assert</span> <span class="n">existing</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">&quot;original content&quot;</span>
+        <span class="k">assert</span> <span class="s2">&quot;max_pdf_size_bytes&quot;</span> <span class="ow">in</span> <span class="n">existing</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_settings_dispatched_from_cli</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">,</span> <span class="n">monkeypatch</span><span class="p">):</span>
+        <span class="n">monkeypatch</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;Config&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">()</span>
+
+        <span class="k">with</span> <span class="n">patch</span><span class="p">(</span><span class="s2">&quot;capcat.cli._auto_init&quot;</span><span class="p">),</span> <span class="n">patch</span><span class="p">(</span><span class="s2">&quot;capcat.cli._cmd_settings&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">mock_cmd</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.cli</span><span class="w"> </span><span class="kn">import</span> <span class="n">_dispatch</span>
+            <span class="n">_dispatch</span><span class="p">([</span><span class="s2">&quot;settings&quot;</span><span class="p">])</span>
+            <span class="n">mock_cmd</span><span class="o">.</span><span class="n">assert_called_once_with</span><span class="p">([])</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestInitUserTemplate</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_init_writes_user_level_template_on_first_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">,</span> <span class="n">monkeypatch</span><span class="p">):</span>
+        <span class="n">user_cfg</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;.config&quot;</span> <span class="o">/</span> <span class="s2">&quot;capcat&quot;</span>
+        <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setenv</span><span class="p">(</span><span class="s2">&quot;HOME&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">))</span>
+
+        <span class="k">with</span> <span class="n">patch</span><span class="p">(</span><span class="s2">&quot;capcat.commands.init.init_project&quot;</span><span class="p">),</span> \
+             <span class="n">patch</span><span class="p">(</span><span class="s2">&quot;capcat.cli._auto_init&quot;</span><span class="p">):</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.cli</span><span class="w"> </span><span class="kn">import</span> <span class="n">_cmd_init</span>
+            <span class="n">_cmd_init</span><span class="p">([])</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="n">user_cfg</span> <span class="o">/</span> <span class="s2">&quot;Global-settings.yaml&quot;</span>
+        <span class="k">assert</span> <span class="n">out</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="s2">&quot;max_pdf_size_bytes&quot;</span> <span class="ow">in</span> <span class="n">out</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_init_does_not_overwrite_existing_user_template</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">,</span> <span class="n">monkeypatch</span><span class="p">):</span>
+        <span class="n">user_cfg</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;.config&quot;</span> <span class="o">/</span> <span class="s2">&quot;capcat&quot;</span>
+        <span class="n">user_cfg</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">user_cfg</span> <span class="o">/</span> <span class="s2">&quot;Global-settings.yaml&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;custom content&quot;</span><span class="p">)</span>
+        <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setenv</span><span class="p">(</span><span class="s2">&quot;HOME&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">))</span>
+
+        <span class="k">with</span> <span class="n">patch</span><span class="p">(</span><span class="s2">&quot;capcat.commands.init.init_project&quot;</span><span class="p">),</span> \
+             <span class="n">patch</span><span class="p">(</span><span class="s2">&quot;capcat.cli._auto_init&quot;</span><span class="p">):</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.cli</span><span class="w"> </span><span class="kn">import</span> <span class="n">_cmd_init</span>
+            <span class="n">_cmd_init</span><span class="p">([])</span>
+
+        <span class="k">assert</span> <span class="p">(</span><span class="n">user_cfg</span> <span class="o">/</span> <span class="s2">&quot;Global-settings.yaml&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;custom content&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_reinit_skips_user_template</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">,</span> <span class="n">monkeypatch</span><span class="p">):</span>
+        <span class="n">user_cfg</span> <span class="o">=</span> <span class="n">tmp_path</span> <span class="o">/</span> <span class="s2">&quot;.config&quot;</span> <span class="o">/</span> <span class="s2">&quot;capcat&quot;</span>
+        <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setenv</span><span class="p">(</span><span class="s2">&quot;HOME&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">))</span>
+
+        <span class="k">with</span> <span class="n">patch</span><span class="p">(</span><span class="s2">&quot;capcat.commands.init.init_project&quot;</span><span class="p">),</span> \
+             <span class="n">patch</span><span class="p">(</span><span class="s2">&quot;capcat.cli._auto_init&quot;</span><span class="p">):</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">capcat.cli</span><span class="w"> </span><span class="kn">import</span> <span class="n">_cmd_init</span>
+            <span class="n">_cmd_init</span><span class="p">([</span><span class="s2">&quot;--reinit&quot;</span><span class="p">])</span>
+
+        <span class="k">assert</span> <span class="ow">not</span> <span class="p">(</span><span class="n">user_cfg</span> <span class="o">/</span> <span class="s2">&quot;Global-settings.yaml&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Run to verify failures</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_cli_settings.py<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: <code>ImportError</code> for <code>_cmd_settings</code>, routing test fails.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Implement in cli.py</strong></li>
+</ul>
+<br>
+<strong>Add <code>GLOBAL_SETTINGS_TEMPLATE</code> constant</strong> at the top of <code>cli.py</code> (after imports). Every field must include inline comments with description, default, and example where non-obvious — matching the spec&#x27;s File Format section exactly:
+<br>
+<div class="ascii-art">GLOBAL_SETTINGS_TEMPLATE = &quot;&quot;&quot;\
+# Global Settings — Capcat
+# Edit this file to tune behavior for this vault.
+# All fields are optional. Defaults are shown in comments.
+# Restart capcat after editing.
+
+# ─── PDF Downloads ──────────────────────────────────────
+pdf:
+  # Skip PDF files larger than this size in bytes.
+  # Default: 20971520 (20MB). Examples: 10485760 = 10MB, 52428800 = 50MB
+  max_pdf_size_bytes: 20971520
+
+  # Maximum number of PDFs queued per article.
+  # Default: 10
+  max_pdf_per_article: 10
+
+# ─── Network ────────────────────────────────────────────
+network:
+  # TCP connection timeout in seconds. Increase for slow servers.
+  # Default: 10
+  connect_timeout: 10
+
+  # HTTP response body read timeout in seconds.
+  # Default: 30
+  read_timeout: 30
+
+  # Image and PDF download timeout in seconds.
+  # Default: 60
+  media_download_timeout: 60
+
+  # HEAD request timeout for link checking in seconds.
+  # Default: 10
+  head_request_timeout: 10
+
+  # Retry attempts on network failure.
+  # Default: 3
+  max_retries: 3
+
+  # Base delay between retries in seconds.
+  # Default: 1.0
+  retry_delay: 1.0
+
+  # Minimum seconds between requests to the same domain.
+  # Passed to EthicalScrapingManager.configure() at startup.
+  # Default: 1.0
+  crawl_delay: 1.0
+
+  # How long to cache robots.txt responses in minutes.
+  # Passed to EthicalScrapingManager.configure() at startup.
+  # Default: 15
+  robots_cache_ttl_minutes: 15
+
+  # HTTP User-Agent header sent with all requests.
+  # Default: &quot;Capcat/2.0 (Personal news archiver)&quot;
+  user_agent: &quot;Capcat/2.0 (Personal news archiver)&quot;
+
+  # HTTP connection pool size.
+  # Default: 20
+  pool_connections: 20
+
+  # Maximum concurrent connections.
+  # Default: 20
+  pool_maxsize: 20
+
+# ─── Processing ─────────────────────────────────────────
+processing:
+  # Default articles fetched per source per run.
+  # Per-source article_count in each source&#x27;s config.yaml overrides this.
+  # Default: 30
+  article_count: 30
+
+  # Concurrent article fetcher workers.
+  # Default: 8
+  max_workers: 8
+
+  # HTML to Markdown conversion timeout in seconds.
+  # Default: 30
+  conversion_timeout: 30
+
+  # Maximum images downloaded per article (normal mode).
+  # Default: 20
+  max_images: 20
+
+  # Maximum images downloaded per article when --media flag is active.
+  # Default: 1000
+  max_images_media_mode: 1000
+
+  # Skip images smaller than this in pixels (width and height).
+  # Default: 150
+  min_image_dimensions: 150
+
+  # Skip images larger than this in bytes.
+  # Default: 5242880 (5MB). Example: 1048576 = 1MB
+  max_image_size_bytes: 5242880
+
+  # Maximum characters in vault filenames.
+  # Default: 100
+  max_filename_length: 100
+
+  # Download and embed images locally.
+  # Default: true
+  download_images: true
+
+  # Download video files.
+  # Default: false
+  download_videos: false
+
+  # Download audio files.
+  # Default: false
+  download_audio: false
+
+  # Download generic document files.
+  # Default: false
+  download_documents: false
+
+  # Fetch and save comments alongside articles.
+  # Default: true
+  create_comments_file: true
+
+  # Strip &lt;script&gt; tags from HTML before conversion.
+  # Default: true
+  remove_script_tags: true
+
+  # Strip &lt;style&gt; tags from HTML before conversion.
+  # Default: true
+  remove_style_tags: true
+
+  # Strip &lt;nav&gt; tags from HTML before conversion.
+  # Default: true
+  remove_nav_tags: true
+
+  # Preserve line breaks in markdown output.
+  # Default: true
+  markdown_line_breaks: true
+
+# ─── UI ─────────────────────────────────────────────────
+ui:
+  # Spinner style for article progress.
+  # Options: dots, wave, loading, pulse, bounce, modern
+  # Default: dots
+  progress_spinner_style: dots
+
+  # Spinner style for batch operations.
+  # Options: activity, progress, pulse, wave, dots, scan
+  # Default: activity
+  batch_spinner_style: activity
+
+  # Progress bar width in characters.
+  # Default: 25
+  progress_bar_width: 25
+
+  # Show animated progress indicators.
+  # Default: true
+  show_progress_animations: true
+
+  # Use emoji in output.
+  # Default: true
+  use_emojis: true
+
+  # Use colors in terminal output.
+  # Default: true
+  use_colors: true
+
+  # Show per-article detail during fetch.
+  # Default: false
+  show_detailed_progress: false
+
+# ─── Logging ────────────────────────────────────────────
+logging:
+  # Log level for all output. Options: DEBUG, INFO, WARNING, ERROR
+  # Default: INFO
+  default_level: INFO
+
+  # Log level for terminal output.
+  # Default: INFO
+  console_level: INFO
+
+  # Log level written to log file.
+  # Default: DEBUG
+  file_level: DEBUG
+
+  # Maximum log file size before rotation in bytes.
+  # Default: 10485760 (10MB)
+  max_log_file_size: 10485760
+
+  # Number of rotated log files to keep.
+  # Default: 5
+  log_file_backup_count: 5
+
+  # Include timestamps in log output.
+  # Default: true
+  include_timestamps: true
+
+  # Include module names in log output.
+  # Default: true
+  include_module_names: true
+
+  # Auto-create log directory if it does not exist.
+  # Default: true
+  auto_create_log_dir: true
+
+  # Colorize log output.
+  # Default: true
+  use_colors: true
+&quot;&quot;&quot;
+</div>
+<br>
+<strong>Add <code>_cmd_settings</code> function:</strong>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_cmd_settings</span><span class="p">(</span><span class="n">args</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Write Config/Global-settings.yaml annotated template in current vault.&quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+    <span class="n">force</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_pop_flag</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="s2">&quot;--force&quot;</span><span class="p">)</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;Config&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;Global-settings.yaml&quot;</span>
+    <span class="k">if</span> <span class="n">out</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">force</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;capcat: </span><span class="si">{</span><span class="n">out</span><span class="si">}</span><span class="s2"> already exists. Use --force to overwrite.&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">GLOBAL_SETTINGS_TEMPLATE</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Written: </span><span class="si">{</span><span class="n">out</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<strong>Wire into <code>_dispatch()</code></strong> — add before the <code>else</code> clause:
+<div class="highlight"><pre><span></span><span class="k">elif</span> <span class="n">command</span> <span class="o">==</span> <span class="s2">&quot;settings&quot;</span><span class="p">:</span>
+    <span class="n">_cmd_settings</span><span class="p">(</span><span class="n">rest</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<strong>Add to <code>_print_help()</code></strong> — add <code>&quot;  settings          Generate Global-settings.yaml template\n&quot;</code> to the Commands block.
+<br>
+<strong>Update <code>_cmd_init</code></strong> — after the <code>init_project(reinit=reinit, ...)</code> call, add:
+<br>
+<div class="highlight"><pre><span></span><span class="k">if</span> <span class="ow">not</span> <span class="n">reinit</span><span class="p">:</span>
+    <span class="n">user_settings</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;.config&quot;</span> <span class="o">/</span> <span class="s2">&quot;capcat&quot;</span> <span class="o">/</span> <span class="s2">&quot;Global-settings.yaml&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">user_settings</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">user_settings</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">user_settings</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">GLOBAL_SETTINGS_TEMPLATE</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+</pre></div>
+
+<br>
+<p>Read the actual <code>_cmd_init</code> code first (lines ~158+) to find the exact insertion point after <code>init_project</code> is called.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Run tests to verify pass</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_cli_settings.py<span class="w"> </span>-v
+</pre></div>
+
+<br>
+<p>Expected: all pass.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 5: Run full suite</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-q
+</pre></div>
+
+<br>
+<p>Expected: all pass.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 6: Commit</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>capcat/cli.py<span class="w"> </span>tests/unit/test_cli_settings.py
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: add capcat settings command and init user-level Global-settings.yaml template&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h2>Task 9: Version bump + merge + release</h2>
+<br>
+<strong>Files:</strong>
+<ul>
+<li>Modify: <code>capcat/__init__.py</code></li>
+</ul>
+<br>
+<ul>
+<li>[ ] <strong>Step 1: Verify all tests pass on clean run</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pytest<span class="w"> </span>tests/unit/<span class="w"> </span>-q
+</pre></div>
+
+<br>
+<p>Expected: all pass, no failures.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 2: Read context-engineering/release.md</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>cat<span class="w"> </span>~/capcat/context-engineering/release.md
+</pre></div>
+
+<br>
+<p>Follow the release procedure defined there exactly.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 3: Read current version and bump to next patch</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span>grep<span class="w"> </span><span class="s1">&#39;__version__&#39;</span><span class="w"> </span>~/capcat/capcat/__init__.py
+</pre></div>
+
+<br>
+<p>Increment the patch number by 1 (e.g. <code>1.8.5</code> → <code>1.8.6</code>). Edit <code>capcat/__init__.py</code> accordingly.</p>
+<br>
+<ul>
+<li>[ ] <strong>Step 4: Merge to main</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>checkout<span class="w"> </span>main<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>merge<span class="w"> </span>feat/global-settings-yaml
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 5: Tag and push</strong></li>
+</ul>
+<br>
+<p>Use the version value read in Step 3:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat
+<span class="nv">NEW_VERSION</span><span class="o">=</span><span class="k">$(</span>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import capcat; print(capcat.__version__)&quot;</span><span class="k">)</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Tagging v</span><span class="si">${</span><span class="nv">NEW_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>
+git<span class="w"> </span>tag<span class="w"> </span><span class="s2">&quot;v</span><span class="si">${</span><span class="nv">NEW_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>
+git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>main<span class="w"> </span>--tags
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 6: Verify CI / PyPI publish</strong></li>
+</ul>
+<br>
+<p>Check GitHub Actions for the publish workflow. After ~2 minutes:</p>
+<br>
+<div class="highlight"><pre><span></span><span class="nv">NEW_VERSION</span><span class="o">=</span><span class="k">$(</span>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import capcat; print(capcat.__version__)&quot;</span><span class="k">)</span>
+pipx<span class="w"> </span>upgrade<span class="w"> </span>capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>capcat<span class="w"> </span>--version
+<span class="c1"># Expected output: capcat ${NEW_VERSION}</span>
+</pre></div>
+
+<br>
+<ul>
+<li>[ ] <strong>Step 7: Commit version bump if not already committed</strong></li>
+</ul>
+<br>
+<div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/capcat<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>capcat/__init__.py
+<span class="nv">NEW_VERSION</span><span class="o">=</span><span class="k">$(</span>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import capcat; print(capcat.__version__)&quot;</span><span class="k">)</span>
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;bump: version to </span><span class="si">${</span><span class="nv">NEW_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>
+</pre></div>
+
+<br>
+<hr>
+<br>
+<h2>Tests Summary</h2>
+<br>
+<p>| Test file | Tests |</p>
+<p>|---|---|</p>
+<p>| <code>tests/unit/test_config_global_settings.py</code> | <code>PdfConfig</code> defaults; <code>FetchNewsConfig.pdf</code>; <code>from_dict</code> completeness; <code>_filter_fields</code>; <code>_load_settings_file</code> (missing, override, silence, merge order); new config fields |</p>
+<p>| <code>tests/unit/test_async_pdf_manager_limits.py</code> | <code>pdf_exceeds_size_limit</code> (4 cases); <code>initialize_pdf_manager</code>; <code>get_pdf_manager</code> defaults; count cap |</p>
+<p>| <code>tests/unit/test_ethical_scraping_configure.py</code> | <code>configure()</code> updates; default crawl_delay; <code>enforce_rate_limit</code> floor (2 timing tests) |</p>
+<p>| <code>tests/unit/test_article_count_chain.py</code> | <code>SourceConfig.article_count</code> default None; guard; <code>_resolve_count</code> (4 cases) |</p>
+<p>| <code>tests/unit/test_cli_settings.py</code> | <code>_cmd_settings</code> write/no-overwrite/force; dispatch routing; init user template (write/no-overwrite/reinit-skip) |</p>
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>legacy.cli</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Code styling */
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            line-height: 1.45;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ASCII Art and Mermaid styling */
+        .ascii-art, .mermaid {
+            background-color: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            white-space: pre;
+            line-height: 1.2;
+            position: relative;
+        }
+
+        /* Mermaid container wrapper */
+        .mermaid-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        /* Copy button for Mermaid diagrams */
+        .mermaid-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .mermaid-container:hover .mermaid-copy-btn {
+            opacity: 1;
+        }
+
+        .mermaid-copy-btn:hover {
+            background-color: #0256c7;
+        }
+
+        .mermaid-copy-btn.copied {
+            background-color: #22863a;
+        }
+
+        /* Navigation styling */
+        .nav-breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .nav-breadcrumb a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table styling */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5da;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+
+        /* Link styling */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Blockquote styling */
+        blockquote {
+            border-left: 4px solid #d1d5da;
+            padding-left: 16px;
+            margin-left: 0;
+            color: #6a737d;
+        }
+
+        /* List styling */
+        ul, ol {
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        /* Header styling */
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        h1 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #e1e4e8;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="nav-breadcrumb"><a href="../index.html">Documentation Home</a> / <a href="../api/index.html">api</a> / legacy</div>
+<h1>legacy.cli</h1>
+<br>
+<strong>File:</strong> <code>Application/legacy/cli.py</code>
+<br>
+<h2>Description</h2>
+<br>
+<p>Professional CLI interface for Capcat using subcommand architecture.</p>
+<p>Follows industry standards like git, docker, and kubernetes.</p>
+<br>
+<h2>Constants</h2>
+<br>
+<h3>AVAILABLE_SOURCES</h3>
+<br>
+<strong>Value:</strong> <code>get_available_sources()</code>
+<br>
+<h3>BUNDLES</h3>
+<br>
+<strong>Value:</strong> <code>get_available_bundles()</code>
+<br>
+<h2>Functions</h2>
+<br>
+<h3>get_available_sources</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">get_available_sources</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span>
+</pre></div>
+
+<br>
+<p>Get available sources from the source registry.</p>
+<br>
+<p>Falls back to hardcoded sources if registry fails to load.</p>
+<br>
+<p>Returns:</p>
+<p>    Dictionary mapping source IDs to display names</p>
+<br>
+<p>Raises:</p>
+<p>    Exception: Caught and logged, triggers fallback sources</p>
+<br>
+<strong>Returns:</strong> Dict[str, str]
+<br>
+<h3>get_available_bundles</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">get_available_bundles</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span>
+</pre></div>
+
+<br>
+<p>Get available bundles from bundles.yml file.</p>
+<br>
+<p>Auto-populates &#x27;all&#x27; bundle with all available sources from registry.</p>
+<p>Falls back to hardcoded bundles if file loading fails.</p>
+<br>
+<p>Returns:</p>
+<p>    Dictionary mapping bundle IDs to bundle data (sources, description)</p>
+<br>
+<p>Raises:</p>
+<p>    Exception: Caught and logged, triggers fallback bundles</p>
+<br>
+<strong>Returns:</strong> Dict[str, Dict[str, Any]]
+<br>
+<h3>_get_fallback_sources</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_get_fallback_sources</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span>
+</pre></div>
+
+<br>
+<p>Fallback source definitions if registry fails.</p>
+<br>
+<p>Provides minimal set of core sources for basic functionality.</p>
+<br>
+<p>Returns:</p>
+<p>    Dictionary of hardcoded source IDs to display names</p>
+<br>
+<strong>Returns:</strong> Dict[str, str]
+<br>
+<h3>_get_fallback_bundles</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_get_fallback_bundles</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span>
+</pre></div>
+
+<br>
+<p>Fallback bundle definitions if registry fails.</p>
+<br>
+<p>Provides minimal set of core bundles for basic functionality.</p>
+<br>
+<p>Returns:</p>
+<p>    Dictionary of hardcoded bundle IDs to bundle data</p>
+<br>
+<strong>Returns:</strong> Dict[str, Dict[str, Any]]
+<br>
+<h3>run_capcat_fetch</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">run_capcat_fetch</span><span class="p">(</span><span class="n">source_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+
+<br>
+<p>Run the &#x27;./capcat fetch&#x27; command as a subprocess for testing new source.</p>
+<br>
+<p>Designed to be easily mockable in tests.</p>
+<br>
+<p>Args:</p>
+<p>    source_id: Source identifier to test</p>
+<p>    count: Number of articles to fetch</p>
+<br>
+<p>Returns:</p>
+<p>    True if fetch successful, False otherwise</p>
+<br>
+<p>Raises:</p>
+<p>    subprocess.CalledProcessError: If fetch command fails</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>source_id</code> (str)</li>
+<li><code>count</code> (int)</li>
+</ul>
+<br>
+<strong>Returns:</strong> bool
+<br>
+<h3>add_source</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">add_source</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Interactive command to add a new RSS-based source.</p>
+<br>
+<p>Guides user through: RSS inspection, configuration, bundle assignment,</p>
+<p>and test fetch. Creates YAML config in sources/active/config_driven/configs/.</p>
+<br>
+<p>Args:</p>
+<p>    url: RSS feed URL to add as new source</p>
+<br>
+<p>Raises:</p>
+<p>    SystemExit: If user cancels or configuration fails</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>url</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<p>⚠️ <strong>High complexity:</strong> 12</p>
+<br>
+<h3>remove_source</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">remove_source</span><span class="p">(</span><span class="n">args</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Namespace</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Enhanced command to remove existing sources with advanced options.</p>
+<br>
+<p>Supports dry-run, backup, analytics, batch removal, and undo operations.</p>
+<br>
+<p>Args:</p>
+<p>    args: Parsed command-line arguments with removal options</p>
+<br>
+<p>Raises:</p>
+<p>    CapcatError: If source removal fails</p>
+<p>    SystemExit: If user cancels operation</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>args</code> (argparse.Namespace)</li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h3>_handle_undo</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_handle_undo</span><span class="p">(</span><span class="n">backup_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Handle undo/restore operation.</p>
+<br>
+<p>Restores sources from backup using specified backup ID.</p>
+<br>
+<p>Args:</p>
+<p>    backup_id: Backup identifier to restore from</p>
+<br>
+<p>Raises:</p>
+<p>    CapcatError: If restore operation fails</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>backup_id</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h3>generate_config_command</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">generate_config_command</span><span class="p">(</span><span class="n">args</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Namespace</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Launch the interactive config generator script.</p>
+<br>
+<p>Executes scripts/generate_source_config.py as subprocess.</p>
+<br>
+<p>Args:</p>
+<p>    args: Parsed command-line arguments with optional output path</p>
+<br>
+<p>Raises:</p>
+<p>    SystemExit: If script not found or execution fails</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>args</code> (argparse.Namespace)</li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<h3>create_parser</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">create_parser</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span>
+</pre></div>
+
+<br>
+<p>Create the main argument parser with subcommands.</p>
+<br>
+<p>Defines global options and all subcommands (single, fetch, bundle, catch,</p>
+<p>add-source, remove-source, generate-config, list).</p>
+<br>
+<p>Returns:</p>
+<p>    Configured ArgumentParser instance</p>
+<br>
+<strong>Returns:</strong> argparse.ArgumentParser
+<br>
+<h3>parse_sources</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">parse_sources</span><span class="p">(</span><span class="n">sources_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+</pre></div>
+
+<br>
+<p>Parse comma-separated sources string and validate.</p>
+<br>
+<p>Args:</p>
+<p>    sources_str: Comma-separated source identifiers</p>
+<br>
+<p>Returns:</p>
+<p>    List of validated source IDs</p>
+<br>
+<p>Raises:</p>
+<p>    ValidationError: If any source ID is unknown</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>sources_str</code> (str)</li>
+</ul>
+<br>
+<strong>Returns:</strong> List[str]
+<br>
+<h3>validate_arguments</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">validate_arguments</span><span class="p">(</span><span class="n">args</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Namespace</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
+</pre></div>
+
+<br>
+<p>Validate and process parsed arguments.</p>
+<br>
+<p>Converts argparse Namespace to configuration dictionary for capcat.py.</p>
+<p>Handles all subcommands and validates required arguments.</p>
+<br>
+<p>Args:</p>
+<p>    args: Parsed command-line arguments</p>
+<br>
+<p>Returns:</p>
+<p>    Configuration dictionary with action, sources, options</p>
+<br>
+<p>Raises:</p>
+<p>    ValidationError: If required arguments missing or invalid</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>args</code> (argparse.Namespace)</li>
+</ul>
+<br>
+<strong>Returns:</strong> Dict[str, Any]
+<br>
+<p>⚠️ <strong>High complexity:</strong> 14</p>
+<br>
+<h3>list_sources_and_bundles</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">list_sources_and_bundles</span><span class="p">(</span><span class="n">what</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;all&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Display available sources and bundles.</p>
+<br>
+<p>Args:</p>
+<p>    what: What to list - &#x27;sources&#x27;, &#x27;bundles&#x27;, or &#x27;all&#x27;</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>what</code> (str) <em>optional</em></li>
+</ul>
+<br>
+<strong>Returns:</strong> None
+<br>
+<p>⚠️ <strong>High complexity:</strong> 11</p>
+<br>
+<h3>parse_arguments</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">parse_arguments</span><span class="p">(</span><span class="n">argv</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
+</pre></div>
+
+<br>
+<p>Parse command line arguments and return validated configuration.</p>
+<br>
+<p>Handles immediate-exit commands (list, add-source, remove-source,</p>
+<p>generate-config, catch) and validates remaining commands.</p>
+<br>
+<p>Args:</p>
+<p>    argv: Command line arguments (uses sys.argv if None)</p>
+<br>
+<p>Returns:</p>
+<p>    Validated configuration dictionary</p>
+<br>
+<p>Raises:</p>
+<p>    ValidationError: If arguments invalid</p>
+<p>    SystemExit: For immediate-exit commands</p>
+<br>
+<strong>Parameters:</strong>
+<br>
+<ul>
+<li><code>argv</code> (Optional[List[str]]) <em>optional</em></li>
+</ul>
+<br>
+<strong>Returns:</strong> Dict[str, Any]
+<br>
+<h3>main</h3>
+<br>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+
+<br>
+<p>Main entry point for direct CLI script execution.</p>
+<br>
+<p>Parses arguments and executes commands. Used when cli.py run directly.</p>
+<p>Normal usage goes through capcat.py which imports functions from here.</p>
+<br>
+<strong>Returns:</strong> None
+<br>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+
+  // Add copy buttons to Mermaid diagrams after rendering
+  document.addEventListener('DOMContentLoaded', function() {
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+
+    mermaidDivs.forEach(function(mermaidDiv) {
+      // Get the original Mermaid source code
+      const mermaidSource = mermaidDiv.textContent;
+
+      // Create container wrapper
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // Create copy button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'mermaid-copy-btn';
+      copyBtn.textContent = 'Copy Mermaid Code';
+      copyBtn.setAttribute('title', 'Copy diagram code for Draw.io, Mermaid Live, etc.');
+
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidSource).then(function() {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(function() {
+            copyBtn.textContent = 'Copy Mermaid Code';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      // Wrap the mermaid div in container and add button
+      mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+      container.appendChild(mermaidDiv);
+      container.appendChild(copyBtn);
+    });
+  });
+</script>
+</body>
+</html>

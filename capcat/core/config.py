@@ -108,6 +108,7 @@ class PdfConfig:
 
     max_pdf_size_bytes: int = 20_971_520  # 20MB
     max_pdf_per_article: int = 10
+    global_deduplication: bool = False  # Prevent same PDF URL from being downloaded multiple times across articles
 
 
 @dataclass
@@ -394,6 +395,10 @@ class ConfigManager:
             ),
             # Logging settings
             "CAPCAT_LOG_LEVEL": ("logging", "default_level", str),
+            # PDF settings
+            "CAPCAT_PDF_MAX_SIZE": ("pdf", "max_pdf_size_bytes", int),
+            "CAPCAT_PDF_MAX_PER_ARTICLE": ("pdf", "max_pdf_per_article", int),
+            "CAPCAT_PDF_GLOBAL_DEDUP": ("pdf", "global_deduplication", bool),
         }
 
         for env_var, (section, key, type_func) in env_mappings.items():

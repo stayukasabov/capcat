@@ -1,0 +1,504 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - button "Switch between light and dark themes" [ref=e4] [cursor=pointer]:
+      - img [ref=e5]
+    - navigation [ref=e14]:
+      - link "News 5 May 2026 ▷" [ref=e15] [cursor=pointer]:
+        - /url: ../../../index.html#theme=light
+      - link "Hacker News" [ref=e16] [cursor=pointer]:
+        - /url: ../../news.html#theme=light
+  - generic [ref=e18]:
+    - generic [ref=e19]:
+      - link "Back to News" [ref=e21] [cursor=pointer]:
+        - /url: ../../news.html#theme=light
+        - generic [ref=e22]: Back to News
+      - link "View Comments" [ref=e24] [cursor=pointer]:
+        - /url: comments.html#theme=light
+        - generic [ref=e25]: View Comments
+    - heading "The Car That Watches You Back - Nobody Asked for This" [level=1] [ref=e26]
+    - generic [ref=e27]:
+      - generic [ref=e28]: PDF
+      - link "2508.15306" [ref=e29] [cursor=pointer]:
+        - /url: ../files/2508.15306.pdf#theme=light
+    - main [ref=e30]:
+      - generic [ref=e31]:
+        - strong [ref=e32]: "Source URL:"
+        - link "https://nobodyaskedforthis.lol/posts/connected-car/" [ref=e33] [cursor=pointer]:
+          - /url: https://nobodyaskedforthis.lol/posts/connected-car/
+      - separator [ref=e34]
+      - paragraph [ref=e35]:
+        - img "A modern car dashboard at dusk, the infotainment screen lit up across the center console." [ref=e36]
+        - text: "On the morning of November 24, 2025, automotive journalist Zerin Dube opened the door of his Jeep Grand Cherokee, settled into the driver’s seat, and pressed the start button. The dashboard came up. The infotainment screen ran its boot animation, blinked to the home view, and then loaded an advertisement on top of the home view. Not a service reminder, not a recall notice. A promotional offer:"
+        - strong [ref=e37]: $1,500 in Loyalty Retail Bonus Cash
+        - text: toward the purchase of a new Jeep, timed to appear at startup, configured to linger for fifteen seconds, and programmed to return at the next ignition cycle if he failed to dismiss it quickly enough.
+      - paragraph [ref=e38]: "He photographed the screen and posted it to X. The caption: “Late stage capitalism popping up on our Grand Cherokee.”"
+      - paragraph [ref=e39]:
+        - img "A Jeep Grand Cherokee infotainment screen displaying a $1,500 Loyalty Retail Bonus Cash promotional offer over the home view." [ref=e40]
+      - paragraph [ref=e41]: Zerin Dube's photograph of the startup ad, posted to X on November 24, 2025.
+      - paragraph [ref=e42]:
+        - text: The photograph captured something people had been watching develop in fragments (a feature added here, a terms-of-service update there) but hadn’t yet seen stated plainly. Dube’s Jeep had not been hacked. Nothing had gone wrong.
+        - link "The advertisement came from Stellantis" [ref=e43] [cursor=pointer]:
+          - /url: https://jalopnik.com/2034692/pop-up-ads-appearing-stellantis-infotainment/
+        - text: ", the company that built the truck, over the truck’s own cellular connection, to a screen in a vehicle the owner had paid for outright."
+      - paragraph [ref=e44]:
+        - text: To turn it off permanently, Stellantis directed owners to call the
+        - link "Brand Connect" [ref=e45] [cursor=pointer]:
+          - /url: https://www.driveuconnect.com/contact-us.html
+        - text: customer service line at 800-777-3600 during business hours.
+      - paragraph [ref=e46]: "This is a story about how a machine most people still think of as property became something else: a platform with monetized inventory and a data feed pointed back at the manufacturer. It is also about the sequence of technical decisions that made that transformation possible. The story starts, depending on where you draw the line, either in 1986 with a nine-inch Buick touchscreen, or in 2012 with a Tesla that changed everything, or in the 1990s when engineers began replacing steel cables with electronic signals and nobody outside the industry particularly noticed."
+      - separator [ref=e47]
+      - heading "Forty Years of Glass" [level=3] [ref=e48]
+      - paragraph [ref=e49]:
+        - img "A 1986 Buick Riviera coupe in profile, photographed against a neutral backdrop." [ref=e50]
+      - paragraph [ref=e51]: The 1986 Buick Riviera. The first production car with a touchscreen.
+      - paragraph [ref=e52]:
+        - text: The
+        - link "1986 Buick Riviera" [ref=e53] [cursor=pointer]:
+          - /url: https://automotivehistory.org/the-first-car-with-a-touchscreen-is-from-1986/
+        - text: "arrived in showrooms carrying what GM called the Graphic Control Center: a nine-inch cathode-ray tube touchscreen managing 91 vehicle functions without conventional switches or knobs. It beeped audibly with each touch. Drivers complained it was distracting to navigate at speed. It was dropped after two model years."
+      - paragraph [ref=e54]:
+        - img "Close-up of the 1986 Buick Riviera's nine-inch CRT touchscreen mounted in the center console, displaying menu options for trip, audio, climate, and gauges." [ref=e55]
+      - paragraph [ref=e56]: GM's Graphic Control Center. Ninety-one functions, one CRT, an audible beep on every press. It survived two model years.
+      - paragraph [ref=e57]: "The concept spent the next fifteen years in development. Lexus introduced a touch-operated navigation system in the 2001 LS430 that was functional and cautious. BMW installed iDrive in the 2002 7 Series: an 8.8-inch display controlled by a single rotary knob that replaced most of the center console controls. Drivers trying to adjust the climate control while moving found themselves drilling through nested menus with a dial. BMW relented and added physical shortcuts after two years of customer complaints. iDrive survived its early reputation and eventually became one of the better systems in the industry, but the lesson (that removing buttons is not the same thing as improving control) did not travel as widely as it should have."
+      - paragraph [ref=e58]:
+        - text: The decisive break came in 2012.
+        - link "Tesla began deliveries of the Model S" [ref=e59] [cursor=pointer]:
+          - /url: https://www.techradar.com/news/car-tech/the-new-tesla-s-has-the-most-insane-in-car-touchscreen-multimedia-system-ever-1185159
+        - text: "with a 17-inch portrait-orientation touchscreen at its center, running a full web browser, integrated with Google Maps, and controlling virtually every function in the car: climate, suspension, sunroof, charging settings, media, navigation. There was a steering wheel with shortcut keys, window switches, a hazard light button, and a glove box release. Everything else was the screen."
+      - paragraph [ref=e60]:
+        - link "Safety researchers pointed to Fitts’s Law" [ref=e61] [cursor=pointer]:
+          - /url: https://www.nngroup.com/articles/tesla-big-touchscreen/
+        - text: ", the principle that acquiring a touch target requires visual confirmation in a way that a physical knob with a learned position does not, and published studies showing that touchscreen-heavy interfaces increased cognitive load. The studies were accurate. The market did not care. Within a decade, a 12-inch screen was unremarkable. Mercedes-Benz developed the Hyperscreen, a 56-inch curved display spanning the full width of the EQS dashboard with three screens beneath a single piece of Gorilla Glass. The Jeep Grand Wagoneer shipped with seven screens."
+      - paragraph [ref=e62]:
+        - 'img "The Mercedes-Benz EQS Hyperscreen: a 56-inch curved display spanning the full width of the dashboard, divided into three panels under one continuous piece of glass." [ref=e63]'
+      - paragraph [ref=e64]: The Mercedes-Benz Hyperscreen. Three displays, fifty-six inches, one piece of Gorilla Glass.
+      - paragraph [ref=e65]:
+        - text: This proliferation of screens has a useful parallel in consumer electronics.
+        - link "We have previously noted" [ref=e66] [cursor=pointer]:
+          - /url: http://nobodyaskedforthis.lol/posts/anker-nano-45w/
+        - text: that Anker added a small OLED display to its Nano 45W charger, a screen that tells you in real time how many watts your phone is drawing, which your phone is already displaying six inches away. The automotive version of this logic produced instrument clusters that display your speed digitally while an analog speedometer sits alongside it, and eventually produced dashboards where a screen replaces the climate knobs, the audio controls, the seat heater buttons, and the parking brake switch, each function now two or three taps into a sub-menu. The screen was not added because it made these things easier. The screen was added because a screen is what modern things look like, and because once installed, it could be updated remotely and eventually monetized.
+      - separator [ref=e67]
+      - heading "From Cables to Code" [level=3] [ref=e68]
+      - paragraph [ref=e69]: "The touchscreen is the visible part of a deeper transformation: the systematic replacement of the car’s mechanical connections with electronic ones."
+      - paragraph [ref=e70]: Until the late 1980s, the relationship between a driver’s inputs and a car’s physical systems was largely direct. Pressing the accelerator pulled a steel cable that opened the throttle body. Turning the steering wheel rotated a column connected mechanically to the front wheels. The brake pedal pushed hydraulic fluid through lines to calipers at each corner. Driver intention was transmitted by force.
+      - paragraph [ref=e71]:
+        - link "Drive by wire" [ref=e72] [cursor=pointer]:
+          - /url: https://en.wikipedia.org/wiki/Drive_by_wire
+        - text: "began replacing the accelerator cable in production vehicles in the early 1990s. Instead of a physical cable, a sensor reads pedal position and reports it to an engine control unit, which commands the throttle electronically. The advantages were real: the ECU could coordinate throttle position with fuel injection, transmission shift points, traction control, and stability management in ways a cable could never accommodate. By the 2000s, electronic throttle control was standard across virtually the entire industry. The physical cable between the pedal and the engine was gone."
+      - paragraph [ref=e73]:
+        - text: "Steering followed. Hydraulic power steering (an engine-driven pump moving fluid to assist the driver) was replaced by electric power steering, which uses a motor on the rack instead. Most electric power steering systems still retain a mechanical column: turn the wheel and the wheels follow through a physical connection."
+        - link "Steer-by-wire" [ref=e74] [cursor=pointer]:
+          - /url: https://gomechanic.in/blog/the-by-wire-system-explained/
+        - text: eliminates even that.
+        - link "Infiniti introduced a production steer-by-wire system in 2013" [ref=e75] [cursor=pointer]:
+          - /url: https://en.wikipedia.org/wiki/Drive_by_wire
+        - text: ", retaining a mechanical fallback. In a full steer-by-wire vehicle, the steering wheel is a sensor and the wheels are moved by actuators. The driver’s input is a signal, not a force. Brake-by-wire follows the same trajectory, replacing the hydraulic master cylinder with electronic actuators, and is present in several current production models."
+      - paragraph [ref=e76]:
+        - text: This architecture is connected internally by the
+        - link "CAN bus" [ref=e77] [cursor=pointer]:
+          - /url: https://en.wikipedia.org/wiki/CAN_bus
+        - text: (Controller Area Network), a communications standard from the 1980s that allows a vehicle’s dozens of electronic control units to talk to each other over a shared network. The CAN bus was designed for reliability within a closed system, and it has almost no built-in authentication. When a message arrives on the bus, there is no native mechanism to verify who sent it. The assumption when the standard was designed was that nothing external would ever reach the bus. That assumption dissolved when vehicles were given cellular modems and internet-connected infotainment systems.
+      - separator [ref=e78]
+      - heading "The Update That Came While You Slept" [level=3] [ref=e79]
+      - paragraph [ref=e80]:
+        - text: Tesla introduced
+        - link "over-the-air (OTA) software updates" [ref=e81] [cursor=pointer]:
+          - /url: https://recharged.com/articles/tesla-over-the-air-updates-explained
+        - text: as a production feature with the Model S in 2012. The premise was genuinely useful. Rather than requiring a dealership visit for software changes, the car connects to Wi-Fi at night, downloads an update, and installs it while parked. Bug fixes, safety improvements, new features, all deployed remotely across the entire fleet.
+      - paragraph [ref=e82]: The early demonstrations were compelling. When Consumer Reports cited inadequate braking distances in the Model 3, Tesla issued an update within days that reduced stopping distance by 19 feet. During Hurricane Irma in 2017, Tesla temporarily unlocked additional range on software-limited batteries for Florida owners who needed to evacuate.
+      - paragraph [ref=e83]: OTA updates are now standard across the connected vehicle industry. BMW, Ford, Volkswagen, and GM deploy them regularly. The capability is table stakes.
+      - paragraph [ref=e84]:
+        - text: What has become clearer is that the same mechanism that delivers improvements can remove features, restrict settings, and gate capabilities behind payment, often without the owner’s agreement and sometimes without notice.
+        - link "Tesla removed the adjustable regenerative braking setting" [ref=e85] [cursor=pointer]:
+          - /url: https://www.autoevolution.com/news/tesla-ota-update-reinstates-low-regenerative-braking-mode-214000.html
+        - text: from its vehicles in a 2020 update, leaving drivers with a single level regardless of preference. The option partially returned in 2023. Tesla also removed Autopilot features from used vehicles, requiring new owners to repurchase capabilities the previous owner had paid for. The hardware remained, but access did not transfer with the title.
+      - paragraph [ref=e86]:
+        - link "Tesla settled a class action in 2021 for $1.5 million" [ref=e87] [cursor=pointer]:
+          - /url: https://www.hotcars.com/tesla-software-update-cut-ev-range-owners-move-to-sue/
+        - text: after owners alleged an OTA update had reduced battery charging capacity in Model S vehicles. A subsequent suit alleged a Model S and Model X update reduced driving range by 20 percent, with some owners receiving error codes indicating degraded or inoperable batteries. Some paid over $500 to third parties to reverse the update. Others faced battery replacement bills exceeding $15,000.
+      - paragraph [ref=e88]:
+        - link "BMW’s heated seat subscription" [ref=e89] [cursor=pointer]:
+          - /url: http://nobodyaskedforthis.lol/posts/bmw-heated-seats/
+        - text: ", eighteen dollars a month to operate warming elements already wired into the car, is the same logic applied more visibly. BMW eventually withdrew the program in most markets after the backlash, but the withdrawal did not change the underlying architecture. The seat hardware is still in the car, and the software still controls whether it works."
+      - paragraph [ref=e90]: Polestar sells a 68-horsepower performance upgrade as an OTA download. The question of whether a manufacturer can alter a product’s capabilities after sale via software has not been definitively resolved legally. In practice, the terms of service accepted at purchase typically grant broad rights over software modifications. You bought the hardware. They retained control of what it does.
+      - paragraph [ref=e91]:
+        - text: This pattern of products that continue to require your compliance after you’ve paid for them, that collect telemetry, that require an account, that update overnight and behave differently in the morning, is not exclusive to cars.
+        - link "We have covered it in the Theragun" [ref=e92] [cursor=pointer]:
+          - /url: http://nobodyaskedforthis.lol/posts/theragun/
+        - text: ", which now connects to your wearables and tracks recovery sessions, and"
+        - link "in the Ember mug" [ref=e93] [cursor=pointer]:
+          - /url: http://nobodyaskedforthis.lol/posts/the-mug-firmware/
+        - text: ", which refuses to heat your coffee until it finishes a 40MB firmware update. Then there’s"
+        - link "the Mill compost bin" [ref=e94] [cursor=pointer]:
+          - /url: http://nobodyaskedforthis.lol/posts/mill-food-recycler/
+        - text: ", which costs $999 and reports your food scraps to a cloud. The car is the largest and most consequential version of a phenomenon already well underway in the kitchen, the bathroom, and the gym bag. Everything is becoming a subscription with telemetry, and the vehicle is merely the highest-stakes implementation of that design philosophy."
+      - separator [ref=e95]
+      - heading "The Attack Surface" [level=3] [ref=e96]
+      - paragraph [ref=e97]:
+        - text: In July 2015, security researchers
+        - link "Charlie Miller and Chris Valasek" [ref=e98] [cursor=pointer]:
+          - /url: https://www.wired.com/2015/07/hackers-remotely-kill-jeep-highway/
+        - text: sat in an office in St. Louis and remotely accessed a 2014 Jeep Cherokee being driven by journalist Andy Greenberg on a highway. Through a vulnerability in the Uconnect infotainment system, and from there to the CAN bus, they commanded the air conditioning, the radio, the windshield wipers, and the transmission. They cut the engine at highway speed and disabled the brakes in a parking lot.
+      - paragraph [ref=e99]: "Chrysler recalled 1.4 million vehicles. The demonstration made a point that has only grown more relevant: the infotainment system’s cellular connection is a path to vehicle systems that were never designed to receive commands from outside."
+      - paragraph [ref=e100]:
+        - text: In 2024, researchers led by Sam Curry found a
+        - link "vulnerability in Kia’s web portal" [ref=e101] [cursor=pointer]:
+          - /url: https://www.helpnetsecurity.com/2025/04/04/cybersecurity-risks-cars/
+        - text: allowing them to reassign control of the internet-connected features of any Kia manufactured after 2013. The vulnerability was in the manufacturer’s cloud infrastructure, not the car itself. The cloud talked to the vehicle’s telematics unit, which talked to vehicle systems. In late 2024, a data leak from Volkswagen’s software subsidiary Cariad exposed
+        - link "precise GPS location data for approximately 800,000 electric vehicles" [ref=e102] [cursor=pointer]:
+          - /url: ../files/downloading_2508.15306#theme=light
+        - text: across VW, Audi, Škoda, and SEAT. The data was stored in Amazon cloud infrastructure with insufficient access controls. It wasn’t extracted through a sophisticated exploit; it was simply accessible.
+      - paragraph [ref=e103]:
+        - text: Researchers at Northeastern University
+        - link "published findings in early 2026 on Tesla’s cellular stack" [ref=e104] [cursor=pointer]:
+          - /url: https://news.northeastern.edu/2026/02/18/connected-cars-hacking-research/
+        - text: ", identifying vulnerabilities to IMSI catching attacks (techniques that spoof cellular towers to intercept traffic). Tesla acknowledged the vulnerabilities were in modem components supplied by Qualcomm and Quectel. The modem is in the car, and the vulnerability is present regardless of whose name is on the component."
+      - paragraph [ref=e105]:
+        - text: Audi vehicles through at least 2024 shipped with software containing
+        - link "well-known vulnerabilities" [ref=e106] [cursor=pointer]:
+          - /url: https://www.helpnetsecurity.com/2025/09/09/connected-car-cybersecurity-europe/
+        - text: ", including components with no active maintainers. Of automotive cybersecurity incidents between 2023 and 2024,"
+        - link "92 percent were remote attacks" [ref=e107] [cursor=pointer]:
+          - /url: https://www.einfochips.com/blog/cybersecurity-for-the-next-gen-mobility/
+        - text: .
+      - paragraph [ref=e108]: The cellular modem that receives Stellantis’s promotional pop-up is the same modem that received the Uconnect exploit a decade earlier. Always-on connectivity, cloud-connected accounts, and logged-in user profiles are each both a requirement for advertising delivery and a component of the attack surface available to anyone who finds a way in.
+      - separator [ref=e109]
+      - heading "Three Companies Want to Be Your Car’s Operating System" [level=3] [ref=e110]
+      - paragraph [ref=e111]: "While automakers fight over whose software runs the dashboard, three technology companies have been running a parallel campaign to own the voice layer: the microphones, the assistant, the conversational interface between driver and vehicle. Each has taken a different approach. All three have ended up in the same place, which is the car interior, listening."
+      - paragraph [ref=e112]:
+        - strong [ref=e113]: Google
+        - text: moved earliest and most completely. The Polestar 2, launched in 2020, was the first production vehicle to run
+        - link "Android Automotive OS natively" [ref=e114] [cursor=pointer]:
+          - /url: https://en.wikipedia.org/wiki/Polestar_2
+        - text: ". Not Android Auto, the phone-mirroring app, but Android Automotive, a full operating system running on the vehicle’s own hardware, independent of any connected phone. The distinction matters: a car running Android Automotive is running Google software at the level of the operating system. Google Maps, Google Assistant, and the Google Play Store are built into the vehicle itself. The car’s infotainment is, in a meaningful sense, an Android device."
+      - paragraph [ref=e115]:
+        - link "The list of vehicles now running Google Built-in" [ref=e116] [cursor=pointer]:
+          - /url: https://www.androidheadlines.com/android-automotive
+        - text: "is long and growing: multiple Volvo and Polestar models, the Chevrolet Silverado, Tahoe, Suburban and Equinox. The GMC Sierra and Yukon and Hummer EV, the Cadillac Lyriq and Escalade IQ and CT5, the Honda Accord and Prologue, the Ford Explorer (2025+), the Lincoln Aviator and Nautilus, the Nissan Rogue, and as of 2026, the Mazda CX-5."
+      - paragraph [ref=e117]:
+        - text: Volvo has deepened this relationship significantly,
+        - link "announcing in 2025 that it would serve as one of Google’s reference hardware platforms" [ref=e118] [cursor=pointer]:
+          - /url: https://www.volvocars.com/intl/media/press-releases/6B411DC79F4F8965/
+        - text: for future Android development in cars. The companies demonstrated Google Gemini running in a Volvo EX90 at Google I/O 2025. Gemini is now rolling out via OTA update to Polestar and Volvo vehicles with Android Automotive OS, a conversational assistant capable of handling compound requests like “find a supermarket on my way home and text Joe that I’m on my way.” The car’s voice interface has become a large language model deployed in a vehicle that also runs Google Maps, Google Play, and Google’s advertising infrastructure. The data implications of this combination have not been extensively discussed in the marketing materials.
+      - paragraph [ref=e119]:
+        - strong [ref=e120]: Amazon
+        - text: took a different approach. Rather than replacing the operating system, get the assistant into whatever is already there. The
+        - link "Echo Auto" [ref=e121] [cursor=pointer]:
+          - /url: https://www.amazon.com/All-New-Echo-Auto-release-Alexa/dp/B09X27YPS1
+        - text: is a small rectangle (roughly credit-card-sized, about as thick as a box of Tic-Tacs) that sticks to the dashboard, connects to the driver’s phone via the Alexa app, and plays through the car’s existing audio system via Bluetooth or the auxiliary input. Five microphones, tuned to hear over road noise and air conditioning. It costs roughly $55.
+      - paragraph [ref=e122]:
+        - 'img "The Amazon Echo Auto: a small black rectangle, roughly the size of a credit card, mounted to a car dashboard, with a row of microphone perforations along the top edge." [ref=e123]'
+      - paragraph [ref=e124]: The Echo Auto. Five microphones, one Amazon logo, the smallest possible Alexa.
+      - paragraph [ref=e125]:
+        - text: The Echo Auto is, functionally, the smallest possible implementation of the thing Amazon already installed in your kitchen, your living room, and your bedroom. Amazon has moved systematically to put Alexa in every room of every home, and the car was the remaining room.
+        - link "We covered the Amazon Smart Microwave" [ref=e126] [cursor=pointer]:
+          - /url: http://nobodyaskedforthis.lol/posts/microwave/
+        - text: ", the appliance that responds to “Alexa, microwave for two minutes” the same way pressing the button marked “2:00” does. The Echo Auto extends that logic to a room that moves at seventy miles per hour, where hands-free control has a slightly stronger safety argument and the commercial opportunity is considerably larger."
+      - paragraph [ref=e127]:
+        - text: For vehicles that don’t need the aftermarket add-on, Amazon has built Alexa directly into the infotainment systems of
+        - link "an extensive roster of manufacturers" [ref=e128] [cursor=pointer]:
+          - /url: https://www.amazon.com/alexa-auto/b?node=17744356011
+        - text: ": Acura, Alfa Romeo, Audi, BMW, Ford, Lincoln, Mazda, MINI, Nissan, Rivian, and Volkswagen, among others. The integration depth varies considerably by brand and model year. Some allow voice control of vehicle functions; others treat Alexa as a media and smart-home interface that happens to be accessible from the car. Lexus offered Alexa integration and then"
+        - link "discontinued it in October 2023" [ref=e129] [cursor=pointer]:
+          - /url: https://www.gearbrain.com/which-cars-have-amazon-alexa-2525958778.html
+        - text: . Alexa integration with Lexus vehicles is no longer functional.
+      - paragraph [ref=e130]:
+        - text: The commercial logic of Amazon’s automotive ambitions is not opaque. Alexa already routes music purchases, smart home device sales, and product reorders through Amazon’s commerce infrastructure. A driver who asks Alexa to add something to their shopping list, find the nearest gas station, or order paper towels for delivery has done so through a system that Amazon owns end to end. The car is another point of purchase.
+        - link "We have previously noted" [ref=e131] [cursor=pointer]:
+          - /url: http://nobodyaskedforthis.lol/posts/amazon-astro/
+        - text: "that the Amazon Astro, a $1,600 home robot discontinued in 2024, was essentially a presence-and-observation device whose primary capability was being in the room with you. The Echo Auto is that logic made portable and more plausible: a microphone in your commute, connected to the largest commercial infrastructure in American retail."
+      - paragraph [ref=e132]:
+        - strong [ref=e133]: Spotify
+        - text: tried a different approach entirely, and it failed so completely that it serves as a useful data point.
+      - paragraph [ref=e134]:
+        - text: The
+        - link "Spotify Car Thing" [ref=e135] [cursor=pointer]:
+          - /url: https://carthing.spotify.com/
+        - text: launched in early 2021 with an invite-only rollout, reached broader availability in February 2022 at $89.99, and was discontinued from production by July 2022 after Spotify took a
+        - link "$31 million write-down" [ref=e136] [cursor=pointer]:
+          - /url: https://www.engadget.com/spotify-stops-manufacturing-car-thing-132028146.html
+        - text: ". It was a physical controller for Spotify: a four-inch touch screen, a large rubberized dial, four shortcut preset buttons, and a microphone for voice commands. It mounted to the dashboard via vent clips and connected to your phone via Bluetooth. It streamed nothing independently. All audio came through the paired phone, over the phone’s data plan, through the car’s audio system via a separate Bluetooth connection. It was, in the most literal sense, a remote control for an app."
+      - paragraph [ref=e137]:
+        - 'img "The Spotify Car Thing mounted to a car vent: a four-inch touchscreen displaying playback controls, with a large rubberized rotary dial and four shortcut buttons below." [ref=e138]'
+      - paragraph [ref=e139]: The Spotify Car Thing. Manufactured at a loss for sixteen months, then remotely deactivated on December 9, 2024.
+      - paragraph [ref=e140]:
+        - text: Spotify described the Car Thing as an
+        - link "“exploration,“" [ref=e141] [cursor=pointer]:
+          - /url: https://www.musicbusinessworldwide.com/spotifys-car-thing-officially-non-operational-less-than-three-years-after-it-rolled-out-in-the-us/
+        - text: a way to learn more about how people listen in the car. What they learned, apparently, was that people would not pay $89.99 for a Spotify remote when their phone already controlled Spotify, in a world where CarPlay and Android Auto already displayed Spotify on the dashboard screen. Production ended after five months. In December 2023, Spotify announced that all existing Car Things would be
+        - link "completely deactivated on December 9, 2024" [ref=e142] [cursor=pointer]:
+          - /url: https://www.billboard.com/business/streaming/spotify-car-thing-deactivated-stop-working-date-1235693625/
+        - text: . Not unsupported. Deactivated. Users were directed to reset the device and bring it to an e-waste recycling center. Billboard called it “the Zune of the 2020s.” A class action lawsuit followed. Spotify eventually offered refunds for customers who contacted support before January 14, 2025.
+      - paragraph [ref=e143]: Enthusiasts attempted to develop custom firmware to keep the devices functional after deactivation. Spotify subsequently tightened its API access, making third-party firmware harder to sustain. The Car Thing was bricked not once but twice, first by the shutdown and then by the API restrictions that foreclosed the community’s workaround.
+      - paragraph [ref=e144]:
+        - text: "The Car Thing sits neatly in a category this publication has written about extensively: hardware that exists to solve a problem the user has not expressed, manufactured at a loss, discontinued before it reaches the user’s second birthday, and ultimately sent to an e-waste facility while still physically functional. The"
+        - link "Coolest Cooler" [ref=e145] [cursor=pointer]:
+          - /url: http://nobodyaskedforthis.lol/posts/the-coolest-cooler/
+        - text: raised $13.3 million and delivered frustration. The Car Thing raised no outside capital, sold at a loss, and delivered a functional product that was then remotely killed. Both are monuments to the difficulty of making people buy something they don’t need for a problem they don’t have. The Car Thing’s epitaph, in the marketing language of its creator, was that it “unlocked helpful learnings.” The learnings, apparently, were that this was not worth doing.
+      - separator [ref=e146]
+      - heading "The Screen You Can’t Escape" [level=3] [ref=e147]
+      - paragraph [ref=e148]: "Before examining what is happening inside vehicles, it helps to map the advertising environment that surrounds the car on every side. The driving experience, from departure to destination and every stop between, passes through an advertising infrastructure so dense and continuous that it begins to resemble infrastructure itself, the way the highway is infrastructure: something that shapes the journey without being the journey’s purpose."
+      - paragraph [ref=e149]:
+        - strong [ref=e150]: At the pump.
+        - link "GSTV (Gas Station TV)" [ref=e151] [cursor=pointer]:
+          - /url: https://www.adexchanger.com/ctv-roundup/gstv-wants-to-turn-gas-stations-into-a-video-ad-marketplace/
+        - text: runs video content and advertising across screens at more than 27,000 gas stations in the United States, reaching approximately 115 million unique monthly viewers. The viewer is the person pumping gas. You swipe your card, lift the nozzle, click it into the filler neck, squeeze the handle, and lock the trigger. The screen above the keypad starts playing video at you, at a volume calibrated to be heard over the pump motor. You cannot mute it. You cannot turn away from it without turning your back on the nozzle. There is one channel, no DVR, no channel surfing, no means of fast-forwarding, and the average fueling session runs four to five minutes.
+      - paragraph [ref=e152]:
+        - img "A Conoco gas station fueling pump with a video display embedded above the keypad, playing a full-motion advertisement to a customer holding the nozzle." [ref=e153]
+      - paragraph [ref=e154]: "A GSTV display, embedded in the pump. Average viewing time: four to five minutes per fill-up. The audience cannot leave."
+      - paragraph [ref=e155]:
+        - text: GSTV presented research at the 2024 IAB NewFronts claiming its
+        - link "attention metrics surpass digital video, social media, connected television, and linear broadcast" [ref=e156] [cursor=pointer]:
+          - /url: https://www.admonsters.com/new-study-reveals-gstv-dominates-ad-attention/
+        - text: ", with 7,702 attentive seconds per thousand impressions and brand recall rates 1.5 times above industry benchmarks."
+        - link "PepsiCo has incorporated GSTV into its core video strategy" [ref=e157] [cursor=pointer]:
+          - /url: https://digiday.com/future-of-tv/extension-broadcast-buy-advertisers-buying-ads-gas-station-screens/
+        - text: . Spark Foundry, one of the larger media buying agencies, consolidated GSTV into its video team alongside television and streaming buys. GSTV pitches at the annual upfront market, competing for television network budgets.
+      - paragraph [ref=e158]:
+        - text: The targeting is more sophisticated than it appears.
+        - link "GSTV works with a data partner that collects mobile device IDs" [ref=e159] [cursor=pointer]:
+          - /url: https://www.adexchanger.com/ctv-roundup/gstv-wants-to-turn-gas-stations-into-a-video-ad-marketplace/
+        - text: from phones near its gas station screens, then matches those against third-party providers including Experian and Acxiom to create audience segments. GSTV cannot identify the specific individual at the pump, but it can identify that people who frequent a particular gas station in a particular zip code tend toward homeownership or outdoor recreation, and route appropriate creative to that screen. Conversion is measured through partnerships with Foursquare that track subsequent retail visits. The pump does not know your name. It knows your phone is there, and it knows where your phone goes next.
+      - paragraph [ref=e160]:
+        - strong [ref=e161]: Inside the store.
+        - text: You hang the nozzle back on the pump, walk through the automatic doors for a Slurpee, and the speakers in the ceiling are running an ad for Slurpees.
+      - paragraph [ref=e162]:
+        - text: In November 2024, 7-Eleven announced a partnership with
+        - link "Qsic" [ref=e163] [cursor=pointer]:
+          - /url: https://www.getqsic.com/
+        - text: ", an audio retail media company, to build what it explicitly describes as one of the largest commercial radio stations in America. Gulp Radio was broadcasting in more than 4,000 stores as of April 2025, with expectations for deployment across more than [] 12,000 7-Eleven, Speedway, and Stripes locations by the end of July]("
+        - link "https://www.cstoredive.com/news/7-eleven-qsic-radio-station-gulp-media/750712/" [ref=e164] [cursor=pointer]:
+          - /url: https://www.cstoredive.com/news/7-eleven-qsic-radio-station-gulp-media/750712/
+        - text: ), well ahead of original projections.
+      - paragraph [ref=e165]:
+        - text: Networked smart speakers stream individual audio feeds into each store.
+        - link "Ads are targeted by location and time of day" [ref=e166] [cursor=pointer]:
+          - /url: https://www.cstoredive.com/news/7-eleven-qsic-radio-station-gulp-media/750712/
+        - text: . Coffee ads in the morning, when coffee demand peaks. The system “zones” audio so that different content plays in different parts of the store; the beer ads play from the speaker over the beer cooler, audible while you have the door open and a six-pack in your hand. Voice talent is generated by text-to-speech, eliminating recording studios and allowing campaigns to update instantly. A sensor measures ambient decibel levels and adjusts speaker volume automatically, ensuring audibility above store noise while also confirming for advertisers whether and how loudly each ad played.
+        - link "Products advertised on Gulp Radio see average sales lift of 5 to 9 percent" [ref=e167] [cursor=pointer]:
+          - /url: https://www.cstoredive.com/news/7-eleven-qsic-radio-station-gulp-media/750712/
+        - text: . A Slurpee promotion achieved 11 percent unit sales growth. Qsic plans to integrate 7-Eleven’s transactional data to optimize ad frequency by purchase pattern.
+      - paragraph [ref=e168]:
+        - text: Qsic is not alone. In 2023, Mood Media’s Vibenomics division and Stingray Advertising announced a partnership creating what they described as the
+        - link "largest U.S. in-store retail media network" [ref=e169] [cursor=pointer]:
+          - /url: https://www.globenewswire.com/news-release/2023/07/25/2710344/0/en/Mood-Media-s-Vibenomics-and-Stingray-Advertising-Create-Largest-US-In-Store-Retail-Media-Network.html
+        - text: ", reaching over 800 million monthly shoppers through audio advertising across"
+        - link "more than 25,000 locations" [ref=e170] [cursor=pointer]:
+          - /url: https://us.moodmedia.com/company/news/mood-media-s-vibenomics-and-stingray-advertising-create-largest-us-in-store-retail-media-network/
+        - text: covering Kroger, Albertsons, Safeway, Rite Aid, and others.
+        - link "Stingray operates across more than 140,000 locations worldwide" [ref=e171] [cursor=pointer]:
+          - /url: https://www.stingray.com/advertising-sales/in-store-retail-media/
+        - text: ", and acquired DMI in October 2025, adding 8,500 further U.S. locations to its audio network."
+      - paragraph [ref=e172]:
+        - strong [ref=e173]: The route itself.
+        - text: Back in the car, the navigation application showing the route to the next destination is displaying promoted pins placed by businesses that paid for the placement.
+        - link "Google Maps displays these markers" [ref=e174] [cursor=pointer]:
+          - /url: https://www.digitalauthority.me/resources/resources-google-map-ads/
+        - text: along the route whether or not the driver searched for the business. Waze, also owned by Google, has displayed pop-up banners at the top of the navigation screen at red lights near sponsored locations,
+        - link "with a prominent “Drive There” button" [ref=e175] [cursor=pointer]:
+          - /url: https://www.autoevolution.com/news/the-most-awful-google-maps-update-ever-everything-you-need-to-know-about-pop-up-ads-236705.html
+        - text: .
+        - link "Google has filed a patent" [ref=e176] [cursor=pointer]:
+          - /url: https://www.motorauthority.com/news/1143831_google-maps-might-suggest-destinations-based-on-ads-you-hear
+        - text: for a system that would integrate the audio stream with the navigation layer, so that an advertisement heard through the car’s speakers could trigger a suggested navigation detour. The patent has not shipped. The intent is documented.
+      - paragraph [ref=e177]:
+        - img "A Google Maps view showing nearby grocery stores. Most listings are marked with a circular pin; a smaller number are marked with a square pin, indicating they are sponsored placements." [ref=e178]
+      - paragraph [ref=e179]: "Sponsored listings on Google Maps. The only visual difference from organic results is the marker shape: squares are paid placements, circles are not."
+      - paragraph [ref=e180]: The driver who stops at a 7-Eleven, hears a Gulp Radio ad for a product near the register, sees a GSTV ad at the pump, and then opens Google Maps navigation is moving through a single continuous advertising environment. Each transition (car to pump, pump to store, store back to car) passes through a different medium with a different operator, but the commercial logic is identical. Your attention is there, your purchase intent is measurable, your location is known, and the inventory will be sold.
+      - separator [ref=e181]
+      - heading "What Is Already in the Car" [level=3] [ref=e182]
+      - paragraph [ref=e183]: The advertising infrastructure arriving in vehicles parallels what has been built for web, mobile, and connected television, and in some cases is importing that infrastructure directly.
+      - paragraph [ref=e184]:
+        - text: On the open web, publishers sell inventory through automated real-time auctions where advertisers bid on individual pageview impressions. On mobile, the same auction infrastructure operates through in-app advertising with device-level identifiers tracking users across apps. On connected television (Roku, Amazon Fire, Samsung TVs) the same programmatic systems have extended to the living room screen, with viewing behavior used to target ads against household profiles.
+        - link "We have covered the Roku home screen in detail" [ref=e185] [cursor=pointer]:
+          - /url: http://nobodyaskedforthis.lol/posts/roku-home-screen/
+        - text: ": the screen that appears before you have chosen to do anything, already running full-motion video advertising, on a device you purchased, in a room you live in."
+      - paragraph [ref=e186]:
+        - text: In-vehicle advertising is being built on the same foundations.
+        - link "Stellantis’s Grand Cherokee pop-up" [ref=e187] [cursor=pointer]:
+          - /url: https://jalopnik.com/2034692/pop-up-ads-appearing-stellantis-infotainment/
+        - text: "was a direct, guaranteed placement: the manufacturer delivered a specific message to a specific set of vehicle identification numbers at a scheduled time, the oldest form of media buying, equivalent to a network upfront buy, except the inventory was the dashboard of a vehicle the recipient owned."
+      - paragraph [ref=e188]:
+        - text: The
+        - link "4screen platform" [ref=e189] [cursor=pointer]:
+          - /url: https://sherwood.news/business/the-rise-of-in-car-ads-automakers-now-view-infotainment-screens-as-huge/
+        - text: ", operating across sixteen vehicle brands including Toyota, Volkswagen, Mercedes-Benz, and Stellantis, runs contextual advertising. A gas station promotion triggered by a low tank reading, or a restaurant suggestion calibrated to time of day and route. Conversion is measured by tracking whether the vehicle parks at the advertised location within three days. The location data required for that measurement is the same telemetry data that exists in the vehicle’s records for other purposes."
+      - paragraph [ref=e190]:
+        - text: Ford has filed patents for a system using exterior cameras to
+        - link "read roadside billboards and display matched advertising on the infotainment screen" [ref=e191] [cursor=pointer]:
+          - /url: https://sherwood.news/business/the-rise-of-in-car-ads-automakers-now-view-infotainment-screens-as-huge/
+        - text: ", and a separate system that listens to in-car conversations and serves targeted advertising based on detected keywords. Both remain patents. The microphones and cameras they would require are already in production vehicles, deployed for hands-free calling, driver monitoring, and parking assistance."
+      - paragraph [ref=e192]:
+        - text: The CarPlay removal is the same dynamic viewed from the manufacturer’s side.
+        - link "GM is phasing out Apple CarPlay and Android Auto" [ref=e193] [cursor=pointer]:
+          - /url: https://news.dealershipguy.com/p/gm-to-phase-out-apple-carplay-and-android-auto-across-all-vehicles-by-2028-2025-10-24
+        - text: from its entire vehicle lineup by 2028. GM earned
+        - link "$5.4 billion" [ref=e194] [cursor=pointer]:
+          - /url: https://www.carluex.store/blogs/news/why-automakers-dropping-carplay-2026
+        - text: from connected services in 2025. Every minute a driver spends in CarPlay is a minute the manufacturer cannot collect location data, serve its own content, or accumulate the behavioral record that feeds that revenue.
+        - link "The connected car data market is projected at $26.4 billion by 2030" [ref=e195] [cursor=pointer]:
+          - /url: https://www.webpronews.com/the-14-billion-dashboard-war-why-automakers-are-racing-to-kill-apple-carplay-and-android-auto/
+        - text: . The in-vehicle advertising market specifically is projected at $6.7 billion by 2034.
+      - paragraph [ref=e196]: There is an uncomfortable irony in the CarPlay story. Apple CarPlay and Android Auto, the systems manufacturers are fighting to remove so they can control the advertising inventory, both already contain advertising. Google Maps promoted pins appear inside CarPlay. Google’s automotive data ambitions extend through Android Auto and, more completely, through Android Automotive OS. The fight over who controls the screen is, in part, a fight over whose ads run on it. The driver is not a participant in this negotiation.
+      - separator [ref=e197]
+      - heading "What the Car Knows" [level=3] [ref=e198]
+      - paragraph [ref=e199]:
+        - text: In 2023,
+        - link "the Mozilla Foundation reviewed the privacy policies of twenty-five major automakers" [ref=e200] [cursor=pointer]:
+          - /url: https://www.mozillafoundation.org/en/privacynotincluded/articles/its-official-cars-are-the-worst-product-category-we-have-ever-reviewed-for-privacy/
+        - text: ", producing what they described as the worst results the project had ever seen across any product category. All twenty-five failed."
+      - paragraph [ref=e201]:
+        - link "Nineteen of the twenty-five (76 percent) stated they can sell personal data." [ref=e202] [cursor=pointer]:
+          - /url: https://www.mozillafoundation.org/en/privacynotincluded/articles/its-official-cars-are-the-worst-product-category-we-have-ever-reviewed-for-privacy/
+        - text: . Fifty-six percent stated they can share data with government or law enforcement in response to an informal request, not a court-issued warrant Nissan’s privacy policy reserves the right to infer drivers’
+        - link "“preferences, characteristics, psychological trends, predispositions, behavior, attitudes, intelligence, abilities, and aptitudes”" [ref=e203] [cursor=pointer]:
+          - /url: https://www.theregister.com/2023/09/06/mozilla_vehicle_data_privacy/
+        - text: and sell those inferences to third parties. BMW, Tesla, and Toyota can collect data
+        - link "including sexual activity, immigration status, race, facial expressions, weight, and genetic information" [ref=e204] [cursor=pointer]:
+          - /url: https://insite.ipwea.org/connected-cars-fail-on-data-privacy-says-mozilla/
+        - text: .
+      - paragraph [ref=e205]:
+        - text: General Motors secretly shared detailed telematics
+        - link "with the data broker LexisNexis Risk Solutions" [ref=e206] [cursor=pointer]:
+          - /url: https://www.eff.org/deeplinks/2024/06/car-makers-shouldnt-be-selling-our-driving-history-data-brokers-and-insurance
+        - text: ", which used braking patterns, acceleration, and time-of-day driving data to adjust insurance rates for drivers who had not been told their data was being sold. The program ended after a 2023 New York Times investigation. The data already shared was not recalled."
+      - paragraph [ref=e207]:
+        - link "Tesla allows users to opt out of vehicle data collection" [ref=e208] [cursor=pointer]:
+          - /url: https://www.theregister.com/2023/09/06/mozilla_vehicle_data_privacy/
+        - text: ", but warns that doing so means Tesla cannot notify owners of vehicle issues in real timet. Toyota’s Connected Services cannot be fully declined without disabling Bluetooth connectivity and aspects of the vehicle warranty."
+        - link "Only two of the twenty-five automakers Mozilla reviewed" [ref=e209] [cursor=pointer]:
+          - /url: https://www.mozillafoundation.org/en/privacynotincluded/articles/its-official-cars-are-the-worst-product-category-we-have-ever-reviewed-for-privacy/
+        - text: (Renault and Dacia, both subject to European GDPR) stated that drivers have the right to have their personal data deleted.
+      - separator [ref=e210]
+      - heading "The Controls You Have Online, and the Ones You Don’t Have in Your Car" [level=3] [ref=e211]
+      - paragraph [ref=e212]: When you visit a website under GDPR jurisdiction, a consent management platform loads before the page content. You are shown a list of data processing purposes (analytics, personalization, advertising) and given a mechanism to decline some or all of them. The Reject All button is often small, the language often deliberately confusing, the consent architecture systematically abused since its introduction. But the mechanism exists. A regulator can investigate its implementation.
+      - paragraph [ref=e213]:
+        - text: On iOS, since
+        - link "Apple’s App Tracking Transparency framework arrived with iOS 14.5 in April 2021" [ref=e214] [cursor=pointer]:
+          - /url: https://tinuiti.com/blog/privacy-prep/apple-ios-idfa-guide/
+        - text: ", every app that wants to track users across other apps must present a standardized prompt asking permission before doing so. Previously, the advertising identifier (the IDFA) was available to any app by default. Apple inverted that. Opt-in is now required, the prompt is not optional, and the language is standardized. Users who decline cannot have their IDFA accessed."
+        - link "Estimates suggested the opt-in rate fell to roughly 25 to 30 percent after the change" [ref=e215] [cursor=pointer]:
+          - /url: https://www.avenga.com/magazine/apple-idfa/
+        - text: . The change cost Meta an estimated $10 billion in annual advertising revenue in 2022. It was a meaningful transfer of control, achieved through a platform-level technical requirement.
+      - paragraph [ref=e216]:
+        - text: Android devices carry an
+        - link "advertising identifier that users can reset or delete in settings" [ref=e217] [cursor=pointer]:
+          - /url: https://www.avenga.com/magazine/apple-idfa/
+        - text: ", breaking the continuity of ad targeting. Browser-level tools (ad blockers, Firefox’s Enhanced Tracking Protection, Safari’s Intelligent Tracking Prevention) degrade behavioral data available to advertisers. Connected television platforms carry advertising identifiers resettable in device settings."
+        - link "As of 2025, nineteen U.S. states" [ref=e218] [cursor=pointer]:
+          - /url: https://blog.lucidprivacy.io/cookie-consent-beyond-2025/
+        - text: have enacted consumer privacy laws with opt-out rights for targeted advertising.
+      - paragraph [ref=e219]: None of this infrastructure has a direct equivalent in the automobile.
+      - paragraph [ref=e220]:
+        - link "A 2025 study by Privacy4Cars" [ref=e221] [cursor=pointer]:
+          - /url: https://www.automotive-fleet.com/10246048/privacy4cars-benchmarks-49-brands-on-handling-consumer-data-privacy-requests
+        - text: evaluated the consumer data rights processes of 49 automotive brands against 12 criteria based on industry best practices. Only five brands scored 3.0 or above on a 5.0-point scale, meaning fewer than half of the identified best practices were adopted. Honda and Acura topped the list at 4.6 after settling with the California Privacy Protection Agency and implementing changes within weeks. Most brands scored significantly lower.
+      - paragraph [ref=e222]: There is no standardized consent mechanism at vehicle purchase for the advertising uses of your driving data. There is no first-use prompt comparable to Apple’s ATT framework, no advertising identifier you can reset from the infotainment settings screen, no Global Privacy Control signal the car reads and honors. The consent was in the purchase agreement at the dealership, dense legal language presented during a transaction where attention was on financing terms and floor mats, broad enough to cover data uses that weren’t clearly articulated and may not have existed yet at the time of signing.
+      - paragraph [ref=e223]:
+        - text: The Stellantis opt-out is a phone number, business hours only. The Tesla opt-out disables safety monitoring. The Toyota opt-out degrades vehicle functionality and affects warranty terms. None of these are equivalent to clicking Reject All on a cookie banner, or to the buried settings menu on an Android phone. Privacy4Cars founder and CEO Andrea Amico has described the situation as equivalent to not wanting to be tracked on a desktop computer,
+        - link "except the desktop computer came with no settings, the operating system is controlled by the manufacturer, and the browser is locked" [ref=e224] [cursor=pointer]:
+          - /url: https://www.automotive-fleet.com/10246048/privacy4cars-benchmarks-49-brands-on-handling-consumer-data-privacy-requests
+        - text: .
+      - paragraph [ref=e225]: The web developed its consent infrastructure (imperfect, gamed, frequently cynical) because regulators required it and platforms competed on privacy. Apple’s ATT changes happened because Apple decided user privacy was a competitive advantage worth disrupting the advertising industry to protect. Neither of those forces has yet operated on the automotive industry with comparable effect.
+      - separator [ref=e226]
+      - heading "Where This Goes" [level=3] [ref=e227]
+      - paragraph [ref=e228]: The driver who starts their car in the morning is already in the advertising environment before leaving the driveway, if the infotainment screen has a manufacturer push waiting on startup. They pump gas through a GSTV screen running video they cannot mute. They walk into the convenience store and hear a Gulp Radio ad for a product near the register. They get back in the car, open Google Maps, which displays promoted pins along the route. The podcast they play has dynamically inserted programmatic spots served against their listener profile. The vehicle’s telematics system logs where all of this happened, when, and for how long.
+      - paragraph [ref=e229]: These are not separate systems that happen to intersect. They are the outer edges of a single advertising infrastructure whose connective tissue is location data (the car’s GPS, the phone’s GPS, the mobile device IDs collected near the pump screen, the vehicle’s cellular connection) and whose monetization logic is identical across each medium. Attention is there, purchase intent is measurable, and the inventory will be sold.
+      - paragraph [ref=e230]:
+        - text: The technology companies have their own positions in this landscape. Google is the operating system in a growing fraction of vehicles, the navigation app in most of the rest, and the data recipient in both. Amazon is the voice layer in the home and increasingly in the car, connected to the largest commercial fulfillment infrastructure in American retail. Spotify’s Car Thing was the reminder that not every attempt to colonize this space succeeds, but its failure was a failure of product-market fit and not a failure of commercial logic. The car remained, as Spotify’s spokesperson put it, “an important place for audio.”
+        - link "What happened next is that the audio became the vehicle’s operating system" [ref=e231] [cursor=pointer]:
+          - /url: http://nobodyaskedforthis.lol/posts/microwave/
+        - text: ", with a major technology company behind the voice that answers."
+      - paragraph [ref=e232]:
+        - text: The in-car advertising market was valued at $1.8 billion in 2025 and is
+        - link "projected to reach $6.7 billion by 2034" [ref=e233] [cursor=pointer]:
+          - /url: https://dataintelo.com/report/in-car-advertising-platform-market
+        - text: . GM earned
+        - link "$5.4 billion" [ref=e234] [cursor=pointer]:
+          - /url: https://www.carluex.store/blogs/news/why-automakers-dropping-carplay-2026
+        - text: from connected services last year alone. Retail media (the category that includes Gulp Radio, GSTV, and the in-store audio networks) is projected to reach
+        - link "$81.6 billion in advertising spending in 2025," [ref=e235] [cursor=pointer]:
+          - /url: https://www.gstv.com/press
+        - text: comprising nearly a quarter of all U.S. digital advertising dollars. These are the targets the business decisions documented in this piece are being made to hit.
+      - paragraph [ref=e236]:
+        - text: The consumer controls that exist online (however imperfect, however frequently gamed) emerged because regulators demanded them and platforms competed on them. Neither of those forces has yet operated on the automobile with comparable effect.
+        - link "The California Privacy Protection Agency has moved against Honda" [ref=e237] [cursor=pointer]:
+          - /url: https://www.automotive-fleet.com/10246048/privacy4cars-benchmarks-49-brands-on-handling-consumer-data-privacy-requests
+        - text: . European regulators under GDPR have begun scrutinizing connected vehicle data practices. The UNECE R155 regulation requires cybersecurity management systems for new vehicle type approvals. But the pace of regulatory development has consistently lagged the pace of deployment.
+      - paragraph [ref=e238]:
+        - text: "In the meantime:"
+        - link "BMW would like $18 a month for the seats you already bought" [ref=e239] [cursor=pointer]:
+          - /url: http://nobodyaskedforthis.lol/posts/bmw-heated-seats/
+        - text: .
+        - link "The mug has a firmware update" [ref=e240] [cursor=pointer]:
+          - /url: http://nobodyaskedforthis.lol/posts/the-mug-firmware/
+        - text: .
+        - link "The microwave has an Alexa" [ref=e241] [cursor=pointer]:
+          - /url: http://nobodyaskedforthis.lol/posts/microwave/
+        - text: . And the car would like a word with its advertisers, through the speakers you paid for, on the cellular connection you pay for monthly, in the cabin where the windows seal out the weather and seal in the audience.
+      - paragraph [ref=e242]: The consumer remedies, where they exist, are unserious. Add a Pi-Hole to the trunk. Buy a 2007 Camry. Neither scales, neither is factory-supported, and neither stops the next car you sit in from trying again.
+      - paragraph [ref=e243]: Zerin Dube tapped the X button. The advertisement disappeared, the Jeep started normally, and nothing was broken.
+      - paragraph [ref=e244]: At the next ignition cycle, the offer came back.
+      - separator [ref=e245]
+      - paragraph [ref=e246]:
+        - emphasis [ref=e247]:
+          - text: Reporting draws on research from the
+          - link "Mozilla Foundation" [ref=e248] [cursor=pointer]:
+            - /url: https://www.mozillafoundation.org/en/privacynotincluded/articles/its-official-cars-are-the-worst-product-category-we-have-ever-reviewed-for-privacy/
+          - text: ","
+          - link "Privacy4Cars" [ref=e249] [cursor=pointer]:
+            - /url: https://www.automotive-fleet.com/10246048/privacy4cars-benchmarks-49-brands-on-handling-consumer-data-privacy-requests
+          - text: ","
+          - link "Help Net Security" [ref=e250] [cursor=pointer]:
+            - /url: https://www.helpnetsecurity.com/2025/04/04/cybersecurity-risks-cars/
+          - text: ", the"
+          - link "Electronic Frontier Foundation" [ref=e251] [cursor=pointer]:
+            - /url: https://www.eff.org/deeplinks/2024/06/car-makers-shouldnt-be-selling-our-driving-history-data-brokers-and-insurance
+          - text: ","
+          - link "AdExchanger" [ref=e252] [cursor=pointer]:
+            - /url: https://www.adexchanger.com/ctv-roundup/gstv-wants-to-turn-gas-stations-into-a-video-ad-marketplace/
+          - text: ","
+          - link "Digiday" [ref=e253] [cursor=pointer]:
+            - /url: https://digiday.com/future-of-tv/extension-broadcast-buy-advertisers-buying-ads-gas-station-screens/
+          - text: ","
+          - link "Sherwood News" [ref=e254] [cursor=pointer]:
+            - /url: https://sherwood.news/business/the-rise-of-in-car-ads-automakers-now-view-infotainment-screens-as-huge/
+          - text: ","
+          - link "Jalopnik" [ref=e255] [cursor=pointer]:
+            - /url: https://jalopnik.com/2034692/pop-up-ads-appearing-stellantis-infotainment/
+          - text: ","
+          - link "C-Store Dive" [ref=e256] [cursor=pointer]:
+            - /url: https://www.cstoredive.com/news/7-eleven-qsic-radio-station-gulp-media/750712/
+          - text: ","
+          - link "Wired" [ref=e257] [cursor=pointer]:
+            - /url: https://www.wired.com/2015/07/hackers-remotely-kill-jeep-highway/
+          - text: ","
+          - link "Cars.com" [ref=e258] [cursor=pointer]:
+            - /url: https://www.cars.com/articles/gm-to-remove-apple-carplay-android-auto-from-future-vehicles-517813/
+          - text: ","
+          - link "Android Headlines" [ref=e259] [cursor=pointer]:
+            - /url: https://www.androidheadlines.com/android-automotive
+          - text: ","
+          - link "Volvo Cars" [ref=e260] [cursor=pointer]:
+            - /url: https://www.volvocars.com/intl/media/press-releases/6B411DC79F4F8965/
+          - text: ", and"
+          - link "Upstream Security" [ref=e261] [cursor=pointer]:
+            - /url: https://www.einfochips.com/blog/cybersecurity-for-the-next-gen-mobility/
+          - text: .
+        - text: Filed Tuesdays
+      - heading "Get the next one in your inbox" [level=3] [ref=e262]
+      - paragraph [ref=e263]: Filed Tuesdays. Free. Same voice as the post you just read. Email address
+    - generic [ref=e264]:
+      - link "Back to News" [ref=e266] [cursor=pointer]:
+        - /url: ../../news.html#theme=light
+        - generic [ref=e267]: Back to News
+      - link "View Comments" [ref=e269] [cursor=pointer]:
+        - /url: comments.html#theme=light
+        - generic [ref=e270]: View Comments
+  - contentinfo [ref=e271]:
+    - generic [ref=e272]:
+      - link [ref=e274] [cursor=pointer]:
+        - /url: https://capcat.org
+        - img [ref=e275]
+      - link "Product by Stayux.com" [ref=e280] [cursor=pointer]:
+        - /url: https://stayux.com
