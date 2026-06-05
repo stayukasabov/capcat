@@ -139,6 +139,9 @@ HTML-Docs/
 # Stale/accidental directories
 345/
 
+# Legacy root sources/ (superseded by capcat/sources/builtin/)
+sources/
+
 # Legacy code (superseded by capcat/)
 legacy/
 capcat_legacy.py
