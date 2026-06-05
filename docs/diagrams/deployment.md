@@ -113,7 +113,7 @@ pip install --user capcat
 python3 -m venv capcat-env
 source capcat-env/bin/activate
 pip install -r requirements.txt
-./capcat bundle tech --count 10
+capcat bundle tech --count 10
 ```
 
 ### 3. Systemd Service

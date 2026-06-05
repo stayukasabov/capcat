@@ -14,16 +14,16 @@ graph TB
     end
 
     subgraph "Application Layer"
-        Main[Main Application<br/>capcat.py]
-        Config[Configuration<br/>core.config]
-        ErrorHandler[Error Handling<br/>core.error_handling]
-        Progress[Progress Tracking<br/>core.progress]
+        Main[Main Application<br/>capcat]
+        Config[Configuration<br/>capcat.core.config]
+        ErrorHandler[Error Handling<br/>capcat.core.error_handling]
+        Progress[Progress Tracking<br/>capcat.core.progress]
     end
 
     subgraph "Source Management"
-        SourceFactory[Source Factory<br/>core.source_system.source_factory]
-        SourceRegistry[Source Registry<br/>core.source_system.source_registry]
-        BaseSource[Base Source<br/>core.source_system.base_source]
+        SourceFactory[Source Factory<br/>capcat.core.source_system.source_factory]
+        SourceRegistry[Source Registry<br/>capcat.core.source_system.source_registry]
+        BaseSource[Base Source<br/>capcat.core.source_system.base_source]
 
         subgraph "Source Types"
             ConfigDriven[Config-Driven Sources<br/>YAML-based]
@@ -32,17 +32,17 @@ graph TB
     end
 
     subgraph "Processing Pipeline"
-        ArticleFetcher[Article Fetcher<br/>core.article_fetcher]
-        MediaProcessor[Media Processor<br/>core.unified_media_processor]
-        ContentFormatter[Content Formatter<br/>core.formatter]
-        HTMLGenerator[HTML Generator<br/>htmlgen/]
+        ArticleFetcher[Article Fetcher<br/>capcat.core.article_fetcher]
+        MediaProcessor[Media Processor<br/>capcat.core.unified_media_processor]
+        ContentFormatter[Content Formatter<br/>capcat.core.formatter]
+        HTMLGenerator[HTML Generator<br/>capcat.htmlgen]
     end
 
     subgraph "Core Services"
-        SessionPool[Session Pool<br/>core.session_pool]
-        ImageProcessor[Image Processor<br/>core.image_processor]
-        Downloader[Media Downloader<br/>core.downloader]
-        Utils[Utilities<br/>core.utils]
+        SessionPool[Session Pool<br/>capcat.core.session_pool]
+        ImageProcessor[Image Processor<br/>capcat.core.image_processor]
+        Downloader[Media Downloader<br/>capcat.core.downloader]
+        Utils[Utilities<br/>capcat.core.utils]
     end
 
     subgraph "Output Layer"

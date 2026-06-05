@@ -129,7 +129,7 @@ graph TB
 
 ## Source Registration Process
 
-1. **Directory Scan**: Scan `sources/active/` directory
+1. **Directory Scan**: Scan `capcat/sources/builtin/` directory
 2. **Type Detection**: Identify config-driven vs custom sources
 3. **Validation**: Validate configuration/implementation
 4. **Registration**: Add to source registry with metadata
