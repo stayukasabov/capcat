@@ -33,8 +33,8 @@ GLOBAL_SETTINGS_TEMPLATE = """\
 # ─── PDF Downloads ──────────────────────────────────────
 pdf:
   # Skip PDF files larger than this size in bytes.
-  # Default: 20971520 (20MB). Examples: 10485760 = 10MB, 52428800 = 50MB
-  max_pdf_size_bytes: 20971520
+  # Default: 31457280 (30MB). Examples: 10485760 = 10MB, 52428800 = 50MB
+  max_pdf_size_bytes: 31457280
 
   # Maximum number of PDFs queued per article.
   # Default: 10

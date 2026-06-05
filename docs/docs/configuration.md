@@ -17,25 +17,62 @@ Precedence from highest to lowest:
 
 ## Global Settings
 
-`Config/Global-settings.yaml`:
+`Config/Global-settings.yaml` (regenerate with `capcat settings --force`):
 
 ```yaml
-fetch:
-  default_count: 30
-  rate_limit: 1.0          # seconds between requests
+# ─── PDF Downloads ──────────────────────────────────────
+pdf:
+  max_pdf_size_bytes: 31457280   # 30MB
+  max_pdf_per_article: 10
 
+# ─── Media Downloads ─────────────────────────────────────
+media:
+  download_pdfs: false
+  download_images: true
+  download_videos: false
+  download_audio: false
+  download_documents: false
+
+# ─── Network ────────────────────────────────────────────
 network:
+  connect_timeout: 10
+  read_timeout: 30
+  media_download_timeout: 60
+  head_request_timeout: 10
+  max_retries: 3
+  retry_delay: 1.0
+  crawl_delay: 1.0            # seconds between requests to same domain
+  robots_cache_ttl_minutes: 15
+  user_agent: "Capcat/2.0 (Personal news archiver)"
   pool_connections: 20
   pool_maxsize: 20
-  timeout: 30
 
-pdf:
-  enabled: false
-  max_pdf_size_bytes: 10485760   # 10MB
+# ─── Processing ─────────────────────────────────────────
+processing:
+  article_count: 30            # global fallback per source
+  max_workers: 8
+  conversion_timeout: 30
+  max_images: 20
+  max_images_media_mode: 1000
+  min_image_dimensions: 150    # pixels, skip smaller images
+  max_image_size_bytes: 5242880  # 5MB
+  max_filename_length: 100
+  create_comments_file: true
+  remove_style_tags: true
+  remove_nav_tags: true
+  markdown_line_breaks: true
 
-output:
-  html: false
-  media: false
+# ─── UI ─────────────────────────────────────────────────
+ui:
+  progress_spinner_style: dots  # dots, wave, loading, pulse, bounce, modern
+
+# ─── Logging ────────────────────────────────────────────
+logging:
+  console_level: INFO          # DEBUG, INFO, WARNING, ERROR
+  file_level: DEBUG
+  max_log_file_size: 10485760  # 10MB
+  log_file_backup_count: 5
+  auto_create_log_dir: true
 ```
 
 ## Environment Variables
@@ -44,7 +81,8 @@ output:
 |----------|-----------|
 | `CAPCAT_POOL_CONNECTIONS` | `network.pool_connections` |
 | `CAPCAT_POOL_MAXSIZE` | `network.pool_maxsize` |
-| `CAPCAT_DEFAULT_COUNT` | `fetch.default_count` |
+| `CAPCAT_PDF_MAX_SIZE` | `pdf.max_pdf_size_bytes` |
+| `CAPCAT_PDF_MAX_PER_ARTICLE` | `pdf.max_pdf_per_article` |
 
 ## Per-Source Config (YAML sources)
 
@@ -80,6 +118,8 @@ media:
 | CLI flag | Effect |
 |----------|--------|
 | `--media` | Sets both `download_files=True` and `download_pdfs=True` |
+| `--pdfs` | Download PDF files only (independent of `--media`) |
+| `--no-pdfs` | Explicitly disable PDF downloads for this run |
 | `--html` | Generate HTML output only (no media download) |
 
 **TUI PDF prompt:**

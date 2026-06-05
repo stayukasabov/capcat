@@ -38,23 +38,28 @@ pip install -r requirements-dev.txt
 
 ```
 Application/
-├── capcat.py              # Main application entry point
-├── capcat                 # Bash wrapper script
-├── run_capcat.py          # Python wrapper
-├── cli.py                 # Command-line interface
-├── core/                  # Core functionality
-│   ├── source_system/     # Source management framework
-│   ├── config.py          # Configuration management
-│   ├── article_fetcher.py # Article processing
-│   └── unified_media_processor.py  # Media handling
-├── sources/               # News source implementations
-│   ├── active/           # Active sources
-│   │   ├── config_driven/ # YAML-configured sources
-│   │   └── custom/        # Python-implemented sources
-│   └── base/             # Base classes and schemas
-├── htmlgen/              # HTML generation system
-├── themes/               # CSS themes for HTML output
-└── docs/                 # Documentation
+├── capcat/                    # Main package
+│   ├── __init__.py            # Version and entry point
+│   ├── cli.py                 # CLI entry point, Global Settings template
+│   ├── core/                  # Core functionality
+│   │   ├── config.py          # Configuration management
+│   │   ├── article_fetcher.py # Article processing
+│   │   ├── unified_article_processor.py
+│   │   ├── unified_media_processor.py
+│   │   ├── source_system/     # Source management framework
+│   │   └── config/            # Config subsystem
+│   ├── sources/               # News source implementations
+│   │   └── builtin/
+│   │       ├── config_driven/ # YAML-configured sources
+│   │       ├── custom/        # Python-implemented sources (hn, lb, etc.)
+│   │       └── bundles.yml    # Bundle definitions
+│   └── htmlgen/               # HTML generation system
+├── tests/                     # Test suite
+├── scripts/                   # Build and doc generation scripts
+├── docs/                      # Documentation (GitHub Pages)
+├── sources/                   # Symlink to capcat/sources/builtin
+├── pyproject.toml
+└── README.md
 ```
 
 ## Development Workflow
@@ -66,7 +71,7 @@ Application/
 1. Create YAML configuration:
 
 ```yaml
-# sources/active/config_driven/configs/newsource.yaml
+# capcat/sources/builtin/config_driven/configs/newsource.yaml
 display_name: "New Source"
 base_url: "https://newsource.com/"
 category: tech
@@ -77,7 +82,7 @@ content_selectors: [".article-content"]
 2. Verify the source:
 
 ```bash
-./capcat fetch newsource --count 5
+capcat fetch newsource --count 5
 ```
 
 #### Option 2: Custom Source (Advanced)
@@ -85,14 +90,14 @@ content_selectors: [".article-content"]
 1. Create source directory:
 
 ```bash
-mkdir -p sources/active/custom/newsource
+mkdir -p capcat/sources/builtin/custom/newsource
 ```
 
 2. Implement source class:
 
 ```python
-# sources/active/custom/newsource/source.py
-from core.source_system.base_source import BaseSource
+# capcat/sources/builtin/custom/newsource/source.py
+from capcat.core.source_system.base_source import BaseSource
 
 class NewSource(BaseSource):
     def __init__(self):

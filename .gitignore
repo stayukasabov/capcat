@@ -164,6 +164,24 @@ docs/rss-feed-candidates.md
 docs/api/debug/
 docs/api/debug_pdf_stalling/
 
+# Stale API docs for deleted one-off scripts
+docs/api/__version__/
+docs/api/add_jekyll_frontmatter/
+docs/api/analyze_hn_*/
+docs/api/build_site/
+docs/api/capcat_legacy/
+docs/api/cleanup_*/
+docs/api/convert_*/
+docs/api/delete_*/
+docs/api/fix_*/
+docs/api/legacy/
+docs/api/quick_cli_fix/
+docs/api/remove_br_tags/
+docs/api/remove_hr_tags/
+docs/api/replace_*/
+docs/api/run_capcat/
+docs/api/update_*/
+
 # Project Specific - Development Artifacts
 # Internal documentation and session notes
 Reports/

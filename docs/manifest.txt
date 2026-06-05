@@ -1,399 +1,208 @@
-Capcat Documentation Manifest
-Generated: 2026-06-02 12:12:54 UTC
-Success rate: 1/1 tasks
-
-Generated Documentation:
-  - ACCESSIBILITY-REMEDIATION-PLAN.md
-  - README.md
-  - api/Config/README.md
-  - api/Config/custom-hn-source.md
-  - api/Config/custom-lb-source.md
-  - api/Config/source.md
-  - api/README.md
-  - api/Video/README.md
-  - api/Video/analyze_audio.md
-  - api/__version__/README.md
-  - api/__version__/__version__.md
-  - api/add_jekyll_frontmatter/README.md
-  - api/add_jekyll_frontmatter/add_jekyll_frontmatter.md
-  - api/analyze_hn_pdf_patterns/README.md
-  - api/analyze_hn_pdf_patterns/analyze_hn_pdf_patterns.md
-  - api/analyze_hn_pdfs_simple/README.md
-  - api/analyze_hn_pdfs_simple/analyze_hn_pdfs_simple.md
-  - api/build/README.md
-  - api/build/__init__.md
-  - api/build/__main__.md
-  - api/build/add_source.md
-  - api/build/add_source_command.md
-  - api/build/add_source_service.md
-  - api/build/article_fetcher.md
-  - api/build/async_pdf_manager.md
-  - api/build/base_source.md
-  - api/build/bundle_manager.md
-  - api/build/bundle_models.md
-  - api/build/bundle_service.md
-  - api/build/bundle_ui.md
-  - api/build/bundle_validator.md
-  - api/build/circuit_breaker.md
-  - api/build/cli.md
-  - api/build/cli_recovery.md
-  - api/build/cli_validation.md
-  - api/build/command_logging.md
-  - api/build/config.md
-  - api/build/config_driven_source.md
-  - api/build/constants.md
-  - api/build/conversion_executor.md
-  - api/build/design_system_compiler.md
-  - api/build/discovery_strategies.md
-  - api/build/downloader.md
-  - api/build/enhanced_argparse.md
-  - api/build/enhanced_remove_command.md
-  - api/build/error_handling.md
-  - api/build/ethical_scraping.md
-  - api/build/exceptions.md
-  - api/build/factory.md
-  - api/build/feed_discovery.md
-  - api/build/feed_parser.md
-  - api/build/fetch.md
-  - api/build/formatter.md
-  - api/build/generate_config.md
-  - api/build/generate_source_config.md
-  - api/build/generator.md
-  - api/build/html_post_processor.md
-  - api/build/image_processor.md
-  - api/build/init.md
-  - api/build/interactive.md
-  - api/build/logging_config.md
-  - api/build/media_config.md
-  - api/build/media_executor.md
-  - api/build/media_processor.md
-  - api/build/network_resilience.md
-  - api/build/pdf_landing_resolver.md
-  - api/build/performance_monitor.md
-  - api/build/progress.md
-  - api/build/questionary_ui.md
-  - api/build/rate_limiter.md
-  - api/build/removal_ui.md
-  - api/build/remove_source.md
-  - api/build/remove_source_command.md
-  - api/build/remove_source_service.md
-  - api/build/retry.md
-  - api/build/retry_skip.md
-  - api/build/rss_feed_introspector.md
-  - api/build/session_pool.md
-  - api/build/shutdown.md
-  - api/build/single.md
-  - api/build/source.md
-  - api/build/source_analytics.md
-  - api/build/source_backup_manager.md
-  - api/build/source_base.md
-  - api/build/source_config.md
-  - api/build/source_config_generator.md
-  - api/build/source_config_mirror.md
-  - api/build/source_configs.md
-  - api/build/source_factory.md
-  - api/build/source_registry.md
-  - api/build/specialized_source_manager.md
-  - api/build/storage_manager.md
-  - api/build/streamlined_comment_processor.md
-  - api/build/template_renderer.md
-  - api/build/theme_utils.md
-  - api/build/timeout_config.md
-  - api/build/timeout_wrapper.md
-  - api/build/tui.md
-  - api/build/tui_context.md
-  - api/build/unified_article_processor.md
-  - api/build/unified_media_processor.md
-  - api/build/unified_source_processor.md
-  - api/build/update_manager.md
-  - api/build/url_utils.md
-  - api/build/utils.md
-  - api/build/validation_engine.md
-  - api/build_site/README.md
-  - api/build_site/build_site.md
-  - api/capcat/README.md
-  - api/capcat/__init__.md
-  - api/capcat/__main__.md
-  - api/capcat/add_source.md
-  - api/capcat/add_source_command.md
-  - api/capcat/add_source_service.md
-  - api/capcat/article_fetcher.md
-  - api/capcat/async_pdf_manager.md
-  - api/capcat/base_generator.md
-  - api/capcat/base_source.md
-  - api/capcat/bundle_manager.md
-  - api/capcat/bundle_models.md
-  - api/capcat/bundle_service.md
-  - api/capcat/bundle_ui.md
-  - api/capcat/bundle_validator.md
-  - api/capcat/capcat.md
-  - api/capcat/circuit_breaker.md
-  - api/capcat/cli.md
-  - api/capcat/cli_recovery.md
-  - api/capcat/cli_validation.md
-  - api/capcat/command_logging.md
-  - api/capcat/config.md
-  - api/capcat/config_driven_source.md
-  - api/capcat/config_schema.md
-  - api/capcat/constants.md
-  - api/capcat/conversion_executor.md
-  - api/capcat/design_system_compiler.md
-  - api/capcat/discovery_strategies.md
-  - api/capcat/downloader.md
-  - api/capcat/enhanced_argparse.md
-  - api/capcat/enhanced_remove_command.md
-  - api/capcat/error_handling.md
-  - api/capcat/ethical_scraping.md
-  - api/capcat/exceptions.md
-  - api/capcat/factory.md
-  - api/capcat/feed_discovery.md
-  - api/capcat/feed_parser.md
-  - api/capcat/fetch.md
-  - api/capcat/formatter.md
-  - api/capcat/generate_config.md
-  - api/capcat/generate_source_config.md
-  - api/capcat/generator.md
-  - api/capcat/html_generator.md
-  - api/capcat/html_post_processor.md
-  - api/capcat/image_processor.md
-  - api/capcat/init.md
-  - api/capcat/interactive.md
-  - api/capcat/logging_config.md
-  - api/capcat/media_config.md
-  - api/capcat/media_executor.md
-  - api/capcat/media_processor.md
-  - api/capcat/network_resilience.md
-  - api/capcat/news_source_adapter.md
-  - api/capcat/pdf_landing_resolver.md
-  - api/capcat/performance_monitor.md
-  - api/capcat/progress.md
-  - api/capcat/questionary_ui.md
-  - api/capcat/rate_limiter.md
-  - api/capcat/removal_ui.md
-  - api/capcat/remove_source.md
-  - api/capcat/remove_source_command.md
-  - api/capcat/remove_source_service.md
-  - api/capcat/retry.md
-  - api/capcat/retry_skip.md
-  - api/capcat/rss_feed_introspector.md
-  - api/capcat/session_pool.md
-  - api/capcat/shutdown.md
-  - api/capcat/single.md
-  - api/capcat/source.md
-  - api/capcat/source_analytics.md
-  - api/capcat/source_backup_manager.md
-  - api/capcat/source_base.md
-  - api/capcat/source_config.md
-  - api/capcat/source_config_generator.md
-  - api/capcat/source_config_mirror.md
-  - api/capcat/source_configs.md
-  - api/capcat/source_factory.md
-  - api/capcat/source_registry.md
-  - api/capcat/specialized_source_manager.md
-  - api/capcat/storage_manager.md
-  - api/capcat/streamlined_comment_processor.md
-  - api/capcat/template_renderer.md
-  - api/capcat/theme_utils.md
-  - api/capcat/timeout_config.md
-  - api/capcat/timeout_wrapper.md
-  - api/capcat/tui.md
-  - api/capcat/tui_context.md
-  - api/capcat/unified_article_processor.md
-  - api/capcat/unified_media_processor.md
-  - api/capcat/unified_source_processor.md
-  - api/capcat/update_manager.md
-  - api/capcat/url_utils.md
-  - api/capcat/utils.md
-  - api/capcat/validation_engine.md
-  - api/capcat_legacy/README.md
-  - api/capcat_legacy/capcat_legacy.md
-  - api/cleanup_development_files/README.md
-  - api/cleanup_development_files/cleanup_development_files.md
-  - api/cleanup_repo/README.md
-  - api/cleanup_repo/cleanup_repo.md
-  - api/cli/README.md
-  - api/cli/cli.md
-  - api/convert_docs_to_html/README.md
-  - api/convert_docs_to_html/convert_docs_to_html.md
-  - api/convert_to_markdown/README.md
-  - api/convert_to_markdown/convert_to_markdown.md
-  - api/debug/README.md
-  - api/debug/content-extraction-debugger.md
-  - api/debug/fix-sources.md
-  - api/debug/log-analyzer.md
-  - api/debug/quick-troubleshoot.md
-  - api/debug/simple-troubleshoot.md
-  - api/debug/source-tester.md
-  - api/debug_pdf_stalling/README.md
-  - api/debug_pdf_stalling/debug_pdf_stalling.md
-  - api/delete_h4_colon/README.md
-  - api/delete_h4_colon/delete_h4_colon.md
-  - api/fix_ascii_formatting/README.md
-  - api/fix_ascii_formatting/fix_ascii_formatting.md
-  - api/fix_breadcrumbs/README.md
-  - api/fix_breadcrumbs/fix_breadcrumbs.md
-  - api/fix_colon_formatting/README.md
-  - api/fix_colon_formatting/fix_colon_formatting.md
-  - api/fix_ethical_scraping_links/README.md
-  - api/fix_ethical_scraping_links/fix_ethical_scraping_links.md
-  - api/fix_footer_typo/README.md
-  - api/fix_footer_typo/fix_footer_typo.md
-  - api/fix_mismatched_tags/README.md
-  - api/fix_mismatched_tags/fix_mismatched_tags.md
-  - api/fix_sources_in_docs/README.md
-  - api/fix_sources_in_docs/fix_sources_in_docs.md
-  - api/htmlgen/README.md
-  - api/htmlgen/__init__.md
-  - api/htmlgen/base_generator.md
-  - api/htmlgen/generator.md
-  - api/index.md
-  - api/legacy/README.md
-  - api/legacy/cli.md
-  - api/legacy/run_capcat.md
-  - api/quick_cli_fix/README.md
-  - api/quick_cli_fix/quick_cli_fix.md
-  - api/remove_br_tags/README.md
-  - api/remove_br_tags/remove_br_tags.md
-  - api/remove_hr_tags/README.md
-  - api/remove_hr_tags/remove_hr_tags.md
-  - api/replace_h4_with_h3/README.md
-  - api/replace_h4_with_h3/replace_h4_with_h3.md
-  - api/replace_strong_tags/README.md
-  - api/replace_strong_tags/replace_strong_tags.md
-  - api/replace_strong_with_h4/README.md
-  - api/replace_strong_with_h4/replace_strong_with_h4.md
-  - api/run_capcat/README.md
-  - api/run_capcat/run_capcat.md
-  - api/scripts/README.md
-  - api/scripts/add_doc_navigation.md
-  - api/scripts/apply_mermaid_design_system.md
-  - api/scripts/convert_md_tables_to_html.md
-  - api/scripts/doc_generator.md
-  - api/scripts/extract_and_summarize.md
-  - api/scripts/final_extractor.md
-  - api/scripts/generate_diagrams.md
-  - api/scripts/generate_source_config.md
-  - api/scripts/intelligent_html_extractor.md
-  - api/scripts/rename_ink_to_imprint.md
-  - api/scripts/replace_exhaustive.md
-  - api/scripts/replace_menus_with_menu.md
-  - api/scripts/run_docs.md
-  - api/scripts/setup_dependencies.md
-  - api/scripts/update_footer_text.md
-  - api/scripts/update_svg_color.md
-  - api/sources/README.md
-  - api/sources/__init__.md
-  - api/sources/config_schema.md
-  - api/sources/factory.md
-  - api/sources/source.md
-  - api/update_html_includes/README.md
-  - api/update_html_includes/update_html_includes.md
-  - api/update_html_jekyll/README.md
-  - api/update_html_jekyll/update_html_jekyll.md
-  - api/update_includes/README.md
-  - api/update_includes/update_includes.md
-  - architecture/components.md
-  - architecture/roadmap.md
-  - architecture/system.md
-  - bugs/acceptance-test-bugs-2026-04-03.md
-  - bugs/acceptance-test-bugs-2026-04-04.md
-  - bugs/acceptance-test-bugs-2026-04-12.md
-  - bugs/acceptance-test-bugs-2026-04-13.md
-  - css/UTILITY-CLASSES.md
-  - design/TUI/Add-an-empty-row.md
-  - design/TUI/Add-cancel-menu-option.md
-  - developer/git-workflow.md
-  - developer/guide.md
-  - developer/release.md
-  - developer/testing.md
-  - diagrams/class_diagrams.md
-  - diagrams/data_flow.md
-  - diagrams/deployment.md
-  - diagrams/processing_pipeline.md
-  - diagrams/source_system.md
-  - diagrams/system_architecture.md
-  - docs/architecture.md
-  - docs/configuration.md
-  - docs/deployment.md
-  - docs/ethical-scraping.md
-  - docs/feature-add-source.md
-  - docs/feature-remove-source.md
-  - docs/index.md
-  - docs/interactive-mode.md
-  - docs/quick-start.md
-  - docs/remove-source-advanced-features.md
-  - docs/rss-news-sources-reference.md
-  - docs/source-development.md
-  - docs/source-management-menu.md
-  - docs/testing.md
-  - docs/tutorials/index.md
-  - docs/tutorials/user/01-getting-started.md
-  - docs/tutorials/user/02-daily-workflow.md
-  - docs/tutorials/user/03-interactive-mode.md
-  - docs/tutorials/user/04-managing-sources.md
-  - docs/tutorials/user/05-bundles.md
-  - docs/tutorials/user/06-customizing-output.md
-  - index.md
-  - reference/modules.md
-  - reference/quick-reference.md
-  - rss-feed-candidates.md
-  - superpowers/2026-04-03-toolchain-proposal.md
-  - superpowers/plans/2026-03-15-breadcrumb-phase1-folder-naming.md
-  - superpowers/plans/2026-03-15-breadcrumb-phase2-html-rendering.md
-  - superpowers/plans/2026-03-17-titled-markdown-filenames.md
-  - superpowers/plans/2026-03-17-user-themes-config.md
-  - superpowers/plans/2026-03-18-clean-architecture-config-driven-sources.md
-  - superpowers/plans/2026-03-18-fix-duplicate-comments-md.md
-  - superpowers/plans/2026-03-18-fix-specialized-source-double-nesting.md
-  - superpowers/plans/2026-03-18-obsidian-wikilinks.md
-  - superpowers/plans/2026-03-19-graceful-shutdown.md
-  - superpowers/plans/2026-03-19-htmlgen-refactor.md
-  - superpowers/plans/2026-03-20-acceptance-test-runner.md
-  - superpowers/plans/2026-03-20-userspace-source-mirror.md
-  - superpowers/plans/2026-03-26-per-source-article-count.md
-  - superpowers/plans/2026-03-27-fix-lazy-load-image-srcset.md
-  - superpowers/plans/2026-03-27-ux-noise-and-reliability.md
-  - superpowers/plans/2026-03-30-comment-thread-depth.md
-  - superpowers/plans/2026-03-31-fix-media-processor-parse-srcset.md
-  - superpowers/plans/2026-03-31-obsidian-frontmatter.md
-  - superpowers/plans/2026-03-31-youtube-player-hero.md
-  - superpowers/plans/2026-04-01-arxiv-pdf-accept-header.md
-  - superpowers/plans/2026-04-01-pdf-bug-fixes.md
-  - superpowers/plans/2026-04-01-rate-limit-thread-safety.md
-  - superpowers/plans/2026-04-02-global-settings-yaml.md
-  - superpowers/plans/2026-04-03-acceptance-test-bug-fixes.md
-  - superpowers/plans/2026-04-03-fix-async-pdf-manager-never-starts.md
-  - superpowers/plans/2026-04-03-pdf-ux-improvements.md
-  - superpowers/plans/2026-04-12-fix-pdf-download-respects-flag.md
-  - superpowers/plans/2026-04-16-per-source-pdf-settings.md
-  - superpowers/plans/2026-04-17-source-update-ux.md
-  - superpowers/plans/2026-04-18-capcat-casestudy-part-two.md
-  - superpowers/plans/2026-04-23-hn-gdpr-comment-permalink.md
-  - superpowers/plans/2026-04-26-single-dated-folder.md
-  - superpowers/plans/2026-05-04-jekyll-docs.md
-  - superpowers/plans/2026-05-05-hn-firebase-api-migration.md
-  - superpowers/plans/2026-05-06-fix-lb-comment-rate-limiting.md
-  - superpowers/plans/2026-05-07-hn-config-abstraction.md
-  - superpowers/plans/2026-05-07-remove-cross-source-dedup.md
-  - superpowers/plans/2026-05-19-pdf-drain-progress-bar.md
-  - superpowers/specs/2026-03-15-breadcrumb-phase1-folder-naming-design.md
-  - superpowers/specs/2026-03-15-breadcrumb-phase2-html-rendering-design.md
-  - superpowers/specs/2026-03-17-titled-markdown-filenames-design.md
-  - superpowers/specs/2026-03-17-user-themes-copy-design.md
-  - superpowers/specs/2026-03-18-clean-architecture-config-driven-sources-design.md
-  - superpowers/specs/2026-03-18-obsidian-wikilinks-design.md
-  - superpowers/specs/2026-03-19-graceful-shutdown-design.md
-  - superpowers/specs/2026-03-19-htmlgen-refactor-design.md
-  - superpowers/specs/2026-03-20-userspace-source-mirror-design.md
-  - superpowers/specs/2026-03-25-per-source-article-count-design.md
-  - superpowers/specs/2026-03-26-pdf-ancestor-filter-design.md
-  - superpowers/specs/2026-03-31-obsidian-frontmatter-prd.md
-  - superpowers/specs/2026-04-02-global-settings-yaml-design.md
-  - superpowers/specs/2026-04-02-user-config-yaml-inventory.md
-  - superpowers/specs/2026-04-18-capcat-casestudy-part-two-design.md
-  - superpowers/specs/2026-05-05-hn-firebase-api-migration-design.md
-  - superpowers/specs/2026-05-19-pdf-drain-progress-bar-design.md
-  - troubleshooting.md
-
-Total files: 532
-Documentation size: 39.5 MB
+docs/404.html
+docs/CNAME
+docs/README.md
+docs/_config.yml
+docs/_includes/footer.html
+docs/_includes/header.html
+docs/_layouts/default.html
+docs/api/README.md
+docs/api/capcat/README.md
+docs/api/capcat/__init__.md
+docs/api/capcat/__main__.md
+docs/api/capcat/add_source.md
+docs/api/capcat/add_source_command.md
+docs/api/capcat/add_source_service.md
+docs/api/capcat/article_fetcher.md
+docs/api/capcat/async_pdf_manager.md
+docs/api/capcat/base_generator.md
+docs/api/capcat/base_source.md
+docs/api/capcat/bundle_manager.md
+docs/api/capcat/bundle_models.md
+docs/api/capcat/bundle_service.md
+docs/api/capcat/bundle_ui.md
+docs/api/capcat/bundle_validator.md
+docs/api/capcat/capcat.md
+docs/api/capcat/circuit_breaker.md
+docs/api/capcat/cli.md
+docs/api/capcat/cli_recovery.md
+docs/api/capcat/cli_validation.md
+docs/api/capcat/command_logging.md
+docs/api/capcat/config.md
+docs/api/capcat/config_driven_source.md
+docs/api/capcat/config_schema.md
+docs/api/capcat/constants.md
+docs/api/capcat/conversion_executor.md
+docs/api/capcat/design_system_compiler.md
+docs/api/capcat/discovery_strategies.md
+docs/api/capcat/downloader.md
+docs/api/capcat/enhanced_argparse.md
+docs/api/capcat/enhanced_remove_command.md
+docs/api/capcat/error_handling.md
+docs/api/capcat/ethical_scraping.md
+docs/api/capcat/exceptions.md
+docs/api/capcat/factory.md
+docs/api/capcat/feed_discovery.md
+docs/api/capcat/feed_parser.md
+docs/api/capcat/fetch.md
+docs/api/capcat/formatter.md
+docs/api/capcat/generate_config.md
+docs/api/capcat/generate_source_config.md
+docs/api/capcat/generator.md
+docs/api/capcat/html_generator.md
+docs/api/capcat/html_post_processor.md
+docs/api/capcat/image_processor.md
+docs/api/capcat/init.md
+docs/api/capcat/interactive.md
+docs/api/capcat/logging_config.md
+docs/api/capcat/media_config.md
+docs/api/capcat/media_executor.md
+docs/api/capcat/media_processor.md
+docs/api/capcat/network_resilience.md
+docs/api/capcat/news_source_adapter.md
+docs/api/capcat/pdf_landing_resolver.md
+docs/api/capcat/performance_monitor.md
+docs/api/capcat/progress.md
+docs/api/capcat/questionary_ui.md
+docs/api/capcat/rate_limiter.md
+docs/api/capcat/removal_ui.md
+docs/api/capcat/remove_source.md
+docs/api/capcat/remove_source_command.md
+docs/api/capcat/remove_source_service.md
+docs/api/capcat/retry.md
+docs/api/capcat/retry_skip.md
+docs/api/capcat/rss_feed_introspector.md
+docs/api/capcat/session_pool.md
+docs/api/capcat/shutdown.md
+docs/api/capcat/single.md
+docs/api/capcat/source.md
+docs/api/capcat/source_analytics.md
+docs/api/capcat/source_backup_manager.md
+docs/api/capcat/source_base.md
+docs/api/capcat/source_config.md
+docs/api/capcat/source_config_generator.md
+docs/api/capcat/source_config_mirror.md
+docs/api/capcat/source_configs.md
+docs/api/capcat/source_factory.md
+docs/api/capcat/source_registry.md
+docs/api/capcat/specialized_source_manager.md
+docs/api/capcat/storage_manager.md
+docs/api/capcat/streamlined_comment_processor.md
+docs/api/capcat/template_renderer.md
+docs/api/capcat/theme_utils.md
+docs/api/capcat/timeout_config.md
+docs/api/capcat/timeout_wrapper.md
+docs/api/capcat/tui.md
+docs/api/capcat/tui_context.md
+docs/api/capcat/unified_article_processor.md
+docs/api/capcat/unified_media_processor.md
+docs/api/capcat/unified_source_processor.md
+docs/api/capcat/update_manager.md
+docs/api/capcat/url_utils.md
+docs/api/capcat/utils.md
+docs/api/capcat/validation_engine.md
+docs/api/cli/README.md
+docs/api/cli/cli.md
+docs/api/htmlgen/README.md
+docs/api/htmlgen/__init__.md
+docs/api/htmlgen/base_generator.md
+docs/api/htmlgen/generator.md
+docs/api/index.md
+docs/api/scripts/README.md
+docs/api/scripts/add_doc_navigation.md
+docs/api/scripts/apply_mermaid_design_system.md
+docs/api/scripts/convert_md_tables_to_html.md
+docs/api/scripts/doc_generator.md
+docs/api/scripts/extract_and_summarize.md
+docs/api/scripts/final_extractor.md
+docs/api/scripts/generate_diagrams.md
+docs/api/scripts/generate_source_config.md
+docs/api/scripts/intelligent_html_extractor.md
+docs/api/scripts/rename_ink_to_imprint.md
+docs/api/scripts/replace_exhaustive.md
+docs/api/scripts/replace_menus_with_menu.md
+docs/api/scripts/run_docs.md
+docs/api/scripts/setup_dependencies.md
+docs/api/scripts/update_footer_text.md
+docs/api/scripts/update_svg_color.md
+docs/api/sources/README.md
+docs/api/sources/__init__.md
+docs/api/sources/config_schema.md
+docs/api/sources/factory.md
+docs/api/sources/source.md
+docs/architecture/components.md
+docs/architecture/roadmap.md
+docs/architecture/system.md
+docs/css/UTILITY-CLASSES.md
+docs/css/design-system.css
+docs/css/main.css
+docs/developer/git-workflow.md
+docs/developer/guide.md
+docs/developer/release.md
+docs/developer/testing.md
+docs/diagrams/class_diagrams.md
+docs/diagrams/data_flow.md
+docs/diagrams/deployment.md
+docs/diagrams/processing_pipeline.md
+docs/diagrams/source_system.md
+docs/diagrams/system_architecture.md
+docs/docs/architecture.md
+docs/docs/configuration.md
+docs/docs/deployment.md
+docs/docs/ethical-scraping.md
+docs/docs/feature-add-source.md
+docs/docs/feature-remove-source.md
+docs/docs/index.md
+docs/docs/interactive-mode.md
+docs/docs/quick-start.md
+docs/docs/remove-source-advanced-features.md
+docs/docs/rss-news-sources-reference.md
+docs/docs/source-development.md
+docs/docs/source-management-menu.md
+docs/docs/testing.md
+docs/docs/tutorials/index.md
+docs/docs/tutorials/user/01-getting-started.md
+docs/docs/tutorials/user/02-daily-workflow.md
+docs/docs/tutorials/user/03-interactive-mode.md
+docs/docs/tutorials/user/04-managing-sources.md
+docs/docs/tutorials/user/05-bundles.md
+docs/docs/tutorials/user/06-customizing-output.md
+docs/fonts/SourceSerif4-Black.woff
+docs/fonts/SourceSerif4-Black.woff2
+docs/fonts/SourceSerif4-Bold.woff
+docs/fonts/SourceSerif4-Bold.woff2
+docs/fonts/SourceSerif4-ExtraBold.woff
+docs/fonts/SourceSerif4-ExtraBold.woff2
+docs/fonts/SourceSerif4-Light.woff
+docs/fonts/SourceSerif4-Light.woff2
+docs/fonts/SourceSerif4-Medium.woff
+docs/fonts/SourceSerif4-Medium.woff2
+docs/fonts/SourceSerif4-Regular.woff
+docs/fonts/SourceSerif4-Regular.woff2
+docs/fonts/SourceSerif4-SemiBold.woff
+docs/fonts/SourceSerif4-SemiBold.woff2
+docs/icons/Bulk-RSS-Fetching-icon.svg
+docs/icons/Capcat-Cat-Color.svg
+docs/icons/Capcat-Cat-ReColor.svg
+docs/icons/Capcat.ico
+docs/icons/Command-Line-Mode-icon.svg
+docs/icons/Crowd.afdesign
+docs/icons/Crowd.svg
+docs/icons/DarkIcons/Bulk-RSS-Fetching-icon.svg
+docs/icons/DarkIcons/Command-Line-Mode-icon.svg
+docs/icons/DarkIcons/HTML-Generation-icon.svg
+docs/icons/DarkIcons/Interactive-Menu-icon.svg
+docs/icons/DarkIcons/Local-Markdown-Storage-icon.svg
+docs/icons/DarkIcons/Offline-Accessibility-icon.svg
+docs/icons/HTML-Generation-icon.svg
+docs/icons/Interactive-Menu-icon.svg
+docs/icons/Local-Markdown-Storage-icon.svg
+docs/icons/Offline-Accessibility-icon.svg
+docs/icons/Your-Own-Sources-icon.svg
+docs/index.html
+docs/index.md
+docs/js/gsap.min.js
+docs/js/jquery-3.6.0.min.js
+docs/js/main.js
+docs/reference/modules.md
+docs/reference/quick-reference.md
+docs/troubleshooting.md
