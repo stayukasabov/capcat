@@ -130,6 +130,40 @@ target/
 *.cpp
 *.h
 
+# Pre-built HTML docs (Jekyll renders from docs/ markdown)
+HTML-Docs/
+
+# Playwright MCP session snapshots
+.playwright-mcp/
+
+# Stale/accidental directories
+345/
+
+# Legacy code (superseded by capcat/)
+legacy/
+capcat_legacy.py
+run_capcat.py
+quick_cli_fix.py
+build_site.py
+run_tests.sh
+
+# Old htmlgen package (superseded by capcat/htmlgen/)
+htmlgen/
+
+# Debug scripts (development only)
+debug/
+
+# Internal design notes
+capcat-html-theme-typography.md
+typography-content.txt
+
+# Internal docs (not for public repo)
+docs/ACCESSIBILITY-REMEDIATION-PLAN.md
+docs/bugs/
+docs/rss-feed-candidates.md
+docs/api/debug/
+docs/api/debug_pdf_stalling/
+
 # Project Specific - Development Artifacts
 # Internal documentation and session notes
 Reports/
