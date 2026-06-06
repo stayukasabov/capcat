@@ -18,7 +18,7 @@ A powerful, modular news article archiving system that fetches articles from 17 
 
 ##  Requirements
 
-- Python 3.8+
+- Python 3.9+
 - Internet connection for article fetching
 - ~100MB disk space for dependencies
 
@@ -262,7 +262,7 @@ MIT-Style Non-Commercial License - see [LICENSE.txt](../LICENSE.txt) file for de
 
 ## Acknowledgments
 
-- Built with Python 3.8+
+- Built with Python 3.9+
 - Uses BeautifulSoup4 for HTML parsing
 - Requests library for HTTP handling
 - Threading for parallel processing

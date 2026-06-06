@@ -9,7 +9,7 @@ render_with_liquid: false
 
 ### Prerequisites
 
-- Python 3.8+
+- Python 3.9+
 - pip (Python package manager)
 - git
 
@@ -57,7 +57,6 @@ Application/
 ├── tests/                     # Test suite
 ├── scripts/                   # Build and doc generation scripts
 ├── docs/                      # Documentation (GitHub Pages)
-├── sources/                   # Symlink to capcat/sources/builtin
 ├── pyproject.toml
 └── README.md
 ```

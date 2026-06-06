@@ -8,7 +8,7 @@ Captures articles from 17 sources as clean Markdown files with optional self-con
 pipx install capcat
 ```
 
-Requires Python 3.8+.
+Requires Python 3.9+.
 
 ## Quick Start
 
