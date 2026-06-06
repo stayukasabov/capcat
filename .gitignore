@@ -167,6 +167,29 @@ docs/rss-feed-candidates.md
 docs/api/debug/
 docs/api/debug_pdf_stalling/
 
+# Unused dark icon variants
+docs/icons/DarkIcons/
+
+# API docs for internal scripts (not public API)
+docs/api/scripts/
+
+# Auto-generated file manifest (goes stale instantly)
+docs/manifest.txt
+
+# One-off migration scripts (completed, kept locally)
+scripts/rename_ink_to_imprint.py
+scripts/update_footer_text.py
+scripts/update_svg_color.py
+scripts/extract_and_summarize.py
+scripts/final_extractor.py
+scripts/intelligent_html_extractor.py
+scripts/convert_md_tables_to_html.py
+scripts/add_doc_navigation.py
+scripts/apply_mermaid_design_system.py
+scripts/run_docs.py
+scripts/replace_exhaustive.py
+scripts/replace_menus_with_menu.py
+
 # Stale API docs for deleted one-off scripts
 docs/api/__version__/
 docs/api/add_jekyll_frontmatter/
