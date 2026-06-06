@@ -5,7 +5,7 @@ render_with_liquid: false
 
 # sources.active.custom.hn.source
 
-**File:** `Application/sources/active/custom/hn/source.py`
+**File:** `capcat/sources/builtin/custom/hn/source.py`
 
 ## Description
 

@@ -217,7 +217,7 @@ Common debugging techniques:
 Implement comprehensive error handling:
 
 ```python
-from core.exceptions import SourceError, FileSystemError
+from capcat.core.exceptions import SourceError, FileSystemError
 
 try:
     article = fetch_article(url)

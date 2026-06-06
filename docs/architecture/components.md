@@ -21,7 +21,7 @@ Responsible for creating source instances based on configuration.
 Auto-discovers and manages available sources.
 
 **Discovery Process:**
-1. Scans `sources/active/` directory
+1. Scans `capcat/sources/builtin/` directory
 2. Loads YAML configs for config-driven sources
 3. Imports Python modules for custom sources
 4. Validates source implementations

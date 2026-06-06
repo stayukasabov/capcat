@@ -140,7 +140,7 @@ HTML-Docs/
 345/
 
 # Legacy root sources/ (superseded by capcat/sources/builtin/)
-sources/
+/sources/
 
 # Legacy code (superseded by capcat/)
 legacy/

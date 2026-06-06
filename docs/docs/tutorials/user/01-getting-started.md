@@ -13,7 +13,7 @@ Install and collect your first articles.
 pipx install capcat
 ```
 
-Requires Python 3.8+.
+Requires Python 3.9+.
 
 ## Verify
 

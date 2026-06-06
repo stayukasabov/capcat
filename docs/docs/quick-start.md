@@ -13,7 +13,7 @@ Get Capcat running in 5 minutes.
 pipx install capcat
 ```
 
-Requires Python 3.8+. `pipx` keeps Capcat isolated from your system Python.
+Requires Python 3.9+. `pipx` keeps Capcat isolated from your system Python.
 
 ## Verify
 

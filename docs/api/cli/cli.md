@@ -127,7 +127,7 @@ def add_source(url: str) -> None
 Interactive command to add a new RSS-based source.
 
 Guides user through: RSS inspection, configuration, bundle assignment,
-and test fetch. Creates YAML config in sources/active/config_driven/configs/.
+and test fetch. Creates YAML config in Config/sources/active/config_driven/configs/.
 
 Args:
     url: RSS feed URL to add as new source
