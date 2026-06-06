@@ -206,6 +206,8 @@ capcat list [sources|bundles|all]
 
 **Returns:** None
 
+⚠️ **High complexity:** 15
+
 ### _cmd_add_source
 
 ```python

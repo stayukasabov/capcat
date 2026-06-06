@@ -9,7 +9,7 @@ A powerful, modular news article archiving system that fetches articles from 12 
 
 ##  Features
 
-- **Multi-Source Support**: 12 news sources including Hacker News, BBC, Nature, IEEE
+- **Multi-Source Support**: 12 news sources + 5 specialized URL processors including Hacker News, BBC, Nature, IEEE
 - **Modular Architecture**: Easy to add new sources with config-driven or custom implementations
 - **Media Handling**: Automatic download and organization of images, videos, and documents
 - **Flexible Output**: Markdown files with optional HTML generation
