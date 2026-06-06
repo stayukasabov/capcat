@@ -239,8 +239,12 @@ test_*.py
 TEST_*.sh
 TEST_*.md
 
-# Allow test files inside the tests/ package
-!tests/**/*.py
+# Allow test files inside tests/unit/ and tests/integration/ only
+# (legacy tests/test_*.py use old imports and are not maintained)
+!tests/unit/**/*.py
+!tests/integration/**/*.py
+!tests/__init__.py
+!tests/conftest.py
 
 # Internal documentation source
 docs-markdown/
