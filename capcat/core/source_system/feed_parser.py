@@ -6,7 +6,7 @@ Provides clean separation of feed parsing logic.
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional
 import feedparser as _fp
 
@@ -51,7 +51,7 @@ def _parse_feedparser_date(time_struct) -> Optional[datetime]:
         return None
     try:
         import calendar
-        return datetime.utcfromtimestamp(calendar.timegm(time_struct))
+        return datetime.fromtimestamp(calendar.timegm(time_struct), tz=timezone.utc)
     except Exception:
         return None
 
@@ -85,7 +85,7 @@ def _entries_to_feed_items(entries) -> List[FeedItem]:
         ))
 
     feed_items.sort(
-        key=lambda x: x.published_date if x.published_date else datetime.min,
+        key=lambda x: x.published_date if x.published_date else datetime.min.replace(tzinfo=timezone.utc),
         reverse=True,
     )
     return feed_items
