@@ -5,11 +5,11 @@ render_with_liquid: false
 
 # Capcat - News Article Archiving System
 
-A powerful, modular news article archiving system that fetches articles from 18 sources, converts them to Markdown, and organizes them with media files.
+A powerful, modular news article archiving system that fetches articles from 12 built-in sources, converts them to Markdown, and organizes them with media files.
 
 ##  Features
 
-- **Multi-Source Support**: 18 news sources including Hacker News, BBC, Nature, IEEE
+- **Multi-Source Support**: 12 news sources including Hacker News, BBC, Nature, IEEE
 - **Modular Architecture**: Easy to add new sources with config-driven or custom implementations
 - **Media Handling**: Automatic download and organization of images, videos, and documents
 - **Flexible Output**: Markdown files with optional HTML generation
@@ -105,12 +105,15 @@ single <url>          # Process single article
 **Sports:**
 - `bbcsport` - BBC Sport
 
-**Custom** (add via `capcat add-source`):
-- `medium` - Medium
-- `substack` - Substack
-- `twitter` - Twitter/X
-- `youtube` - YouTube
-- `vimeo` - Vimeo
+**Specialized Processors** (used automatically when fetching matching URLs via `capcat single`):
+- `medium` - Medium.com (paywall detection, image embedding)
+- `substack` - Substack.com (newsletter formatting)
+- `twitter` - X.com (thread extraction)
+- `youtube` - YouTube (video metadata, requires yt-dlp)
+- `vimeo` - Vimeo (video metadata, requires yt-dlp)
+
+These processors are not shown in the TUI source menu. They activate
+automatically when a URL from their platform is processed.
 
 ### Predefined Bundles
 

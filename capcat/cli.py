@@ -646,11 +646,24 @@ def _cmd_list(args: list[str]) -> None:
     registry.discover_sources()
 
     if what in ("sources", "all"):
-        print("\nAvailable sources:")
+        visible = []
+        hidden = []
         for sid in sorted(registry.get_available_sources()):
             cfg = registry.get_source_config(sid)
             name = cfg.display_name if cfg else sid
+            if cfg and cfg.hidden:
+                hidden.append((sid, name))
+            else:
+                visible.append((sid, name))
+
+        print("\nAvailable sources:")
+        for sid, name in visible:
             print(f"  {sid:<20} {name}")
+
+        if hidden:
+            print("\nSpecialized processors (used automatically for matching URLs):")
+            for sid, name in hidden:
+                print(f"  {sid:<20} {name}")
 
     if what in ("bundles", "all"):
         bundles = get_available_bundles(project_root=_project_root)
