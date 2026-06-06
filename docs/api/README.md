@@ -5,11 +5,11 @@ render_with_liquid: false
 
 # Capcat - News Article Archiving System
 
-A powerful, modular news article archiving system that fetches articles from 13+ sources, converts them to Markdown, and organizes them with media files.
+A powerful, modular news article archiving system that fetches articles from 17 sources, converts them to Markdown, and organizes them with media files.
 
 ##  Features
 
-- **Multi-Source Support**: 13+ news sources including Hacker News, BBC, Nature, IEEE
+- **Multi-Source Support**: 17 news sources including Hacker News, BBC, Nature, IEEE
 - **Modular Architecture**: Easy to add new sources with config-driven or custom implementations
 - **Media Handling**: Automatic download and organization of images, videos, and documents
 - **Flexible Output**: Markdown files with optional HTML generation
@@ -19,7 +19,7 @@ A powerful, modular news article archiving system that fetches articles from 13+
 
 ##  Requirements
 
-- Python 3.8+
+- Python 3.9+
 - Internet connection for article fetching
 - ~100MB disk space for dependencies
 
@@ -28,43 +28,29 @@ A powerful, modular news article archiving system that fetches articles from 13+
 ### Quick Setup
 
 ```bash
-# Clone repository
-git clone <repository-url>
-cd capcat
-
-# Setup environment
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
+pipx install capcat
 
 # Verify installation
-./capcat list sources
-```
-
-### Docker (Alternative)
-
-```bash
-docker build -t capcat .
-docker run -v $(pwd)/output:/app/output capcat bundle tech --count 10
+capcat list sources
 ```
 
 ##  Quick Start
 
 ```bash
 # Fetch 10 tech articles
-./capcat bundle tech --count 10
+capcat bundle tech --count 10
 
 # Fetch from specific sources
-./capcat fetch hn,bbc --count 15 --media
+capcat fetch hn,bbc --count 15 --media
 
 # Single article processing
-./capcat single https://example.com/article
+capcat single https://example.com/article
 
 # List available sources
-./capcat list sources
+capcat list sources
 
 # Show bundles
-./capcat list bundles
+capcat list bundles
 ```
 
 ##  Usage
@@ -73,7 +59,7 @@ docker run -v $(pwd)/output:/app/output capcat bundle tech --count 10
 
 ```bash
 # Basic usage
-./capcat <command> [options]
+capcat <command> [options]
 
 # Commands
 list sources           # Show all available sources
@@ -84,11 +70,15 @@ single <url>          # Process single article
 
 # Options
 --count N             # Number of articles (default: 30)
---media               # Download videos/audio/documents
---html                # Generate HTML output
---output-dir DIR      # Custom output directory
---config FILE         # Custom config file
---debug               # Enable debug logging
+--media               # Download images, video, audio, and PDF files
+--pdfs                # Download PDF files only
+--no-pdfs             # Explicitly disable PDF downloads
+--html                # Generate self-contained HTML output
+--output DIR          # Output directory (default: current dir)
+--update              # Re-fetch and update existing articles
+-V, --verbose         # Verbose output
+-q, --quiet           # Quiet output
+-L <file>             # Log output to file
 ```
 
 ### Available Sources
@@ -110,19 +100,28 @@ single <url>          # Process single article
 
 **AI/ML:**
 - `mitnews` - MIT News
+- `google-research` - Google Research
 
 **Sports:**
 - `bbcsport` - BBC Sport
 
+**Custom** (add via `capcat add-source`):
+- `medium` - Medium
+- `substack` - Substack
+- `twitter` - Twitter/X
+- `youtube` - YouTube
+- `vimeo` - Vimeo
+
 ### Predefined Bundles
 
 ```bash
-./capcat bundle tech          # ieee + mashable
-./capcat bundle techpro       # hn + lb + iq
-./capcat bundle news          # bbc + guardian
-./capcat bundle science       # nature + scientificamerican
-./capcat bundle ai            # mitnews
-./capcat bundle sports        # bbcsport
+capcat bundle tech          # ieee + mashable
+capcat bundle techpro       # hn + lb + iq
+capcat bundle news          # bbc + guardian
+capcat bundle science       # nature + scientificamerican
+capcat bundle ai            # mitnews + google-research
+capcat bundle sports        # bbcsport
+capcat bundle all           # all built-in sources
 ```
 
 ##  Output Structure
@@ -150,7 +149,7 @@ single <url>          # Process single article
 
 ### Command Line (Highest Priority)
 ```bash
-./capcat fetch hn --count 20 --media
+capcat fetch hn --count 20 --media
 ```
 
 ### Environment Variables
@@ -175,7 +174,7 @@ sources:
 
 #### Config-Driven (15-30 minutes)
 ```yaml
-# sources/active/config_driven/configs/newsource.yaml
+# capcat/sources/builtin/config_driven/configs/newsource.yaml
 display_name: "New Source"
 base_url: "https://newsource.com/"
 category: tech
@@ -185,8 +184,8 @@ content_selectors: [".article-content"]
 
 #### Custom Implementation (2-4 hours)
 ```python
-# sources/active/custom/newsource/source.py
-from core.source_system.base_source import BaseSource
+# capcat/sources/builtin/custom/newsource/source.py
+from capcat.core.source_system.base_source import BaseSource
 
 class NewSource(BaseSource):
     def get_articles(self, count=30):
@@ -197,13 +196,13 @@ class NewSource(BaseSource):
 ### Verification
 ```bash
 # Verify all sources work
-./capcat list sources
+capcat list sources
 
 # Verify specific source
-./capcat fetch newsource --count 5
+capcat fetch newsource --count 5
 
 # Verify bundle
-./capcat bundle tech --count 10
+capcat bundle tech --count 10
 ```
 
 ##  Architecture
@@ -227,28 +226,14 @@ graph TB
 
 ##  Common Issues & Solutions
 
-### Module Not Found
-```bash
-# Use wrapper (handles venv automatically)
-./capcat list sources
-
-# Or activate manually
-source venv/bin/activate
-```
-
 ### Source Failures
 - 90% success rate is normal (anti-bot protection)
 - Some sources may have temporary issues
-- Check debug logs for details
+- Use `capcat fetch hn -V` for verbose output to diagnose
 
 ### Performance Issues
-```bash
-# Reduce parallel workers
-export CAPCAT_MAX_WORKERS=4
-
-# Enable progress tracking
-./capcat fetch hn --count 10 --debug
-```
+- Reduce worker count in `Config/Global-settings.yaml` under `processing.max_workers`
+- Use `-q` for quiet mode in automated/cron runs
 
 ##  Documentation
 
@@ -278,7 +263,7 @@ MIT-Style Non-Commercial License - see [LICENSE.txt](../LICENSE.txt) file for de
 
 ## Acknowledgments
 
-- Built with Python 3.8+
+- Built with Python 3.9+
 - Uses BeautifulSoup4 for HTML parsing
 - Requests library for HTTP handling
 - Threading for parallel processing

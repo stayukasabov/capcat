@@ -1,6 +1,6 @@
 # capcat
 
-**File:** `Application/capcat.py`
+**File:** `capcat/cli.py`
 
 ## Description
 

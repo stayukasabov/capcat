@@ -15,11 +15,11 @@ Capcat is a modular news article archiving system designed for scalability and e
 graph TB
     subgraph "User Interface"
         CLI[CLI Interface]
-        Wrapper[Bash Wrapper]
+        TUI[Interactive TUI]
     end
 
     subgraph "Core Application"
-        Main[capcat.py]
+        Main[capcat]
         Config[Configuration]
         Progress[Progress Tracking]
     end
@@ -46,7 +46,7 @@ graph TB
     end
 
     CLI --> Main
-    Wrapper --> Main
+    TUI --> Main
     Main --> Config
     Main --> Progress
     Main --> Factory
@@ -67,9 +67,9 @@ graph TB
 
 ### Core Application Layer
 
-- **capcat.py**: Main application orchestrator
-- **cli.py**: Command-line argument parsing and validation
-- **core.config**: Configuration management and validation
+- **capcat.cli**: CLI entry point and argument parsing
+- **capcat.core.config**: Configuration management and validation
+- **capcat.core.interactive**: TUI mode orchestration
 
 ### Source System
 

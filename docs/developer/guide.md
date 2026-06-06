@@ -31,7 +31,7 @@ pip install -r requirements.txt
 pip install -r requirements-dev.txt
 
 # Verify installation
-./capcat list sources
+capcat list sources
 ```
 
 ## Project Structure
@@ -116,7 +116,7 @@ class NewSource(BaseSource):
 3. Validate implementation:
 
 ```bash
-./capcat fetch newsource --count 5
+capcat fetch newsource --count 5
 ```
 
 ### Code Style Guidelines
@@ -157,10 +157,10 @@ Verify your changes work correctly:
 
 ```bash
 # Fetch from source
-./capcat fetch sourcename --count 5
+capcat fetch sourcename --count 5
 
 # Try bundle
-./capcat bundle tech --count 10
+capcat bundle tech --count 10
 ```
 
 ### Documentation
@@ -182,10 +182,10 @@ Enable debug logging:
 ```bash
 # Enable debug mode
 export CAPCAT_DEBUG=1
-./capcat fetch hn --count 5
+capcat fetch hn --count 5
 
 # Or use Python directly
-python capcat.py --debug fetch hn --count 5
+python -m capcat --debug fetch hn --count 5
 ```
 
 Common debugging techniques:

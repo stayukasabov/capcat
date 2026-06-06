@@ -97,7 +97,7 @@ Returns:
 def run_capcat_fetch(source_id: str, count: int) -> bool
 ```
 
-Run the './capcat fetch' command as a subprocess for testing new source.
+Run the 'capcat fetch' command as a subprocess for testing new source.
 
 Designed to be easily mockable in tests.
 
@@ -257,7 +257,7 @@ def validate_arguments(args: argparse.Namespace) -> Dict[str, Any]
 
 Validate and process parsed arguments.
 
-Converts argparse Namespace to configuration dictionary for capcat.py.
+Converts argparse Namespace to configuration dictionary for the application.
 Handles all subcommands and validates required arguments.
 
 Args:
@@ -331,8 +331,8 @@ def main() -> None
 
 Main entry point for direct CLI script execution.
 
-Parses arguments and executes commands. Used when cli.py run directly.
-Normal usage goes through capcat.py which imports functions from here.
+Parses arguments and executes commands. This is the main entry point
+invoked by the `capcat` console script defined in pyproject.toml.
 
 **Returns:** None
 
