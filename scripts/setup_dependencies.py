@@ -93,8 +93,8 @@ class DependencyManager:
         """
         try:
             version_info = sys.version_info
-            if version_info.major < 3 or (version_info.major == 3 and version_info.minor < 8):
-                self.log_error(f"Python 3.8+ required, found {version_info.major}.{version_info.minor}")
+            if version_info.major < 3 or (version_info.major == 3 and version_info.minor < 9):
+                self.log_error(f"Python 3.9+ required, found {version_info.major}.{version_info.minor}")
                 return False
 
             self.log_verbose(f"Python version: {version_info.major}.{version_info.minor}.{version_info.micro}")

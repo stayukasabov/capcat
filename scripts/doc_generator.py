@@ -489,7 +489,7 @@ This is the complete API reference for Capcat.
 
 ### Core Components
 
-- [capcat](./capcat.md) - Main application entry point
+- [capcat](capcat.md) - Package init and version
 - [cli](./cli.md) - Command-line interface
 - [core.config](./core/config.md) - Configuration management
 - [core.article_fetcher](./core/article_fetcher.md) - Article processing
@@ -497,7 +497,7 @@ This is the complete API reference for Capcat.
 ### Source System
 
 - [core.source_system](./core/source_system/README.md) - Source management framework
-- [sources.active](./sources/active/README.md) - Active news sources
+- [sources.builtin](./sources/builtin/README.md) - Built-in news sources
 
 ### Media Processing
 
@@ -527,11 +527,11 @@ Capcat is a modular news article archiving system designed for scalability and e
 graph TB
     subgraph "User Interface"
         CLI[CLI Interface]
-        Wrapper[Bash Wrapper]
+        TUI[Interactive TUI]
     end
 
     subgraph "Core Application"
-        Main[capcat.py]
+        Main[capcat]
         Config[Configuration]
         Progress[Progress Tracking]
     end
@@ -558,7 +558,7 @@ graph TB
     end
 
     CLI --> Main
-    Wrapper --> Main
+    TUI --> Main
     Main --> Config
     Main --> Progress
     Main --> Factory
@@ -579,9 +579,9 @@ graph TB
 
 ### Core Application Layer
 
-- **capcat.py**: Main application orchestrator
-- **cli.py**: Command-line argument parsing and validation
-- **core.config**: Configuration management and validation
+- **capcat.cli**: CLI entry point and argument parsing
+- **capcat.core.config**: Configuration management and validation
+- **capcat.core.interactive**: TUI mode orchestration
 
 ### Source System
 
@@ -656,7 +656,7 @@ Responsible for creating source instances based on configuration.
 Auto-discovers and manages available sources.
 
 **Discovery Process:**
-1. Scans `sources/active/` directory
+1. Scans `capcat/sources/builtin/` directory
 2. Loads YAML configs for config-driven sources
 3. Imports Python modules for custom sources
 4. Validates source implementations
@@ -789,7 +789,7 @@ Complete reference of all modules, classes, and functions in Capcat.
 
 ### Prerequisites
 
-- Python 3.8+
+- Python 3.9+
 - pip (Python package manager)
 - git
 
@@ -811,30 +811,34 @@ pip install -r requirements.txt
 pip install -r requirements-dev.txt
 
 # Verify installation
-./capcat list sources
+capcat list sources
 ```
 
 ## Project Structure
 
 ```
 Application/
-├── capcat.py              # Main application entry point
-├── capcat                 # Bash wrapper script
-├── run_capcat.py          # Python wrapper
-├── cli.py                 # Command-line interface
-├── core/                  # Core functionality
-│   ├── source_system/     # Source management framework
-│   ├── config.py          # Configuration management
-│   ├── article_fetcher.py # Article processing
-│   └── unified_media_processor.py  # Media handling
-├── sources/               # News source implementations
-│   ├── active/           # Active sources
-│   │   ├── config_driven/ # YAML-configured sources
-│   │   └── custom/        # Python-implemented sources
-│   └── base/             # Base classes and schemas
-├── htmlgen/              # HTML generation system
-├── themes/               # CSS themes for HTML output
-└── docs/                 # Documentation
+├── capcat/                    # Main package
+│   ├── __init__.py            # Version and entry point
+│   ├── cli.py                 # CLI entry point, Global Settings template
+│   ├── core/                  # Core functionality
+│   │   ├── config.py          # Configuration management
+│   │   ├── article_fetcher.py # Article processing
+│   │   ├── unified_article_processor.py
+│   │   ├── unified_media_processor.py
+│   │   ├── source_system/     # Source management framework
+│   │   └── config/            # Config subsystem
+│   ├── sources/               # News source implementations
+│   │   └── builtin/
+│   │       ├── config_driven/ # YAML-configured sources
+│   │       ├── custom/        # Python-implemented sources (hn, lb, etc.)
+│   │       └── bundles.yml    # Bundle definitions
+│   └── htmlgen/               # HTML generation system
+├── tests/                     # Test suite
+├── scripts/                   # Build and doc generation scripts
+├── docs/                      # Documentation (GitHub Pages)
+├── pyproject.toml
+└── README.md
 ```
 
 ## Development Workflow
@@ -846,7 +850,7 @@ Application/
 1. Create YAML configuration:
 
 ```yaml
-# sources/active/config_driven/configs/newsource.yaml
+# capcat/sources/builtin/config_driven/configs/newsource.yaml
 display_name: "New Source"
 base_url: "https://newsource.com/"
 category: tech
@@ -857,7 +861,7 @@ content_selectors: [".article-content"]
 2. Verify the source:
 
 ```bash
-./capcat fetch newsource --count 5
+capcat fetch newsource --count 5
 ```
 
 #### Option 2: Custom Source (Advanced)
@@ -865,14 +869,14 @@ content_selectors: [".article-content"]
 1. Create source directory:
 
 ```bash
-mkdir -p sources/active/custom/newsource
+mkdir -p capcat/sources/builtin/custom/newsource
 ```
 
 2. Implement source class:
 
 ```python
-# sources/active/custom/newsource/source.py
-from core.source_system.base_source import BaseSource
+# capcat/sources/builtin/custom/newsource/source.py
+from capcat.core.source_system.base_source import BaseSource
 
 class NewSource(BaseSource):
     def __init__(self):
@@ -892,7 +896,7 @@ class NewSource(BaseSource):
 3. Validate implementation:
 
 ```bash
-./capcat fetch newsource --count 5
+capcat fetch newsource --count 5
 ```
 
 ### Code Style Guidelines
@@ -933,10 +937,10 @@ Verify your changes work correctly:
 
 ```bash
 # Fetch from source
-./capcat fetch sourcename --count 5
+capcat fetch sourcename --count 5
 
 # Try bundle
-./capcat bundle tech --count 10
+capcat bundle tech --count 10
 ```
 
 ### Documentation
@@ -958,10 +962,10 @@ Enable debug logging:
 ```bash
 # Enable debug mode
 export CAPCAT_DEBUG=1
-./capcat fetch hn --count 5
+capcat fetch hn --count 5
 
 # Or use Python directly
-python capcat.py --debug fetch hn --count 5
+python -m capcat --debug fetch hn --count 5
 ```
 
 Common debugging techniques:
@@ -993,7 +997,7 @@ Common debugging techniques:
 Implement comprehensive error handling:
 
 ```python
-from core.exceptions import SourceError, FileSystemError
+from capcat.core.exceptions import SourceError, FileSystemError
 
 try:
     article = fetch_article(url)
@@ -1025,11 +1029,11 @@ except Exception as e:
         """Generate comprehensive README."""
         readme_content = """# Capcat - News Article Archiving System
 
-A powerful, modular news article archiving system that fetches articles from 13+ sources, converts them to Markdown, and organizes them with media files.
+A powerful, modular news article archiving system that fetches articles from 18 sources, converts them to Markdown, and organizes them with media files.
 
 ##  Features
 
-- **Multi-Source Support**: 13+ news sources including Hacker News, BBC, Nature, IEEE
+- **Multi-Source Support**: 18 news sources including Hacker News, BBC, Nature, IEEE
 - **Modular Architecture**: Easy to add new sources with config-driven or custom implementations
 - **Media Handling**: Automatic download and organization of images, videos, and documents
 - **Flexible Output**: Markdown files with optional HTML generation
@@ -1039,7 +1043,7 @@ A powerful, modular news article archiving system that fetches articles from 13+
 
 ##  Requirements
 
-- Python 3.8+
+- Python 3.9+
 - Internet connection for article fetching
 - ~100MB disk space for dependencies
 
@@ -1048,43 +1052,29 @@ A powerful, modular news article archiving system that fetches articles from 13+
 ### Quick Setup
 
 ```bash
-# Clone repository
-git clone <repository-url>
-cd capcat
-
-# Setup environment
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
+pipx install capcat
 
 # Verify installation
-./capcat list sources
-```
-
-### Docker (Alternative)
-
-```bash
-docker build -t capcat .
-docker run -v $(pwd)/output:/app/output capcat bundle tech --count 10
+capcat list sources
 ```
 
 ##  Quick Start
 
 ```bash
 # Fetch 10 tech articles
-./capcat bundle tech --count 10
+capcat bundle tech --count 10
 
 # Fetch from specific sources
-./capcat fetch hn,bbc --count 15 --media
+capcat fetch hn,bbc --count 15 --media
 
 # Single article processing
-./capcat single https://example.com/article
+capcat single https://example.com/article
 
 # List available sources
-./capcat list sources
+capcat list sources
 
 # Show bundles
-./capcat list bundles
+capcat list bundles
 ```
 
 ##  Usage
@@ -1093,7 +1083,7 @@ docker run -v $(pwd)/output:/app/output capcat bundle tech --count 10
 
 ```bash
 # Basic usage
-./capcat <command> [options]
+capcat <command> [options]
 
 # Commands
 list sources           # Show all available sources
@@ -1104,11 +1094,15 @@ single <url>          # Process single article
 
 # Options
 --count N             # Number of articles (default: 30)
---media               # Download videos/audio/documents
---html                # Generate HTML output
---output-dir DIR      # Custom output directory
---config FILE         # Custom config file
---debug               # Enable debug logging
+--media               # Download images, video, audio, and PDF files
+--pdfs                # Download PDF files only
+--no-pdfs             # Explicitly disable PDF downloads
+--html                # Generate self-contained HTML output
+--output DIR          # Output directory (default: current dir)
+--update              # Re-fetch and update existing articles
+-V, --verbose         # Verbose output
+-q, --quiet           # Quiet output
+-L <file>             # Log output to file
 ```
 
 ### Available Sources
@@ -1130,19 +1124,28 @@ single <url>          # Process single article
 
 **AI/ML:**
 - `mitnews` - MIT News
+- `google-research` - Google Research
 
 **Sports:**
 - `bbcsport` - BBC Sport
 
+**Custom** (add via `capcat add-source`):
+- `medium` - Medium
+- `substack` - Substack
+- `twitter` - Twitter/X
+- `youtube` - YouTube
+- `vimeo` - Vimeo
+
 ### Predefined Bundles
 
 ```bash
-./capcat bundle tech          # ieee + mashable
-./capcat bundle techpro       # hn + lb + iq
-./capcat bundle news          # bbc + guardian
-./capcat bundle science       # nature + scientificamerican
-./capcat bundle ai            # mitnews
-./capcat bundle sports        # bbcsport
+capcat bundle tech          # ieee + mashable
+capcat bundle techpro       # hn + lb + iq
+capcat bundle news          # bbc + guardian
+capcat bundle science       # nature + scientificamerican
+capcat bundle ai            # mitnews + google-research
+capcat bundle sports        # bbcsport
+capcat bundle all           # all built-in sources
 ```
 
 ##  Output Structure
@@ -1170,7 +1173,7 @@ single <url>          # Process single article
 
 ### Command Line (Highest Priority)
 ```bash
-./capcat fetch hn --count 20 --media
+capcat fetch hn --count 20 --media
 ```
 
 ### Environment Variables
@@ -1195,7 +1198,7 @@ sources:
 
 #### Config-Driven (15-30 minutes)
 ```yaml
-# sources/active/config_driven/configs/newsource.yaml
+# capcat/sources/builtin/config_driven/configs/newsource.yaml
 display_name: "New Source"
 base_url: "https://newsource.com/"
 category: tech
@@ -1205,8 +1208,8 @@ content_selectors: [".article-content"]
 
 #### Custom Implementation (2-4 hours)
 ```python
-# sources/active/custom/newsource/source.py
-from core.source_system.base_source import BaseSource
+# capcat/sources/builtin/custom/newsource/source.py
+from capcat.core.source_system.base_source import BaseSource
 
 class NewSource(BaseSource):
     def get_articles(self, count=30):
@@ -1217,13 +1220,13 @@ class NewSource(BaseSource):
 ### Verification
 ```bash
 # Verify all sources work
-./capcat list sources
+capcat list sources
 
 # Verify specific source
-./capcat fetch newsource --count 5
+capcat fetch newsource --count 5
 
 # Verify bundle
-./capcat bundle tech --count 10
+capcat bundle tech --count 10
 ```
 
 ##  Architecture
@@ -1247,28 +1250,14 @@ graph TB
 
 ##  Common Issues & Solutions
 
-### Module Not Found
-```bash
-# Use wrapper (handles venv automatically)
-./capcat list sources
-
-# Or activate manually
-source venv/bin/activate
-```
-
 ### Source Failures
 - 90% success rate is normal (anti-bot protection)
 - Some sources may have temporary issues
-- Check debug logs for details
+- Use `capcat fetch hn -V` for verbose output to diagnose
 
 ### Performance Issues
-```bash
-# Reduce parallel workers
-export CAPCAT_MAX_WORKERS=4
-
-# Enable progress tracking
-./capcat fetch hn --count 10 --debug
-```
+- Reduce worker count in `Config/Global-settings.yaml` under `processing.max_workers`
+- Use `-q` for quiet mode in automated/cron runs
 
 ##  Documentation
 
@@ -1298,7 +1287,7 @@ MIT-Style Non-Commercial License - see [LICENSE.txt](../LICENSE.txt) file for de
 
 ## Acknowledgments
 
-- Built with Python 3.8+
+- Built with Python 3.9+
 - Uses BeautifulSoup4 for HTML parsing
 - Requests library for HTTP handling
 - Threading for parallel processing

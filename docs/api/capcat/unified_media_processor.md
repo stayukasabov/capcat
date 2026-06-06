@@ -52,6 +52,29 @@ Returns:
 
 **Returns:** str
 
+##### _download_inline_images
+
+```python
+def _download_inline_images(content: str, article_folder: str, session: requests.Session, img_cfg: dict, max_image_bytes: int) -> str
+```
+
+Download images already referenced inline in markdown content.
+
+Scans for ![alt](url) patterns, downloads each remote image, and
+replaces the URL with a local path. This ensures images captured by
+content selectors (e.g. Guardian, BBC) are downloaded even when
+image_processing selectors find different URLs on the full page.
+
+**Parameters:**
+
+- `content` (str)
+- `article_folder` (str)
+- `session` (requests.Session)
+- `img_cfg` (dict)
+- `max_image_bytes` (int)
+
+**Returns:** str
+
 ##### _insert_images_into_markdown
 
 ```python

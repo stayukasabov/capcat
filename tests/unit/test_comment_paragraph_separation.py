@@ -166,7 +166,7 @@ class TestContentSelectorBreadth:
         """BBC first selector must grab both text and image blocks."""
         import yaml
 
-        with open("sources/active/config_driven/configs/bbc.yaml") as f:
+        with open("capcat/sources/builtin/config_driven/configs/bbc.yaml") as f:
             cfg = yaml.safe_load(f)
         first = cfg["content_selectors"][0]
 
@@ -188,7 +188,7 @@ class TestContentSelectorBreadth:
     def test_bbc_selectors_include_article(self):
         import yaml
 
-        with open("sources/active/config_driven/configs/bbc.yaml") as f:
+        with open("capcat/sources/builtin/config_driven/configs/bbc.yaml") as f:
             cfg = yaml.safe_load(f)
         selectors = cfg["content_selectors"]
         has_broad = any(
@@ -200,7 +200,7 @@ class TestContentSelectorBreadth:
     def test_guardian_selectors_include_article(self):
         import yaml
 
-        with open("sources/active/config_driven/configs/guardian.yaml") as f:
+        with open("capcat/sources/builtin/config_driven/configs/guardian.yaml") as f:
             cfg = yaml.safe_load(f)
         selectors = cfg["content_selectors"]
         has_broad = any(

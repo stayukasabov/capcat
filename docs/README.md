@@ -4,11 +4,11 @@ layout: default
 
 # Capcat - News Article Archiving System
 
-A powerful, modular news article archiving system that fetches articles from 17 sources, converts them to Markdown, and organizes them with media files.
+A powerful, modular news article archiving system that fetches articles from 18 sources, converts them to Markdown, and organizes them with media files.
 
 ##  Features
 
-- **Multi-Source Support**: 17 news sources including Hacker News, BBC, Nature, IEEE
+- **Multi-Source Support**: 18 news sources including Hacker News, BBC, Nature, IEEE
 - **Modular Architecture**: Easy to add new sources with config-driven or custom implementations
 - **Media Handling**: Automatic download and organization of images, videos, and documents
 - **Flexible Output**: Markdown files with optional HTML generation

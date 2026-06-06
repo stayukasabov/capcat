@@ -151,7 +151,7 @@ build_site.py
 run_tests.sh
 
 # Old htmlgen package (superseded by capcat/htmlgen/)
-htmlgen/
+/htmlgen/
 
 # Debug scripts (development only)
 debug/

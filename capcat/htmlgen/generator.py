@@ -200,7 +200,7 @@ class ArticleHTMLGenerator:
         function injectThemeIntoLinks(t) {{
           document.querySelectorAll("a[href]").forEach(function (link) {{
             var href = link.getAttribute("href");
-            if (!href || /^(https?:|\/\/|mailto:|javascript:|tel:)/.test(href)) return;
+            if (!href || /^(https?:|\\/\\/|mailto:|javascript:|tel:)/.test(href)) return;
             if (href.indexOf("#theme=") !== -1) href = href.replace(/(#|&)theme=(light|dark)/, "$$1theme=" + t);
             else if (href.indexOf("#") !== -1) href = href + "&theme=" + t;
             else href = href + "#theme=" + t;
