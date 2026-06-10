@@ -197,7 +197,7 @@ class ProgressIndicator:
         # Always restore cursor when stopping
         self._show_cursor()
 
-        dice_char = "\033[1;91m◐\033[0m"
+        dice_char = "\033[1;38;5;157m▷\033[0m"
 
         if success_message:
             print(f"{dice_char} {success_message.upper()}")
@@ -648,7 +648,7 @@ class BatchProgress:
                 if success
                 else "\033[1;31m\u2612\033[0m"
             )
-            dice_char = "\033[1;38;5;166m◐\033[0m"
+            dice_char = "\033[1;38;5;157m▷\033[0m"
             spinner_char = "\033[38;5;166m CATCHING ▶\033[0m"
 
             # Clear progress line before printing item completion
