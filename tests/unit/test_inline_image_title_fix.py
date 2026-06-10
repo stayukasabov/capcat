@@ -118,14 +118,15 @@ class TestLinkedImageWebUrls:
         assert "[![Hero](images/hero_1920x1080.png" in result
         assert "](images/hero_1920x1080.png)" in result
 
-    def test_linked_image_no_match_left_alone(self):
-        """Linked images where filenames don't match are left alone."""
+    def test_linked_image_mismatched_filename_still_replaced(self):
+        """Linked images always point to local, even if filenames differ."""
         content = (
             '[![Alt](images/local.png "title")]'
             "(https://example.com/unrelated-page)"
         )
         result = UnifiedMediaProcessor._replace_linked_image_urls(content)
-        assert "https://example.com/unrelated-page" in result
+        assert "https://example.com/unrelated-page" not in result
+        assert "](images/local.png)" in result
 
     def test_multiple_linked_images(self):
         """Multiple linked images all get outer URLs replaced."""
@@ -153,8 +154,8 @@ class TestLinkedImageWebUrls:
         assert "https://substackcdn.com" not in result
         assert "](images/4e479728-5057-4be5-8bf2-07bf36085bd3_1024x2282.png)" in result
 
-    def test_generic_filename_no_match(self):
-        """image-14.png should NOT match a UUID-named web URL (different filenames)."""
+    def test_generic_filename_still_replaced(self):
+        """image-14.png links to local even when web URL has UUID filename."""
         content = (
             '[![](images/image-14.png)]'
             "(https://substackcdn.com/image/fetch/f_auto/"
@@ -162,8 +163,8 @@ class TestLinkedImageWebUrls:
             "%2Fimages%2F58e7bc3b-b784-4b3f-84b8-675a43252fa5_1024x7640.png)"
         )
         result = UnifiedMediaProcessor._replace_linked_image_urls(content)
-        # Filenames don't match, so web URL stays (can't reliably map)
-        assert "https://substackcdn.com" in result
+        assert "https://substackcdn.com" not in result
+        assert "](images/image-14.png)" in result
 
     def test_plain_images_not_affected(self):
         """Non-linked images ![alt](path) are not modified."""
