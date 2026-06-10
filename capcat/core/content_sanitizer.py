@@ -96,6 +96,52 @@ def _strip_dangerous_html(content: str) -> str:
         content,
         flags=re.IGNORECASE,
     )
+
+    # M2: Remove <iframe>...</iframe> tags
+    content = re.sub(
+        r"<iframe\b[^>]*>[\s\S]*?</iframe>",
+        "",
+        content,
+        flags=re.IGNORECASE,
+    )
+
+    # M3: Remove inline JS event handlers from HTML elements
+    content = re.sub(
+        r"\s+on\w+\s*=\s*(?:\"[^\"]*\"|'[^']*'|[^\s>]+)",
+        "",
+        content,
+        flags=re.IGNORECASE,
+    )
+
+    # M4: Remove <img> tags with known tracker domains
+    def _remove_tracker_img(match):
+        tag = match.group(0)
+        src_match = re.search(r'src\s*=\s*["\']([^"\']+)["\']', tag, re.IGNORECASE)
+        if src_match:
+            src = src_match.group(1)
+            for domain in TRACKER_DOMAINS:
+                if domain in src:
+                    return ""
+        return tag
+
+    content = re.sub(r"<img\b[^>]*>", _remove_tracker_img, content, flags=re.IGNORECASE)
+
+    # M5: Remove <meta http-equiv="refresh">
+    content = re.sub(
+        r'<meta\s+[^>]*http-equiv\s*=\s*["\']refresh["\'][^>]*>',
+        "",
+        content,
+        flags=re.IGNORECASE,
+    )
+
+    # M6: Remove <link rel="prefetch/preload/dns-prefetch">
+    content = re.sub(
+        r'<link\s+[^>]*rel\s*=\s*["\'](?:prefetch|preload|dns-prefetch)["\'][^>]*>',
+        "",
+        content,
+        flags=re.IGNORECASE,
+    )
+
     return content
 
 
