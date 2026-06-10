@@ -318,3 +318,64 @@ class TestHtmlTrackerImageRemoval:
         content = '<img src="images/photo.jpg" alt="Article photo">'
         result = sanitize(content, mode="html")
         assert "images/photo.jpg" in result
+
+
+class TestPreservation:
+    """Content that MUST survive sanitization unchanged."""
+
+    def test_markdown_links_preserved(self):
+        content = "Read more at [Example](https://example.com/article)."
+        result = sanitize(content, mode="markdown")
+        assert content == result
+
+    def test_markdown_images_local_preserved(self):
+        content = "![Photo](images/photo.jpg)"
+        result = sanitize(content, mode="markdown")
+        assert content == result
+
+    def test_plain_text_urls_preserved(self):
+        content = "Visit https://example.com for more info."
+        result = sanitize(content, mode="markdown")
+        assert content == result
+
+    def test_article_structure_preserved(self):
+        content = (
+            "# Title\n\n"
+            "**Source URL:** [https://example.com](https://example.com)\n\n"
+            "---\n\n"
+            "Article body with **bold** and *italic* text.\n\n"
+            "## Section\n\n"
+            "More content here.\n"
+        )
+        result = sanitize(content, mode="markdown")
+        assert content == result
+
+    def test_non_tracker_external_image_preserved(self):
+        content = '<img src="https://cdn.example.com/photo.jpg" alt="Article photo">'
+        result = sanitize(content, mode="markdown")
+        assert "cdn.example.com/photo.jpg" in result
+
+    def test_fenced_code_block_preserved(self):
+        content = (
+            "Example tracking code:\n\n"
+            "```javascript\n"
+            '<script src="https://google-analytics.com/ga.js"></script>\n'
+            "ga('send', 'pageview');\n"
+            "```\n\n"
+            "Do not run this."
+        )
+        result = sanitize(content, mode="markdown")
+        assert "google-analytics.com" in result
+        assert "ga('send'" in result
+
+    def test_empty_content_returns_empty(self):
+        assert sanitize("", mode="markdown") == ""
+        assert sanitize("", mode="html") == ""
+
+    def test_none_content_returns_none(self):
+        assert sanitize(None, mode="markdown") is None
+
+    def test_plain_text_only_unchanged(self):
+        content = "Just some plain text with no HTML at all."
+        result = sanitize(content, mode="markdown")
+        assert content == result
