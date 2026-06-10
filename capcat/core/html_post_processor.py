@@ -611,6 +611,9 @@ class HTMLPostProcessor:
 
     def _write_html_file(self, file_path: Path, content: str) -> None:
         """Write HTML content to file."""
+        from capcat.core.content_sanitizer import sanitize
+
+        content = sanitize(content, mode="html")
         try:
             with open(file_path, "w", encoding="utf-8") as f:
                 f.write(content)
