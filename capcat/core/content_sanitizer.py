@@ -142,6 +142,40 @@ def _strip_dangerous_html(content: str) -> str:
         flags=re.IGNORECASE,
     )
 
+    # M7: SVG onload/script removal handled by M1 (strips <script> inside SVG)
+    # and M3 (strips onload from any element including SVG). No additional code.
+
+    # M8: Remove external url() from inline style attributes
+    def _clean_style_url(match):
+        style_val = match.group(1)
+        cleaned = re.sub(
+            r"url\s*\(\s*(?:['\"]?\s*(?:https?:)?//[^)]+)\s*\)",
+            "",
+            style_val,
+            flags=re.IGNORECASE,
+        )
+        cleaned = re.sub(r";\s*;", ";", cleaned)
+        cleaned = re.sub(r"^\s*;\s*", "", cleaned)
+        cleaned = re.sub(r"\s*;\s*$", "", cleaned)
+        if not cleaned.strip():
+            return ""
+        return f'style="{cleaned}"'
+
+    content = re.sub(
+        r'style\s*=\s*"([^"]*)"',
+        _clean_style_url,
+        content,
+        flags=re.IGNORECASE,
+    )
+
+    # M9: Remove elements with protocol-relative URLs in src/href
+    content = re.sub(
+        r'<(?:script|link)\b[^>]*(?:src|href)\s*=\s*["\']//[^"\']+["\'][^>]*>(?:[\s\S]*?</(?:script|link)>)?',
+        "",
+        content,
+        flags=re.IGNORECASE,
+    )
+
     return content
 
 

