@@ -184,9 +184,10 @@ class UnifiedMediaProcessor:
         For archiving, the outer link must also point to the local file.
         Matches when the local filename appears in the outer web URL.
         """
-        # Match [![alt](images/filename ...)](https://...)
+        # Match [![alt](images/filename "optional title")](https://...)
+        # Title may contain parentheses, so match quoted string explicitly.
         linked_img_pattern = re.compile(
-            r'(\[!\[[^\]]*\]\(images/([^\s")\]]+)[^)]*\)\])\((https?://[^)]+)\)'
+            r'(\[!\[[^\]]*\]\(images/([^\s")\]]+)(?:\s+"[^"]*")?\)\])\((https?://[^)]+)\)'
         )
 
         def _replace_outer(match):

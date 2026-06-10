@@ -139,6 +139,32 @@ class TestLinkedImageWebUrls:
         assert "](images/a_100x100.png)" in result
         assert "](images/b_200x200.jpg)" in result
 
+    def test_title_with_parentheses(self):
+        """Title containing parentheses must not break the regex."""
+        content = (
+            '[![Capcat HTML Output - Index view (dark theme)]'
+            '(images/4e479728-5057-4be5-8bf2-07bf36085bd3_1024x2282.png '
+            '"Capcat HTML Output - Index view (dark theme)")]'
+            "(https://substackcdn.com/image/fetch/f_auto,q_auto:good/"
+            "https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic"
+            "%2Fimages%2F4e479728-5057-4be5-8bf2-07bf36085bd3_1024x2282.png)"
+        )
+        result = UnifiedMediaProcessor._replace_linked_image_urls(content)
+        assert "https://substackcdn.com" not in result
+        assert "](images/4e479728-5057-4be5-8bf2-07bf36085bd3_1024x2282.png)" in result
+
+    def test_generic_filename_no_match(self):
+        """image-14.png should NOT match a UUID-named web URL (different filenames)."""
+        content = (
+            '[![](images/image-14.png)]'
+            "(https://substackcdn.com/image/fetch/f_auto/"
+            "https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic"
+            "%2Fimages%2F58e7bc3b-b784-4b3f-84b8-675a43252fa5_1024x7640.png)"
+        )
+        result = UnifiedMediaProcessor._replace_linked_image_urls(content)
+        # Filenames don't match, so web URL stays (can't reliably map)
+        assert "https://substackcdn.com" in result
+
     def test_plain_images_not_affected(self):
         """Non-linked images ![alt](path) are not modified."""
         content = '![Plain](images/photo.png "Photo")\nSome text.'
