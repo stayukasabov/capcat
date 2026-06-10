@@ -181,26 +181,26 @@ class UnifiedMediaProcessor:
     def _replace_linked_image_urls(content: str) -> str:
         """Replace web URLs in linked-image markdown with local image paths.
 
-        markdownify converts <a href="web"><img src="local"></a> into
-        [![alt](images/local.png "title")](https://web/local.png).
-        For archiving, the outer link must also point to the local file.
-        Matches when the local filename appears in the outer web URL.
+        Pattern: [![alt](images/file.png)](https://web-url)
+        Becomes: [![alt](images/file.png)](images/file.png)
         """
-        # Match [![alt](images/filename "optional title")](https://...)
-        # Title may contain parentheses, so match quoted string explicitly.
-        linked_img_pattern = re.compile(
-            r'(\[!\[[^\]]*\]\(images/([^\s")\]]+)(?:\s+"[^"]*")?\)\])\((https?://[^)]+)\)'
-        )
+        import re
 
-        def _replace_outer(match):
-            img_part = match.group(1)       # [![alt](images/file.png "title")]
-            local_filename = match.group(2)  # file.png
-            # For archiving, linked images must always point to the local
-            # file. The image already displays from images/, so the outer
-            # link should go there too regardless of filename matching.
-            return f"{img_part}(images/{local_filename})"
+        # Find all [![...](images/filename)](...) patterns and extract the local path
+        def replace_link(match):
+            full_match = match.group(0)
+            # Extract the images/filename part from the inner image reference
+            inner_img_match = re.search(r'images/([^)\s"]+)', full_match)
+            if inner_img_match:
+                local_path = f"images/{inner_img_match.group(1)}"
+                # Replace the outer URL with the local path
+                return re.sub(r'\]\([^)]+\)$', f']({local_path})', full_match)
+            return full_match
 
-        return linked_img_pattern.sub(_replace_outer, content)
+        # Match [![...](images/file "optional title")](...) then outer (...)
+        # Title may contain parentheses, so match: images/file optionally followed by "..."
+        pattern = r'\[!\[[^\]]*\]\(images/[^\s"]+(?:\s+"[^"]*")?\)\]\([^)]+\)'
+        return re.sub(pattern, replace_link, content)
 
     @staticmethod
     def _insert_images_into_markdown(content: str, url_mapping: dict) -> str:
