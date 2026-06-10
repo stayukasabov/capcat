@@ -77,6 +77,12 @@ class UnifiedMediaProcessor:
                 content, article_folder, session, img_cfg, max_image_bytes
             )
 
+            # Phase 1b: Replace web URLs in linked-image wrappers
+            # [![alt](images/local)](https://web) -> [![alt](images/local)](images/local)
+            content = UnifiedMediaProcessor._replace_linked_image_urls(
+                content
+            )
+
             # Phase 2: Discover and download additional images from the full
             # page HTML using image_processing selectors. This catches images
             # that are outside the content selector scope.
@@ -168,6 +174,35 @@ class UnifiedMediaProcessor:
                 f"Downloaded {downloaded} inline images from markdown content"
             )
         return content
+
+    @staticmethod
+    def _replace_linked_image_urls(content: str) -> str:
+        """Replace web URLs in linked-image markdown with local image paths.
+
+        markdownify converts <a href="web"><img src="local"></a> into
+        [![alt](images/local.png "title")](https://web/local.png).
+        For archiving, the outer link must also point to the local file.
+        Matches when the local filename appears in the outer web URL.
+        """
+        # Match [![alt](images/filename ...)](https://...)
+        linked_img_pattern = re.compile(
+            r'(\[!\[[^\]]*\]\(images/([^\s")\]]+)[^)]*\)\])\((https?://[^)]+)\)'
+        )
+
+        def _replace_outer(match):
+            img_part = match.group(1)       # [![alt](images/file.png "title")]
+            local_filename = match.group(2)  # file.png
+            web_url = match.group(3)         # https://...
+
+            # Only replace if the local filename appears in the web URL
+            # (handles CDN transform variants of the same image)
+            from urllib.parse import unquote
+            decoded_url = unquote(web_url)
+            if local_filename in decoded_url or local_filename in web_url:
+                return f"{img_part}(images/{local_filename})"
+            return match.group(0)
+
+        return linked_img_pattern.sub(_replace_outer, content)
 
     @staticmethod
     def _insert_images_into_markdown(content: str, url_mapping: dict) -> str:

@@ -102,3 +102,67 @@ class TestInlineImageTitleAttribute:
         )
         assert cdn_url not in result
         assert "images/abc123.png" in result
+
+
+class TestLinkedImageWebUrls:
+    """Linked images [![alt](local)](weburl) must replace outer web URL with local path."""
+
+    def test_linked_image_outer_url_replaced(self):
+        """[![alt](images/local.png "title")](https://web/local.png) -> link to local."""
+        content = (
+            '[![Hero](images/hero_1920x1080.png "Hero Image")]'
+            "(https://substackcdn.com/image/fetch/f_auto/https%3A%2F%2Fexample.com%2Fimages%2Fhero_1920x1080.png)"
+        )
+        result = UnifiedMediaProcessor._replace_linked_image_urls(content)
+        assert "https://substackcdn.com" not in result
+        assert "[![Hero](images/hero_1920x1080.png" in result
+        assert "](images/hero_1920x1080.png)" in result
+
+    def test_linked_image_no_match_left_alone(self):
+        """Linked images where filenames don't match are left alone."""
+        content = (
+            '[![Alt](images/local.png "title")]'
+            "(https://example.com/unrelated-page)"
+        )
+        result = UnifiedMediaProcessor._replace_linked_image_urls(content)
+        assert "https://example.com/unrelated-page" in result
+
+    def test_multiple_linked_images(self):
+        """Multiple linked images all get outer URLs replaced."""
+        content = (
+            '[![A](images/a_100x100.png "A")](https://cdn.example.com/fetch/a_100x100.png)\n'
+            "Some text\n"
+            '[![B](images/b_200x200.jpg "B")](https://cdn.example.com/fetch/q_auto/https%3A%2F%2Fmedia.com%2Fb_200x200.jpg)\n'
+        )
+        result = UnifiedMediaProcessor._replace_linked_image_urls(content)
+        assert "https://cdn.example.com" not in result
+        assert "](images/a_100x100.png)" in result
+        assert "](images/b_200x200.jpg)" in result
+
+    def test_plain_images_not_affected(self):
+        """Non-linked images ![alt](path) are not modified."""
+        content = '![Plain](images/photo.png "Photo")\nSome text.'
+        result = UnifiedMediaProcessor._replace_linked_image_urls(content)
+        assert content == result
+
+    def test_integrated_with_download_inline_images(self):
+        """Full pipeline: download + link replacement works end to end."""
+        # Substack pattern: <a href="cdn_url_A"><img src="cdn_url_B" title="..."></a>
+        # markdownify produces: [![alt](cdn_url_B "title")](cdn_url_A)
+        cdn_img = "https://substackcdn.com/image/fetch/w_1456,c_limit/https%3A%2F%2Fmedia.com%2Fimages%2Fphoto_1920x1080.png"
+        cdn_link = "https://substackcdn.com/image/fetch/f_auto/https%3A%2F%2Fmedia.com%2Fimages%2Fphoto_1920x1080.png"
+        content = f'[![Shot]({cdn_img} "my shot")]({cdn_link})'
+        article_folder = "/tmp/test_article"
+
+        with patch("capcat.core.downloader.download_file") as mock_dl:
+            mock_dl.return_value = "images/photo_1920x1080.png"
+            result = UnifiedMediaProcessor._download_inline_images(
+                content, article_folder, MagicMock(), {}, 10 * 1024 * 1024
+            )
+
+        # After Phase 1, inner URL replaced but outer link still web
+        # _replace_linked_image_urls fixes the outer link
+        result = UnifiedMediaProcessor._replace_linked_image_urls(result)
+        assert "substackcdn.com" not in result
+        assert "[![Shot](images/photo_1920x1080.png" in result
+        assert "](images/photo_1920x1080.png)" in result
