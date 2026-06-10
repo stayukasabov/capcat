@@ -1219,6 +1219,11 @@ class ArticleFetcher(ABC):
             updated_article_content, article_folder_path
         )
 
+        from capcat.core.content_sanitizer import sanitize
+
+        updated_article_content = sanitize(
+            updated_article_content, mode="markdown"
+        )
         with open(filename, "w", encoding="utf-8") as f:
             f.write(updated_article_content)
 
