@@ -135,7 +135,11 @@ class UnifiedMediaProcessor:
         image_processing selectors find different URLs on the full page.
         """
         logger = get_logger(__name__)
-        inline_pattern = re.compile(r'!\[([^\]]*)\]\((https?://[^)]+)\)')
+        # Match ![alt](url) and ![alt](url "title") separately so the
+        # title portion is excluded from the captured URL.
+        inline_pattern = re.compile(
+            r'!\[([^\]]*)\]\((https?://[^\s"]+)(?:\s+"[^"]*")?\)'
+        )
         matches = inline_pattern.findall(content)
         if not matches:
             return content
