@@ -77,12 +77,6 @@ class UnifiedMediaProcessor:
                 content, article_folder, session, img_cfg, max_image_bytes
             )
 
-            # Phase 1b: Replace web URLs in linked-image wrappers
-            # [![alt](images/local)](https://web) -> [![alt](images/local)](images/local)
-            content = UnifiedMediaProcessor._replace_linked_image_urls(
-                content
-            )
-
             # Phase 2: Discover and download additional images from the full
             # page HTML using image_processing selectors. This catches images
             # that are outside the content selector scope.
@@ -118,6 +112,14 @@ class UnifiedMediaProcessor:
                 logger.info(f"Media processing completed for {source_name}")
             else:
                 logger.debug(f"No images processed for {source_name}")
+
+            # Final pass: replace web URLs in linked-image wrappers
+            # [![alt](images/local)](https://web) -> [![...](images/local)](images/local)
+            # Runs after both Phase 1 and Phase 2 so all inner image
+            # URLs have been replaced with local paths.
+            content = UnifiedMediaProcessor._replace_linked_image_urls(
+                content
+            )
 
             return content
 
