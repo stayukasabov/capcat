@@ -379,3 +379,86 @@ class TestPreservation:
         content = "Just some plain text with no HTML at all."
         result = sanitize(content, mode="markdown")
         assert content == result
+
+
+class TestIntegration:
+    """Full article content with mixed dangerous and safe elements."""
+
+    def test_mixed_content_markdown(self):
+        content = (
+            "# White House App Analysis\n\n"
+            "**Source URL:** [https://example.com/article](https://example.com/article)\n\n"
+            "---\n\n"
+            "The app contacts **31 unique hosts**.\n\n"
+            "Read the [full analysis](https://example.com/report).\n\n"
+            "![Diagram](images/diagram.png)\n\n"
+            "## Tracking Infrastructure\n\n"
+            '<script>ga("send", "pageview")</script>\n'
+            '<img src="https://www.google-analytics.com/collect?v=1&tid=UA-123">\n'
+            '<iframe src="https://ads.doubleclick.net/frame"></iframe>\n'
+            '<img src="https://example.com/pixel.gif" width="1" height="1">\n'
+            '<div style="display:none"><img src="https://hidden-tracker.com/beacon"></div>\n'
+            '<meta http-equiv="refresh" content="0;url=https://redirect.com">\n'
+            '<link rel="dns-prefetch" href="//analytics.example.com">\n\n'
+            "```javascript\n"
+            "// This is example code in the article\n"
+            '<script src="https://google-analytics.com/ga.js"></script>\n'
+            "```\n\n"
+            "The privacy label says no data is collected.\n"
+        )
+
+        result = sanitize(content, mode="markdown")
+
+        # Dangerous elements removed
+        assert "google-analytics.com/collect" not in result
+        assert "<iframe" not in result
+        assert "doubleclick.net" not in result
+        assert 'width="1" height="1"' not in result
+        assert "display:none" not in result
+        assert "hidden-tracker.com" not in result
+        assert 'http-equiv="refresh"' not in result.lower()
+        assert "dns-prefetch" not in result
+
+        # Safe content preserved
+        assert "# White House App Analysis" in result
+        assert "https://example.com/article" in result
+        assert "[full analysis](https://example.com/report)" in result
+        assert "![Diagram](images/diagram.png)" in result
+        assert "The privacy label says no data is collected." in result
+
+        # Code block preserved
+        assert "// This is example code in the article" in result
+        assert "google-analytics.com/ga.js" in result  # Inside code block
+
+    def test_mixed_content_html(self):
+        content = (
+            "<html><head><title>Test</title></head><body>\n"
+            "<h1>Article</h1>\n"
+            '<script>ga("send")</script>\n'
+            '<link rel="stylesheet" href="https://fonts.googleapis.com/css">\n'
+            '<img src="https://www.facebook.com/tr?id=123&ev=PageView">\n'
+            "<p>Safe content with <a href='https://example.com'>link</a></p>\n"
+            '<img src="images/photo.jpg" alt="photo">\n'
+            "</body></html>"
+        )
+
+        result = sanitize(content, mode="html")
+
+        # Dangerous elements removed
+        assert "<script>" not in result
+        assert "fonts.googleapis.com" not in result
+        assert "facebook.com/tr" not in result
+
+        # CSP injected
+        assert "Content-Security-Policy" in result
+        assert "script-src 'none'" in result
+
+        # Safe content preserved
+        assert "<h1>Article</h1>" in result
+        assert "https://example.com" in result
+        assert "images/photo.jpg" in result
+
+    def test_markdown_mode_does_not_add_csp(self):
+        content = "<html><head></head><body>Text</body></html>"
+        result = sanitize(content, mode="markdown")
+        assert "Content-Security-Policy" not in result
