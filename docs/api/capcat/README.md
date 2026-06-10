@@ -39,6 +39,7 @@ Clean architecture implementation applying SOLID principles:
 - Dependency Inversion: Depend on abstractions not concretions
 - [`capcat.core.session_pool`](./session_pool.md) - Global session pooling for optimal network performance across all sources
 - [`capcat.core.constants`](./constants.md) - Application-wide constants for Capcat
+- [`capcat.core.content_sanitizer`](./content_sanitizer.md) - Content Sanitizer - Archive isolation for Capcat
 - [`capcat.core.shutdown`](./shutdown.md) - Graceful shutdown handling for Capcat
 - [`capcat.core.rate_limiter`](./rate_limiter.md) - Rate limiting system for Capcat to prevent overwhelming source servers
 - [`capcat.core.ethical_scraping`](./ethical_scraping.md) - Ethical scraping utilities for Capcat

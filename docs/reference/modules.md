@@ -29,6 +29,7 @@ Complete reference of all modules, classes, and functions in Capcat.
 - [capcat.core.config.source_base](../api/capcat/source_base.md) - Base configuration classes for news sources
 - [capcat.core.config.source_registry](../api/capcat/source_registry.md) - Source Registry for managing all available news sources and their configurations
 - [capcat.core.constants](../api/capcat/constants.md) - Application-wide constants for Capcat
+- [capcat.core.content_sanitizer](../api/capcat/content_sanitizer.md) - Content Sanitizer - Archive isolation for Capcat
 - [capcat.core.conversion_executor](../api/capcat/conversion_executor.md) - Shared executor pool for HTML-to-Markdown conversion to prevent nested ThreadPoolExecutor deadlock
 - [capcat.core.design_system_compiler](../api/capcat/design_system_compiler.md) - Design System Compiler for Capcat HTML Generation
 
@@ -166,9 +167,9 @@ Usage:
 
 ## Statistics
 
-- **Total Modules**: 108
+- **Total Modules**: 109
 - **Total Classes**: 196
-- **Total Functions**: 297
-- **Public Functions**: 218
-- **Documentation Coverage**: 73.4%
+- **Total Functions**: 308
+- **Public Functions**: 220
+- **Documentation Coverage**: 71.4%
 

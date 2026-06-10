@@ -75,6 +75,23 @@ image_processing selectors find different URLs on the full page.
 
 **Returns:** str
 
+##### _replace_linked_image_urls
+
+```python
+def _replace_linked_image_urls(content: str) -> str
+```
+
+Replace web URLs in linked-image markdown with local image paths.
+
+Pattern: [![alt](images/file.png)](https://web-url)
+Becomes: [![alt](images/file.png)](images/file.png)
+
+**Parameters:**
+
+- `content` (str)
+
+**Returns:** str
+
 ##### _insert_images_into_markdown
 
 ```python
@@ -107,6 +124,16 @@ Load source configuration from YAML file.
 
 
 ## Functions
+
+### replace_link
+
+```python
+def replace_link(match)
+```
+
+**Parameters:**
+
+- `match`
 
 ### _resolve
 
