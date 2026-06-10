@@ -256,3 +256,65 @@ class TestHeuristicHiddenElements:
         result = sanitize(content, mode="markdown")
         assert "track.gif" not in result
         assert "Text" in result
+
+
+class TestHtmlCspInjection:
+    """H1: Content Security Policy meta tag injected."""
+
+    def test_csp_injected_after_head(self):
+        content = "<html><head><title>Test</title></head><body>Text</body></html>"
+        result = sanitize(content, mode="html")
+        assert 'Content-Security-Policy' in result
+        assert "script-src 'none'" in result
+        assert "connect-src 'none'" in result
+        assert result.index("Content-Security-Policy") < result.index("</head>")
+
+    def test_csp_not_injected_in_markdown_mode(self):
+        content = "<html><head><title>Test</title></head><body>Text</body></html>"
+        result = sanitize(content, mode="markdown")
+        assert "Content-Security-Policy" not in result
+
+
+class TestHtmlExternalStylesheetRemoval:
+    """H2: External <link rel='stylesheet'> removed."""
+
+    def test_external_stylesheet_removed(self):
+        content = '<head><link rel="stylesheet" href="https://fonts.googleapis.com/css"></head>'
+        result = sanitize(content, mode="html")
+        assert "fonts.googleapis.com" not in result
+
+    def test_local_stylesheet_preserved(self):
+        content = '<head><link rel="stylesheet" href="css/main.css"></head>'
+        result = sanitize(content, mode="html")
+        assert "css/main.css" in result
+
+
+class TestHtmlExternalScriptRemoval:
+    """H3: External <script src='...'> removed."""
+
+    def test_external_script_removed(self):
+        content = '<script src="https://cdn.tracker.com/analytics.js"></script>\nText'
+        result = sanitize(content, mode="html")
+        assert "cdn.tracker.com" not in result
+        assert "Text" in result
+
+    def test_inline_script_also_removed(self):
+        """Inline scripts removed by M1 in both modes."""
+        content = '<script>ga("send", "pageview")</script>\nText'
+        result = sanitize(content, mode="html")
+        assert "<script>" not in result
+        assert "Text" in result
+
+
+class TestHtmlTrackerImageRemoval:
+    """H4: <img> with tracker domain src removed in HTML mode."""
+
+    def test_facebook_pixel_removed(self):
+        content = '<img src="https://www.facebook.com/tr?id=123&ev=PageView">'
+        result = sanitize(content, mode="html")
+        assert "facebook.com" not in result
+
+    def test_content_image_preserved(self):
+        content = '<img src="images/photo.jpg" alt="Article photo">'
+        result = sanitize(content, mode="html")
+        assert "images/photo.jpg" in result

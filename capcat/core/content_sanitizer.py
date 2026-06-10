@@ -240,4 +240,43 @@ def _strip_tracking_heuristics(content: str) -> str:
 
 def _apply_html_hardening(content: str) -> str:
     """Apply HTML-specific hardening rules (H1-H4)."""
+
+    # H1: Inject Content Security Policy meta tag after <head>
+    csp_tag = (
+        '<meta http-equiv="Content-Security-Policy" content="'
+        "default-src 'self'; "
+        "script-src 'none'; "
+        "connect-src 'none'; "
+        "img-src 'self' data:; "
+        "style-src 'self' 'unsafe-inline'"
+        '">'
+    )
+    content = re.sub(
+        r"(<head\b[^>]*>)",
+        rf"\1\n    {csp_tag}",
+        content,
+        count=1,
+        flags=re.IGNORECASE,
+    )
+
+    # H2: Remove external <link rel="stylesheet"> (keep local ones)
+    def _remove_external_stylesheet(match):
+        tag = match.group(0)
+        href_match = re.search(r'href\s*=\s*["\']([^"\']+)["\']', tag, re.IGNORECASE)
+        if href_match:
+            href = href_match.group(1)
+            if href.startswith(("http://", "https://", "//")):
+                return ""
+        return tag
+
+    content = re.sub(
+        r'<link\b[^>]*rel\s*=\s*["\']stylesheet["\'][^>]*>',
+        _remove_external_stylesheet,
+        content,
+        flags=re.IGNORECASE,
+    )
+
+    # H3: External <script src="..."> already handled by M1 (removes all script tags).
+    # H4: Tracker domain images already handled by M4.
+
     return content
