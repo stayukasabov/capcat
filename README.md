@@ -157,6 +157,26 @@ Config priority: CLI flag, TUI prompt, per-source `Config/sources/active/<source
 - No paywall circumvention
 - Proper source attribution
 
+## Archive Isolation
+
+Every archived file passes through a content sanitizer before saving.
+The sanitizer silently removes:
+
+- Tracking pixels and analytics beacons
+- Embedded scripts and iframes
+- DNS prefetch/preload hints
+- Hidden elements with external references
+- Known tracker domain resources (Google Analytics, DoubleClick, Facebook Pixel, etc.)
+
+Heuristic detection catches unlisted trackers by identifying:
+- 1x1 pixel images
+- Query-heavy image URLs (fingerprinting patterns)
+- URLs with /collect, /pixel, /beacon, /analytics paths
+- Hidden elements containing external references
+
+Article links and source URLs are preserved. The archive is yours to read
+offline with zero external connections.
+
 ## Documentation
 
 Full documentation at [capcat.org](https://capcat.org):
