@@ -181,6 +181,60 @@ def _strip_dangerous_html(content: str) -> str:
 
 def _strip_tracking_heuristics(content: str) -> str:
     """Detect and remove tracking elements by heuristic patterns."""
+
+    def _is_heuristic_tracker(tag: str) -> bool:
+        """Check if an <img> tag matches tracking heuristics."""
+        src_match = re.search(r'src\s*=\s*["\']([^"\']+)["\']', tag, re.IGNORECASE)
+        if not src_match:
+            return False
+        src = src_match.group(1)
+
+        # Heuristic 1: 1x1 pixel images
+        if re.search(r'(?:width|height)\s*=\s*["\']?1["\']?', tag, re.IGNORECASE):
+            other_dim = re.findall(r'(?:width|height)\s*=\s*["\']?(\d+)["\']?', tag, re.IGNORECASE)
+            if all(int(d) <= 1 for d in other_dim):
+                return True
+
+        # Heuristic 1b: Filename contains pixel/beacon/track
+        src_lower = src.lower()
+        if re.search(r"(?:^|/)(?:pixel|beacon|track)\b", src_lower.split("?")[0]):
+            return True
+
+        # Heuristic 2: Query-heavy image URLs (3+ query params)
+        if "?" in src:
+            query = src.split("?", 1)[1]
+            param_count = len(re.findall(r"[&;]", query)) + 1
+            if param_count >= 3:
+                return True
+
+        # Heuristic 3: Tracker path patterns
+        path = src.split("?")[0]
+        for pattern in TRACKER_PATH_PATTERNS:
+            if pattern in path.lower():
+                return True
+
+        # Heuristic 4: Visibility hidden on the image itself
+        if re.search(r'style\s*=\s*"[^"]*visibility\s*:\s*hidden', tag, re.IGNORECASE):
+            return True
+
+        return False
+
+    # Apply heuristics to <img> tags not already removed by M4
+    content = re.sub(
+        r"<img\b[^>]*>",
+        lambda m: "" if _is_heuristic_tracker(m.group(0)) else m.group(0),
+        content,
+        flags=re.IGNORECASE,
+    )
+
+    # Heuristic 4b: Remove display:none containers with external URLs
+    content = re.sub(
+        r'<div\b[^>]*style\s*=\s*"[^"]*display\s*:\s*none[^"]*"[^>]*>[\s\S]*?</div>',
+        "",
+        content,
+        flags=re.IGNORECASE,
+    )
+
     return content
 
 

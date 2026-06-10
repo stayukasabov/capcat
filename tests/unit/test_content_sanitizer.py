@@ -177,3 +177,82 @@ class TestMarkdownProtocolRelativeRemoval:
         result = sanitize(content, mode="markdown")
         assert "googleapis.com" not in result
         assert "Text" in result
+
+
+class TestHeuristic1x1Pixel:
+    """Heuristic: 1x1 pixel images detected and removed."""
+
+    def test_1x1_width_height_removed(self):
+        content = '<img src="https://unknown.com/img" width="1" height="1">\nText'
+        result = sanitize(content, mode="markdown")
+        assert "unknown.com" not in result
+        assert "Text" in result
+
+    def test_pixel_in_filename_removed(self):
+        content = '<img src="https://example.com/pixel.gif">\nText'
+        result = sanitize(content, mode="markdown")
+        assert "pixel.gif" not in result
+        assert "Text" in result
+
+    def test_beacon_in_filename_removed(self):
+        content = '<img src="https://example.com/beacon.png">\nText'
+        result = sanitize(content, mode="markdown")
+        assert "beacon.png" not in result
+        assert "Text" in result
+
+    def test_normal_image_preserved(self):
+        content = '<img src="https://example.com/photo.jpg" width="800" height="600">'
+        result = sanitize(content, mode="markdown")
+        assert "photo.jpg" in result
+
+
+class TestHeuristicQueryHeavyImage:
+    """Heuristic: Images with 3+ query params detected as fingerprinting."""
+
+    def test_query_heavy_image_removed(self):
+        content = '<img src="https://example.com/img?uid=123&sid=456&cb=789&t=1">\nText'
+        result = sanitize(content, mode="markdown")
+        assert "uid=123" not in result
+        assert "Text" in result
+
+    def test_image_with_few_params_preserved(self):
+        content = '<img src="https://example.com/img?w=800&h=600">'
+        result = sanitize(content, mode="markdown")
+        assert "example.com/img" in result
+
+
+class TestHeuristicTrackerPath:
+    """Heuristic: URLs with tracker path patterns detected."""
+
+    def test_collect_path_removed(self):
+        content = '<img src="https://custom-domain.com/collect?v=1&tid=UA-123">\nText'
+        result = sanitize(content, mode="markdown")
+        assert "custom-domain.com" not in result
+        assert "Text" in result
+
+    def test_pixel_path_removed(self):
+        content = '<img src="https://metrics.example.com/pixel/view">\nText'
+        result = sanitize(content, mode="markdown")
+        assert "metrics.example.com" not in result
+        assert "Text" in result
+
+    def test_normal_path_preserved(self):
+        content = '<img src="https://example.com/images/photo.jpg">'
+        result = sanitize(content, mode="markdown")
+        assert "photo.jpg" in result
+
+
+class TestHeuristicHiddenElements:
+    """Heuristic: Hidden elements with external URLs removed."""
+
+    def test_display_none_with_external_url_removed(self):
+        content = '<div style="display:none"><img src="https://tracker.com/pixel.gif"></div>\nText'
+        result = sanitize(content, mode="markdown")
+        assert "tracker.com" not in result
+        assert "Text" in result
+
+    def test_visibility_hidden_with_external_url_removed(self):
+        content = '<img src="https://example.com/track.gif" style="visibility:hidden">\nText'
+        result = sanitize(content, mode="markdown")
+        assert "track.gif" not in result
+        assert "Text" in result
