@@ -149,6 +149,10 @@ class ConfigDrivenSource(BaseSource):
                 progress_callback=progress_callback,
             )
 
+            # Extract publish date from fetched HTML (no extra request)
+            if not article.published_date and getattr(fetcher, "_last_extracted_date", None):
+                article.published_date = fetcher._last_extracted_date
+
             self._record_content_fetch(success)
 
             if success:

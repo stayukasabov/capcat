@@ -3064,6 +3064,10 @@ class NewsSourceArticleFetcher(ArticleFetcher):
                 record_fetch_result(False, "error")
             return False, None, None
 
+        # Extract publish date from already-fetched HTML (no extra request)
+        from capcat.core.date_extractor import extract_publish_date
+        self._last_extracted_date = extract_publish_date(soup)
+
         # Detect JavaScript-only SPA shells before attempting extraction.
         # These pages have a nearly empty body with a root mount point - all
         # content is rendered client-side and cannot be extracted without a
