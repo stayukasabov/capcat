@@ -337,7 +337,7 @@ Auto-discovers categories from source configurations.
 
 **Returns:** str
 
-⚠️ **High complexity:** 49
+⚠️ **High complexity:** 58
 
 ##### _generate_index_navigation
 
@@ -744,20 +744,28 @@ Returns:
 
 - `source_id`
 
+### get_article_date
+
+```python
+def get_article_date(item)
+```
+
+Read 'date' from article YAML frontmatter. Returns string or empty.
+
+**Parameters:**
+
+- `item`
+
 ### sort_items
 
 ```python
 def sort_items(item)
 ```
 
-Return a sort key for a directory entry based on category order.
+Return a sort key for a directory entry.
 
-Args:
-    item: A ``pathlib.Path``-like directory entry with a ``name``
-        attribute.
-
-Returns:
-    Tuple used as a sort key: ``(category_index, source_order, name)``.
+Root level: category order, then bundle order.
+Source level: publication date (newest first), then mtime.
 
 **Parameters:**
 

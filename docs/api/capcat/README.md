@@ -74,6 +74,7 @@ for performance optimization and self-contained HTML generation
 - [`capcat.core.template_renderer`](./template_renderer.md) - Simple Template Renderer for Capcat
 Replaces {{placeholder}} variables with actual values from configuration
 - [`capcat.core.async_pdf_manager`](./async_pdf_manager.md) - Asynchronous PDF download manager to prevent thread pool exhaustion
+- [`capcat.core.date_extractor`](./date_extractor.md) - Extract publication dates from HTML pages
 - [`capcat.htmlgen.factory`](./factory.md) - Factory for creating ArticleHTMLGenerator instances
 - [`capcat.htmlgen.generator`](./generator.md) - HTML Generator for Capcat - Static Site Generation
 Creates self-contained HTML files from markdown content with embedded CSS and JavaScript

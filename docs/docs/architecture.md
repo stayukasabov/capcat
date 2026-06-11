@@ -32,14 +32,17 @@ capcat fetch <source>
 SourceRegistry  →  SourceFactory  →  Source instance
                                             |
                               article discovery (RSS / scrape)
+                              + date extraction (RSS pubDate / HTML JSON-LD)
                                             |
                               UnifiedSourceProcessor (8 workers)
                                             |
                               ArticleFetcher  +  fetch_comments()
+                              + date extraction from fetched HTML (no extra request)
                                             |
                               MediaProcessor  →  images / PDFs
                                             |
                               HTMLGenerator   →  article HTML
+                              (sorted by publication date, newest first)
                                             |
                               News/<source>/  (output directory)
 ```
@@ -61,8 +64,11 @@ Auto-discovers all sources from `Config/sources/active/`. Singleton - call `get_
 ### SessionPool
 `pool_connections=20, pool_maxsize=20` - shared across all workers via `get_session_pool()`.
 
+### DateExtractor
+Extracts publication dates from already-fetched HTML pages (no extra HTTP requests). Priority: JSON-LD `datePublished` > `<meta property="article:published_time">` > `<time datetime="...">`. RSS sources get dates directly from feed entries.
+
 ### HTMLGenerator
-Six templates: `article-with-comments.html`, `article-no-comments.html`, `comments-with-navigation.html`, `article-capcats.html`, `root-index.html`, `source-index.html`.
+Six templates: `article-with-comments.html`, `article-no-comments.html`, `comments-with-navigation.html`, `article-capcats.html`, `root-index.html`, `source-index.html`. Source-level article listings sort by publication date (newest first), falling back to file modification time for articles without dates.
 
 ## Directory Layout
 

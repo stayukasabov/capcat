@@ -31,6 +31,7 @@ Complete reference of all modules, classes, and functions in Capcat.
 - [capcat.core.constants](../api/capcat/constants.md) - Application-wide constants for Capcat
 - [capcat.core.content_sanitizer](../api/capcat/content_sanitizer.md) - Content Sanitizer - Archive isolation for Capcat
 - [capcat.core.conversion_executor](../api/capcat/conversion_executor.md) - Shared executor pool for HTML-to-Markdown conversion to prevent nested ThreadPoolExecutor deadlock
+- [capcat.core.date_extractor](../api/capcat/date_extractor.md) - Extract publication dates from HTML pages
 - [capcat.core.design_system_compiler](../api/capcat/design_system_compiler.md) - Design System Compiler for Capcat HTML Generation
 
 Compiles CSS custom properties from the design system into hardcoded values
@@ -167,9 +168,9 @@ Usage:
 
 ## Statistics
 
-- **Total Modules**: 109
+- **Total Modules**: 110
 - **Total Classes**: 196
-- **Total Functions**: 308
-- **Public Functions**: 220
+- **Total Functions**: 311
+- **Public Functions**: 222
 - **Documentation Coverage**: 71.4%
 
