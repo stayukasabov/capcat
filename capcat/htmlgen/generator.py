@@ -1067,16 +1067,31 @@ class ArticleHTMLGenerator:
                     return category
             return None
 
-        # 7. Custom sorting function for category-based organization
+        # 7. Helper: read publication date from article frontmatter
+        def get_article_date(item):
+            """Read 'date' from article YAML frontmatter. Returns string or empty."""
+            md = find_article_md(item)
+            if md is None:
+                return ""
+            try:
+                with open(md, "r", encoding="utf-8") as f:
+                    content = f.read(2048)
+                if not content.startswith("---"):
+                    return ""
+                end = content.find("---", 3)
+                if end == -1:
+                    return ""
+                fm = yaml.safe_load(content[3:end])
+                return str(fm.get("date") or "") if isinstance(fm, dict) else ""
+            except Exception:
+                return ""
+
+        # 8. Custom sorting function for category-based organization
         def sort_items(item):
-            """Return a sort key for a directory entry based on category order.
+            """Return a sort key for a directory entry.
 
-            Args:
-                item: A ``pathlib.Path``-like directory entry with a ``name``
-                    attribute.
-
-            Returns:
-                Tuple used as a sort key: ``(category_index, source_order, name)``.
+            Root level: category order, then bundle order.
+            Source level: publication date (newest first), then mtime.
             """
             source_id = extract_source_id(item.name)
             category = find_category(source_id)
@@ -1093,7 +1108,18 @@ class ArticleHTMLGenerator:
 
                 return (0, category_priority, source_position, source_id)
 
-            # Non-categorized items sorted by modification time
+            # Source-level: sort by publication date (newest first)
+            if not is_root_level and item.is_dir():
+                date_str = get_article_date(item)
+                if date_str:
+                    try:
+                        from datetime import datetime as _dt
+                        dt = _dt.fromisoformat(date_str)
+                        return (0, -dt.timestamp(), item.name)
+                    except (ValueError, TypeError):
+                        pass
+
+            # Fallback: modification time
             return (1, 0, 0, item.stat().st_mtime)
 
         # --- End of Auto-Discovery Logic ---
