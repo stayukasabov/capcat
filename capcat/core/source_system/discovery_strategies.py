@@ -257,6 +257,7 @@ class RSSDiscoveryStrategy(DiscoveryStrategy):
                 url=item.url,
                 summary=item.description,
                 comment_url=None,
+                published_date=str(item.published_date) if item.published_date else None,
             )
             articles.append(article)
 
