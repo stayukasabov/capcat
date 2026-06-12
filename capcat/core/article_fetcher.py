@@ -6,6 +6,7 @@ This module contains the base ArticleFetcher class that eliminates
 code duplication between source-specific implementations.
 """
 
+import mimetypes
 import os
 import time
 from abc import ABC, abstractmethod
@@ -691,6 +692,7 @@ class ArticleFetcher(ABC):
                     f"[here]({local_path}).\n\n"
                 )
             elif file_type == "audio":
+                mime = mimetypes.guess_type(url)[0] or "audio/mpeg"
                 md_content += "## Audio\n\n"
                 md_content += (
                     f"This article is an audio file. You can listen to it "
@@ -698,10 +700,11 @@ class ArticleFetcher(ABC):
                 )
                 md_content += (
                     f'<audio controls>\n  <source src="{local_path}" '
-                    f'type="audio/mpeg">\n  Your browser does not support '
+                    f'type="{mime}">\n  Your browser does not support '
                     f'the audio element.\n</audio>\n\n'
                 )
             elif file_type == "video":
+                mime = mimetypes.guess_type(url)[0] or "video/mp4"
                 md_content += "## Video\n\n"
                 md_content += (
                     f"This article is a video file. You can watch it "
@@ -709,7 +712,7 @@ class ArticleFetcher(ABC):
                 )
                 md_content += (
                     f'<video controls width="1280" height="720">\n  '
-                    f'<source src="{local_path}" type="video/mp4">\n  '
+                    f'<source src="{local_path}" type="{mime}">\n  '
                     f'Your browser does not support the video element.\n'
                     f'</video>\n\n'
                 )
