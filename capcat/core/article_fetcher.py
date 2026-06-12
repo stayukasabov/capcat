@@ -907,11 +907,14 @@ class ArticleFetcher(ABC):
         if progress_callback:
             progress_callback(0.2, "parsing")
 
+        # Read response body once to avoid duplicate memory copies
+        html_text = response.text
+
         # Store original full page HTML for fallback image detection
-        original_full_html = response.text
+        original_full_html = html_text
 
         try:
-            soup = BeautifulSoup(response.text, "html.parser")
+            soup = BeautifulSoup(html_text, "html.parser")
         except Exception as e:
             self.logger.debug(f"Failed to parse HTML from {url}: {e}")
             return False, None, None
@@ -3056,8 +3059,11 @@ class NewsSourceArticleFetcher(ArticleFetcher):
         if progress_callback:
             progress_callback(0.2, "parsing")
 
+        # Read response body once to avoid duplicate memory copies
+        html_text = response.text
+
         try:
-            soup = BeautifulSoup(response.text, "html.parser")
+            soup = BeautifulSoup(html_text, "html.parser")
         except Exception as e:
             self.logger.debug(f"Failed to parse HTML from {url}: {e}")
             if is_tui_active():
@@ -3359,7 +3365,7 @@ class NewsSourceArticleFetcher(ArticleFetcher):
             )
             updated_markdown = UnifiedMediaProcessor.process_article_media(
                 content=article_content,
-                html_content=response.text,
+                html_content=html_text,
                 url=url,
                 article_folder=article_folder_path,
                 source_name=source_name,
