@@ -22,6 +22,27 @@ from capcat.core.utils import truncate_title_intelligently
 from capcat.core.storage_manager import find_article_md, find_comments_md
 
 
+def _manifest_article_count(source_dir: Path) -> "int | None":
+    """Return the number of articles in the manifest, or None if unavailable.
+
+    Used by the HTML index generator to get an accurate unique article count
+    instead of counting filesystem directories (which may include duplicates
+    from pre-dedup runs).
+    """
+    import json
+    manifest_path = source_dir / ".capcat_fetched.json"
+    if not manifest_path.exists():
+        return None
+    try:
+        with open(manifest_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        if isinstance(data, dict) and len(data) > 0:
+            return len(data)
+        return None
+    except (json.JSONDecodeError, OSError):
+        return None
+
+
 class ArticleHTMLGenerator:
     """
     Static HTML generator for Capcat archives.
@@ -1179,7 +1200,7 @@ class ArticleHTMLGenerator:
                         "category": category,
                     })
                 else:
-                    article_count = sum(1 for d in item.rglob("*") if d.is_dir() and find_article_md(d) is not None)
+                    article_count = _manifest_article_count(item) or sum(1 for d in item.rglob("*") if d.is_dir() and find_article_md(d) is not None)
                     source_id = extract_source_id(item.name)
 
                     # Determine if we're in Capcats (single article captures)
