@@ -17,6 +17,10 @@ Follows DRY principle while maintaining source-specific optimizations.
 
 ## Constants
 
+### MANIFEST_FILENAME
+
+**Value:** `'.capcat_fetched.json'`
+
 ### NEW_SOURCE_SYSTEM_AVAILABLE
 
 **Value:** `True`
@@ -145,12 +149,12 @@ Process articles using the new source system.
 
 **Returns:** None
 
-⚠️ **High complexity:** 20
+⚠️ **High complexity:** 22
 
 ##### _process_articles_with_new_system
 
 ```python
-def _process_articles_with_new_system(self, source, articles, base_dir: str, download_files: bool, quiet: bool, verbose: bool, download_pdfs: bool = False)
+def _process_articles_with_new_system(self, source, articles, base_dir: str, download_files: bool, quiet: bool, verbose: bool, download_pdfs: bool = False, manifest: dict = None)
 ```
 
 Process articles using the new source system with parallel execution.
@@ -165,8 +169,9 @@ Process articles using the new source system with parallel execution.
 - `quiet` (bool)
 - `verbose` (bool)
 - `download_pdfs` (bool) *optional*
+- `manifest` (dict) *optional*
 
-⚠️ **High complexity:** 13
+⚠️ **High complexity:** 14
 
 ##### _process_single_article_new_system
 
@@ -193,6 +198,60 @@ Process a single article using the new source system.
 
 
 ## Functions
+
+### load_manifest
+
+```python
+def load_manifest(base_dir: str) -> dict
+```
+
+Load the URL manifest from a source output directory.
+
+Returns a dict mapping URL -> folder_name. Returns empty dict if
+the manifest does not exist or is corrupt.
+
+**Parameters:**
+
+- `base_dir` (str)
+
+**Returns:** dict
+
+### save_manifest
+
+```python
+def save_manifest(base_dir: str, manifest: dict) -> None
+```
+
+Write the URL manifest to a source output directory.
+
+**Parameters:**
+
+- `base_dir` (str)
+- `manifest` (dict)
+
+**Returns:** None
+
+### filter_already_fetched
+
+```python
+def filter_already_fetched(articles: list, manifest: dict) -> tuple
+```
+
+Partition articles into new (not in manifest) and count of skipped.
+
+Args:
+    articles: List of Article objects with a .url attribute.
+    manifest: Dict mapping URL -> folder_name from a previous run.
+
+Returns:
+    (new_articles, skipped_count) tuple.
+
+**Parameters:**
+
+- `articles` (list)
+- `manifest` (dict)
+
+**Returns:** tuple
 
 ### _resolve_count
 

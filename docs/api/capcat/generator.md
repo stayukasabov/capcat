@@ -337,7 +337,7 @@ Auto-discovers categories from source configurations.
 
 **Returns:** str
 
-⚠️ **High complexity:** 58
+⚠️ **High complexity:** 59
 
 ##### _generate_index_navigation
 
@@ -711,6 +711,24 @@ Generate error page HTML.
 
 
 ## Functions
+
+### _manifest_article_count
+
+```python
+def _manifest_article_count(source_dir: Path) -> 'int | None'
+```
+
+Return the number of articles in the manifest, or None if unavailable.
+
+Used by the HTML index generator to get an accurate unique article count
+instead of counting filesystem directories (which may include duplicates
+from pre-dedup runs).
+
+**Parameters:**
+
+- `source_dir` (Path)
+
+**Returns:** 'int | None'
 
 ### extract_source_id
 
