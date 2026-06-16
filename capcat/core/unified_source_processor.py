@@ -575,7 +575,6 @@ class UnifiedSourceProcessor:
 
         # Log summary with old+new counts
         successful = successful_count
-        failed = failed_count
         existing = len(manifest) - successful
         total = len(manifest)
 
