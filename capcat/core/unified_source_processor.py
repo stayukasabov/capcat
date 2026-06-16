@@ -7,6 +7,7 @@ a single, configurable processor that works with all sources.
 Follows DRY principle while maintaining source-specific optimizations.
 """
 
+import json
 import os
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed, TimeoutError
@@ -42,6 +43,50 @@ try:
     MIRROR_AVAILABLE = True
 except ImportError:
     MIRROR_AVAILABLE = False
+
+
+MANIFEST_FILENAME = ".capcat_fetched.json"
+
+
+def load_manifest(base_dir: str) -> dict:
+    """Load the URL manifest from a source output directory.
+
+    Returns a dict mapping URL -> folder_name. Returns empty dict if
+    the manifest does not exist or is corrupt.
+    """
+    path = os.path.join(base_dir, MANIFEST_FILENAME)
+    if not os.path.exists(path):
+        return {}
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        if isinstance(data, dict):
+            return data
+        return {}
+    except (json.JSONDecodeError, OSError):
+        return {}
+
+
+def save_manifest(base_dir: str, manifest: dict) -> None:
+    """Write the URL manifest to a source output directory."""
+    path = os.path.join(base_dir, MANIFEST_FILENAME)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(manifest, f, indent=2, ensure_ascii=False)
+
+
+def filter_already_fetched(articles: list, manifest: dict) -> tuple:
+    """Partition articles into new (not in manifest) and count of skipped.
+
+    Args:
+        articles: List of Article objects with a .url attribute.
+        manifest: Dict mapping URL -> folder_name from a previous run.
+
+    Returns:
+        (new_articles, skipped_count) tuple.
+    """
+    new = [a for a in articles if a.url not in manifest]
+    skipped = len(articles) - len(new)
+    return new, skipped
 
 
 @dataclass
@@ -351,13 +396,34 @@ class UnifiedSourceProcessor:
             else:
                 base_dir = create_batch_output_directory(source_name)
 
+            # Load manifest for deduplication on re-runs
+            manifest = load_manifest(base_dir)
+            articles, skipped_count = filter_already_fetched(articles, manifest)
+
+            if skipped_count > 0:
+                self.logger.info(
+                    f"Skipped {skipped_count} already-fetched articles"
+                )
+
+            if not articles:
+                existing_count = len(manifest)
+                self.logger.info(
+                    f"All articles already fetched ({existing_count} in archive)"
+                )
+                print(
+                    f"\n{source_config.display_name}: 0 new, "
+                    f"{existing_count} already in archive\n",
+                    flush=True,
+                )
+                return
+
             self.logger.info(
-                f"Found {len(articles)} articles. Fetching content in parallel..."
+                f"Found {len(articles)} new articles. Fetching content in parallel..."
             )
 
             # Process articles using new system approach
             self._process_articles_with_new_system(
-                source, articles, base_dir, resolved_files, quiet, verbose, resolved_pdfs
+                source, articles, base_dir, resolved_files, quiet, verbose, resolved_pdfs, manifest
             )
 
             # Drain pending PDF downloads before returning.
@@ -402,8 +468,11 @@ class UnifiedSourceProcessor:
         quiet: bool,
         verbose: bool,
         download_pdfs: bool = False,
+        manifest: dict = None,
     ):
         """Process articles using the new source system with parallel execution."""
+        if manifest is None:
+            manifest = {}
         filtered_articles = list(enumerate(articles, 1))
 
         if not filtered_articles:
@@ -464,6 +533,7 @@ class UnifiedSourceProcessor:
                             success = future.result(timeout=5)  # Short timeout to detect hangs
                             if success:
                                 successful_count += 1
+                                manifest[article.url] = article.title
                             else:
                                 failed_count += 1
                             progress.item_completed(success, article.title)
@@ -500,13 +570,17 @@ class UnifiedSourceProcessor:
                 # Calling shutdown() twice is idempotent per Python docs.
                 executor.shutdown(wait=False, cancel_futures=True)
 
-        # Log summary
+        # Save manifest with newly fetched URLs
+        save_manifest(base_dir, manifest)
+
+        # Log summary with old+new counts
         successful = successful_count
         failed = failed_count
-        success_rate = (successful / len(futures)) * 100 if futures else 0
+        existing = len(manifest) - successful
+        total = len(manifest)
 
         self.logger.info(
-            f"{source_display_name} articles summary: {successful} successful, {failed} failed ({success_rate:.1f}% success rate)"
+            f"{source_display_name}: {successful} new, {existing} already in archive, {total} total"
         )
 
     def _process_single_article_new_system(
