@@ -22,6 +22,33 @@ from capcat.core.utils import truncate_title_intelligently
 from capcat.core.storage_manager import find_article_md, find_comments_md
 
 
+def _is_duplicate_folder(name: str, parent: Path, *, require_manifest: bool = False) -> bool:
+    """Return True if *name* looks like a duplicate folder created by _get_unique_folder_name.
+
+    Duplicate folders end with ``-N`` where N is 2-99, and a base folder
+    (without the suffix) also exists in *parent*.  Names that naturally end
+    with a large number (e.g. ``Article-2026``) are NOT treated as duplicates.
+
+    When *require_manifest* is True, the function also checks for a
+    ``.capcat_fetched.json`` manifest in *parent*.  If it is absent the
+    folder is assumed NOT to be a duplicate (dedup was never used).
+    """
+    import re as _re
+
+    m = _re.match(r"^(.+)-(\d{1,2})$", name)
+    if m is None:
+        return False
+
+    base_name = m.group(1)
+    if not (parent / base_name).exists():
+        return False
+
+    if require_manifest and not (parent / ".capcat_fetched.json").exists():
+        return False
+
+    return True
+
+
 def _manifest_article_count(source_dir: Path) -> "int | None":
     """Return the number of articles in the manifest, or None if unavailable.
 
@@ -1184,6 +1211,12 @@ class ArticleHTMLGenerator:
 
                         category = find_category(source_id) if source_id else None
                     else:
+                        # At source level, skip duplicate folders from pre-dedup runs
+                        if _is_duplicate_folder(item.name, path):
+                            self.logger.debug(
+                                f"Skipping duplicate article folder: {item.name}"
+                            )
+                            continue
                         # At source level, articles don't need orphan filtering
                         source_id = None
                         category = None
