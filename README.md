@@ -1,6 +1,6 @@
 # Capcat - A command-line tool designed to solve content preservation challenges with Ethical Scraping.
 
-**v2.0.26** | Python 3.9+ | [capcat.org](https://capcat.org)
+**v2.0.29** | Python 3.9+ | [capcat.org](https://capcat.org)
 
 Captures articles from 12 built-in sources as clean Markdown files with optional self-contained HTML output. Includes 5 specialized URL processors for platforms like Medium, YouTube, and X. Supports interactive TUI and batch automation.
 
