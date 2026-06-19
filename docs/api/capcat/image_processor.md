@@ -430,6 +430,12 @@ def _apply_url_patterns(content: str, original_url: str, local_path: str) -> str
 
 Apply systematic URL replacement patterns.
 
+Only uses exact-match strategies. Broad fallback patterns (basename
+matching, base-URL-without-query) are unsafe: CDN proxy URLs like
+/.netlify/images or /_next/image share the same path across all
+images and differ only in query parameters, so a loose regex
+overwrites every image reference to the last one processed.
+
 **Parameters:**
 
 - `content` (str)
