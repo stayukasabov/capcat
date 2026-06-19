@@ -1988,6 +1988,15 @@ class ArticleFetcher(ABC):
                                         relative_url.lstrip("/"),
                                     ]
 
+                                    # Path+query: CDN proxy URLs (Netlify,
+                                    # Next.js) share the same path and
+                                    # differ only in query params.
+                                    if parsed.query:
+                                        relative_url_variants.insert(
+                                            0,
+                                            f"{relative_url}?{parsed.query}",
+                                        )
+
                                     # Also try protocol-relative URL
                                     # (//domain/path)
                                     protocol_relative_url = (
