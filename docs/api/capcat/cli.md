@@ -91,7 +91,7 @@ Args:
 
 **Returns:** None
 
-⚠️ **High complexity:** 15
+⚠️ **High complexity:** 16
 
 ### _pop_flag
 

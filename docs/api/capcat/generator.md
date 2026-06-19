@@ -337,7 +337,7 @@ Auto-discovers categories from source configurations.
 
 **Returns:** str
 
-⚠️ **High complexity:** 59
+⚠️ **High complexity:** 60
 
 ##### _generate_index_navigation
 
@@ -711,6 +711,29 @@ Generate error page HTML.
 
 
 ## Functions
+
+### _is_duplicate_folder
+
+```python
+def _is_duplicate_folder(name: str, parent: Path) -> bool
+```
+
+Return True if *name* looks like a duplicate folder created by _get_unique_folder_name.
+
+Duplicate folders end with ``-N`` where N is 2-99, and a base folder
+(without the suffix) also exists in *parent*.  Names that naturally end
+with a large number (e.g. ``Article-2026``) are NOT treated as duplicates.
+
+When *require_manifest* is True, the function also checks for a
+``.capcat_fetched.json`` manifest in *parent*.  If it is absent the
+folder is assumed NOT to be a duplicate (dedup was never used).
+
+**Parameters:**
+
+- `name` (str)
+- `parent` (Path)
+
+**Returns:** bool
 
 ### _manifest_article_count
 
