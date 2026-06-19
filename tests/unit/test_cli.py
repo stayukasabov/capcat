@@ -211,3 +211,60 @@ def test_init_already_initialized_exits(tmp_path) -> None:
                 with pytest.raises(SystemExit) as exc_info:
                     main()
     assert exc_info.value.code == 1
+
+
+# ---------------------------------------------------------------------------
+# Regression: cli-help-flags bugs
+# ---------------------------------------------------------------------------
+
+def test_init_help_flag_prints_usage(capsys) -> None:
+    """'capcat init --help' prints usage, does not call init_project."""
+    with patch("capcat.commands.init.init_project") as mock_init:
+        with patch.object(sys, "argv", ["capcat", "init", "--help"]):
+            from capcat.cli import main
+            main()
+    out = capsys.readouterr().out
+    assert "Usage" in out
+    mock_init.assert_not_called()
+
+
+def test_init_h_flag_prints_usage(capsys) -> None:
+    """'capcat init -h' prints usage, does not call init_project."""
+    with patch("capcat.commands.init.init_project") as mock_init:
+        with patch.object(sys, "argv", ["capcat", "init", "-h"]):
+            from capcat.cli import main
+            main()
+    out = capsys.readouterr().out
+    assert "Usage" in out
+    mock_init.assert_not_called()
+
+
+def test_list_help_flag_prints_usage_not_sources(capsys) -> None:
+    """'capcat list --help' prints usage, does not list sources."""
+    with patch.object(sys, "argv", ["capcat", "list", "--help"]):
+        from capcat.cli import main
+        main()
+    out = capsys.readouterr().out
+    assert "Usage" in out
+    assert "Available sources" not in out
+
+
+def test_list_h_flag_prints_usage_not_sources(capsys) -> None:
+    """'capcat list -h' prints usage, does not list sources."""
+    with patch.object(sys, "argv", ["capcat", "list", "-h"]):
+        from capcat.cli import main
+        main()
+    out = capsys.readouterr().out
+    assert "Usage" in out
+    assert "Available sources" not in out
+
+
+def test_flag_without_command_exits_nonzero(capsys) -> None:
+    """'capcat -V' (flag used without a command) exits with code 1 and helpful message."""
+    with patch.object(sys, "argv", ["capcat", "-V"]):
+        from capcat.cli import main
+        with pytest.raises(SystemExit) as exc_info:
+            main()
+    assert exc_info.value.code == 1
+    out = capsys.readouterr().out
+    assert "command" in out.lower()

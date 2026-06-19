@@ -250,15 +250,16 @@ def _print_help() -> None:
         "  settings         Write Global-settings.yaml template to Config/\n"
         "  settings --force Overwrite existing Global-settings.yaml with the\n"
         "                   latest template (preserves nothing - back up first)\n"
-        "\nOptions:\n"
+        "\nGlobal options:\n"
         "  -L <file>        Log output to file\n"
+        "  --version        Show version and exit\n"
+        "  --help           Show this help\n"
+        "\nPer-command options (use after a command):\n"
         "  -V, --verbose    Verbose output\n"
         "  -q, --quiet      Quiet output\n"
         "  --media          Download media files\n"
         "  --html           Generate HTML output\n"
         "  --update         Update existing articles\n"
-        "  --version        Show version and exit\n"
-        "  --help           Show this help\n"
     )
 
 
@@ -356,6 +357,11 @@ def _dispatch(args: list[str]) -> None:
         _cmd_generate_config(rest)
     elif command == "settings":
         _cmd_settings(rest)
+    elif command.startswith("-"):
+        print(f"capcat: '{command}' is not a command. "
+              f"Flags must follow a command, e.g. 'capcat fetch hn {command}'.\n"
+              f"Run 'capcat --help' for commands.")
+        raise SystemExit(1)
     else:
         print(f"capcat: unknown command '{command}'. Run 'capcat --help'.")
         raise SystemExit(1)
@@ -409,6 +415,12 @@ def _cmd_init(args: list[str]) -> None:
     Args:
         args: Remaining arguments after ``init`` (e.g. ``["--reinit"]``).
     """
+    if args and args[0] in ("-h", "--help"):
+        print("Usage: capcat init [--reinit]\n\n"
+              "Initialize a capcat project in the current directory.\n\n"
+              "Options:\n"
+              "  --reinit   Reset internal state without overwriting Config/\n")
+        return
     from pathlib import Path
     from capcat.commands.init import init_project, AlreadyInitializedError
     reinit = "--reinit" in args
@@ -626,13 +638,12 @@ def _cmd_bundle(args: list[str], log_file: str | None = None) -> None:
 
 def _cmd_list(args: list[str]) -> None:
     """capcat list [sources|bundles|all]"""
-    what = "all"
-    if args and args[0] not in ("-h", "--help"):
-        what = args[0]
-
-    if what in ("-h", "--help"):
+    if args and args[0] in ("-h", "--help"):
         print("Usage: capcat list [sources|bundles|all]")
         return
+    what = "all"
+    if args:
+        what = args[0]
 
     from capcat.core.source_system.source_registry import SourceRegistry
     from capcat.core.source_system.bundle_service import get_available_bundles
