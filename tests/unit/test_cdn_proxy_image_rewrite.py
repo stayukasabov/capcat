@@ -1,14 +1,14 @@
 """
-Regression test for CDN proxy image URL rewriting.
+Regression tests for CDN proxy image URL rewriting.
 
-Bug: When multiple images share the same URL path and differ only in query
-parameters (Netlify /.netlify/images, Next.js /_next/image, Cloudinary
-/image/fetch, etc.), replace_image_urls rewrites ALL image references to the
-last image processed instead of mapping each to its correct local file.
+Bug 1 (clobbering): When multiple images share the same URL path and differ
+only in query parameters (Netlify, Next.js, Cloudinary, etc.),
+replace_image_urls rewrites ALL image references to the last image processed.
 
-Root cause: _apply_url_patterns has fallback regex patterns that match on
-the shared basename ("images") or base-URL-without-query, both of which are
-identical across all images from the same CDN proxy endpoint.
+Bug 2 (relative URLs): The formatter may emit relative src paths
+(/.netlify/images?url=...) while the url_mapping keys are absolute
+(https://host/.netlify/images?url=...). Exact string matching fails
+because the strings differ.
 """
 
 from capcat.core.image_processor import ImageProcessor
@@ -110,3 +110,66 @@ def test_nextjs_proxy_urls_stay_distinct():
 
     assert "![a](images/image-1.png)" in result
     assert "![b](images/image-2.png)" in result
+
+
+# Relative URL in markdown, absolute URL in url_mapping.
+# The formatter emits whatever src the page has (often relative),
+# but the image downloader resolves to absolute via urljoin.
+RELATIVE_NETLIFY_MARKDOWN = """\
+![cover](/.netlify/images?url=cover.jpg&w=1440)
+
+![map](/.netlify/images?url=map.jpg&w=1440)
+
+![photo](/.netlify/images?url=photo.jpg&w=1440)
+"""
+
+RELATIVE_NETLIFY_URL_MAPPING = {
+    "https://example.com/.netlify/images?url=cover.jpg&w=1440": "image-1.webp",
+    "https://example.com/.netlify/images?url=map.jpg&w=1440": "image-2.webp",
+    "https://example.com/.netlify/images?url=photo.jpg&w=1440": "image-3.webp",
+}
+
+
+def test_relative_urls_replaced_via_path_match():
+    """Relative URLs in markdown must match absolute keys via path+query."""
+    result = ImageProcessor.replace_image_urls(
+        RELATIVE_NETLIFY_MARKDOWN, RELATIVE_NETLIFY_URL_MAPPING
+    )
+
+    assert "![cover](images/image-1.webp)" in result
+    assert "![map](images/image-2.webp)" in result
+    assert "![photo](images/image-3.webp)" in result
+
+
+def test_relative_urls_no_clobber():
+    """Relative URL replacement must not clobber to last image."""
+    result = ImageProcessor.replace_image_urls(
+        RELATIVE_NETLIFY_MARKDOWN, RELATIVE_NETLIFY_URL_MAPPING
+    )
+
+    count = result.count("image-3.webp")
+    assert count == 1, (
+        f"image-3.webp appears {count} times; expected 1."
+    )
+
+
+# Mixed: some images have relative URLs, some absolute (can happen if
+# the page mixes inline and CDN-served images).
+MIXED_MARKDOWN = """\
+![a](https://example.com/static/hero.jpg)
+
+![b](/.netlify/images?url=detail.jpg&w=800)
+"""
+
+MIXED_URL_MAPPING = {
+    "https://example.com/static/hero.jpg": "image-1.jpg",
+    "https://example.com/.netlify/images?url=detail.jpg&w=800": "image-2.jpg",
+}
+
+
+def test_mixed_absolute_and_relative():
+    """Both absolute and relative URLs in the same document get replaced."""
+    result = ImageProcessor.replace_image_urls(MIXED_MARKDOWN, MIXED_URL_MAPPING)
+
+    assert "![a](images/image-1.jpg)" in result
+    assert "![b](images/image-2.jpg)" in result

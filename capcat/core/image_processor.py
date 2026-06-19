@@ -833,6 +833,18 @@ class ImageProcessor:
         replacement = rf"![\1]({local_path})"
         content = re.sub(pattern, replacement, content)
 
+        # Relative URL fallback: the formatter may emit a relative src
+        # (e.g. /.netlify/images?url=...) while the url_mapping key is
+        # the absolute URL resolved via urljoin. Try replacing the
+        # path+query portion so relative references get matched too.
+        parsed = urlparse(original_url)
+        if parsed.scheme and parsed.netloc:
+            relative = parsed.path
+            if parsed.query:
+                relative += "?" + parsed.query
+            if relative and relative != original_url and relative in content:
+                content = content.replace(relative, local_path)
+
         return content
 
 
