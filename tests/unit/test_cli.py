@@ -259,9 +259,19 @@ def test_list_h_flag_prints_usage_not_sources(capsys) -> None:
     assert "Available sources" not in out
 
 
-def test_flag_without_command_exits_nonzero(capsys) -> None:
-    """'capcat -V' (flag used without a command) exits with code 1 and helpful message."""
+def test_dash_V_prints_version(capsys) -> None:
+    """-V is a version alias: prints version and exits cleanly."""
     with patch.object(sys, "argv", ["capcat", "-V"]):
+        from capcat.cli import main
+        main()
+    out = capsys.readouterr().out
+    assert "capcat" in out
+    assert out.strip() != ""
+
+
+def test_flag_without_command_exits_nonzero(capsys) -> None:
+    """Bare unknown flag without a command exits with code 1 and helpful message."""
+    with patch.object(sys, "argv", ["capcat", "-q"]):
         from capcat.cli import main
         with pytest.raises(SystemExit) as exc_info:
             main()

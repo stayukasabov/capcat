@@ -252,10 +252,10 @@ def _print_help() -> None:
         "                   latest template (preserves nothing - back up first)\n"
         "\nGlobal options:\n"
         "  -L <file>        Log output to file\n"
-        "  --version        Show version and exit\n"
+        "  -V, --version    Show version and exit\n"
         "  --help           Show this help\n"
         "\nPer-command options (use after a command):\n"
-        "  -V, --verbose    Verbose output\n"
+        "  --verbose        Verbose output\n"
         "  -q, --quiet      Quiet output\n"
         "  --media          Download media files\n"
         "  --html           Generate HTML output\n"
@@ -318,7 +318,7 @@ def _dispatch(args: list[str]) -> None:
         _print_help()
         return
 
-    if args[0] == "--version":
+    if args[0] in ("--version", "-V"):
         from capcat import __version__
         print(f"capcat {__version__}")
         return
