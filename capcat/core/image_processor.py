@@ -817,30 +817,21 @@ class ImageProcessor:
     def _apply_url_patterns(
         content: str, original_url: str, local_path: str
     ) -> str:
-        """Apply systematic URL replacement patterns."""
-        # Direct string replacement
+        """Apply systematic URL replacement patterns.
+
+        Only uses exact-match strategies. Broad fallback patterns (basename
+        matching, base-URL-without-query) are unsafe: CDN proxy URLs like
+        /.netlify/images or /_next/image share the same path across all
+        images and differ only in query parameters, so a loose regex
+        overwrites every image reference to the last one processed.
+        """
+        # Direct string replacement (handles the vast majority of cases)
         content = content.replace(original_url, local_path)
 
-        # Markdown image pattern replacement
-        parsed = urlparse(original_url)
+        # Full URL regex replacement (safety net for URL-encoded variants)
+        pattern = rf"!\[([^\]]*)\]\({re.escape(original_url)}\)"
         replacement = rf"![\1]({local_path})"
-
-        patterns = [
-            # Full URL with escaping
-            rf"!\[([^\]]*)\]\({re.escape(original_url)}\)",
-            # Base URL without query parameters
-            rf'!\[([^\]]*)\]\({re.escape(f"{parsed.scheme}://{parsed.netloc}{parsed.path}")}[^)]*\)',
-            # Filename-based matching
-            (
-                rf"!\[([^\]]*)\]\([^)]*{re.escape(os.path.basename(parsed.path))}[^)]*\)"
-                if parsed.path
-                else None
-            ),
-        ]
-
-        for pattern in patterns:
-            if pattern:
-                content = re.sub(pattern, replacement, content)
+        content = re.sub(pattern, replacement, content)
 
         return content
 
