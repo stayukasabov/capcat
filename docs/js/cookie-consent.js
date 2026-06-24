@@ -48,8 +48,8 @@
           "No personal data is collected." +
         "</p>" +
         '<div class="cookie-consent-actions">' +
-          '<button id="cookie-accept" class="cookie-btn cookie-btn-accept">Accept</button>' +
           '<button id="cookie-decline" class="cookie-btn cookie-btn-decline">Decline</button>' +
+          '<button id="cookie-accept" class="cookie-btn cookie-btn-accept">Accept</button>' +
         "</div>" +
       "</div>";
 
