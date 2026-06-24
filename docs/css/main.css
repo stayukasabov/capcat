@@ -1998,7 +1998,7 @@ body.menu-open {
   font-size: var(--text-small, 1rem);
   font-weight: var(--font-weight-medium, 500);
   padding: 0.4rem 1.2rem;
-  border-radius: var(--radius-sm, 4px);
+  border-radius: var(--radius-lg, 12px);
   border: none;
   cursor: pointer;
   transition: background-color var(--transition-fast, 150ms ease);
