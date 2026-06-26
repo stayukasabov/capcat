@@ -753,7 +753,7 @@ def _show_completion_screen(generate_html: bool, success: bool, fetch_result=Non
     if generate_html:
         html_path = _find_latest_index_html()
         if html_path:
-            print(f"\n   HTML index: file://{html_path}")
+            print(f"\n   HTML index: {html_path}")
         else:
             print("\n   HTML index: not found")
 
@@ -797,13 +797,13 @@ def _find_latest_index_html() -> "str | None":
         for date_dir in news_dir.glob("News_*"):
             index = date_dir / "index.html"
             if index.exists():
-                candidates.append((index.stat().st_mtime, str(index.resolve())))
+                candidates.append((index.stat().st_mtime, index.resolve().as_uri()))
 
         # Single articles: Capcats/date-slug/html/article.html
         capcats_dir = get_capcats_dir()
         for article_html in capcats_dir.glob("*/html/article.html"):
             candidates.append(
-                (article_html.stat().st_mtime, str(article_html.resolve()))
+                (article_html.stat().st_mtime, article_html.resolve().as_uri())
             )
     except Exception:
         pass
