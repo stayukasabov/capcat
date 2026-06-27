@@ -5,6 +5,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
+import requests
 
 from capcat.core.source_system.base_source import Article, ArticleDiscoveryError, SourceConfig
 from capcat.sources.builtin.custom.substack.source import SubstackSource
@@ -139,4 +140,58 @@ class TestSubstackFetch:
         ):
             success, folder = source.fetch_article_content(article, str(tmp_path))
 
+        assert success is False
+
+
+class TestSubstack403LinkOnly:
+    def test_fetch_creates_link_only_on_403(self, tmp_path):
+        """When Substack returns 403, fetch_article_content creates a link-only entry."""
+        source = SubstackSource(_config())
+        article = Article(title="Blocked Post", url="https://example.substack.com/p/blocked")
+
+        mock_resp = MagicMock()
+        mock_resp.status_code = 403
+        mock_resp.raise_for_status.side_effect = requests.exceptions.HTTPError(
+            response=mock_resp
+        )
+        source.session = MagicMock()
+        source.session.head.return_value = mock_resp
+        source.session.get.return_value = mock_resp
+
+        success, folder = source.fetch_article_content(article, str(tmp_path))
+
+        assert success is True
+        assert folder is not None
+        md_files = list(Path(folder).glob("*.md"))
+        assert len(md_files) == 1
+        content = md_files[0].read_text()
+        assert "ethical scraping" in content.lower()
+        assert "https://example.substack.com/p/blocked" in content
+
+    def test_fetch_still_handles_paywall(self, tmp_path):
+        """Paywall detection (non-403) must still work as before."""
+        source = SubstackSource(_config())
+        article = Article(title="Paywalled Post", url="https://example.substack.com/p/paid")
+
+        with patch.object(source, "_is_paywalled", return_value="hard"), \
+             patch.object(source, "_handle_paywalled_content", return_value=(True, str(tmp_path / "pw"))):
+            success, folder = source.fetch_article_content(article, str(tmp_path))
+
+        assert success is True
+
+    def test_fetch_non_403_error_returns_false(self, tmp_path):
+        """Non-403 HTTP errors return (False, None), not a link-only entry."""
+        source = SubstackSource(_config())
+        article = Article(title="Server Error", url="https://example.substack.com/p/err")
+
+        mock_resp = MagicMock()
+        mock_resp.status_code = 500
+        mock_resp.raise_for_status.side_effect = requests.exceptions.HTTPError(
+            response=mock_resp
+        )
+        source.session = MagicMock()
+        source.session.head.return_value = mock_resp
+        source.session.get.return_value = mock_resp
+
+        success, folder = source.fetch_article_content(article, str(tmp_path))
         assert success is False

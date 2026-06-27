@@ -4,11 +4,15 @@ Abstract base class for all news sources.
 Defines the contract that all source implementations must follow.
 """
 
+import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple
 
 import requests
+
+from capcat.core.storage_manager import article_md_filename
+from capcat.core.utils import sanitize_filename
 
 
 @dataclass
@@ -288,6 +292,46 @@ class BaseSource(ABC):
             True if URL should be skipped
         """
         return False
+
+    def _create_link_only_entry(
+        self, article: "Article", output_dir: str, reason: str
+    ) -> Tuple[bool, Optional[str]]:
+        """Create a link-only markdown entry when content is inaccessible.
+
+        Used when a site restricts automated access (e.g. HTTP 403).
+        Returns (True, folder_path) on success, (False, None) on failure.
+        """
+        try:
+            safe_title = sanitize_filename(article.title or self.config.display_name)
+            article_folder = os.path.join(output_dir, safe_title)
+            os.makedirs(article_folder, exist_ok=True)
+
+            content = f"# {article.title or self.config.display_name}\n\n"
+            content += f"**Source URL:** [{article.url}]({article.url})\n\n"
+            content += "---\n\n"
+            content += "Capcat could not fetch this article's content.\n\n"
+            content += f"**Reason:** {reason}\n\n"
+            content += (
+                "Capcat follows ethical scraping principles and respects "
+                "website access restrictions.\n"
+                "Visit the source URL above to read the article directly.\n"
+            )
+
+            filename = os.path.join(
+                article_folder,
+                article_md_filename(article.title or self.config.display_name),
+            )
+            with open(filename, "w", encoding="utf-8") as f:
+                f.write(content)
+
+            self.logger.info(
+                f"Ethical scraping: {reason}, created link-only entry for {article.url}"
+            )
+            return True, article_folder
+
+        except Exception as e:
+            self.logger.error(f"Failed to create link-only entry: {e}")
+            return False, None
 
     def get_rate_limit(self) -> float:
         """Get the rate limit for this source."""

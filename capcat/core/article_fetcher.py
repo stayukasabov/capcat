@@ -2792,8 +2792,9 @@ class ArticleFetcher(ABC):
             if "403" in combined_error or "forbidden" in combined_error:
                 error_category = "Access Denied (403 Forbidden)"
                 recommendation = (
-                    "This website uses protection (likely Cloudflare) that "
-                    "blocks automated access."
+                    "This website restricts automated access. Capcat follows "
+                    "ethical scraping principles and does not bypass access "
+                    "controls."
                 )
             elif "404" in combined_error or "not found" in combined_error:
                 error_category = "Article Not Found (404)"

@@ -8,6 +8,8 @@ import os
 import re
 from typing import List, Optional, Tuple
 
+import requests
+
 from bs4 import BeautifulSoup
 
 from capcat.core.storage_manager import article_md_filename, find_article_md
@@ -96,7 +98,15 @@ class SubstackSource(BaseSource):
             )
 
             # Check for paywall type
-            paywall_type = self._is_paywalled(article.url)
+            try:
+                paywall_type = self._is_paywalled(article.url)
+            except requests.exceptions.HTTPError as e:
+                if e.response is not None and e.response.status_code == 403:
+                    return self._create_link_only_entry(
+                        article, output_dir,
+                        "This Substack restricts automated access"
+                    )
+                raise
 
             if paywall_type == "hard":
                 # Hard paywall - only extract preview content
@@ -120,6 +130,16 @@ class SubstackSource(BaseSource):
             else:
                 return False, None
 
+        except requests.exceptions.HTTPError as e:
+            if e.response is not None and e.response.status_code == 403:
+                return self._create_link_only_entry(
+                    article, output_dir,
+                    "This Substack restricts automated access"
+                )
+            raise ContentFetchError(
+                f"Failed to fetch Substack content for {article.url}: {e}",
+                self.config.name,
+            )
         except Exception as e:
             raise ContentFetchError(
                 f"Failed to fetch Substack content for {article.url}: {e}",
@@ -372,6 +392,13 @@ class SubstackSource(BaseSource):
 
             return "none"
 
+        except requests.exceptions.HTTPError as e:
+            if e.response is not None and e.response.status_code == 403:
+                raise
+            self.logger.warning(
+                f"Error checking paywall status for {url}: {e}"
+            )
+            return "none"
         except Exception as e:
             self.logger.warning(
                 f"Error checking paywall status for {url}: {e}"
