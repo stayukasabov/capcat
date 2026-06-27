@@ -117,11 +117,8 @@ class TestSubstackFetch:
 
         fake_folder = str(tmp_path / "Test_Post")
 
-        with patch.object(
-            source,
-            "_fetch_substack_content_direct",
-            return_value=(True, fake_folder),
-        ):
+        with patch.object(source, "_is_paywalled", return_value="none"), \
+             patch.object(source, "_fetch_substack_content_direct", return_value=(True, fake_folder)):
             Path(fake_folder).mkdir(parents=True, exist_ok=True)
             (Path(fake_folder) / "article.md").write_text("# Test", encoding="utf-8")
             success, folder = source.fetch_article_content(article, str(tmp_path))
@@ -133,11 +130,8 @@ class TestSubstackFetch:
         source = SubstackSource(_config())
         article = Article(title="Test Post", url="https://example.substack.com/p/test")
 
-        with patch.object(
-            source,
-            "_fetch_substack_content_direct",
-            return_value=(False, None),
-        ):
+        with patch.object(source, "_is_paywalled", return_value="none"), \
+             patch.object(source, "_fetch_substack_content_direct", return_value=(False, None)):
             success, folder = source.fetch_article_content(article, str(tmp_path))
 
         assert success is False
