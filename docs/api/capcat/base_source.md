@@ -300,6 +300,26 @@ Returns:
 
 **Returns:** bool
 
+##### _create_link_only_entry
+
+```python
+def _create_link_only_entry(self, article: 'Article', output_dir: str, reason: str) -> Tuple[bool, Optional[str]]
+```
+
+Create a link-only markdown entry when content is inaccessible.
+
+Used when a site restricts automated access (e.g. HTTP 403).
+Returns (True, folder_path) on success, (False, None) on failure.
+
+**Parameters:**
+
+- `self`
+- `article` ('Article')
+- `output_dir` (str)
+- `reason` (str)
+
+**Returns:** Tuple[bool, Optional[str]]
+
 ##### get_rate_limit
 
 ```python
