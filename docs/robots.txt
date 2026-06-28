@@ -1,0 +1,44 @@
+# capcat.org - Capcat CLI Documentation
+# Capcat - A command-line tool designed to solve content preservation challenges with Ethical Scraping
+# Author: Stayu Kasabov - Product Designer & Architect | Agentic AI Prototyping & MVP Development (LLMs)
+
+User-agent: *
+Allow: /
+Disallow: /api/build/
+Disallow: /api/add_jekyll_frontmatter/
+Disallow: /api/cleanup_development_files/
+Disallow: /api/cleanup_repo/
+Disallow: /api/convert_docs_to_html/
+Disallow: /api/convert_to_markdown/
+Disallow: /api/delete_h4_colon/
+Disallow: /api/update_html_includes/
+Disallow: /api/update_html_jekyll/
+Disallow: /api/update_includes/
+Disallow: /api/Video/
+
+# Block AI training crawlers
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: cohere-ai
+Disallow: /
+
+Sitemap: https://capcat.org/sitemap.xml
