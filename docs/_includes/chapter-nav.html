@@ -1,0 +1,35 @@
+{% assign chapters = site.data.navigation.chapters %}
+{% assign current_url = page.url %}
+{% assign current_index = nil %}
+
+{% for ch in chapters %}
+  {% if ch.url == current_url %}
+    {% assign current_index = forloop.index0 %}
+  {% endif %}
+{% endfor %}
+
+{% if current_index != nil %}
+{% assign prev_index = current_index | minus: 1 %}
+{% assign next_index = current_index | plus: 1 %}
+{% assign total = chapters | size %}
+
+<nav class="chapter-nav" aria-label="Chapter navigation">
+  {% if current_index > 0 %}
+  <a href="{{ chapters[prev_index].url }}" class="chapter-nav-link chapter-nav-prev">
+    <span class="chapter-nav-label">Previous</span>
+    <span class="chapter-nav-title">&larr; {{ chapters[prev_index].title }}</span>
+  </a>
+  {% else %}
+  <span class="chapter-nav-link chapter-nav-prev"></span>
+  {% endif %}
+
+  {% if next_index < total %}
+  <a href="{{ chapters[next_index].url }}" class="chapter-nav-link chapter-nav-next">
+    <span class="chapter-nav-label">Next</span>
+    <span class="chapter-nav-title">{{ chapters[next_index].title }} &rarr;</span>
+  </a>
+  {% else %}
+  <span class="chapter-nav-link chapter-nav-next"></span>
+  {% endif %}
+</nav>
+{% endif %}

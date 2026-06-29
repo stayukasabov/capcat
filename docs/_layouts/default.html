@@ -88,6 +88,45 @@
       border-top: 1px solid var(--color-border, #e5e5e5);
       margin: 2rem 0;
     }
+    .chapter-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-top: var(--space-xl, 3rem);
+      padding-top: var(--space-lg, 2rem);
+      border-top: 1px solid var(--border-color, rgba(26, 22, 20, 0.1));
+    }
+    .chapter-nav-link {
+      display: flex;
+      flex-direction: column;
+      text-decoration: none;
+      max-width: 45%;
+    }
+    .chapter-nav-prev { align-items: flex-start; }
+    .chapter-nav-next { align-items: flex-end; text-align: right; margin-left: auto; }
+    .chapter-nav-label {
+      font-family: var(--font-family-body);
+      font-size: var(--text-small, 1rem);
+      color: var(--imprint-muted, #827c7c);
+      line-height: var(--line-height-ui, 1.4);
+    }
+    .chapter-nav-title {
+      font-family: var(--font-family-body);
+      font-size: var(--text-small, 1rem);
+      font-weight: var(--font-weight-medium, 500);
+      color: var(--accent-primary, #f1540d);
+      line-height: var(--line-height-ui, 1.4);
+      transition: color var(--transition-base, 250ms ease);
+    }
+    a.chapter-nav-link:hover .chapter-nav-title {
+      color: var(--accent-hover, #d64605);
+      text-decoration: underline;
+    }
+    @media (max-width: 600px) {
+      .chapter-nav { flex-direction: column; gap: var(--space-sm, 1rem); }
+      .chapter-nav-link { max-width: 100%; }
+      .chapter-nav-next { align-items: flex-start; text-align: left; margin-left: 0; }
+    }
   </style>
 </head>
 <body>
@@ -165,6 +204,7 @@
     <div class="container">
       <div class="docs-prose">
         {{ content }}
+        {% include chapter-nav.html %}
       </div>
     </div>
   </main>
