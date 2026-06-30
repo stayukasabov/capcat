@@ -170,7 +170,7 @@ Usage:
 
 - **Total Modules**: 110
 - **Total Classes**: 196
-- **Total Functions**: 316
+- **Total Functions**: 317
 - **Public Functions**: 225
-- **Documentation Coverage**: 71.2%
+- **Documentation Coverage**: 71.0%
 

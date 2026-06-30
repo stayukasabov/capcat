@@ -224,6 +224,22 @@ Returns:
 
 **Returns:** 'str | None'
 
+### _find_latest_article_md
+
+```python
+def _find_latest_article_md() -> 'str | None'
+```
+
+Find the most recently modified article markdown file.
+
+Checks single article folders (Capcats/*/*.md) and batch fetch folders
+(News_*/*/*/*.md), returning whichever was modified most recently.
+
+Returns:
+    Percent-encoded file:// URI string, or None if not found.
+
+**Returns:** 'str | None'
+
 ### _handle_manage_bundles
 
 ```python
