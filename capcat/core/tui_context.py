@@ -16,6 +16,7 @@ if TYPE_CHECKING:
 _tui_active: bool = False
 _tui_results_lock = threading.Lock()
 _tui_results: list[tuple[bool, str | None]] = []
+_last_output_dir: str | None = None
 
 
 def set_tui_active(active: bool) -> None:
@@ -29,8 +30,21 @@ def is_tui_active() -> bool:
     return _tui_active
 
 
+def set_last_output_dir(path: str | None) -> None:
+    """Store the output directory from the most recent command."""
+    global _last_output_dir
+    _last_output_dir = path
+
+
+def get_last_output_dir() -> str | None:
+    """Return the output directory from the most recent command, or None."""
+    return _last_output_dir
+
+
 def reset_fetch_results() -> None:
     """Clear accumulated fetch results. Call before each fetch dispatch."""
+    global _last_output_dir
+    _last_output_dir = None
     with _tui_results_lock:
         _tui_results.clear()
 
