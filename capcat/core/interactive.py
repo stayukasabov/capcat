@@ -757,7 +757,7 @@ def _show_completion_screen(generate_html: bool, success: bool, fetch_result=Non
         else:
             print("\n   HTML index: not found")
     else:
-        md_path = _find_latest_article_md()
+        md_path = _find_output_md()
         if md_path:
             print(f"\n   Output: {md_path}")
 
@@ -818,25 +818,36 @@ def _find_latest_index_html() -> "str | None":
     return None
 
 
-def _find_latest_article_md() -> "str | None":
-    """Find the most recently modified article markdown file.
+def _find_output_md() -> "str | None":
+    """Return a file:// URI for the most recent markdown output.
 
-    Checks single article folders (Capcats/*/*.md) and batch fetch folders
-    (News_*/*/*/*.md), returning whichever was modified most recently.
-
-    Returns:
-        Percent-encoded file:// URI string, or None if not found.
+    Uses the output directory stored by _cmd_single via tui_context when
+    available (reliable), falling back to filesystem discovery (fragile).
     """
+    from pathlib import Path
+    from capcat.core.tui_context import get_last_output_dir
+
+    out_dir = get_last_output_dir()
+    if out_dir:
+        d = Path(out_dir)
+        if d.is_dir():
+            md_files = sorted(d.glob("*.md"), key=lambda f: f.stat().st_mtime, reverse=True)
+            if md_files:
+                return md_files[0].resolve().as_uri()
+
+    return _find_latest_article_md()
+
+
+def _find_latest_article_md() -> "str | None":
+    """Filesystem fallback: glob for the most recent .md across output dirs."""
     candidates: list[tuple[float, str]] = []
     try:
         from capcat.core.config import get_news_dir, get_capcats_dir
 
-        # Single articles: Capcats/<slug>/*.md
         capcats_dir = get_capcats_dir()
         for md_file in capcats_dir.glob("*/*.md"):
             candidates.append((md_file.stat().st_mtime, md_file.resolve().as_uri()))
 
-        # Batch fetches: News_*/<source>/<article>/*.md
         news_dir = get_news_dir()
         for md_file in news_dir.glob("News_*/*/*/*.md"):
             candidates.append((md_file.stat().st_mtime, md_file.resolve().as_uri()))

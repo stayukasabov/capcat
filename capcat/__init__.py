@@ -1,6 +1,6 @@
 """Capcat - A command-line tool designed to solve content preservation challenges with Ethical Scraping."""
 
-__version__ = "2.0.32"
+__version__ = "2.0.33"
 
 from capcat.cli import run_app  # noqa: E402
 

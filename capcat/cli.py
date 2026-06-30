@@ -489,6 +489,9 @@ def _cmd_single(args: list[str], log_file: str | None = None) -> None:
     )
     if success and out_dir:
         print(f"Saved to: {out_dir}")
+        from capcat.core.tui_context import is_tui_active, set_last_output_dir
+        if is_tui_active():
+            set_last_output_dir(out_dir)
 
 
 # ---------------------------------------------------------------------------
