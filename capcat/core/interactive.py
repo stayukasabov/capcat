@@ -756,6 +756,10 @@ def _show_completion_screen(generate_html: bool, success: bool, fetch_result=Non
             print(f"\n   HTML index: {html_path}")
         else:
             print("\n   HTML index: not found")
+    else:
+        md_path = _find_latest_article_md()
+        if md_path:
+            print(f"\n   Output: {md_path}")
 
     print()
 
@@ -805,6 +809,37 @@ def _find_latest_index_html() -> "str | None":
             candidates.append(
                 (article_html.stat().st_mtime, article_html.resolve().as_uri())
             )
+    except Exception:
+        pass
+
+    if candidates:
+        candidates.sort(reverse=True)
+        return candidates[0][1]
+    return None
+
+
+def _find_latest_article_md() -> "str | None":
+    """Find the most recently modified article markdown file.
+
+    Checks single article folders (Capcats/*/*.md) and batch fetch folders
+    (News_*/*/*/*.md), returning whichever was modified most recently.
+
+    Returns:
+        Percent-encoded file:// URI string, or None if not found.
+    """
+    candidates: list[tuple[float, str]] = []
+    try:
+        from capcat.core.config import get_news_dir, get_capcats_dir
+
+        # Single articles: Capcats/<slug>/*.md
+        capcats_dir = get_capcats_dir()
+        for md_file in capcats_dir.glob("*/*.md"):
+            candidates.append((md_file.stat().st_mtime, md_file.resolve().as_uri()))
+
+        # Batch fetches: News_*/<source>/<article>/*.md
+        news_dir = get_news_dir()
+        for md_file in news_dir.glob("News_*/*/*/*.md"):
+            candidates.append((md_file.stat().st_mtime, md_file.resolve().as_uri()))
     except Exception:
         pass
 
