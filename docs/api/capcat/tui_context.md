@@ -41,6 +41,30 @@ Return True if the TUI is currently running.
 
 **Returns:** bool
 
+### set_last_output_dir
+
+```python
+def set_last_output_dir(path: str | None) -> None
+```
+
+Store the output directory from the most recent command.
+
+**Parameters:**
+
+- `path` (str | None)
+
+**Returns:** None
+
+### get_last_output_dir
+
+```python
+def get_last_output_dir() -> str | None
+```
+
+Return the output directory from the most recent command, or None.
+
+**Returns:** str | None
+
 ### reset_fetch_results
 
 ```python

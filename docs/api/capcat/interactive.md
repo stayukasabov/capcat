@@ -224,19 +224,26 @@ Returns:
 
 **Returns:** 'str | None'
 
+### _find_output_md
+
+```python
+def _find_output_md() -> 'str | None'
+```
+
+Return a file:// URI for the most recent markdown output.
+
+Uses the output directory stored by _cmd_single via tui_context when
+available (reliable), falling back to filesystem discovery (fragile).
+
+**Returns:** 'str | None'
+
 ### _find_latest_article_md
 
 ```python
 def _find_latest_article_md() -> 'str | None'
 ```
 
-Find the most recently modified article markdown file.
-
-Checks single article folders (Capcats/*/*.md) and batch fetch folders
-(News_*/*/*/*.md), returning whichever was modified most recently.
-
-Returns:
-    Percent-encoded file:// URI string, or None if not found.
+Filesystem fallback: glob for the most recent .md across output dirs.
 
 **Returns:** 'str | None'
 
