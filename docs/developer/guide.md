@@ -28,7 +28,7 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 
 # Install development dependencies
-pip install -r requirements-dev.txt
+pip install -e ".[dev]"
 
 # Verify installation
 capcat list sources
