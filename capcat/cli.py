@@ -308,8 +308,8 @@ def main() -> None:
 def _dispatch(args: list[str]) -> None:
     """Route a raw argument list to the appropriate command handler.
 
-    Handles global flags (-L, --version, --help) before delegating to
-    per-command functions. Exits with code 1 on unknown commands.
+    Handles global flags (-L, --version, --help, --json) before delegating
+    to per-command functions. Exits with code 1 on unknown commands.
 
     Args:
         args: sys.argv[1:] with the program name already removed.
@@ -334,37 +334,61 @@ def _dispatch(args: list[str]) -> None:
             print("capcat: -L requires a filename argument")
             raise SystemExit(1)
 
+    # Hidden flag: never documented in --help/usage text (see plan
+    # docs/superpowers/plans/2026-07-18-cli-json-output.md). Strips out
+    # before command routing so per-command arg parsing never sees it.
+    json_output = "--json" in args
+    if json_output:
+        args = [a for a in args if a != "--json"]
+
     command = args[0]
     rest = args[1:]
 
     _auto_init(command)
 
-    if command == "init":
-        _cmd_init(rest)
-    elif command == "single":
-        _cmd_single(rest, log_file=log_file)
-    elif command == "fetch":
-        _cmd_fetch(rest, log_file=log_file)
-    elif command == "bundle":
-        _cmd_bundle(rest, log_file=log_file)
-    elif command == "list":
-        _cmd_list(rest)
-    elif command == "add-source":
-        _cmd_add_source(rest)
-    elif command == "remove-source":
-        _cmd_remove_source(rest)
-    elif command == "generate-config":
-        _cmd_generate_config(rest)
-    elif command == "settings":
-        _cmd_settings(rest)
-    elif command.startswith("-"):
-        print(f"capcat: '{command}' is not a command. "
-              f"Flags must follow a command, e.g. 'capcat fetch hn {command}'.\n"
-              f"Run 'capcat --help' for commands.")
-        raise SystemExit(1)
-    else:
-        print(f"capcat: unknown command '{command}'. Run 'capcat --help'.")
-        raise SystemExit(1)
+    from capcat.core import json_events
+    real_stdout = sys.stdout
+    if json_output:
+        json_events.enable(real_stdout)
+        sys.stdout = sys.stderr
+
+    try:
+        if command == "init":
+            _cmd_init(rest)
+        elif command == "single":
+            _cmd_single(rest, log_file=log_file, json_output=json_output)
+        elif command == "fetch":
+            _cmd_fetch(rest, log_file=log_file, json_output=json_output)
+        elif command == "bundle":
+            _cmd_bundle(rest, log_file=log_file, json_output=json_output)
+        elif command == "list":
+            _cmd_list(rest, json_output=json_output)
+        elif command == "add-source":
+            _cmd_add_source(rest)
+        elif command == "remove-source":
+            _cmd_remove_source(rest)
+        elif command == "generate-config":
+            _cmd_generate_config(rest)
+        elif command == "settings":
+            _cmd_settings(rest)
+        elif command.startswith("-"):
+            print(f"capcat: '{command}' is not a command. "
+                  f"Flags must follow a command, e.g. 'capcat fetch hn {command}'.\n"
+                  f"Run 'capcat --help' for commands.")
+            raise SystemExit(1)
+        else:
+            print(f"capcat: unknown command '{command}'. Run 'capcat --help'.")
+            raise SystemExit(1)
+    except SystemExit:
+        raise
+    except Exception as exc:
+        if json_output:
+            json_events.emit("error", message=str(exc))
+        raise
+    finally:
+        if json_output:
+            sys.stdout = real_stdout
+            json_events.disable()
 
 
 # ---------------------------------------------------------------------------
@@ -450,7 +474,7 @@ def _cmd_init(args: list[str]) -> None:
 # single <url>
 # ---------------------------------------------------------------------------
 
-def _cmd_single(args: list[str], log_file: str | None = None) -> None:
+def _cmd_single(args: list[str], log_file: str | None = None, json_output: bool = False) -> None:
     """capcat single <url> [--output DIR] [--media] [--html] [--update]
        [--verbose] [--quiet] [--log-file FILE]
     """
@@ -498,7 +522,7 @@ def _cmd_single(args: list[str], log_file: str | None = None) -> None:
 # fetch <sources>
 # ---------------------------------------------------------------------------
 
-def _cmd_fetch(args: list[str], log_file: str | None = None) -> None:
+def _cmd_fetch(args: list[str], log_file: str | None = None, json_output: bool = False) -> None:
     """capcat fetch <sources> [--count N] [--output DIR] [--media] [--html]
        [--update] [--verbose] [--quiet] [--log-file FILE]
     """
@@ -551,7 +575,7 @@ def _cmd_fetch(args: list[str], log_file: str | None = None) -> None:
 # bundle <name>
 # ---------------------------------------------------------------------------
 
-def _cmd_bundle(args: list[str], log_file: str | None = None) -> None:
+def _cmd_bundle(args: list[str], log_file: str | None = None, json_output: bool = False) -> None:
     """capcat bundle <name> [--count N] [--output DIR] [--media] [--html]
        [--all] [--update] [--verbose] [--quiet] [--log-file FILE]
     """
@@ -639,7 +663,7 @@ def _cmd_bundle(args: list[str], log_file: str | None = None) -> None:
 # list [sources|bundles|all]
 # ---------------------------------------------------------------------------
 
-def _cmd_list(args: list[str]) -> None:
+def _cmd_list(args: list[str], json_output: bool = False) -> None:
     """capcat list [sources|bundles|all]"""
     if args and args[0] in ("-h", "--help"):
         print("Usage: capcat list [sources|bundles|all]")
