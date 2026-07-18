@@ -334,12 +334,14 @@ def _dispatch(args: list[str]) -> None:
             print("capcat: -L requires a filename argument")
             raise SystemExit(1)
 
-    # Hidden flag: never documented in --help/usage text (see plan
-    # docs/superpowers/plans/2026-07-18-cli-json-output.md). Strips out
-    # before command routing so per-command arg parsing never sees it.
-    json_output = "--json" in args
+    # Hidden internal IPC flag: never documented in --help/usage text (see
+    # plan docs/superpowers/plans/2026-07-18-cli-json-output.md). Not a
+    # public data-format option - a private contract with the CapcatMac
+    # companion app. Strips out before command routing so per-command arg
+    # parsing never sees it.
+    json_output = "--capcatmac-ipc" in args
     if json_output:
-        args = [a for a in args if a != "--json"]
+        args = [a for a in args if a != "--capcatmac-ipc"]
 
     command = args[0]
     rest = args[1:]

@@ -17,25 +17,25 @@ def _captured_output(*args):
 
 def test_top_level_help_never_mentions_json():
     output = _captured_output("--help")
-    assert "--json" not in output
+    assert "--capcatmac-ipc" not in output
     assert "json" not in output.lower()
 
 
 def test_fetch_usage_never_mentions_json():
     output = _captured_output("fetch", "--help")
-    assert "--json" not in output
+    assert "--capcatmac-ipc" not in output
 
 
 def test_bundle_usage_never_mentions_json():
     output = _captured_output("bundle", "--help")
-    assert "--json" not in output
+    assert "--capcatmac-ipc" not in output
 
 
 def test_single_usage_never_mentions_json():
     output = _captured_output("single", "--help")
-    assert "--json" not in output
+    assert "--capcatmac-ipc" not in output
 
 
 def test_list_usage_never_mentions_json():
     output = _captured_output("list", "--help")
-    assert "--json" not in output
+    assert "--capcatmac-ipc" not in output

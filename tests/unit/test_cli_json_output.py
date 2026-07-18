@@ -17,7 +17,7 @@ def test_json_flag_is_stripped_before_command_routing(monkeypatch, tmp_path):
 
     monkeypatch.setattr(cli, "_cmd_list", fake_cmd_list)
     monkeypatch.setattr(cli, "_auto_init", lambda command: None)
-    cli._dispatch(["list", "sources", "--json"])
+    cli._dispatch(["list", "sources", "--capcatmac-ipc"])
     assert captured_args["args"] == ["sources"]
     assert captured_args["json_output"] is True
 
@@ -30,7 +30,7 @@ def test_json_mode_redirects_human_print_to_stderr(monkeypatch, tmp_path, capsys
         print("human readable line")
 
     monkeypatch.setattr(cli, "_cmd_list", fake_cmd_list)
-    cli._dispatch(["list", "sources", "--json"])
+    cli._dispatch(["list", "sources", "--capcatmac-ipc"])
     captured = capsys.readouterr()
     assert captured.out == ""
     assert "human readable line" in captured.err
@@ -61,7 +61,7 @@ def test_stdout_is_restored_after_json_command_even_on_exception(monkeypatch, tm
 
     monkeypatch.setattr(cli, "_cmd_list", fake_cmd_list)
     with pytest.raises(RuntimeError):
-        cli._dispatch(["list", "sources", "--json"])
+        cli._dispatch(["list", "sources", "--capcatmac-ipc"])
     assert sys.stdout is real_stdout
 
 
@@ -81,7 +81,7 @@ def test_unexpected_exception_emits_fatal_error_event(monkeypatch, tmp_path):
     monkeypatch.setattr(sys, "stdout", stream)
 
     with pytest.raises(RuntimeError):
-        cli._dispatch(["list", "sources", "--json"])
+        cli._dispatch(["list", "sources", "--capcatmac-ipc"])
 
     lines = [_json.loads(line) for line in stream.getvalue().strip().splitlines() if line]
     assert lines == [{"event": "error", "message": "boom"}]
