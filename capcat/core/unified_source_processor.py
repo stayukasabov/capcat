@@ -16,6 +16,8 @@ from pathlib import Path
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Optional
 
+from capcat.core import json_events
+
 if TYPE_CHECKING:
     from capcat.core.source_system.base_source import SourceConfig
 
@@ -510,6 +512,37 @@ class UnifiedSourceProcessor:
 
                 successful_count = 0
                 failed_count = 0
+                source_id = getattr(source.config, "name", None) or str(source_display_name)
+
+                def _emit_media_downloaded(article_path: str, index: int) -> None:
+                    base = Path(article_path)
+                    images_dir = base / "images"
+                    if images_dir.is_dir():
+                        image_count = sum(1 for _ in images_dir.iterdir() if _.is_file())
+                        if image_count > 0:
+                            json_events.emit(
+                                "media_downloaded", article_index=index,
+                                type="image", count=image_count,
+                            )
+                    pdf_count = sum(1 for _ in base.glob("*.pdf"))
+                    if pdf_count > 0:
+                        json_events.emit(
+                            "media_downloaded", article_index=index,
+                            type="pdf", count=pdf_count,
+                        )
+
+                def _emit_article_outcome(success: bool, index: int, article, article_path) -> None:
+                    if success:
+                        json_events.record_article_fetched(
+                            source=source_id, index=index, title=article.title,
+                            url=article.url, output_path=article_path or "",
+                        )
+                        if article_path:
+                            _emit_media_downloaded(article_path, index)
+                    else:
+                        json_events.record_article_error(
+                            source=source_id, url=article.url, error="fetch failed",
+                        )
 
                 # Process with aggressive timeout to prevent hangs
                 # Give 60 seconds per article as reasonable max time
@@ -530,19 +563,27 @@ class UnifiedSourceProcessor:
                             if elapsed > total_timeout:
                                 raise TimeoutError(f"Global timeout exceeded: {elapsed}s")
 
-                            success = future.result(timeout=5)  # Short timeout to detect hangs
+                            success, article_path = future.result(timeout=5)  # Short timeout to detect hangs
                             if success:
                                 successful_count += 1
                                 manifest[article.url] = article.title
                             else:
                                 failed_count += 1
                             progress.item_completed(success, article.title)
+                            try:
+                                _emit_article_outcome(success, i, article, article_path)
+                            except Exception:
+                                self.logger.debug("json event emission failed", exc_info=True)
                         except TimeoutError:
                             self.logger.warning(
                                 f"Article {article.title} timed out - marking as failed"
                             )
                             failed_count += 1
                             progress.item_completed(False, article.title)
+                            try:
+                                _emit_article_outcome(False, i, article, None)
+                            except Exception:
+                                self.logger.debug("json event emission failed", exc_info=True)
                             # Cancel the future to release resources
                             future.cancel()
                         except Exception as exc:
@@ -551,6 +592,10 @@ class UnifiedSourceProcessor:
                             )
                             failed_count += 1
                             progress.item_completed(False, article.title)
+                            try:
+                                _emit_article_outcome(False, i, article, None)
+                            except Exception:
+                                self.logger.debug("json event emission failed", exc_info=True)
                 except TimeoutError:
                     self.logger.warning(
                         f"Timeout waiting for articles after {total_timeout}s. "
@@ -591,7 +636,7 @@ class UnifiedSourceProcessor:
         progress_tracker=None,
         index: int = 1,
         download_pdfs: bool = False,
-    ) -> bool:
+    ) -> tuple[bool, str | None]:
         """Process a single article using the new source system."""
 
         def progress_callback(progress: float, stage: str):
@@ -671,12 +716,12 @@ class UnifiedSourceProcessor:
                             _build_comments_metadata(article, source),
                         )
 
-            return success
+            return success, article_path if success else None
         except Exception as e:
             self.logger.error(
                 f"Failed to process article '{article.title}': {e}"
             )
-            return False
+            return False, None
 
 
 # Global processor instance
