@@ -677,6 +677,8 @@ def launch_web_view(directory_path: str, incremental: bool = True, is_single_art
     index_url = processor.process_directory_tree(directory_path, incremental, is_single_article)
 
     if index_url:
+        from capcat.core import json_events
+        json_events.set_html_path(index_url)
         return processor.launch_browser(index_url)
 
     return False
