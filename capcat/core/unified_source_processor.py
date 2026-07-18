@@ -636,7 +636,7 @@ class UnifiedSourceProcessor:
         progress_tracker=None,
         index: int = 1,
         download_pdfs: bool = False,
-    ) -> tuple[bool, str | None]:
+    ) -> tuple[bool, Optional[str]]:
         """Process a single article using the new source system."""
 
         def progress_callback(progress: float, stage: str):
