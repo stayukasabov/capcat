@@ -2,7 +2,7 @@
 
 **v2.0.36** | Python 3.9+ | [capcat.org](https://capcat.org)
 
-Captures articles from 12 built-in sources as clean Markdown files with optional self-contained HTML output. Includes 5 specialized URL processors for platforms like Medium, YouTube, and X. Supports interactive TUI and batch automation.
+Captures articles from 12 built-in sources as Markdown files with YAML frontmatter, optional PDF downloads, and self-contained HTML output using an editable theme. Sources, bundles, and global settings are all plain, user-editable YAML, and new sources can be added from any RSS feed. Has an interactive TUI and batch automation.
 
 ## Installation
 
