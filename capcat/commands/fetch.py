@@ -3,11 +3,13 @@ from __future__ import annotations
 
 import argparse
 import os
+import time
 from typing import Dict, List, Tuple
 
 from capcat.core.shutdown import GracefulShutdown
 from capcat.core.unified_source_processor import process_source_articles
 from capcat.core.source_system.base_source import SourceError
+from capcat.core import json_events
 
 
 def process_sources(
@@ -17,6 +19,7 @@ def process_sources(
     logger: object,
     generate_html: bool = False,
     output_dir: str = ".",
+    command: str = "fetch",
 ) -> Dict[str, object]:
     """Process multiple sources using the unified processor.
 
@@ -27,6 +30,8 @@ def process_sources(
         logger: Logger instance for output.
         generate_html: Whether to generate HTML output after processing.
         output_dir: Output directory path for saved articles.
+        command: The CLI command name ("fetch" or "bundle"), included in
+            the hidden --json run_start event.
 
     Returns:
         Dict with keys 'successful' (list), 'failed' (list of tuples), 'total'.
@@ -35,11 +40,20 @@ def process_sources(
     failed_sources: List[Tuple[str, str]] = []
     is_batch = len(sources) > 1
     completed = 0
+    total_fetched = 0
+    total_errors = 0
+
+    start_time = time.time()
+    json_events.emit(
+        "run_start", command=command, sources=sources,
+        count=getattr(args, "count", None),
+    )
 
     with GracefulShutdown() as shutdown:
         for source in sources:
             if shutdown.should_shutdown():
                 break
+            json_events.emit("source_start", source=source)
             try:
                 logger.info(f"Processing {source} articles...")
                 process_source_articles(
@@ -70,9 +84,25 @@ def process_sources(
                         f"Skipping {source} and continuing with remaining sources"
                     )
 
+            fetched, errors = json_events.pop_article_counts()
+            total_fetched += fetched
+            total_errors += errors
+            json_events.emit(
+                "source_complete", source=source, fetched=fetched, errors=errors
+            )
+
         if shutdown.should_shutdown():
             print(f"\nCancelled - fetched {completed} of {len(sources)} sources.")
             os._exit(130)
+
+    json_events.emit(
+        "run_complete",
+        total_fetched=total_fetched,
+        total_errors=total_errors,
+        output_dir=output_dir,
+        html_path=json_events.pop_html_path(),
+        duration_seconds=round(time.time() - start_time, 1),
+    )
 
     return {
         "successful": successful_sources,

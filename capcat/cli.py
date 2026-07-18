@@ -568,6 +568,7 @@ def _cmd_fetch(args: list[str], log_file: str | None = None, json_output: bool =
         logger=logger,
         generate_html=html,
         output_dir=output,
+        command="fetch",
     )
 
 
@@ -656,6 +657,7 @@ def _cmd_bundle(args: list[str], log_file: str | None = None, json_output: bool 
         logger=logger,
         generate_html=html,
         output_dir=output,
+        command="bundle",
     )
 
 
