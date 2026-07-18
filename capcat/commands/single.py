@@ -254,12 +254,15 @@ def scrape_single_article(
     if generate_html:
         try:
             from capcat.core.html_post_processor import HTMLPostProcessor
+            from capcat.core import json_events
             processor = HTMLPostProcessor()
-            processor.process_directory_tree(
+            index_url = processor.process_directory_tree(
                 base_dir,
                 incremental=False,
                 is_single_article=True,
             )
+            if index_url:
+                json_events.set_html_path(index_url)
             logger.info(f"Generated HTML in: {base_dir}")
         except Exception as e:
             logger.warning(f"Failed to generate HTML: {e}")

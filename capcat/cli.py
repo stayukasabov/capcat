@@ -501,6 +501,14 @@ def _cmd_single(args: list[str], log_file: str | None = None, json_output: bool 
 
     _setup_logging(verbose=verbose, quiet=quiet, log_file=log_file)
 
+    import time as _time
+    from pathlib import Path as _Path
+    from capcat.core import json_events
+
+    start_time = _time.time()
+    json_events.emit("run_start", command="single", sources=[url], count=1)
+    json_events.emit("source_start", source="single")
+
     from capcat.commands.single import scrape_single_article
     success, out_dir = scrape_single_article(
         url=url,
@@ -511,6 +519,27 @@ def _cmd_single(args: list[str], log_file: str | None = None, json_output: bool 
         generate_html=html,
         update_mode=update,
     )
+
+    if success:
+        json_events.record_article_fetched(
+            source="single", index=1,
+            title=_Path(out_dir).name if out_dir else "",
+            url=url, output_path=out_dir or "",
+        )
+    else:
+        json_events.record_article_error(source="single", url=url, error="fetch failed")
+
+    fetched, errors = json_events.pop_article_counts()
+    json_events.emit("source_complete", source="single", fetched=fetched, errors=errors)
+    json_events.emit(
+        "run_complete",
+        total_fetched=fetched,
+        total_errors=errors,
+        output_dir=out_dir or output,
+        html_path=json_events.pop_html_path(),
+        duration_seconds=round(_time.time() - start_time, 1),
+    )
+
     if success and out_dir:
         print(f"Saved to: {out_dir}")
         from capcat.core.tui_context import is_tui_active, set_last_output_dir
