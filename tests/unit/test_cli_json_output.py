@@ -86,3 +86,49 @@ def test_unexpected_exception_emits_fatal_error_event(monkeypatch, tmp_path):
     lines = [_json.loads(line) for line in stream.getvalue().strip().splitlines() if line]
     assert lines == [{"event": "error", "message": "boom"}]
     json_events.disable()
+
+
+def test_list_sources_json_shape(monkeypatch, tmp_path):
+    from capcat.core import json_events
+
+    class FakeConfig:
+        def __init__(self, display_name, category, hidden):
+            self.display_name = display_name
+            self.category = category
+            self.hidden = hidden
+
+    class FakeRegistry:
+        def __init__(self, project_root=None):
+            pass
+
+        def discover_sources(self):
+            pass
+
+        def get_available_sources(self):
+            return ["hn", "twitter"]
+
+        def get_source_config(self, sid):
+            if sid == "hn":
+                return FakeConfig("Hacker News", "tech", False)
+            return FakeConfig("Twitter", "social", True)
+
+    monkeypatch.setattr(
+        "capcat.core.source_system.source_registry.SourceRegistry", FakeRegistry
+    )
+    monkeypatch.setattr(
+        "capcat.core.config.find_project_root", lambda: tmp_path
+    )
+
+    stream = io.StringIO()
+    json_events.enable(stream)
+    cli._cmd_list(["sources"], json_output=True)
+    json_events.disable()
+
+    import json
+    decoded = json.loads(stream.getvalue().strip())
+    assert decoded == {
+        "sources": [
+            {"id": "hn", "name": "Hacker News", "category": "tech", "hidden": False},
+            {"id": "twitter", "name": "Twitter", "category": "social", "hidden": True},
+        ]
+    }

@@ -683,6 +683,8 @@ def _cmd_list(args: list[str], json_output: bool = False) -> None:
     registry = SourceRegistry(project_root=_project_root)
     registry.discover_sources()
 
+    payload: dict = {}
+
     if what in ("sources", "all"):
         visible = []
         hidden = []
@@ -690,18 +692,29 @@ def _cmd_list(args: list[str], json_output: bool = False) -> None:
             cfg = registry.get_source_config(sid)
             name = cfg.display_name if cfg else sid
             if cfg and cfg.hidden:
-                hidden.append((sid, name))
+                hidden.append((sid, name, cfg))
             else:
-                visible.append((sid, name))
+                visible.append((sid, name, cfg))
 
         print("\nAvailable sources:")
-        for sid, name in visible:
+        for sid, name, _cfg in visible:
             print(f"  {sid:<20} {name}")
 
         if hidden:
             print("\nSpecialized processors (used automatically for matching URLs):")
-            for sid, name in hidden:
+            for sid, name, _cfg in hidden:
                 print(f"  {sid:<20} {name}")
+
+        if json_output:
+            sources_json = []
+            for sid, name, cfg in visible + hidden:
+                sources_json.append({
+                    "id": sid,
+                    "name": name,
+                    "category": cfg.category if cfg else "general",
+                    "hidden": bool(cfg and cfg.hidden),
+                })
+            payload["sources"] = sources_json
 
     if what in ("bundles", "all"):
         bundles = get_available_bundles(project_root=_project_root)
@@ -714,6 +727,20 @@ def _cmd_list(args: list[str], json_output: bool = False) -> None:
             desc = bundle_data.get("description", "")
             print(f"  {bundle_id:<20} {desc}")
             print(f"  {'':20} Sources: {sources_str}")
+
+        if json_output:
+            bundles_json = []
+            for bundle_id, bundle_data in sorted(bundles.items()):
+                bundles_json.append({
+                    "id": bundle_id,
+                    "description": bundle_data.get("description", ""),
+                    "source_ids": bundle_data["sources"],
+                })
+            payload["bundles"] = bundles_json
+
+    if json_output:
+        from capcat.core import json_events
+        json_events.emit_raw(payload)
 
 
 # ---------------------------------------------------------------------------
