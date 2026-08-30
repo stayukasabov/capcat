@@ -1,6 +1,6 @@
 # Capcat - A command-line tool designed to solve content preservation challenges with Ethical Scraping.
 
-**v2.0.36** | Python 3.9+ | [capcat.org](https://capcat.org)
+**v2.0.37** | Python 3.9+ | [stayukasabov.github.io/capcat](https://stayukasabov.github.io/capcat)
 
 Captures articles from 12 built-in sources as Markdown files with YAML frontmatter, optional PDF downloads, and self-contained HTML output using an editable theme. Sources, bundles, and global settings are all plain, user-editable YAML, and new sources can be added from any RSS feed. Has an interactive TUI and batch automation.
 
@@ -179,11 +179,11 @@ offline with zero external connections.
 
 ## Documentation
 
-Full documentation at [capcat.org](https://capcat.org):
-- [Quick Start Guide](https://capcat.org/docs/quick-start.html)
-- [Architecture Overview](https://capcat.org/docs/architecture.html)
-- [Source Development](https://capcat.org/docs/source-development.html)
-- [Interactive Mode](https://capcat.org/docs/interactive-mode.html)
+Full documentation at [stayukasabov.github.io/capcat](https://stayukasabov.github.io/capcat):
+- [Quick Start Guide](https://stayukasabov.github.io/capcat/docs/quick-start.html)
+- [Architecture Overview](https://stayukasabov.github.io/capcat/docs/architecture.html)
+- [Source Development](https://stayukasabov.github.io/capcat/docs/source-development.html)
+- [Interactive Mode](https://stayukasabov.github.io/capcat/docs/interactive-mode.html)
 
 ## Contributing
 
@@ -195,6 +195,6 @@ MIT License - see [LICENSE.txt](LICENSE.txt)
 
 ## Links
 
-- **Website**: [capcat.org](https://capcat.org)
+- **Website**: [stayukasabov.github.io/capcat](https://stayukasabov.github.io/capcat)
 - **Repository**: [github.com/stayukasabov/capcat](https://github.com/stayukasabov/capcat)
 - **Issues**: [github.com/stayukasabov/capcat/issues](https://github.com/stayukasabov/capcat/issues)
