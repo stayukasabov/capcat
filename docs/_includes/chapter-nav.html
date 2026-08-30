@@ -15,7 +15,7 @@
 
 <nav class="chapter-nav" aria-label="Chapter navigation">
   {% if current_index > 0 %}
-  <a href="{{ chapters[prev_index].url }}" class="chapter-nav-link chapter-nav-prev">
+  <a href="{{ chapters[prev_index].url | relative_url }}" class="chapter-nav-link chapter-nav-prev">
     <span class="chapter-nav-label">Previous</span>
     <span class="chapter-nav-title">&larr; {{ chapters[prev_index].title }}</span>
   </a>
@@ -24,7 +24,7 @@
   {% endif %}
 
   {% if next_index < total %}
-  <a href="{{ chapters[next_index].url }}" class="chapter-nav-link chapter-nav-next">
+  <a href="{{ chapters[next_index].url | relative_url }}" class="chapter-nav-link chapter-nav-next">
     <span class="chapter-nav-label">Next</span>
     <span class="chapter-nav-title">{{ chapters[next_index].title }} &rarr;</span>
   </a>
