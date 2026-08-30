@@ -38,11 +38,11 @@ content_selectors:
   - "article .body"
 ```
 
-See [Source Development](/docs/source-development.html) for the full reference.
+See [Source Development](/capcat/docs/source-development.html) for the full reference.
 
 ### Custom Python Source
 
-For sites needing comment integration or complex scraping - create `Config/sources/active/custom/<name>/source.py`. See [Source Development](/docs/source-development.html).
+For sites needing comment integration or complex scraping - create `Config/sources/active/custom/<name>/source.py`. See [Source Development](/capcat/docs/source-development.html).
 
 ## Remove a Source
 

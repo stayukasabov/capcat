@@ -1,6 +1,6 @@
 title: Capcat Documentation
-url: "https://capcat.org"
-baseurl: ""
+url: "https://stayukasabov.github.io"
+baseurl: "/capcat"
 
 # No theme - layout is provided by docs/_layouts/default.html
 theme: ~

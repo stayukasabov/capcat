@@ -1,4 +1,4 @@
-# capcat.org - Capcat CLI Documentation
+# stayukasabov.github.io/capcat - Capcat CLI Documentation
 # Capcat - A command-line tool designed to solve content preservation challenges with Ethical Scraping
 # Author: Stayu Kasabov - Product Designer & Architect | Agentic AI Prototyping & MVP Development (LLMs)
 
@@ -41,4 +41,4 @@ Disallow: /
 User-agent: cohere-ai
 Disallow: /
 
-Sitemap: https://capcat.org/sitemap.xml
+Sitemap: https://stayukasabov.github.io/capcat/sitemap.xml

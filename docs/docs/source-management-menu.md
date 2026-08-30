@@ -32,7 +32,7 @@ capcat remove-source --undo      # undo last removal
 capcat add-source --url https://example.com/feed.xml
 ```
 
-**Manually** - drop a YAML file in `Config/sources/active/config_driven/configs/`. See [Source Development](/docs/source-development.html).
+**Manually** - drop a YAML file in `Config/sources/active/config_driven/configs/`. See [Source Development](/capcat/docs/source-development.html).
 
 **Custom Python source** - implement `BaseSource` in `Config/sources/active/custom/<name>/source.py`.
 

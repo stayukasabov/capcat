@@ -50,4 +50,4 @@ content_selectors:
   - "article .body"
 ```
 
-See [Source Development](/docs/source-development.html) for the full YAML reference.
+See [Source Development](/capcat/docs/source-development.html) for the full YAML reference.

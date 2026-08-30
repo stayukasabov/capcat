@@ -6,9 +6,9 @@
   <!-- Google tag (gtag.js) - loaded conditionally by cookie-consent.js -->
   <title>{% if page.title %}{{ page.title }} - {% endif %}Capcat</title>
   <meta name="description" content="Capcat documentation">
-  <link rel="stylesheet" href="/css/design-system.css">
-  <link rel="stylesheet" href="/css/main.css?v=5">
-  <link rel="icon" type="image/x-icon" href="/icons/Capcat.ico">
+  <link rel="stylesheet" href="/capcat/css/design-system.css">
+  <link rel="stylesheet" href="/capcat/css/main.css?v=5">
+  <link rel="icon" type="image/x-icon" href="/capcat/icons/Capcat.ico">
   <style>
     .docs-prose {
       padding: var(--space-xl, 3rem) var(--space-xxl, 4rem);
@@ -134,7 +134,7 @@
   <div class="container">
     <nav class="main-nav">
       <div class="logo">
-        <a href="/" aria-label="Back to Home"><svg
+        <a href="/capcat/" aria-label="Back to Home"><svg
           class="capcat-logo"
           width="100%"
           height="20"
@@ -157,15 +157,15 @@
       </div>
       <ul class="nav-links" id="main-navigation">
         <li>
-          <a href="/#features" title="View Capcat features">Features</a>
+          <a href="/capcat/#features" title="View Capcat features">Features</a>
         </li>
         <li>
-          <a href="/#how-it-works" title="Learn how Capcat works"
+          <a href="/capcat/#how-it-works" title="Learn how Capcat works"
             >How It Works</a
           >
         </li>
         <li>
-          <a href="https://capcat.org/docs/tutorials/index.html" title="Browse Capcat tutorials">Tutorials</a>
+          <a href="/capcat/docs/tutorials/index.html" title="Browse Capcat tutorials">Tutorials</a>
         </li>
         <li>
           <a
@@ -213,7 +213,7 @@
   <div class="container">
     <div class="footer-content">
       <div class="footer-logo">
-        <a href="/" aria-label="Back to Home"><svg
+        <a href="/capcat/" aria-label="Back to Home"><svg
           class="capcat-logo"
           width="100%"
           height="48"
@@ -240,18 +240,18 @@
           <h4>Documentation</h4>
           <ul>
             <li>
-              <a href="/docs/index.html" title="Full documentation index"
+              <a href="/capcat/docs/index.html" title="Full documentation index"
                 >Documentation Index</a
               >
             </li>
             <li>
-              <a href="/docs/architecture.html" title="System architecture"
+              <a href="/capcat/docs/architecture.html" title="System architecture"
                 >Architecture</a
               >
             </li>
             <li>
               <a
-                href="/docs/source-development.html"
+                href="/capcat/docs/source-development.html"
                 title="Develop custom sources"
                 >Source Development</a
               >
@@ -263,7 +263,7 @@
           <h4>Resources</h4>
           <ul>
             <li>
-              <a href="/docs/tutorials/index.html" title="Browse tutorials"
+              <a href="/capcat/docs/tutorials/index.html" title="Browse tutorials"
                 >Tutorials</a
               >
             </li>
@@ -302,7 +302,7 @@
             </li>
             <li>
               <a
-                href="/docs/ethical-scraping.html"
+                href="/capcat/docs/ethical-scraping.html"
                 title="Ethical scraping guidelines"
                 >Ethical Scraping</a
               >
@@ -343,8 +343,8 @@
     <path fill="currentColor" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6 1.41 1.41z"/>
   </svg>
 </button>
-<script src="/js/main.js" defer></script>
-<script src="/js/cookie-consent.js" defer></script>
+<script src="/capcat/js/main.js" defer></script>
+<script src="/capcat/js/cookie-consent.js" defer></script>
 <script type="module">
   import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
   mermaid.initialize({ startOnLoad: false, theme: 'neutral' });
