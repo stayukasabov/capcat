@@ -69,7 +69,7 @@ This documentation is automatically generated from the source code. To update:
 python scripts/doc_generator.py
 ```
 
-Last generated: $(date)
+Last generated: 2026-10-08
 
 ---
 

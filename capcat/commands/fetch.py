@@ -31,7 +31,7 @@ def process_sources(
         generate_html: Whether to generate HTML output after processing.
         output_dir: Output directory path for saved articles.
         command: The CLI command name ("fetch" or "bundle"), included in
-            the hidden --json run_start event.
+            the hidden --capcatmac-ipc run_start event.
 
     Returns:
         Dict with keys 'successful' (list), 'failed' (list of tuples), 'total'.

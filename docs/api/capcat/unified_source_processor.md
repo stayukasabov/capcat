@@ -171,12 +171,12 @@ Process articles using the new source system with parallel execution.
 - `download_pdfs` (bool) *optional*
 - `manifest` (dict) *optional*
 
-⚠️ **High complexity:** 14
+⚠️ **High complexity:** 24
 
 ##### _process_single_article_new_system
 
 ```python
-def _process_single_article_new_system(self, source, article, base_dir: str, download_files: bool, progress_tracker = None, index: int = 1, download_pdfs: bool = False) -> bool
+def _process_single_article_new_system(self, source, article, base_dir: str, download_files: bool, progress_tracker = None, index: int = 1, download_pdfs: bool = False) -> tuple[bool, Optional[str]]
 ```
 
 Process a single article using the new source system.
@@ -192,7 +192,7 @@ Process a single article using the new source system.
 - `index` (int) *optional*
 - `download_pdfs` (bool) *optional*
 
-**Returns:** bool
+**Returns:** tuple[bool, Optional[str]]
 
 ⚠️ **High complexity:** 23
 
@@ -400,4 +400,32 @@ def progress_callback(progress: float, stage: str)
 
 - `progress` (float)
 - `stage` (str)
+
+### _emit_media_downloaded
+
+```python
+def _emit_media_downloaded(article_path: str, index: int) -> None
+```
+
+**Parameters:**
+
+- `article_path` (str)
+- `index` (int)
+
+**Returns:** None
+
+### _emit_article_outcome
+
+```python
+def _emit_article_outcome(success: bool, index: int, article, article_path) -> None
+```
+
+**Parameters:**
+
+- `success` (bool)
+- `index` (int)
+- `article`
+- `article_path`
+
+**Returns:** None
 

@@ -6,6 +6,7 @@ Automatically extracts and generates comprehensive documentation from the codeba
 """
 
 import ast
+import datetime as dt
 
 import json
 import os
@@ -1311,7 +1312,8 @@ MIT-Style Non-Commercial License - see [LICENSE.txt](../LICENSE.txt) file for de
 
     def generate_index(self) -> None:
         """Generate documentation index."""
-        index_content = """# Capcat Documentation
+        generated_on = dt.date.today().isoformat()
+        index_content = f"""# Capcat Documentation
 
 Welcome to the comprehensive documentation for Capcat, a modular news article archiving system.
 
@@ -1377,7 +1379,7 @@ This documentation is automatically generated from the source code. To update:
 python scripts/doc_generator.py
 ```
 
-Last generated: $(date)
+Last generated: {generated_on}
 
 ---
 

@@ -1,4 +1,4 @@
-"""JSON event emission for the hidden --json CLI output mode.
+"""JSON event emission for the hidden --capcatmac-ipc CLI output mode.
 
 Module-level state, mirroring the existing capcat.core.tui_context pattern
 (set_tui_active/is_tui_active) - enabled once per command invocation rather
@@ -44,7 +44,7 @@ def emit(event: str, **fields: Any) -> None:
 def emit_raw(payload: dict) -> None:
     """Print *payload* as a single JSON object, no "event" wrapper.
 
-    Used for one-shot structured output (list --json) as opposed to the
+    Used for one-shot structured output (list --capcatmac-ipc) as opposed to the
     NDJSON event stream emit() produces for fetch/bundle/single.
     """
     if not _enabled or _stream is None:

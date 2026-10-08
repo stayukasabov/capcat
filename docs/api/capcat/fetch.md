@@ -16,7 +16,7 @@ Batch fetch command - processes multiple sources via the unified processor.
 ### process_sources
 
 ```python
-def process_sources(sources: List[str], args: argparse.Namespace, config: object, logger: object, generate_html: bool = False, output_dir: str = '.') -> Dict[str, object]
+def process_sources(sources: List[str], args: argparse.Namespace, config: object, logger: object, generate_html: bool = False, output_dir: str = '.', command: str = 'fetch') -> Dict[str, object]
 ```
 
 Process multiple sources using the unified processor.
@@ -28,6 +28,8 @@ Args:
     logger: Logger instance for output.
     generate_html: Whether to generate HTML output after processing.
     output_dir: Output directory path for saved articles.
+    command: The CLI command name ("fetch" or "bundle"), included in
+        the hidden --capcatmac-ipc run_start event.
 
 Returns:
     Dict with keys 'successful' (list), 'failed' (list of tuples), 'total'.
@@ -40,6 +42,7 @@ Returns:
 - `logger` (object)
 - `generate_html` (bool) *optional*
 - `output_dir` (str) *optional*
+- `command` (str) *optional*
 
 **Returns:** Dict[str, object]
 

@@ -79,8 +79,8 @@ def _dispatch(args: list[str]) -> None
 
 Route a raw argument list to the appropriate command handler.
 
-Handles global flags (-L, --version, --help) before delegating to
-per-command functions. Exits with code 1 on unknown commands.
+Handles global flags (-L, --version, --help, --capcatmac-ipc) before delegating
+to per-command functions. Exits with code 1 on unknown commands.
 
 Args:
     args: sys.argv[1:] with the program name already removed.
@@ -91,7 +91,7 @@ Args:
 
 **Returns:** None
 
-⚠️ **High complexity:** 16
+⚠️ **High complexity:** 22
 
 ### _pop_flag
 
@@ -145,7 +145,7 @@ Args:
 ### _cmd_single
 
 ```python
-def _cmd_single(args: list[str], log_file: str | None = None) -> None
+def _cmd_single(args: list[str], log_file: str | None = None, json_output: bool = False) -> None
 ```
 
 capcat single <url> [--output DIR] [--media] [--html] [--update]
@@ -155,13 +155,16 @@ capcat single <url> [--output DIR] [--media] [--html] [--update]
 
 - `args` (list[str])
 - `log_file` (str | None) *optional*
+- `json_output` (bool) *optional*
 
 **Returns:** None
+
+⚠️ **High complexity:** 12
 
 ### _cmd_fetch
 
 ```python
-def _cmd_fetch(args: list[str], log_file: str | None = None) -> None
+def _cmd_fetch(args: list[str], log_file: str | None = None, json_output: bool = False) -> None
 ```
 
 capcat fetch <sources> [--count N] [--output DIR] [--media] [--html]
@@ -171,13 +174,14 @@ capcat fetch <sources> [--count N] [--output DIR] [--media] [--html]
 
 - `args` (list[str])
 - `log_file` (str | None) *optional*
+- `json_output` (bool) *optional*
 
 **Returns:** None
 
 ### _cmd_bundle
 
 ```python
-def _cmd_bundle(args: list[str], log_file: str | None = None) -> None
+def _cmd_bundle(args: list[str], log_file: str | None = None, json_output: bool = False) -> None
 ```
 
 capcat bundle <name> [--count N] [--output DIR] [--media] [--html]
@@ -187,6 +191,7 @@ capcat bundle <name> [--count N] [--output DIR] [--media] [--html]
 
 - `args` (list[str])
 - `log_file` (str | None) *optional*
+- `json_output` (bool) *optional*
 
 **Returns:** None
 
@@ -195,7 +200,7 @@ capcat bundle <name> [--count N] [--output DIR] [--media] [--html]
 ### _cmd_list
 
 ```python
-def _cmd_list(args: list[str]) -> None
+def _cmd_list(args: list[str], json_output: bool = False) -> None
 ```
 
 capcat list [sources|bundles|all]
@@ -203,10 +208,11 @@ capcat list [sources|bundles|all]
 **Parameters:**
 
 - `args` (list[str])
+- `json_output` (bool) *optional*
 
 **Returns:** None
 
-⚠️ **High complexity:** 15
+⚠️ **High complexity:** 21
 
 ### _cmd_add_source
 

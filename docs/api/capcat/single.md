@@ -138,5 +138,5 @@ Returns:
 
 **Returns:** Tuple[bool, Optional[str]]
 
-⚠️ **High complexity:** 18
+⚠️ **High complexity:** 19
 

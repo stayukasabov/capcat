@@ -308,7 +308,7 @@ def main() -> None:
 def _dispatch(args: list[str]) -> None:
     """Route a raw argument list to the appropriate command handler.
 
-    Handles global flags (-L, --version, --help, --json) before delegating
+    Handles global flags (-L, --version, --help, --capcatmac-ipc) before delegating
     to per-command functions. Exits with code 1 on unknown commands.
 
     Args:

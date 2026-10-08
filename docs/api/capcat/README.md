@@ -23,6 +23,7 @@ This package contains the following modules:
 - [`capcat.core.logging_config`](./logging_config.md) - Logging configuration for Capcat
 - [`capcat.core.downloader`](./downloader.md) - Media downloader for Capcat
 - [`capcat.core.theme_utils`](./theme_utils.md) - Theme utilities for hash-based theme persistence
+- [`capcat.core.json_events`](./json_events.md) - JSON event emission for the hidden --capcatmac-ipc CLI output mode
 - [`capcat.core.article_fetcher`](./article_fetcher.md) - Shared article fetching functionality for Capcat sources
 - [`capcat.core.retry_skip`](./retry_skip.md) - Retry-and-Skip Logic for Network Resilience
 

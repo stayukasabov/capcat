@@ -46,6 +46,7 @@ for performance optimization and self-contained HTML generation
 Handles post-processing HTML generation after article scraping is complete
 - [capcat.core.image_processor](../api/capcat/image_processor.md) - Global Image Processor for Capcat
 - [capcat.core.interactive](../api/capcat/interactive.md) - Interactive mode for Capcat
+- [capcat.core.json_events](../api/capcat/json_events.md) - JSON event emission for the hidden --capcatmac-ipc CLI output mode
 - [capcat.core.logging_config](../api/capcat/logging_config.md) - Logging configuration for Capcat
 - [capcat.core.media_config](../api/capcat/media_config.md) - Media Configuration Manager for different news sources
 - [capcat.core.media_executor](../api/capcat/media_executor.md) - Shared executor pool for media processing to prevent nested ThreadPoolExecutor deadlock
@@ -168,9 +169,9 @@ Usage:
 
 ## Statistics
 
-- **Total Modules**: 110
+- **Total Modules**: 111
 - **Total Classes**: 196
-- **Total Functions**: 320
-- **Public Functions**: 227
-- **Documentation Coverage**: 70.9%
+- **Total Functions**: 332
+- **Public Functions**: 237
+- **Documentation Coverage**: 71.4%
 
