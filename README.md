@@ -1,6 +1,6 @@
 # Capcat - A command-line tool designed to solve content preservation challenges with Ethical Scraping.
 
-**v2.0.37** | Python 3.9+ | [stayukasabov.github.io/capcat](https://stayukasabov.github.io/capcat)
+**v2.0.38** | Python 3.9+ | [stayukasabov.github.io/capcat](https://stayukasabov.github.io/capcat)
 
 Captures articles from 12 built-in sources as Markdown files with YAML frontmatter, optional PDF downloads, and self-contained HTML output using an editable theme. Sources, bundles, and global settings are all plain, user-editable YAML, and new sources can be added from any RSS feed. Has an interactive TUI and batch automation.
 
